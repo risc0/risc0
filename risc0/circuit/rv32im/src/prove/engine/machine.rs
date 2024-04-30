@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::atomic::{AtomicUsize, Ordering};
-
 use anyhow::Result;
 use rayon::prelude::*;
 use risc0_circuit_rv32im_sys::ffi::{RawMemoryTransaction, RawPreflightCycle, RawPreflightTrace};
@@ -95,8 +93,8 @@ impl MachineContext {
                 RawPreflightCycle {
                     major: major.as_u32(),
                     minor,
-                    mem_idx: x.mem_idx.load(Ordering::Relaxed),
-                    extra_idx: x.extra_idx.load(Ordering::Relaxed),
+                    mem_idx: x.mem_idx,
+                    extra_idx: x.extra_idx,
                 }
             })
             .chain(trace.body.cycles.iter().map(|x| {
@@ -104,8 +102,8 @@ impl MachineContext {
                 RawPreflightCycle {
                     major: major.as_u32(),
                     minor,
-                    mem_idx: x.mem_idx.load(Ordering::Relaxed) + trace.pre.txns.len(),
-                    extra_idx: x.extra_idx.load(Ordering::Relaxed) + trace.pre.extras.len(),
+                    mem_idx: x.mem_idx + trace.pre.txns.len(),
+                    extra_idx: x.extra_idx + trace.pre.extras.len(),
                 }
             }))
             .collect();
@@ -190,14 +188,15 @@ impl MachineContext {
     }
 
     #[tracing::instrument(skip_all)]
-    pub fn sort(&mut self, name: &str) {
+    pub fn sort(&mut self, name: &str) -> Result<()> {
         nvtx::range_push!("sort({name})");
         match name {
-            "ram" => CIRCUIT.sort_ram(&self.raw_machine_ctx).unwrap(),
-            "bytes" => CIRCUIT.sort_bytes(&self.raw_machine_ctx).unwrap(),
+            "ram" => CIRCUIT.sort_ram(&self.raw_machine_ctx)?,
+            "bytes" => CIRCUIT.sort_bytes(&self.raw_machine_ctx)?,
             _ => unimplemented!("Unknown argument type {name}"),
         };
         nvtx::range_pop!();
+        Ok(())
     }
 
     pub fn step_exec(
@@ -205,7 +204,7 @@ impl MachineContext {
         steps: usize,
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         // let cur_cycle = self.get_cycle(cycle);
         // tracing::debug!("[{cycle}] {:?}", cur_cycle);
         CIRCUIT.par_step_exec(steps, cycle, &self.raw_machine_ctx, args)
@@ -217,44 +216,56 @@ impl MachineContext {
         last_cycle: usize,
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
-        counts: Option<&[AtomicUsize]>,
-    ) {
+    ) -> Result<()> {
         if cycle == 0 || self.is_exec_par_safe(cycle) {
             // tracing::debug!("step_exec: {cycle}");
-            self.step_exec(steps, cycle, args).unwrap();
+            self.step_exec(steps, cycle, args)?;
 
             let mut seq_cycle = cycle + 1;
             while seq_cycle < last_cycle && !self.is_exec_par_safe(seq_cycle) {
-                self.step_exec(steps, seq_cycle, args).unwrap();
+                self.step_exec(steps, seq_cycle, args)?;
                 seq_cycle += 1;
             }
 
-            if let Some(counts) = counts {
-                let cycles = seq_cycle - cycle;
-                counts[cycles].fetch_add(1, Ordering::SeqCst);
-            }
+            // if let Some(counts) = counts {
+            //     let cycles = seq_cycle - cycle;
+            //     counts[cycles].fetch_add(1, Ordering::SeqCst);
+            // }
         }
+        Ok(())
     }
 
-    pub fn rev_step_exec(&self, steps: usize, last_cycle: usize, args: &[SyncSlice<BabyBearElem>]) {
-        (0..last_cycle).rev().for_each(|cycle| {
-            self.next_step_exec(steps, last_cycle, cycle, args, None);
-        });
+    pub fn rev_step_exec(
+        &self,
+        steps: usize,
+        last_cycle: usize,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<()> {
+        (0..last_cycle)
+            .rev()
+            .try_for_each(|cycle| self.next_step_exec(steps, last_cycle, cycle, args))
     }
 
-    pub fn par_step_exec(&self, steps: usize, last_cycle: usize, args: &[SyncSlice<BabyBearElem>]) {
-        let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
+    pub fn par_step_exec(
+        &self,
+        steps: usize,
+        last_cycle: usize,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<()> {
+        // let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
 
-        (0..last_cycle).into_par_iter().for_each(|cycle| {
-            self.next_step_exec(steps, last_cycle, cycle, args, Some(&counts));
-        });
+        (0..last_cycle)
+            .into_par_iter()
+            .try_for_each(|cycle| self.next_step_exec(steps, last_cycle, cycle, args))?;
 
-        for (cycles, count) in counts.iter().enumerate() {
-            let count = count.load(Ordering::Relaxed);
-            if count > 0 {
-                tracing::debug!("cycles: {cycles} -> {count}");
-            }
-        }
+        // for (cycles, count) in counts.iter().enumerate() {
+        //     let count = count.load(Ordering::Relaxed);
+        //     if count > 0 {
+        //         tracing::debug!("cycles: {cycles} -> {count}");
+        //     }
+        // }
+
+        Ok(())
     }
 
     pub fn step_verify_mem(
@@ -262,7 +273,7 @@ impl MachineContext {
         steps: usize,
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         // let cur_cycle = self.get_cycle(cycle);
         // tracing::debug!("[{cycle}] {cur_cycle:?}");
         CIRCUIT.par_step_verify_mem(steps, cycle, &self.raw_machine_ctx, args)
@@ -285,12 +296,11 @@ impl MachineContext {
         steps: usize,
         cycle: usize,
         data: SyncSlice<BabyBearElem>,
-    ) {
+    ) -> Result<()> {
         if self.is_verify_mem_par_safe(cycle) {
-            CIRCUIT
-                .inject_ram_backs(&self.raw_machine_ctx, steps, cycle, data)
-                .unwrap();
+            CIRCUIT.inject_backs_ram(&self.raw_machine_ctx, steps, cycle, data)?;
         }
+        Ok(())
     }
 
     pub fn par_step_verify_mem(
@@ -298,31 +308,41 @@ impl MachineContext {
         steps: usize,
         last_cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
-    ) {
-        let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
+    ) -> Result<()> {
+        // let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
 
-        (0..last_cycle).into_par_iter().for_each(|cycle| {
+        (0..last_cycle).into_par_iter().try_for_each(|cycle| {
             if cycle == 0 || self.is_verify_mem_par_safe(cycle) {
                 // tracing::trace!("step_verify_mem({cycle})");
-                self.step_verify_mem(steps, cycle, args).unwrap();
+                self.step_verify_mem(steps, cycle, args)?;
 
                 let mut seq_cycle = cycle + 1;
                 while seq_cycle < last_cycle && !self.is_verify_mem_par_safe(seq_cycle) {
-                    self.step_verify_mem(steps, seq_cycle, args).unwrap();
+                    self.step_verify_mem(steps, seq_cycle, args)?;
                     seq_cycle += 1;
                 }
 
-                let cycles = seq_cycle - cycle;
-                counts.get(cycles).unwrap().fetch_add(1, Ordering::SeqCst);
+                // let cycles = seq_cycle - cycle;
+                // counts.get(cycles).unwrap().fetch_add(1, Ordering::SeqCst);
             }
-        });
+            Ok(())
+        })
 
-        for (cycles, count) in counts.iter().enumerate() {
-            let count = count.load(Ordering::Relaxed);
-            if count > 0 {
-                tracing::debug!("cycles: {cycles} -> {count}");
-            }
-        }
+        // for (cycles, count) in counts.iter().enumerate() {
+        //     let count = count.load(Ordering::Relaxed);
+        //     if count > 0 {
+        //         tracing::debug!("cycles: {cycles} -> {count}");
+        //     }
+        // }
+    }
+
+    pub fn inject_verify_bytes_backs(
+        &self,
+        steps: usize,
+        cycle: usize,
+        data: SyncSlice<BabyBearElem>,
+    ) -> Result<()> {
+        CIRCUIT.inject_backs_bytes(&self.raw_machine_ctx, steps, cycle, data)
     }
 
     pub fn step_verify_bytes(
@@ -330,7 +350,7 @@ impl MachineContext {
         steps: usize,
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         CIRCUIT.par_step_verify_bytes(steps, cycle, &self.raw_machine_ctx, args)
     }
 }

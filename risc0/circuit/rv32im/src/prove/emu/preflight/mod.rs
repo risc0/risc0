@@ -15,10 +15,7 @@
 #[cfg(test)]
 mod tests;
 
-use std::{
-    collections::VecDeque,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::collections::VecDeque;
 
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
@@ -70,12 +67,12 @@ pub enum Back {
     },
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PreflightCycle {
     pub mux: TopMux,
     pub back: Option<Back>,
-    pub mem_idx: AtomicUsize,
-    pub extra_idx: AtomicUsize,
+    pub mem_idx: usize,
+    pub extra_idx: usize,
 }
 
 #[derive(Clone, Dbg, PartialEq)]
@@ -115,33 +112,13 @@ struct Preflight {
     input_digest: Digest,
 }
 
-impl Clone for PreflightCycle {
-    fn clone(&self) -> Self {
-        Self {
-            mux: self.mux.clone(),
-            back: self.back.clone(),
-            mem_idx: AtomicUsize::new(self.mem_idx.load(Ordering::Relaxed)),
-            extra_idx: AtomicUsize::new(self.extra_idx.load(Ordering::Relaxed)),
-        }
-    }
-}
-
-impl PartialEq for PreflightCycle {
-    fn eq(&self, other: &Self) -> bool {
-        self.mux == other.mux
-            && self.back == other.back
-            && self.mem_idx.load(Ordering::Relaxed) == other.mem_idx.load(Ordering::Relaxed)
-            && self.extra_idx.load(Ordering::Relaxed) == other.extra_idx.load(Ordering::Relaxed)
-    }
-}
-
 impl PreflightCycle {
     fn new(mux: TopMux, back: Option<Back>, mem_idx: usize, extra_idx: usize) -> Self {
         Self {
             mux,
             back,
-            mem_idx: AtomicUsize::new(mem_idx),
-            extra_idx: AtomicUsize::new(extra_idx),
+            mem_idx,
+            extra_idx,
         }
     }
 }
