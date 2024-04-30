@@ -294,18 +294,20 @@ jobs:
         os: [Linux, macOS]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: risc0/RustCrypto-crypto-bigint
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-default
-      # we need a toolchain to
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - run: cargo install --force --path risc0/cargo-risczero -F experimental
-      - uses: actions/checkout@v4
-        with:
-          repository: risc0/RustCrypto-crypto-bigint
-      - uses: ./.github/actions/sccache
+      - name: Install risczero toolchain
+        run: |
+          cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+          cargo install --force --path risc0/cargo-risczero -F experimental
+        working-directory: risc0
       - run: cargo risczero test
+        working-directory: RustCrypto-crypto-bigint
       - run: sccache --show-stats
 
   doc:
