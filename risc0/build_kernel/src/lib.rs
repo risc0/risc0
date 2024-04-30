@@ -141,7 +141,9 @@ impl KernelBuild {
 
         let mut flags = vec![];
         if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
-            flags.push(nvcc_flags);
+            for flag in nvcc_flags.split(" ") {
+                flags.push(flag.to_string());
+            }
         } else {
             flags.push("-arch=native".into());
         }
