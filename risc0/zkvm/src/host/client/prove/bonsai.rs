@@ -19,8 +19,8 @@ use bonsai_sdk::alpha::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, is_dev_mode, sha::Digestible, ExecutorEnv, InnerReceipt, ProveInfo,
-    ProverOpts, Receipt, ReceiptKind, VerifierContext,
+    compute_image_id, is_dev_mode, sha::Digestible, CompactReceipt, ExecutorEnv, InnerReceipt,
+    ProveInfo, ProverOpts, Receipt, ReceiptKind, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
@@ -79,11 +79,12 @@ impl Prover for BonsaiProver {
         let session = client.create_session(image_id_hex, input_id, receipts_ids)?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
-        loop {
+        let succinct_prove_info = loop {
             // The session has already been started in the executor. Poll bonsai to check if
             // the proof request succeeded.
             let res = session.status(&client)?;
             if res.status == "RUNNING" {
+                // TODO(#1759): Improve upon this polling solution.
                 std::thread::sleep(Duration::from_secs(5));
                 continue;
             }
@@ -116,14 +117,14 @@ impl Prover for BonsaiProver {
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;
                 }
-                return Ok(ProveInfo {
+                break ProveInfo {
                     receipt,
                     stats: crate::SessionStats {
                         segments: stats.segments,
                         total_cycles: stats.total_cycles,
                         user_cycles: stats.cycles,
                     },
-                });
+                };
             } else {
                 bail!(
                     "Bonsai prover workflow [{}] exited: {} err: {}",
@@ -133,7 +134,66 @@ impl Prover for BonsaiProver {
                         .unwrap_or("Bonsai workflow missing error_msg".into()),
                 );
             }
+        };
+        match opts.receipt_kind {
+            // If the caller requested a composite or succinct receipt, we are done.
+            ReceiptKind::Composite | ReceiptKind::Succinct => {
+                return Ok(succinct_prove_info);
+            }
+            // If they requested a compact receipts, we need to continue.
+            ReceiptKind::Compact => {}
         }
+
+        // Request that Bonsai compress further, to Groth16.
+        let snark_session = client.create_snark(session.uuid)?;
+        let snark_receipt = loop {
+            let res = snark_session.status(&client)?;
+            match res.status.as_str() {
+                "RUNNING" => {
+                    // TODO(#1759): Improve upon this polling solution.
+                    std::thread::sleep(Duration::from_secs(5));
+                    continue;
+                }
+                "SUCCEEDED" => {
+                    break res.output.with_context(|| {
+                        format!(
+                            "Bonsai prover workflow [{}] reported success, but provided no receipt",
+                            snark_session.uuid
+                        )
+                    })?;
+                }
+                _ => {
+                    bail!(
+                        "Bonsai prover workflow [{}] exited: {} err: {}",
+                        snark_session.uuid,
+                        res.status,
+                        res.error_msg
+                            .unwrap_or("Bonsai workflow missing error_msg".into()),
+                    );
+                }
+            }
+        };
+
+        // Assemble the compact receipt, and verify it.
+        // TODO(DO NOT MERGE(add issue number)): If the Groth16 parameters used by Bonsai do not
+        // match, this verification will fail. When Bonsai returned ReceiptMetadata, we'll be able
+        // to detect this error condition.
+        let compact_receipt = Receipt::new(
+            InnerReceipt::Compact(CompactReceipt {
+                seal: snark_receipt.snark.to_vec(),
+                claim: succinct_prove_info.receipt.claim()?,
+            }),
+            succinct_prove_info.receipt.journal.bytes,
+        );
+        compact_receipt
+            .verify_integrity_with_context(ctx)
+            .context("failed to verify CompactReceipt returned by Bonsai")?;
+
+        // Return the compact receipt, with the stats collected earlier.
+        Ok(ProveInfo {
+            receipt: compact_receipt,
+            stats: succinct_prove_info.stats,
+        })
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
