@@ -91,10 +91,14 @@ tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+enum-iterator = "2.0"
 flate2 = "1.0"
+human-repr = { version = "1.0", features = ["1024"] }
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
+serde_with = "3.8"
 serial_test = "3.0"
+tabled = "0.15"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
