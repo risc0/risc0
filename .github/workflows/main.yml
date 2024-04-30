@@ -300,8 +300,7 @@ jobs:
           key: ${{ matrix.os }}-default
       - run: cargo install --force --path risc0/cargo-risczero -F experimental
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - name: Checkout bigint accelerator fork
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: risc0/RustCrypto-crypto-bigint
       - run: cargo risczero test
