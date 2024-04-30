@@ -19,12 +19,10 @@ use hex::FromHex;
 use regex::Regex;
 use risc0_zkvm::{
     get_prover_server,
-    recursion::identity_p254,
     sha::{Digest, Digestible},
-    CompactReceipt, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, VerifierContext,
-    ALLOWED_CONTROL_ROOT,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
 use crate::bootstrap::Bootstrap;
 
@@ -160,7 +158,8 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 
  library TestReceipt {
 "#;
-    let (receipt, image_id) = generate_receipt();
+    let receipt = generate_receipt();
+    let image_id = receipt.claim().unwrap().pre.digest();
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
     let post_digest = format!(
         "0x{}",
@@ -200,7 +199,7 @@ fn split_digest(d: Digest) -> (String, String) {
 
 // Return a Compact `Receipt` and the imageID used to generate the proof.
 // Requires running Docker on an x86 architecture.
-fn generate_receipt() -> (Receipt, Digest) {
+fn generate_receipt() -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::BusyLoop { cycles: 0 })
         .unwrap()
@@ -214,10 +213,9 @@ fn generate_receipt() -> (Receipt, Digest) {
 
     tracing::info!("prove");
     let prover = get_prover_server(&ProverOpts::compact()).unwrap();
-    let receipt = prover
+
+    prover
         .prove_session(&VerifierContext::default(), &session)
         .unwrap()
-        .receipt;
-
-    (receipt, image_id)
+        .receipt
 }
