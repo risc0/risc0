@@ -309,8 +309,9 @@ jobs:
           cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
           cargo install --force --path risc0/cargo-risczero -F experimental
         working-directory: risc0
-      - run: cargo risczero test
+      - name: run cargo risczero test
         working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
+        run: cargo risczero test
       - run: sccache --show-stats
 
   doc:
