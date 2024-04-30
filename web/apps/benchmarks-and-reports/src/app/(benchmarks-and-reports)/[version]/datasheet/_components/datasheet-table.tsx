@@ -18,7 +18,7 @@ import { type ReactNode, useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
 
-const MAX_AMOUNT_OF_ROWS = 5;
+const MAX_AMOUNT_OF_ROWS = 25;
 
 export function DatasheetTable<TData, TValue>({
   title,
