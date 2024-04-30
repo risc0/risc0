@@ -37,6 +37,7 @@ jobs:
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       test: ${{ steps.filter.outputs.test }}
+      test-crates: ${{ steps.filter.outputs.test-crates }}
       web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
