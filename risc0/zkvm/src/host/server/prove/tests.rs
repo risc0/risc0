@@ -30,8 +30,8 @@ use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, InnerReceipt, ProveInfo, ProverOpts, ProverServer,
-    Receipt, ReceiptKind, Session, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, ReceiptKind,
+    Session, VerifierContext,
 };
 
 fn prover_opts_fast() -> ProverOpts {
@@ -497,12 +497,7 @@ fn sys_input() {
 
 #[cfg(feature = "docker")]
 mod docker {
-    use crate::{
-        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
-        InnerReceipt, ProverOpts, Receipt, ReceiptKind, VerifierContext,
-    };
-    use anyhow::{bail, Result};
-    use risc0_groth16::docker::stark_to_snark;
+    use crate::{get_prover_server, ExecutorEnv, InnerReceipt, ProverOpts, Receipt, ReceiptKind};
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
     #[test]
@@ -546,36 +541,34 @@ mod docker {
                 InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
             },
         };
-        Ok(())
+        receipt.verify(MULTI_TEST_ID).unwrap();
     }
 
-    fn test_fake_compress(receipt: &Receipt) -> Result<()> {
-        fn ensure_fake(receipt: Receipt) -> Result<()> {
-            if let InnerReceipt::Fake { claim: _ } = receipt.inner {
-                Ok(())
-            } else {
-                bail!("expected fake receipt")
-            }
+    fn test_fake_compress(receipt: &Receipt) {
+        fn ensure_fake(receipt: Receipt) {
+            let InnerReceipt::Fake { claim: _ } = receipt.inner else {
+                panic!("expected fake receipt");
+            };
         }
         let fake = Receipt::new(
             InnerReceipt::Fake {
-                claim: receipt.claim()?,
+                claim: receipt.claim().unwrap(),
             },
             receipt.clone().journal.bytes,
         );
 
         let prover = get_prover_server(&ProverOpts::default()).unwrap();
         let receipt = prover.compress(&ProverOpts::composite(), &fake).unwrap();
-        ensure_fake(receipt)?;
+        ensure_fake(receipt);
         let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
-        ensure_fake(receipt)?;
+        ensure_fake(receipt);
         let receipt = prover.compress(&ProverOpts::compact(), &fake).unwrap();
-        ensure_fake(receipt)
+        ensure_fake(receipt);
     }
 
     fn generate_receipt(opts: ProverOpts) -> Receipt {
         let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::BusyLoop { cycles: 0 })
+            .write(&MultiTestSpec::DoNothing)
             .unwrap()
             .build()
             .unwrap();
@@ -587,24 +580,24 @@ mod docker {
     fn prover_stark2snark() {
         // composite receipts
         let composite_receipt = &generate_receipt(ProverOpts::composite());
-        self::test_compress(ProverOpts::composite(), composite_receipt).unwrap();
-        self::test_compress(ProverOpts::succinct(), composite_receipt).unwrap();
-        self::test_compress(ProverOpts::compact(), composite_receipt).unwrap();
+        self::test_compress(ProverOpts::composite(), composite_receipt);
+        self::test_compress(ProverOpts::succinct(), composite_receipt);
+        self::test_compress(ProverOpts::compact(), composite_receipt);
 
         // succinct receipts
         let succinct_receipt = &generate_receipt(ProverOpts::succinct());
-        self::test_compress(ProverOpts::composite(), succinct_receipt).unwrap();
-        self::test_compress(ProverOpts::succinct(), succinct_receipt).unwrap();
-        self::test_compress(ProverOpts::compact(), succinct_receipt).unwrap();
+        self::test_compress(ProverOpts::composite(), succinct_receipt);
+        self::test_compress(ProverOpts::succinct(), succinct_receipt);
+        self::test_compress(ProverOpts::compact(), succinct_receipt);
 
         // compact receipts
         let compact_receipt = &generate_receipt(ProverOpts::compact());
-        self::test_compress(ProverOpts::composite(), compact_receipt).unwrap();
-        self::test_compress(ProverOpts::succinct(), compact_receipt).unwrap();
-        self::test_compress(ProverOpts::compact(), compact_receipt).unwrap();
+        self::test_compress(ProverOpts::composite(), compact_receipt);
+        self::test_compress(ProverOpts::succinct(), compact_receipt);
+        self::test_compress(ProverOpts::compact(), compact_receipt);
 
         // fake receipts
-        self::test_fake_compress(compact_receipt).unwrap();
+        self::test_fake_compress(compact_receipt);
     }
 }
 
