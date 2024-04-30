@@ -34,7 +34,7 @@ namespace risc0::circuit::rv32im {
 
 constexpr size_t kBabyBearExtSize = 4;
 constexpr size_t kMaxRamRowsPerCycle = 5;
-constexpr size_t kMaxTwinsPerCycle = 21;
+constexpr size_t kMaxBytePairsPerCycle = 21;
 
 constexpr size_t kWordSize = sizeof(uint32_t);
 constexpr size_t kBitWidth = 256;
@@ -79,9 +79,10 @@ struct MachineContext {
   std::vector<RamArgumentRow> ramSorted;
   std::vector<uint32_t> ramIndex;
 
-  std::vector<uint32_t> byteTwins;
-  std::vector<uint32_t> byteIndex;
+  std::array<std::atomic<uint32_t>, 256 * 256> bytePairs{0};
   std::vector<uint32_t> byteSorted;
+  std::vector<uint32_t> byteWrites;
+  std::vector<uint32_t> byteReads;
 
   void sortRam();
   void sortBytes();
@@ -487,7 +488,7 @@ void MachineContext::sortRam() {
   }
 }
 
-void inject_ram_backs(void* ctx, size_t steps, size_t cycle, Fp* data) {
+void inject_backs_ram(void* ctx, size_t steps, size_t cycle, Fp* data) {
   MachineContext* mctx = static_cast<MachineContext*>(ctx);
   assert(cycle != 0);
 
@@ -531,42 +532,52 @@ extern_plonkRead_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 
 
 void extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> args) {
   MachineContext* mctx = static_cast<MachineContext*>(ctx);
-  uint32_t idx = mctx->byteIndex[cycle]++;
-  assert(idx < kMaxTwinsPerCycle);
-  uint32_t twin = args[0].asUInt32() << 8 | args[1].asUInt32();
-  mctx->byteTwins[cycle * kMaxTwinsPerCycle + idx] = twin;
+  uint32_t pair = args[0].asUInt32() << 8 | args[1].asUInt32();
+  mctx->bytePairs[pair]++;
+  mctx->byteWrites[cycle]++;
 }
 
 void MachineContext::sortBytes() {
   // printf("sortBytes\n");
-  {
-    nvtx3::scoped_range range("prepare");
-    for (size_t i = 0; i < steps; i++) {
-      uint32_t count = byteIndex[i];
-      for (size_t j = 0; j < count; j++) {
-        byteSorted.push_back(byteTwins[i * kMaxTwinsPerCycle + j]);
-      }
+  size_t pos = 0;
+  auto next = [&]() {
+    while (!bytePairs[pos]) {
+      pos++;
+    }
+    bytePairs[pos]--;
+    return pos;
+  };
+
+  for (size_t cycle = 0; cycle < steps; cycle++) {
+    uint32_t count = byteWrites[cycle];
+    assert(count <= kMaxBytePairsPerCycle);
+    for (size_t i = 0; i < count; i++) {
+      byteSorted[cycle * kMaxBytePairsPerCycle + i] = next();
     }
   }
+}
 
-  // printf("bytes: %lu\n", byteSorted.size());
-  {
-    nvtx3::scoped_range range("sort");
-    std::sort(poolstl::par, byteSorted.begin(), byteSorted.end());
-  }
+void inject_backs_bytes(void* ctx, size_t steps, size_t cycle, Fp* data) {
+  MachineContext* mctx = static_cast<MachineContext*>(ctx);
+  assert(cycle != 0);
 
-  {
-    nvtx3::scoped_range range("update");
-    std::exclusive_scan(byteIndex.begin(), byteIndex.end(), byteIndex.begin(), 0);
+  uint32_t writeCount = mctx->byteWrites[cycle - 1];
+  // printf("inject> cycle: %lu, writeCount: %u\n", cycle, writeCount);
+  if (writeCount) {
+    uint32_t pair = mctx->byteSorted[(cycle - 1) * kMaxBytePairsPerCycle + writeCount - 1];
+    // printf("inject> pair: %x\n", pair);
+    data[0 * steps + cycle - 1] = Fp(pair >> 8 & 0xff);
+    data[1 * steps + cycle - 1] = Fp(pair & 0xff);
   }
 }
 
 std::array<Fp, 2>
 extern_plonkRead_bytes(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args) {
   MachineContext* mctx = static_cast<MachineContext*>(ctx);
-  uint32_t idx = mctx->byteIndex[cycle]++;
-  uint32_t twin = mctx->byteSorted[idx];
-  return {Fp(twin >> 8 & 0xff), Fp(twin & 0xff)};
+  uint32_t idx = mctx->byteReads[cycle]++;
+  uint32_t pair = mctx->byteSorted[cycle * kMaxBytePairsPerCycle + idx];
+  // printf("plonkReadBytes> cycle: %lu, idx: %u, pair: %x\n", cycle, idx, pair);
+  return {Fp(pair >> 8 & 0xff), Fp(pair & 0xff)};
 }
 
 void extern_plonkWriteAccum_ram(void* ctx,
@@ -625,8 +636,9 @@ MachineContext* risc0_circuit_rv32im_machine_context_alloc(PreflightTrace* trace
   ctx->steps = steps;
   ctx->ramRows.resize(steps * kMaxRamRowsPerCycle);
   ctx->ramIndex.resize(steps);
-  ctx->byteTwins.resize(steps * kMaxTwinsPerCycle);
-  ctx->byteIndex.resize(steps);
+  ctx->byteSorted.resize(steps * kMaxBytePairsPerCycle);
+  ctx->byteWrites.resize(steps);
+  ctx->byteReads.resize(steps);
   return ctx;
 }
 

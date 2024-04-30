@@ -17,9 +17,10 @@ use std::ffi::CStr;
 use anyhow::{anyhow, Result};
 use risc0_circuit_rv32im_sys::ffi::{
     risc0_circuit_rv32im_accum_context_alloc, risc0_circuit_rv32im_accum_context_free,
-    risc0_circuit_rv32im_calc_prefix_products, risc0_circuit_rv32im_inject_ram_backs,
-    risc0_circuit_rv32im_machine_context_alloc, risc0_circuit_rv32im_machine_context_free,
-    risc0_circuit_rv32im_poly_fp, risc0_circuit_rv32im_sort_bytes, risc0_circuit_rv32im_sort_ram,
+    risc0_circuit_rv32im_calc_prefix_products, risc0_circuit_rv32im_inject_backs_bytes,
+    risc0_circuit_rv32im_inject_backs_ram, risc0_circuit_rv32im_machine_context_alloc,
+    risc0_circuit_rv32im_machine_context_free, risc0_circuit_rv32im_poly_fp,
+    risc0_circuit_rv32im_sort_bytes, risc0_circuit_rv32im_sort_ram,
     risc0_circuit_rv32im_step_compute_accum, risc0_circuit_rv32im_step_exec,
     risc0_circuit_rv32im_step_verify_accum, risc0_circuit_rv32im_step_verify_bytes,
     risc0_circuit_rv32im_step_verify_mem, risc0_circuit_string_free, risc0_circuit_string_ptr,
@@ -76,7 +77,7 @@ impl CircuitImpl {
         cycle: usize,
         ctx: &SyncMachineContext,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
         self.wrap_ffi(|err| unsafe {
             risc0_circuit_rv32im_step_exec(err, ctx.0, steps, cycle, args.as_ptr())
@@ -89,7 +90,7 @@ impl CircuitImpl {
         cycle: usize,
         ctx: &SyncMachineContext,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
         self.wrap_ffi(|err| unsafe {
             risc0_circuit_rv32im_step_verify_mem(err, ctx.0, steps, cycle, args.as_ptr())
@@ -102,7 +103,7 @@ impl CircuitImpl {
         cycle: usize,
         ctx: &SyncMachineContext,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
         self.wrap_ffi(|err| unsafe {
             risc0_circuit_rv32im_step_verify_bytes(err, ctx.0, steps, cycle, args.as_ptr())
@@ -113,7 +114,7 @@ impl CircuitImpl {
         self.wrap_ffi(|err| unsafe { risc0_circuit_rv32im_sort_ram(err, ctx.0) })
     }
 
-    pub fn inject_ram_backs(
+    pub fn inject_backs_ram(
         &self,
         ctx: &SyncMachineContext,
         steps: usize,
@@ -121,12 +122,24 @@ impl CircuitImpl {
         data: SyncSlice<BabyBearElem>,
     ) -> Result<()> {
         self.wrap_ffi(|err| unsafe {
-            risc0_circuit_rv32im_inject_ram_backs(err, ctx.0, steps, cycle, data.get_ptr())
+            risc0_circuit_rv32im_inject_backs_ram(err, ctx.0, steps, cycle, data.get_ptr())
         })
     }
 
     pub fn sort_bytes(&self, ctx: &SyncMachineContext) -> Result<()> {
         self.wrap_ffi(|err| unsafe { risc0_circuit_rv32im_sort_bytes(err, ctx.0) })
+    }
+
+    pub fn inject_backs_bytes(
+        &self,
+        ctx: &SyncMachineContext,
+        steps: usize,
+        cycle: usize,
+        data: SyncSlice<BabyBearElem>,
+    ) -> Result<()> {
+        self.wrap_ffi(|err| unsafe {
+            risc0_circuit_rv32im_inject_backs_bytes(err, ctx.0, steps, cycle, data.get_ptr())
+        })
     }
 
     pub fn par_step_compute_accum(
@@ -135,7 +148,7 @@ impl CircuitImpl {
         cycle: usize,
         ctx: &SyncAccumContext,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
         self.wrap_ffi(|err| unsafe {
             risc0_circuit_rv32im_step_compute_accum(err, ctx.0, steps, cycle, args.as_ptr())
@@ -152,7 +165,7 @@ impl CircuitImpl {
         cycle: usize,
         ctx: &SyncAccumContext,
         args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<BabyBearElem> {
+    ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
         self.wrap_ffi(|err| unsafe {
             risc0_circuit_rv32im_step_verify_accum(err, ctx.0, steps, cycle, args.as_ptr())
