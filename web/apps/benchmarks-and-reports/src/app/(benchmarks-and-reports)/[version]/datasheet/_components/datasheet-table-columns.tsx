@@ -1,6 +1,6 @@
 "use client";
 
-import { createColumnHelper } from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { TableColumnHeader } from "shared/client/table/table-column-header";
 import { formatBytes } from "shared/utils/format-bytes";
 import { formatDuration } from "shared/utils/format-duration";
@@ -10,11 +10,19 @@ import type { DatasheetTableSchema } from "./datasheet-table-schema";
 const columnHelper = createColumnHelper<DatasheetTableSchema>();
 
 export const datasheetTableColumns = [
+  columnHelper.accessor("name", {
+    header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
+    cell: (info) => <div className="font-mono">{info.getValue() ?? "-"}</div>,
+  }),
+  columnHelper.accessor("hashfn", {
+    header: ({ column }) => <TableColumnHeader column={column} title="Hash Function" />,
+    cell: (info) => <div className="font-mono">{info.getValue() ?? "-"}</div>,
+  }),
   {
     accessorKey: "total_cycles",
     header: ({ column }) => <TableColumnHeader column={column} title="Cycles" />,
     cell: ({ row }) => (
-      <div className="font-mono">{`${(row.getValue("total_cycles") ?? row.getValue("cycles")) / 1024}k`}</div>
+      <div className="font-mono">{`${(row.original.total_cycles ?? row.original.cycles) / 1024}k`}</div>
     ),
   },
   columnHelper.accessor("duration", {
@@ -36,4 +44,4 @@ export const datasheetTableColumns = [
       <div className="font-mono">{formatHz(row.getValue("throughput") ?? row.getValue("speed")) ?? "-"}</div>
     ),
   },
-];
+] as ColumnDef<DatasheetTableSchema, unknown>[];

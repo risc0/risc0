@@ -58,7 +58,7 @@ The [guest code] confirms the JWT's integrity using the public key and records t
 [here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
 [zkVM]: https://dev.risczero.com/zkvm
 [shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
-[Rust Resources]: https://dev.risczero.com/zkvm/developer-guide/rust-resources
+[Rust Resources]: https://dev.risczero.com/api/zkvm/rust-resources
 [guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
 [host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
 [journal]: https://dev.risczero.com/terminology#journal
