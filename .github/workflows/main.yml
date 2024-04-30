@@ -294,11 +294,13 @@ jobs:
         os: [Linux, macOS]
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: 'risc0'
       - uses: actions/checkout@v4
         with:
           repository: risc0/RustCrypto-crypto-bigint
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
+      - uses: ./risc0/.github/actions/rustup
+      - uses: ./risc0/.github/actions/sccache
         with:
           key: ${{ matrix.os }}-default
       - name: Install risczero toolchain
