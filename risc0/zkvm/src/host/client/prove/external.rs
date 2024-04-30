@@ -150,6 +150,7 @@ impl Prover for ExternalProver {
                 })
             }
             (_, ReceiptKind::Compact) => {
+                // TODO(#1760) Support compression to compact receipt in client/server API.
                 bail!("ExternalProver does not support compression to CompactReceipt");
             }
         }
