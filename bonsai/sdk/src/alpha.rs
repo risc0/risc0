@@ -484,11 +484,11 @@ impl Client {
             .get(format!("{}/receipts/{}", self.url, session_id.uuid))
             .send()?;
 
-        if !resp.status().is_success() {
-            if resp.status().as_u16() == 404 {
+        if !res.status().is_success() {
+            if res.status().as_u16() == 404 {
                 return Err(SdkErr::ReceiptNotFound);
             }
-            let body = resp.text()?;
+            let body = res.text()?;
             return Err(SdkErr::InternalServerErr(body));
         }
 
