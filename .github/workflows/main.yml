@@ -305,6 +305,7 @@ jobs:
         with:
           repository: risc0/RustCrypto-crypto-bigint
       - run: cargo risczero test
+      - run: sccache --show-stats
 
   doc:
     if: needs.changes.outputs.doc == 'true'
