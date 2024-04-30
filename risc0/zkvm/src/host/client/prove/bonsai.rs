@@ -220,7 +220,10 @@ impl Prover for BonsaiProver {
             }
             (_, ReceiptKind::Compact) => {
                 // Caller is requesting a CompactReceipt. Provide a hint on how to get one.
-                bail!("BonsaiProver does not support compression on existing receipts. Send ReceiptKind with initial prove request to get a CompactReceipt.");
+                bail!([
+                    "BonsaiProver does not support compression on existing receipts",
+                    "Set receipt_kind on ProverOpts in initial prove request to get a CompactReceipt."
+                ].join(""));
             }
         }
     }
