@@ -103,6 +103,7 @@ where
             );
         }
 
+        // Compress the receipt to the requested level.
         let receipt = match self.receipt_kind {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
