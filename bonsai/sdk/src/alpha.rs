@@ -485,7 +485,7 @@ impl Client {
             .send()?;
 
         if !res.status().is_success() {
-            if res.status().as_u16() == 404 {
+            if res.status() == reqwest::StatusCode::NOT_FOUND {
                 return Err(SdkErr::ReceiptNotFound);
             }
             let body = res.text()?;
