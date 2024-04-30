@@ -45,6 +45,9 @@ pub enum SdkErr {
     /// Missing file
     #[error("failed to find file on disk: {0:?}")]
     FileNotFound(#[from] std::io::Error),
+    /// Receipt not found
+    #[error("Receipt not found")]
+    ReceiptNotFound,
 }
 
 /// Collection of serialization object for the REST api
@@ -481,13 +484,21 @@ impl Client {
             .get(format!("{}/receipts/{}", self.url, session_id.uuid))
             .send()?;
 
-        if !res.status().is_success() {
-            let body = res.text()?;
-            return Err(SdkErr::InternalServerErr(body));
+        match res.error_for_status() {
+            Ok(res) => {
+                let res: ReceiptDownload = res.json()?;
+                self.download(&res.url)
+            },
+            Err(err) => {
+                if err.status() == Some(reqwest::StatusCode::NOT_FOUND) {
+                    return Err(SdkErr::ReceiptNotFound);
+                }
+                else {
+                    let body = res.text()?;
+                    return Err(SdkErr::InternalServerErr(body));
+                }
+            }
         }
-        let res: ReceiptDownload = res.json()?;
-
-        self.download(&res.url)
     }
 
     /// Delete an existing image
