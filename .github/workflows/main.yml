@@ -304,6 +304,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: risc0/RustCrypto-crypto-bigint
+      - uses: ./.github/actions/sccache
       - run: cargo risczero test
       - run: sccache --show-stats
 
