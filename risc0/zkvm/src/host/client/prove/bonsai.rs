@@ -19,8 +19,8 @@ use bonsai_sdk::alpha::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, sha::Digestible, ExecutorEnv, InnerReceipt, ProveInfo, ProverOpts, Receipt,
-    VerifierContext,
+    compute_image_id, is_dev_mode, sha::Digestible, ExecutorEnv, InnerReceipt, ProveInfo,
+    ProverOpts, Receipt, ReceiptKind, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
@@ -136,18 +136,32 @@ impl Prover for BonsaiProver {
         }
     }
 
-    fn compress(&self, _: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
-        match receipt.inner {
-            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
-            // NOTE: Bonsai always returns a SuccinctReceipt, and does not support compression of
-            // SegmentReceipts uploaded by clients. It would be possible to support this, but there
-            // is not an apparent reason to do so.
-            InnerReceipt::Composite(_) => Err(anyhow!(
-                "BonsaiProver does not support compress on a composite receipt"
-            )),
-            InnerReceipt::Fake { .. } => Err(anyhow!(
-                "BonsaiProver does not support compress on a composite receipt"
-            )),
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match (&receipt.inner, opts.receipt_kind) {
+            // Compression is a no-op when the requested kind is at least as large as the current.
+            (InnerReceipt::Composite(_), ReceiptKind::Composite)
+            | (InnerReceipt::Succinct(_), ReceiptKind::Composite | ReceiptKind::Succinct)
+            | (
+                InnerReceipt::Compact(_),
+                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Compact,
+            ) => Ok(receipt.clone()),
+            // Compression is always a no-op in dev mode
+            (InnerReceipt::Fake { .. }, _) => {
+                ensure!(
+                    is_dev_mode(),
+                    "dev mode must be enabled to compress fake receipts"
+                );
+                Ok(receipt.clone())
+            }
+            // NOTE: Bonsai always returns a SuccinctReceipt, and does not currenly support
+            // compression of existing receipts uploaded by clients.
+            (_, ReceiptKind::Succinct) => {
+                bail!("BonsaiProver does not support compression on existing receipts");
+            }
+            (_, ReceiptKind::Compact) => {
+                // Caller is requesting a CompactReceipt. Provide a hint on how to get one.
+                bail!("BonsaiProver does not support compression on existing receipts. Send ReceiptKind with initial prove request to get a CompactReceipt.");
+            }
         }
     }
 }

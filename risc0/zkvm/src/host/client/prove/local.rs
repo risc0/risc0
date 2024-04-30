@@ -16,8 +16,8 @@ use anyhow::{bail, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext,
+    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl, ProveInfo,
+    Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [crate::ProverServer] by calling
@@ -51,18 +51,7 @@ impl Prover for LocalProver {
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
-        match receipt.inner {
-            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
-            InnerReceipt::Composite(ref inner) => Ok(Receipt {
-                inner: InnerReceipt::Succinct(
-                    get_prover_server(opts)?.compsite_to_succinct(inner)?,
-                ),
-                journal: receipt.journal.clone(),
-            }),
-            InnerReceipt::Fake { .. } => {
-                bail!("BonsaiProver does not support compress on a composite receipt")
-            }
-        }
+        get_prover_server(opts)?.compress(opts, receipt)
     }
 }
 

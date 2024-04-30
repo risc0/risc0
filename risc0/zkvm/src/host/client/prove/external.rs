@@ -18,9 +18,9 @@ use anyhow::{anyhow, bail, ensure, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    compute_image_id, host::api::AssetRequest, sha::Digestible, ApiClient, Asset, CompositeReceipt,
-    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, SegmentReceipt, SessionInfo, SuccinctReceipt,
-    VerifierContext,
+    compute_image_id, host::api::AssetRequest, is_dev_mode, sha::Digestible, ApiClient, Asset,
+    CompositeReceipt, ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SegmentReceipt,
+    SessionInfo, SuccinctReceipt, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -39,8 +39,8 @@ impl ExternalProver {
         }
     }
 
-    /// Internal implementation of the compress function.
-    fn compress_internal(
+    /// Internal implementation of the compress function from CompositeReceipt to SuccinctReceipt.
+    fn composite_to_succinct(
         client: &ApiClient,
         opts: &ProverOpts,
         receipt: &CompositeReceipt,
@@ -77,7 +77,7 @@ impl ExternalProver {
             |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
                 InnerReceipt::Succinct(assumption) => client.resolve(opts, conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
                 InnerReceipt::Composite(assumption) => {
-                    client.resolve(opts, conditional.try_into()?, Self::compress_internal(client, opts, assumption)?.try_into()?, AssetRequest::Inline)
+                    client.resolve(opts, conditional.try_into()?, Self::composite_to_succinct(client, opts, assumption)?.try_into()?, AssetRequest::Inline)
                 }
                 InnerReceipt::Fake { .. } => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
@@ -124,19 +124,33 @@ impl Prover for ExternalProver {
     }
 
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
-        match receipt.inner {
-            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
-            InnerReceipt::Composite(ref composite) => {
+        match (&receipt.inner, opts.receipt_kind) {
+            // Compression is a no-op when the requested kind is at least as large as the current.
+            (InnerReceipt::Composite(_), ReceiptKind::Composite)
+            | (InnerReceipt::Succinct(_), ReceiptKind::Composite | ReceiptKind::Succinct)
+            | (
+                InnerReceipt::Compact(_),
+                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Compact,
+            ) => Ok(receipt.clone()),
+            // Compression is always a no-op in dev mode
+            (InnerReceipt::Fake { .. }, _) => {
+                ensure!(
+                    is_dev_mode(),
+                    "dev mode must be enabled to compress fake receipts"
+                );
+                Ok(receipt.clone())
+            }
+            (InnerReceipt::Composite(composite), ReceiptKind::Succinct) => {
                 let client = ApiClient::new_sub_process(&self.r0vm_path)?;
                 Ok(Receipt {
-                    inner: InnerReceipt::Succinct(Self::compress_internal(
+                    inner: InnerReceipt::Succinct(Self::composite_to_succinct(
                         &client, opts, composite,
                     )?),
                     journal: receipt.journal.clone(),
                 })
             }
-            InnerReceipt::Fake { .. } => {
-                bail!("ExternalProver cannot compress a fake receipt")
+            (_, ReceiptKind::Compact) => {
+                bail!("ExternalProver does not support compression to CompactReceipt");
             }
         }
     }
