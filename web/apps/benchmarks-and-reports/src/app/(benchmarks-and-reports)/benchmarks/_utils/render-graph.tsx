@@ -1,5 +1,5 @@
-import { Chart } from "chart.js"; // stay on 2.9.4, much faster
 import truncate from "lodash-es/truncate";
+import Chart from "react-chartjs-2";
 import type { FormattedDataSetEntry } from "./collect-benches-per-test-case";
 
 const TOOL_COLORS = {
@@ -19,16 +19,10 @@ const TOOL_COLORS = {
 };
 
 export function renderGraph({
-  parent,
-  benchName,
   platformName,
+  benchName,
   dataset,
-}: { parent: HTMLElement; benchName: string; platformName: string; dataset: FormattedDataSetEntry[] }) {
-  const canvas = document.createElement("canvas");
-  canvas.className = "benchmark-chart";
-  canvas.id = `${platformName}-${benchName}`;
-  parent.appendChild(canvas);
-
+}: { platformName: string; benchName: string; dataset: FormattedDataSetEntry[] }) {
   // biome-ignore lint/style/noNonNullAssertion: ignore
   const color = TOOL_COLORS[dataset.length > 0 ? dataset[0]!.tool : "_"];
 
@@ -122,9 +116,5 @@ export function renderGraph({
     },
   };
 
-  new Chart(canvas, {
-    type: "line",
-    data,
-    options,
-  });
+  return <Chart height={75} id={`${platformName}-${benchName}`} type="line" data={data} options={options} />;
 }

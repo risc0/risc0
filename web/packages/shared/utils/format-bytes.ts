@@ -16,5 +16,5 @@ export function formatBytes(bytes: number) {
     unitIndex++;
   }
 
-  return `${bytes.toFixed(2)}${UNITS[unitIndex]}`;
+  return `${bytes.toFixed(2)} ${UNITS[unitIndex]}`;
 }
