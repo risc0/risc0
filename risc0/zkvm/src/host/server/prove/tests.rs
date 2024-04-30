@@ -497,7 +497,10 @@ fn sys_input() {
 
 #[cfg(feature = "docker")]
 mod docker {
-    use crate::{get_prover_server, ExecutorEnv, InnerReceipt, ProverOpts, Receipt, ReceiptKind};
+    use crate::{
+        get_prover_server, host::server::prove::DevModeProver, ExecutorEnv, InnerReceipt,
+        ProverOpts, Receipt, ReceiptKind,
+    };
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
     #[test]
@@ -557,7 +560,7 @@ mod docker {
             receipt.clone().journal.bytes,
         );
 
-        let prover = get_prover_server(&ProverOpts::default()).unwrap();
+        let prover = DevModeProver;
         let receipt = prover.compress(&ProverOpts::composite(), &fake).unwrap();
         ensure_fake(receipt);
         let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
