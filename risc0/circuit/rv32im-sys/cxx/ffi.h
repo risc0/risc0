@@ -47,9 +47,10 @@ template <typename T, typename F> T ffi_wrap(risc0_error* err, T val, F fn) {
 namespace risc0::circuit::rv32im {
 
 Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args);
+void inject_backs_ram(void* ctx, size_t steps, size_t cycle, Fp* data);
 Fp step_verify_mem(void* ctx, size_t steps, size_t cycle, Fp** args);
+void inject_backs_bytes(void* ctx, size_t steps, size_t cycle, Fp* data);
 Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args);
-void inject_ram_backs(void* ctx, size_t steps, size_t cycle, Fp* data);
 Fp step_compute_accum(void* ctx, size_t steps, size_t cycle, Fp** args);
 Fp step_verify_accum(void* ctx, size_t steps, size_t cycle, Fp** args);
 
