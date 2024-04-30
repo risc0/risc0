@@ -78,7 +78,7 @@ jobs:
               - compact_proof/**
               - external/**
               - risc0/**
-            test-crates
+            test-crates:
               - *base
               - risc0/**
             web:
