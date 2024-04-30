@@ -498,8 +498,9 @@ fn sys_input() {
 #[cfg(feature = "docker")]
 mod docker {
     use crate::{
-        get_prover_server, host::server::prove::DevModeProver, ExecutorEnv, InnerReceipt,
-        ProverOpts, Receipt, ReceiptKind,
+        get_prover_server,
+        host::server::prove::{DevModeProver, ProverServer},
+        ExecutorEnv, InnerReceipt, ProverOpts, Receipt, ReceiptKind,
     };
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
