@@ -78,6 +78,9 @@ jobs:
               - compact_proof/**
               - external/**
               - risc0/**
+            test-crates
+              - *base
+              - risc0/**
             web:
               - *base
               - examples/browser-verify/**
@@ -97,6 +100,7 @@ jobs:
       - examples
       - docker
       - test
+      - test-crates
       - web
     runs-on: ubuntu-latest
     steps:
@@ -278,6 +282,28 @@ jobs:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
       - run: sccache --show-stats
+
+  test-crates:
+    if: needs.changes.outputs.test-crates == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-default
+      - run: cargo install --force --path risc0/cargo-risczero -F experimental
+      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - name: Checkout bigint accelerator fork
+        uses: actions/checkout@v4
+        with:
+          repository: risc0/RustCrypto-crypto-bigint
+      - run: cargo risczero test
 
   doc:
     if: needs.changes.outputs.doc == 'true'
