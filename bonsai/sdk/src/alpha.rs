@@ -45,6 +45,9 @@ pub enum SdkErr {
     /// Missing file
     #[error("failed to find file on disk: {0:?}")]
     FileNotFound(#[from] std::io::Error),
+    /// Receipt not found
+    #[error("Receipt not found")]
+    ReceiptNotFound,
 }
 
 /// Collection of serialization object for the REST api
@@ -493,11 +496,14 @@ impl Client {
             .send()?;
 
         if !res.status().is_success() {
+            if res.status() == reqwest::StatusCode::NOT_FOUND {
+                return Err(SdkErr::ReceiptNotFound);
+            }
             let body = res.text()?;
             return Err(SdkErr::InternalServerErr(body));
         }
-        let res: ReceiptDownload = res.json()?;
 
+        let res: ReceiptDownload = res.json()?;
         self.download(&res.url)
     }
 

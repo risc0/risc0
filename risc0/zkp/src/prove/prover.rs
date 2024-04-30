@@ -196,6 +196,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         let mut eval_u: Vec<H::ExtElem> = Vec::new();
         tracing::info_span!("eval_u").in_scope(|| {
+            nvtx::range_push!("eval_u");
             for (id, pg) in self.groups.iter().enumerate() {
                 let pg = pg.as_ref().unwrap();
 
@@ -216,11 +217,13 @@ impl<'a, H: Hal> Prover<'a, H> {
                     eval_u.extend(view);
                 });
             }
+            nvtx::range_pop!();
         });
 
         // Now, convert the values to coefficients via interpolation
         let mut coeff_u = vec![H::ExtElem::ZERO; eval_u.len()];
         tracing::info_span!("poly_interpolate").in_scope(|| {
+            nvtx::range_push!("poly_interpolate");
             let mut pos = 0;
             for reg in self.taps.regs() {
                 poly_interpolate(
@@ -231,9 +234,11 @@ impl<'a, H: Hal> Prover<'a, H> {
                 );
                 pos += reg.size();
             }
+            nvtx::range_pop!();
         });
 
         // Add in the coeffs of the check polynomials.
+        nvtx::range_push!("misc");
         let z_pow = z.pow(ext_size);
         let which = Vec::from_iter(0u32..H::CHECK_SIZE as u32);
         let xs = vec![z_pow; H::CHECK_SIZE];
@@ -258,13 +263,20 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Set the mix mix value, which is used for FRI batching.
         let mix = self.iop.random_ext_elem();
         tracing::debug!("Mix = {mix:?}");
+        nvtx::range_pop!();
 
         // Do the coefficient mixing
         // Begin by making a zeroed output buffer
         let combo_count = self.taps.combos_size();
+        nvtx::range_push!("alloc(combos)");
         let combos = vec![H::ExtElem::ZERO; self.cycles * (combo_count + 1)];
+        nvtx::range_pop!();
+        nvtx::range_push!("copy(combos)");
         let combos = self.hal.copy_from_extelem("combos", combos.as_slice());
+        nvtx::range_pop!();
+
         tracing::info_span!("mix_poly_coeffs").in_scope(|| {
+            nvtx::range_push!("mix_poly_coeffs");
             let mut cur_mix = H::ExtElem::ONE;
 
             for (id, pg) in self.groups.iter().enumerate() {
@@ -299,6 +311,7 @@ impl<'a, H: Hal> Prover<'a, H> {
                 H::CHECK_SIZE,
                 self.cycles,
             );
+            nvtx::range_pop!();
         });
 
         // Load the near final coefficients back to the CPU
@@ -350,16 +363,21 @@ impl<'a, H: Hal> Prover<'a, H> {
                 });
             });
         });
+
         // Sum the combos up into one final polynomial + make it into 4 Fp polys.
         // Additionally, it needs to be bit reversed to make everyone happy
+        nvtx::range_push!("sum");
         let final_poly_coeffs = self
             .hal
             .alloc_elem("final_poly_coeffs", self.cycles * ext_size);
         self.hal.eltwise_sum_extelem(&final_poly_coeffs, &combos);
+        nvtx::range_pop!();
 
         // Finally do the FRI protocol to prove the degree of the polynomial
+        nvtx::range_push!("bit_rev");
         self.hal.batch_bit_reverse(&final_poly_coeffs, ext_size);
         tracing::debug!("FRI-proof, size = {}", final_poly_coeffs.size() / ext_size);
+        nvtx::range_pop!();
 
         fri_prove(self.hal, &mut self.iop, &final_poly_coeffs, |iop, idx| {
             for pg in self.groups.iter() {

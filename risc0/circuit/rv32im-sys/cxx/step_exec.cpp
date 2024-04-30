@@ -14,6 +14,7 @@
 
 // This code is automatically generated
 
+#include "extern.h"
 #include "ffi.h"
 #include "fp.h"
 
@@ -27,12 +28,13 @@ namespace risc0::circuit::rv32im {
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-variable"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
+Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::array<Fp, 96> host_args;
-  std::array<Fp, 32> host_outs;
   // loc(unknown)
   Fp x0(56361032);
   // loc(unknown)
@@ -1953,13 +1955,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       reg = x433;
     }
     {
-      host_args.at(0) = x435;
-      host_args.at(1) = x425;
-      host_args.at(2) = x434;
-      host_args.at(3) = x430;
-      host_args.at(4) = x433;
-      host_args.at(5) = x95;
-      host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+      extern_ramWrite(ctx, cycle, "", {x435, x425, x434, x430, x433, x95});
     }
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
     auto x437 = args[2][117 * steps + ((cycle - 0) & mask)];
@@ -2100,13 +2096,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       reg = x451;
     }
     {
-      host_args.at(0) = x453;
-      host_args.at(1) = x443;
-      host_args.at(2) = x452;
-      host_args.at(3) = x448;
-      host_args.at(4) = x451;
-      host_args.at(5) = x95;
-      host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+      extern_ramWrite(ctx, cycle, "", {x453, x443, x452, x448, x451, x95});
     }
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
     auto x454 = args[2][124 * steps + ((cycle - 0) & mask)];
@@ -2247,13 +2237,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       reg = x468;
     }
     {
-      host_args.at(0) = x470;
-      host_args.at(1) = x460;
-      host_args.at(2) = x469;
-      host_args.at(3) = x465;
-      host_args.at(4) = x468;
-      host_args.at(5) = x95;
-      host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+      extern_ramWrite(ctx, cycle, "", {x470, x460, x469, x465, x468, x95});
     }
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
     auto x471 = args[2][131 * steps + ((cycle - 0) & mask)];
@@ -2402,13 +2386,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x488;
         }
         {
-          host_args.at(0) = x87;
-          host_args.at(1) = x485;
-          host_args.at(2) = x486;
-          host_args.at(3) = x487;
-          host_args.at(4) = x488;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x87, x485, x486, x487, x488, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x489 = args[2][119 * steps + ((cycle - 0) & mask)];
@@ -2497,13 +2475,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x496;
         }
         {
-          host_args.at(0) = x86;
-          host_args.at(1) = x493;
-          host_args.at(2) = x494;
-          host_args.at(3) = x495;
-          host_args.at(4) = x496;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x86, x493, x494, x495, x496, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x497 = args[2][126 * steps + ((cycle - 0) & mask)];
@@ -2592,13 +2564,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x504;
         }
         {
-          host_args.at(0) = x85;
-          host_args.at(1) = x501;
-          host_args.at(2) = x502;
-          host_args.at(3) = x503;
-          host_args.at(4) = x504;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x85, x501, x502, x503, x504, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x505 = args[2][133 * steps + ((cycle - 0) & mask)];
@@ -2687,13 +2653,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x512;
         }
         {
-          host_args.at(0) = x84;
-          host_args.at(1) = x509;
-          host_args.at(2) = x510;
-          host_args.at(3) = x511;
-          host_args.at(4) = x512;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x84, x509, x510, x511, x512, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x513 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -2786,13 +2746,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x521;
         }
         {
-          host_args.at(0) = x83;
-          host_args.at(1) = x518;
-          host_args.at(2) = x519;
-          host_args.at(3) = x520;
-          host_args.at(4) = x521;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x83, x518, x519, x520, x521, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x522 = args[2][119 * steps + ((cycle - 0) & mask)];
@@ -2881,13 +2835,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x529;
         }
         {
-          host_args.at(0) = x82;
-          host_args.at(1) = x526;
-          host_args.at(2) = x527;
-          host_args.at(3) = x528;
-          host_args.at(4) = x529;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x82, x526, x527, x528, x529, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x530 = args[2][126 * steps + ((cycle - 0) & mask)];
@@ -2976,13 +2924,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x537;
         }
         {
-          host_args.at(0) = x81;
-          host_args.at(1) = x534;
-          host_args.at(2) = x535;
-          host_args.at(3) = x536;
-          host_args.at(4) = x537;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x81, x534, x535, x536, x537, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x538 = args[2][133 * steps + ((cycle - 0) & mask)];
@@ -3071,13 +3013,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x545;
         }
         {
-          host_args.at(0) = x80;
-          host_args.at(1) = x542;
-          host_args.at(2) = x543;
-          host_args.at(3) = x544;
-          host_args.at(4) = x545;
-          host_args.at(5) = x95;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x80, x542, x543, x544, x545, x95});
         }
         // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x546 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -3536,13 +3472,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x669 = args[2][118 * steps + ((cycle - 1) & mask)];
         assert(x669 != Fp::invalid());
         {
-          host_args.at(0) = x669;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x670 = host_outs.at(0);
-          auto x671 = host_outs.at(1);
-          auto x672 = host_outs.at(2);
-          auto x673 = host_outs.at(3);
+          auto [x670, x671, x672, x673] = extern_ramRead(ctx, cycle, "", {x669, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -3633,13 +3563,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":84:0)
         auto x678 = x669 + x96;
         {
-          host_args.at(0) = x678;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x679 = host_outs.at(0);
-          auto x680 = host_outs.at(1);
-          auto x681 = host_outs.at(2);
-          auto x682 = host_outs.at(3);
+          auto [x679, x680, x681, x682] = extern_ramRead(ctx, cycle, "", {x678, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -3730,13 +3654,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":84:0)
         auto x687 = x669 + x93;
         {
-          host_args.at(0) = x687;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x688 = host_outs.at(0);
-          auto x689 = host_outs.at(1);
-          auto x690 = host_outs.at(2);
-          auto x691 = host_outs.at(3);
+          auto [x688, x689, x690, x691] = extern_ramRead(ctx, cycle, "", {x687, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -3827,13 +3745,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":84:0)
         auto x696 = x669 + x76;
         {
-          host_args.at(0) = x696;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x697 = host_outs.at(0);
-          auto x698 = host_outs.at(1);
-          auto x699 = host_outs.at(2);
-          auto x700 = host_outs.at(3);
+          auto [x697, x698, x699, x700] = extern_ramRead(ctx, cycle, "", {x696, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -3940,13 +3852,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":95:0)
         auto x708 = x706 + x77;
         {
-          host_args.at(0) = x708;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x709 = host_outs.at(0);
-          auto x710 = host_outs.at(1);
-          auto x711 = host_outs.at(2);
-          auto x712 = host_outs.at(3);
+          auto [x709, x710, x711, x712] = extern_ramRead(ctx, cycle, "", {x708, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -4037,13 +3943,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":95:0)
         auto x717 = x708 + x96;
         {
-          host_args.at(0) = x717;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x718 = host_outs.at(0);
-          auto x719 = host_outs.at(1);
-          auto x720 = host_outs.at(2);
-          auto x721 = host_outs.at(3);
+          auto [x718, x719, x720, x721] = extern_ramRead(ctx, cycle, "", {x717, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -4134,13 +4034,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":95:0)
         auto x726 = x708 + x93;
         {
-          host_args.at(0) = x726;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x727 = host_outs.at(0);
-          auto x728 = host_outs.at(1);
-          auto x729 = host_outs.at(2);
-          auto x730 = host_outs.at(3);
+          auto [x727, x728, x729, x730] = extern_ramRead(ctx, cycle, "", {x726, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -4231,13 +4125,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":95:0)
         auto x735 = x708 + x76;
         {
-          host_args.at(0) = x735;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x736 = host_outs.at(0);
-          auto x737 = host_outs.at(1);
-          auto x738 = host_outs.at(2);
-          auto x739 = host_outs.at(3);
+          auto [x736, x737, x738, x739] = extern_ramRead(ctx, cycle, "", {x735, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -4520,13 +4408,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:0)
         if (x793 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:23");
         {
-          host_args.at(0) = x87;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x794 = host_outs.at(0);
-          auto x795 = host_outs.at(1);
-          auto x796 = host_outs.at(2);
-          auto x797 = host_outs.at(3);
+          auto [x794, x795, x796, x797] = extern_ramRead(ctx, cycle, "", {x87, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -4623,13 +4505,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/components/u32.cpp":40:0)
         args[1][75] = x805;
         {
-          host_args.at(0) = x86;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x806 = host_outs.at(0);
-          auto x807 = host_outs.at(1);
-          auto x808 = host_outs.at(2);
-          auto x809 = host_outs.at(3);
+          auto [x806, x807, x808, x809] = extern_ramRead(ctx, cycle, "", {x86, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -4726,13 +4602,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/components/u32.cpp":40:0)
         args[1][79] = x817;
         {
-          host_args.at(0) = x85;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x818 = host_outs.at(0);
-          auto x819 = host_outs.at(1);
-          auto x820 = host_outs.at(2);
-          auto x821 = host_outs.at(3);
+          auto [x818, x819, x820, x821] = extern_ramRead(ctx, cycle, "", {x85, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -4829,13 +4699,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/components/u32.cpp":40:0)
         args[1][83] = x829;
         {
-          host_args.at(0) = x84;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x830 = host_outs.at(0);
-          auto x831 = host_outs.at(1);
-          auto x832 = host_outs.at(2);
-          auto x833 = host_outs.at(3);
+          auto [x830, x831, x832, x833] = extern_ramRead(ctx, cycle, "", {x84, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -5079,13 +4943,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:0)
         if (x881 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:23");
         {
-          host_args.at(0) = x83;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x882 = host_outs.at(0);
-          auto x883 = host_outs.at(1);
-          auto x884 = host_outs.at(2);
-          auto x885 = host_outs.at(3);
+          auto [x882, x883, x884, x885] = extern_ramRead(ctx, cycle, "", {x83, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -5182,13 +5040,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/components/u32.cpp":40:0)
         args[1][91] = x893;
         {
-          host_args.at(0) = x82;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x894 = host_outs.at(0);
-          auto x895 = host_outs.at(1);
-          auto x896 = host_outs.at(2);
-          auto x897 = host_outs.at(3);
+          auto [x894, x895, x896, x897] = extern_ramRead(ctx, cycle, "", {x82, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -5285,13 +5137,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/components/u32.cpp":40:0)
         args[1][95] = x905;
         {
-          host_args.at(0) = x81;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x906 = host_outs.at(0);
-          auto x907 = host_outs.at(1);
-          auto x908 = host_outs.at(2);
-          auto x909 = host_outs.at(3);
+          auto [x906, x907, x908, x909] = extern_ramRead(ctx, cycle, "", {x81, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -5388,13 +5234,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/components/u32.cpp":40:0)
         args[1][99] = x917;
         {
-          host_args.at(0) = x80;
-          host_args.at(1) = x95;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x918 = host_outs.at(0);
-          auto x919 = host_outs.at(1);
-          auto x920 = host_outs.at(2);
-          auto x921 = host_outs.at(3);
+          auto [x918, x919, x920, x921] = extern_ramRead(ctx, cycle, "", {x80, x95});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -5531,9 +5371,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     auto x942 = x941 + x931;
     // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":31:0)
     auto x943 = x942 - x77;
-    host_args.at(0) = x476;
-    host_args.at(1) = x943;
-    host(ctx, "log", "%u: Reset: PC = %10x", host_args.data(), 2, host_outs.data(), 0);
+    extern_log(ctx, cycle, "%u: Reset: PC = %10x", {x476, x943});
   }
   // loc("Top/Code/OneHot/hot[5](Reg)"("./zirgen/components/mux.h":49:0))
   auto x944 = args[0][6 * steps + ((cycle - 0) & mask)];
@@ -5584,15 +5422,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":192:0)
       auto x962 = (x961 == 0) ? Fp(1) : Fp(0);
       if (x962 != 0) {
-        host_args.at(0) = x945;
-        host_args.at(1) = x959;
-        host(ctx, "log", "%u: BODY pc: %10x", host_args.data(), 2, host_outs.data(), 0);
-        host_args.at(0) = x959;
-        host(ctx, "trace", "", host_args.data(), 1, host_outs.data(), 0);
-        host_args.at(0) = x945;
-        host_args.at(1) = x959;
-        host(ctx, "getMajor", "", host_args.data(), 2, host_outs.data(), 1);
-        auto x963 = host_outs.at(0);
+        extern_log(ctx, cycle, "%u: BODY pc: %10x", {x945, x959});
+        extern_trace(ctx, cycle, "", {x959});
+        auto x963 = extern_getMajor(ctx, cycle, "", {x945, x959});
         {
           // loc("./zirgen/components/onehot.h":37:0)
           auto x964 = (x963 == 0) ? Fp(1) : Fp(0);
@@ -5869,10 +5701,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":200:0)
         auto x1042 = x96 - x1041;
         if (x1042 != 0) {
-          host_args.at(0) = x945;
-          host_args.at(1) = x959;
-          host_args.at(2) = x960;
-          host(ctx, "log", "%u: BODY pc: %10x, major = %u", host_args.data(), 3, host_outs.data(), 0);
+          extern_log(ctx, cycle, "%u: BODY pc: %10x, major = %u", {x945, x959, x960});
         }
         {
           // loc("./zirgen/components/onehot.h":37:0)
@@ -6144,13 +5973,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":112:0)
       auto x1117 = x959 * x75;
       {
-        host_args.at(0) = x1117;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x1118 = host_outs.at(0);
-        auto x1119 = host_outs.at(1);
-        auto x1120 = host_outs.at(2);
-        auto x1121 = host_outs.at(3);
+        auto [x1118, x1119, x1120, x1121] = extern_ramRead(ctx, cycle, "", {x1117, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][119 * steps + cycle];
@@ -6531,12 +6354,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:0)
       if (x1207 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/decode.cpp:33");
       {
-        host_args.at(0) = x1122;
-        host_args.at(1) = x1123;
-        host_args.at(2) = x1124;
-        host_args.at(3) = x1125;
-        host(ctx, "getMinor", "", host_args.data(), 4, host_outs.data(), 1);
-        auto x1208 = host_outs.at(0);
+        auto x1208 = extern_getMinor(ctx, cycle, "", {x1122, x1123, x1124, x1125});
         {
           // loc("./zirgen/components/onehot.h":37:0)
           auto x1209 = (x1208 == 0) ? Fp(1) : Fp(0);
@@ -7222,13 +7040,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":134:0)
       auto x1267 = x1266 + x48;
       {
-        host_args.at(0) = x1267;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x1268 = host_outs.at(0);
-        auto x1269 = host_outs.at(1);
-        auto x1270 = host_outs.at(2);
-        auto x1271 = host_outs.at(3);
+        auto [x1268, x1269, x1270, x1271] = extern_ramRead(ctx, cycle, "", {x1267, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][126 * steps + cycle];
@@ -7315,13 +7127,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":135:0)
       auto x1278 = x1277 + x48;
       {
-        host_args.at(0) = x1278;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x1279 = host_outs.at(0);
-        auto x1280 = host_outs.at(1);
-        auto x1281 = host_outs.at(2);
-        auto x1282 = host_outs.at(3);
+        auto [x1279, x1280, x1281, x1282] = extern_ramRead(ctx, cycle, "", {x1278, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][133 * steps + cycle];
@@ -7946,36 +7752,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x1444 = args[2][211 * steps + ((cycle - 0) & mask)];
       assert(x1444 != Fp::invalid());
-      host_args.at(0) = x1305;
-      host_args.at(1) = x1306;
-      host_args.at(2) = x1307;
-      host_args.at(3) = x1308;
-      host_args.at(4) = x1266;
-      host_args.at(5) = x1272;
-      host_args.at(6) = x1273;
-      host_args.at(7) = x1274;
-      host_args.at(8) = x1275;
-      host_args.at(9) = x1277;
-      host_args.at(10) = x1283;
-      host_args.at(11) = x1284;
-      host_args.at(12) = x1285;
-      host_args.at(13) = x1286;
-      host_args.at(14) = x1300;
-      host_args.at(15) = x1301;
-      host_args.at(16) = x1302;
-      host_args.at(17) = x1303;
-      host_args.at(18) = x1318;
-      host_args.at(19) = x1319;
-      host_args.at(20) = x1320;
-      host_args.at(21) = x1321;
-      host_args.at(22) = x1380;
-      host_args.at(23) = x1384;
-      host_args.at(24) = x1392;
-      host_args.at(25) = x1396;
-      host_args.at(26) = x1437;
-      host_args.at(27) = x1444;
-      host_args.at(28) = x1443;
-      host(ctx, "log", "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", host_args.data(), 29, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", {x1305, x1306, x1307, x1308, x1266, x1272, x1273, x1274, x1275, x1277, x1283, x1284, x1285, x1286, x1300, x1301, x1302, x1303, x1318, x1319, x1320, x1321, x1380, x1384, x1392, x1396, x1437, x1444, x1443});
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
       auto x1445 = x1189 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
@@ -8204,12 +7981,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1482;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1380;
-          host_args.at(2) = x1384;
-          host_args.at(3) = x1392;
-          host_args.at(4) = x1396;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1380, x1384, x1392, x1396});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":38:0)
           auto x1483 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -8237,13 +8009,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x1396;
           }
           {
-            host_args.at(0) = x1483;
-            host_args.at(1) = x1380;
-            host_args.at(2) = x1384;
-            host_args.at(3) = x1392;
-            host_args.at(4) = x1396;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1483, x1380, x1384, x1392, x1396, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1484 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -8527,12 +8293,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1514;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1380;
-          host_args.at(2) = x1384;
-          host_args.at(3) = x1392;
-          host_args.at(4) = x1396;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1380, x1384, x1392, x1396});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":39:0)
           auto x1515 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -8560,13 +8321,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x1396;
           }
           {
-            host_args.at(0) = x1515;
-            host_args.at(1) = x1380;
-            host_args.at(2) = x1384;
-            host_args.at(3) = x1392;
-            host_args.at(4) = x1396;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1515, x1380, x1384, x1392, x1396, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1516 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -8850,12 +8605,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1546;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1380;
-          host_args.at(2) = x1384;
-          host_args.at(3) = x1392;
-          host_args.at(4) = x1396;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1380, x1384, x1392, x1396});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":40:0)
           auto x1547 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -8883,13 +8633,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x1396;
           }
           {
-            host_args.at(0) = x1547;
-            host_args.at(1) = x1380;
-            host_args.at(2) = x1384;
-            host_args.at(3) = x1392;
-            host_args.at(4) = x1396;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1547, x1380, x1384, x1392, x1396, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1548 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -9173,12 +8917,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1578;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1380;
-          host_args.at(2) = x1384;
-          host_args.at(3) = x1392;
-          host_args.at(4) = x1396;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1380, x1384, x1392, x1396});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":41:0)
           auto x1579 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -9206,13 +8945,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x1396;
           }
           {
-            host_args.at(0) = x1579;
-            host_args.at(1) = x1380;
-            host_args.at(2) = x1384;
-            host_args.at(3) = x1392;
-            host_args.at(4) = x1396;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1579, x1380, x1384, x1392, x1396, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1580 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -9496,12 +9229,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1610;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1380;
-          host_args.at(2) = x1384;
-          host_args.at(3) = x1392;
-          host_args.at(4) = x1396;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1380, x1384, x1392, x1396});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":42:0)
           auto x1611 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -9529,13 +9257,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x1396;
           }
           {
-            host_args.at(0) = x1611;
-            host_args.at(1) = x1380;
-            host_args.at(2) = x1384;
-            host_args.at(3) = x1392;
-            host_args.at(4) = x1396;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1611, x1380, x1384, x1392, x1396, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1612 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -9819,12 +9541,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1642;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1444;
-          host_args.at(2) = x95;
-          host_args.at(3) = x95;
-          host_args.at(4) = x95;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1444, x95, x95, x95});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":43:0)
           auto x1643 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -9852,13 +9569,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x95;
           }
           {
-            host_args.at(0) = x1643;
-            host_args.at(1) = x1444;
-            host_args.at(2) = x95;
-            host_args.at(3) = x95;
-            host_args.at(4) = x95;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1643, x1444, x95, x95, x95, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1644 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -10142,12 +9853,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1674;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1443;
-          host_args.at(2) = x95;
-          host_args.at(3) = x95;
-          host_args.at(4) = x95;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1443, x95, x95, x95});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":44:0)
           auto x1675 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -10175,13 +9881,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x95;
           }
           {
-            host_args.at(0) = x1675;
-            host_args.at(1) = x1443;
-            host_args.at(2) = x95;
-            host_args.at(3) = x95;
-            host_args.at(4) = x95;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1675, x1443, x95, x95, x95, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1676 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -10479,12 +10179,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1714;
         }
         if (x1452 != 0) {
-          host_args.at(0) = x1448;
-          host_args.at(1) = x1380;
-          host_args.at(2) = x1384;
-          host_args.at(3) = x1392;
-          host_args.at(4) = x1396;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x1448, x1380, x1384, x1392, x1396});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":45:0)
           auto x1715 = x1448 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -10512,13 +10207,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x1396;
           }
           {
-            host_args.at(0) = x1715;
-            host_args.at(1) = x1380;
-            host_args.at(2) = x1384;
-            host_args.at(3) = x1392;
-            host_args.at(4) = x1396;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x1715, x1380, x1384, x1392, x1396, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x1716 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -10628,13 +10317,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":112:0)
       auto x1721 = x959 * x75;
       {
-        host_args.at(0) = x1721;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x1722 = host_outs.at(0);
-        auto x1723 = host_outs.at(1);
-        auto x1724 = host_outs.at(2);
-        auto x1725 = host_outs.at(3);
+        auto [x1722, x1723, x1724, x1725] = extern_ramRead(ctx, cycle, "", {x1721, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][119 * steps + cycle];
@@ -11015,12 +10698,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:0)
       if (x1811 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/decode.cpp:33");
       {
-        host_args.at(0) = x1726;
-        host_args.at(1) = x1727;
-        host_args.at(2) = x1728;
-        host_args.at(3) = x1729;
-        host(ctx, "getMinor", "", host_args.data(), 4, host_outs.data(), 1);
-        auto x1812 = host_outs.at(0);
+        auto x1812 = extern_getMinor(ctx, cycle, "", {x1726, x1727, x1728, x1729});
         {
           // loc("./zirgen/components/onehot.h":37:0)
           auto x1813 = (x1812 == 0) ? Fp(1) : Fp(0);
@@ -11878,13 +11556,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":134:0)
       auto x1957 = x1956 + x48;
       {
-        host_args.at(0) = x1957;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x1958 = host_outs.at(0);
-        auto x1959 = host_outs.at(1);
-        auto x1960 = host_outs.at(2);
-        auto x1961 = host_outs.at(3);
+        auto [x1958, x1959, x1960, x1961] = extern_ramRead(ctx, cycle, "", {x1957, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][126 * steps + cycle];
@@ -11971,13 +11643,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":135:0)
       auto x1968 = x1967 + x48;
       {
-        host_args.at(0) = x1968;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x1969 = host_outs.at(0);
-        auto x1970 = host_outs.at(1);
-        auto x1971 = host_outs.at(2);
-        auto x1972 = host_outs.at(3);
+        auto [x1969, x1970, x1971, x1972] = extern_ramRead(ctx, cycle, "", {x1968, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][133 * steps + cycle];
@@ -12602,36 +12268,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x2134 = args[2][211 * steps + ((cycle - 0) & mask)];
       assert(x2134 != Fp::invalid());
-      host_args.at(0) = x1995;
-      host_args.at(1) = x1996;
-      host_args.at(2) = x1997;
-      host_args.at(3) = x1998;
-      host_args.at(4) = x1956;
-      host_args.at(5) = x1962;
-      host_args.at(6) = x1963;
-      host_args.at(7) = x1964;
-      host_args.at(8) = x1965;
-      host_args.at(9) = x1967;
-      host_args.at(10) = x1973;
-      host_args.at(11) = x1974;
-      host_args.at(12) = x1975;
-      host_args.at(13) = x1976;
-      host_args.at(14) = x1990;
-      host_args.at(15) = x1991;
-      host_args.at(16) = x1992;
-      host_args.at(17) = x1993;
-      host_args.at(18) = x2008;
-      host_args.at(19) = x2009;
-      host_args.at(20) = x2010;
-      host_args.at(21) = x2011;
-      host_args.at(22) = x2070;
-      host_args.at(23) = x2074;
-      host_args.at(24) = x2082;
-      host_args.at(25) = x2086;
-      host_args.at(26) = x2127;
-      host_args.at(27) = x2134;
-      host_args.at(28) = x2133;
-      host(ctx, "log", "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", host_args.data(), 29, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", {x1995, x1996, x1997, x1998, x1956, x1962, x1963, x1964, x1965, x1967, x1973, x1974, x1975, x1976, x1990, x1991, x1992, x1993, x2008, x2009, x2010, x2011, x2070, x2074, x2082, x2086, x2127, x2134, x2133});
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
       auto x2135 = x1793 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
@@ -12914,12 +12551,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2200;
         }
         if (x2142 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2070;
-          host_args.at(2) = x2074;
-          host_args.at(3) = x2082;
-          host_args.at(4) = x2086;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2070, x2074, x2082, x2086});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":46:0)
           auto x2201 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -12947,13 +12579,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2086;
           }
           {
-            host_args.at(0) = x2201;
-            host_args.at(1) = x2070;
-            host_args.at(2) = x2074;
-            host_args.at(3) = x2082;
-            host_args.at(4) = x2086;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2201, x2070, x2074, x2082, x2086, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2202 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -13253,12 +12879,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2241;
         }
         if (x2142 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2070;
-          host_args.at(2) = x2074;
-          host_args.at(3) = x2082;
-          host_args.at(4) = x2086;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2070, x2074, x2082, x2086});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":47:0)
           auto x2242 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -13286,13 +12907,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2086;
           }
           {
-            host_args.at(0) = x2242;
-            host_args.at(1) = x2070;
-            host_args.at(2) = x2074;
-            host_args.at(3) = x2082;
-            host_args.at(4) = x2086;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2242, x2070, x2074, x2082, x2086, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2243 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -13592,12 +13207,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2282;
         }
         if (x2142 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2070;
-          host_args.at(2) = x2074;
-          host_args.at(3) = x2082;
-          host_args.at(4) = x2086;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2070, x2074, x2082, x2086});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":48:0)
           auto x2283 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -13625,13 +13235,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2086;
           }
           {
-            host_args.at(0) = x2283;
-            host_args.at(1) = x2070;
-            host_args.at(2) = x2074;
-            host_args.at(3) = x2082;
-            host_args.at(4) = x2086;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2283, x2070, x2074, x2082, x2086, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2284 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -13931,12 +13535,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2323;
         }
         if (x2142 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2134;
-          host_args.at(2) = x95;
-          host_args.at(3) = x95;
-          host_args.at(4) = x95;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2134, x95, x95, x95});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":49:0)
           auto x2324 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -13964,13 +13563,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x95;
           }
           {
-            host_args.at(0) = x2324;
-            host_args.at(1) = x2134;
-            host_args.at(2) = x95;
-            host_args.at(3) = x95;
-            host_args.at(4) = x95;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2324, x2134, x95, x95, x95, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2325 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -14270,12 +13863,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2364;
         }
         if (x2142 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2133;
-          host_args.at(2) = x95;
-          host_args.at(3) = x95;
-          host_args.at(4) = x95;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2133, x95, x95, x95});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":50:0)
           auto x2365 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -14303,13 +13891,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x95;
           }
           {
-            host_args.at(0) = x2365;
-            host_args.at(1) = x2133;
-            host_args.at(2) = x95;
-            host_args.at(3) = x95;
-            host_args.at(4) = x95;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2365, x2133, x95, x95, x95, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2366 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -14613,12 +14195,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2407;
         }
         if (x95 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2070;
-          host_args.at(2) = x2074;
-          host_args.at(3) = x2082;
-          host_args.at(4) = x2086;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2070, x2074, x2082, x2086});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":51:0)
           auto x2408 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -14646,13 +14223,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2086;
           }
           {
-            host_args.at(0) = x2408;
-            host_args.at(1) = x2070;
-            host_args.at(2) = x2074;
-            host_args.at(3) = x2082;
-            host_args.at(4) = x2086;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2408, x2070, x2074, x2082, x2086, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2409 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -14960,12 +14531,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2452;
         }
         if (x95 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2070;
-          host_args.at(2) = x2074;
-          host_args.at(3) = x2082;
-          host_args.at(4) = x2086;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2070, x2074, x2082, x2086});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":52:0)
           auto x2453 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -14993,13 +14559,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2086;
           }
           {
-            host_args.at(0) = x2453;
-            host_args.at(1) = x2070;
-            host_args.at(2) = x2074;
-            host_args.at(3) = x2082;
-            host_args.at(4) = x2086;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2453, x2070, x2074, x2082, x2086, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2454 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -15307,12 +14867,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2497;
         }
         if (x95 != 0) {
-          host_args.at(0) = x2138;
-          host_args.at(1) = x2070;
-          host_args.at(2) = x2074;
-          host_args.at(3) = x2082;
-          host_args.at(4) = x2086;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2138, x2070, x2074, x2082, x2086});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":53:0)
           auto x2498 = x2138 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -15340,13 +14895,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2086;
           }
           {
-            host_args.at(0) = x2498;
-            host_args.at(1) = x2070;
-            host_args.at(2) = x2074;
-            host_args.at(3) = x2082;
-            host_args.at(4) = x2086;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2498, x2070, x2074, x2082, x2086, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2499 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -15458,13 +15007,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":112:0)
       auto x2505 = x959 * x75;
       {
-        host_args.at(0) = x2505;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x2506 = host_outs.at(0);
-        auto x2507 = host_outs.at(1);
-        auto x2508 = host_outs.at(2);
-        auto x2509 = host_outs.at(3);
+        auto [x2506, x2507, x2508, x2509] = extern_ramRead(ctx, cycle, "", {x2505, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][119 * steps + cycle];
@@ -15845,12 +15388,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:0)
       if (x2595 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/decode.cpp:33");
       {
-        host_args.at(0) = x2510;
-        host_args.at(1) = x2511;
-        host_args.at(2) = x2512;
-        host_args.at(3) = x2513;
-        host(ctx, "getMinor", "", host_args.data(), 4, host_outs.data(), 1);
-        auto x2596 = host_outs.at(0);
+        auto x2596 = extern_getMinor(ctx, cycle, "", {x2510, x2511, x2512, x2513});
         {
           // loc("./zirgen/components/onehot.h":37:0)
           auto x2597 = (x2596 == 0) ? Fp(1) : Fp(0);
@@ -16587,13 +16125,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":134:0)
       auto x2712 = x2711 + x48;
       {
-        host_args.at(0) = x2712;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x2713 = host_outs.at(0);
-        auto x2714 = host_outs.at(1);
-        auto x2715 = host_outs.at(2);
-        auto x2716 = host_outs.at(3);
+        auto [x2713, x2714, x2715, x2716] = extern_ramRead(ctx, cycle, "", {x2712, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][126 * steps + cycle];
@@ -16680,13 +16212,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":135:0)
       auto x2723 = x2722 + x48;
       {
-        host_args.at(0) = x2723;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x2724 = host_outs.at(0);
-        auto x2725 = host_outs.at(1);
-        auto x2726 = host_outs.at(2);
-        auto x2727 = host_outs.at(3);
+        auto [x2724, x2725, x2726, x2727] = extern_ramRead(ctx, cycle, "", {x2723, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][133 * steps + cycle];
@@ -17311,36 +16837,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x2889 = args[2][211 * steps + ((cycle - 0) & mask)];
       assert(x2889 != Fp::invalid());
-      host_args.at(0) = x2750;
-      host_args.at(1) = x2751;
-      host_args.at(2) = x2752;
-      host_args.at(3) = x2753;
-      host_args.at(4) = x2711;
-      host_args.at(5) = x2717;
-      host_args.at(6) = x2718;
-      host_args.at(7) = x2719;
-      host_args.at(8) = x2720;
-      host_args.at(9) = x2722;
-      host_args.at(10) = x2728;
-      host_args.at(11) = x2729;
-      host_args.at(12) = x2730;
-      host_args.at(13) = x2731;
-      host_args.at(14) = x2745;
-      host_args.at(15) = x2746;
-      host_args.at(16) = x2747;
-      host_args.at(17) = x2748;
-      host_args.at(18) = x2763;
-      host_args.at(19) = x2764;
-      host_args.at(20) = x2765;
-      host_args.at(21) = x2766;
-      host_args.at(22) = x2825;
-      host_args.at(23) = x2829;
-      host_args.at(24) = x2837;
-      host_args.at(25) = x2841;
-      host_args.at(26) = x2882;
-      host_args.at(27) = x2889;
-      host_args.at(28) = x2888;
-      host(ctx, "log", "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", host_args.data(), 29, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", {x2750, x2751, x2752, x2753, x2711, x2717, x2718, x2719, x2720, x2722, x2728, x2729, x2730, x2731, x2745, x2746, x2747, x2748, x2763, x2764, x2765, x2766, x2825, x2829, x2837, x2841, x2882, x2889, x2888});
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
       auto x2890 = x2577 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
@@ -17639,12 +17136,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2963;
         }
         if (x95 != 0) {
-          host_args.at(0) = x2893;
-          host_args.at(1) = x2825;
-          host_args.at(2) = x2829;
-          host_args.at(3) = x2837;
-          host_args.at(4) = x2841;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2893, x2825, x2829, x2837, x2841});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":54:0)
           auto x2964 = x2893 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -17672,13 +17164,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2841;
           }
           {
-            host_args.at(0) = x2964;
-            host_args.at(1) = x2825;
-            host_args.at(2) = x2829;
-            host_args.at(3) = x2837;
-            host_args.at(4) = x2841;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x2964, x2825, x2829, x2837, x2841, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x2965 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -17986,12 +17472,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3008;
         }
         if (x95 != 0) {
-          host_args.at(0) = x2893;
-          host_args.at(1) = x2825;
-          host_args.at(2) = x2829;
-          host_args.at(3) = x2837;
-          host_args.at(4) = x2841;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2893, x2825, x2829, x2837, x2841});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":55:0)
           auto x3009 = x2893 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -18019,13 +17500,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2841;
           }
           {
-            host_args.at(0) = x3009;
-            host_args.at(1) = x2825;
-            host_args.at(2) = x2829;
-            host_args.at(3) = x2837;
-            host_args.at(4) = x2841;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3009, x2825, x2829, x2837, x2841, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3010 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -18333,12 +17808,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3053;
         }
         if (x95 != 0) {
-          host_args.at(0) = x2893;
-          host_args.at(1) = x2825;
-          host_args.at(2) = x2829;
-          host_args.at(3) = x2837;
-          host_args.at(4) = x2841;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2893, x2825, x2829, x2837, x2841});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":56:0)
           auto x3054 = x2893 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -18366,13 +17836,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2841;
           }
           {
-            host_args.at(0) = x3054;
-            host_args.at(1) = x2825;
-            host_args.at(2) = x2829;
-            host_args.at(3) = x2837;
-            host_args.at(4) = x2841;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3054, x2825, x2829, x2837, x2841, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3055 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -18680,12 +18144,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3099;
         }
         if (x2897 != 0) {
-          host_args.at(0) = x2893;
-          host_args.at(1) = x954;
-          host_args.at(2) = x952;
-          host_args.at(3) = x950;
-          host_args.at(4) = x2734;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2893, x954, x952, x950, x2734});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":57:0)
           auto x3100 = x2893 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -18713,13 +18172,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2734;
           }
           {
-            host_args.at(0) = x3100;
-            host_args.at(1) = x954;
-            host_args.at(2) = x952;
-            host_args.at(3) = x950;
-            host_args.at(4) = x2734;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3100, x954, x952, x950, x2734, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3101 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -19017,12 +18470,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3139;
         }
         if (x2897 != 0) {
-          host_args.at(0) = x2893;
-          host_args.at(1) = x954;
-          host_args.at(2) = x952;
-          host_args.at(3) = x950;
-          host_args.at(4) = x2734;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2893, x954, x952, x950, x2734});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":58:0)
           auto x3140 = x2893 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -19050,13 +18498,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2734;
           }
           {
-            host_args.at(0) = x3140;
-            host_args.at(1) = x954;
-            host_args.at(2) = x952;
-            host_args.at(3) = x950;
-            host_args.at(4) = x2734;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3140, x954, x952, x950, x2734, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3141 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -19334,12 +18776,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3170;
         }
         if (x2897 != 0) {
-          host_args.at(0) = x2893;
-          host_args.at(1) = x2825;
-          host_args.at(2) = x2829;
-          host_args.at(3) = x2837;
-          host_args.at(4) = x2841;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2893, x2825, x2829, x2837, x2841});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":59:0)
           auto x3171 = x2893 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -19367,13 +18804,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2841;
           }
           {
-            host_args.at(0) = x3171;
-            host_args.at(1) = x2825;
-            host_args.at(2) = x2829;
-            host_args.at(3) = x2837;
-            host_args.at(4) = x2841;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3171, x2825, x2829, x2837, x2841, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3172 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -19651,12 +19082,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3201;
         }
         if (x2897 != 0) {
-          host_args.at(0) = x2893;
-          host_args.at(1) = x2825;
-          host_args.at(2) = x2829;
-          host_args.at(3) = x2837;
-          host_args.at(4) = x2841;
-          host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Writing to rd=x%u, val = %w", {x2893, x2825, x2829, x2837, x2841});
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":60:0)
           auto x3202 = x2893 + x48;
           // loc("zirgen/components/u32.cpp":34:0)
@@ -19684,13 +19110,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2841;
           }
           {
-            host_args.at(0) = x3202;
-            host_args.at(1) = x2825;
-            host_args.at(2) = x2829;
-            host_args.at(3) = x2837;
-            host_args.at(4) = x2841;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3202, x2825, x2829, x2837, x2841, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3203 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -19800,13 +19220,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":20:0)
       auto x3208 = x959 * x75;
       {
-        host_args.at(0) = x3208;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x3209 = host_outs.at(0);
-        auto x3210 = host_outs.at(1);
-        auto x3211 = host_outs.at(2);
-        auto x3212 = host_outs.at(3);
+        auto [x3209, x3210, x3211, x3212] = extern_ramRead(ctx, cycle, "", {x3208, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][119 * steps + cycle];
@@ -20187,12 +19601,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:0)
       if (x3298 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/decode.cpp:33");
       {
-        host_args.at(0) = x3213;
-        host_args.at(1) = x3214;
-        host_args.at(2) = x3215;
-        host_args.at(3) = x3216;
-        host(ctx, "getMinor", "", host_args.data(), 4, host_outs.data(), 1);
-        auto x3299 = host_outs.at(0);
+        auto x3299 = extern_getMinor(ctx, cycle, "", {x3213, x3214, x3215, x3216});
         {
           // loc("./zirgen/components/onehot.h":37:0)
           auto x3300 = (x3299 == 0) ? Fp(1) : Fp(0);
@@ -20756,13 +20165,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":38:0)
       auto x3441 = x3440 + x48;
       {
-        host_args.at(0) = x3441;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x3442 = host_outs.at(0);
-        auto x3443 = host_outs.at(1);
-        auto x3444 = host_outs.at(2);
-        auto x3445 = host_outs.at(3);
+        auto [x3442, x3443, x3444, x3445] = extern_ramRead(ctx, cycle, "", {x3441, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][126 * steps + cycle];
@@ -20849,13 +20252,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":39:0)
       auto x3452 = x3451 + x48;
       {
-        host_args.at(0) = x3452;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x3453 = host_outs.at(0);
-        auto x3454 = host_outs.at(1);
-        auto x3455 = host_outs.at(2);
-        auto x3456 = host_outs.at(3);
+        auto [x3453, x3454, x3455, x3456] = extern_ramRead(ctx, cycle, "", {x3452, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][133 * steps + cycle];
@@ -21315,13 +20712,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":80:0)
       auto x3573 = x3572 + x3521;
       {
-        host_args.at(0) = x3573;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x3574 = host_outs.at(0);
-        auto x3575 = host_outs.at(1);
-        auto x3576 = host_outs.at(2);
-        auto x3577 = host_outs.at(3);
+        auto [x3574, x3575, x3576, x3577] = extern_ramRead(ctx, cycle, "", {x3573, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][140 * steps + cycle];
@@ -21401,27 +20792,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x3581);
         reg = x3581;
       }
-      host_args.at(0) = x3461;
-      host_args.at(1) = x3462;
-      host_args.at(2) = x3463;
-      host_args.at(3) = x3464;
-      host_args.at(4) = x3440;
-      host_args.at(5) = x3446;
-      host_args.at(6) = x3447;
-      host_args.at(7) = x3448;
-      host_args.at(8) = x3449;
-      host_args.at(9) = x3451;
-      host_args.at(10) = x3457;
-      host_args.at(11) = x3458;
-      host_args.at(12) = x3459;
-      host_args.at(13) = x3460;
-      host_args.at(14) = x3573;
-      host_args.at(15) = x3531;
-      host_args.at(16) = x3578;
-      host_args.at(17) = x3579;
-      host_args.at(18) = x3580;
-      host_args.at(19) = x3581;
-      host(ctx, "log", "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, Addr = %10x, lowBits = %u, loaded = %w", host_args.data(), 20, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, Addr = %10x, lowBits = %u, loaded = %w", {x3461, x3462, x3463, x3464, x3440, x3446, x3447, x3448, x3449, x3451, x3457, x3458, x3459, x3460, x3573, x3531, x3578, x3579, x3580, x3581});
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":92:0)
       auto x3582 = x959 + x77;
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":14:0)
@@ -21705,12 +21076,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3642 = args[2][218 * steps + ((cycle - 0) & mask)];
         assert(x3642 != Fp::invalid());
-        host_args.at(0) = x3631;
-        host_args.at(1) = x3639;
-        host_args.at(2) = x3640;
-        host_args.at(3) = x3641;
-        host_args.at(4) = x3642;
-        host(ctx, "log", "  fillByte = %4x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  fillByte = %4x, extended: %w", {x3631, x3639, x3640, x3641, x3642});
         if (x3472 != 0) {
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":76:0)
           auto x3643 = x3468 + x48;
@@ -21739,13 +21105,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3642;
           }
           {
-            host_args.at(0) = x3643;
-            host_args.at(1) = x3639;
-            host_args.at(2) = x3640;
-            host_args.at(3) = x3641;
-            host_args.at(4) = x3642;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3643, x3639, x3640, x3641, x3642, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3644 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -22046,12 +21406,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3691 = args[2][218 * steps + ((cycle - 0) & mask)];
         assert(x3691 != Fp::invalid());
-        host_args.at(0) = x3681;
-        host_args.at(1) = x3688;
-        host_args.at(2) = x3689;
-        host_args.at(3) = x3690;
-        host_args.at(4) = x3691;
-        host(ctx, "log", "  fillByte = %4x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  fillByte = %4x, extended: %w", {x3681, x3688, x3689, x3690, x3691});
         if (x3472 != 0) {
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":77:0)
           auto x3692 = x3468 + x48;
@@ -22080,13 +21435,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3691;
           }
           {
-            host_args.at(0) = x3692;
-            host_args.at(1) = x3688;
-            host_args.at(2) = x3689;
-            host_args.at(3) = x3690;
-            host_args.at(4) = x3691;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3692, x3688, x3689, x3690, x3691, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3693 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -22371,12 +21720,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3737 = args[2][218 * steps + ((cycle - 0) & mask)];
         assert(x3737 != Fp::invalid());
-        host_args.at(0) = x95;
-        host_args.at(1) = x3734;
-        host_args.at(2) = x3735;
-        host_args.at(3) = x3736;
-        host_args.at(4) = x3737;
-        host(ctx, "log", "  fillByte = %4x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  fillByte = %4x, extended: %w", {x95, x3734, x3735, x3736, x3737});
         if (x3472 != 0) {
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":78:0)
           auto x3738 = x3468 + x48;
@@ -22405,13 +21749,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3737;
           }
           {
-            host_args.at(0) = x3738;
-            host_args.at(1) = x3734;
-            host_args.at(2) = x3735;
-            host_args.at(3) = x3736;
-            host_args.at(4) = x3737;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3738, x3734, x3735, x3736, x3737, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3739 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -22738,12 +22076,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3789 = args[2][218 * steps + ((cycle - 0) & mask)];
         assert(x3789 != Fp::invalid());
-        host_args.at(0) = x95;
-        host_args.at(1) = x3786;
-        host_args.at(2) = x3787;
-        host_args.at(3) = x3788;
-        host_args.at(4) = x3789;
-        host(ctx, "log", "  fillByte = %4x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  fillByte = %4x, extended: %w", {x95, x3786, x3787, x3788, x3789});
         if (x3472 != 0) {
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":79:0)
           auto x3790 = x3468 + x48;
@@ -22772,13 +22105,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3789;
           }
           {
-            host_args.at(0) = x3790;
-            host_args.at(1) = x3786;
-            host_args.at(2) = x3787;
-            host_args.at(3) = x3788;
-            host_args.at(4) = x3789;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3790, x3786, x3787, x3788, x3789, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3791 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -23079,12 +22406,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3838 = args[2][218 * steps + ((cycle - 0) & mask)];
         assert(x3838 != Fp::invalid());
-        host_args.at(0) = x95;
-        host_args.at(1) = x3835;
-        host_args.at(2) = x3836;
-        host_args.at(3) = x3837;
-        host_args.at(4) = x3838;
-        host(ctx, "log", "  fillByte = %4x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  fillByte = %4x, extended: %w", {x95, x3835, x3836, x3837, x3838});
         if (x3472 != 0) {
           // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":80:0)
           auto x3839 = x3468 + x48;
@@ -23113,13 +22435,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3838;
           }
           {
-            host_args.at(0) = x3839;
-            host_args.at(1) = x3835;
-            host_args.at(2) = x3836;
-            host_args.at(3) = x3837;
-            host_args.at(4) = x3838;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x3839, x3835, x3836, x3837, x3838, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x3840 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -23348,11 +22664,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x3876 = x3529 * x3457;
         // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":81:0)
         auto x3877 = x3876 + x3875;
-        host_args.at(0) = x3865;
-        host_args.at(1) = x3869;
-        host_args.at(2) = x3873;
-        host_args.at(3) = x3877;
-        host(ctx, "log", "  writeVal = %w", host_args.data(), 4, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  writeVal = %w", {x3865, x3869, x3873, x3877});
         // loc("zirgen/components/u32.cpp":34:0)
         {
           auto& reg = args[2][147 * steps + cycle];
@@ -23378,13 +22690,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3877;
         }
         {
-          host_args.at(0) = x3573;
-          host_args.at(1) = x3865;
-          host_args.at(2) = x3869;
-          host_args.at(3) = x3873;
-          host_args.at(4) = x3877;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x3573, x3865, x3869, x3873, x3877, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3878 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -23562,11 +22868,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x3911 = x3526 * x3458;
         // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":82:0)
         auto x3912 = x3911 + x3910;
-        host_args.at(0) = x3902;
-        host_args.at(1) = x3909;
-        host_args.at(2) = x3906;
-        host_args.at(3) = x3912;
-        host(ctx, "log", "  writeVal = %w", host_args.data(), 4, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  writeVal = %w", {x3902, x3909, x3906, x3912});
         // loc("zirgen/components/u32.cpp":34:0)
         {
           auto& reg = args[2][147 * steps + cycle];
@@ -23592,13 +22894,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3912;
         }
         {
-          host_args.at(0) = x3573;
-          host_args.at(1) = x3902;
-          host_args.at(2) = x3909;
-          host_args.at(3) = x3906;
-          host_args.at(4) = x3912;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x3573, x3902, x3909, x3906, x3912, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3913 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -23776,11 +23072,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x3946 = x3934 * x3460;
         // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":83:0)
         auto x3947 = x3946 + x3945;
-        host_args.at(0) = x3938;
-        host_args.at(1) = x3941;
-        host_args.at(2) = x3944;
-        host_args.at(3) = x3947;
-        host(ctx, "log", "  writeVal = %w", host_args.data(), 4, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  writeVal = %w", {x3938, x3941, x3944, x3947});
         // loc("zirgen/components/u32.cpp":34:0)
         {
           auto& reg = args[2][147 * steps + cycle];
@@ -23806,13 +23098,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3947;
         }
         {
-          host_args.at(0) = x3573;
-          host_args.at(1) = x3938;
-          host_args.at(2) = x3941;
-          host_args.at(3) = x3944;
-          host_args.at(4) = x3947;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x3573, x3938, x3941, x3944, x3947, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x3948 = args[2][147 * steps + ((cycle - 0) & mask)];
@@ -23927,13 +23213,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/multiply.cpp":20:0)
       auto x3964 = x959 * x75;
       {
-        host_args.at(0) = x3964;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x3965 = host_outs.at(0);
-        auto x3966 = host_outs.at(1);
-        auto x3967 = host_outs.at(2);
-        auto x3968 = host_outs.at(3);
+        auto [x3965, x3966, x3967, x3968] = extern_ramRead(ctx, cycle, "", {x3964, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][119 * steps + cycle];
@@ -24314,12 +23594,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:0)
       if (x4054 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/decode.cpp:33");
       {
-        host_args.at(0) = x3969;
-        host_args.at(1) = x3970;
-        host_args.at(2) = x3971;
-        host_args.at(3) = x3972;
-        host(ctx, "getMinor", "", host_args.data(), 4, host_outs.data(), 1);
-        auto x4055 = host_outs.at(0);
+        auto x4055 = extern_getMinor(ctx, cycle, "", {x3969, x3970, x3971, x3972});
         {
           // loc("./zirgen/components/onehot.h":37:0)
           auto x4056 = (x4055 == 0) ? Fp(1) : Fp(0);
@@ -24450,12 +23725,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("./zirgen/components/onehot.h":40:0)
         if (x4090 != 0) throw std::runtime_error("eqz failed at: ./zirgen/components/onehot.h:40");
       }
-      host_args.at(0) = x95;
-      host_args.at(1) = x95;
-      host_args.at(2) = x95;
-      host_args.at(3) = x95;
-      host_args.at(4) = x95;
-      host(ctx, "log", "  useImm=%u, usePo2=%u, signedA=%u, signedB=%u, useHigh=%u", host_args.data(), 5, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  useImm=%u, usePo2=%u, signedA=%u, signedB=%u, useHigh=%u", {x95, x95, x95, x95, x95});
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[1](Reg)"("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":102:0))
       auto x4091 = args[2][182 * steps + ((cycle - 0) & mask)];
       assert(x4091 != Fp::invalid());
@@ -24488,13 +23758,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/multiply.cpp":54:0)
       auto x4103 = x4102 + x48;
       {
-        host_args.at(0) = x4103;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x4104 = host_outs.at(0);
-        auto x4105 = host_outs.at(1);
-        auto x4106 = host_outs.at(2);
-        auto x4107 = host_outs.at(3);
+        auto [x4104, x4105, x4106, x4107] = extern_ramRead(ctx, cycle, "", {x4103, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][126 * steps + cycle];
@@ -24581,13 +23845,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/multiply.cpp":55:0)
       auto x4114 = x4113 + x48;
       {
-        host_args.at(0) = x4114;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x4115 = host_outs.at(0);
-        auto x4116 = host_outs.at(1);
-        auto x4117 = host_outs.at(2);
-        auto x4118 = host_outs.at(3);
+        auto [x4115, x4116, x4117, x4118] = extern_ramRead(ctx, cycle, "", {x4114, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][133 * steps + cycle];
@@ -24667,17 +23925,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x4122);
         reg = x4122;
       }
-      host_args.at(0) = x4102;
-      host_args.at(1) = x4108;
-      host_args.at(2) = x4109;
-      host_args.at(3) = x4110;
-      host_args.at(4) = x4111;
-      host_args.at(5) = x4113;
-      host_args.at(6) = x4119;
-      host_args.at(7) = x4120;
-      host_args.at(8) = x4121;
-      host_args.at(9) = x4122;
-      host(ctx, "log", "  rs1=x%u -> %w, rs2=x%u -> %w", host_args.data(), 10, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  rs1=x%u -> %w, rs2=x%u -> %w", {x4102, x4108, x4109, x4110, x4111, x4113, x4119, x4120, x4121, x4122});
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":70:0)
       auto x4123 = x4006 * x59;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":70:0)
@@ -25585,13 +24833,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x4347;
         }
         {
-          host_args.at(0) = x4386;
-          host_args.at(1) = x4317;
-          host_args.at(2) = x4321;
-          host_args.at(3) = x4343;
-          host_args.at(4) = x4347;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x4386, x4317, x4321, x4343, x4347, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x4387 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -25680,13 +24922,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x4284;
         }
         {
-          host_args.at(0) = x4393;
-          host_args.at(1) = x4250;
-          host_args.at(2) = x4254;
-          host_args.at(3) = x4280;
-          host_args.at(4) = x4284;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x4393, x4250, x4254, x4280, x4284, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x4394 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -25876,13 +25112,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":20:0)
       auto x4415 = x959 * x75;
       {
-        host_args.at(0) = x4415;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x4416 = host_outs.at(0);
-        auto x4417 = host_outs.at(1);
-        auto x4418 = host_outs.at(2);
-        auto x4419 = host_outs.at(3);
+        auto [x4416, x4417, x4418, x4419] = extern_ramRead(ctx, cycle, "", {x4415, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][119 * steps + cycle];
@@ -26263,12 +25493,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:0)
       if (x4505 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/decode.cpp:33");
       {
-        host_args.at(0) = x4420;
-        host_args.at(1) = x4421;
-        host_args.at(2) = x4422;
-        host_args.at(3) = x4423;
-        host(ctx, "getMinor", "", host_args.data(), 4, host_outs.data(), 1);
-        auto x4506 = host_outs.at(0);
+        auto x4506 = extern_getMinor(ctx, cycle, "", {x4420, x4421, x4422, x4423});
         {
           // loc("./zirgen/components/onehot.h":37:0)
           auto x4507 = (x4506 == 0) ? Fp(1) : Fp(0);
@@ -26456,12 +25681,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x4559 = args[2][199 * steps + ((cycle - 0) & mask)];
       assert(x4559 != Fp::invalid());
-      host_args.at(0) = x4554;
-      host_args.at(1) = x4555;
-      host_args.at(2) = x4559;
-      host_args.at(3) = x4558;
-      host_args.at(4) = x4546;
-      host(ctx, "log", "  useImm=%u, usePo2=%u, signed=%u, onesComp=%u, useRem=%u", host_args.data(), 5, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  useImm=%u, usePo2=%u, signed=%u, onesComp=%u, useRem=%u", {x4554, x4555, x4559, x4558, x4546});
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":37:0)
       auto x4560 = x4473 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":37:0)
@@ -26473,13 +25693,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":56:0)
       auto x4564 = x4563 + x48;
       {
-        host_args.at(0) = x4564;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x4565 = host_outs.at(0);
-        auto x4566 = host_outs.at(1);
-        auto x4567 = host_outs.at(2);
-        auto x4568 = host_outs.at(3);
+        auto [x4565, x4566, x4567, x4568] = extern_ramRead(ctx, cycle, "", {x4564, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][126 * steps + cycle];
@@ -26566,13 +25780,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":57:0)
       auto x4575 = x4574 + x48;
       {
-        host_args.at(0) = x4575;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x4576 = host_outs.at(0);
-        auto x4577 = host_outs.at(1);
-        auto x4578 = host_outs.at(2);
-        auto x4579 = host_outs.at(3);
+        auto [x4576, x4577, x4578, x4579] = extern_ramRead(ctx, cycle, "", {x4575, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][133 * steps + cycle];
@@ -26652,17 +25860,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x4583);
         reg = x4583;
       }
-      host_args.at(0) = x4563;
-      host_args.at(1) = x4569;
-      host_args.at(2) = x4570;
-      host_args.at(3) = x4571;
-      host_args.at(4) = x4572;
-      host_args.at(5) = x4574;
-      host_args.at(6) = x4580;
-      host_args.at(7) = x4581;
-      host_args.at(8) = x4582;
-      host_args.at(9) = x4583;
-      host(ctx, "log", "  rs1=x%u -> %w, rs2=x%u -> %w", host_args.data(), 10, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  rs1=x%u -> %w, rs2=x%u -> %w", {x4563, x4569, x4570, x4571, x4572, x4574, x4580, x4581, x4582, x4583});
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":70:0)
       auto x4584 = x4457 * x59;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":70:0)
@@ -26993,24 +26191,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(x4685 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":83:0)
         auto x4686 = x4559 + x4558;
-        host_args.at(0) = x4569;
-        host_args.at(1) = x4570;
-        host_args.at(2) = x4571;
-        host_args.at(3) = x4572;
-        host_args.at(4) = x4682;
-        host_args.at(5) = x4683;
-        host_args.at(6) = x4684;
-        host_args.at(7) = x4685;
-        host_args.at(8) = x4686;
-        host(ctx, "divide", "", host_args.data(), 9, host_outs.data(), 8);
-        auto x4687 = host_outs.at(0);
-        auto x4688 = host_outs.at(1);
-        auto x4689 = host_outs.at(2);
-        auto x4690 = host_outs.at(3);
-        auto x4691 = host_outs.at(4);
-        auto x4692 = host_outs.at(5);
-        auto x4693 = host_outs.at(6);
-        auto x4694 = host_outs.at(7);
+        auto [x4687, x4688, x4689, x4690, x4691, x4692, x4693, x4694] = extern_divide(ctx, cycle, "", {x4569, x4570, x4571, x4572, x4682, x4683, x4684, x4685, x4686});
         // loc("zirgen/components/bytes.cpp":101:0)
         {
           auto& reg = args[2][22 * steps + cycle];
@@ -27096,23 +26277,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:0))
       auto x4706 = args[2][29 * steps + ((cycle - 0) & mask)];
       assert(x4706 != Fp::invalid());
-      host_args.at(0) = x4569;
-      host_args.at(1) = x4570;
-      host_args.at(2) = x4571;
-      host_args.at(3) = x4572;
-      host_args.at(4) = x4695;
-      host_args.at(5) = x4696;
-      host_args.at(6) = x4697;
-      host_args.at(7) = x4698;
-      host_args.at(8) = x4699;
-      host_args.at(9) = x4700;
-      host_args.at(10) = x4701;
-      host_args.at(11) = x4702;
-      host_args.at(12) = x4703;
-      host_args.at(13) = x4704;
-      host_args.at(14) = x4705;
-      host_args.at(15) = x4706;
-      host(ctx, "log", "  numer=%w, denom=%w, quot=%w, rem=%w", host_args.data(), 16, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  numer=%w, denom=%w, quot=%w, rem=%w", {x4569, x4570, x4571, x4572, x4695, x4696, x4697, x4698, x4699, x4700, x4701, x4702, x4703, x4704, x4705, x4706});
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
       auto x4707 = x4487 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
@@ -27189,13 +26354,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x4706;
         }
         {
-          host_args.at(0) = x4719;
-          host_args.at(1) = x4703;
-          host_args.at(2) = x4704;
-          host_args.at(3) = x4705;
-          host_args.at(4) = x4706;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x4719, x4703, x4704, x4705, x4706, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x4720 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -27284,13 +26443,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x4702;
         }
         {
-          host_args.at(0) = x4726;
-          host_args.at(1) = x4699;
-          host_args.at(2) = x4700;
-          host_args.at(3) = x4701;
-          host_args.at(4) = x4702;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x4726, x4699, x4700, x4701, x4702, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x4727 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -28867,33 +28020,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x5173 = x5172 * x61;
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":225:0)
       auto x5174 = x5165 + x5173;
-      host_args.at(0) = x4779;
-      host_args.at(1) = x4780;
-      host_args.at(2) = x4781;
-      host_args.at(3) = x4782;
-      host_args.at(4) = x4971;
-      host_args.at(5) = x5037;
-      host_args.at(6) = x5103;
-      host_args.at(7) = x5169;
-      host(ctx, "log", "  a = %w, ax = %w", host_args.data(), 8, host_outs.data(), 0);
-      host_args.at(0) = x4783;
-      host_args.at(1) = x4784;
-      host_args.at(2) = x4785;
-      host_args.at(3) = x4786;
-      host_args.at(4) = x4973;
-      host_args.at(5) = x5039;
-      host_args.at(6) = x5105;
-      host_args.at(7) = x5171;
-      host(ctx, "log", "  b = %w, bx = %w", host_args.data(), 8, host_outs.data(), 0);
-      host_args.at(0) = x4787;
-      host_args.at(1) = x4788;
-      host_args.at(2) = x4789;
-      host_args.at(3) = x4790;
-      host_args.at(4) = x4976;
-      host_args.at(5) = x5042;
-      host_args.at(6) = x5108;
-      host_args.at(7) = x5174;
-      host(ctx, "log", "  c = %w, cx = %w", host_args.data(), 8, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  a = %w, ax = %w", {x4779, x4780, x4781, x4782, x4971, x5037, x5103, x5169});
+      extern_log(ctx, cycle, "  b = %w, bx = %w", {x4783, x4784, x4785, x4786, x4973, x5039, x5105, x5171});
+      extern_log(ctx, cycle, "  c = %w, cx = %w", {x4787, x4788, x4789, x4790, x4976, x5042, x5108, x5174});
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":231:0)
       auto x5175 = x4779 - x4971;
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":231:0)
@@ -29335,15 +28464,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x5294);
         reg = x5294;
       }
-      host_args.at(0) = x5211;
-      host_args.at(1) = x5212;
-      host_args.at(2) = x5213;
-      host_args.at(3) = x5214;
-      host_args.at(4) = x5276;
-      host_args.at(5) = x5280;
-      host_args.at(6) = x5288;
-      host_args.at(7) = x5292;
-      host(ctx, "log", "  numer = %w, numerAbs = %w", host_args.data(), 8, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  numer = %w, numerAbs = %w", {x5211, x5212, x5213, x5214, x5276, x5280, x5288, x5292});
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/7(VerifyDivideCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:0))
       auto x5295 = args[2][119 * steps + ((cycle - 0) & mask)];
       assert(x5295 != Fp::invalid());
@@ -29478,15 +28599,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x5336);
         reg = x5336;
       }
-      host_args.at(0) = x5215;
-      host_args.at(1) = x5216;
-      host_args.at(2) = x5217;
-      host_args.at(3) = x5218;
-      host_args.at(4) = x5318;
-      host_args.at(5) = x5322;
-      host_args.at(6) = x5330;
-      host_args.at(7) = x5334;
-      host(ctx, "log", "  demom = %w, denomAbs = %w", host_args.data(), 8, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  demom = %w, denomAbs = %w", {x5215, x5216, x5217, x5218, x5318, x5322, x5330, x5334});
       // loc("zirgen/components/u32.cpp":143:0)
       auto x5337 = x5322 * x91;
       // loc("zirgen/components/u32.cpp":143:0)
@@ -29727,15 +28840,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x5404);
         reg = x5404;
       }
-      host_args.at(0) = x5219;
-      host_args.at(1) = x5220;
-      host_args.at(2) = x5221;
-      host_args.at(3) = x5222;
-      host_args.at(4) = x5386;
-      host_args.at(5) = x5390;
-      host_args.at(6) = x5398;
-      host_args.at(7) = x5402;
-      host(ctx, "log", "  quot = %w, quotAbs = %w", host_args.data(), 8, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  quot = %w, quotAbs = %w", {x5219, x5220, x5221, x5222, x5386, x5390, x5398, x5402});
       // loc("zirgen/components/u32.cpp":111:0)
       auto x5405 = x5253 * x5223;
       // loc("zirgen/components/u32.cpp":111:0)
@@ -29863,15 +28968,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x5443);
         reg = x5443;
       }
-      host_args.at(0) = x5223;
-      host_args.at(1) = x5224;
-      host_args.at(2) = x5225;
-      host_args.at(3) = x5226;
-      host_args.at(4) = x5425;
-      host_args.at(5) = x5429;
-      host_args.at(6) = x5437;
-      host_args.at(7) = x5441;
-      host(ctx, "log", "  rem = %w, remAbs = %w", host_args.data(), 8, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  rem = %w, remAbs = %w", {x5223, x5224, x5225, x5226, x5425, x5429, x5437, x5441});
       // loc("zirgen/components/u32.cpp":95:0)
       auto x5444 = x5318 + x91;
       // loc("zirgen/components/u32.cpp":95:0)
@@ -30150,12 +29247,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:0))
       auto x5526 = args[2][34 * steps + ((cycle - 0) & mask)];
       assert(x5526 != Fp::invalid());
-      host_args.at(0) = x5484;
-      host_args.at(1) = x5488;
-      host_args.at(2) = x5522;
-      host_args.at(3) = x5526;
-      host_args.at(4) = x5525;
-      host(ctx, "log", "  mul->getOut() = %w, denomRemCheck->carry = %u", host_args.data(), 5, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  mul->getOut() = %w, denomRemCheck->carry = %u", {x5484, x5488, x5522, x5526, x5525});
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":161:0)
       auto x5527 = x5484 - x5276;
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":161:0)
@@ -30324,13 +29416,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":142:0)
       auto x5564 = x959 * x75;
       {
-        host_args.at(0) = x5564;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x5565 = host_outs.at(0);
-        auto x5566 = host_outs.at(1);
-        auto x5567 = host_outs.at(2);
-        auto x5568 = host_outs.at(3);
+        auto [x5565, x5566, x5567, x5568] = extern_ramRead(ctx, cycle, "", {x5564, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][119 * steps + cycle];
@@ -30421,13 +29507,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":147:0)
       if (x5572 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/ecall.cpp:147");
       {
-        host_args.at(0) = x29;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x5574 = host_outs.at(0);
-        auto x5575 = host_outs.at(1);
-        auto x5576 = host_outs.at(2);
-        auto x5577 = host_outs.at(3);
+        auto [x5574, x5575, x5576, x5577] = extern_ramRead(ctx, cycle, "", {x29, x96});
         // loc("zirgen/components/u32.cpp":88:0)
         {
           auto& reg = args[2][126 * steps + cycle];
@@ -30591,11 +29671,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":154:0)
         auto x5603 = x96 - x5602;
         if (x5603 != 0) {
-          host_args.at(0) = x5578;
-          host_args.at(1) = x5579;
-          host_args.at(2) = x5580;
-          host_args.at(3) = x5581;
-          host(ctx, "log", "  ecall, selector = %w", host_args.data(), 4, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  ecall, selector = %w", {x5578, x5579, x5580, x5581});
         }
       }
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[0](Reg)"("./zirgen/components/mux.h":49:0))
@@ -30603,13 +29679,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       assert(x5604 != Fp::invalid());
       if (x5604 != 0) {
         {
-          host_args.at(0) = x28;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5605 = host_outs.at(0);
-          auto x5606 = host_outs.at(1);
-          auto x5607 = host_outs.at(2);
-          auto x5608 = host_outs.at(3);
+          auto [x5605, x5606, x5607, x5608] = extern_ramRead(ctx, cycle, "", {x28, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -30710,13 +29780,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5619;
         }
         {
-          host_args.at(0) = x27;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5620 = host_outs.at(0);
-          auto x5621 = host_outs.at(1);
-          auto x5622 = host_outs.at(2);
-          auto x5623 = host_outs.at(3);
+          auto [x5620, x5621, x5622, x5623] = extern_ramRead(ctx, cycle, "", {x27, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -30796,15 +29860,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x5627);
           reg = x5627;
         }
-        host_args.at(0) = x5624;
-        host_args.at(1) = x5625;
-        host_args.at(2) = x5626;
-        host_args.at(3) = x5627;
-        host_args.at(4) = x5609;
-        host_args.at(5) = x5610;
-        host_args.at(6) = x5611;
-        host_args.at(7) = x5612;
-        host(ctx, "log", "ECallHalt> exitCode = %w, ramAddr = %w", host_args.data(), 8, host_outs.data(), 0);
+        extern_log(ctx, cycle, "ECallHalt> exitCode = %w, ramAddr = %w", {x5624, x5625, x5626, x5627, x5609, x5610, x5611, x5612});
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":25:0)
         auto x5628 = x959 + x77;
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":14:0)
@@ -30914,13 +29970,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       }
       if (x5591 != 0) {
         {
-          host_args.at(0) = x27;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5652 = host_outs.at(0);
-          auto x5653 = host_outs.at(1);
-          auto x5654 = host_outs.at(2);
-          auto x5655 = host_outs.at(3);
+          auto [x5652, x5653, x5654, x5655] = extern_ramRead(ctx, cycle, "", {x27, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -31177,12 +30227,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5703 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5703 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5700;
-          host_args.at(2) = x5701;
-          host_args.at(3) = x5702;
-          host_args.at(4) = x5703;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5700, x5701, x5702, x5703});
         }
         if (x5675 != 0) {
           // loc("Top/mux(Mux)/body(BodyStep)/global(Global)/input(GlobalDigest)/word[1](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
@@ -31229,12 +30274,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5711 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5711 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5708;
-          host_args.at(2) = x5709;
-          host_args.at(3) = x5710;
-          host_args.at(4) = x5711;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5708, x5709, x5710, x5711});
         }
         if (x5676 != 0) {
           // loc("Top/mux(Mux)/body(BodyStep)/global(Global)/input(GlobalDigest)/word[2](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
@@ -31281,12 +30321,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5719 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5719 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5716;
-          host_args.at(2) = x5717;
-          host_args.at(3) = x5718;
-          host_args.at(4) = x5719;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5716, x5717, x5718, x5719});
         }
         if (x5679 != 0) {
           // loc("Top/mux(Mux)/body(BodyStep)/global(Global)/input(GlobalDigest)/word[3](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
@@ -31333,12 +30368,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5727 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5727 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5724;
-          host_args.at(2) = x5725;
-          host_args.at(3) = x5726;
-          host_args.at(4) = x5727;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5724, x5725, x5726, x5727});
         }
         if (x5682 != 0) {
           // loc("Top/mux(Mux)/body(BodyStep)/global(Global)/input(GlobalDigest)/word[4](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
@@ -31385,12 +30415,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5735 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5735 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5732;
-          host_args.at(2) = x5733;
-          host_args.at(3) = x5734;
-          host_args.at(4) = x5735;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5732, x5733, x5734, x5735});
         }
         if (x5685 != 0) {
           // loc("Top/mux(Mux)/body(BodyStep)/global(Global)/input(GlobalDigest)/word[5](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
@@ -31437,12 +30462,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5743 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5743 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5740;
-          host_args.at(2) = x5741;
-          host_args.at(3) = x5742;
-          host_args.at(4) = x5743;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5740, x5741, x5742, x5743});
         }
         if (x5688 != 0) {
           // loc("Top/mux(Mux)/body(BodyStep)/global(Global)/input(GlobalDigest)/word[6](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
@@ -31489,12 +30509,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5751 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5751 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5748;
-          host_args.at(2) = x5749;
-          host_args.at(3) = x5750;
-          host_args.at(4) = x5751;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5748, x5749, x5750, x5751});
         }
         if (x5691 != 0) {
           // loc("Top/mux(Mux)/body(BodyStep)/global(Global)/input(GlobalDigest)/word[7](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
@@ -31541,12 +30556,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x5759 = args[2][203 * steps + ((cycle - 0) & mask)];
           assert(x5759 != Fp::invalid());
-          host_args.at(0) = x5693;
-          host_args.at(1) = x5756;
-          host_args.at(2) = x5757;
-          host_args.at(3) = x5758;
-          host_args.at(4) = x5759;
-          host(ctx, "log", "  Read from %u: %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  Read from %u: %w", {x5693, x5756, x5757, x5758, x5759});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x5760 = args[2][200 * steps + ((cycle - 0) & mask)];
@@ -31585,13 +30595,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5763;
         }
         {
-          host_args.at(0) = x27;
-          host_args.at(1) = x5760;
-          host_args.at(2) = x5761;
-          host_args.at(3) = x5762;
-          host_args.at(4) = x5763;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x27, x5760, x5761, x5762, x5763, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x5764 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -31756,13 +30760,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       }
       if (x5592 != 0) {
         {
-          host_args.at(0) = x27;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5792 = host_outs.at(0);
-          auto x5793 = host_outs.at(1);
-          auto x5794 = host_outs.at(2);
-          auto x5795 = host_outs.at(3);
+          auto [x5792, x5793, x5794, x5795] = extern_ramRead(ctx, cycle, "", {x27, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -31843,13 +30841,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5799;
         }
         {
-          host_args.at(0) = x28;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5800 = host_outs.at(0);
-          auto x5801 = host_outs.at(1);
-          auto x5802 = host_outs.at(2);
-          auto x5803 = host_outs.at(3);
+          auto [x5800, x5801, x5802, x5803] = extern_ramRead(ctx, cycle, "", {x28, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -32003,10 +30995,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/2(ECallSoftware)/Twit/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x5828 = args[2][76 * steps + ((cycle - 0) & mask)];
         assert(x5828 != Fp::invalid());
-        host_args.at(0) = x5826;
-        host_args.at(1) = x5827;
-        host_args.at(2) = x5828;
-        host(ctx, "log", "Calculated orig = %u, output chunks = %u, first cycle-1 = %u", host_args.data(), 3, host_outs.data(), 0);
+        extern_log(ctx, cycle, "Calculated orig = %u, output chunks = %u, first cycle-1 = %u", {x5826, x5827, x5828});
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":95:0)
         auto x5829 = x5828 + x96;
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":95:0)
@@ -32060,8 +31049,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":99:0)
         if (x5842 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/ecall.cpp:99");
         {
-          host_args.at(0) = x5826;
-          host(ctx, "syscallInit", "", host_args.data(), 1, host_outs.data(), 0);
+          extern_syscallInit(ctx, cycle, "", {x5826});
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":14:0)
         auto x5843 = x959 + x77;
@@ -32167,17 +31155,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x64);
           reg = x64;
         }
-        host(ctx, "log", "Set next major to be ecall copy in", host_args.data(), 0, host_outs.data(), 0);
+        extern_log(ctx, cycle, "Set next major to be ecall copy in", {});
       }
       if (x5595 != 0) {
         {
-          host_args.at(0) = x27;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5866 = host_outs.at(0);
-          auto x5867 = host_outs.at(1);
-          auto x5868 = host_outs.at(2);
-          auto x5869 = host_outs.at(3);
+          auto [x5866, x5867, x5868, x5869] = extern_ramRead(ctx, cycle, "", {x27, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -32258,13 +31240,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5873;
         }
         {
-          host_args.at(0) = x28;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5874 = host_outs.at(0);
-          auto x5875 = host_outs.at(1);
-          auto x5876 = host_outs.at(2);
-          auto x5877 = host_outs.at(3);
+          auto [x5874, x5875, x5876, x5877] = extern_ramRead(ctx, cycle, "", {x28, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -32345,13 +31321,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5881;
         }
         {
-          host_args.at(0) = x26;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5882 = host_outs.at(0);
-          auto x5883 = host_outs.at(1);
-          auto x5884 = host_outs.at(2);
-          auto x5885 = host_outs.at(3);
+          auto [x5882, x5883, x5884, x5885] = extern_ramRead(ctx, cycle, "", {x26, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][147 * steps + cycle];
@@ -32540,13 +31510,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       }
       if (x5598 != 0) {
         {
-          host_args.at(0) = x28;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x5914 = host_outs.at(0);
-          auto x5915 = host_outs.at(1);
-          auto x5916 = host_outs.at(2);
-          auto x5917 = host_outs.at(3);
+          auto [x5914, x5915, x5916, x5917] = extern_ramRead(ctx, cycle, "", {x28, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -33016,19 +31980,10 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x6019 = args[2][149 * steps + ((cycle - 0) & mask)];
       assert(x6019 != Fp::invalid());
-      host_args.at(0) = x68;
-      host_args.at(1) = x6019;
-      host_args.at(2) = x5954;
-      host(ctx, "log", "SHA_INIT: major = %u, minor = %u, count = %u", host_args.data(), 3, host_outs.data(), 0);
+      extern_log(ctx, cycle, "SHA_INIT: major = %u, minor = %u, count = %u", {x68, x6019, x5954});
       if (x5946 != 0) {
         {
-          host_args.at(0) = x25;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6020 = host_outs.at(0);
-          auto x6021 = host_outs.at(1);
-          auto x6022 = host_outs.at(2);
-          auto x6023 = host_outs.at(3);
+          auto [x6020, x6021, x6022, x6023] = extern_ramRead(ctx, cycle, "", {x25, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -33109,13 +32064,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x6027;
         }
         {
-          host_args.at(0) = x24;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6028 = host_outs.at(0);
-          auto x6029 = host_outs.at(1);
-          auto x6030 = host_outs.at(2);
-          auto x6031 = host_outs.at(3);
+          auto [x6028, x6029, x6030, x6031] = extern_ramRead(ctx, cycle, "", {x24, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -33364,12 +32313,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x6090 = args[2][146 * steps + ((cycle - 0) & mask)];
         assert(x6090 != Fp::invalid());
-        host_args.at(0) = x6089;
-        host_args.at(1) = x6087;
-        host_args.at(2) = x6085;
-        host_args.at(3) = x6083;
-        host_args.at(4) = x6090;
-        host(ctx, "log", "  FromEcall: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, repeat: %u", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  FromEcall: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, repeat: %u", {x6089, x6087, x6085, x6083, x6090});
       }
       if (x5947 != 0) {
         // loc("zirgen/components/ram.cpp":43:0)
@@ -33542,12 +32486,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x6107 = args[2][146 * steps + ((cycle - 0) & mask)];
         assert(x6107 != Fp::invalid());
-        host_args.at(0) = x6106;
-        host_args.at(1) = x6104;
-        host_args.at(2) = x6102;
-        host_args.at(3) = x6100;
-        host_args.at(4) = x6107;
-        host(ctx, "log", "  FromPageFault: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, repeat: %u", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  FromPageFault: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, repeat: %u", {x6106, x6104, x6102, x6100, x6107});
       }
       if (x5950 != 0) {
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("zirgen/circuit/rv32im/v1/edsl/sha.cpp":230:0))
@@ -33619,13 +32558,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":239:0)
         auto x6116 = x6115 + x5954;
         {
-          host_args.at(0) = x6116;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6117 = host_outs.at(0);
-          auto x6118 = host_outs.at(1);
-          auto x6119 = host_outs.at(2);
-          auto x6120 = host_outs.at(3);
+          auto [x6117, x6118, x6119, x6120] = extern_ramRead(ctx, cycle, "", {x6116, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -33708,13 +32641,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":240:0)
         auto x6125 = x6116 + x77;
         {
-          host_args.at(0) = x6125;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6126 = host_outs.at(0);
-          auto x6127 = host_outs.at(1);
-          auto x6128 = host_outs.at(2);
-          auto x6129 = host_outs.at(3);
+          auto [x6126, x6127, x6128, x6129] = extern_ramRead(ctx, cycle, "", {x6125, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -36006,14 +34933,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x6726 = args[2][149 * steps + ((cycle - 0) & mask)];
       assert(x6726 != Fp::invalid());
-      host_args.at(0) = x67;
-      host_args.at(1) = x6726;
-      host_args.at(2) = x6639;
-      host_args.at(3) = x6725;
-      host_args.at(4) = x6723;
-      host_args.at(5) = x6721;
-      host_args.at(6) = x6712;
-      host(ctx, "log", "SHA_LOAD: major = %u, minor = %u, count = %u, data0 = %10x, data1 = %10x, state = %10x, repeat: %u", host_args.data(), 7, host_outs.data(), 0);
+      extern_log(ctx, cycle, "SHA_LOAD: major = %u, minor = %u, count = %u, data0 = %10x, data1 = %10x, state = %10x, repeat: %u", {x67, x6726, x6639, x6725, x6723, x6721, x6712});
       // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":310:0)
       auto x6727 = x96 - x6726;
       if (x6727 != 0) {
@@ -36025,13 +34945,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":311:0)
         auto x6730 = x6729 - x6639;
         {
-          host_args.at(0) = x6730;
-          host_args.at(1) = x6728;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6731 = host_outs.at(0);
-          auto x6732 = host_outs.at(1);
-          auto x6733 = host_outs.at(2);
-          auto x6734 = host_outs.at(3);
+          auto [x6731, x6732, x6733, x6734] = extern_ramRead(ctx, cycle, "", {x6730, x6728});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -36114,13 +35028,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":312:0)
         auto x6739 = x9 - x6639;
         {
-          host_args.at(0) = x6739;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6740 = host_outs.at(0);
-          auto x6741 = host_outs.at(1);
-          auto x6742 = host_outs.at(2);
-          auto x6743 = host_outs.at(3);
+          auto [x6740, x6741, x6742, x6743] = extern_ramRead(ctx, cycle, "", {x6739, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -36210,13 +35118,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":315:0)
         auto x6750 = x6749 - x6639;
         {
-          host_args.at(0) = x6750;
-          host_args.at(1) = x6748;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6751 = host_outs.at(0);
-          auto x6752 = host_outs.at(1);
-          auto x6753 = host_outs.at(2);
-          auto x6754 = host_outs.at(3);
+          auto [x6751, x6752, x6753, x6754] = extern_ramRead(ctx, cycle, "", {x6750, x6748});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -36299,13 +35201,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":316:0)
         auto x6759 = x8 - x6639;
         {
-          host_args.at(0) = x6759;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x6760 = host_outs.at(0);
-          auto x6761 = host_outs.at(1);
-          auto x6762 = host_outs.at(2);
-          auto x6763 = host_outs.at(3);
+          auto [x6760, x6761, x6762, x6763] = extern_ramRead(ctx, cycle, "", {x6759, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -42050,22 +40946,12 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x8968 = x8967 * x8966;
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:0)
       if (x8968 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:23");
-      host_args.at(0) = x66;
-      host_args.at(1) = x8932;
-      host_args.at(2) = x8924;
-      host_args.at(3) = x8938;
-      host(ctx, "log", "SHA_MAIN: major = %u, minor = %u, count = %u, repeat = %u", host_args.data(), 4, host_outs.data(), 0);
+      extern_log(ctx, cycle, "SHA_MAIN: major = %u, minor = %u, count = %u, repeat = %u", {x66, x8932, x8924, x8938});
       if (x8933 != 0) {
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":384:0)
         auto x8969 = x6 - x8924;
         {
-          host_args.at(0) = x8969;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x8970 = host_outs.at(0);
-          auto x8971 = host_outs.at(1);
-          auto x8972 = host_outs.at(2);
-          auto x8973 = host_outs.at(3);
+          auto [x8970, x8971, x8972, x8973] = extern_ramRead(ctx, cycle, "", {x8969, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -46991,13 +45877,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":406:0)
           auto x10768 = x10767 + x8924;
           {
-            host_args.at(0) = x10768;
-            host_args.at(1) = x96;
-            host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-            auto x10769 = host_outs.at(0);
-            auto x10770 = host_outs.at(1);
-            auto x10771 = host_outs.at(2);
-            auto x10772 = host_outs.at(3);
+            auto [x10769, x10770, x10771, x10772] = extern_ramRead(ctx, cycle, "", {x10768, x96});
             // loc("zirgen/components/u32.cpp":88:0)
             {
               auto& reg = args[2][119 * steps + cycle];
@@ -47082,13 +45962,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":407:0)
           auto x10778 = x10777 + x8924;
           {
-            host_args.at(0) = x10778;
-            host_args.at(1) = x96;
-            host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-            auto x10779 = host_outs.at(0);
-            auto x10780 = host_outs.at(1);
-            auto x10781 = host_outs.at(2);
-            auto x10782 = host_outs.at(3);
+            auto [x10779, x10780, x10781, x10782] = extern_ramRead(ctx, cycle, "", {x10778, x96});
             // loc("zirgen/components/u32.cpp":88:0)
             {
               auto& reg = args[2][126 * steps + cycle];
@@ -47381,16 +46255,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(x10875 != Fp::invalid());
           // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":408:0)
           auto x10876 = x10875 * x77;
-          host_args.at(0) = x10876;
-          host_args.at(1) = x10773;
-          host_args.at(2) = x10774;
-          host_args.at(3) = x10775;
-          host_args.at(4) = x10776;
-          host_args.at(5) = x10874;
-          host_args.at(6) = x10871;
-          host_args.at(7) = x10868;
-          host_args.at(8) = x10865;
-          host(ctx, "log", "  io0: [%10x] %w, a: %w", host_args.data(), 9, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  io0: [%10x] %w, a: %w", {x10876, x10773, x10774, x10775, x10776, x10874, x10871, x10868, x10865});
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x10877 = args[2][191 * steps + ((cycle - 0) & mask)];
           assert(x10877 != Fp::invalid());
@@ -47604,16 +46469,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(x10965 != Fp::invalid());
           // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":409:0)
           auto x10966 = x10965 * x77;
-          host_args.at(0) = x10966;
-          host_args.at(1) = x10783;
-          host_args.at(2) = x10784;
-          host_args.at(3) = x10785;
-          host_args.at(4) = x10786;
-          host_args.at(5) = x10964;
-          host_args.at(6) = x10961;
-          host_args.at(7) = x10958;
-          host_args.at(8) = x10955;
-          host(ctx, "log", "  io1: [%10x] %w, e: %w", host_args.data(), 9, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  io1: [%10x] %w, e: %w", {x10966, x10783, x10784, x10785, x10786, x10964, x10961, x10958, x10955});
           // loc("./zirgen/components/u32.h":27:0)
           auto x10967 = x10865 * x79;
           // loc("./zirgen/components/u32.h":26:0)
@@ -47910,13 +46766,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x11071;
           }
           {
-            host_args.at(0) = x11082;
-            host_args.at(1) = x11080;
-            host_args.at(2) = x11077;
-            host_args.at(3) = x11074;
-            host_args.at(4) = x11071;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x11082, x11080, x11077, x11074, x11071, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x11083 = args[2][119 * steps + ((cycle - 0) & mask)];
@@ -48209,13 +47059,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x11165;
           }
           {
-            host_args.at(0) = x11176;
-            host_args.at(1) = x11174;
-            host_args.at(2) = x11171;
-            host_args.at(3) = x11168;
-            host_args.at(4) = x11165;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x11176, x11174, x11171, x11168, x11165, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x11177 = args[2][126 * steps + ((cycle - 0) & mask)];
@@ -53511,14 +52355,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x13282 = x13281 * x13280;
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:0)
       if (x13282 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:23");
-      host_args.at(0) = x959;
-      host(ctx, "log", "  PageFault: PC = %10x", host_args.data(), 1, host_outs.data(), 0);
+      extern_log(ctx, cycle, "  PageFault: PC = %10x", {x959});
       {
-        host_args.at(0) = x959;
-        host(ctx, "pageInfo", "", host_args.data(), 1, host_outs.data(), 3);
-        auto x13283 = host_outs.at(0);
-        auto x13284 = host_outs.at(1);
-        auto x13285 = host_outs.at(2);
+        auto [x13283, x13284, x13285] = extern_pageInfo(ctx, cycle, "", {x959});
         // loc("./zirgen/components/bits.h":27:0)
         {
           auto& reg = args[2][118 * steps + cycle];
@@ -54029,10 +52868,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(x13387 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":194:0)
         auto x13388 = x13387 * x77;
-        host_args.at(0) = x13388;
-        host_args.at(1) = x13356;
-        host_args.at(2) = x13385;
-        host(ctx, "log", "  COPYIN INIT: dest=%x, remaining=%u first chunk words=%u", host_args.data(), 3, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  COPYIN INIT: dest=%x, remaining=%u first chunk words=%u", {x13388, x13356, x13385});
       }
       if (x13351 != 0) {
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":199:0)
@@ -54121,15 +52957,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       assert(x13410 != Fp::invalid());
       if (x13410 != 0) {
         {
-          host(ctx, "syscallFini", "", host_args.data(), 0, host_outs.data(), 8);
-          auto x13411 = host_outs.at(0);
-          auto x13412 = host_outs.at(1);
-          auto x13413 = host_outs.at(2);
-          auto x13414 = host_outs.at(3);
-          auto x13415 = host_outs.at(4);
-          auto x13416 = host_outs.at(5);
-          auto x13417 = host_outs.at(6);
-          auto x13418 = host_outs.at(7);
+          auto [x13411, x13412, x13413, x13414, x13415, x13416, x13417, x13418] = extern_syscallFini(ctx, cycle, "", {});
           // loc("zirgen/components/u32.cpp":34:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -54155,13 +52983,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x13414;
           }
           {
-            host_args.at(0) = x27;
-            host_args.at(1) = x13411;
-            host_args.at(2) = x13412;
-            host_args.at(3) = x13413;
-            host_args.at(4) = x13414;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x27, x13411, x13412, x13413, x13414, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x13419 = args[2][119 * steps + ((cycle - 0) & mask)];
@@ -54242,13 +53064,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x13418;
           }
           {
-            host_args.at(0) = x28;
-            host_args.at(1) = x13415;
-            host_args.at(2) = x13416;
-            host_args.at(3) = x13417;
-            host_args.at(4) = x13418;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x28, x13415, x13416, x13417, x13418, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x13423 = args[2][126 * steps + ((cycle - 0) & mask)];
@@ -54357,15 +53173,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x13442 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x13442 != Fp::invalid());
-        host_args.at(0) = x13439;
-        host_args.at(1) = x13440;
-        host_args.at(2) = x13441;
-        host_args.at(3) = x13442;
-        host_args.at(4) = x13435;
-        host_args.at(5) = x13436;
-        host_args.at(6) = x13437;
-        host_args.at(7) = x13438;
-        host(ctx, "log", "  COPYIN FINI: a0=%w a1=%w", host_args.data(), 8, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  COPYIN FINI: a0=%w a1=%w", {x13439, x13440, x13441, x13442, x13435, x13436, x13437, x13438});
         // loc("zirgen/components/ram.cpp":43:0)
         {
           auto& reg = args[2][130 * steps + cycle];
@@ -54686,11 +53494,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x13497 = args[2][172 * steps + ((cycle - 0) & mask)];
         assert(x13497 != Fp::invalid());
         {
-          host(ctx, "syscallBody", "", host_args.data(), 0, host_outs.data(), 4);
-          auto x13498 = host_outs.at(0);
-          auto x13499 = host_outs.at(1);
-          auto x13500 = host_outs.at(2);
-          auto x13501 = host_outs.at(3);
+          auto [x13498, x13499, x13500, x13501] = extern_syscallBody(ctx, cycle, "", {});
           // loc("zirgen/components/u32.cpp":34:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -54716,13 +53520,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x13501;
           }
           {
-            host_args.at(0) = x13497;
-            host_args.at(1) = x13498;
-            host_args.at(2) = x13499;
-            host_args.at(3) = x13500;
-            host_args.at(4) = x13501;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x13497, x13498, x13499, x13500, x13501, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x13502 = args[2][119 * steps + ((cycle - 0) & mask)];
@@ -54780,12 +53578,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
           // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":245:0)
           auto x13506 = x13497 * x77;
-          host_args.at(0) = x13506;
-          host_args.at(1) = x13502;
-          host_args.at(2) = x13503;
-          host_args.at(3) = x13504;
-          host_args.at(4) = x13505;
-          host(ctx, "log", "  COPYIN BODY: %x <- %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  COPYIN BODY: %x <- %w", {x13506, x13502, x13503, x13504, x13505});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("zirgen/components/ram.cpp":179:0))
         auto x13507 = args[2][117 * steps + ((cycle - 0) & mask)];
@@ -54855,11 +53648,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":241:0)
         auto x13513 = x13512 + x96;
         {
-          host(ctx, "syscallBody", "", host_args.data(), 0, host_outs.data(), 4);
-          auto x13514 = host_outs.at(0);
-          auto x13515 = host_outs.at(1);
-          auto x13516 = host_outs.at(2);
-          auto x13517 = host_outs.at(3);
+          auto [x13514, x13515, x13516, x13517] = extern_syscallBody(ctx, cycle, "", {});
           // loc("zirgen/components/u32.cpp":34:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -54885,13 +53674,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x13517;
           }
           {
-            host_args.at(0) = x13513;
-            host_args.at(1) = x13514;
-            host_args.at(2) = x13515;
-            host_args.at(3) = x13516;
-            host_args.at(4) = x13517;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x13513, x13514, x13515, x13516, x13517, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x13518 = args[2][126 * steps + ((cycle - 0) & mask)];
@@ -54949,12 +53732,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
           // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":245:0)
           auto x13522 = x13513 * x77;
-          host_args.at(0) = x13522;
-          host_args.at(1) = x13518;
-          host_args.at(2) = x13519;
-          host_args.at(3) = x13520;
-          host_args.at(4) = x13521;
-          host(ctx, "log", "  COPYIN BODY: %x <- %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  COPYIN BODY: %x <- %w", {x13522, x13518, x13519, x13520, x13521});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("zirgen/components/ram.cpp":179:0))
         auto x13523 = args[2][124 * steps + ((cycle - 0) & mask)];
@@ -55026,11 +53804,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":241:0)
         auto x13530 = x13529 + x93;
         {
-          host(ctx, "syscallBody", "", host_args.data(), 0, host_outs.data(), 4);
-          auto x13531 = host_outs.at(0);
-          auto x13532 = host_outs.at(1);
-          auto x13533 = host_outs.at(2);
-          auto x13534 = host_outs.at(3);
+          auto [x13531, x13532, x13533, x13534] = extern_syscallBody(ctx, cycle, "", {});
           // loc("zirgen/components/u32.cpp":34:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -55056,13 +53830,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x13534;
           }
           {
-            host_args.at(0) = x13530;
-            host_args.at(1) = x13531;
-            host_args.at(2) = x13532;
-            host_args.at(3) = x13533;
-            host_args.at(4) = x13534;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x13530, x13531, x13532, x13533, x13534, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x13535 = args[2][133 * steps + ((cycle - 0) & mask)];
@@ -55120,12 +53888,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
           // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":245:0)
           auto x13539 = x13530 * x77;
-          host_args.at(0) = x13539;
-          host_args.at(1) = x13535;
-          host_args.at(2) = x13536;
-          host_args.at(3) = x13537;
-          host_args.at(4) = x13538;
-          host(ctx, "log", "  COPYIN BODY: %x <- %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  COPYIN BODY: %x <- %w", {x13539, x13535, x13536, x13537, x13538});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("zirgen/components/ram.cpp":179:0))
         auto x13540 = args[2][131 * steps + ((cycle - 0) & mask)];
@@ -55195,11 +53958,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":241:0)
         auto x13546 = x13545 + x76;
         {
-          host(ctx, "syscallBody", "", host_args.data(), 0, host_outs.data(), 4);
-          auto x13547 = host_outs.at(0);
-          auto x13548 = host_outs.at(1);
-          auto x13549 = host_outs.at(2);
-          auto x13550 = host_outs.at(3);
+          auto [x13547, x13548, x13549, x13550] = extern_syscallBody(ctx, cycle, "", {});
           // loc("zirgen/components/u32.cpp":34:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -55225,13 +53984,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x13550;
           }
           {
-            host_args.at(0) = x13546;
-            host_args.at(1) = x13547;
-            host_args.at(2) = x13548;
-            host_args.at(3) = x13549;
-            host_args.at(4) = x13550;
-            host_args.at(5) = x93;
-            host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+            extern_ramWrite(ctx, cycle, "", {x13546, x13547, x13548, x13549, x13550, x93});
           }
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
           auto x13551 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -55289,12 +54042,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
           // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":245:0)
           auto x13555 = x13546 * x77;
-          host_args.at(0) = x13555;
-          host_args.at(1) = x13551;
-          host_args.at(2) = x13552;
-          host_args.at(3) = x13553;
-          host_args.at(4) = x13554;
-          host(ctx, "log", "  COPYIN BODY: %x <- %w", host_args.data(), 5, host_outs.data(), 0);
+          extern_log(ctx, cycle, "  COPYIN BODY: %x <- %w", {x13555, x13551, x13552, x13553, x13554});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("zirgen/components/ram.cpp":179:0))
         auto x13556 = args[2][138 * steps + ((cycle - 0) & mask)];
@@ -55635,23 +54383,13 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x13635 = args[2][179 * steps + ((cycle - 0) & mask)];
       assert(x13635 != Fp::invalid());
-      host_args.at(0) = x13633;
-      host_args.at(1) = x13620;
-      host_args.at(2) = x13634;
-      host_args.at(3) = x13635;
-      host(ctx, "log", "BIGINT: stage = %u, stageOffset = %u, mulActive = %u, finalize = %u", host_args.data(), 4, host_outs.data(), 0);
+      extern_log(ctx, cycle, "BIGINT: stage = %u, stageOffset = %u, mulActive = %u, finalize = %u", {x13633, x13620, x13634, x13635});
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":204:0))
       auto x13636 = args[2][172 * steps + ((cycle - 0) & mask)];
       assert(x13636 != Fp::invalid());
       if (x13636 != 0) {
         {
-          host_args.at(0) = x27;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13637 = host_outs.at(0);
-          auto x13638 = host_outs.at(1);
-          auto x13639 = host_outs.at(2);
-          auto x13640 = host_outs.at(3);
+          auto [x13637, x13638, x13639, x13640] = extern_ramRead(ctx, cycle, "", {x27, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -55732,13 +54470,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x13644;
         }
         {
-          host_args.at(0) = x25;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13645 = host_outs.at(0);
-          auto x13646 = host_outs.at(1);
-          auto x13647 = host_outs.at(2);
-          auto x13648 = host_outs.at(3);
+          auto [x13645, x13646, x13647, x13648] = extern_ramRead(ctx, cycle, "", {x25, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -55819,13 +54551,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x13652;
         }
         {
-          host_args.at(0) = x24;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13653 = host_outs.at(0);
-          auto x13654 = host_outs.at(1);
-          auto x13655 = host_outs.at(2);
-          auto x13656 = host_outs.at(3);
+          auto [x13653, x13654, x13655, x13656] = extern_ramRead(ctx, cycle, "", {x24, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -55906,13 +54632,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x13660;
         }
         {
-          host_args.at(0) = x26;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13661 = host_outs.at(0);
-          auto x13662 = host_outs.at(1);
-          auto x13663 = host_outs.at(2);
-          auto x13664 = host_outs.at(3);
+          auto [x13661, x13662, x13663, x13664] = extern_ramRead(ctx, cycle, "", {x26, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -56157,13 +54877,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":248:0)
         auto x13719 = x13718 + x13717;
         {
-          host_args.at(0) = x13719;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13720 = host_outs.at(0);
-          auto x13721 = host_outs.at(1);
-          auto x13722 = host_outs.at(2);
-          auto x13723 = host_outs.at(3);
+          auto [x13720, x13721, x13722, x13723] = extern_ramRead(ctx, cycle, "", {x13719, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][119 * steps + cycle];
@@ -56246,13 +54960,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":248:0)
         auto x13728 = x13719 + x96;
         {
-          host_args.at(0) = x13728;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13729 = host_outs.at(0);
-          auto x13730 = host_outs.at(1);
-          auto x13731 = host_outs.at(2);
-          auto x13732 = host_outs.at(3);
+          auto [x13729, x13730, x13731, x13732] = extern_ramRead(ctx, cycle, "", {x13728, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][126 * steps + cycle];
@@ -56335,13 +55043,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":248:0)
         auto x13737 = x13719 + x93;
         {
-          host_args.at(0) = x13737;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13738 = host_outs.at(0);
-          auto x13739 = host_outs.at(1);
-          auto x13740 = host_outs.at(2);
-          auto x13741 = host_outs.at(3);
+          auto [x13738, x13739, x13740, x13741] = extern_ramRead(ctx, cycle, "", {x13737, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][133 * steps + cycle];
@@ -56424,13 +55126,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":248:0)
         auto x13746 = x13719 + x76;
         {
-          host_args.at(0) = x13746;
-          host_args.at(1) = x96;
-          host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-          auto x13747 = host_outs.at(0);
-          auto x13748 = host_outs.at(1);
-          auto x13749 = host_outs.at(2);
-          auto x13750 = host_outs.at(3);
+          auto [x13747, x13748, x13749, x13750] = extern_ramRead(ctx, cycle, "", {x13746, x96});
           // loc("zirgen/components/u32.cpp":88:0)
           {
             auto& reg = args[2][140 * steps + cycle];
@@ -56560,21 +55256,10 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x13778 = x13777 + x13773;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":251:0)
         auto x13779 = x13718 * x77;
-        host_args.at(0) = x13779;
-        host_args.at(1) = x13778;
-        host_args.at(2) = x13772;
-        host_args.at(3) = x13766;
-        host_args.at(4) = x13760;
-        host(ctx, "log", "  Reading: ioAddr = 0x%x, data = { %u, %u, %u, %u }", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  Reading: ioAddr = 0x%x, data = { %u, %u, %u, %u }", {x13779, x13778, x13772, x13766, x13760});
       }
       {
-        host_args.at(0) = x25;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13780 = host_outs.at(0);
-        auto x13781 = host_outs.at(1);
-        auto x13782 = host_outs.at(2);
-        auto x13783 = host_outs.at(3);
+        auto [x13780, x13781, x13782, x13783] = extern_ramRead(ctx, cycle, "", {x25, x96});
         // loc("./zirgen/components/u32.h":27:0)
         auto x13784 = x13783 * x79;
         // loc("./zirgen/components/u32.h":26:0)
@@ -56589,83 +55274,29 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x13789 = x13788 + x13784;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":13:0)
         auto x13790 = x13789 * x75;
-        host_args.at(0) = x13790;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13791 = host_outs.at(0);
-        auto x13792 = host_outs.at(1);
-        auto x13793 = host_outs.at(2);
-        auto x13794 = host_outs.at(3);
+        auto [x13791, x13792, x13793, x13794] = extern_ramRead(ctx, cycle, "", {x13790, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13795 = x13790 + x96;
-        host_args.at(0) = x13795;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13796 = host_outs.at(0);
-        auto x13797 = host_outs.at(1);
-        auto x13798 = host_outs.at(2);
-        auto x13799 = host_outs.at(3);
+        auto [x13796, x13797, x13798, x13799] = extern_ramRead(ctx, cycle, "", {x13795, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13800 = x13790 + x93;
-        host_args.at(0) = x13800;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13801 = host_outs.at(0);
-        auto x13802 = host_outs.at(1);
-        auto x13803 = host_outs.at(2);
-        auto x13804 = host_outs.at(3);
+        auto [x13801, x13802, x13803, x13804] = extern_ramRead(ctx, cycle, "", {x13800, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13805 = x13790 + x76;
-        host_args.at(0) = x13805;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13806 = host_outs.at(0);
-        auto x13807 = host_outs.at(1);
-        auto x13808 = host_outs.at(2);
-        auto x13809 = host_outs.at(3);
+        auto [x13806, x13807, x13808, x13809] = extern_ramRead(ctx, cycle, "", {x13805, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13810 = x13790 + x77;
-        host_args.at(0) = x13810;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13811 = host_outs.at(0);
-        auto x13812 = host_outs.at(1);
-        auto x13813 = host_outs.at(2);
-        auto x13814 = host_outs.at(3);
+        auto [x13811, x13812, x13813, x13814] = extern_ramRead(ctx, cycle, "", {x13810, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13815 = x13790 + x72;
-        host_args.at(0) = x13815;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13816 = host_outs.at(0);
-        auto x13817 = host_outs.at(1);
-        auto x13818 = host_outs.at(2);
-        auto x13819 = host_outs.at(3);
+        auto [x13816, x13817, x13818, x13819] = extern_ramRead(ctx, cycle, "", {x13815, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13820 = x13790 + x71;
-        host_args.at(0) = x13820;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13821 = host_outs.at(0);
-        auto x13822 = host_outs.at(1);
-        auto x13823 = host_outs.at(2);
-        auto x13824 = host_outs.at(3);
+        auto [x13821, x13822, x13823, x13824] = extern_ramRead(ctx, cycle, "", {x13820, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13825 = x13790 + x70;
-        host_args.at(0) = x13825;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13826 = host_outs.at(0);
-        auto x13827 = host_outs.at(1);
-        auto x13828 = host_outs.at(2);
-        auto x13829 = host_outs.at(3);
-        host_args.at(0) = x24;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13830 = host_outs.at(0);
-        auto x13831 = host_outs.at(1);
-        auto x13832 = host_outs.at(2);
-        auto x13833 = host_outs.at(3);
+        auto [x13826, x13827, x13828, x13829] = extern_ramRead(ctx, cycle, "", {x13825, x96});
+        auto [x13830, x13831, x13832, x13833] = extern_ramRead(ctx, cycle, "", {x24, x96});
         // loc("./zirgen/components/u32.h":27:0)
         auto x13834 = x13833 * x79;
         // loc("./zirgen/components/u32.h":26:0)
@@ -56680,83 +55311,29 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x13839 = x13838 + x13834;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":13:0)
         auto x13840 = x13839 * x75;
-        host_args.at(0) = x13840;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13841 = host_outs.at(0);
-        auto x13842 = host_outs.at(1);
-        auto x13843 = host_outs.at(2);
-        auto x13844 = host_outs.at(3);
+        auto [x13841, x13842, x13843, x13844] = extern_ramRead(ctx, cycle, "", {x13840, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13845 = x13840 + x96;
-        host_args.at(0) = x13845;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13846 = host_outs.at(0);
-        auto x13847 = host_outs.at(1);
-        auto x13848 = host_outs.at(2);
-        auto x13849 = host_outs.at(3);
+        auto [x13846, x13847, x13848, x13849] = extern_ramRead(ctx, cycle, "", {x13845, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13850 = x13840 + x93;
-        host_args.at(0) = x13850;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13851 = host_outs.at(0);
-        auto x13852 = host_outs.at(1);
-        auto x13853 = host_outs.at(2);
-        auto x13854 = host_outs.at(3);
+        auto [x13851, x13852, x13853, x13854] = extern_ramRead(ctx, cycle, "", {x13850, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13855 = x13840 + x76;
-        host_args.at(0) = x13855;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13856 = host_outs.at(0);
-        auto x13857 = host_outs.at(1);
-        auto x13858 = host_outs.at(2);
-        auto x13859 = host_outs.at(3);
+        auto [x13856, x13857, x13858, x13859] = extern_ramRead(ctx, cycle, "", {x13855, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13860 = x13840 + x77;
-        host_args.at(0) = x13860;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13861 = host_outs.at(0);
-        auto x13862 = host_outs.at(1);
-        auto x13863 = host_outs.at(2);
-        auto x13864 = host_outs.at(3);
+        auto [x13861, x13862, x13863, x13864] = extern_ramRead(ctx, cycle, "", {x13860, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13865 = x13840 + x72;
-        host_args.at(0) = x13865;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13866 = host_outs.at(0);
-        auto x13867 = host_outs.at(1);
-        auto x13868 = host_outs.at(2);
-        auto x13869 = host_outs.at(3);
+        auto [x13866, x13867, x13868, x13869] = extern_ramRead(ctx, cycle, "", {x13865, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13870 = x13840 + x71;
-        host_args.at(0) = x13870;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13871 = host_outs.at(0);
-        auto x13872 = host_outs.at(1);
-        auto x13873 = host_outs.at(2);
-        auto x13874 = host_outs.at(3);
+        auto [x13871, x13872, x13873, x13874] = extern_ramRead(ctx, cycle, "", {x13870, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13875 = x13840 + x70;
-        host_args.at(0) = x13875;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13876 = host_outs.at(0);
-        auto x13877 = host_outs.at(1);
-        auto x13878 = host_outs.at(2);
-        auto x13879 = host_outs.at(3);
-        host_args.at(0) = x26;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13880 = host_outs.at(0);
-        auto x13881 = host_outs.at(1);
-        auto x13882 = host_outs.at(2);
-        auto x13883 = host_outs.at(3);
+        auto [x13876, x13877, x13878, x13879] = extern_ramRead(ctx, cycle, "", {x13875, x96});
+        auto [x13880, x13881, x13882, x13883] = extern_ramRead(ctx, cycle, "", {x26, x96});
         // loc("./zirgen/components/u32.h":27:0)
         auto x13884 = x13883 * x79;
         // loc("./zirgen/components/u32.h":26:0)
@@ -56771,76 +55348,28 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x13889 = x13888 + x13884;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":13:0)
         auto x13890 = x13889 * x75;
-        host_args.at(0) = x13890;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13891 = host_outs.at(0);
-        auto x13892 = host_outs.at(1);
-        auto x13893 = host_outs.at(2);
-        auto x13894 = host_outs.at(3);
+        auto [x13891, x13892, x13893, x13894] = extern_ramRead(ctx, cycle, "", {x13890, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13895 = x13890 + x96;
-        host_args.at(0) = x13895;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13896 = host_outs.at(0);
-        auto x13897 = host_outs.at(1);
-        auto x13898 = host_outs.at(2);
-        auto x13899 = host_outs.at(3);
+        auto [x13896, x13897, x13898, x13899] = extern_ramRead(ctx, cycle, "", {x13895, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13900 = x13890 + x93;
-        host_args.at(0) = x13900;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13901 = host_outs.at(0);
-        auto x13902 = host_outs.at(1);
-        auto x13903 = host_outs.at(2);
-        auto x13904 = host_outs.at(3);
+        auto [x13901, x13902, x13903, x13904] = extern_ramRead(ctx, cycle, "", {x13900, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13905 = x13890 + x76;
-        host_args.at(0) = x13905;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13906 = host_outs.at(0);
-        auto x13907 = host_outs.at(1);
-        auto x13908 = host_outs.at(2);
-        auto x13909 = host_outs.at(3);
+        auto [x13906, x13907, x13908, x13909] = extern_ramRead(ctx, cycle, "", {x13905, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13910 = x13890 + x77;
-        host_args.at(0) = x13910;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13911 = host_outs.at(0);
-        auto x13912 = host_outs.at(1);
-        auto x13913 = host_outs.at(2);
-        auto x13914 = host_outs.at(3);
+        auto [x13911, x13912, x13913, x13914] = extern_ramRead(ctx, cycle, "", {x13910, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13915 = x13890 + x72;
-        host_args.at(0) = x13915;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13916 = host_outs.at(0);
-        auto x13917 = host_outs.at(1);
-        auto x13918 = host_outs.at(2);
-        auto x13919 = host_outs.at(3);
+        auto [x13916, x13917, x13918, x13919] = extern_ramRead(ctx, cycle, "", {x13915, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13920 = x13890 + x71;
-        host_args.at(0) = x13920;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13921 = host_outs.at(0);
-        auto x13922 = host_outs.at(1);
-        auto x13923 = host_outs.at(2);
-        auto x13924 = host_outs.at(3);
+        auto [x13921, x13922, x13923, x13924] = extern_ramRead(ctx, cycle, "", {x13920, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":18:0)
         auto x13925 = x13890 + x70;
-        host_args.at(0) = x13925;
-        host_args.at(1) = x96;
-        host(ctx, "ramRead", "", host_args.data(), 2, host_outs.data(), 4);
-        auto x13926 = host_outs.at(0);
-        auto x13927 = host_outs.at(1);
-        auto x13928 = host_outs.at(2);
-        auto x13929 = host_outs.at(3);
+        auto [x13926, x13927, x13928, x13929] = extern_ramRead(ctx, cycle, "", {x13925, x96});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":73:0)
         auto x13930 = x13791 * x13841;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":73:0)
@@ -61565,135 +60094,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x16290 = x16289 * x90;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":130:0)
         auto x16291 = x16290 - x12;
-        host_args.at(0) = x15916;
-        host_args.at(1) = x15922;
-        host_args.at(2) = x15928;
-        host_args.at(3) = x15934;
-        host_args.at(4) = x15940;
-        host_args.at(5) = x15946;
-        host_args.at(6) = x15952;
-        host_args.at(7) = x15958;
-        host_args.at(8) = x15964;
-        host_args.at(9) = x15970;
-        host_args.at(10) = x15976;
-        host_args.at(11) = x15982;
-        host_args.at(12) = x15988;
-        host_args.at(13) = x15994;
-        host_args.at(14) = x16000;
-        host_args.at(15) = x16006;
-        host_args.at(16) = x16012;
-        host_args.at(17) = x16018;
-        host_args.at(18) = x16024;
-        host_args.at(19) = x16030;
-        host_args.at(20) = x16036;
-        host_args.at(21) = x16042;
-        host_args.at(22) = x16048;
-        host_args.at(23) = x16054;
-        host_args.at(24) = x16060;
-        host_args.at(25) = x16066;
-        host_args.at(26) = x16072;
-        host_args.at(27) = x16078;
-        host_args.at(28) = x16084;
-        host_args.at(29) = x16090;
-        host_args.at(30) = x16096;
-        host_args.at(31) = x16102;
-        host_args.at(32) = x16108;
-        host_args.at(33) = x16114;
-        host_args.at(34) = x16120;
-        host_args.at(35) = x16126;
-        host_args.at(36) = x16132;
-        host_args.at(37) = x16138;
-        host_args.at(38) = x16144;
-        host_args.at(39) = x16150;
-        host_args.at(40) = x16156;
-        host_args.at(41) = x16162;
-        host_args.at(42) = x16168;
-        host_args.at(43) = x16174;
-        host_args.at(44) = x16180;
-        host_args.at(45) = x16186;
-        host_args.at(46) = x16192;
-        host_args.at(47) = x16198;
-        host_args.at(48) = x16204;
-        host_args.at(49) = x16210;
-        host_args.at(50) = x16216;
-        host_args.at(51) = x16222;
-        host_args.at(52) = x16228;
-        host_args.at(53) = x16234;
-        host_args.at(54) = x16240;
-        host_args.at(55) = x16246;
-        host_args.at(56) = x16252;
-        host_args.at(57) = x16258;
-        host_args.at(58) = x16264;
-        host_args.at(59) = x16270;
-        host_args.at(60) = x16276;
-        host_args.at(61) = x16282;
-        host_args.at(62) = x16288;
-        host_args.at(63) = x16291;
-        host_args.at(64) = x13891;
-        host_args.at(65) = x13892;
-        host_args.at(66) = x13893;
-        host_args.at(67) = x13894;
-        host_args.at(68) = x13896;
-        host_args.at(69) = x13897;
-        host_args.at(70) = x13898;
-        host_args.at(71) = x13899;
-        host_args.at(72) = x13901;
-        host_args.at(73) = x13902;
-        host_args.at(74) = x13903;
-        host_args.at(75) = x13904;
-        host_args.at(76) = x13906;
-        host_args.at(77) = x13907;
-        host_args.at(78) = x13908;
-        host_args.at(79) = x13909;
-        host_args.at(80) = x13911;
-        host_args.at(81) = x13912;
-        host_args.at(82) = x13913;
-        host_args.at(83) = x13914;
-        host_args.at(84) = x13916;
-        host_args.at(85) = x13917;
-        host_args.at(86) = x13918;
-        host_args.at(87) = x13919;
-        host_args.at(88) = x13921;
-        host_args.at(89) = x13922;
-        host_args.at(90) = x13923;
-        host_args.at(91) = x13924;
-        host_args.at(92) = x13926;
-        host_args.at(93) = x13927;
-        host_args.at(94) = x13928;
-        host_args.at(95) = x13929;
-        host(ctx, "bigintQuotient", "", host_args.data(), 96, host_outs.data(), 32);
-        auto x16292 = host_outs.at(0);
-        auto x16293 = host_outs.at(1);
-        auto x16294 = host_outs.at(2);
-        auto x16295 = host_outs.at(3);
-        auto x16296 = host_outs.at(4);
-        auto x16297 = host_outs.at(5);
-        auto x16298 = host_outs.at(6);
-        auto x16299 = host_outs.at(7);
-        auto x16300 = host_outs.at(8);
-        auto x16301 = host_outs.at(9);
-        auto x16302 = host_outs.at(10);
-        auto x16303 = host_outs.at(11);
-        auto x16304 = host_outs.at(12);
-        auto x16305 = host_outs.at(13);
-        auto x16306 = host_outs.at(14);
-        auto x16307 = host_outs.at(15);
-        auto x16308 = host_outs.at(16);
-        auto x16309 = host_outs.at(17);
-        auto x16310 = host_outs.at(18);
-        auto x16311 = host_outs.at(19);
-        auto x16312 = host_outs.at(20);
-        auto x16313 = host_outs.at(21);
-        auto x16314 = host_outs.at(22);
-        auto x16315 = host_outs.at(23);
-        auto x16316 = host_outs.at(24);
-        auto x16317 = host_outs.at(25);
-        auto x16318 = host_outs.at(26);
-        auto x16319 = host_outs.at(27);
-        auto x16320 = host_outs.at(28);
-        auto x16321 = host_outs.at(29);
-        auto x16322 = host_outs.at(30);
-        auto x16323 = host_outs.at(31);
+        auto [x16292, x16293, x16294, x16295, x16296, x16297, x16298, x16299, x16300, x16301, x16302, x16303, x16304, x16305, x16306, x16307, x16308, x16309, x16310, x16311, x16312, x16313, x16314, x16315, x16316, x16317, x16318, x16319, x16320, x16321, x16322, x16323] = extern_bigintQuotient(ctx, cycle, "", {x15916, x15922, x15928, x15934, x15940, x15946, x15952, x15958, x15964, x15970, x15976, x15982, x15988, x15994, x16000, x16006, x16012, x16018, x16024, x16030, x16036, x16042, x16048, x16054, x16060, x16066, x16072, x16078, x16084, x16090, x16096, x16102, x16108, x16114, x16120, x16126, x16132, x16138, x16144, x16150, x16156, x16162, x16168, x16174, x16180, x16186, x16192, x16198, x16204, x16210, x16216, x16222, x16228, x16234, x16240, x16246, x16252, x16258, x16264, x16270, x16276, x16282, x16288, x16291, x13891, x13892, x13893, x13894, x13896, x13897, x13898, x13899, x13901, x13902, x13903, x13904, x13906, x13907, x13908, x13909, x13911, x13912, x13913, x13914, x13916, x13917, x13918, x13919, x13921, x13922, x13923, x13924, x13926, x13927, x13928, x13929});
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":73:0)
         auto x16324 = x16292 * x13891;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":73:0)
@@ -72027,13 +70428,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x19589;
         }
         {
-          host_args.at(0) = x19595;
-          host_args.at(1) = x19592;
-          host_args.at(2) = x19591;
-          host_args.at(3) = x19590;
-          host_args.at(4) = x19589;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x19595, x19592, x19591, x19590, x19589, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19596 = args[2][119 * steps + ((cycle - 0) & mask)];
@@ -72128,13 +70523,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x19600;
         }
         {
-          host_args.at(0) = x19604;
-          host_args.at(1) = x19603;
-          host_args.at(2) = x19602;
-          host_args.at(3) = x19601;
-          host_args.at(4) = x19600;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x19604, x19603, x19602, x19601, x19600, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19605 = args[2][126 * steps + ((cycle - 0) & mask)];
@@ -72229,13 +70618,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x19609;
         }
         {
-          host_args.at(0) = x19613;
-          host_args.at(1) = x19612;
-          host_args.at(2) = x19611;
-          host_args.at(3) = x19610;
-          host_args.at(4) = x19609;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x19613, x19612, x19611, x19610, x19609, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19614 = args[2][133 * steps + ((cycle - 0) & mask)];
@@ -72330,13 +70713,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x19618;
         }
         {
-          host_args.at(0) = x19622;
-          host_args.at(1) = x19621;
-          host_args.at(2) = x19620;
-          host_args.at(3) = x19619;
-          host_args.at(4) = x19618;
-          host_args.at(5) = x93;
-          host(ctx, "ramWrite", "", host_args.data(), 6, host_outs.data(), 0);
+          extern_ramWrite(ctx, cycle, "", {x19622, x19621, x19620, x19619, x19618, x93});
         }
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19623 = args[2][140 * steps + ((cycle - 0) & mask)];
@@ -72442,12 +70819,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x19650 = x19649 + x19645;
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":445:0)
         auto x19651 = x19594 * x77;
-        host_args.at(0) = x19651;
-        host_args.at(1) = x19650;
-        host_args.at(2) = x19644;
-        host_args.at(3) = x19638;
-        host_args.at(4) = x19632;
-        host(ctx, "log", "  Writing: ioAddr = 0x%x, data = { %u, %u, %u, %u }", host_args.data(), 5, host_outs.data(), 0);
+        extern_log(ctx, cycle, "  Writing: ioAddr = 0x%x, data = { %u, %u, %u, %u }", {x19651, x19650, x19644, x19638, x19632});
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":453:0)
       auto x19652 = x96 - x13635;
@@ -72740,16 +71112,13 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x19709);
           reg = x19709;
         }
-        host_args.at(0) = x19708;
-        host(ctx, "log", "isFromEcall, set sysExitCode: %u", host_args.data(), 1, host_outs.data(), 0);
+        extern_log(ctx, cycle, "isFromEcall, set sysExitCode: %u", {x19708});
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":156:0)
         args[1][104] = x19708;
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":157:0)
         args[1][105] = x19709;
         {
-          host_args.at(0) = x19708;
-          host_args.at(1) = x959;
-          host(ctx, "halt", "", host_args.data(), 2, host_outs.data(), 0);
+          extern_halt(ctx, cycle, "", {x19708, x959});
         }
       }
       // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":163:0))
@@ -72774,16 +71143,13 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x0);
           reg = x0;
         }
-        host_args.at(0) = x93;
-        host(ctx, "log", "isFromPageFault, set sysExitCode: %u", host_args.data(), 1, host_outs.data(), 0);
+        extern_log(ctx, cycle, "isFromPageFault, set sysExitCode: %u", {x93});
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":169:0)
         args[1][104] = x93;
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":170:0)
         args[1][105] = x95;
         {
-          host_args.at(0) = x93;
-          host_args.at(1) = x959;
-          host(ctx, "halt", "", host_args.data(), 2, host_outs.data(), 0);
+          extern_halt(ctx, cycle, "", {x93, x959});
         }
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":14:0)
@@ -72899,8 +71265,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     // loc("Top/Code/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x19736 = args[0][0 * steps + ((cycle - 0) & mask)];
     assert(x19736 != Fp::invalid());
-    host_args.at(0) = x19736;
-    host(ctx, "log", "%u: RamFini", host_args.data(), 1, host_outs.data(), 0);
+    extern_log(ctx, cycle, "%u: RamFini", {x19736});
   }
   // loc("Top/Code/OneHot/hot[7](Reg)"("./zirgen/components/mux.h":49:0))
   auto x19737 = args[0][8 * steps + ((cycle - 0) & mask)];
@@ -72909,8 +71274,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     // loc("Top/Code/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x19738 = args[0][0 * steps + ((cycle - 0) & mask)];
     assert(x19738 != Fp::invalid());
-    host_args.at(0) = x19738;
-    host(ctx, "log", "%u: BytesFini", host_args.data(), 1, host_outs.data(), 0);
+    extern_log(ctx, cycle, "%u: BytesFini", {x19738});
   }
   // loc("Top/Code/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":78:0))
   auto x19739 = args[0][1 * steps + ((cycle - 0) & mask)];
@@ -76822,14 +75186,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19779 = args[2][120 * steps + ((cycle - 0) & mask)];
       assert(x19779 != Fp::invalid());
-      host_args.at(0) = x19773;
-      host_args.at(1) = x19774;
-      host_args.at(2) = x19775;
-      host_args.at(3) = x19776;
-      host_args.at(4) = x19777;
-      host_args.at(5) = x19778;
-      host_args.at(6) = x19779;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19773, x19774, x19775, x19776, x19777, x19778, x19779});
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19780 = args[2][121 * steps + ((cycle - 0) & mask)];
       assert(x19780 != Fp::invalid());
@@ -76851,14 +75208,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19786 = args[2][127 * steps + ((cycle - 0) & mask)];
       assert(x19786 != Fp::invalid());
-      host_args.at(0) = x19780;
-      host_args.at(1) = x19781;
-      host_args.at(2) = x19782;
-      host_args.at(3) = x19783;
-      host_args.at(4) = x19784;
-      host_args.at(5) = x19785;
-      host_args.at(6) = x19786;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19780, x19781, x19782, x19783, x19784, x19785, x19786});
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19787 = args[2][128 * steps + ((cycle - 0) & mask)];
       assert(x19787 != Fp::invalid());
@@ -76880,14 +75230,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19793 = args[2][134 * steps + ((cycle - 0) & mask)];
       assert(x19793 != Fp::invalid());
-      host_args.at(0) = x19787;
-      host_args.at(1) = x19788;
-      host_args.at(2) = x19789;
-      host_args.at(3) = x19790;
-      host_args.at(4) = x19791;
-      host_args.at(5) = x19792;
-      host_args.at(6) = x19793;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19787, x19788, x19789, x19790, x19791, x19792, x19793});
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19794 = args[2][135 * steps + ((cycle - 0) & mask)];
       assert(x19794 != Fp::invalid());
@@ -76909,14 +75252,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19800 = args[2][141 * steps + ((cycle - 0) & mask)];
       assert(x19800 != Fp::invalid());
-      host_args.at(0) = x19794;
-      host_args.at(1) = x19795;
-      host_args.at(2) = x19796;
-      host_args.at(3) = x19797;
-      host_args.at(4) = x19798;
-      host_args.at(5) = x19799;
-      host_args.at(6) = x19800;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19794, x19795, x19796, x19797, x19798, x19799, x19800});
     }
   }
   if (x475 != 0) {
@@ -76942,14 +75278,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19807 = args[2][122 * steps + ((cycle - 0) & mask)];
       assert(x19807 != Fp::invalid());
-      host_args.at(0) = x19801;
-      host_args.at(1) = x19802;
-      host_args.at(2) = x19803;
-      host_args.at(3) = x19804;
-      host_args.at(4) = x19805;
-      host_args.at(5) = x19806;
-      host_args.at(6) = x19807;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19801, x19802, x19803, x19804, x19805, x19806, x19807});
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19808 = args[2][123 * steps + ((cycle - 0) & mask)];
       assert(x19808 != Fp::invalid());
@@ -76971,14 +75300,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19814 = args[2][129 * steps + ((cycle - 0) & mask)];
       assert(x19814 != Fp::invalid());
-      host_args.at(0) = x19808;
-      host_args.at(1) = x19809;
-      host_args.at(2) = x19810;
-      host_args.at(3) = x19811;
-      host_args.at(4) = x19812;
-      host_args.at(5) = x19813;
-      host_args.at(6) = x19814;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19808, x19809, x19810, x19811, x19812, x19813, x19814});
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19815 = args[2][130 * steps + ((cycle - 0) & mask)];
       assert(x19815 != Fp::invalid());
@@ -77000,14 +75322,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19821 = args[2][136 * steps + ((cycle - 0) & mask)];
       assert(x19821 != Fp::invalid());
-      host_args.at(0) = x19815;
-      host_args.at(1) = x19816;
-      host_args.at(2) = x19817;
-      host_args.at(3) = x19818;
-      host_args.at(4) = x19819;
-      host_args.at(5) = x19820;
-      host_args.at(6) = x19821;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19815, x19816, x19817, x19818, x19819, x19820, x19821});
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19822 = args[2][137 * steps + ((cycle - 0) & mask)];
       assert(x19822 != Fp::invalid());
@@ -77029,14 +75344,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
       auto x19828 = args[2][143 * steps + ((cycle - 0) & mask)];
       assert(x19828 != Fp::invalid());
-      host_args.at(0) = x19822;
-      host_args.at(1) = x19823;
-      host_args.at(2) = x19824;
-      host_args.at(3) = x19825;
-      host_args.at(4) = x19826;
-      host_args.at(5) = x19827;
-      host_args.at(6) = x19828;
-      host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+      extern_plonkWrite_ram(ctx, cycle, "ram", {x19822, x19823, x19824, x19825, x19826, x19827, x19828});
     }
   }
   if (x944 != 0) {
@@ -77066,14 +75374,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19836 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x19836 != Fp::invalid());
-        host_args.at(0) = x19830;
-        host_args.at(1) = x19831;
-        host_args.at(2) = x19832;
-        host_args.at(3) = x19833;
-        host_args.at(4) = x19834;
-        host_args.at(5) = x19835;
-        host_args.at(6) = x19836;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19830, x19831, x19832, x19833, x19834, x19835, x19836});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19837 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x19837 != Fp::invalid());
@@ -77095,14 +75396,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19843 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x19843 != Fp::invalid());
-        host_args.at(0) = x19837;
-        host_args.at(1) = x19838;
-        host_args.at(2) = x19839;
-        host_args.at(3) = x19840;
-        host_args.at(4) = x19841;
-        host_args.at(5) = x19842;
-        host_args.at(6) = x19843;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19837, x19838, x19839, x19840, x19841, x19842, x19843});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19844 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x19844 != Fp::invalid());
@@ -77124,14 +75418,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19850 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x19850 != Fp::invalid());
-        host_args.at(0) = x19844;
-        host_args.at(1) = x19845;
-        host_args.at(2) = x19846;
-        host_args.at(3) = x19847;
-        host_args.at(4) = x19848;
-        host_args.at(5) = x19849;
-        host_args.at(6) = x19850;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19844, x19845, x19846, x19847, x19848, x19849, x19850});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19851 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x19851 != Fp::invalid());
@@ -77153,14 +75440,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19857 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x19857 != Fp::invalid());
-        host_args.at(0) = x19851;
-        host_args.at(1) = x19852;
-        host_args.at(2) = x19853;
-        host_args.at(3) = x19854;
-        host_args.at(4) = x19855;
-        host_args.at(5) = x19856;
-        host_args.at(6) = x19857;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19851, x19852, x19853, x19854, x19855, x19856, x19857});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -77189,14 +75469,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19865 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x19865 != Fp::invalid());
-        host_args.at(0) = x19859;
-        host_args.at(1) = x19860;
-        host_args.at(2) = x19861;
-        host_args.at(3) = x19862;
-        host_args.at(4) = x19863;
-        host_args.at(5) = x19864;
-        host_args.at(6) = x19865;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19859, x19860, x19861, x19862, x19863, x19864, x19865});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19866 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x19866 != Fp::invalid());
@@ -77218,14 +75491,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19872 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x19872 != Fp::invalid());
-        host_args.at(0) = x19866;
-        host_args.at(1) = x19867;
-        host_args.at(2) = x19868;
-        host_args.at(3) = x19869;
-        host_args.at(4) = x19870;
-        host_args.at(5) = x19871;
-        host_args.at(6) = x19872;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19866, x19867, x19868, x19869, x19870, x19871, x19872});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19873 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x19873 != Fp::invalid());
@@ -77247,14 +75513,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19879 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x19879 != Fp::invalid());
-        host_args.at(0) = x19873;
-        host_args.at(1) = x19874;
-        host_args.at(2) = x19875;
-        host_args.at(3) = x19876;
-        host_args.at(4) = x19877;
-        host_args.at(5) = x19878;
-        host_args.at(6) = x19879;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19873, x19874, x19875, x19876, x19877, x19878, x19879});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19880 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x19880 != Fp::invalid());
@@ -77276,14 +75535,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19886 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x19886 != Fp::invalid());
-        host_args.at(0) = x19880;
-        host_args.at(1) = x19881;
-        host_args.at(2) = x19882;
-        host_args.at(3) = x19883;
-        host_args.at(4) = x19884;
-        host_args.at(5) = x19885;
-        host_args.at(6) = x19886;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19880, x19881, x19882, x19883, x19884, x19885, x19886});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -77312,14 +75564,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19894 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x19894 != Fp::invalid());
-        host_args.at(0) = x19888;
-        host_args.at(1) = x19889;
-        host_args.at(2) = x19890;
-        host_args.at(3) = x19891;
-        host_args.at(4) = x19892;
-        host_args.at(5) = x19893;
-        host_args.at(6) = x19894;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19888, x19889, x19890, x19891, x19892, x19893, x19894});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19895 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x19895 != Fp::invalid());
@@ -77341,14 +75586,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19901 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x19901 != Fp::invalid());
-        host_args.at(0) = x19895;
-        host_args.at(1) = x19896;
-        host_args.at(2) = x19897;
-        host_args.at(3) = x19898;
-        host_args.at(4) = x19899;
-        host_args.at(5) = x19900;
-        host_args.at(6) = x19901;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19895, x19896, x19897, x19898, x19899, x19900, x19901});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19902 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x19902 != Fp::invalid());
@@ -77370,14 +75608,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19908 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x19908 != Fp::invalid());
-        host_args.at(0) = x19902;
-        host_args.at(1) = x19903;
-        host_args.at(2) = x19904;
-        host_args.at(3) = x19905;
-        host_args.at(4) = x19906;
-        host_args.at(5) = x19907;
-        host_args.at(6) = x19908;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19902, x19903, x19904, x19905, x19906, x19907, x19908});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19909 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x19909 != Fp::invalid());
@@ -77399,14 +75630,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19915 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x19915 != Fp::invalid());
-        host_args.at(0) = x19909;
-        host_args.at(1) = x19910;
-        host_args.at(2) = x19911;
-        host_args.at(3) = x19912;
-        host_args.at(4) = x19913;
-        host_args.at(5) = x19914;
-        host_args.at(6) = x19915;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19909, x19910, x19911, x19912, x19913, x19914, x19915});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -77435,14 +75659,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19923 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x19923 != Fp::invalid());
-        host_args.at(0) = x19917;
-        host_args.at(1) = x19918;
-        host_args.at(2) = x19919;
-        host_args.at(3) = x19920;
-        host_args.at(4) = x19921;
-        host_args.at(5) = x19922;
-        host_args.at(6) = x19923;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19917, x19918, x19919, x19920, x19921, x19922, x19923});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19924 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x19924 != Fp::invalid());
@@ -77464,14 +75681,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19930 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x19930 != Fp::invalid());
-        host_args.at(0) = x19924;
-        host_args.at(1) = x19925;
-        host_args.at(2) = x19926;
-        host_args.at(3) = x19927;
-        host_args.at(4) = x19928;
-        host_args.at(5) = x19929;
-        host_args.at(6) = x19930;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19924, x19925, x19926, x19927, x19928, x19929, x19930});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19931 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x19931 != Fp::invalid());
@@ -77493,14 +75703,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19937 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x19937 != Fp::invalid());
-        host_args.at(0) = x19931;
-        host_args.at(1) = x19932;
-        host_args.at(2) = x19933;
-        host_args.at(3) = x19934;
-        host_args.at(4) = x19935;
-        host_args.at(5) = x19936;
-        host_args.at(6) = x19937;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19931, x19932, x19933, x19934, x19935, x19936, x19937});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19938 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x19938 != Fp::invalid());
@@ -77522,14 +75725,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19944 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x19944 != Fp::invalid());
-        host_args.at(0) = x19938;
-        host_args.at(1) = x19939;
-        host_args.at(2) = x19940;
-        host_args.at(3) = x19941;
-        host_args.at(4) = x19942;
-        host_args.at(5) = x19943;
-        host_args.at(6) = x19944;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19938, x19939, x19940, x19941, x19942, x19943, x19944});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19945 = args[2][144 * steps + ((cycle - 0) & mask)];
         assert(x19945 != Fp::invalid());
@@ -77551,14 +75747,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19951 = args[2][150 * steps + ((cycle - 0) & mask)];
         assert(x19951 != Fp::invalid());
-        host_args.at(0) = x19945;
-        host_args.at(1) = x19946;
-        host_args.at(2) = x19947;
-        host_args.at(3) = x19948;
-        host_args.at(4) = x19949;
-        host_args.at(5) = x19950;
-        host_args.at(6) = x19951;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19945, x19946, x19947, x19948, x19949, x19950, x19951});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -77587,14 +75776,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19959 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x19959 != Fp::invalid());
-        host_args.at(0) = x19953;
-        host_args.at(1) = x19954;
-        host_args.at(2) = x19955;
-        host_args.at(3) = x19956;
-        host_args.at(4) = x19957;
-        host_args.at(5) = x19958;
-        host_args.at(6) = x19959;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19953, x19954, x19955, x19956, x19957, x19958, x19959});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19960 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x19960 != Fp::invalid());
@@ -77616,14 +75798,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19966 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x19966 != Fp::invalid());
-        host_args.at(0) = x19960;
-        host_args.at(1) = x19961;
-        host_args.at(2) = x19962;
-        host_args.at(3) = x19963;
-        host_args.at(4) = x19964;
-        host_args.at(5) = x19965;
-        host_args.at(6) = x19966;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19960, x19961, x19962, x19963, x19964, x19965, x19966});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19967 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x19967 != Fp::invalid());
@@ -77645,14 +75820,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19973 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x19973 != Fp::invalid());
-        host_args.at(0) = x19967;
-        host_args.at(1) = x19968;
-        host_args.at(2) = x19969;
-        host_args.at(3) = x19970;
-        host_args.at(4) = x19971;
-        host_args.at(5) = x19972;
-        host_args.at(6) = x19973;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19967, x19968, x19969, x19970, x19971, x19972, x19973});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19974 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x19974 != Fp::invalid());
@@ -77674,14 +75842,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19980 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x19980 != Fp::invalid());
-        host_args.at(0) = x19974;
-        host_args.at(1) = x19975;
-        host_args.at(2) = x19976;
-        host_args.at(3) = x19977;
-        host_args.at(4) = x19978;
-        host_args.at(5) = x19979;
-        host_args.at(6) = x19980;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19974, x19975, x19976, x19977, x19978, x19979, x19980});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -77710,14 +75871,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19988 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x19988 != Fp::invalid());
-        host_args.at(0) = x19982;
-        host_args.at(1) = x19983;
-        host_args.at(2) = x19984;
-        host_args.at(3) = x19985;
-        host_args.at(4) = x19986;
-        host_args.at(5) = x19987;
-        host_args.at(6) = x19988;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19982, x19983, x19984, x19985, x19986, x19987, x19988});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19989 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x19989 != Fp::invalid());
@@ -77739,14 +75893,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19995 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x19995 != Fp::invalid());
-        host_args.at(0) = x19989;
-        host_args.at(1) = x19990;
-        host_args.at(2) = x19991;
-        host_args.at(3) = x19992;
-        host_args.at(4) = x19993;
-        host_args.at(5) = x19994;
-        host_args.at(6) = x19995;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19989, x19990, x19991, x19992, x19993, x19994, x19995});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x19996 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x19996 != Fp::invalid());
@@ -77768,14 +75915,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20002 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x20002 != Fp::invalid());
-        host_args.at(0) = x19996;
-        host_args.at(1) = x19997;
-        host_args.at(2) = x19998;
-        host_args.at(3) = x19999;
-        host_args.at(4) = x20000;
-        host_args.at(5) = x20001;
-        host_args.at(6) = x20002;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x19996, x19997, x19998, x19999, x20000, x20001, x20002});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20003 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x20003 != Fp::invalid());
@@ -77797,14 +75937,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20009 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x20009 != Fp::invalid());
-        host_args.at(0) = x20003;
-        host_args.at(1) = x20004;
-        host_args.at(2) = x20005;
-        host_args.at(3) = x20006;
-        host_args.at(4) = x20007;
-        host_args.at(5) = x20008;
-        host_args.at(6) = x20009;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20003, x20004, x20005, x20006, x20007, x20008, x20009});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -77833,14 +75966,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20017 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x20017 != Fp::invalid());
-        host_args.at(0) = x20011;
-        host_args.at(1) = x20012;
-        host_args.at(2) = x20013;
-        host_args.at(3) = x20014;
-        host_args.at(4) = x20015;
-        host_args.at(5) = x20016;
-        host_args.at(6) = x20017;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20011, x20012, x20013, x20014, x20015, x20016, x20017});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20018 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x20018 != Fp::invalid());
@@ -77862,14 +75988,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20024 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x20024 != Fp::invalid());
-        host_args.at(0) = x20018;
-        host_args.at(1) = x20019;
-        host_args.at(2) = x20020;
-        host_args.at(3) = x20021;
-        host_args.at(4) = x20022;
-        host_args.at(5) = x20023;
-        host_args.at(6) = x20024;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20018, x20019, x20020, x20021, x20022, x20023, x20024});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20025 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x20025 != Fp::invalid());
@@ -77891,14 +76010,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20031 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x20031 != Fp::invalid());
-        host_args.at(0) = x20025;
-        host_args.at(1) = x20026;
-        host_args.at(2) = x20027;
-        host_args.at(3) = x20028;
-        host_args.at(4) = x20029;
-        host_args.at(5) = x20030;
-        host_args.at(6) = x20031;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20025, x20026, x20027, x20028, x20029, x20030, x20031});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20032 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x20032 != Fp::invalid());
@@ -77920,14 +76032,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20038 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x20038 != Fp::invalid());
-        host_args.at(0) = x20032;
-        host_args.at(1) = x20033;
-        host_args.at(2) = x20034;
-        host_args.at(3) = x20035;
-        host_args.at(4) = x20036;
-        host_args.at(5) = x20037;
-        host_args.at(6) = x20038;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20032, x20033, x20034, x20035, x20036, x20037, x20038});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20039 = args[2][144 * steps + ((cycle - 0) & mask)];
         assert(x20039 != Fp::invalid());
@@ -77949,14 +76054,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20045 = args[2][150 * steps + ((cycle - 0) & mask)];
         assert(x20045 != Fp::invalid());
-        host_args.at(0) = x20039;
-        host_args.at(1) = x20040;
-        host_args.at(2) = x20041;
-        host_args.at(3) = x20042;
-        host_args.at(4) = x20043;
-        host_args.at(5) = x20044;
-        host_args.at(6) = x20045;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20039, x20040, x20041, x20042, x20043, x20044, x20045});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -77985,14 +76083,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20053 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x20053 != Fp::invalid());
-        host_args.at(0) = x20047;
-        host_args.at(1) = x20048;
-        host_args.at(2) = x20049;
-        host_args.at(3) = x20050;
-        host_args.at(4) = x20051;
-        host_args.at(5) = x20052;
-        host_args.at(6) = x20053;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20047, x20048, x20049, x20050, x20051, x20052, x20053});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20054 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x20054 != Fp::invalid());
@@ -78014,14 +76105,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20060 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x20060 != Fp::invalid());
-        host_args.at(0) = x20054;
-        host_args.at(1) = x20055;
-        host_args.at(2) = x20056;
-        host_args.at(3) = x20057;
-        host_args.at(4) = x20058;
-        host_args.at(5) = x20059;
-        host_args.at(6) = x20060;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20054, x20055, x20056, x20057, x20058, x20059, x20060});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -78050,14 +76134,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20068 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x20068 != Fp::invalid());
-        host_args.at(0) = x20062;
-        host_args.at(1) = x20063;
-        host_args.at(2) = x20064;
-        host_args.at(3) = x20065;
-        host_args.at(4) = x20066;
-        host_args.at(5) = x20067;
-        host_args.at(6) = x20068;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20062, x20063, x20064, x20065, x20066, x20067, x20068});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20069 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x20069 != Fp::invalid());
@@ -78079,14 +76156,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20075 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x20075 != Fp::invalid());
-        host_args.at(0) = x20069;
-        host_args.at(1) = x20070;
-        host_args.at(2) = x20071;
-        host_args.at(3) = x20072;
-        host_args.at(4) = x20073;
-        host_args.at(5) = x20074;
-        host_args.at(6) = x20075;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20069, x20070, x20071, x20072, x20073, x20074, x20075});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -78115,14 +76185,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20083 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x20083 != Fp::invalid());
-        host_args.at(0) = x20077;
-        host_args.at(1) = x20078;
-        host_args.at(2) = x20079;
-        host_args.at(3) = x20080;
-        host_args.at(4) = x20081;
-        host_args.at(5) = x20082;
-        host_args.at(6) = x20083;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20077, x20078, x20079, x20080, x20081, x20082, x20083});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20084 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x20084 != Fp::invalid());
@@ -78144,14 +76207,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20090 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x20090 != Fp::invalid());
-        host_args.at(0) = x20084;
-        host_args.at(1) = x20085;
-        host_args.at(2) = x20086;
-        host_args.at(3) = x20087;
-        host_args.at(4) = x20088;
-        host_args.at(5) = x20089;
-        host_args.at(6) = x20090;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20084, x20085, x20086, x20087, x20088, x20089, x20090});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -78180,14 +76236,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20098 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x20098 != Fp::invalid());
-        host_args.at(0) = x20092;
-        host_args.at(1) = x20093;
-        host_args.at(2) = x20094;
-        host_args.at(3) = x20095;
-        host_args.at(4) = x20096;
-        host_args.at(5) = x20097;
-        host_args.at(6) = x20098;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20092, x20093, x20094, x20095, x20096, x20097, x20098});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20099 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x20099 != Fp::invalid());
@@ -78209,14 +76258,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20105 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x20105 != Fp::invalid());
-        host_args.at(0) = x20099;
-        host_args.at(1) = x20100;
-        host_args.at(2) = x20101;
-        host_args.at(3) = x20102;
-        host_args.at(4) = x20103;
-        host_args.at(5) = x20104;
-        host_args.at(6) = x20105;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20099, x20100, x20101, x20102, x20103, x20104, x20105});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20106 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x20106 != Fp::invalid());
@@ -78238,14 +76280,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20112 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x20112 != Fp::invalid());
-        host_args.at(0) = x20106;
-        host_args.at(1) = x20107;
-        host_args.at(2) = x20108;
-        host_args.at(3) = x20109;
-        host_args.at(4) = x20110;
-        host_args.at(5) = x20111;
-        host_args.at(6) = x20112;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20106, x20107, x20108, x20109, x20110, x20111, x20112});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20113 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x20113 != Fp::invalid());
@@ -78267,14 +76302,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20119 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x20119 != Fp::invalid());
-        host_args.at(0) = x20113;
-        host_args.at(1) = x20114;
-        host_args.at(2) = x20115;
-        host_args.at(3) = x20116;
-        host_args.at(4) = x20117;
-        host_args.at(5) = x20118;
-        host_args.at(6) = x20119;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20113, x20114, x20115, x20116, x20117, x20118, x20119});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -78303,14 +76331,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20127 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x20127 != Fp::invalid());
-        host_args.at(0) = x20121;
-        host_args.at(1) = x20122;
-        host_args.at(2) = x20123;
-        host_args.at(3) = x20124;
-        host_args.at(4) = x20125;
-        host_args.at(5) = x20126;
-        host_args.at(6) = x20127;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20121, x20122, x20123, x20124, x20125, x20126, x20127});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20128 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x20128 != Fp::invalid());
@@ -78332,14 +76353,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20134 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x20134 != Fp::invalid());
-        host_args.at(0) = x20128;
-        host_args.at(1) = x20129;
-        host_args.at(2) = x20130;
-        host_args.at(3) = x20131;
-        host_args.at(4) = x20132;
-        host_args.at(5) = x20133;
-        host_args.at(6) = x20134;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20128, x20129, x20130, x20131, x20132, x20133, x20134});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20135 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x20135 != Fp::invalid());
@@ -78361,14 +76375,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20141 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x20141 != Fp::invalid());
-        host_args.at(0) = x20135;
-        host_args.at(1) = x20136;
-        host_args.at(2) = x20137;
-        host_args.at(3) = x20138;
-        host_args.at(4) = x20139;
-        host_args.at(5) = x20140;
-        host_args.at(6) = x20141;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20135, x20136, x20137, x20138, x20139, x20140, x20141});
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20142 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x20142 != Fp::invalid());
@@ -78390,14 +76397,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
         auto x20148 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x20148 != Fp::invalid());
-        host_args.at(0) = x20142;
-        host_args.at(1) = x20143;
-        host_args.at(2) = x20144;
-        host_args.at(3) = x20145;
-        host_args.at(4) = x20146;
-        host_args.at(5) = x20147;
-        host_args.at(6) = x20148;
-        host(ctx, "plonkWrite", "ram", host_args.data(), 7, host_outs.data(), 0);
+        extern_plonkWrite_ram(ctx, cycle, "ram", {x20142, x20143, x20144, x20145, x20146, x20147, x20148});
       }
     }
   }
