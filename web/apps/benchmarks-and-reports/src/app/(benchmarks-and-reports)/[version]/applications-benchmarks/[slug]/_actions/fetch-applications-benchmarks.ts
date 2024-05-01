@@ -8,7 +8,7 @@ export async function fetchApplicationsBenchmarks({ url, version }: { url: strin
       Authorization: `token ${env.GITHUB_PAT}`,
       Accept: "application/vnd.github.v3.raw",
     },
-    next: { revalidate: 3600 },
+    next: { revalidate: 900 },
   })
     .then((response) => {
       if (!response.ok) {

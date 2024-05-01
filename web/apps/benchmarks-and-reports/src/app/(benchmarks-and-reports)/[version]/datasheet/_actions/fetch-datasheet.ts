@@ -8,7 +8,7 @@ export async function fetchDatasheet({ version, url }: { version: string; url: s
       Authorization: `token ${env.GITHUB_PAT}`,
       Accept: "application/vnd.github.v3.raw",
     },
-    next: { revalidate: 3600 },
+    cache: "no-store",
   })
     .then((response) => {
       if (!response.ok) {

@@ -10,7 +10,7 @@ export async function fetchDatasheetCommitHash({ version }: { version: string })
         Authorization: `token ${env.GITHUB_PAT}`,
         Accept: "application/vnd.github.v3.raw",
       },
-      next: { revalidate: 3600 },
+      cache: "no-store",
     },
   );
   const responseText = await response.text();

@@ -10,7 +10,7 @@ export async function fetchCratesValidationResults({ hash }: { hash: string }) {
         Authorization: `token ${env.GITHUB_PAT}`,
         Accept: "application/vnd.github.v3.raw",
       },
-      next: { revalidate: 3600 },
+      next: { revalidate: 900 },
     },
   );
   const responseJson = await response.json();
