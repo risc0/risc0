@@ -505,7 +505,7 @@ mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
     #[test]
-    fn prove_nothing_compact() {
+    fn stark2snark() {
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::DoNothing)
             .unwrap()
