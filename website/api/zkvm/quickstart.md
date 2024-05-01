@@ -27,7 +27,9 @@ cargo binstall cargo-risczero
 cargo risczero install
 ```
 
-> Note: To install a specific version instead of using the latest stable version, use `cargo binstall cargo-risczero@<version>` where the version is the crates.io release tag. 
+> Note: To install a specific version instead of using the latest stable version, use `cargo binstall cargo-risczero@<version>`, where the version is the crates.io release tag.
+>
+> The version used must match the `risc0-zkvm` version from your guest and host.
 
 ## 2. Create a New Project
 
