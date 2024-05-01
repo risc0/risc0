@@ -6,8 +6,8 @@ import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { replace } from "string-ts";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
-import ApplicationsBenchmarksCommitHashButton from "./_components/applications-benchmarks-commit-hash-button";
-import ApplicationsBenchmarksContent from "./_components/applications-benchmarks-content";
+import { ApplicationsBenchmarksCommitHashButton } from "./_components/applications-benchmarks-commit-hash-button";
+import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
 import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
 export function generateMetadata({ params }) {

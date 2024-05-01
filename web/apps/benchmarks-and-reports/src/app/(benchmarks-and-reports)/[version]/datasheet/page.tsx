@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { DATASHEET_DESCRIPTION } from "../_utils/constants";
-import DatasheetCommitHashButton from "./_components/datasheet-commit-hash-button";
-import DatasheetContent from "./_components/datasheet-content";
+import { DatasheetCommitHashButton } from "./_components/datasheet-commit-hash-button";
+import { DatasheetContent } from "./_components/datasheet-content";
 
 export const metadata: Metadata = {
   title: "Datasheet",

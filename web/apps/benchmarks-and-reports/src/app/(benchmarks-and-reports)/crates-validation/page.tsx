@@ -1,13 +1,11 @@
 import { Separator } from "@risc0/ui/separator";
-import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CopyButton } from "shared/client/components/copy-button";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { CRATES_VALIDATION_DESCRIPTION } from "../[version]/_utils/constants";
-import { findMostRecentHash } from "./_actions/find-most-recent-hash";
-import CratesIoValidationContent from "./_components/crates-io-validation-content";
+import { CratesIoValidationContent } from "./_components/crates-io-validation-content";
+import { CratesIoValidationHashButton } from "./_components/creates-io-validation-hash-button";
 
 export const metadata: Metadata = {
   title: "Crates.io Validation",
@@ -23,9 +21,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function CratesIoValidationPage() {
-  const mostRecentHash = await findMostRecentHash();
-
+export default function CratesIoValidationPage() {
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
@@ -39,18 +35,17 @@ export default async function CratesIoValidationPage() {
             and the RISC Zero zkVM
           </p>
         </div>
-        {mostRecentHash && (
-          <CopyButton size="sm" variant="ghost" value={mostRecentHash}>
-            Commit Hash<span className="hidden sm:inline">: {truncate(mostRecentHash, 15)}</span>
-          </CopyButton>
-        )}
+
+        <Suspense fallback={<SuspenseLoader />}>
+          <CratesIoValidationHashButton />
+        </Suspense>
       </div>
 
       <Separator className="mt-2" />
 
       <div className="mt-6">
         <Suspense fallback={<SuspenseLoader />}>
-          <CratesIoValidationContent mostRecentHash={mostRecentHash} />
+          <CratesIoValidationContent />
         </Suspense>
       </div>
     </div>
