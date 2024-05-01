@@ -148,7 +148,7 @@ where
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
 
-        use crate::host::receipt::decode_receipt_claim_from_seal;
+        use crate::host::receipt::segment::decode_receipt_claim_from_seal;
 
         let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
 
