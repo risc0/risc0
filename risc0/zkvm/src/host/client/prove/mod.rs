@@ -141,7 +141,7 @@ pub struct ProverOpts {
 #[derive(Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ReceiptKind {
-    /// Request that a [CompositeReceipr][crate::CompactReceipt] be generated.
+    /// Request that a [CompositeReceipt][crate::CompositeReceipt] be generated.
     ///
     /// Composite receipts are made up a receipt for every segment in a zkVM execution, and every
     /// assumption. They are linear in size with respect to the execution length.
