@@ -24,9 +24,8 @@ use serde::{Deserialize, Serialize};
 use super::{InnerReceipt, SegmentReceipt, VerifierContext};
 use crate::{sha::Digestible, Assumptions, MaybePruned, Output, ReceiptClaim};
 
-/// A receipt composed of one or more [SegmentReceipt] structs proving a single
-/// execution with continuations, and zero or more [Receipt] structs proving any
-/// assumptions.
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
+/// continuations, and zero or more [Receipt](crate::Receipt) structs proving any assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct CompositeReceipt {
