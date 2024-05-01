@@ -1,14 +1,16 @@
 "use server";
 
+import { unstable_noStore as noStore } from "next/cache";
 import env from "~/env";
 
 export async function fetchDatasheet({ version, url }: { version: string; url: string }) {
+  noStore();
+
   return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`, {
     headers: {
       Authorization: `token ${env.GITHUB_PAT}`,
       Accept: "application/vnd.github.v3.raw",
     },
-    cache: "no-store",
   })
     .then((response) => {
       if (!response.ok) {
