@@ -1,0 +1,6 @@
+{
+  "extends": ["web/node_modules/@risc0/ui/biome.base.jsonc"],
+  "files": {
+    "include": ["web"]
+  }
+}

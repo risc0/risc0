@@ -16,17 +16,21 @@ use std::env;
 
 fn main() {
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        let cuda_bin = env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_KERNEL").expect(
-            "CARGO_FEATURE_CUDA is defined, but DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_KERNEL is not",
+        println!(
+            "cargo:rustc-env=RECURSION_CUDA_EVAL_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_EVAL_FATBIN").unwrap()
         );
-        println!("cargo:rustc-env=RECURSION_CUDA_PATH={cuda_bin}");
+        println!(
+            "cargo:rustc-env=RECURSION_CUDA_STEPS_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_STEPS_FATBIN").unwrap()
+        );
     }
 
     if env::var("CARGO_FEATURE_METAL").is_ok() {
-        let metal_bin = env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL").expect(
-            "CARGO_FEATURE_METAL is defined, but DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL is not",
+        println!(
+            "cargo:rustc-env=RECURSION_METAL_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL").unwrap()
         );
-        println!("cargo:rustc-env=RECURSION_METAL_PATH={metal_bin}");
     }
 
     #[cfg(feature = "prove")]
@@ -46,7 +50,7 @@ fn download_zkr() {
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "3504a2542626acb974dea1ae5542c90c032c4ef42f230977f40f245442a1ec23";
+    const SHA256_HASH: &str = "48d53160fb8d7756667aadc6437120f1d252eb37ca56528877da5c9918cbe4f5";
 
     fn check_sha2(path: &Path) -> bool {
         let data = fs::read(path).unwrap();

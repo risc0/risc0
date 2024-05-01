@@ -24,7 +24,7 @@ use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 /// HASH_ELF uses the risc0_zkvm::sha interface for hashing.
 /// HASH_RUST_CRYPTO_ELF uses RustCrypto's [sha2] crate, patched to use the RISC
 /// Zero accelerator. See `src/methods/guest/Cargo.toml` for the patch
-/// definition, which can be used to enable SHA-256 accelerrator support
+/// definition, which can be used to enable SHA-256 accelerator support
 /// everywhere the [sha2] crate is used.
 fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Receipt) {
     let env = ExecutorEnv::builder()
@@ -43,7 +43,7 @@ fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Receipt) {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, elf).unwrap();
+    let receipt = prover.prove(env, elf).unwrap().receipt;
 
     let digest = receipt.journal.decode().unwrap();
     (digest, receipt)
@@ -72,11 +72,9 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use serial_test::serial;
     use sha_methods::{HASH_ID, HASH_RUST_CRYPTO_ID};
 
     #[test]
-    #[serial]
     fn hash_abc() {
         let (digest, receipt) = super::provably_hash("abc", false);
         receipt.verify(HASH_ID).unwrap();
@@ -88,7 +86,6 @@ mod tests {
     }
 
     #[test]
-    #[serial]
     fn hash_abc_rust_crypto() {
         let (digest, receipt) = super::provably_hash("abc", true);
         receipt.verify(HASH_RUST_CRYPTO_ID).unwrap();

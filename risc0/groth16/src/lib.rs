@@ -58,7 +58,7 @@ pub(crate) fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
 }
 
 // Deserialize an element over the G2 group from bytes in big-endian format
-pub(crate) fn g2_from_bytes(elem: &Vec<Vec<Vec<u8>>>) -> Result<G2Affine, Error> {
+pub(crate) fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
     if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
         return Err(anyhow!("Malformed G2 field element"));
     }
@@ -107,4 +107,9 @@ pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
         fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(a)))?)?,
         fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(b)))?)?,
     ))
+}
+
+/// Creates an `ark_bn254::Fr` from a hex string
+pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
+    fr_from_bytes(&from_u256(&format!("0x{}", val))?)
 }

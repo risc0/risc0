@@ -46,7 +46,8 @@ pub trait Elem:
     + core::clone::Clone
     + core::marker::Copy
     + Sized
-    + bytemuck::Pod
+    + bytemuck::NoUninit
+    + bytemuck::CheckedBitPattern
     + core::default::Default
     + Clone
     + Copy
@@ -105,6 +106,12 @@ pub trait Elem:
     /// methods, this may be called on an INVALID element.
     fn is_valid(&self) -> bool;
 
+    /// Returns true if this element is represented in reduced/normalized form.
+    /// Every element has exactly one reduced form. For a field of prime order
+    /// P, this typically means the underlying data is < P, and for an extension
+    /// field, this typically means every component is in reduced form.
+    fn is_reduced(&self) -> bool;
+
     /// Returns 0 if this element is INVALID, else the value of this
     /// element.  Unlike most methods, this may be called on an
     /// INVALID element.
@@ -119,6 +126,12 @@ pub trait Elem:
     /// Returns this element, but checks to make sure it's valid.
     fn ensure_valid(&self) -> &Self {
         debug_assert!(self.is_valid());
+        self
+    }
+
+    /// Returns this element, but checks to make sure it's in reduced form.
+    fn ensure_reduced(&self) -> &Self {
+        assert!(self.is_reduced());
         self
     }
 
@@ -142,19 +155,7 @@ pub trait Elem:
     /// Interprets a slice of u32s as a slice of these elements.
     /// These elements may not be INVALID.
     fn from_u32_slice(u32s: &[u32]) -> &[Self] {
-        let elems = Self::from_u32_slice_unchecked(u32s);
-        if cfg!(debug_assertions) {
-            for elem in elems {
-                elem.ensure_valid();
-            }
-        }
-        elems
-    }
-
-    /// Interprets a slice of u32s as a slice of these elements.
-    /// These elements may be INVALID.
-    fn from_u32_slice_unchecked(u32s: &[u32]) -> &[Self] {
-        bytemuck::cast_slice(u32s)
+        bytemuck::checked::cast_slice(u32s)
     }
 }
 
@@ -229,6 +230,37 @@ pub trait RootsOfUnity: Sized + 'static {
     const ROU_REV: &'static [Self];
 }
 
+/// Equivalent to exponents.map(|exponent|
+/// base.pow(exponent)).collect(), but optimized to execute fewer
+/// multiplies.  Exponents must be sorted and strictly increasing.
+pub fn map_pow<E: super::field::Elem>(base: E, exponents: &[usize]) -> Vec<E> {
+    let mut result = Vec::with_capacity(exponents.len());
+
+    let mut prev_exp: usize;
+    match exponents.first() {
+        None => return result,
+        Some(&exp) => {
+            result.push(base.pow(exp));
+            prev_exp = exp;
+        }
+    }
+
+    for exp in exponents.iter().skip(1).copied() {
+        assert!(
+            prev_exp < exp,
+            "Expecting exponents to be strictly increasing but {prev_exp} is not less than {exp}"
+        );
+        if exp == prev_exp + 1 {
+            result.push(*result.last().unwrap() * base);
+        } else {
+            result.push(*result.last().unwrap() * base.pow(exp - prev_exp));
+        }
+        prev_exp = exp;
+    }
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use core::fmt::Debug;
@@ -267,7 +299,7 @@ mod tests {
     where
         F: Into<u64> + From<u64> + Debug,
     {
-        // For testng, we do 128-bit arithmetic so we don't have to worry about
+        // For testing, we do 128-bit arithmetic so we don't have to worry about
         // overflows.
         let p: u128 = p_u64 as _;
 
@@ -299,6 +331,15 @@ mod tests {
                 assert!(xinv != x);
             }
             assert_eq!(xinv * x, F::ONE);
+        }
+
+        // Make sure map_pow produces the same results as calling F::pow.
+        let base: F = non_zero_rand(&mut rng);
+        let map_pow_cases: &[&[usize]] = &[&[], &[0], &[0, 1, 2, 3], &[1, 18, 19, 1234, 5678]];
+        for exps in map_pow_cases.iter() {
+            let expected: alloc::vec::Vec<_> = exps.iter().map(|&exp| base.pow(exp)).collect();
+            let actual = super::map_pow(base, exps);
+            assert_eq!(expected, actual);
         }
     }
 }

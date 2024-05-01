@@ -14,7 +14,7 @@
 
 use core::cmp::max;
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use rand::thread_rng;
 use rayon::prelude::*;
 use risc0_core::field::{Elem, Field};
@@ -25,10 +25,7 @@ use crate::{
         CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CODE,
         REGISTER_GROUP_DATA,
     },
-    hal::{
-        cpu::{CpuBuffer, SyncSlice},
-        Buffer,
-    },
+    hal::cpu::{CpuBuffer, SyncSlice},
     MIN_PO2, ZK_CYCLES,
 };
 
@@ -57,8 +54,6 @@ where
     pub steps: usize,
     // Indicates whether the guest program has already halted
     pub halted: bool,
-    // Maximum allowable execution length of guest program
-    max_po2: usize,
     // Counter for zkVM execution
     pub cycle: usize,
 }
@@ -69,13 +64,7 @@ where
     C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
-    pub fn new(
-        circuit: &'static C,
-        handler: S,
-        min_po2: usize,
-        max_po2: usize,
-        io: &[F::Elem],
-    ) -> Self {
+    pub fn new(circuit: &'static C, handler: S, min_po2: usize, io: &[F::Elem]) -> Self {
         let po2 = max(min_po2, MIN_PO2);
         let taps = circuit.get_taps();
         let code_size = taps.group_size(REGISTER_GROUP_CODE);
@@ -86,15 +75,14 @@ where
             circuit,
             handler,
             // Initialize trace to min_po2 size
-            code: CpuBuffer::from_fn(steps * code_size, |_| F::Elem::ZERO),
+            code: CpuBuffer::from_fn("code", steps * code_size, |_| F::Elem::ZERO),
             code_size,
-            data: CpuBuffer::from_fn(steps * data_size, |_| F::Elem::INVALID),
+            data: CpuBuffer::from_fn("data", steps * data_size, |_| F::Elem::INVALID),
             data_size,
             io: CpuBuffer::from(Vec::from(io)),
             po2,
             steps,
             halted: false,
-            max_po2,
             cycle: 0,
         }
     }
@@ -111,7 +99,7 @@ where
                 debug!("halted");
                 return Ok(false);
             }
-            self.expand()?;
+            panic!("expand must not be called.");
         }
         let code_buf = self.code.as_slice_sync();
         for (i, code) in code.iter().enumerate().take(self.code_size) {
@@ -128,41 +116,6 @@ where
         self.halted = self.halted || result == F::Elem::ZERO;
         self.cycle += 1;
         Ok(true)
-    }
-
-    pub fn expand(&mut self) -> Result<()> {
-        debug!("expand");
-        assert!(false, "expand must not be called.");
-        if self.steps >= (1 << self.max_po2) {
-            bail!("Cannot expand, max po2 of {} reached.", self.max_po2);
-        }
-        let new_code = self.expand_buf(&self.code, F::Elem::ZERO, self.code_size);
-        self.code = new_code;
-
-        let new_data = self.expand_buf(&self.data, F::Elem::INVALID, self.data_size);
-        self.data = new_data;
-
-        self.po2 += 1;
-        self.steps *= 2;
-        Ok(())
-    }
-
-    fn expand_buf(
-        &self,
-        buf: &CpuBuffer<F::Elem>,
-        fill_val: F::Elem,
-        row_size: usize,
-    ) -> CpuBuffer<F::Elem> {
-        assert_eq!(self.steps * row_size, buf.size());
-
-        let new_buf = CpuBuffer::from_fn(buf.size() * 2, |_| fill_val);
-        for i in 0..row_size {
-            let idx = i * self.steps;
-            let src = buf.slice(idx, self.cycle);
-            let tgt = new_buf.slice(idx * 2, self.cycle);
-            tgt.as_slice_mut().copy_from_slice(&src.as_slice());
-        }
-        new_buf
     }
 
     fn compute_verify(&mut self) {

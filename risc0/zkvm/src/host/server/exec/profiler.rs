@@ -41,7 +41,7 @@ use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
 
 use self::proto::Line;
-use crate::{host::client::env::TraceCallback, TraceEvent};
+use crate::{TraceCallback, TraceEvent};
 
 mod proto {
     // Generated proto interface.
@@ -140,7 +140,7 @@ pub struct Profiler {
     insn: u32,
 
     // Cycle count when the last instruction started
-    cycle: u32,
+    cycle: u64,
 
     // Pop stack
     pop_stack: Vec<u32>,
@@ -263,16 +263,15 @@ impl Profiler {
 
     /// Returns the frames name at the given pc.
     pub fn lookup_pc(&self, pc: u64) -> Vec<Frame> {
-        let frames = if let Some(symbol) = self.profile.function_lookup.get(&pc).as_deref().cloned()
-        {
+        let frames = if let Some(symbol) = self.profile.function_lookup.get(&pc).cloned() {
             let mut dwarf_frames = lookup_pc(pc as u32, &self.ctx);
             dwarf_frames.reverse();
-            let name = demangle_name(symbol).replace("&", "");
+            let name = demangle_name(symbol).replace('&', "");
             let mut lineno: i64 = 0;
             let mut filename = "unknown".to_string();
-            if dwarf_frames.len() > 0 {
+            if !dwarf_frames.is_empty() {
                 let debug_frame = &dwarf_frames[0];
-                let debug_name = debug_frame.name.replace("&", "");
+                let debug_name = debug_frame.name.replace('&', "");
                 if name == debug_name {
                     lineno = debug_frame.lineno;
                     filename = debug_frame.filename.clone();
@@ -353,7 +352,7 @@ impl Profiler {
     /// returning the compiled profile protobuf, encoded as bytes.
     pub fn finalize_to_vec(&mut self) -> Vec<u8> {
         let root_ref = Rc::clone(&self.root);
-        tracing::debug!("{}", self.root.borrow().fmt(0, &self));
+        tracing::debug!("{}", self.root.borrow().fmt(0, self));
         self.walk_stacks(root_ref, Vec::new());
         self.profile.profile.encode_to_vec()
     }
@@ -368,7 +367,7 @@ impl TraceCallback for Profiler {
                 let orig_pc = self.pc;
                 let orig_insn = self.insn;
 
-                if self.call_stack_path.len() > 0 {
+                if !self.call_stack_path.is_empty() {
                     let current_node = self
                         .current_node
                         .as_ref()
@@ -440,7 +439,8 @@ impl TraceCallback for Profiler {
                 self.insn = insn;
                 self.cycle = cycle;
             }
-            _ => (),
+            TraceEvent::RegisterSet { .. } => (),
+            TraceEvent::MemorySet { .. } => (),
         }
         Ok(())
     }
@@ -478,7 +478,6 @@ impl ProfileBuilder {
         let sample_type = proto::ValueType {
             r#type: builder.get_string("cycles"),
             unit: builder.get_string("count"),
-            ..Default::default()
         };
         builder.profile.sample_type.push(sample_type);
 

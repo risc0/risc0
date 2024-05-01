@@ -12,7 +12,7 @@ message ServerRequest {
     ProveSegmentRequest prove_segment = 3;
     LiftRequest lift = 4;
     JoinRequest join = 5;
-    IdentityP254Request identiy_p254 = 6;
+    IdentityP254Request identity_p254 = 6;
     ResolveRequest resolve = 7;
   }
 }
@@ -139,11 +139,12 @@ message ExecutorEnv {
   google.protobuf.Empty trace_events = 9;
   string pprof_out = 10;
   repeated Assumption assumptions = 11;
+  string segment_path = 12;
 }
 
 message Assumption {
   oneof kind {
-    Asset proven = 1; // Receipt
+    Asset proven = 1;     // Receipt
     Asset unresolved = 2; // MaybePruned<ReceiptClaim>
   }
 }
@@ -151,6 +152,13 @@ message Assumption {
 message ProverOpts {
   string hashfn = 1;
   bool prove_guest_errors = 2;
+  ReceiptKind receipt_kind = 3;
+}
+
+enum ReceiptKind {
+  COMPOSITE = 0;
+  SUCCINCT = 1;
+  COMPACT = 2;
 }
 
 message SessionInfo {
@@ -227,7 +235,7 @@ message PosixCmd {
 
 message TraceEvent {
   message InstructionStart {
-    uint32 cycle = 1;
+    uint64 cycle = 1;
     uint32 pc = 2;
     uint32 insn = 3;
   }
@@ -266,7 +274,7 @@ message OnSessionDone {
 }
 
 message OnProveDone {
-  Asset receipt = 1;
+  Asset prove_info = 1;
 }
 
 message GenericReply {

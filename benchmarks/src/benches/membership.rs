@@ -26,6 +26,7 @@ pub fn new_jobs() -> Vec<Job> {
             risc0_benchmark_methods::MEMBERSHIP_ELF,
             risc0_benchmark_methods::MEMBERSHIP_ID.into(),
             to_vec(&input).unwrap(),
+            n as usize,
         ));
     }
     jobs

@@ -70,7 +70,8 @@ The control root is the Merkle hash of a set of [control ID]s.
 
 The control root plays a key role in enforcing zkVM version control. Each [control ID] identifies one [recursion program]; the control root identifies the list of allowed recursion programs. When the RISC-V circuit or recursion programs change, the control root is updated to reflect the new set of allowed functions.
 
-This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit].
+This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit]. <br/>
+See also: [Code reference for control root]
 
 ### Deterministic Builds
 
@@ -226,6 +227,11 @@ This record is stored as a vector of [Segments].
 A STARK (scalable, transparent argument of knowledge) serves as proof of validity for a [zkVM] program. <br/>
 See also: [About STARKs], [Sequence Diagram for RISC Zero's STARK], [RISC Zero's ZKP Whitepaper]
 
+### SNARK
+
+A SNARK (succinct non-interactive argument of knowledge) serves as proof of validity for Blockchain applications due to their small size compared to [STARK] proofs. <br/>
+See also: [About SNARKs]
+
 ### Validity Proof
 
 A validity proof is a cryptographic argument that attests to the validity of an [execution trace].
@@ -248,12 +254,14 @@ A virtual machine that runs trusted code and generates proofs.
 RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [STARK]-based proof system.
 
 [About STARKs]: ./reference-docs/about-starks.md
+[About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups/#validity-proofs
 [Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
 [assumption]: #assumption
 [assumptions]: #assumption
 [cargo risczero]: https://docs.rs/crate/cargo-risczero/latest
 [circuit]: #circuit
 [clock cycles]: #clock-cycles
+[Code reference for control root]: https://github.com/risc0/risc0/blob/v0.21.0/risc0/circuit/recursion/src/control_id.rs#L16
 [commit]: #commit
 [compose]: #composition
 [composition]: #composition
@@ -272,7 +280,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [execution]: #execute
 [executed]: #executor
 [executor]: #executor
-[Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Executor.html
+[Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Executor.html
 [execution trace]: #execution-trace
 [Groth16]: #groth16
 [Groth16 Circuit]: #groth16-circuit

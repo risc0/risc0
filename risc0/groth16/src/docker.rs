@@ -12,13 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    env::consts::ARCH,
-    fs::File,
-    io::{Cursor, Read},
-    path::Path,
-    process::Command,
-};
+use std::{env::consts::ARCH, path::Path, process::Command};
 
 use anyhow::{bail, Result};
 use tempfile::tempdir;
@@ -37,18 +31,15 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
 
     let tmp_dir = tempdir()?;
     let work_dir = std::env::var("RISC0_WORK_DIR");
-    let work_dir = work_dir
-        .as_ref()
-        .map(|x| Path::new(x))
-        .unwrap_or(tmp_dir.path());
+    let work_dir = work_dir.as_ref().map(Path::new).unwrap_or(tmp_dir.path());
 
     tracing::debug!("seal-to-json");
-    std::fs::write(work_dir.join("seal.r0"), &identity_p254_seal_bytes)?;
+    std::fs::write(work_dir.join("seal.r0"), identity_p254_seal_bytes)?;
     let seal_path = work_dir.join("input.json");
     let proof_path = work_dir.join("proof.json");
-    let seal_json = File::create(&seal_path)?;
-    let mut seal_reader = Cursor::new(&identity_p254_seal_bytes);
-    to_json(&mut seal_reader, &seal_json)?;
+    let mut seal_json = Vec::new();
+    to_json(identity_p254_seal_bytes, &mut seal_json)?;
+    std::fs::write(seal_path, seal_json)?;
 
     tracing::debug!("risc0-groth16-prover");
     let status = Command::new("docker")
@@ -56,16 +47,14 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .arg("--rm")
         .arg("-v")
         .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
-        .arg("risc0-groth16-prover")
+        .arg("risczero/risc0-groth16-prover:v2024-04-03.2")
         .status()?;
     if !status.success() {
-        panic!("docker returned failure exit code: {:?}", status.code());
+        bail!("docker returned failure exit code: {:?}", status.code());
     }
 
     tracing::debug!("Parsing proof");
-    let mut proof_file = File::open(proof_path)?;
-    let mut contents = String::new();
-    proof_file.read_to_string(&mut contents)?;
+    let contents = std::fs::read_to_string(proof_path)?;
     let proof_json: ProofJson = serde_json::from_str(&contents)?;
     proof_json.try_into()
 }

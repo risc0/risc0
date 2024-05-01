@@ -6,5 +6,5 @@ edition = "2021"
 [package.metadata.risc0]
 methods = ["guest"]
 
-[build-dependencies.risc0-build]
-workspace = true
+[build-dependencies]
+risc0-build = { workspace = true }

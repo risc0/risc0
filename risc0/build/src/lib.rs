@@ -36,9 +36,24 @@ use risc0_zkp::core::digest::DIGEST_WORDS;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-pub use docker::docker_build;
+pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
+
+/// Get the path used by cargo-risczero that stores downloaded toolchains
+pub fn risc0_data() -> Result<PathBuf> {
+    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+        dir.into()
+    } else if let Some(root) = dirs::data_dir() {
+        root.join("cargo-risczero")
+    } else if let Some(home) = dirs::home_dir() {
+        home.join(".cargo-risczero")
+    } else {
+        anyhow::bail!("Could not determine cargo-risczero data dir. Set RISC0_DATA_DIR env var.");
+    };
+
+    Ok(dir)
+}
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -81,7 +96,7 @@ impl GuestListEntry {
     }
 
     fn codegen_consts(&self) -> String {
-        // Quick check for '#' to avoid injection of arbitrary Rust code into the the
+        // Quick check for '#' to avoid injection of arbitrary Rust code into the
         // method.rs file. This would not be a serious issue since it would only
         // affect the user that set the path, but it's good to add a check.
         if self.path.contains('#') {
@@ -303,11 +318,25 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     .concat()
     .join("\x1f");
 
+    if !cpp_toolchain_override() {
+        let cc_path = risc0_data()
+            .unwrap()
+            .join("cpp/bin/riscv32-unknown-elf-gcc");
+        cmd.env("CC", cc_path)
+            .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+    }
+
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar)
         .args(args);
-
     cmd
+}
+
+fn cpp_toolchain_override() -> bool {
+    // detect if there's an attempt to override the Cpp toolchain.
+    // Overriding the toolchain useful for troubleshooting crates.
+    std::env::var("CC_riscv32im_risc0_zkvm_elf").is_ok()
+        || std::env::var("CFLAGS_riscv32im_risc0_zkvm_elf").is_ok()
 }
 
 /// Builds a static library providing a rust runtime.
@@ -358,7 +387,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
     let reader = std::io::BufReader::new(child.stdout.take().unwrap());
     let mut libs = Vec::new();
-    for message in cargo_metadata::Message::parse_stream(reader) {
+    for message in Message::parse_stream(reader) {
         match message.unwrap() {
             Message::CompilerArtifact(artifact) => {
                 for filename in artifact.filenames {
@@ -396,6 +425,10 @@ fn build_guest_package<P>(
 ) where
     P: AsRef<Path>,
 {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        return;
+    }
+
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
     let mut cmd = if let Some(lib) = runtime_lib {
@@ -436,6 +469,7 @@ fn build_guest_package<P>(
         .read(true)
         .write(true)
         .create(true)
+        .truncate(false)
         .open(tty_file)
         .ok();
 
@@ -525,9 +559,6 @@ fn get_guest_dir() -> PathBuf {
 pub fn embed_methods_with_options(
     mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
 ) -> Vec<GuestListEntry> {
-    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
-        return Vec::new();
-    }
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = get_guest_dir();
@@ -597,7 +628,7 @@ pub fn embed_methods_with_options(
         .unwrap();
 
     // HACK: It's not particularly practical to figure out all the
-    // files that all the guest crates transtively depend on.  So, we
+    // files that all the guest crates transitively depend on.  So, we
     // want to run the guest "cargo build" command each time we build.
     //
     // Since we generate methods.rs each time we run, it will always

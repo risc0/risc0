@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::BTreeMap, path::PathBuf};
+use std::path::PathBuf;
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
-use risc0_binfmt::{MemoryImage, PageTableInfo, SystemState};
+use risc0_binfmt::SystemState;
 use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     host::{
-        receipt::{decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt},
+        receipt::{
+            segment::decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt,
+        },
         recursion::SuccinctReceipt,
     },
-    Assumptions, ExitCode, Journal, MaybePruned, Output, ProverOpts, Receipt, ReceiptClaim,
-    TraceEvent,
+    Assumptions, ExitCode, Journal, MaybePruned, Output, ProveInfo, ProverOpts, Receipt,
+    ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
 mod ver {
     use super::pb::base::CompatVersion;
 
-    pub const MEMORY_IMAGE: CompatVersion = CompatVersion { value: 1 };
     pub const RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const SEGMENT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const SUCCINCT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
@@ -200,6 +201,12 @@ impl From<pb::api::ProverOpts> for ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_kind: match opts.receipt_kind {
+                0 => ReceiptKind::Composite,
+                1 => ReceiptKind::Succinct,
+                2 => ReceiptKind::Compact,
+                value => panic!("Unknown receipt kind number: {value}"),
+            },
         }
     }
 }
@@ -209,65 +216,8 @@ impl From<ProverOpts> for pb::api::ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_kind: opts.receipt_kind as i32,
         }
-    }
-}
-
-impl From<MemoryImage> for pb::core::MemoryImage {
-    fn from(value: MemoryImage) -> Self {
-        let pages = value
-            .pages
-            .iter()
-            .map(|(addr, data)| pb::core::PageEntry {
-                addr: *addr,
-                data: data.clone(),
-            })
-            .collect();
-        Self {
-            version: Some(ver::MEMORY_IMAGE),
-            info: Some(value.info.into()),
-            pc: value.pc,
-            pages,
-        }
-    }
-}
-
-impl TryFrom<pb::core::MemoryImage> for MemoryImage {
-    type Error = anyhow::Error;
-
-    fn try_from(value: pb::core::MemoryImage) -> Result<Self> {
-        let version = value.version.ok_or(malformed_err())?.value;
-        if version > ver::MEMORY_IMAGE.value {
-            bail!("Incompatible MemoryImage version: {version}");
-        }
-        let pages = BTreeMap::from_iter(
-            value
-                .pages
-                .into_iter()
-                .map(|entry| (entry.addr, entry.data)),
-        );
-        Ok(Self {
-            pages,
-            info: value.info.ok_or(malformed_err())?.try_into()?,
-            pc: value.pc,
-        })
-    }
-}
-
-impl From<PageTableInfo> for pb::core::PageTableInfo {
-    fn from(value: PageTableInfo) -> Self {
-        Self {
-            page_size: value.page_size,
-            page_table_addr: value.page_table_addr,
-        }
-    }
-}
-
-impl TryFrom<pb::core::PageTableInfo> for PageTableInfo {
-    type Error = anyhow::Error;
-
-    fn try_from(value: pb::core::PageTableInfo) -> Result<Self> {
-        Self::new(value.page_table_addr, value.page_size)
     }
 }
 
@@ -293,6 +243,49 @@ impl TryFrom<pb::base::SemanticVersion> for semver::Version {
             patch: value.patch,
             pre: semver::Prerelease::new(&value.pre)?,
             build: semver::BuildMetadata::new(&value.build)?,
+        })
+    }
+}
+
+impl From<SessionStats> for pb::core::SessionStats {
+    fn from(value: SessionStats) -> Self {
+        Self {
+            // we use usize because that's the type returned by len() for vectors
+            segments: value.segments.try_into().unwrap(),
+            total_cycles: value.total_cycles,
+            user_cycles: value.user_cycles,
+        }
+    }
+}
+
+impl TryFrom<pb::core::SessionStats> for SessionStats {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::SessionStats) -> Result<Self> {
+        Ok(Self {
+            segments: value.segments.try_into()?,
+            total_cycles: value.total_cycles,
+            user_cycles: value.user_cycles,
+        })
+    }
+}
+
+impl From<ProveInfo> for pb::core::ProveInfo {
+    fn from(value: ProveInfo) -> Self {
+        Self {
+            receipt: Some(value.receipt.into()),
+            stats: Some(value.stats.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::ProveInfo> for ProveInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::ProveInfo) -> Result<Self> {
+        Ok(Self {
+            receipt: value.receipt.ok_or(malformed_err())?.try_into()?,
+            stats: value.stats.ok_or(malformed_err())?.try_into()?,
         })
     }
 }

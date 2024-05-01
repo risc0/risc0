@@ -55,10 +55,13 @@ pub trait Syscall {
 /// Access to memory and machine state for syscalls.
 pub trait SyscallContext {
     /// Returns the current cycle being executed.
-    fn get_cycle(&self) -> usize;
+    fn get_cycle(&self) -> u64;
 
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
+
+    /// Loads an individual byte from memory.
+    fn load_u8(&mut self, addr: u32) -> Result<u8>;
 
     /// Loads bytes from the given region of memory.
     fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
@@ -67,26 +70,6 @@ pub trait SyscallContext {
             region.push(self.load_u8(addr)?);
         }
         Ok(region)
-    }
-
-    /// Loads an individual word from memory.
-    fn load_u32(&mut self, addr: u32) -> Result<u32>;
-
-    /// Loads an individual byte from memory.
-    fn load_u8(&mut self, addr: u32) -> Result<u8>;
-
-    /// Loads a null-terminated string from memory.
-    fn load_string(&mut self, mut addr: u32) -> Result<String> {
-        let mut s: Vec<u8> = Vec::new();
-        loop {
-            let b = self.load_u8(addr)?;
-            if b == 0 {
-                break;
-            }
-            s.push(b);
-            addr += 1;
-        }
-        String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 }
 
@@ -147,7 +130,10 @@ impl Syscall for SysCycleCount {
         ctx: &mut dyn SyscallContext,
         _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        Ok((ctx.get_cycle() as u32, 0))
+        let cycle = ctx.get_cycle();
+        let hi = (cycle >> 32) as u32;
+        let lo = cycle as u32;
+        Ok((hi, lo))
     }
 }
 
@@ -223,12 +209,12 @@ impl SysVerify {
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
 
-        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&claim_digest));
+        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(claim_digest));
 
         // Iterate over the list looking for a matching assumption.
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            if cached_assumption.get_claim()?.digest() == claim_digest {
+            if cached_assumption.claim()?.digest() == claim_digest {
                 assumption = Some(cached_assumption.clone());
                 break;
             }
@@ -242,7 +228,7 @@ impl SysVerify {
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        return Ok((0, 0));
+        Ok((0, 0))
     }
 
     fn sys_verify(&mut self, mut from_guest: Vec<u8>, to_guest: &mut [u32]) -> Result<(u32, u32)> {
@@ -271,15 +257,15 @@ impl SysVerify {
 
         tracing::debug!(
             "SYS_VERIFY: {}, {}",
-            hex::encode(&image_id),
-            hex::encode(&journal_digest)
+            hex::encode(image_id),
+            hex::encode(journal_digest)
         );
 
         // Iterate over the list looking for a matching assumption. If found, return the
         // post state digest and system exit code.
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            let assumption_claim = cached_assumption.get_claim()?;
+            let assumption_claim = cached_assumption.claim()?;
             let cmp_result = Self::sys_verify_cmp(&assumption_claim, &image_id, &journal_digest);
             let (post_state_digest, sys_exit_code) = match cmp_result {
                 Ok(None) => continue,
@@ -308,7 +294,7 @@ impl SysVerify {
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        return Ok((0, 0));
+        Ok((0, 0))
     }
 
     /// Check whether the claim satisfies the requirements to return for sys_verify.
@@ -317,7 +303,6 @@ impl SysVerify {
         image_id: &Digest,
         journal_digest: &Digest,
     ) -> Result<Option<(Digest, u32)>, PrunedValueError> {
-        // DO NOT MERGE: Check here that the cached assumption has no assumptions
         let assumption_journal_digest = claim
             .as_value()?
             .output
@@ -512,8 +497,8 @@ impl<'a> PosixIo<'a> {
         let fd = ctx.load_register(REG_A3);
         let nbytes = ctx.load_register(REG_A4) as usize;
 
-        tracing::debug!(
-            "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {} bytes",
+        tracing::trace!(
+            "sys_read(fd: {fd}, nbytes: {nbytes}, into: {} bytes)",
             to_guest.len() * WORD_SIZE
         );
 
@@ -545,10 +530,7 @@ impl<'a> PosixIo<'a> {
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
         let nread_main = read_all(to_guest_u8)?;
 
-        tracing::debug!(
-            "Main read got {nread_main} bytes out of requested {}",
-            to_guest_u8.len()
-        );
+        tracing::trace!("read: {nread_main}, requested: {}", to_guest_u8.len());
 
         // It's possible that there's an unaligned word at the end
         let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
@@ -578,7 +560,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fd)
             .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
 
-        tracing::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+        tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
@@ -594,15 +576,56 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fileno::STDOUT)
             .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
 
-        tracing::debug!(
-            "Writing {buf_len} bytes to STDOUT file descriptor {}",
-            &fileno::STDOUT
-        );
+        tracing::debug!("sys_log({buf_len} bytes)");
 
-        let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
+        let msg = format!("R0VM[{}] ", ctx.get_cycle());
         writer
             .borrow_mut()
             .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
         Ok((0, 0))
     }
 }
+
+// SysCycleCount:
+//     ctx.get_cycle()
+
+// SysGetenv:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysPanic:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysRandom:
+//     write to_guest
+
+// SysVerify:
+//     let from_guest_ptr = ctx.load_register(REG_A3);
+//     let from_guest_len = ctx.load_register(REG_A4);
+//     let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+
+// SysArgs:
+//     let arg_index = ctx.load_register(REG_A3);
+
+// SysSliceIo:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_read:
+//     let fd = ctx.load_register(REG_A3);
+//     let nbytes = ctx.load_register(REG_A4) as usize;
+
+// PosixIo/sys_write:
+//     let fd = ctx.load_register(REG_A3);
+//     let buf_ptr = ctx.load_register(REG_A4);
+//     let buf_len = ctx.load_register(REG_A5);
+//     let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_log:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;

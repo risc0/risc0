@@ -13,27 +13,19 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_circuit_rv32im::{
-    layout::{OutBuffer, LAYOUT},
-    REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
-};
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::{
-    adapter::TapsProvider,
-    hal::{CircuitHal, Hal},
-    layout::Buffer,
-    prove::adapter::ProveAdapter,
-};
+use risc0_zkp::hal::{CircuitHal, Hal};
 
-use super::{exec::MachineContext, HalPair, ProverServer};
+use super::{HalPair, ProverServer};
 use crate::{
     host::{
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        client::prove::ReceiptKind,
+        prove_info::ProveInfo,
+        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
-        CIRCUIT,
     },
     sha::Digestible,
-    Loader, Receipt, Segment, Session, VerifierContext,
+    CompositeReceipt, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -44,6 +36,7 @@ where
 {
     name: String,
     hal_pair: HalPair<H, C>,
+    receipt_kind: ReceiptKind,
 }
 
 impl<H, C> ProverImpl<H, C>
@@ -52,10 +45,11 @@ where
     C: CircuitHal<H>,
 {
     /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>) -> Self {
+    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_kind: ReceiptKind) -> Self {
         Self {
             name: name.to_string(),
             hal_pair,
+            receipt_kind,
         }
     }
 }
@@ -65,12 +59,13 @@ where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     C: CircuitHal<H>,
 {
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
-        tracing::info!(
-            "prove_session: {}, exit_code = {:?}, journal = {:?}",
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
+        tracing::debug!(
+            "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
             session.exit_code,
-            session.journal.as_ref().map(|x| hex::encode(x))
+            session.journal.as_ref().map(hex::encode),
+            session.segments.len()
         );
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
@@ -84,116 +79,94 @@ where
             }
         }
         // TODO(#982): Support unresolved assumptions here.
+        let assumptions = session
+            .assumptions
+            .iter()
+            .map(|x| Ok(x.as_receipt()?.inner.clone()))
+            .collect::<Result<Vec<_>>>()?;
         let composite_receipt = CompositeReceipt {
             segments,
-            assumptions: session
-                .assumptions
-                .iter()
-                .map(|a| Ok(a.as_receipt()?.inner.clone()))
-                .collect::<Result<Vec<_>>>()?,
+            assumptions,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
         };
 
         // Verify the receipt to catch if something is broken in the proving process.
         composite_receipt.verify_integrity_with_context(ctx)?;
-        if composite_receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+        if composite_receipt.claim()?.digest() != session.claim()?.digest() {
             tracing::debug!("composite receipt and session claim do not match");
-            tracing::debug!(
-                "composite receipt claim: {:#?}",
-                composite_receipt.get_claim()?
-            );
-            tracing::debug!("session claim: {:#?}", session.get_claim()?);
+            tracing::debug!("composite receipt claim: {:#?}", composite_receipt.claim()?);
+            tracing::debug!("session claim: {:#?}", session.claim()?);
             bail!(
                 "session and composite receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.get_claim()?.digest()),
-                hex::encode(&composite_receipt.get_claim()?.digest())
+                hex::encode(session.claim()?.digest()),
+                hex::encode(composite_receipt.claim()?.digest())
             );
         }
 
-        let receipt = Receipt::new(
-            InnerReceipt::Composite(composite_receipt),
-            session.journal.clone().unwrap_or_default().bytes,
-        );
+        let receipt = match self.receipt_kind {
+            ReceiptKind::Composite => Receipt::new(
+                InnerReceipt::Composite(composite_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            ),
+            ReceiptKind::Succinct => {
+                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
+                Receipt::new(
+                    InnerReceipt::Succinct(succinct_receipt),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
+            }
+            ReceiptKind::Compact => {
+                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
+                let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+                Receipt::new(
+                    InnerReceipt::Compact(compact_receipt),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
+            }
+        };
 
         // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
-        if receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+        if receipt.claim()?.digest() != session.claim()?.digest() {
             tracing::debug!("receipt and session claim do not match");
-            tracing::debug!("receipt claim: {:#?}", receipt.get_claim()?);
-            tracing::debug!("session claim: {:#?}", session.get_claim()?);
+            tracing::debug!("receipt claim: {:#?}", receipt.claim()?);
+            tracing::debug!("session claim: {:#?}", session.claim()?);
             bail!(
                 "session and receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.get_claim()?.digest()),
-                hex::encode(&receipt.get_claim()?.digest())
+                hex::encode(session.claim()?.digest()),
+                hex::encode(receipt.claim()?.digest())
             );
         }
 
-        Ok(receipt)
+        Ok(ProveInfo {
+            receipt,
+            stats: session.stats(),
+        })
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        use risc0_zkp::prove::executor::Executor;
+        use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
 
-        tracing::debug!(
-            "prove_segment[{}]: po2: {}, cycles: {}",
-            segment.index,
-            segment.po2,
-            segment.cycles,
-        );
-        let (hal, circuit_hal) = (self.hal_pair.hal.as_ref(), &self.hal_pair.circuit_hal);
-        let hashfn = &hal.get_hash_suite().name;
+        use crate::host::receipt::segment::decode_receipt_claim_from_seal;
 
-        let io = segment.prepare_globals()?;
-        let machine = MachineContext::new(segment);
-        let po2 = segment.po2 as usize;
-        let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
+        let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
 
-        let loader = Loader::new();
-        loader.load(|chunk, fini| executor.step(chunk, fini))?;
-        executor.finalize();
+        let prover =
+            SegmentProverImpl::new(self.hal_pair.hal.clone(), self.hal_pair.circuit_hal.clone());
+        let seal = prover.prove_segment(&segment.inner)?;
 
-        let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
-
-        adapter.execute(prover.iop());
-
-        prover.set_po2(adapter.po2() as usize);
-
-        prover.commit_group(
-            REGISTER_GROUP_CODE,
-            hal.copy_from_elem("code", &adapter.get_code().as_slice()),
-        );
-        prover.commit_group(
-            REGISTER_GROUP_DATA,
-            hal.copy_from_elem("data", &adapter.get_data().as_slice()),
-        );
-        adapter.accumulate(prover.iop());
-        prover.commit_group(
-            REGISTER_GROUP_ACCUM,
-            hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
-        );
-
-        let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
-        let out_slice = &adapter.get_io().as_slice();
-
-        tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(LAYOUT));
-        let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
-
-        let seal = prover.finalize(&[&mix, &out], circuit_hal.as_ref());
+        let mut claim = decode_receipt_claim_from_seal(&seal)?;
+        claim.output = segment.output.clone().into();
 
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
-            hashfn: hashfn.clone(),
-            claim: segment.get_claim()?,
+            hashfn,
+            claim,
         };
         receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        self.hal_pair.hal.get_memory_usage()
     }
 
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {

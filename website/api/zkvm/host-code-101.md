@@ -45,8 +45,10 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 
 let env = ExecutorEnv::builder().build().unwrap();
 let prover = default_prover();
-let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
+let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap().receipt;
 ```
+
+Here, the zkVM uses `METHOD_NAME_ELF` binary to execute guest code. The `METHOD_NAME_ELF` is computed during compilation. The user needs to import it (`use methods::{METHOD_NAME_ELF};`) and then pass it as an input parameter to the `prover.prove` function.
 
 To see more complex examples, check out the [examples].
 
@@ -64,9 +66,11 @@ another party for verification, along these lines:
 # use risc0_zkvm_methods::HELLO_COMMIT_ID as METHOD_NAME_ID;
 # let env = ExecutorEnv::builder().build().unwrap();
 # let prover = default_prover();
-# let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
+# let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap().receipt;
 receipt.verify(METHOD_NAME_ID).unwrap();
 ```
+
+During compilation, we compute the `METHOD_NAME_ID`, and the user needs to import it (`use methods::{METHOD_NAME_ID};`) before passing it to `receipt.verify` function for verification.
 
 For more information on passing and verifying receipts, check out our page on
 [Receipts]. For practical demos, check out the [examples].
@@ -79,7 +83,7 @@ sufficient for you to build your first [zkVM application][zkVM]!
 If you run into problems, don't be a stranger! You can file an issue on [these
 docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[Bonsai]: ../bonsai/bonsai-overview.md
+[Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
 [examples]: ./examples.md
 [execute]: /terminology#execute

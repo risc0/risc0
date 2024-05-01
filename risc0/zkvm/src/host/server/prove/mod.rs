@@ -15,9 +15,6 @@
 //! Run the zkVM guest and prove its results.
 
 mod dev_mode;
-mod exec;
-pub(crate) mod loader;
-mod plonk;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
@@ -26,29 +23,24 @@ use std::rc::Rc;
 
 use anyhow::{anyhow, bail, Result};
 use cfg_if::cfg_if;
-use risc0_circuit_rv32im::CircuitImpl;
-use risc0_core::field::{
-    baby_bear::{BabyBear, Elem, ExtElem},
-    Elem as _,
-};
-use risc0_zkp::{
-    adapter::CircuitInfo,
-    core::digest::DIGEST_WORDS,
-    hal::{CircuitHal, Hal},
-};
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
+    host::{
+        prove_info::ProveInfo,
+        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    },
+    is_dev_mode, stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt,
+    ReceiptKind, Segment, Session, VerifierContext,
 };
 
-/// A ProverServer can execute a given ELF binary and produce a [Receipt]
+/// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
 /// that can be used to verify correct computation.
 pub trait ProverServer {
     /// Prove the specified ELF binary.
-    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(env, &VerifierContext::default(), elf)
     }
 
@@ -58,20 +50,17 @@ pub trait ProverServer {
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
         self.prove_session(ctx, &session)
     }
 
     /// Prove the specified [Session].
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt>;
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
 
     /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
-
-    /// Return the peak memory usage that this [ProverServer] has experienced.
-    fn get_peak_memory_usage(&self) -> usize;
 
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt>;
@@ -98,7 +87,7 @@ pub trait ProverServer {
     /// [CompositeReceipt] into a single [SuccinctReceipt] that proves the same top-level claim. It
     /// accomplishes this by iterative application of the recursion programs including lift, join,
     /// and resolve.
-    fn compress(&self, receipt: &CompositeReceipt) -> Result<SuccinctReceipt> {
+    fn compsite_to_succinct(&self, receipt: &CompositeReceipt) -> Result<SuccinctReceipt> {
         // Compress all receipts in the top-level session into one succinct receipt for the session.
         let continuation_receipt = receipt
             .segments
@@ -122,7 +111,7 @@ pub trait ProverServer {
             |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
                 InnerReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
                 InnerReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &self.compress(assumption)?)
+                    self.resolve(&conditional, &self.compsite_to_succinct(assumption)?)
                 }
                 InnerReceipt::Fake { .. } => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
@@ -132,6 +121,66 @@ pub trait ProverServer {
                 )
             },
         )
+    }
+
+    /// Compress a [SuccinctReceipt] into a [CompactReceipt].
+    fn succinct_to_compact(&self, receipt: &SuccinctReceipt) -> Result<CompactReceipt> {
+        let ident_receipt = self.identity_p254(receipt).unwrap();
+        let seal_bytes = ident_receipt.get_seal_bytes();
+
+        let seal = stark_to_snark(&seal_bytes)?.to_vec();
+        Ok(CompactReceipt {
+            seal,
+            claim: receipt.claim.clone(),
+        })
+    }
+
+    /// Compress a [SuccinctReceipt] into a [CompactReceipt].
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match &receipt.inner {
+            // note: fake receipts are only used in development. Therefore, compresing a fake receipt is a no-op.
+            InnerReceipt::Fake { claim: _ } => Ok(receipt.clone()),
+            InnerReceipt::Composite(_) => match opts.receipt_kind {
+                ReceiptKind::Composite => Ok(receipt.clone()),
+                ReceiptKind::Succinct => {
+                    let succinct_receipt = self.compsite_to_succinct(receipt.inner.composite()?)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Succinct(succinct_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
+                ReceiptKind::Compact => {
+                    let succinct_receipt = self.compsite_to_succinct(receipt.inner.composite()?)?;
+                    let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Compact(compact_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
+            },
+            InnerReceipt::Succinct(_) => match opts.receipt_kind {
+                ReceiptKind::Composite => {
+                    bail!("compressing a succinct receipt to a composite receipt is not supported.")
+                }
+                ReceiptKind::Succinct => Ok(receipt.clone()),
+                ReceiptKind::Compact => {
+                    let compact_receipt = self.succinct_to_compact(receipt.inner.succinct()?)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Compact(compact_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
+            },
+            InnerReceipt::Compact(_) => match opts.receipt_kind {
+                ReceiptKind::Composite => {
+                    bail!("compressing a compact receipt to a composite receipt is not supported.")
+                }
+                ReceiptKind::Succinct => {
+                    bail!("compressing a compact receipt to a succinct receipt is not supported.")
+                }
+                ReceiptKind::Compact => Ok(receipt.clone()),
+            },
+        }
     }
 }
 
@@ -150,49 +199,11 @@ where
 }
 
 impl Session {
-    /// For each segment, call [Segment::prove] and collect the receipts.
-    pub fn prove(&self) -> Result<Receipt> {
+    /// For each segment, call [ProverServer::prove_session] and collect the
+    /// receipts.
+    pub fn prove(&self) -> Result<ProveInfo> {
         let prover = get_prover_server(&ProverOpts::default())?;
         prover.prove_session(&VerifierContext::default(), self)
-    }
-}
-
-impl Segment {
-    /// Call the ZKP system to produce a [SegmentReceipt].
-    pub fn prove(&self, ctx: &VerifierContext) -> Result<SegmentReceipt> {
-        let prover = get_prover_server(&ProverOpts::default())?;
-        prover.prove_segment(ctx, self)
-    }
-
-    fn prepare_globals(&self) -> Result<Vec<Elem>> {
-        let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
-        tracing::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
-
-        // initialize Input
-        let mut offset = 0;
-        for i in 0..DIGEST_WORDS * WORD_SIZE {
-            io[offset + i] = Elem::ZERO;
-        }
-        offset += DIGEST_WORDS * WORD_SIZE;
-
-        // initialize PC
-        let pc_bytes = self.pre_image.pc.to_le_bytes();
-        for i in 0..WORD_SIZE {
-            io[offset + i] = (pc_bytes[i] as u32).into();
-        }
-        offset += WORD_SIZE;
-
-        // initialize ImageID
-        let merkle_root = self.pre_image.compute_root_hash()?;
-        let merkle_root = merkle_root.as_words();
-        for i in 0..DIGEST_WORDS {
-            let bytes = merkle_root[i].to_le_bytes();
-            for j in 0..WORD_SIZE {
-                io[offset + i * WORD_SIZE + j] = (bytes[j] as u32).into();
-            }
-        }
-
-        Ok(io)
     }
 }
 
@@ -201,7 +212,7 @@ mod cuda {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+    use risc0_circuit_rv32im::prove::hal::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
     use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, ProverImpl, ProverServer};
@@ -215,6 +226,7 @@ mod cuda {
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_kind.clone(),
                 )))
             }
             "poseidon2" => {
@@ -223,6 +235,7 @@ mod cuda {
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_kind.clone(),
                 )))
             }
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
@@ -235,7 +248,7 @@ mod metal {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::metal::MetalCircuitHal;
+    use risc0_circuit_rv32im::prove::hal::metal::MetalCircuitHal;
     use risc0_zkp::hal::metal::{
         MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
     };
@@ -251,6 +264,7 @@ mod metal {
                 Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_kind.clone(),
                 )))
             }
             "poseidon2" => {
@@ -259,6 +273,7 @@ mod metal {
                 Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_kind.clone(),
                 )))
             }
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
@@ -271,14 +286,14 @@ mod cpu {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cpu::CpuCircuitHal;
+    use risc0_circuit_rv32im::prove::hal::cpu::CpuCircuitHal;
     use risc0_zkp::{
         core::hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
         hal::cpu::CpuHal,
     };
 
     use super::{HalPair, ProverImpl, ProverServer};
-    use crate::{host::CIRCUIT, ProverOpts};
+    use crate::ProverOpts;
 
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         let suite = match opts.hashfn.as_str() {
@@ -287,9 +302,13 @@ mod cpu {
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         };
         let hal = Rc::new(CpuHal::new(suite));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
+        let circuit_hal = Rc::new(CpuCircuitHal::new());
         let hal_pair = HalPair { hal, circuit_hal };
-        Ok(Rc::new(ProverImpl::new("cpu", hal_pair)))
+        Ok(Rc::new(ProverImpl::new(
+            "cpu",
+            hal_pair,
+            opts.receipt_kind.clone(),
+        )))
     }
 }
 

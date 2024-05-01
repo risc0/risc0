@@ -57,20 +57,22 @@ pub struct PolyGroup<H: Hal> {
 }
 
 impl<H: Hal> PolyGroup<H> {
-    #[tracing::instrument(name = "PolyGroup", skip_all, fields(name = _name))]
+    #[tracing::instrument(name = "PolyGroup", skip_all, fields(name))]
     pub fn new(
         hal: &H,
         coeffs: H::Buffer<H::Elem>,
         count: usize,
         size: usize,
-        _name: &'static str,
+        name: &'static str,
     ) -> Self {
+        nvtx::range_push!("poly_group({name})");
         assert_eq!(coeffs.size(), count * size);
         let domain = size * INV_RATE;
         let evaluated = hal.alloc_elem("evaluated", count * domain);
         hal.batch_expand_into_evaluate_ntt(&evaluated, &coeffs, count, log2_ceil(INV_RATE));
         hal.batch_bit_reverse(&coeffs, count);
         let merkle = MerkleTreeProver::new(hal, &evaluated, domain, count, QUERIES);
+        nvtx::range_pop!();
         PolyGroup {
             coeffs,
             count,

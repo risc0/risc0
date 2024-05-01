@@ -19,6 +19,7 @@ use alloc::{vec, vec::Vec};
 use anyhow::{anyhow, Error, Result};
 use ark_bn254::{Bn254, Fr};
 use ark_groth16::{prepare_verifying_key, PreparedVerifyingKey, VerifyingKey};
+use core::str::FromStr;
 use serde::{Deserialize, Serialize};
 
 use crate::{from_u256, g1_from_bytes, g2_from_bytes};
@@ -166,7 +167,7 @@ impl VerifyingKeyJson {
         if self.vk_beta_2.len() < 2 || self.vk_beta_2[0].len() < 2 || self.vk_beta_2[1].len() < 2 {
             return Err(anyhow!("Malformed G2 element field: vk_beta_2"));
         }
-        let beta_g2 = g2_from_bytes(&vec![
+        let beta_g2 = g2_from_bytes(&[
             vec![
                 from_u256(&self.vk_beta_2[0][1])?,
                 from_u256(&self.vk_beta_2[0][0])?,
@@ -181,7 +182,7 @@ impl VerifyingKeyJson {
         {
             return Err(anyhow!("Malformed G2 element field: vk_gamma_2"));
         }
-        let gamma_g2 = g2_from_bytes(&vec![
+        let gamma_g2 = g2_from_bytes(&[
             vec![
                 from_u256(&self.vk_gamma_2[0][1])?,
                 from_u256(&self.vk_gamma_2[0][0])?,
@@ -196,7 +197,7 @@ impl VerifyingKeyJson {
         {
             return Err(anyhow!("Malformed G2 element field: vk_delta_2"));
         }
-        let delta_g2 = g2_from_bytes(&vec![
+        let delta_g2 = g2_from_bytes(&[
             vec![
                 from_u256(&self.vk_delta_2[0][1])?,
                 from_u256(&self.vk_delta_2[0][0])?,
@@ -241,14 +242,12 @@ pub struct PublicInputsJson {
 impl PublicInputsJson {
     /// Converts public inputs to scalars over the field of the G1/G2 groups.
     pub fn to_scalar(&self) -> Result<Vec<Fr>, Error> {
-        let mut parsed_inputs: Vec<Fr> = Vec::with_capacity(self.values.len());
-        for input in self.values.clone() {
-            match input.parse::<u64>() {
-                Ok(n) => parsed_inputs.push(Fr::from(n)),
-                Err(_) => return Err(anyhow!("Failed to decode 'public inputs' values")),
-            }
-        }
-        Ok(parsed_inputs)
+        self.values
+            .iter()
+            .map(|input| {
+                Fr::from_str(input).map_err(|_| anyhow!("Failed to decode 'public inputs' values"))
+            })
+            .collect()
     }
 }
 

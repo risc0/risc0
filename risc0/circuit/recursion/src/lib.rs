@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ use risc0_zkp::{
 
 pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
+pub const REGISTER_GROUP_CTRL: usize = 1;
 pub const REGISTER_GROUP_DATA: usize = 2;
 
 pub const GLOBAL_MIX: usize = 0;

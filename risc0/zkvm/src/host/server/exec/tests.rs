@@ -24,7 +24,7 @@ use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    BLST_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -57,7 +57,17 @@ fn run_test(spec: MultiTestSpec) {
 }
 
 #[test]
-#[should_panic(expected = "cycle count too large")]
+fn cpp_test() {
+    let session = ExecutorImpl::from_elf(ExecutorEnv::default(), BLST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let message: String = session.journal.unwrap().decode().unwrap();
+    assert_eq!(message.as_str(), "blst is such a blast");
+}
+
+#[test]
+#[should_panic(expected = "too small")]
 fn insufficient_segment_limit() {
     let env = ExecutorEnv::builder()
         .segment_limit_po2(14)
@@ -86,7 +96,7 @@ fn basic() {
         image,
     };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id().unwrap();
+    let pre_image_id = image.compute_id();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -94,9 +104,9 @@ fn basic() {
     let segment = session.segments.first().unwrap().resolve().unwrap();
 
     assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.exit_code, ExitCode::Halted(0));
-    assert_eq!(segment.pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segment.post_state.digest(), pre_image_id);
+    assert_eq!(segment.inner.exit_code, ExitCode::Halted(0));
+    assert_eq!(segment.inner.pre_state.digest(), pre_image_id);
+    assert_ne!(segment.inner.post_state.digest(), pre_image_id);
     assert_eq!(segment.index, 0);
 }
 
@@ -121,7 +131,7 @@ fn system_split() {
 
     let program = Program { entry, image };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id().unwrap();
+    let pre_image_id = image.compute_id();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -133,13 +143,13 @@ fn system_split() {
         .collect();
 
     assert_eq!(segments.len(), 2);
-    assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segments[0].post_state.digest(), pre_image_id);
-    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
+    assert_eq!(segments[0].inner.exit_code, ExitCode::SystemSplit);
+    assert_eq!(segments[0].inner.pre_state.digest(), pre_image_id);
+    assert_ne!(segments[0].inner.post_state.digest(), pre_image_id);
+    assert_eq!(segments[1].inner.exit_code, ExitCode::Halted(0));
     assert_eq!(
-        segments[1].pre_image.compute_id().unwrap(),
-        segments[0].post_state.digest()
+        segments[1].inner.pre_state.digest(),
+        segments[0].inner.post_state.digest()
     );
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
@@ -307,7 +317,13 @@ fn posix_style_read() {
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
-        let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+        let (actual, num_read): (Vec<u8>, Vec<usize>) = session.journal.unwrap().decode().unwrap();
+        for ((_, len), n_read) in pos_and_len.iter().zip(num_read) {
+            assert_eq!(
+                *len as usize, n_read,
+                "length mismatch, pos and lens: {pos_and_len:?}"
+            )
+        }
         assert_eq!(
             from_utf8(&actual).unwrap(),
             from_utf8(&expected).unwrap(),
@@ -346,6 +362,84 @@ fn posix_style_read() {
             run(pos_and_len);
         }
     }
+}
+
+#[test]
+fn short_read_combinations() {
+    const FD: u32 = 123;
+    // Initial buffer to read bytes on top of.
+    let buf: Vec<u8> = (b'a'..=b'l').collect();
+    // Input to read bytes from.
+    let readbuf: Vec<u8> = (b'A'..b'L').collect();
+
+    for read_len in 0..WORD_SIZE {
+        for excess_buffer in 0..WORD_SIZE * 2 {
+            let buffer = read_len + excess_buffer;
+            let mut expected = buf.to_vec();
+
+            expected[..read_len].copy_from_slice(&readbuf[..read_len]);
+
+            // The current behaviour of the read call for more bytes than available is to write
+            // zeroes for the remaining bytes.
+            expected[read_len..buffer].fill(0);
+
+            let spec = MultiTestSpec::SysRead {
+                fd: FD,
+                buf: buf.to_vec(),
+                pos_and_len: vec![(0, buffer as u32)],
+            };
+            let env = ExecutorEnv::builder()
+                .read_fd(FD, &readbuf[..read_len])
+                .write(&spec)
+                .unwrap()
+                .build()
+                .unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+            let session = exec.run().unwrap();
+            assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+            let (actual, num_read): (Vec<u8>, Vec<usize>) =
+                session.journal.unwrap().decode().unwrap();
+            assert_eq!(
+                [read_len].as_slice(),
+                &num_read,
+                "length mismatch, length {read_len} buffer: {buffer}"
+            );
+            assert_eq!(
+                from_utf8(&actual).unwrap(),
+                from_utf8(&expected).unwrap(),
+                "length {read_len}, buffer {buffer}"
+            );
+        }
+    }
+}
+
+#[test]
+fn unaligned_short_read() {
+    const FD: u32 = 123;
+    // Initial buffer to read bytes on top of.
+    let buf: Vec<u8> = vec![0; 9];
+    let readbuf: &[u8] = b"1234567";
+
+    let spec = MultiTestSpec::SysRead {
+        fd: FD,
+        buf: buf.clone(),
+        pos_and_len: vec![(0, 9)],
+    };
+    let env = ExecutorEnv::builder()
+        .read_fd(FD, readbuf)
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+    let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+    let mut expected = readbuf.to_vec();
+    expected.resize(buf.len(), 0);
+    assert_eq!(actual, expected, "pos and lens: {spec:?}");
 }
 
 #[test]
@@ -432,7 +526,7 @@ mod sys_verify {
 
     fn exec_pause(exit_code: u8) -> Session {
         let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::PauseContinue(exit_code))
+            .write(&MultiTestSpec::PauseResume(exit_code))
             .unwrap()
             .build()
             .unwrap();
@@ -457,7 +551,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -489,7 +583,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap())
+                .add_assumption(halt_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -513,7 +607,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap())
+                .add_assumption(pause_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -531,14 +625,14 @@ mod sys_verify {
         let hello_commit_session = exec_hello_commit();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_session.get_claim().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_session.claim().unwrap()).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -566,13 +660,13 @@ mod sys_verify {
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&halt_session.get_claim().unwrap()).unwrap(),
+                claim_words: to_vec(&halt_session.claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap())
+                .add_assumption(halt_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -590,13 +684,13 @@ mod sys_verify {
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&pause_session.get_claim().unwrap()).unwrap(),
+                claim_words: to_vec(&pause_session.claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap())
+                .add_assumption(pause_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -614,7 +708,7 @@ mod sys_verify {
         // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
         let pruned_claim =
-            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.get_claim().unwrap().digest());
+            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.claim().unwrap().digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&pruned_claim).unwrap(),
         };
@@ -623,7 +717,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
 
@@ -739,6 +833,25 @@ fn args() {
 }
 
 #[test]
+fn buf_read() {
+    // Host-provided input is 7 bytes, while the guest requests to read 9.
+    let input = b"1234567";
+    let env = ExecutorEnv::builder()
+        .env_var("TEST_MODE", "BUF_READ")
+        // Previously failed on anything > buf and not % 4 == 0
+        // https://github.com/risc0/risc0/pull/1557
+        .write(&9usize)
+        .unwrap()
+        .write_slice(input.as_slice())
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let output = session.journal.unwrap().bytes;
+    assert_eq!(output, input);
+}
+
+#[test]
 fn commit_hello_world() {
     ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
@@ -801,7 +914,7 @@ fn fault() {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
-    assert!(err.to_string().contains("fault"));
+    assert!(err.to_string().contains("StoreAccessFault"));
 }
 
 #[test]
@@ -921,12 +1034,12 @@ fn memory_access() {
         .err()
         .unwrap()
         .to_string()
-        .contains("fault"));
+        .contains("StoreAccessFault"));
     assert!(access_memory(0x0C00_0000)
         .err()
         .unwrap()
         .to_string()
-        .contains("fault"));
+        .contains("StoreAccessFault"));
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
 
@@ -950,6 +1063,7 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
+                .inner
                 .post_state
                 .digest()
         })
@@ -988,6 +1102,7 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
+                .inner
                 .post_state
                 .digest()
         })
@@ -1001,7 +1116,12 @@ fn aligned_alloc() {
 }
 
 #[test]
-#[should_panic(expected = "cycle count too large")]
+fn alloc_zeroed() {
+    run_test(MultiTestSpec::AllocZeroed);
+}
+
+#[test]
+#[should_panic(expected = "too small")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
 }
@@ -1088,7 +1208,7 @@ mod docker {
     #[test]
     fn session_limit() {
         fn run_session(
-            loop_cycles: u32,
+            loop_cycles: u64,
             segment_limit_po2: u32,
             session_count_limit: u64,
         ) -> anyhow::Result<Session> {
@@ -1118,12 +1238,12 @@ mod docker {
         // this should contain exactly 2 segments
         assert!(run_session(1 << 16, 16, 2).is_ok());
 
-        // make sure that it's ok to run with a limit that's higher the actual count
+        // it's ok to run with a limit that's higher than the actual count
         assert!(run_session(1 << 16, 16, 10).is_ok());
 
-        let err = run_session(1 << 16, 15, 3).err().unwrap();
+        let err = run_session(1 << 16, 15, 2).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
 
-        assert!(run_session(1 << 16, 15, 16).is_ok());
+        assert!(run_session(1 << 16, 15, 17).is_ok());
     }
 }

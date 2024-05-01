@@ -15,21 +15,24 @@
 #include "fp.h"
 #include "fpext.h"
 
-extern "C" __global__ void eltwise_add_fp(Fp* out, const Fp* x, const Fp* y, const uint32_t count) {
+extern "C" __global__
+void eltwise_add_fp(Fp* out, const Fp* x, const Fp* y, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     out[idx] = x[idx] + y[idx];
   }
 }
 
-extern "C" __global__ void eltwise_mul_factor_fp(Fp* io, const Fp& factor, const uint32_t count) {
+extern "C" __global__
+void eltwise_mul_factor_fp(Fp* io, const Fp& factor, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     io[idx] = io[idx] * factor;
   }
 }
 
-extern "C" __global__ void eltwise_copy_fp(Fp* out, const Fp* in, const uint32_t count) {
+extern "C" __global__
+void eltwise_copy_fp(Fp* out, const Fp* in, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   // If the following check is not included, there is a SIGABRT that causes tests to fail
   // cuda-memcheck also throws lots of out of bounds read errors if this check is omitted
@@ -38,8 +41,8 @@ extern "C" __global__ void eltwise_copy_fp(Fp* out, const Fp* in, const uint32_t
   }
 }
 
-extern "C" __global__ void
-eltwise_sum_fpext(Fp* out, const FpExt* in, const uint32_t to_add, const uint32_t count) {
+extern "C" __global__
+void eltwise_sum_fpext(Fp* out, const FpExt* in, const uint32_t to_add, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     FpExt tot;
@@ -51,4 +54,18 @@ eltwise_sum_fpext(Fp* out, const FpExt* in, const uint32_t to_add, const uint32_
     out[idx + 2 * count] = tot.elems[2];
     out[idx + 3 * count] = tot.elems[3];
   }
+}
+
+extern "C" __global__
+void eltwise_zeroize_fp(Fp* elems) {
+  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  Fp val = elems[idx];
+  elems[idx] = val.zeroize();
+}
+
+extern "C" __global__
+void eltwise_zeroize_fpext(FpExt* elems) {
+  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  FpExt val = elems[idx];
+  elems[idx] = val.zeroize();
 }

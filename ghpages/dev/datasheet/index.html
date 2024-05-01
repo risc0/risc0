@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
     .head-wrapper {
       position: relative;
@@ -27,14 +26,12 @@
 
     .container {
       display: grid;
-      /* Two columns */
       grid-template-columns: repeat(2, 1fr);
       gap: 30px;
     }
 
     .footer {
       display: grid;
-      /* Three columns */
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
@@ -43,8 +40,8 @@
       grid-column: span 2;
     }
 
-    .box {
-      border: 1px solid black;
+    .box,
+    .qrcode-box {
       padding: 10px;
       box-sizing: border-box;
       border: none;
@@ -63,26 +60,13 @@
       gap: 10px;
     }
 
-    .qrcode-box {
-      border: 1px solid black;
-      padding: 10px;
-      box-sizing: border-box;
-      border: none;
-    }
-
     .responsive {
-      /* Reducing the width to half */
       width: 50%;
-      /* Keeping the aspect ratio intact */
       height: auto;
-      /* To use margin auto for centering */
       display: block;
-      /* Center the image horizontally */
       margin: 0 auto;
     }
 
-
-    /* Table base styles */
     table {
       border-collapse: collapse;
       width: 100%;
@@ -100,23 +84,19 @@
       font-weight: 600;
     }
 
-    /* Zebra stripe alternate rows */
     tr:nth-child(even) {
       background-color: #f9f9f9;
     }
 
-    /* Highlight row on hover */
     tr:hover {
       background-color: #e6e6e6;
     }
 
-    /* Header styles */
     th {
       text-align: left;
       font-size: 1em;
     }
 
-    /* Content styles */
     td {
       font-size: 1em;
     }
@@ -125,7 +105,6 @@
       margin-top: -10px;
     }
 
-    /* Print-specific styles */
     @media print {
       body {
         font-size: 10px;
@@ -138,7 +117,6 @@
 
       table {
         width: 100%;
-        /* Reduce font size for print */
         font-size: 10px;
       }
 
@@ -190,8 +168,6 @@
       }
     }
 
-    /* Different styles for US Letter */
-    /* Using a min-width slightly below 216mm to target US Letter */
     @media print and (min-width: 215mm) {
 
       table td,
@@ -210,64 +186,18 @@
       <h1>RISC Zero Datasheet</h1>
       <p>
         Commit hash: <span id="hash-content">Loading...</span>
-        <br></br>
-        Use cargo run —release —example loop in head of main to collect data for your machine
       </p>
     </div>
   </div>
 
   <div class="container">
-    <!-- The table containers for JavaScript to append benchmarks -->
     <div class="box" id="table1"></div>
     <div class="box" id="table2"></div>
     <div class="box" id="table3"></div>
     <div class="box" id="table4"></div>
   </div>
 
-  <div class="footnote">
-    <p>*This uses continuations, reducing the memory usage but producing more receipts (if not rolled up with Bonsai).
-    </p>
-  </div>
-
-  <div class="footer">
-    <div class="text-box">
-      The performance of the prover depends on the number of execution cycles in the zkVM guest. We
-      therefore give
-      performance data for different guest execution lengths, as indicated in the "Cycles" column. For cryptographic
-      reasons, the
-      cycle count for each segment is always rounded up in length to the next highest power of two; thus, a program that
-      requires 33000
-      cycles
-      will have the same performance as a program that requires 63000 cycles, as both will round up to 65536 (64 k)
-      cycles.
-      <br></br>
-      Initializing a zkVM guest requires over 16 k cycles. Combined with this power of two rounding, this means that no
-      program can be executed in fewer than 64 k cycles.
-      <br></br>
-      To give context for these numbers we have included a table indicating the size of some of our example programs in
-      cycles. Note that some programs vary in cycle count depending on input data. The cycle counts given here use the
-      default input data, or, for examples with no defaults, the input data suggested in the associated README file.
-      <br></br>
-    </div>
-    <div class="box" id="table_cycle_count"></div>
-  </div>
-  <div class="qrcode-container">
-    <div class="qrcode-box">
-      <figure>
-        <img src="static/risczero_qrcode.png" alt="Image 2">
-        <figcaption text-align: center;>www.RISCZero.com</figcaption>
-      </figure>
-    </div>
-    <div class="qrcode-box">
-      <figure>
-        <img src="static/zkvm_examples_qrcode.png" alt="Image 3">
-        <figcaption text-align: center;>zkVM Examples</figcaption>
-      </figure>
-    </div>
-  </div>
-
   <script>
-    // Function to format duration
     function formatDuration(duration) {
       const thresholds = [1000, 1000, 1000, 60, 60];
       const units = ['ns', 'µs', 'ms', 's', 'min', 'h'];
@@ -279,7 +209,6 @@
       return `${duration.toFixed(2)}${units[unitIndex]}`;
     }
 
-    // Function to format bytes
     function formatBytes(bytes) {
       const units = ['B', 'KB', 'MB', 'GB', 'TB'];
       let unitIndex = 0;
@@ -290,7 +219,6 @@
       return `${bytes.toFixed(2)}${units[unitIndex]}`;
     }
 
-    // Function to format Hertz
     function formatHz(hertz) {
       const units = ['Hz', 'KHz', 'MHz', 'GHz'];
       let unitIndex = 0;
@@ -301,7 +229,6 @@
       return `${hertz.toFixed(2)}${units[unitIndex]}`;
     }
 
-    // Function to fetch and display commit hash
     async function fetchCommitHash() {
       try {
         let response = await fetch('COMMIT_HASH.txt');
@@ -314,78 +241,16 @@
       }
     }
 
-    // Array of examples to include in the table
-    const includeExamples = [
-      "bevy",
-      "chess",
-      "digital-signature",
-      "ecdsa",
-      "hello-world",
-      "json",
-      "password-checker",
-      "prorata",
-      "sha",
-      "smartcore-ml",
-      "waldo",
-      "wasm",
-      "wordle"
-    ];
-
-    function cycleCountTable() {
-      // Parse the CSV file
-      Papa.parse('cycle_count.csv', {
-        download: true,
-        header: true,
-        complete: function (results) {
-          const data = results.data;
-
-          // Filter the data based on the includeExamples array
-          const filteredData = data.filter(item => includeExamples.includes(item.name));
-
-          // Get the correct container for this table
-          const tableContainer = document.getElementById(`table_cycle_count`);
-
-          // Create a table element
-          const table = document.createElement('table');
-
-          // Create and append the table header
-          const headerRow = document.createElement('tr');
-          const nameHeader = document.createElement('th');
-          nameHeader.textContent = 'Example';
-          const cyclesHeader = document.createElement('th');
-          cyclesHeader.textContent = 'Cycles';
-          headerRow.appendChild(nameHeader);
-          headerRow.appendChild(cyclesHeader);
-          table.appendChild(headerRow);
-
-          // Create and append the table rows
-          filteredData.forEach(item => {
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            nameCell.textContent = item.name;
-            const cyclesCell = document.createElement('td');
-            cyclesCell.textContent = `${item.cycles / 1024}k`;
-            row.appendChild(nameCell);
-            row.appendChild(cyclesCell);
-            table.appendChild(row);
-          });
-
-          // Append the table to the document body
-          tableContainer.appendChild(table);
-        }
-      });
-    }
-
     async function fetchData() {
       const filenameToTitle = {
         'macOS-apple_m2_pro.json': 'Metal on Apple M2 Pro',
-        'Linux-nvidia_rtx_a5000.json': 'CUDA on NVIDIA RTX A5000',
+        'Linux-nvidia_rtx_3090_ti.json': 'CUDA on NVIDIA RTX 3090 Ti',
         'macOS-cpu.json': 'CPU only on Apple M2 Pro',
-        'Linux-cpu.json': 'CPU only on TBD [Linux]'
+        'Linux-cpu.json': 'CPU only on c6i.8xlarge'
       };
 
       try {
-        const urls = ['macOS-apple_m2_pro.json', 'Linux-nvidia_rtx_a5000.json', 'macOS-cpu.json', 'Linux-cpu.json'];
+        const urls = ['macOS-apple_m2_pro.json', 'Linux-nvidia_rtx_3090_ti.json', 'macOS-cpu.json', 'Linux-cpu.json'];
         const dataPromises = urls.map(url =>
           fetch(url)
             .then(response => {
@@ -430,33 +295,24 @@
           const tableBody = document.createElement('tbody');
           dataArray.forEach(item => {
             const row = document.createElement('tr');
-            Object.keys(item).forEach(key => {
+            function addCell(key, format) {
               const cell = document.createElement('td');
-              let value = item[key];
-
-              if (key === 'cycles') {
-                value = `${value / 1024}k${value >= 2048 * 1024 ? '*' : ''}`;
-              } else if (key === 'duration') {
-                value = formatDuration(value);
-              } else if (key === 'ram' || key === 'seal') {
-                value = formatBytes(value);
-              } else if (key === 'speed') {
-                value = formatHz(value);
-              }
-
-              cell.textContent = value;
+              cell.textContent = format(item[key]);
               row.appendChild(cell);
-            });
+            }
+
+            addCell('total_cycles', value => `${value / 1024}k${value >= 2048 * 1024 ? '*' : ''}`);
+            addCell('duration', value => formatDuration(value));
+            addCell('ram', value => formatBytes(value));
+            addCell('seal', value => formatBytes(value));
+            addCell('throughput', value => formatHz(value));
+
             tableBody.appendChild(row);
           });
 
           table.appendChild(tableBody);
           tableContainer.appendChild(table);
         });
-
-        const logoDiv = document.createElement('div');
-        logoDiv.innerHTML = '<img src="static/RISC_Zero_Logo.jpeg" alt="RISC Zero Logo" class="responsive">';
-        document.getElementById('logo-container').appendChild(logoDiv);
 
       } catch (error) {
         console.error('Error processing data:', error);
@@ -467,8 +323,6 @@
     document.addEventListener("DOMContentLoaded", fetchCommitHash);
     // Invoke fetchData when the document is ready
     document.addEventListener("DOMContentLoaded", fetchData);
-    // Invoke cycleCountTable when the document is ready
-    document.addEventListener("DOMContentLoaded", cycleCountTable);
   </script>
 
 </body>

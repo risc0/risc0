@@ -596,9 +596,10 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.6.0-rc.1"
+version = "0.8.0-rc.1"
 dependencies = [
  "reqwest",
+ "risc0-groth16",
  "serde",
  "thiserror",
 ]
@@ -750,9 +751,9 @@ dependencies = [
 
 [[package]]
 name = "cargo_metadata"
-version = "0.17.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7daec1a2a2129eeba1644b220b4647ec537b0b5d4bfd6876fcc5a540056b592"
+checksum = "2d886547e41f740c616ae73108f6eb70afe6d940c7bc697cb30f13daec073037"
 dependencies = [
  "camino",
  "cargo-platform",
@@ -1040,37 +1041,60 @@ dependencies = [
 ]
 
 [[package]]
-name = "crossbeam-deque"
-version = "0.8.3"
+name = "crossbeam"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce6fd6f855243022dcecf8702fef0c297d4338e226845fe067f6341ad9fa0cef"
+checksum = "1137cd7e7fc0fb5d3c5a8678be38ec56e819125d8d7907411fe24ccb943faca8"
 dependencies = [
- "cfg-if",
+ "crossbeam-channel",
+ "crossbeam-deque",
+ "crossbeam-epoch",
+ "crossbeam-queue",
+ "crossbeam-utils",
+]
+
+[[package]]
+name = "crossbeam-channel"
+version = "0.5.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab3db02a9c5b5121e1e42fbdb1aeb65f5e02624cc58c43f2884c6ccac0b82f95"
+dependencies = [
+ "crossbeam-utils",
+]
+
+[[package]]
+name = "crossbeam-deque"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "613f8cc01fe9cf1a3eb3d7f488fd2fa8388403e97039e2f73692932e291a770d"
+dependencies = [
  "crossbeam-epoch",
  "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.15"
+version = "0.9.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae211234986c545741a7dc064309f67ee1e5ad243d0e48335adc0484d960bcc7"
+checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
 dependencies = [
- "autocfg",
- "cfg-if",
  "crossbeam-utils",
- "memoffset",
- "scopeguard",
+]
+
+[[package]]
+name = "crossbeam-queue"
+version = "0.3.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df0346b5d5e76ac2fe4e327c5fd1118d6be7c51dfb18f9b7922923f287471e35"
+dependencies = [
+ "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.16"
+version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a22b2d63d4d1dc0b7f1b6b2747dd0088008a9be28b6ddf0b1e7d335e3037294"
-dependencies = [
- "cfg-if",
-]
+checksum = "248e3bacc7dc6baa3b21e405ee045c3047101a49145e7e9eca583ab4c2ca5345"
 
 [[package]]
 name = "crossterm"
@@ -1282,6 +1306,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive-debug"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e53ef7e1cf756fd5a8e74b9a0a9504ec446eddde86c3063a76ff26a13b7773b1"
+dependencies = [
+ "proc-macro2",
+ "quote 1.0.33",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "derive_more"
 version = "0.99.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1341,6 +1376,15 @@ name = "directories"
 version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a49173b84e034382284f27f1af4dcbbd231ffa358c0fe316541a7337f376a35"
+dependencies = [
+ "dirs-sys",
+]
+
+[[package]]
+name = "dirs"
+version = "5.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "44c45a9d03d6676652bcb5e724c7e988de1acad23a711b5217ab9cbecbec2225"
 dependencies = [
  "dirs-sys",
 ]
@@ -2148,11 +2192,11 @@ dependencies = [
 
 [[package]]
 name = "home"
-version = "0.5.5"
+version = "0.5.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5444c27eef6923071f7ebcc33e3444508466a76f7a2b93da00ed6e19f30c1ddb"
+checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2188,12 +2232,6 @@ name = "httpdate"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
-
-[[package]]
-name = "human-repr"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f58b778a5761513caf593693f8951c97a5b610841e754788400f32102eefdff1"
 
 [[package]]
 name = "hyper"
@@ -2380,9 +2418,9 @@ checksum = "b1a46d1a171d865aa5f83f92695765caa047a9b4cbae2cbf37dbd613a793fd4c"
 
 [[package]]
 name = "jobserver"
-version = "0.1.27"
+version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c37f63953c4c63420ed5fd3d6d398c719489b9f872b9fa683262f8edd363c7d"
+checksum = "ab46a6e9526ddef3ae7f787c06f0f2600639ba80ea3eade3d8e670a2230f51d6"
 dependencies = [
  "libc",
 ]
@@ -2567,9 +2605,9 @@ checksum = "03087c2bad5e1034e8cace5926dec053fb3790248370865f5117a7d0213354c8"
 
 [[package]]
 name = "libc"
-version = "0.2.150"
+version = "0.2.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89d92a4743f9a61002fae18374ed11e7973f530cb3a3255fb354818118b2203c"
+checksum = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd"
 
 [[package]]
 name = "libloading"
@@ -2664,15 +2702,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "memoffset"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a634b1c61a95585bd15607c6ab0c4e5b226e695ff2800ba0cdccddf208c406c"
-dependencies = [
- "autocfg",
-]
-
-[[package]]
 name = "merkle_light"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2691,11 +2720,11 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.25.0"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "550b24b0cd4cf923f36bae78eca457b3a10d8a6a14a9c84cb2687b527e6a84af"
+checksum = "c43f73953f8cbe511f021b58f18c3ce1c3d1ae13fe953293e13345bf83217f25"
 dependencies = [
- "bitflags 1.3.2",
+ "bitflags 2.4.1",
  "block",
  "core-graphics-types",
  "foreign-types",
@@ -2929,6 +2958,15 @@ dependencies = [
  "proc-macro2",
  "quote 1.0.33",
  "syn 2.0.39",
+]
+
+[[package]]
+name = "nvtx"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad2e855e8019f99e4b94ac33670eb4e4f570a2e044f3749a0b2c7f83b841e52c"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
@@ -3747,7 +3785,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "elf",
@@ -3759,11 +3797,12 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "cargo-platform",
  "cargo_metadata",
+ "dirs",
  "docker-generate",
  "risc0-binfmt",
  "risc0-zkp",
@@ -3775,7 +3814,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "cc",
  "directories",
@@ -3786,7 +3825,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3794,6 +3833,7 @@ dependencies = [
  "downloader",
  "hex",
  "metal",
+ "nvtx",
  "rand",
  "rayon",
  "risc0-circuit-recursion-sys",
@@ -3806,7 +3846,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3815,23 +3855,33 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
+ "bytemuck",
+ "cfg-if",
+ "crossbeam",
+ "crypto-bigint",
  "cust",
+ "derive-debug",
+ "lazy-regex",
  "metal",
+ "nvtx",
  "rand",
  "rayon",
+ "risc0-binfmt",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "serde",
+ "sha2",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3840,7 +3890,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3848,18 +3898,23 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
  "ark-groth16",
  "ark-serialize",
+ "bytemuck",
  "hex",
  "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
+ "risc0-core",
  "risc0-zkp",
  "serde",
+ "serde_json",
+ "tempfile",
+ "tracing",
 ]
 
 [[package]]
@@ -3885,7 +3940,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "cc",
  "cust",
@@ -3895,7 +3950,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3904,9 +3959,10 @@ dependencies = [
  "digest",
  "ff",
  "hex",
- "lazy_static",
  "metal",
  "ndarray",
+ "nvtx",
+ "parking_lot",
  "paste",
  "rand",
  "rand_core",
@@ -3921,7 +3977,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3930,17 +3986,15 @@ dependencies = [
  "bytemuck",
  "bytes",
  "cfg-if",
- "crypto-bigint",
  "elf",
  "getrandom",
  "hex",
- "human-repr",
  "lazy-regex",
- "num-derive",
- "num-traits",
+ "nvtx",
  "prost",
  "prost-build",
  "protobuf-src",
+ "rand",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",
@@ -3961,7 +4015,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -3970,7 +4024,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.21.0-alpha.1"
+version = "1.0.0-rc.3"
 
 [[package]]
 name = "rkyv"
@@ -4150,9 +4204,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.27"
+version = "0.38.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfeae074e687625746172d639330f1de242a178bf3189b51e35a7a21573513ac"
+checksum = "65e04861e65f21776e67888bfbea442b3642beaa0138fdb1dd7a84a52dffdb89"
 dependencies = [
  "bitflags 2.4.1",
  "errno",
@@ -4408,7 +4462,6 @@ dependencies = [
  "hex",
  "risc0-zkvm",
  "serde",
- "serial_test",
  "sha-methods",
 ]
 

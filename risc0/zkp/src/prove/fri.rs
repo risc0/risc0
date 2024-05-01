@@ -92,6 +92,7 @@ pub fn fri_prove<H: Hal, F>(
 ) where
     F: Fn(&mut WriteIOP<H::Field>, usize),
 {
+    nvtx::range_push!("fri_prove");
     let ext_size = H::ExtElem::EXT_SIZE;
     let orig_domain = coeffs.size() / ext_size * INV_RATE;
     let mut rounds = Vec::new();
@@ -123,4 +124,5 @@ pub fn fri_prove<H: Hal, F>(
             round.prove_query(hal, iop, &mut pos);
         }
     }
+    nvtx::range_pop!();
 }

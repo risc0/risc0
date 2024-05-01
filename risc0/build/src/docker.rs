@@ -24,6 +24,8 @@ use risc0_zkvm_platform::{
 };
 use tempfile::tempdir;
 
+use crate::get_env_var;
+
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
 **/.git
@@ -32,23 +34,40 @@ const DOCKER_IGNORE: &str = r#"
 **/tmp
 "#;
 
-const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
+/// The target directory for the ELF binaries.
+pub const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
+
+/// Indicates weather the build was successful or skipped.
+pub enum BuildStatus {
+    /// The build was successful.
+    Success,
+    /// The build was skipped.
+    Skipped,
+}
 
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
+pub fn docker_build(
+    manifest_path: &Path,
+    src_dir: &Path,
+    features: &[String],
+) -> Result<BuildStatus> {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
+        return Ok(BuildStatus::Skipped);
+    }
+
     let manifest_path = manifest_path
         .canonicalize()
         .context(format!("manifest_path: {manifest_path:?}"))?;
     let src_dir = src_dir.canonicalize().context("src_dir")?;
-    eprintln!("Docker context: {src_dir:?}");
-
     let meta = MetadataCommand::new()
         .manifest_path(&manifest_path)
         .exec()
         .context("Manifest not found")?;
-    let root_pkg = meta.root_package().context("failed to parse Cargo.toml")?;
+    let root_pkg = meta.root_package().context("Failed to parse Cargo.toml")?;
     let pkg_name = &root_pkg.name;
 
+    eprintln!("Docker context: {src_dir:?}");
     eprintln!("Building ELF binaries in {pkg_name} for riscv32im-risc0-zkvm-elf target...");
 
     if !Command::new("docker")
@@ -75,16 +94,14 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
     println!("ELFs ready at:");
 
     let target_dir = src_dir.join(TARGET_DIR);
-    for target in root_pkg.targets.iter() {
-        if target.is_bin() {
-            let elf_path = target_dir.join(&pkg_name).join(&target.name);
-            let image_id = compute_image_id(&elf_path)?;
-            let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
-            println!("ImageID: {} - {:?}", image_id, rel_elf_path);
-        }
+    for target in root_pkg.targets.iter().filter(|t| t.is_bin()) {
+        let elf_path = target_dir.join(&pkg_name).join(&target.name);
+        let image_id = compute_image_id(&elf_path)?;
+        let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
+        println!("ImageID: {} - {:?}", image_id, rel_elf_path);
     }
 
-    Ok(())
+    Ok(BuildStatus::Success)
 }
 
 /// Create the dockerfile.
@@ -128,7 +145,7 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:v2024-01-31.1")
+        .from_alias("build", "risczero/risc0-guest-builder:v2024-04-22.0")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -156,7 +173,7 @@ fn create_dockerfile(
     Ok(())
 }
 
-/// Build the dockerfile and ouputs the ELF.
+/// Build the dockerfile and outputs the ELF.
 ///
 /// Overwrites if an ELF with the same name already exists.
 fn build(src_dir: &Path, temp_dir: &Path) -> Result<()> {
@@ -196,7 +213,7 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
     let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).context("unable to load elf")?;
     let image =
         MemoryImage::new(&program, PAGE_SIZE as u32).context("unable to create memory image")?;
-    Ok(image.compute_id()?.to_string())
+    Ok(image.compute_id().to_string())
 }
 
 // requires Docker to be installed
@@ -212,7 +229,7 @@ mod test {
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        self::docker_build(manifest_path, &src_dir, &[]).unwrap()
+        self::docker_build(manifest_path, &src_dir, &[]).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
@@ -233,15 +250,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "804c487280b17cff1dc244a43e7e0b3af889460c069a35a49831a93070c2981c",
-        );
-        compare_image_id(
-            "risc0_zkvm_methods_guest/hello_commit",
-            "814a0b41fcd444bd108888eebc8634b09b15627cec05dead7bcc8874bc8e5a3a",
-        );
-        compare_image_id(
-            "risc0_zkvm_methods_guest/slice_io",
-            "1d031a0f7b8fc6ee88a659d8cb5b2f81d4806d61a8340c43fa72cee0fc5527a6",
+            "1fd2c95aca7f51b849775dc26cd0d2bbfbe9b65853f1b1a476c1e1ff546252b5",
         );
     }
 }

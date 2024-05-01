@@ -24,11 +24,13 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::{anyhow, Context, Result};
 use hex::FromHex;
 use merkle::MerkleGroup;
+use rand::thread_rng;
 use risc0_circuit_recursion::{
-    cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
+    adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
         hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, HashSuite},
@@ -50,20 +52,20 @@ use crate::{
     receipt_claim::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
-    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON2_CONTROL_ID,
+    HalPair, ReceiptClaim, SegmentReceipt,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without
 // messing up bootstrap dependencies.
 /// Number of rows to use for the recursion circuit witness as a power of 2.
-const RECURSION_PO2: usize = 18;
+pub const RECURSION_PO2: usize = 18;
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 /// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
-/// change the circuit later, this is set to 8 which allows for enough control IDs to be ecoded
+/// change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
 /// that we are unlikely to need more.
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 /// Size of the code group in the taps of the recursion circuit.
-const RECURSION_CODE_SIZE: usize = 21;
+const RECURSION_CODE_SIZE: usize = 23;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {
@@ -111,7 +113,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         pre: a.claim.pre.clone(),
         post: b.claim.post.clone(),
         exit_code: b.claim.exit_code,
-        input: a.claim.input.clone(),
+        input: a.claim.input,
         output: b.claim.output.clone(),
     };
 
@@ -176,7 +178,7 @@ pub fn resolve(
 ///
 /// The identity_p254 program is used as the last step in the prover pipeline before running the
 /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
-/// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
+/// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
 pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
@@ -232,12 +234,9 @@ mod cuda {
     pub use risc0_circuit_recursion::cuda::{
         CudaCircuitHalPoseidon, CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
     };
-    pub use risc0_zkp::{
-        core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
-    };
+    pub use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
@@ -256,27 +255,17 @@ mod cuda {
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
-        HalPair { hal, circuit_hal }
-    }
 }
 
 #[cfg(feature = "metal")]
 mod metal {
     pub use risc0_circuit_recursion::metal::MetalCircuitHal;
-    pub use risc0_zkp::{
-        core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::metal::{
-            MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon,
-            MetalHashPoseidon2, MetalHashSha256,
-        },
+    pub use risc0_zkp::hal::metal::{
+        MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon, MetalHashPoseidon2,
+        MetalHashSha256,
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
@@ -293,13 +282,6 @@ mod metal {
     pub fn poseidon2_hal_pair() -> HalPair<MetalHalPoseidon2, MetalCircuitHal<MetalHashPoseidon2>> {
         let hal = Rc::new(MetalHalPoseidon2::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
 }
@@ -365,7 +347,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cuda::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else if #[cfg(feature = "metal")] {
         /// TODO
@@ -389,7 +371,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            metal::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else {
         /// TODO
@@ -532,7 +514,7 @@ impl Prover {
         a: &SuccinctReceipt,
         allowed_ids: &MerkleGroup,
     ) -> Result<()> {
-        self.add_seal(&a.seal, &a.control_id, &allowed_ids)?;
+        self.add_seal(&a.seal, &a.control_id, allowed_ids)?;
         let mut data = Vec::<u32>::new();
         a.claim.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
@@ -678,44 +660,67 @@ impl Prover {
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let hashfn = Rc::clone(&hal.get_hash_suite().hashfn);
 
-        adapter.execute(prover.iop());
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
+
+        adapter.execute(prover.iop(), hal);
 
         let seal = if skip_seal {
             Vec::new()
         } else {
             prover.set_po2(adapter.po2() as usize);
 
-            prover.commit_group(
-                REGISTER_GROUP_CODE,
-                hal.copy_from_elem("code", &*adapter.get_code().as_slice()),
-            );
-            prover.commit_group(
-                REGISTER_GROUP_DATA,
-                hal.copy_from_elem("data", &*adapter.get_data().as_slice()),
-            );
-            adapter.accumulate(prover.iop());
-            prover.commit_group(
-                REGISTER_GROUP_ACCUM,
-                hal.copy_from_elem("accum", &*adapter.get_accum().as_slice()),
-            );
+            let ctrl = hal.copy_from_elem("ctrl", &adapter.get_code().as_slice());
+            prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
 
-            let mix = hal.copy_from_elem("mix", &*adapter.get_mix().as_slice());
-            let out = hal.copy_from_elem("out", &*adapter.get_io().as_slice());
+            let data = hal.copy_from_elem("data", &adapter.get_data().as_slice());
+            prover.commit_group(REGISTER_GROUP_DATA, &data);
 
-            prover.finalize(&[&mix, &out], circuit_hal)
+            // Make the mixing values
+            let mix: Vec<_> = (0..CircuitImpl::MIX_SIZE)
+                .map(|_| prover.iop().random_elem())
+                .collect();
+            let mix = hal.copy_from_elem("mix", mix.as_slice());
+
+            let steps = adapter.get_steps();
+            let mut accum = vec![BabyBearElem::INVALID; steps * CIRCUIT.accum_size()];
+
+            // Add random noise to end of accum
+            let mut rng = thread_rng();
+            for i in steps - ZK_CYCLES..steps {
+                for j in 0..CIRCUIT.accum_size() {
+                    accum[j * steps + i] = BabyBearElem::random(&mut rng);
+                }
+            }
+
+            let io = hal.copy_from_elem("io", &adapter.get_io().as_slice());
+            let accum = hal.copy_from_elem("accum", accum.as_slice());
+
+            circuit_hal.accumulate(&ctrl, &io, &data, &mix, &accum, steps);
+
+            prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
+
+            prover.finalize(&[&mix, &io], circuit_hal)
         };
 
         Ok(RecursionReceipt {
             control_id: self.control_id,
-            seal: seal.into(),
+            seal,
             output: self.output.clone(),
         })
     }
 
     #[tracing::instrument(skip_all)]
     fn preflight(&mut self) -> Result<exec::MachineContext> {
-        let mut machine = exec::MachineContext::new(take(&mut self.input).into());
+        let mut machine = exec::MachineContext::new(take(&mut self.input));
         let mut preflight = preflight::Preflight::new(&mut machine);
 
         for (cycle, row) in self.program.code_by_row().enumerate() {

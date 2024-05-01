@@ -52,7 +52,10 @@ pub fn prove_token_validation(claims: &CustomClaims) -> (Receipt, String) {
 
     let prover = default_prover();
 
-    let receipt = prover.prove(env, VALIDATOR_ELF).expect("failed to prove");
+    let receipt = prover
+        .prove(env, VALIDATOR_ELF)
+        .expect("failed to prove")
+        .receipt;
 
     let output: String = receipt
         .journal

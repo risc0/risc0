@@ -1,0 +1,17 @@
+[package]
+name = "doc-test-stable"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+anyhow = "1.0"
+risc0-zkvm = { git = "https://github.com/risc0/risc0.git", branch = "release-0.21", features = [
+  "prove",
+] }
+risc0-zkvm-methods = { git = "https://github.com/risc0/risc0.git", branch = "release-0.21" }
+serde = { version = "1.0", features = ["derive"] }
+
+[build-dependencies]
+glob = "0.3"
