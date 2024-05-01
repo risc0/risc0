@@ -18,17 +18,18 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
-use risc0_benchmark::{benches::*, init_logging, run_jobs, Job};
+use risc0_benchmark::{benches::*, run_jobs, Job};
+use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
     // CSV output file
-    #[arg(long, value_name = "FILE")]
+    #[arg(long, value_name = "FILE", default_value = "metrics.csv")]
     out: PathBuf,
 
     #[command(subcommand)]
-    command: Command,
+    command: Option<Command>,
 }
 
 #[derive(Eq, PartialEq, Subcommand, Sequence)]
@@ -73,10 +74,16 @@ impl Command {
     }
 }
 
+fn init_logging() {
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
+}
+
 fn main() {
     init_logging();
 
     let cli = Cli::parse();
-    let jobs = cli.command.get_jobs();
-    run_jobs(&cli.out, jobs);
+    let cmd = cli.command.unwrap_or(Command::All);
+    run_jobs(&cli.out, cmd.get_jobs());
 }

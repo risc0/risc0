@@ -4,23 +4,6 @@ import "base.proto";
 
 package protos.core;
 
-message MemoryImage {
-  protos.base.CompatVersion version = 1;
-  PageTableInfo info = 2;
-  uint32 pc = 3;
-  repeated PageEntry pages = 4;
-}
-
-message PageEntry {
-  uint32 addr = 1;
-  bytes data = 2;
-}
-
-message PageTableInfo {
-  uint32 page_size = 1;
-  uint32 page_table_addr = 2;
-}
-
 message ProveInfo {
   Receipt receipt = 1;
   SessionStats stats = 2;

@@ -135,21 +135,35 @@ impl KernelBuild {
     }
 
     fn compile_cuda(&mut self, output: &str) {
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
         println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
 
-        // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
-        // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-        // decrease in performance but a compile time in the minutes. Use
-        // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
-        let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".to_string());
-
         let mut flags = vec![];
-        flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
         if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
-            flags.push(nvcc_flags);
+            for flag in nvcc_flags.split(' ') {
+                flags.push(flag.to_string());
+            }
         } else {
             flags.push("-arch=native".into());
+        }
+
+        fn enable_debug(output: &str) -> bool {
+            if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
+                return debug.contains(output);
+            }
+            false
+        }
+
+        if enable_debug(output) {
+            flags.push("-G".into());
+        } else {
+            // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
+            // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
+            // decrease in performance but a compile time in the minutes. Use
+            // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
+            let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".into());
+            flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
         }
 
         self.cached_compile(

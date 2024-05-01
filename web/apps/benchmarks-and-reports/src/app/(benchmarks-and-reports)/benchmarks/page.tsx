@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
-import { BENCHMARKS_DESCRIPTION } from "../_utils/constants";
+import { BENCHMARKS_DESCRIPTION } from "../[version]/_utils/constants";
 import { Charts } from "./_components/charts";
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: `https://benchmarks.risczero.com/api/og?title=Benchmarks&description=${encodeURIComponent(
+        url: `https://reports-and-benchmarks-risczero.vercel.app/api/og?title=Benchmarks&description=${encodeURIComponent(
           BENCHMARKS_DESCRIPTION,
         )}`,
       },

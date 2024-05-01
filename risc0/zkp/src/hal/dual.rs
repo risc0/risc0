@@ -77,6 +77,10 @@ where
         BufferImpl::new(lhs, rhs)
     }
 
+    fn get_at(&self, idx: usize) -> T {
+        self.lhs.get_at(idx)
+    }
+
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         self.lhs.view(f)
     }
@@ -328,6 +332,21 @@ where
             .gather_sample(&dst.rhs, &src.rhs, idx, size, stride);
         dst.assert_eq();
     }
+
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        self.lhs.prefix_products(&io.lhs);
+        self.rhs.prefix_products(&io.rhs);
+        // io.assert_eq();
+
+        io.lhs.view(|lhs| {
+            io.rhs.view(|rhs| {
+                assert_eq!(lhs.len(), rhs.len());
+                for i in 0..lhs.len() {
+                    assert_eq!(lhs[i], rhs[i], "{i}");
+                }
+            });
+        })
+    }
 }
 
 pub struct DualCircuitHal<F, LH, RH, LC, RC>
@@ -398,5 +417,17 @@ where
             steps,
         );
         check.assert_eq();
+    }
+
+    fn accumulate(
+        &self,
+        _ctrl: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _io: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _data: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _mix: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _accum: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _steps: usize,
+    ) {
+        todo!()
     }
 }

@@ -308,7 +308,7 @@ PolyExtStep::Const(1040977421), // loc(unknown)
 PolyExtStep::Const(12), // loc(unknown)
 PolyExtStep::Const(48), // loc(unknown)
 PolyExtStep::Const(192), // loc(unknown)
-PolyExtStep::True, // zirgen/circuit/recursion/recursion.cpp:38
+PolyExtStep::True, // zirgen/circuit/recursion/recursion.cpp:18
 PolyExtStep::Get(17), // top(recursion::Top)/code(recursion::Code)/select(OneHot)/micro_ops(Reg)(components/mux.h:49)
 PolyExtStep::Get(16), // top(recursion::Top)/code(recursion::Code)/write_addr(Reg)(zirgen/circuit/recursion/top.cpp:23)
 PolyExtStep::Get(24), // top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[0](recursion::MicroInst)/opcode(Reg)(compiler/edsl/component.h:154)

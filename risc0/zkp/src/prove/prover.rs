@@ -33,13 +33,17 @@ pub struct Prover<'a, H: Hal> {
     po2: usize,
 }
 
-fn make_coeffs<H: Hal>(hal: &H, buf: H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
+fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
+    nvtx::range_push!("make_coeffs");
+    let coeffs = hal.alloc_elem("coeffs", witness.size());
+    hal.eltwise_copy_elem(&coeffs, witness);
     // Do interpolate
-    hal.batch_interpolate_ntt(&buf, count);
+    hal.batch_interpolate_ntt(&coeffs, count);
     // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
     #[cfg(not(feature = "circuit_debug"))]
-    hal.zk_shift(&buf, count);
-    buf
+    hal.zk_shift(&coeffs, count);
+    nvtx::range_pop!();
+    coeffs
 }
 
 impl<'a, H: Hal> Prover<'a, H> {
@@ -74,24 +78,24 @@ impl<'a, H: Hal> Prover<'a, H> {
     /// Commits a given buffer to the IOP; the values must not subsequently
     /// change.
     #[tracing::instrument(skip_all)]
-    pub fn commit_group(&mut self, tap_group_index: usize, buf: H::Buffer<H::Elem>) {
+    pub fn commit_group(&mut self, tap_group_index: usize, witness: &H::Buffer<H::Elem>) {
+        nvtx::range_push!("commit_group({})", witness.name());
         let group_size = self.taps.group_size(tap_group_index);
-        assert_eq!(buf.size() % group_size, 0);
-        assert_eq!(buf.size() / group_size, self.cycles);
+        assert_eq!(witness.size() % group_size, 0);
+        assert_eq!(witness.size() / group_size, self.cycles);
         assert!(
             self.groups[tap_group_index].is_none(),
             "Attempted to commit group {} more than once",
             self.taps.group_name(tap_group_index)
         );
 
-        let name = buf.name();
-        let coeffs = make_coeffs(self.hal, buf, group_size);
+        let coeffs = make_coeffs(self.hal, witness, group_size);
         let group_ref = self.groups[tap_group_index].insert(PolyGroup::new(
             self.hal,
             coeffs,
             group_size,
             self.cycles,
-            name,
+            witness.name(),
         ));
 
         group_ref.merkle.commit(&mut self.iop);
@@ -101,6 +105,7 @@ impl<'a, H: Hal> Prover<'a, H> {
             self.taps.group_name(tap_group_index),
             group_ref.merkle.root()
         );
+        nvtx::range_pop!();
     }
 
     /// Generates the proof and returns the seal.
@@ -109,6 +114,8 @@ impl<'a, H: Hal> Prover<'a, H> {
     where
         C: CircuitHal<H>,
     {
+        nvtx::range_push!("finalize");
+
         // Set the poly mix value, which is used for constraint compression in the
         // DEEP-ALI protocol.
         let poly_mix = self.iop.random_ext_elem();
@@ -189,6 +196,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         let mut eval_u: Vec<H::ExtElem> = Vec::new();
         tracing::info_span!("eval_u").in_scope(|| {
+            nvtx::range_push!("eval_u");
             for (id, pg) in self.groups.iter().enumerate() {
                 let pg = pg.as_ref().unwrap();
 
@@ -209,11 +217,13 @@ impl<'a, H: Hal> Prover<'a, H> {
                     eval_u.extend(view);
                 });
             }
+            nvtx::range_pop!();
         });
 
         // Now, convert the values to coefficients via interpolation
         let mut coeff_u = vec![H::ExtElem::ZERO; eval_u.len()];
         tracing::info_span!("poly_interpolate").in_scope(|| {
+            nvtx::range_push!("poly_interpolate");
             let mut pos = 0;
             for reg in self.taps.regs() {
                 poly_interpolate(
@@ -224,9 +234,11 @@ impl<'a, H: Hal> Prover<'a, H> {
                 );
                 pos += reg.size();
             }
+            nvtx::range_pop!();
         });
 
         // Add in the coeffs of the check polynomials.
+        nvtx::range_push!("misc");
         let z_pow = z.pow(ext_size);
         let which = Vec::from_iter(0u32..H::CHECK_SIZE as u32);
         let xs = vec![z_pow; H::CHECK_SIZE];
@@ -251,13 +263,20 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Set the mix mix value, which is used for FRI batching.
         let mix = self.iop.random_ext_elem();
         tracing::debug!("Mix = {mix:?}");
+        nvtx::range_pop!();
 
         // Do the coefficient mixing
         // Begin by making a zeroed output buffer
         let combo_count = self.taps.combos_size();
+        nvtx::range_push!("alloc(combos)");
         let combos = vec![H::ExtElem::ZERO; self.cycles * (combo_count + 1)];
+        nvtx::range_pop!();
+        nvtx::range_push!("copy(combos)");
         let combos = self.hal.copy_from_extelem("combos", combos.as_slice());
+        nvtx::range_pop!();
+
         tracing::info_span!("mix_poly_coeffs").in_scope(|| {
+            nvtx::range_push!("mix_poly_coeffs");
             let mut cur_mix = H::ExtElem::ONE;
 
             for (id, pg) in self.groups.iter().enumerate() {
@@ -292,12 +311,14 @@ impl<'a, H: Hal> Prover<'a, H> {
                 H::CHECK_SIZE,
                 self.cycles,
             );
+            nvtx::range_pop!();
         });
 
         // Load the near final coefficients back to the CPU
         tracing::info_span!("load_combos").in_scope(|| {
             combos.view_mut(|combos| {
                 tracing::info_span!("part1").in_scope(|| {
+                    nvtx::range_push!("part1");
                     let mut cur_pos = 0;
                     let mut cur = H::ExtElem::ONE;
                     // Subtract the U coeffs from the combos
@@ -314,9 +335,11 @@ impl<'a, H: Hal> Prover<'a, H> {
                         cur_pos += 1;
                         cur *= mix;
                     }
+                    nvtx::range_pop!();
                 });
                 // Divide each element by (x - Z * back1^back) for each back
                 tracing::info_span!("part2").in_scope(|| {
+                    nvtx::range_push!("part2");
                     combos
                         .par_chunks_exact_mut(self.cycles)
                         .zip(0..combo_count)
@@ -328,25 +351,33 @@ impl<'a, H: Hal> Prover<'a, H> {
                                 );
                             }
                         });
+                    nvtx::range_pop!();
                 });
                 tracing::info_span!("part3").in_scope(|| {
+                    nvtx::range_push!("part3");
                     // Divide check polys by z^EXT_SIZE
                     let slice = &mut combos
                         [combo_count * self.cycles..combo_count * self.cycles + self.cycles];
                     assert_eq!(poly_divide(slice, z_pow), H::ExtElem::ZERO);
+                    nvtx::range_pop!();
                 });
             });
         });
+
         // Sum the combos up into one final polynomial + make it into 4 Fp polys.
         // Additionally, it needs to be bit reversed to make everyone happy
+        nvtx::range_push!("sum");
         let final_poly_coeffs = self
             .hal
             .alloc_elem("final_poly_coeffs", self.cycles * ext_size);
         self.hal.eltwise_sum_extelem(&final_poly_coeffs, &combos);
+        nvtx::range_pop!();
 
         // Finally do the FRI protocol to prove the degree of the polynomial
+        nvtx::range_push!("bit_rev");
         self.hal.batch_bit_reverse(&final_poly_coeffs, ext_size);
         tracing::debug!("FRI-proof, size = {}", final_poly_coeffs.size() / ext_size);
+        nvtx::range_pop!();
 
         fri_prove(self.hal, &mut self.iop, &final_poly_coeffs, |iop, idx| {
             for pg in self.groups.iter() {
@@ -367,6 +398,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Return final proof
         let proof = self.iop.proof;
         tracing::debug!("Proof size = {}", proof.len());
+        nvtx::range_pop!();
         proof
     }
 }

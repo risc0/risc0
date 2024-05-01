@@ -15,5 +15,5 @@ export function formatHz(hertz: number) {
     unitIndex++;
   }
 
-  return `${hertz.toFixed(2)}${UNITS[unitIndex]}`;
+  return `${hertz.toFixed(2)} ${UNITS[unitIndex]}`;
 }

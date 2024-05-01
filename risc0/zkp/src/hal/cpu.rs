@@ -23,7 +23,7 @@ use parking_lot::{
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use super::{Buffer, Hal, TRACKER};
+use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -68,7 +68,7 @@ struct TrackedVec<T>(Vec<T>);
 
 impl<T> TrackedVec<T> {
     pub fn new(vec: Vec<T>) -> Self {
-        TRACKER
+        tracker()
             .lock()
             .unwrap()
             .alloc(vec.capacity() * std::mem::size_of::<T>());
@@ -78,7 +78,7 @@ impl<T> TrackedVec<T> {
 
 impl<T> Drop for TrackedVec<T> {
     fn drop(&mut self) {
-        TRACKER
+        tracker()
             .lock()
             .unwrap()
             .free(self.0.capacity() * std::mem::size_of::<T>());
@@ -93,8 +93,12 @@ pub struct CpuBuffer<T> {
 }
 
 enum SyncSliceRef<'a, T: Default + Clone> {
-    FromBuf(MappedRwLockWriteGuard<'a, [T]>),
-    FromSlice(&'a SyncSlice<'a, T>),
+    FromBuf {
+        _inner: MappedRwLockWriteGuard<'a, [T]>,
+    },
+    FromSlice {
+        _inner: &'a SyncSlice<'a, T>,
+    },
 }
 
 /// A buffer which can be used across multiple threads.  Users are
@@ -120,7 +124,7 @@ impl<'a, T: Default + Clone> SyncSlice<'a, T> {
         SyncSlice {
             ptr,
             size,
-            _buf: SyncSliceRef::FromBuf(buf),
+            _buf: SyncSliceRef::FromBuf { _inner: buf },
         }
     }
 
@@ -146,7 +150,7 @@ impl<'a, T: Default + Clone> SyncSlice<'a, T> {
             self.size
         );
         SyncSlice {
-            _buf: SyncSliceRef::FromSlice(self),
+            _buf: SyncSliceRef::FromSlice { _inner: self },
             ptr: unsafe { self.ptr.add(offset) },
             size,
         }
@@ -234,6 +238,11 @@ impl<T: Clone> Buffer<T> for CpuBuffer<T> {
             buf: Arc::clone(&self.buf),
             region,
         }
+    }
+
+    fn get_at(&self, idx: usize) -> T {
+        let buf = self.buf.read();
+        buf.0[idx].clone()
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
@@ -586,6 +595,13 @@ impl<F: Field> Hal for CpuHal<F> {
         }
     }
 
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        let mut io = io.as_slice_mut();
+        for i in 1..io.len() {
+            io[i] = io[i] * io[i - 1];
+        }
+    }
+
     fn has_unified_memory(&self) -> bool {
         true
     }
@@ -599,7 +615,7 @@ impl<F: Field> Hal for CpuHal<F> {
 mod tests {
     use hex::FromHex;
     use rand::thread_rng;
-    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_core::field::baby_bear::{BabyBear, BabyBearExtElem};
 
     use super::*;
     use crate::core::hash::sha::Sha256HashSuite;
@@ -675,6 +691,26 @@ mod tests {
             1,
             16,
             &["da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8"],
+        );
+    }
+
+    #[test]
+    fn prefix_products() {
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let io = vec![BabyBearExtElem::from_u32(2); 4];
+        let io = hal.copy_from_extelem("io", &io);
+        hal.prefix_products(&io);
+
+        let io: Vec<_> = io.as_slice().iter().cloned().collect();
+
+        assert_eq!(
+            &io,
+            &[
+                BabyBearExtElem::from_u32(2),
+                BabyBearExtElem::from_u32(4),
+                BabyBearExtElem::from_u32(8),
+                BabyBearExtElem::from_u32(16),
+            ]
         );
     }
 }

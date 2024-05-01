@@ -1,7 +1,7 @@
 import { isNil } from "lodash-es";
 
 const THRESHOLDS = [1000, 1000, 1000, 60, 60] as const;
-const UNITS = ["ns", "µs", "ms", "s", "min", "h"] as const;
+const UNITS = ["ns", "µs", "ms", "s", "m", "h"] as const;
 
 export function formatDuration(duration: number) {
   if (isNil(duration)) {

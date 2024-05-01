@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { CopyButton } from "shared/client/components/copy-button";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
-import { CRATES_VALIDATION_DESCRIPTION } from "../_utils/constants";
+import { CRATES_VALIDATION_DESCRIPTION } from "../[version]/_utils/constants";
 import { findMostRecentHash } from "./_actions/find-most-recent-hash";
 import CratesIoValidationContent from "./_components/crates-io-validation-content";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: `https://benchmarks.risczero.com/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
+        url: `https://reports-and-benchmarks-risczero.vercel.app/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
           CRATES_VALIDATION_DESCRIPTION,
         )}`,
       },

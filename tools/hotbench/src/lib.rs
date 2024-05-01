@@ -14,6 +14,7 @@
 
 use std::{
     cell::RefCell,
+    env,
     hint::black_box,
     path::PathBuf,
     time::{Duration, Instant},
@@ -168,9 +169,9 @@ impl<'a> Bencher<'a> {
         if benchmark_file.exists() {
             let json = std::fs::read_to_string(&benchmark_file).unwrap();
             let base: BenchmarkData = serde_json::from_str(&json).unwrap();
-            let delta_min = base.min as f32 / min_speed;
-            let delta_max = base.max as f32 / max_speed;
-            let delta_avg = base.value as f32 / avg_speed;
+            let delta_min = min_speed / base.min as f32;
+            let delta_max = max_speed / base.max as f32;
+            let delta_avg = avg_speed / base.value as f32;
             println!("  change:");
             println!("    thrpt: [{} {} {}]", delta_min, delta_avg, delta_max);
         }
@@ -191,6 +192,14 @@ impl<'a> Bencher<'a> {
     }
 }
 
+pub fn hotbench_main() {
+    if env::var("RISC0_HOTBENCH_LOG").is_ok() {
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+            .init();
+    }
+}
+
 #[macro_export]
 macro_rules! benchmark_group {
     ($name:ident, $($function:path),+ $(,)*) => {
@@ -208,6 +217,7 @@ macro_rules! benchmark_group {
 macro_rules! benchmark_main {
     ($($group:path),+) => {
         fn main() {
+            $crate::hotbench_main();
             $(
                 $group();
             )+

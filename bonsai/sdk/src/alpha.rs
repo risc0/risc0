@@ -45,6 +45,9 @@ pub enum SdkErr {
     /// Missing file
     #[error("failed to find file on disk: {0:?}")]
     FileNotFound(#[from] std::io::Error),
+    /// Receipt not found
+    #[error("Receipt not found")]
+    ReceiptNotFound,
 }
 
 /// Collection of serialization object for the REST api
@@ -254,6 +257,17 @@ impl SessionId {
             return Err(SdkErr::InternalServerErr(body));
         }
         Ok(res.text()?)
+    }
+
+    /// Stops a running proving session
+    pub fn stop(&self, client: &Client) -> Result<(), SdkErr> {
+        let url = format!("{}/sessions/stop/{}", client.url, self.uuid);
+        let res = client.client.get(url).send()?;
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+        Ok(())
     }
 }
 
@@ -482,11 +496,14 @@ impl Client {
             .send()?;
 
         if !res.status().is_success() {
+            if res.status() == reqwest::StatusCode::NOT_FOUND {
+                return Err(SdkErr::ReceiptNotFound);
+            }
             let body = res.text()?;
             return Err(SdkErr::InternalServerErr(body));
         }
-        let res: ReceiptDownload = res.json()?;
 
+        let res: ReceiptDownload = res.json()?;
         self.download(&res.url)
     }
 
@@ -994,6 +1011,29 @@ mod tests {
 
         assert_eq!(logs, "\"Hello\\nWorld\"");
 
+        create_mock.assert();
+    }
+
+    #[test]
+    fn session_stop() {
+        let server = MockServer::start();
+
+        let uuid = Uuid::new_v4().to_string();
+        let session_id = SessionId::new(uuid);
+
+        let create_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/sessions/stop/{}", session_id.uuid))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200).header("content-type", "text/plain");
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client =
+            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+
+        session_id.stop(&client).unwrap();
         create_mock.assert();
     }
 
