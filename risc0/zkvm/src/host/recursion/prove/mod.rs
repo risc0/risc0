@@ -49,8 +49,8 @@ use serde::{Deserialize, Serialize};
 pub use self::program::Program;
 use super::CIRCUIT;
 use crate::{
+    receipt::{valid_control_ids, SuccinctReceipt},
     receipt_claim::{Merge, Output},
-    recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
     HalPair, ReceiptClaim, SegmentReceipt,
 };

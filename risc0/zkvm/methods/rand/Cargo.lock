@@ -46,7 +46,7 @@ dependencies = [
  "blake2",
  "derivative",
  "digest",
- "sha2",
+ "sha2 0.10.8",
 ]
 
 [[package]]
@@ -549,7 +549,7 @@ dependencies = [
  "risc0-core",
  "risc0-zkvm-platform",
  "serde",
- "sha2",
+ "sha2 0.10.6",
  "tracing",
 ]
 
@@ -572,7 +572,7 @@ dependencies = [
  "rrs-lib",
  "semver",
  "serde",
- "sha2",
+ "sha2 0.10.8",
  "tracing",
 ]
 
@@ -636,6 +636,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.39",
+]
+
+[[package]]
+name = "sha2"
+version = "0.10.6"
+source = "git+https://github.com/risc0/RustCrypto-hashes?tag=sha2-v0.10.6-risczero.0#7fd6900c4f637bd15ee2642dfa77110f8f1ad065"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
 ]
 
 [[package]]

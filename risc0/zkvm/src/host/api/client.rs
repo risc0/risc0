@@ -24,10 +24,10 @@ use super::{
 };
 use crate::{
     get_version,
+    receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
     host::{
         api::SegmentInfo,
         client::prove::get_r0vm_path,
-        receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
     },
     ExecutorEnv, Journal, ProveInfo, ProverOpts,
 };

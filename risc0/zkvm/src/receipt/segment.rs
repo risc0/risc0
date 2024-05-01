@@ -72,7 +72,7 @@ impl SegmentReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        tracing::debug!("SegmentReceipt::verify_integrity_with_context");
+        //tracing::debug!("SegmentReceipt::verify_integrity_with_context");
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             Self::allowed_control_ids()
                 .find(|x| x == control_id)
@@ -91,11 +91,11 @@ impl SegmentReceipt {
         // claim on the struct.
         let decoded_claim = decode_receipt_claim_from_seal(&self.seal)?;
         if decoded_claim.digest() != self.claim.digest() {
-            tracing::debug!(
-                "decoded segment receipt claim does not match claim field:\ndecoded: {:#?},\nexpected: {:#?}",
-                decoded_claim,
-                self.claim,
-            );
+            //tracing::debug!(
+            //    "decoded segment receipt claim does not match claim field:\ndecoded: {:#?},\nexpected: {:#?}",
+            //    decoded_claim,
+            //    self.claim,
+            //);
             return Err(VerificationError::ReceiptFormatError);
         }
         Ok(())

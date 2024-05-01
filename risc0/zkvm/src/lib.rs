@@ -74,6 +74,7 @@ extern crate alloc;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
+mod receipt;
 mod receipt_claim;
 pub mod serde;
 pub mod sha;
@@ -83,6 +84,8 @@ pub mod sha;
 pub mod recursion {
     pub use super::host::recursion::*;
 }
+
+#[cfg(target_os = "zkvm")]
 
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
@@ -132,15 +135,18 @@ pub use {
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        receipt::{
-            Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
-            SegmentReceipt, SuccinctReceipt, VerifierContext,
-        },
         recursion::ALLOWED_CONTROL_ROOT,
     },
     risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
     risc0_groth16::Seal as Groth16Seal,
+};
+
+#[cfg(not(target_os = "zkvm"))]
+pub use receipt::{CompactReceipt, SuccinctReceipt};
+pub use receipt::{
+    Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
+    VerifierContext,
 };
 
 use semver::Version;

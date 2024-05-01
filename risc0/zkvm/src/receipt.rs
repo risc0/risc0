@@ -14,9 +14,12 @@
 
 //! Manages the output and cryptographic data for a proven computation.
 
+#[cfg(not(target_os = "zkvm"))]
 pub(crate) mod compact;
 pub(crate) mod composite;
 pub(crate) mod segment;
+#[cfg(not(target_os = "zkvm"))]
+pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
@@ -41,8 +44,12 @@ use crate::{
     Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
-pub use self::{compact::CompactReceipt, composite::CompositeReceipt, segment::SegmentReceipt};
-pub use super::recursion::SuccinctReceipt;
+#[cfg(not(target_os = "zkvm"))]
+pub use self::{compact::CompactReceipt, succinct::SuccinctReceipt};
+
+pub use self::{
+    composite::CompositeReceipt, segment::SegmentReceipt,
+};
 
 /// A receipt attesting to the execution of a guest program.
 ///
@@ -148,7 +155,7 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
-        tracing::debug!("Receipt::verify_with_context");
+        //tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
         // NOTE: Post-state digest and input digest are unconstrained by this method.
@@ -174,15 +181,15 @@ impl Receipt {
         if claim.output.digest() != expected_output.digest() {
             let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
-                tracing::debug!(
-                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                    hex::encode(&self.journal.bytes),
-                    hex::encode(expected_output.digest()),
-                    hex::encode(claim.output.digest()),
-                );
+                //tracing::debug!(
+                //    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                //    hex::encode(&self.journal.bytes),
+                //    hex::encode(expected_output.digest()),
+                //    hex::encode(claim.output.digest()),
+                //);
                 return Err(VerificationError::JournalDigestMismatch);
             }
-            tracing::debug!("accepting zero digest for output of receipt with empty journal");
+            //tracing::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
@@ -203,7 +210,7 @@ impl Receipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        tracing::debug!("Receipt::verify_integrity_with_context");
+        //tracing::debug!("Receipt::verify_integrity_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
         // Check that self.journal is attested to by the inner receipt.
@@ -221,15 +228,15 @@ impl Receipt {
         if claim.output.digest() != expected_output.digest() {
             let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
-                tracing::debug!(
-                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                    hex::encode(&self.journal.bytes),
-                    hex::encode(expected_output.digest()),
-                    hex::encode(claim.output.digest()),
-                );
+                //tracing::debug!(
+                //    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                //    hex::encode(&self.journal.bytes),
+                //    hex::encode(expected_output.digest()),
+                //    hex::encode(claim.output.digest()),
+                //);
                 return Err(VerificationError::JournalDigestMismatch);
             }
-            tracing::debug!("accepting zero digest for output of receipt with empty journal");
+            //tracing::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
@@ -281,9 +288,11 @@ pub enum InnerReceipt {
     Composite(CompositeReceipt),
 
     /// The [SuccinctReceipt].
+    #[cfg(not(target_os = "zkvm"))]
     Succinct(SuccinctReceipt),
 
     /// The [CompactReceipt].
+    #[cfg(not(target_os = "zkvm"))]
     Compact(CompactReceipt),
 
     /// A fake receipt for testing and development.
@@ -309,10 +318,12 @@ impl InnerReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        tracing::debug!("InnerReceipt::verify_integrity_with_context");
+        //tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
+            #[cfg(not(target_os = "zkvm"))]
             InnerReceipt::Compact(x) => x.verify_integrity(),
+            #[cfg(not(target_os = "zkvm"))]
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
@@ -334,6 +345,7 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Compact] arm.
+    #[cfg(not(target_os = "zkvm"))]
     pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
         if let InnerReceipt::Compact(x) = self {
             Ok(x)
@@ -343,6 +355,7 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Succinct] arm.
+    #[cfg(not(target_os = "zkvm"))]
     pub fn succinct(&self) -> Result<&SuccinctReceipt, VerificationError> {
         if let InnerReceipt::Succinct(x) = self {
             Ok(x)
@@ -355,7 +368,9 @@ impl InnerReceipt {
     pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.claim(),
+        #[cfg(not(target_os = "zkvm"))]
             InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
+        #[cfg(not(target_os = "zkvm"))]
             InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }

@@ -24,8 +24,8 @@ use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
-use super::CIRCUIT;
-use crate::{host::receipt::VerifierContext, sha::Digestible, ReceiptClaim};
+use crate::{receipt::VerifierContext, sha::Digestible, ReceiptClaim};
+const CIRCUIT: risc0_circuit_recursion::CircuitImpl = risc0_circuit_recursion::CircuitImpl::new();
 
 /// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
