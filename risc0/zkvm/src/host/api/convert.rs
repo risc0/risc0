@@ -22,7 +22,9 @@ use risc0_zkp::core::digest::Digest;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     host::{
-        receipt::{decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt},
+        receipt::{
+            segment::decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt,
+        },
         recursion::SuccinctReceipt,
     },
     Assumptions, ExitCode, Journal, MaybePruned, Output, ProveInfo, ProverOpts, Receipt,

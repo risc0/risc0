@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{collections::BTreeSet, string::String, vec::Vec};
+use alloc::{string::String, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -23,19 +23,13 @@ use risc0_circuit_rv32im::{
     layout, CircuitImpl, CIRCUIT,
 };
 use risc0_zkp::{
-    adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO},
-    core::digest::Digest,
-    layout::Buffer,
-    verify::VerificationError,
+    adapter::CircuitInfo as _, core::digest::Digest, layout::Buffer, verify::VerificationError,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use super::{metadata::SegmentReceiptVerifierInfo, VerifierContext};
-use crate::{
-    sha::{Digestible, Sha256},
-    MaybePruned, ReceiptClaim,
-};
+use super::VerifierContext;
+use crate::{sha::Digestible, MaybePruned, ReceiptClaim};
 
 /// A receipt attesting to the execution of a Segment.
 ///
@@ -70,16 +64,6 @@ impl SegmentReceipt {
             .chain(SHA256_CONTROL_ID)
             .chain(BLAKE2B_CONTROL_ID)
             .map(|x| Digest::from_hex(x).unwrap())
-    }
-
-    /// Information about the parameters used to verify the receipt. Includes parameters that are
-    /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_info() -> SegmentReceiptVerifierInfo {
-        SegmentReceiptVerifierInfo {
-            control_ids: BTreeSet::from_iter(Self::allowed_control_ids()),
-            proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-        }
     }
 
     /// Verify the integrity of this receipt, ensuring the claim is attested
@@ -169,7 +153,7 @@ pub(crate) fn decode_receipt_claim_from_seal(
         pre: pre.into(),
         post: post.into(),
         exit_code,
-        input: MaybePruned::Pruned(input),
+        input,
         output: MaybePruned::Pruned(output),
     })
 }

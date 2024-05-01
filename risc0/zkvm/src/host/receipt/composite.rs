@@ -21,10 +21,7 @@ use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use super::{
-    metadata::CompositeReceiptVerifierInfo, CompactReceipt, InnerReceipt, SegmentReceipt,
-    SuccinctReceipt, VerifierContext,
-};
+use super::{InnerReceipt, SegmentReceipt, VerifierContext};
 use crate::{sha::Digestible, Assumptions, MaybePruned, Output, ReceiptClaim};
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single
@@ -53,16 +50,6 @@ pub struct CompositeReceipt {
 }
 
 impl CompositeReceipt {
-    /// Information about the parameters used to verify the receipt. Includes parameters that are
-    /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_info() -> CompositeReceiptVerifierInfo {
-        CompositeReceiptVerifierInfo {
-            segment: SegmentReceipt::verifier_info(),
-            succinct: SuccinctReceipt::verifier_info(),
-            compact: CompactReceipt::verifier_info(),
-        }
-    }
-
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(
