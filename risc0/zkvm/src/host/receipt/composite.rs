@@ -150,7 +150,7 @@ impl CompositeReceipt {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
-            input: first_claim.input.clone(),
+            input: first_claim.input,
             output: output.into(),
         })
     }
