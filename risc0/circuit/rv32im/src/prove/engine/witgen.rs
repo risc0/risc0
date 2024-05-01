@@ -38,13 +38,26 @@ pub struct WitnessGenerator {
 impl WitnessGenerator {
     pub fn new(po2: usize, io: &[BabyBearElem]) -> Self {
         let steps = 1 << po2;
+
+        nvtx::range_push!("alloc(ctrl)");
+        let ctrl = CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO);
+        nvtx::range_pop!();
+
+        nvtx::range_push!("alloc(data)");
+        let data = CpuBuffer::from_fn("data", steps * CIRCUIT.data_size(), |_| {
+            BabyBearElem::INVALID
+        });
+        nvtx::range_pop!();
+
+        nvtx::range_push!("alloc(io)");
+        let io = CpuBuffer::from(Vec::from(io));
+        nvtx::range_pop!();
+
         Self {
             steps,
-            ctrl: CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
-            data: CpuBuffer::from_fn("data", steps * CIRCUIT.data_size(), |_| {
-                BabyBearElem::INVALID
-            }),
-            io: CpuBuffer::from(Vec::from(io)),
+            ctrl,
+            data,
+            io,
         }
     }
 
@@ -54,14 +67,37 @@ impl WitnessGenerator {
 
         let mut machine = MachineContext::new(self.steps, trace);
         self.compute_execute(&mut machine)?;
-        self.compute_verify(&mut machine);
+        self.compute_verify_ram(&mut machine)?;
+        self.compute_verify_bytes(&mut machine)?;
+        let mut rng = thread_rng();
+
+        {
+            nvtx::range_push!("noise");
+            let ctrl = self.ctrl.as_slice_sync();
+            let data = self.data.as_slice_sync();
+
+            for i in 0..ZK_CYCLES {
+                let cycle = self.steps - ZK_CYCLES + i;
+                // Set ctrl to all zeros for the ZK_CYCLES
+                for j in 0..CIRCUIT.ctrl_size() {
+                    ctrl.set(j * self.steps + cycle, BabyBearElem::ZERO);
+                }
+                // Set data to random for the ZK_CYCLES
+                for j in 0..CIRCUIT.data_size() {
+                    data.set(j * self.steps + cycle, BabyBearElem::random(&mut rng));
+                }
+            }
+            nvtx::range_pop!();
+        }
 
         // Zero out 'invalid' entries in data and output.
+        nvtx::range_push!("zeroize");
         self.data
             .as_slice_mut()
             .par_iter_mut()
             .chain(self.io.as_slice_mut().par_iter_mut())
             .for_each(|value| *value = value.valid_or_zero());
+        nvtx::range_pop!();
 
         nvtx::range_pop!();
         Ok(())
@@ -91,7 +127,7 @@ impl WitnessGenerator {
                     machine.step_exec(self.steps, cycle, args).unwrap();
                 }
             } else {
-                machine.rev_step_exec(self.steps, last_cycle, args);
+                machine.rev_step_exec(self.steps, last_cycle, args).unwrap();
             }
         }
 
@@ -109,18 +145,23 @@ impl WitnessGenerator {
         nvtx::range_push!("compute_execute");
 
         tracing::debug!("load");
+        nvtx::range_push!("load");
         let mut loader = Loader::new(self.steps, &mut self.ctrl);
         let last_cycle = loader.load();
+        nvtx::range_pop!();
 
         #[cfg(not(feature = "seq"))]
-        tracing::info_span!("inject_exec_backs").in_scope(|| {
+        {
+            nvtx::range_push!("inject_exec_backs");
             tracing::debug!("inject_exec_backs");
             for cycle in 0..last_cycle {
                 machine.inject_exec_backs(self.steps, cycle, &self.data.as_slice_sync());
             }
-        });
+            nvtx::range_pop!();
+        }
 
-        tracing::info_span!("step_exec").in_scope(|| {
+        {
+            nvtx::range_push!("step_exec");
             tracing::debug!("step_exec");
             let args = &[
                 self.ctrl.as_slice_sync(),
@@ -129,55 +170,39 @@ impl WitnessGenerator {
             ];
 
             #[cfg(not(feature = "seq"))]
-            machine.par_step_exec(self.steps, last_cycle, args);
+            machine.par_step_exec(self.steps, last_cycle, args)?;
 
             #[cfg(feature = "seq")]
             for cycle in 0..last_cycle {
-                machine.step_exec(self.steps, cycle, args).unwrap();
+                machine.step_exec(self.steps, cycle, args)?;
             }
-        });
+            nvtx::range_pop!();
+        }
 
         nvtx::range_pop!();
         Ok(())
     }
 
     #[tracing::instrument(skip_all)]
-    fn compute_verify(&mut self, machine: &mut MachineContext) {
-        nvtx::range_push!("compute_verify");
+    fn compute_verify_ram(&mut self, machine: &mut MachineContext) -> Result<()> {
+        nvtx::range_push!("verify_ram");
+        tracing::debug!("verify_ram");
 
-        tracing::debug!("compute_verify");
-        let mut rng = thread_rng();
-        {
-            let ctrl = self.ctrl.as_slice_sync();
-            let data = self.data.as_slice_sync();
-
-            for i in 0..ZK_CYCLES {
-                let cycle = self.steps - ZK_CYCLES + i;
-                // Set ctrl to all zeros for the ZK_CYCLES
-                for j in 0..CIRCUIT.ctrl_size() {
-                    ctrl.set(j * self.steps + cycle, BabyBearElem::ZERO);
-                }
-                // Set data to random for the ZK_CYCLES
-                for j in 0..CIRCUIT.data_size() {
-                    data.set(j * self.steps + cycle, BabyBearElem::random(&mut rng));
-                }
-            }
-        }
-
-        // Do the verify cycles
         let last_cycle = self.steps - ZK_CYCLES;
 
-        machine.sort("ram");
+        machine.sort("ram")?;
 
         #[cfg(not(feature = "seq"))]
-        tracing::info_span!("inject_verify_mem_backs").in_scope(|| {
+        {
+            nvtx::range_push!("inject_verify_mem_backs");
             tracing::debug!("inject_verify_mem_backs");
             for cycle in 0..last_cycle {
-                machine.inject_verify_mem_backs(self.steps, cycle, self.data.as_slice_sync());
+                machine.inject_verify_mem_backs(self.steps, cycle, self.data.as_slice_sync())?;
             }
-        });
+            nvtx::range_pop!();
+        }
 
-        tracing::info_span!("step_verify_mem").in_scope(|| {
+        {
             nvtx::range_push!("step_verify_mem");
             tracing::debug!("step_verify_mem");
             let args = &[
@@ -187,17 +212,39 @@ impl WitnessGenerator {
             ];
 
             #[cfg(not(feature = "seq"))]
-            machine.par_step_verify_mem(self.steps, last_cycle, args);
+            machine.par_step_verify_mem(self.steps, last_cycle, args)?;
 
             #[cfg(feature = "seq")]
             for cycle in 0..last_cycle {
-                machine.step_verify_mem(self.steps, cycle, args).unwrap();
+                machine.step_verify_mem(self.steps, cycle, args)?;
             }
             nvtx::range_pop!();
-        });
+        }
 
-        machine.sort("bytes");
-        tracing::info_span!("step_verify_bytes").in_scope(|| {
+        nvtx::range_pop!();
+        Ok(())
+    }
+
+    #[tracing::instrument(skip_all)]
+    fn compute_verify_bytes(&mut self, machine: &mut MachineContext) -> Result<()> {
+        nvtx::range_push!("verify_bytes");
+        tracing::debug!("verify_bytes");
+
+        let last_cycle = self.steps - ZK_CYCLES;
+
+        machine.sort("bytes")?;
+
+        #[cfg(not(feature = "seq"))]
+        {
+            nvtx::range_push!("inject_verify_bytes_backs");
+            tracing::debug!("inject_verify_bytes_backs");
+            for cycle in 1..last_cycle {
+                machine.inject_verify_bytes_backs(self.steps, cycle, self.data.as_slice_sync())?;
+            }
+            nvtx::range_pop!();
+        }
+
+        {
             nvtx::range_push!("step_verify_bytes");
             tracing::debug!("step_verify_bytes");
             let args = &[
@@ -205,12 +252,20 @@ impl WitnessGenerator {
                 self.io.as_slice_sync(),
                 self.data.as_slice_sync(),
             ];
+
+            #[cfg(not(feature = "seq"))]
+            (0..last_cycle)
+                .into_par_iter()
+                .try_for_each(|cycle| machine.step_verify_bytes(self.steps, cycle, args))?;
+
+            #[cfg(feature = "seq")]
             for cycle in 0..last_cycle {
-                machine.step_verify_bytes(self.steps, cycle, args).unwrap();
+                machine.step_verify_bytes(self.steps, cycle, args)?;
             }
             nvtx::range_pop!();
-        });
+        }
 
         nvtx::range_pop!();
+        Ok(())
     }
 }

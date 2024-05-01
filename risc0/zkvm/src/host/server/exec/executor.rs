@@ -188,7 +188,7 @@ impl<'a> ExecutorImpl<'a> {
         })?;
         let elapsed = start_time.elapsed();
 
-        // Set the session_journal to the committed data iff the the guest set a non-zero output.
+        // Set the session_journal to the committed data iff the guest set a non-zero output.
         let session_journal = result
             .output_digest
             .and_then(|digest| (digest != Digest::ZERO).then(|| journal.buf.take()));

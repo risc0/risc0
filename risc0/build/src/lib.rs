@@ -96,7 +96,7 @@ impl GuestListEntry {
     }
 
     fn codegen_consts(&self) -> String {
-        // Quick check for '#' to avoid injection of arbitrary Rust code into the the
+        // Quick check for '#' to avoid injection of arbitrary Rust code into the
         // method.rs file. This would not be a serious issue since it would only
         // affect the user that set the path, but it's good to add a check.
         if self.path.contains('#') {
