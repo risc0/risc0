@@ -27,6 +27,8 @@ cargo binstall cargo-risczero
 cargo risczero install
 ```
 
+> Note: To install a specific version instead of using the latest stable version, use `cargo binstall cargo-risczero@<version>` where the version is the crates.io release tag. 
+
 ## 2. Create a New Project
 
 The `cargo-risczero` tool takes `--guest-name` parameter, a [guest] program that
