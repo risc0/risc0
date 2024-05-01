@@ -141,7 +141,7 @@ impl KernelBuild {
 
         let mut flags = vec![];
         if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
-            for flag in nvcc_flags.split(" ") {
+            for flag in shlex::split(&nvcc_flags).unwrap() {
                 flags.push(flag.to_string());
             }
         } else {
