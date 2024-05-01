@@ -48,7 +48,7 @@ export function VersionSelect() {
         <SelectGroup>
           <SelectLabel>Versions</SelectLabel>
           {VERSIONS.map(({ label, value }) => (
-            <SelectItem key={value} className="cursor-pointer font-mono" value={value}>
+            <SelectItem key={value} className="cursor-pointer font-mono text-xs" value={value}>
               {label}
             </SelectItem>
           ))}
