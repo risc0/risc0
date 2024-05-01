@@ -219,7 +219,7 @@ impl ProverOpts {
     }
 
     /// Return [ProverOpts] with the receipt_kind set to the given value.
-    pub fn with_prove_guest_errors(mut self, receipt_kind: ReceiptKind) -> Self {
+    pub fn with_receipt_kind(mut self, receipt_kind: ReceiptKind) -> Self {
         self.receipt_kind = receipt_kind;
         self
     }
