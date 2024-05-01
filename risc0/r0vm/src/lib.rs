@@ -174,15 +174,14 @@ impl Cli {
             HashFn::Sha256 => "sha-256",
             HashFn::Poseidon2 => "poseidon2",
         };
-        let mut opts = ProverOpts::default();
-        opts.hashfn = hashfn.to_string();
-        opts.prove_guest_errors = self.prove_guest_errors;
-        opts.receipt_kind = match self.receipt_kind {
-            ReceiptKind::Composite => risc0_zkvm::ReceiptKind::Composite,
-            ReceiptKind::Succinct => risc0_zkvm::ReceiptKind::Succinct,
-            ReceiptKind::Compact => risc0_zkvm::ReceiptKind::Compact,
-        };
-
+        let opts = ProverOpts::default()
+            .with_hashfn(hashfn.to_string())
+            .with_prove_guest_errors(self.prove_guest_errors)
+            .with_receipt_kind(match self.receipt_kind {
+                ReceiptKind::Composite => risc0_zkvm::ReceiptKind::Composite,
+                ReceiptKind::Succinct => risc0_zkvm::ReceiptKind::Succinct,
+                ReceiptKind::Compact => risc0_zkvm::ReceiptKind::Compact,
+            });
         get_prover_server(&opts).unwrap()
     }
 }

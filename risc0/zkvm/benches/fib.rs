@@ -57,8 +57,7 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
     group.bench(name, |b| {
         let iterations = 100_000;
 
-        let mut opts = ProverOpts::composite();
-        opts.hashfn = hashfn.to_string();
+        let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
 
         let prover = get_prover_server(&opts).unwrap();
         let ctx = VerifierContext::default();

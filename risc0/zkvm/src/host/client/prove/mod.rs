@@ -205,6 +205,24 @@ impl ProverOpts {
             receipt_kind: ReceiptKind::Compact,
         }
     }
+
+    /// Return [ProverOpts] with the hashfn set to the given value.
+    pub fn with_hashfn(mut self, hashfn: String) -> Self {
+        self.hashfn = hashfn;
+        self
+    }
+
+    /// Return [ProverOpts] with prove_guest_errors set to the given value.
+    pub fn with_prove_guest_errors(mut self, prove_guest_errors: bool) -> Self {
+        self.prove_guest_errors = prove_guest_errors;
+        self
+    }
+
+    /// Return [ProverOpts] with the receipt_kind set to the given value.
+    pub fn with_prove_guest_errors(mut self, receipt_kind: ReceiptKind) -> Self {
+        self.receipt_kind = receipt_kind;
+        self
+    }
 }
 
 /// Return a default [Prover] based on environment variables and feature flags.
