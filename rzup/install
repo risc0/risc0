@@ -4,18 +4,19 @@
 
 set -eo pipefail
 
-echo "Installing risc0up..."
+echo "Installing rzup..."
 
 BASE_DIR=${XDG_CONFIG_HOME:-$HOME}
 RISC0_DIR=${RISC0_DIR-"$BASE_DIR/.risc0"}
 RISC0_BIN_DIR="$RISC0_DIR/bin"
 
-BIN_URL="https://raw.githubusercontent.com/risc0/risc0/hmrtn/risc0up/risc0up/risc0up"
-BIN_PATH="$RISC0_BIN_DIR/risc0up"
+# TODO: Change this path to main
+BIN_URL="https://raw.githubusercontent.com/risc0/risc0/hmrtn/rzup-installer/rzup/rzup"
+BIN_PATH="$RISC0_BIN_DIR/rzup"
 
 command -v curl >/dev/null 2>&1 || { echo >&2 "curl is required but it's not installed. Aborting."; exit 1; }
 
-# Create the .risc0up bin directory and risc0up binary if it doesn't exist.
+# Create the .rzup bin directory and rzup binary if it doesn't exist.
 mkdir -p $RISC0_BIN_DIR
 curl -# -L $BIN_URL -o $BIN_PATH
 chmod +x $BIN_PATH
@@ -33,9 +34,9 @@ detect_shell() {
 detect_shell
 
 
-# add risc0up to PATH if it isn't already present
+# add rzup to PATH if it isn't already present
 if [[ ":$PATH:" != *":${RISC0_BIN_DIR}:"* ]]; then
-    echo "Adding risc0up to PATH in ${PROFILE}..."
+    echo "Adding rzup to PATH in ${PROFILE}..."
     {
         echo
         echo "export PATH=\"\$PATH:$RISC0_BIN_DIR\""
@@ -43,6 +44,6 @@ if [[ ":$PATH:" != *":${RISC0_BIN_DIR}:"* ]]; then
 fi
 
 echo "Detected your preferred shell as ${PREF_SHELL}."
-echo "Added risc0up to PATH in ${PROFILE}."
-echo "Run 'source ${PROFILE}' or start a new terminal session to use risc0up."
-echo "Then, run 'risc0up' to install the zkVM."
+echo "Added rzup to PATH in ${PROFILE}."
+echo "Run 'source ${PROFILE}' or start a new terminal session to use rzup."
+echo "Then, run 'rzup' to install the zkVM."
