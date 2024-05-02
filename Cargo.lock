@@ -938,6 +938,7 @@ name = "cargo-risczero"
 version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
+ "bincode",
  "bonsai-sdk",
  "cargo-generate",
  "cargo_metadata",
@@ -962,6 +963,7 @@ dependencies = [
  "tempfile",
  "text_io",
  "tokio",
+ "tracing",
  "tracing-subscriber 0.3.18",
  "xz",
  "zip",
