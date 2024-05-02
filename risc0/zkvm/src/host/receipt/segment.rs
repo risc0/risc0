@@ -50,7 +50,7 @@ pub struct SegmentReceipt {
     /// [SegmentReceipt::claim].
     pub seal: Vec<u32>,
 
-    /// Segment index within the [Receipt]
+    /// Segment index within the [Receipt](crate::Receipt)
     pub index: u32,
 
     /// Name of the hash function used to create this receipt.
