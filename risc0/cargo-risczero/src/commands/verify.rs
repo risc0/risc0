@@ -27,7 +27,7 @@ pub struct VerifyCommand {
     #[command(flatten)]
     source: Source,
 
-    /// The image ID to verify the receipt against.
+    /// The hex-encoded image ID to verify the receipt against.
     image_id: String,
 
     /// The client environment variables.
@@ -56,7 +56,6 @@ enum SourceType<'a> {
 impl VerifyCommand {
     #[instrument(skip(self))]
     pub fn run(&self) -> Result<()> {
-        // Instantiate client first to check for errors
         debug!("Running verify command");
         let receipt = self.get_receipt()?;
         let image_id = self.get_image_id()?;
@@ -64,11 +63,11 @@ impl VerifyCommand {
         match receipt.verify(image_id) {
             Ok(_) => {
                 info!("Receipt verified successfully");
-                println!("Receipt verified successfully");
+                println!("✅ Receipt is valid!");
             }
             Err(error) => {
                 error!(?error, "Receipt verification failed");
-                eprintln!("Receipt verification failed: {error}");
+                eprintln!("❌ Receipt is not valid: {error}");
             }
         }
 
