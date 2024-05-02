@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-MIN_RUST_VERSION="1.74.1" # Minimum required Rust version
 VERBOSE_MODE=1
 
 print_banner() {
@@ -24,17 +23,6 @@ log_verbose() {
   if [ "$VERBOSE_MODE" -eq 0 ]; then
     echo "$@"
   fi
-}
-
-version_gte() {
-  local -a version1=(${1//./ })
-  local -a version2=(${2//./ })
-  for ((i = 0; i < ${#version1[@]}; i++)); do
-    if [[ -z ${version2[i]} ]]; then version2[i]=0; fi
-    if ((10#${version1[i]} > 10#${version2[i]})); then return 0; fi
-    if ((10#${version1[i]} < 10#${version2[i]})); then return 1; fi
-  done
-  return 0
 }
 
 execute_with_feedback() {
@@ -71,19 +59,10 @@ execute_with_feedback() {
   fi
 }
 
-check_rust_version() {
+check_rust_installed() {
   if ! command -v rustc &>/dev/null; then
     echo "Rust is not installed. Please install Rust using https://rustup.rs/ and rerun this script."
     exit 1
-  else
-    local current_version=$(rustc --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-    if version_gte $current_version $MIN_RUST_VERSION; then
-      log_verbose "Rust version $current_version meets the minimum requirement."
-    else
-      echo "Your Rust version ($current_version) is below the minimum requirement ($MIN_RUST_VERSION)."
-      echo "Please update Rust by running 'rustup update' and rerun this script."
-      exit 1
-    fi
   fi
 }
 
@@ -146,7 +125,7 @@ parse_args() {
 main() {
   parse_args "$@"
   print_banner
-  check_rust_version
+  check_rust_installed
   install_cargo_binstall
   binstall_cargo_risczero
   install_risczero
