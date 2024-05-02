@@ -779,6 +779,7 @@ dependencies = [
  "ark-ec",
  "ark-groth16",
  "ark-serialize",
+ "bytemuck",
  "hex",
  "lazy_static",
  "num-bigint",
