@@ -47,9 +47,9 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 pub use self::program::Program;
-use super::CIRCUIT;
+use crate::receipt::succinct::CIRCUIT;
 use crate::{
-    receipt::{valid_control_ids, SuccinctReceipt},
+    receipt::{succinct::valid_control_ids, SuccinctReceipt},
     receipt_claim::{Merge, Output},
     sha::Digestible,
     HalPair, ReceiptClaim, SegmentReceipt,

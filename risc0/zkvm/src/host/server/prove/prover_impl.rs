@@ -18,10 +18,10 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use super::{HalPair, ProverServer};
 use crate::{
+    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
     },
     sha::Digestible,
@@ -147,7 +147,7 @@ where
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
 
-        use crate::host::receipt::segment::decode_receipt_claim_from_seal;
+        use crate::receipt::segment::decode_receipt_claim_from_seal;
 
         let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
 

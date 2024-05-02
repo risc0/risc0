@@ -15,9 +15,9 @@
 use anyhow::{bail, Result};
 
 use crate::{
+        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     host::{
         prove_info::ProveInfo,
-        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         server::session::null_callback,
     },
     ExecutorEnv, ExecutorImpl, ProverServer, Receipt, Segment, Session, VerifierContext,

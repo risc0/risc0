@@ -28,9 +28,9 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
+    receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     host::{
         prove_info::ProveInfo,
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     },
     is_dev_mode, stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt,
     ReceiptKind, Segment, Session, VerifierContext,

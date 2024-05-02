@@ -495,15 +495,15 @@ fn sys_input() {
     prove_session_fast(&session);
 }
 
-#[cfg(feature = "docker")]
+//#[cfg(feature = "docker")]
 mod docker {
     use crate::{
-        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
+        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl, ExitCode,
         InnerReceipt, ProverOpts, Receipt, ReceiptKind, VerifierContext,
     };
     use anyhow::{bail, Result};
     use risc0_groth16::docker::stark_to_snark;
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF};
 
     #[test]
     fn stark2snark() {
@@ -593,6 +593,26 @@ mod docker {
             .unwrap();
         let prover = get_prover_server(&opts).unwrap();
         prover.prove(env, MULTI_TEST_ELF).unwrap().receipt
+    }
+
+    fn exec_verify(receipt: Receipt) {
+        let env = ExecutorEnv::builder()
+            .write(&(receipt, MULTI_TEST_ID))
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, VERIFY_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
+        assert_eq!(session.exit_code, ExitCode::Halted(0));
+        println!("{:?}", session.stats());
+    }
+
+    #[test]
+    fn verify_in_guest() {
+        let composite_receipt = generate_receipt(ProverOpts::composite());
+        exec_verify(composite_receipt);
     }
 
     #[test]

@@ -26,10 +26,10 @@ use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, Tcp
 use crate::{
     get_prover_server, get_version,
     host::{
-        client::slice_io::SliceIo, recursion::SuccinctReceipt, server::session::NullSegmentRef,
+        client::slice_io::SliceIo, server::session::NullSegmentRef,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, TraceCallback,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback,
     TraceEvent, VerifierContext,
 };
 

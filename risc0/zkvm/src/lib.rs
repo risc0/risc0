@@ -85,8 +85,6 @@ pub mod recursion {
     pub use super::host::recursion::*;
 }
 
-#[cfg(target_os = "zkvm")]
-
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
