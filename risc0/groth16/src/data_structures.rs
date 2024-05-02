@@ -17,11 +17,11 @@ extern crate alloc;
 use alloc::{vec, vec::Vec};
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::{Bn254, Fr};
+use ark_bn254::Bn254;
 use core::str::FromStr;
 use serde::{Deserialize, Serialize};
 
-use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes, Fr, VerifyingKey};
 
 /// Groth16 seal object encoded in big endian.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -242,7 +242,9 @@ impl PublicInputsJson {
         self.values
             .iter()
             .map(|input| {
-                Fr::from_str(input).map_err(|_| anyhow!("Failed to decode 'public inputs' values"))
+                ark_bn254::Fr::from_str(input)
+                    .map(Fr)
+                    .map_err(|_| anyhow!("Failed to decode 'public inputs' values"))
             })
             .collect()
     }

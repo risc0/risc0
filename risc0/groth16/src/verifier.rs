@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::{Bn254, Fr, G1Projective};
+use ark_bn254::{Bn254, G1Projective};
 use ark_ec::AffineRepr;
 use ark_groth16::{Groth16, PreparedVerifyingKey, Proof};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
@@ -104,8 +104,11 @@ impl Verifier {
             .map_err(|err| anyhow!(err))?;
 
         let mut encoded_prepared_inputs = Vec::new();
-        let prepared_inputs =
-            Groth16::<Bn254>::prepare_inputs(&pvk, public_inputs).map_err(|err| anyhow!(err))?;
+        let prepared_inputs = Groth16::<Bn254>::prepare_inputs(
+            &pvk,
+            &public_inputs.iter().map(|x| x.0).collect::<Vec<_>>(),
+        )
+        .map_err(|err| anyhow!(err))?;
         prepared_inputs
             .serialize_uncompressed(&mut encoded_prepared_inputs)
             .map_err(|err| anyhow!(err))?;
@@ -149,32 +152,83 @@ impl Verifier {
 
 /// Verifying key for Groth16 proofs.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct VerifyingKey(
-    #[serde(with = "serde_verifying_key")] pub(crate) ark_groth16::VerifyingKey<Bn254>,
-);
+pub struct Fr(#[serde(with = "serde_ark")] pub(crate) ark_bn254::Fr);
 
-mod serde_verifying_key {
-    use ark_bn254::Bn254;
-    use ark_groth16::VerifyingKey;
+impl Digestible for Fr {
+    /// Compute a tagged hash of the [Fr] value.
+    fn digest<S: Sha256>(&self) -> Digest {
+        let mut buffer = Vec::<u8>::with_capacity(32);
+        // Serialization into a pre-allocated buffer should never fail.
+        self.0.serialize_uncompressed(&mut buffer).unwrap();
+        // Convert to big-endian representation.
+        buffer.reverse();
+        tagged_struct::<S>(
+            "risc0_groth16.Fr",
+            &[bytemuck::pod_read_unaligned::<Digest>(&buffer)],
+            &[],
+        )
+    }
+}
+
+/// Verifying key for Groth16 proofs.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct VerifyingKey(#[serde(with = "serde_ark")] pub(crate) ark_groth16::VerifyingKey<Bn254>);
+
+/// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
+fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
+    let mut buffer = Vec::<u8>::new();
+    // If p is the point at infinity, the verifying key is invalid. Panic.
+    let (x, y) = p.xy().unwrap();
+    y.serialize_uncompressed(&mut buffer).unwrap();
+    x.serialize_uncompressed(&mut buffer).unwrap();
+    buffer.reverse();
+    *S::hash_bytes(&buffer)
+}
+
+impl Digestible for VerifyingKey {
+    /// Hash the [VerifyingKey] to get a struct digest.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>(
+            "risc0_groth16.VerifyingKey",
+            &[
+                hash_point::<S>(self.0.alpha_g1),
+                hash_point::<S>(self.0.beta_g2),
+                hash_point::<S>(self.0.gamma_g2),
+                hash_point::<S>(self.0.delta_g2),
+                tagged_iter::<S>(
+                    "risc0_groth16.VerifyingKey.IC",
+                    self.0.gamma_abc_g1.iter().map(|p| hash_point::<S>(*p)),
+                ),
+            ],
+            &[],
+        )
+    }
+}
+
+/// Compatibility module providing simple serde interop
+mod serde_ark {
     use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-    use serde::{de::Error as _, ser::Error as _, Deserialize, Deserializer, Serializer};
+    use serde::{
+        de::Error as _, ser::Error as _, Deserialize, Deserializer, Serialize, Serializer,
+    };
 
-    pub fn serialize<S>(key: &VerifyingKey<Bn254>, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S>(key: &impl CanonicalSerialize, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         let mut buffer = Vec::<u8>::new();
         key.serialize_uncompressed(&mut buffer)
             .map_err(S::Error::custom)?;
-        serializer.serialize_bytes(&buffer)
+        buffer.serialize(serializer)
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<VerifyingKey<Bn254>, D::Error>
+    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,
+        T: CanonicalDeserialize,
     {
         let buffer = Vec::<u8>::deserialize(deserializer)?;
-        VerifyingKey::<Bn254>::deserialize_uncompressed(buffer.as_slice()).map_err(D::Error::custom)
+        T::deserialize_uncompressed(buffer.as_slice()).map_err(D::Error::custom)
     }
 }
 
@@ -215,35 +269,4 @@ fn try_verifying_key() -> Result<VerifyingKey, Error> {
         delta_g2,
         gamma_abc_g1,
     }))
-}
-
-/// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
-fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
-    let mut buffer = Vec::<u8>::new();
-    // If p is the point at infinity, the verifying key is invalid. Panic.
-    let (x, y) = p.xy().unwrap();
-    y.serialize_uncompressed(&mut buffer).unwrap();
-    x.serialize_uncompressed(&mut buffer).unwrap();
-    buffer.reverse();
-    *S::hash_bytes(&buffer)
-}
-
-impl Digestible for VerifyingKey {
-    /// Hash the [VerifyingKey] to get a struct digest.
-    fn digest<S: Sha256>(&self) -> Digest {
-        tagged_struct::<S>(
-            "risc0.Groth16VerifyingKey",
-            &[
-                hash_point::<S>(self.0.alpha_g1),
-                hash_point::<S>(self.0.beta_g2),
-                hash_point::<S>(self.0.gamma_g2),
-                hash_point::<S>(self.0.delta_g2),
-                tagged_iter::<S>(
-                    "risc0.Groth16VerifyingKey.IC",
-                    self.0.gamma_abc_g1.iter().map(|p| hash_point::<S>(*p)),
-                ),
-            ],
-            &[],
-        )
-    }
 }

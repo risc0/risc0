@@ -337,7 +337,6 @@ version = "0.1.0"
 dependencies = [
  "risc0-groth16",
  "risc0-zkvm",
- "sha2",
 ]
 
 [[package]]
@@ -551,6 +550,7 @@ dependencies = [
  "ark-ec",
  "ark-groth16",
  "ark-serialize",
+ "bytemuck",
  "hex",
  "lazy_static",
  "num-bigint",
@@ -658,8 +658,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.6"
-source = "git+https://github.com/risc0/RustCrypto-hashes?tag=sha2-v0.10.6-risczero.0#7fd6900c4f637bd15ee2642dfa77110f8f1ad065"
+version = "0.10.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
 dependencies = [
  "cfg-if",
  "cpufeatures",

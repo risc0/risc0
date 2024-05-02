@@ -17,7 +17,7 @@
 use core::str::FromStr;
 
 use anyhow::{anyhow, Error, Result};
-use ark_bn254::{Fr, G1Affine, G2Affine};
+use ark_bn254::{G1Affine, G2Affine};
 use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
@@ -34,7 +34,7 @@ mod verifier;
 pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
 #[cfg(feature = "prove")]
 pub use seal_to_json::to_json;
-pub use verifier::{Verifier, VerifyingKey, VERIFYING_KEY};
+pub use verifier::{Fr, Verifier, VerifyingKey, VERIFYING_KEY};
 
 /// Splits the digest in half returning a scalar for each halve.
 pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
@@ -55,7 +55,9 @@ pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
 // Deserialize a scalar field from bytes in big-endian format
 pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
     let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
-    Fr::deserialize_uncompressed(&*scalar).map_err(|err| anyhow!(err))
+    ark_bn254::Fr::deserialize_uncompressed(&*scalar)
+        .map(Fr)
+        .map_err(|err| anyhow!(err))
 }
 
 // Deserialize an element over the G1 group from bytes in big-endian format

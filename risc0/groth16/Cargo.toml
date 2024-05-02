@@ -13,7 +13,7 @@ ark-bn254 = { version = "0.4" }
 ark-ec = { version = "0.4" }
 ark-groth16 = { version = "0.4", default-features = false }
 ark-serialize = { version = "0.4", default-features = false }
-bytemuck = { version = "1.14", optional = true }
+bytemuck = { version = "1.14" }
 hex = { version = "0.4", default-features = false, features = ["alloc"] }
 lazy_static = "1.4"
 num-bigint = { version = "0.4", default-features = false }
@@ -38,7 +38,6 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 default = ["std"]
 docker = ["prove"]
 prove = [
-  "dep:bytemuck",
   "dep:num-traits",
   "dep:risc0-core",
   "dep:serde_json",

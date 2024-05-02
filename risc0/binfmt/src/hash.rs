@@ -15,9 +15,12 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use core::borrow::Borrow;
+use core::{borrow::Borrow, mem::size_of};
 
-use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_BYTES},
+    hash::sha::Sha256,
+};
 
 /// Defines a collision resistant hash for the typed and structured data.
 pub trait Digestible {
@@ -37,6 +40,20 @@ impl Digestible for Vec<u8> {
     }
 }
 
+impl<D: Digestible> Digestible for [D] {
+    /// A default incremental hashing algorithm for a slice of Digestible elements.
+    ///
+    /// This hashing routine may not be appropriate for add use cases. In particular, it is not a
+    /// PRF and cannot be used as a MAC. Given a digest of a list, anyone can compute the digest of
+    /// that list with additional elements appended to the front of the list. It also does not
+    /// domain separate typed data, and the digest of an empty slice is the zero digest.
+    fn digest<S: Sha256>(&self) -> Digest {
+        self.iter().rfold(Digest::ZERO, |accum, item| {
+            *S::hash_bytes(&[accum.as_bytes(), item.digest::<S>().as_bytes()].concat())
+        })
+    }
+}
+
 impl<T: Digestible> Digestible for Option<T> {
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
@@ -51,7 +68,10 @@ impl<T: Digestible> Digestible for Option<T> {
 /// Used for hashing of the receipt claim, and in the recursion predicates.
 pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &[u32]) -> Digest {
     let tag_digest: Digest = *S::hash_bytes(tag.as_bytes());
-    let mut all = Vec::<u8>::new();
+    #[allow(clippy::manual_slice_size_calculation)]
+    let mut all = Vec::<u8>::with_capacity(
+        DIGEST_BYTES * (down.len() + 1) + size_of::<u32>() * data.len() + size_of::<u16>(),
+    );
     all.extend_from_slice(tag_digest.as_bytes());
     for digest in down {
         all.extend_from_slice(digest.borrow().as_ref());
