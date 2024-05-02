@@ -21,7 +21,7 @@ EOF
 }
 
 log_verbose() {
-  if [ "$VERBOSE_MODE" -eq 1 ]; then
+  if [ "$VERBOSE_MODE" -eq 0 ]; then
     echo "$@"
   fi
 }
