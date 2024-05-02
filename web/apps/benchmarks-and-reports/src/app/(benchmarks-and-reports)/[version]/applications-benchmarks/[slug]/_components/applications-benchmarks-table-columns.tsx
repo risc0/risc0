@@ -1,6 +1,6 @@
 "use client";
 
-import { createColumnHelper } from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { TableColumnHeader } from "shared/client/table/table-column-header";
 import { formatBytes } from "shared/utils/format-bytes";
 import { formatDuration } from "shared/utils/format-duration";
@@ -46,4 +46,4 @@ export const applicationsBenchmarksTableColumns = [
     header: ({ column }) => <TableColumnHeader align="right" column={column} title="Proof Bytes" />,
     cell: (info) => <div className="text-right font-mono">{formatBytes(Number(info.getValue()))}</div>,
   }),
-];
+] as ColumnDef<ApplicationsBenchmarksTableSchema, unknown>[];

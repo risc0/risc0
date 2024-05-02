@@ -4,7 +4,7 @@ import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dialog";
-import { createColumnHelper } from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { Highlight, themes } from "prism-react-renderer";
@@ -140,4 +140,4 @@ export const cratesIoValidationTableColumns = [
       );
     },
   }),
-];
+] as ColumnDef<CratesIoValidationTableSchema, unknown>[];
