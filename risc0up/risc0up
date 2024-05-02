@@ -92,7 +92,11 @@ install_cargo_binstall() {
 }
 
 binstall_cargo_risczero() {
-  execute_with_feedback "cargo binstall cargo-risczero --no-confirm" "Installing the latest version of cargo-risczero"
+  if [ -n "$RISCZERO_VERSION" ]; then
+    execute_with_feedback "cargo binstall cargo-risczero@$RISCZERO_VERSION --no-confirm" "Installing cargo-risczero version $RISCZERO_VERSION"
+  else
+    execute_with_feedback "cargo binstall cargo-risczero --no-confirm" "Installing the latest version of cargo-risczero"
+  fi
 }
 
 install_risczero() {
@@ -102,25 +106,29 @@ install_risczero() {
 usage() {
   echo "Usage: $0 [options]"
   echo "Options:"
-  echo "    --verbose                   Enable verbose output"
-  echo "    -h, --help                  Display this help message and exit"
+  echo " -v, --version VERSION  Install a specific version of cargo-risczero"
+  echo " --verbose              Enable verbose output"
+  echo " -h, --help             Display this help message and exit"
 }
 
 parse_args() {
   while [[ "$#" -gt 0 ]]; do
     case $1 in
-    --verbose) VERBOSE_MODE=1 ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown option: $1" >&2
-      usage
-      exit 1
-      ;;
+      -v | --version)
+        RISCZERO_VERSION="$2"
+        shift 2
+        ;;
+      --verbose) VERBOSE_MODE=1 ;;
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "Unknown option: $1" >&2
+        usage
+        exit 1
+        ;;
     esac
-    shift
   done
 }
 
