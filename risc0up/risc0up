@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 MIN_RUST_VERSION="1.74.1" # Minimum required Rust version
 VERBOSE_MODE=0
