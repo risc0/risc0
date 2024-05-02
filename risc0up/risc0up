@@ -7,8 +7,8 @@ print_banner() {
   cat <<"EOF"
 
     ██████  █▀▀▀██
-    ██████  █ ▄▀ █       A zero-knowledge verifiable
-    ██████  ██▄▄▄█       general computing platform.
+    ██████  █ ▄▀ █        Prove anything.
+    ██████  ██▄▄▄█       Verify everywhere.
     ██████
     ██████   RISC
     ██████   ZERO
@@ -122,20 +122,20 @@ EOF
 parse_args() {
   while [[ "$#" -gt 0 ]]; do
     case $1 in
-      -v | --version)
-        RISCZERO_VERSION="$2"
-        shift 2
-        ;;
-      --verbose) VERBOSE_MODE=1 ;;
-      -h | --help)
-        usage
-        exit 0
-        ;;
-      *)
-        echo "Unknown option: $1" >&2
-        usage
-        exit 1
-        ;;
+    -v | --version)
+      RISCZERO_VERSION="$2"
+      shift 2
+      ;;
+    --verbose) VERBOSE_MODE=1 ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
     esac
   done
 }
