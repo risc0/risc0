@@ -140,10 +140,10 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-#[cfg(not(target_os = "zkvm"))]
-pub use receipt::{CompactReceipt, SuccinctReceipt};
+#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
+pub use receipt::CompactReceipt;
 pub use receipt::{
-    Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
+    Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt, SuccinctReceipt,
     VerifierContext,
 };
 
