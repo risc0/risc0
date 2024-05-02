@@ -91,7 +91,9 @@ pub use bytes::Bytes;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-pub use self::receipt_claim::{Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim};
+pub use self::receipt_claim::{
+    Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+};
 #[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
 pub use {
     self::host::{
@@ -133,8 +135,10 @@ pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
         receipt::{
-            Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
-            SegmentReceipt, SuccinctReceipt, VerifierContext,
+            Assumption, CompactReceipt, CompactReceiptVerifierInfo, CompositeReceipt,
+            CompositeReceiptVerifierInfo, InnerReceipt, Journal, Receipt, SegmentReceipt,
+            SegmentReceiptVerifierInfo, SuccinctReceipt, SuccinctReceiptVerifierInfo,
+            VerifierContext,
         },
         recursion::ALLOWED_CONTROL_ROOT,
     },

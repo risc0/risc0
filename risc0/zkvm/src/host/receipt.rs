@@ -35,14 +35,19 @@ use risc0_zkp::{
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
+// Make succinct receipt available through this `receipt` module.
 use crate::{
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
-pub use self::{compact::CompactReceipt, composite::CompositeReceipt, segment::SegmentReceipt};
-pub use super::recursion::SuccinctReceipt;
+pub use self::{
+    compact::{CompactReceipt, CompactReceiptVerifierInfo},
+    composite::{CompositeReceipt, CompositeReceiptVerifierInfo},
+    segment::{SegmentReceipt, SegmentReceiptVerifierInfo},
+};
+pub use super::recursion::{SuccinctReceipt, SuccinctReceiptVerifierInfo};
 
 /// A receipt attesting to the execution of a guest program.
 ///
@@ -109,17 +114,26 @@ pub struct Receipt {
 
     /// The public commitment written by the guest.
     ///
-    /// This data is cryptographically authenticated in
-    /// [Receipt::verify].
+    /// This data is cryptographically authenticated in [Receipt::verify].
     pub journal: Journal,
+
+    /// Metadata providing context on the receipt, about the proving system, SDK versions, and other
+    /// information to help with interoperability. It is not cryptographically bound to the receipt,
+    /// and should not be used for security-relevant decisions, such as choosing whether or not to
+    /// accept a receipt based on it's stated version.
+    pub metadata: ReceiptMetadata,
 }
 
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
+        let metadata = ReceiptMetadata {
+            verifier_info: inner.verifier_info(),
+        };
         Self {
             inner,
             journal: Journal::new(journal),
+            metadata,
         }
     }
 
@@ -203,6 +217,14 @@ impl Receipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        // TODO(victor): Write a test to confirm this works.
+        if self.inner.verifier_info() != self.metadata.verifier_info {
+            return Err(VerificationError::VerifierInfoMismatch {
+                expected: self.inner.verifier_info(),
+                received: self.metadata.verifier_info,
+            });
+        }
+
         tracing::debug!("Receipt::verify_integrity_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
@@ -276,6 +298,7 @@ impl AsRef<[u8]> for Journal {
 /// [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
 pub enum InnerReceipt {
     /// A non-succinct [CompositeReceipt].
     Composite(CompositeReceipt),
@@ -360,6 +383,32 @@ impl InnerReceipt {
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }
     }
+
+    /// Return the digest of the verifier info struct for the appropriate receipt verifier.
+    pub fn verifier_info(&self) -> Digest {
+        match self {
+            InnerReceipt::Composite(_) => CompositeReceipt::verifier_info().digest(),
+            InnerReceipt::Compact(_) => CompactReceipt::verifier_info().digest(),
+            InnerReceipt::Succinct(_) => SuccinctReceipt::verifier_info().digest(),
+            InnerReceipt::Fake { .. } => Digest::ZERO,
+        }
+    }
+}
+
+/// Metadata providing context on the receipt, about the proving system, SDK versions, and other
+/// information to help with interoperability. It is not cryptographically bound to the receipt,
+/// and should not be used for security-relevant decisions, such as choosing whether or not to
+/// accept a receipt based on it's stated version.
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct ReceiptMetadata {
+    /// Information which can be used to decide whether a given verifier is compatible with this
+    /// receipt (i.e. that it may be able to verify it).
+    ///
+    /// It is intended to be used when there are multiple verifier implementations (e.g.
+    /// corresponding to multiple versions of a proof system or circuit) and it is ambiguous which
+    /// one should be used to attempt verification of a receipt.
+    pub verifier_info: Digest,
 }
 
 /// An assumption attached to a guest execution as a result of calling

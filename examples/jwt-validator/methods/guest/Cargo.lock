@@ -776,12 +776,15 @@ version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
+ "ark-ec",
  "ark-groth16",
  "ark-serialize",
  "hex",
+ "lazy_static",
  "num-bigint",
  "num-derive",
  "num-traits",
+ "risc0-binfmt",
  "risc0-zkp",
  "serde",
 ]

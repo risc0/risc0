@@ -276,7 +276,7 @@ extern_bigintQuotient(void* ctx, size_t cycle, const char* extra, std::array<Fp,
     return q;
   }
   if (n < 2) {
-    // TODO(victor): Not an important case. But we should likely handle it anyway.
+    // NOTE: Not an important case, and so has not been implemented.
     throw std::runtime_error("bigint quotient: denominator must be at least 9 bits");
   }
   size_t m = a.size() - n - 1;

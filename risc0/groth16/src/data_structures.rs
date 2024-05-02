@@ -18,11 +18,10 @@ use alloc::{vec, vec::Vec};
 
 use anyhow::{anyhow, Error, Result};
 use ark_bn254::{Bn254, Fr};
-use ark_groth16::{prepare_verifying_key, PreparedVerifyingKey, VerifyingKey};
 use core::str::FromStr;
 use serde::{Deserialize, Serialize};
 
-use crate::{from_u256, g1_from_bytes, g2_from_bytes};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes, VerifyingKey};
 
 /// Groth16 seal object encoded in big endian.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -137,7 +136,7 @@ pub struct ProofJson {
     curve: Option<String>,
 }
 
-/// Groth16 VErifying Key encoded as JSON.
+/// Groth16 Verifying Key encoded as JSON.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct VerifyingKeyJson {
     protocol: String,
@@ -155,7 +154,7 @@ pub struct VerifyingKeyJson {
 
 impl VerifyingKeyJson {
     /// Computes the prepared verifying key
-    pub fn prepared_verifying_key(&self) -> Result<PreparedVerifyingKey<Bn254>, Error> {
+    pub fn verifying_key(&self) -> Result<VerifyingKey, Error> {
         if self.vk_alpha_1.len() < 2 {
             return Err(anyhow!("Malformed G1 element field: vk_alpha_1"));
         }
@@ -220,15 +219,13 @@ impl VerifyingKeyJson {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        let vk = VerifyingKey::<Bn254> {
+        Ok(VerifyingKey(ark_groth16::VerifyingKey::<Bn254> {
             alpha_g1,
             beta_g2,
             gamma_g2,
             delta_g2,
             gamma_abc_g1,
-        };
-
-        Ok(prepare_verifying_key(&vk))
+        }))
     }
 }
 
@@ -394,6 +391,6 @@ mod tests {
         assert_eq!(vk.protocol, "groth16");
         assert_eq!(vk.curve, "bn128");
         assert_eq!(vk.n_public, 1);
-        vk.prepared_verifying_key().unwrap();
+        vk.verifying_key().unwrap();
     }
 }

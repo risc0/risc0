@@ -53,12 +53,10 @@ impl Prover for LocalProver {
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         match receipt.inner {
             InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
-            InnerReceipt::Composite(ref inner) => Ok(Receipt {
-                inner: InnerReceipt::Succinct(
-                    get_prover_server(opts)?.compsite_to_succinct(inner)?,
-                ),
-                journal: receipt.journal.clone(),
-            }),
+            InnerReceipt::Composite(ref inner) => Ok(Receipt::new(
+                InnerReceipt::Succinct(get_prover_server(opts)?.compsite_to_succinct(inner)?),
+                receipt.journal.bytes.clone(),
+            )),
             InnerReceipt::Fake { .. } => {
                 bail!("BonsaiProver does not support compress on a composite receipt")
             }

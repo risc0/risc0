@@ -128,12 +128,10 @@ impl Prover for ExternalProver {
             InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
             InnerReceipt::Composite(ref composite) => {
                 let client = ApiClient::new_sub_process(&self.r0vm_path)?;
-                Ok(Receipt {
-                    inner: InnerReceipt::Succinct(Self::compress_internal(
-                        &client, opts, composite,
-                    )?),
-                    journal: receipt.journal.clone(),
-                })
+                Ok(Receipt::new(
+                    InnerReceipt::Succinct(Self::compress_internal(&client, opts, composite)?),
+                    receipt.journal.bytes.clone(),
+                ))
             }
             InnerReceipt::Fake { .. } => {
                 bail!("ExternalProver cannot compress a fake receipt")

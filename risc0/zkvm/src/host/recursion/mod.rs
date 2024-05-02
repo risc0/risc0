@@ -26,7 +26,7 @@ mod tests;
 
 pub use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 
-pub use self::receipt::SuccinctReceipt;
+pub use self::receipt::{SuccinctReceipt, SuccinctReceiptVerifierInfo};
 #[cfg(feature = "prove")]
 pub use self::{
     prove::{

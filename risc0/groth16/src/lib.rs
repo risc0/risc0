@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Core module used to implement Groth16.
+//! Groth16 prover and verifier integration for RISC Zero.
 
 use core::str::FromStr;
 
@@ -22,19 +22,35 @@ use ark_serialize::CanonicalDeserialize;
 use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
 
-pub mod data_structures;
+mod data_structures;
 #[cfg(feature = "prove")]
 pub mod docker;
 #[cfg(feature = "prove")]
 mod seal_format;
 #[cfg(feature = "prove")]
 mod seal_to_json;
-pub mod verifier;
+mod verifier;
 
 pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
 #[cfg(feature = "prove")]
 pub use seal_to_json::to_json;
-pub use verifier::Verifier;
+pub use verifier::{Verifier, VerifyingKey, VERIFYING_KEY};
+
+/// Splits the digest in half returning a scalar for each halve.
+pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
+    let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
+    let middle = big_endian.len() / 2;
+    let (b, a) = big_endian.split_at(middle);
+    Ok((
+        fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(a)))?)?,
+        fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(b)))?)?,
+    ))
+}
+
+/// Creates an `ark_bn254::Fr` from a hex string
+pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
+    fr_from_bytes(&from_u256(&format!("0x{}", val))?)
+}
 
 // Deserialize a scalar field from bytes in big-endian format
 pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
@@ -96,20 +112,4 @@ fn to_fixed_array(input: Vec<u8>) -> [u8; 32] {
     let start = core::cmp::max(32, input.len()) - core::cmp::min(32, input.len());
     fixed_array[start..].copy_from_slice(&input[input.len().saturating_sub(32)..]);
     fixed_array
-}
-
-/// Splits the digest in half returning a scalar for each halve.
-pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
-    let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
-    let middle = big_endian.len() / 2;
-    let (b, a) = big_endian.split_at(middle);
-    Ok((
-        fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(a)))?)?,
-        fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(b)))?)?,
-    ))
-}
-
-/// Creates an `ark_bn254::Fr` from a hex string
-pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
-    fr_from_bytes(&from_u256(&format!("0x{}", val))?)
 }

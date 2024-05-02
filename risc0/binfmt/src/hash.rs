@@ -71,10 +71,21 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &
 ///
 /// Used for hashing of the receipt claim assumptions list, and in the recursion
 /// predicates.
-pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest {
-    list.iter().rev().fold(Digest::ZERO, |list_digest, elem| {
+pub fn tagged_iter<S: Sha256>(
+    tag: &str,
+    iter: impl DoubleEndedIterator<Item = impl Borrow<Digest>>,
+) -> Digest {
+    iter.rfold(Digest::ZERO, |list_digest, elem| {
         tagged_list_cons::<S>(tag, elem.borrow(), &list_digest)
     })
+}
+
+/// A list hashing routine, permitting iterative opening over elements.
+///
+/// Used for hashing of the receipt claim assumptions list, and in the recursion
+/// predicates.
+pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest {
+    tagged_iter::<S>(tag, list.iter().map(|x| x.borrow()))
 }
 
 /// Calculate the hash resulting from adding one element to a [tagged_list]
