@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 MIN_RUST_VERSION="1.74.1" # Minimum required Rust version
-VERBOSE_MODE=0
+VERBOSE_MODE=1
 
 print_banner() {
   cat <<"EOF"
@@ -43,7 +43,7 @@ execute_with_feedback() {
 
   echo "$MESSAGE..."
 
-  if [ "$VERBOSE_MODE" -eq 1 ]; then
+  if [ "$VERBOSE_MODE" -eq 0 ]; then
     echo "Executing: $COMMAND"
     eval "$COMMAND"
     local STATUS=$?
@@ -110,7 +110,7 @@ The installer for RISC Zero.
 Install, update or revert to a specific RISC Zero version.
 
 USAGE:
-    foundryup <OPTIONS>
+    rzup <OPTIONS>
 
 OPTIONS:
     -h, --help      Print help information
@@ -126,7 +126,10 @@ parse_args() {
       RISCZERO_VERSION="$2"
       shift 2
       ;;
-    --verbose) VERBOSE_MODE=1 ;;
+    --verbose)
+      VERBOSE_MODE=$((1 - VERBOSE_MODE))
+      shift
+      ;;
     -h | --help)
       usage
       exit 0
