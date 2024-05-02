@@ -61,7 +61,7 @@ pub enum RisczeroCmd {
     New(NewCommand),
     /// Uploads the guest code to Bonsai.
     Deploy(DeployCommand),
-    /// Verify if a receipt is valid.
+    /// Verifies if a receipt is valid.
     Verify(VerifyCommand),
     /// Build a crate for RISC Zero.
     #[cfg(feature = "experimental")]
