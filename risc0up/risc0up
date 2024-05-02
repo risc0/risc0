@@ -104,11 +104,19 @@ install_risczero() {
 }
 
 usage() {
-  echo "Usage: $0 [options]"
-  echo "Options:"
-  echo " -v, --version VERSION  Install a specific version of cargo-risczero"
-  echo " --verbose              Enable verbose output"
-  echo " -h, --help             Display this help message and exit"
+  cat 1>&2 <<EOF
+The installer for RISC Zero.
+
+Install, update or revert to a specific RISC Zero version.
+
+USAGE:
+    foundryup <OPTIONS>
+
+OPTIONS:
+    -h, --help      Print help information
+    -v, --version   Install a specific version of cargo-risczero
+    --verbose       Enable verbose output
+EOF
 }
 
 parse_args() {
