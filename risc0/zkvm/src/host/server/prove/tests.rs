@@ -495,7 +495,7 @@ fn sys_input() {
     prove_session_fast(&session);
 }
 
-//#[cfg(feature = "docker")]
+#[cfg(feature = "docker")]
 mod docker {
     use crate::{
         default_prover, get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl, ExitCode,
@@ -617,6 +617,8 @@ mod docker {
         exec_verify(&composite_receipt);
         let succinct_receipt = default_prover().compress(&ProverOpts::succinct(), &composite_receipt).unwrap();
         exec_verify(&succinct_receipt);
+        let compact_receipt = default_prover().compress(&ProverOpts::compact(), &succinct_receipt).unwrap();
+        exec_verify(&compact_receipt);
     }
 
     #[test]
