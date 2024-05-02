@@ -608,7 +608,7 @@ mod docker {
             .run()
             .unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
-        tracing::info!("{:?}", session.stats());
+        println!("{:?}", session.stats());
     }
 
     #[test]

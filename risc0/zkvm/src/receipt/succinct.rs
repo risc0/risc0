@@ -113,10 +113,10 @@ impl SuccinctReceipt {
             .map_err(|_| VerificationError::ReceiptFormatError)?;
         let allowed_root = Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap();
         if control_root != allowed_root {
-            tracing::debug!(
-                "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {allowed_root:?}",
-                control_root,
-            );
+            //tracing::debug!(
+            //    "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {allowed_root:?}",
+            //    control_root,
+            //);
             return Err(VerificationError::ControlVerificationError {
                 control_id: control_root,
             });
@@ -126,10 +126,10 @@ impl SuccinctReceipt {
         let output_hash =
             read_sha_halfs(&mut seal_claim).map_err(|_| VerificationError::ReceiptFormatError)?;
         if output_hash != self.claim.digest() {
-            tracing::debug!(
-                "succinct receipt claim does not match the output digest: claim: {:#?}, digest expected: {output_hash:?}",
-                self.claim,
-            );
+            //tracing::debug!(
+            //    "succinct receipt claim does not match the output digest: claim: {:#?}, digest expected: {output_hash:?}",
+            //    self.claim,
+            //);
             return Err(VerificationError::JournalDigestMismatch);
         }
         // Everything passed
