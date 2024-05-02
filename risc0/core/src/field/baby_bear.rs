@@ -56,7 +56,7 @@ const R2: u32 = 1172168163;
 /// - Otherwise have as large a power of 2 in the factors of P-1 as possible.
 ///
 /// This last property is useful for number theoretical transforms (the fast
-/// fourier transform equivalent on finite fields). See [risc0_zkp::core::ntt]
+/// fourier transform equivalent on finite fields). See risc0_zkp::core::ntt
 /// for details.
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite

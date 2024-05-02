@@ -3,7 +3,7 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 import { latestVersion } from "./src/versions.js";
 
 /** @type {import("next").NextConfig} */
-const config = {
+let config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -27,10 +27,19 @@ const config = {
         destination: latestVersion ? `/${latestVersion}` : "/",
         permanent: true,
       },
+      {
+        source: "/:version/applications-benchmarks",
+        destination: "/:version/applications-benchmarks/macOS-apple_m2_pro", // TODO: make sure this is the right default
+        permanent: true,
+      },
     ];
   },
 };
 
-export default withBundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-})(config);
+if (process.env.ANALYZE === "true") {
+  config = withBundleAnalyzer({
+    enabled: true,
+  })(config);
+}
+
+export default config;
