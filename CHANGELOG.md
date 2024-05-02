@@ -4,7 +4,7 @@
 ### 🔥 Prover Performance Improvements
 
 * Witness generation has been parallelized by adding another preflight pass.
-* Improved performance by using precomputed Merkle roots.
+* Improved performance by minimizing data transfers when constructing merkle proofs.
 * Parallelized `step_verify_bytes` function.
 * Changed `eval_check` to precomputing powers of poly_mix.
 
