@@ -28,7 +28,6 @@ pub struct VerifyCommand {
     source: Source,
 
     /// The image ID to verify the receipt against.
-    #[arg(long)]
     image_id: String,
 
     /// The client environment variables.
@@ -43,7 +42,7 @@ struct Source {
     #[arg(group = "source", long)]
     path: Option<String>,
 
-    /// The ID of the receipt.
+    /// The Bonsai ID of the receipt to download and verify.
     #[arg(groups = ["source", "bonsai"], long)]
     id: Option<String>,
 }
