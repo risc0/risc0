@@ -152,7 +152,7 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
-        //tracing::debug!("Receipt::verify_with_context");
+        tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
         // NOTE: Post-state digest and input digest are unconstrained by this method.
@@ -178,15 +178,15 @@ impl Receipt {
         if claim.output.digest() != expected_output.digest() {
             let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
-                //tracing::debug!(
-                //    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                //    hex::encode(&self.journal.bytes),
-                //    hex::encode(expected_output.digest()),
-                //    hex::encode(claim.output.digest()),
-                //);
+                tracing::debug!(
+                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                    hex::encode(&self.journal.bytes),
+                    hex::encode(expected_output.digest()),
+                    hex::encode(claim.output.digest()),
+                );
                 return Err(VerificationError::JournalDigestMismatch);
             }
-            //tracing::debug!("accepting zero digest for output of receipt with empty journal");
+            tracing::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
@@ -207,7 +207,7 @@ impl Receipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        //tracing::debug!("Receipt::verify_integrity_with_context");
+        tracing::debug!("Receipt::verify_integrity_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
         // Check that self.journal is attested to by the inner receipt.
@@ -225,15 +225,15 @@ impl Receipt {
         if claim.output.digest() != expected_output.digest() {
             let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
-                //tracing::debug!(
-                //    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                //    hex::encode(&self.journal.bytes),
-                //    hex::encode(expected_output.digest()),
-                //    hex::encode(claim.output.digest()),
-                //);
+                tracing::debug!(
+                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                    hex::encode(&self.journal.bytes),
+                    hex::encode(expected_output.digest()),
+                    hex::encode(claim.output.digest()),
+                );
                 return Err(VerificationError::JournalDigestMismatch);
             }
-            //tracing::debug!("accepting zero digest for output of receipt with empty journal");
+            tracing::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
@@ -314,7 +314,7 @@ impl InnerReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        //tracing::debug!("InnerReceipt::verify_integrity_with_context");
+        tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
             #[cfg(any(not(target_os = "zkvm"), feature = "std"))]

@@ -55,7 +55,7 @@ impl CompositeReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        //tracing::debug!("CompositeReceipt::verify_integrity_with_context");
+        tracing::debug!("CompositeReceipt::verify_integrity_with_context");
         // Verify the continuation, by verifying every segment receipt in order.
         let (final_receipt, receipts) = self
             .segments
@@ -67,7 +67,7 @@ impl CompositeReceipt {
         let mut expected_pre_state_digest = None;
         for receipt in receipts {
             receipt.verify_integrity_with_context(ctx)?;
-            //tracing::debug!("claim: {:#?}", receipt.claim);
+            tracing::debug!("claim: {:#?}", receipt.claim);
             if let Some(id) = expected_pre_state_digest {
                 if id != receipt.claim.pre.digest() {
                     return Err(VerificationError::ImageVerificationError);
@@ -91,7 +91,7 @@ impl CompositeReceipt {
 
         // Verify the last receipt in the continuation.
         final_receipt.verify_integrity_with_context(ctx)?;
-        //tracing::debug!("final: {:#?}", final_receipt.claim);
+        tracing::debug!("final: {:#?}", final_receipt.claim);
         if let Some(id) = expected_pre_state_digest {
             if id != final_receipt.claim.pre.digest() {
                 return Err(VerificationError::ImageVerificationError);
@@ -100,7 +100,7 @@ impl CompositeReceipt {
 
         // Verify all assumption receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
-            //tracing::debug!("verifying assumption: {:?}", receipt.claim()?.digest());
+            tracing::debug!("verifying assumption: {:?}", receipt.claim()?.digest());
             receipt.verify_integrity_with_context(ctx)?;
         }
 
@@ -158,10 +158,10 @@ impl CompositeReceipt {
     /// consistent with the exit code, and with the journal_digest and
     /// assumptions encoded on self.
     fn verify_output_consistency(&self, claim: &ReceiptClaim) -> Result<(), VerificationError> {
-        //tracing::debug!(
-        //    "verify_output_consistency: exit_code = {:?}",
-        //    claim.exit_code
-        //);
+        tracing::debug!(
+            "verify_output_consistency: exit_code = {:?}",
+            claim.exit_code
+        );
         if claim.exit_code.expects_output() && claim.output.is_some() {
             let self_output = Output {
                 journal: MaybePruned::Pruned(
@@ -179,11 +179,11 @@ impl CompositeReceipt {
                         .ok_or(VerificationError::ReceiptFormatError)?
                         == Vec::<u8>::new().digest();
                 if !empty_output {
-                    //tracing::debug!(
-                    //    "output digest does not match: expected {:?}; decoded {:?}",
-                    //    &self_output,
-                    //    &claim.output
-                    //);
+                    tracing::debug!(
+                        "output digest does not match: expected {:?}; decoded {:?}",
+                        &self_output,
+                        &claim.output
+                    );
                     return Err(VerificationError::ReceiptFormatError);
                 }
             }
@@ -191,21 +191,21 @@ impl CompositeReceipt {
             // Ensure all output fields are empty. If not, this receipt is internally
             // inconsistent.
             if claim.output.is_some() {
-                //tracing::debug!("unexpected non-empty claim output: {:?}", &claim.output);
+                tracing::debug!("unexpected non-empty claim output: {:?}", &claim.output);
                 return Err(VerificationError::ReceiptFormatError);
             }
             if !self.assumptions.is_empty() {
-                //tracing::debug!(
-                //    "unexpected non-empty composite receipt assumptions: {:?}",
-                //    &self.assumptions
-                //);
+                tracing::debug!(
+                    "unexpected non-empty composite receipt assumptions: {:?}",
+                    &self.assumptions
+                );
                 return Err(VerificationError::ReceiptFormatError);
             }
             if self.journal_digest.is_some() {
-                //tracing::debug!(
-                //    "unexpected non-empty composite receipt journal_digest: {:?}",
-                //    &self.journal_digest
-                //);
+                tracing::debug!(
+                    "unexpected non-empty composite receipt journal_digest: {:?}",
+                    &self.journal_digest
+                );
                 return Err(VerificationError::ReceiptFormatError);
             }
         }

@@ -13,7 +13,6 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { path = "../..", default-features = false, features = ["std", "getrandom"] }
-risc0-zkp = { path = "../../../zkp" }
 risc0-zkvm-methods = { path = "..", default-features = false }
 
 [profile.release]

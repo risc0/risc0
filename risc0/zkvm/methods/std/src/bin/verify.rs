@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{guest::env, Receipt};
-use risc0_zkp::core::digest:: Digest;
+use risc0_zkvm::{guest::env, sha::Digest, Receipt};
 
 fn main() {
     let (receipt, image_id): (Receipt, Digest) = env::read();
