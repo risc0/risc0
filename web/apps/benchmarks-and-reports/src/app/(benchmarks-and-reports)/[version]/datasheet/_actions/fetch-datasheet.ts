@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import { unstable_noStore as noStore } from "next/cache";
 import env from "~/env";

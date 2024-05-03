@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import env from "~/env";
 import type { CratesIoValidationTableSchema } from "../_components/crates-io-validation-table-schema";
