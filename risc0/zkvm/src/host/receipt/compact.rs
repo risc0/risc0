@@ -93,7 +93,7 @@ impl Digestible for CompactReceiptVerifierInfo {
     /// Hash the [CompactReceiptVerifierInfo] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
-            "risc0.SuccinctReceiptVerifierInfo",
+            "risc0.CompactReceiptVerifierInfo",
             &[
                 self.control_root,
                 self.bn254_control_id,
