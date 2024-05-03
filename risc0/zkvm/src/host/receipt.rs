@@ -162,6 +162,13 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
+        if self.inner.verifier_info() != self.metadata.verifier_info {
+            return Err(VerificationError::VerifierInfoMismatch {
+                expected: self.inner.verifier_info(),
+                received: self.metadata.verifier_info,
+            });
+        }
+
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
@@ -217,7 +224,6 @@ impl Receipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        // TODO(victor): Write a test to confirm this works.
         if self.inner.verifier_info() != self.metadata.verifier_info {
             return Err(VerificationError::VerifierInfoMismatch {
                 expected: self.inner.verifier_info(),
@@ -488,5 +494,63 @@ impl Default for VerifierContext {
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{InnerReceipt, Receipt};
+    use crate::{
+        sha::{Digest, DIGEST_BYTES},
+        ExitCode, MaybePruned, ReceiptClaim,
+    };
+    use risc0_zkp::verify::VerificationError;
+
+    #[test]
+    fn mangled_version_info_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Pruned(Digest::ZERO),
+            post: MaybePruned::Pruned(Digest::ZERO),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: None.into(),
+        };
+
+        let mut mangled_receipt = Receipt::new(
+            InnerReceipt::Fake {
+                claim: claim.clone(),
+            },
+            vec![],
+        );
+        let ones_digest = Digest::from([1u8; DIGEST_BYTES]);
+        mangled_receipt.metadata.verifier_info = ones_digest;
+
+        assert_eq!(
+            mangled_receipt.verify(Digest::ZERO).err().unwrap(),
+            VerificationError::VerifierInfoMismatch {
+                expected: Digest::ZERO,
+                received: ones_digest
+            }
+        );
+        assert_eq!(
+            mangled_receipt
+                .verify_with_context(&Default::default(), Digest::ZERO)
+                .err()
+                .unwrap(),
+            VerificationError::VerifierInfoMismatch {
+                expected: Digest::ZERO,
+                received: ones_digest
+            }
+        );
+        assert_eq!(
+            mangled_receipt
+                .verify_integrity_with_context(&Default::default())
+                .err()
+                .unwrap(),
+            VerificationError::VerifierInfoMismatch {
+                expected: Digest::ZERO,
+                received: ones_digest
+            }
+        );
     }
 }
