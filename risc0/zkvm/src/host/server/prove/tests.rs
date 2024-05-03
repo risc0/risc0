@@ -498,7 +498,7 @@ fn sys_input() {
 #[cfg(feature = "docker")]
 mod docker {
     use crate::{
-        default_prover, get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl, ExitCode,
+        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl, ExitCode,
         InnerReceipt, ProverOpts, Receipt, ReceiptKind, VerifierContext,
     };
     use anyhow::{bail, Result};
