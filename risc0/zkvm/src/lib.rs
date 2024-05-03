@@ -60,8 +60,8 @@
 //! [`cargo risczero` tool]: https://crates.io/crates/cargo-risczero
 //! [dev-docs]: https://dev.risczero.com
 //! [examples]: https://dev.risczero.com/api/zkvm/examples
-//! [receipt]: crate::host::receipt::Receipt
-//! [receipt-verify]: crate::host::receipt::Receipt::verify
+//! [receipt]: crate::receipt::Receipt
+//! [receipt-verify]: crate::receipt::Receipt::verify
 //! [rust guest workarounds]:
 //!     https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22
 //! [YouTube]: https://www.youtube.com/@risczero
