@@ -90,7 +90,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ] }
-enum-iterator = "2.0"
+enum-iterator = "2.1"
 flate2 = "1.0"
 hotbench = { workspace = true }
 human-repr = { version = "1.0", features = ["1024"] }
