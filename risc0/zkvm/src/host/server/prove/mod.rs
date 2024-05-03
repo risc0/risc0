@@ -21,7 +21,7 @@ mod tests;
 
 use std::rc::Rc;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use cfg_if::cfg_if;
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::hal::{CircuitHal, Hal};
@@ -135,22 +135,24 @@ pub trait ProverServer {
         })
     }
 
-    /// Compress a [SuccinctReceipt] into a [CompactReceipt].
+    /// Compress a receipt into one with a smaller representation.
+    ///
+    /// The requested target representation is determined by the [ReceiptKind] specified on the
+    /// provided [ProverOpts]. If the receipt is already at least as compressed as the requested
+    /// kind, this is a no-op.
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         match &receipt.inner {
-            // note: fake receipts are only used in development. Therefore, compresing a fake receipt is a no-op.
-            InnerReceipt::Fake { claim: _ } => Ok(receipt.clone()),
-            InnerReceipt::Composite(_) => match opts.receipt_kind {
+            InnerReceipt::Composite(inner) => match opts.receipt_kind {
                 ReceiptKind::Composite => Ok(receipt.clone()),
                 ReceiptKind::Succinct => {
-                    let succinct_receipt = self.compsite_to_succinct(receipt.inner.composite()?)?;
+                    let succinct_receipt = self.compsite_to_succinct(inner)?;
                     Ok(Receipt::new(
                         InnerReceipt::Succinct(succinct_receipt),
                         receipt.journal.bytes.clone(),
                     ))
                 }
                 ReceiptKind::Compact => {
-                    let succinct_receipt = self.compsite_to_succinct(receipt.inner.composite()?)?;
+                    let succinct_receipt = self.compsite_to_succinct(inner)?;
                     let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
                     Ok(Receipt::new(
                         InnerReceipt::Compact(compact_receipt),
@@ -158,13 +160,10 @@ pub trait ProverServer {
                     ))
                 }
             },
-            InnerReceipt::Succinct(_) => match opts.receipt_kind {
-                ReceiptKind::Composite => {
-                    bail!("compressing a succinct receipt to a composite receipt is not supported.")
-                }
-                ReceiptKind::Succinct => Ok(receipt.clone()),
+            InnerReceipt::Succinct(inner) => match opts.receipt_kind {
+                ReceiptKind::Composite | ReceiptKind::Succinct => Ok(receipt.clone()),
                 ReceiptKind::Compact => {
-                    let compact_receipt = self.succinct_to_compact(receipt.inner.succinct()?)?;
+                    let compact_receipt = self.succinct_to_compact(inner)?;
                     Ok(Receipt::new(
                         InnerReceipt::Compact(compact_receipt),
                         receipt.journal.bytes.clone(),
@@ -172,14 +171,17 @@ pub trait ProverServer {
                 }
             },
             InnerReceipt::Compact(_) => match opts.receipt_kind {
-                ReceiptKind::Composite => {
-                    bail!("compressing a compact receipt to a composite receipt is not supported.")
+                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Compact => {
+                    Ok(receipt.clone())
                 }
-                ReceiptKind::Succinct => {
-                    bail!("compressing a compact receipt to a succinct receipt is not supported.")
-                }
-                ReceiptKind::Compact => Ok(receipt.clone()),
             },
+            InnerReceipt::Fake { claim: _ } => {
+                ensure!(
+                    is_dev_mode(),
+                    "dev mode must be enabled to compress fake receipts"
+                );
+                Ok(receipt.clone())
+            }
         }
     }
 }
@@ -304,11 +306,7 @@ mod cpu {
         let hal = Rc::new(CpuHal::new(suite));
         let circuit_hal = Rc::new(CpuCircuitHal::new());
         let hal_pair = HalPair { hal, circuit_hal };
-        Ok(Rc::new(ProverImpl::new(
-            "cpu",
-            hal_pair,
-            opts.receipt_kind.clone(),
-        )))
+        Ok(Rc::new(ProverImpl::new("cpu", hal_pair, opts.receipt_kind)))
     }
 }
 

@@ -20,7 +20,8 @@ use crate::{
         prove_info::ProveInfo,
         server::session::null_callback,
     },
-    ExecutorEnv, ExecutorImpl, ProverServer, Receipt, Segment, Session, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Segment, Session,
+    VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -103,5 +104,14 @@ impl ProverServer for DevModeProver {
 
     fn identity_p254(&self, _a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
         unimplemented!("This is unsupported for dev mode.")
+    }
+
+    fn compress(&self, _opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        Ok(Receipt::new(
+            InnerReceipt::Fake {
+                claim: receipt.claim()?,
+            },
+            receipt.journal.bytes.clone(),
+        ))
     }
 }

@@ -19,12 +19,10 @@ use hex::FromHex;
 use regex::Regex;
 use risc0_zkvm::{
     get_prover_server,
-    recursion::identity_p254,
     sha::{Digest, Digestible},
-    stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
-    VerifierContext, ALLOWED_CONTROL_ROOT,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
 use crate::bootstrap::Bootstrap;
 
@@ -160,7 +158,8 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 
  library TestReceipt {
 "#;
-    let (receipt, image_id) = generate_receipt();
+    let receipt = generate_receipt();
+    let image_id = receipt.claim().unwrap().pre.digest();
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
     let post_digest = format!(
         "0x{}",
@@ -200,7 +199,7 @@ fn split_digest(d: Digest) -> (String, String) {
 
 // Return a Compact `Receipt` and the imageID used to generate the proof.
 // Requires running Docker on an x86 architecture.
-fn generate_receipt() -> (Receipt, Digest) {
+fn generate_receipt() -> Receipt {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::BusyLoop { cycles: 0 })
         .unwrap()
@@ -213,27 +212,10 @@ fn generate_receipt() -> (Receipt, Digest) {
     let session = exec.run().unwrap();
 
     tracing::info!("prove");
-    let opts = ProverOpts::default();
-    let ctx = VerifierContext::default();
-    let prover = get_prover_server(&opts).unwrap();
-    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
-    let claim = receipt.claim().unwrap();
-    let composite_receipt = receipt.inner.composite().unwrap();
-    let succinct_receipt = prover.compsite_to_succinct(composite_receipt).unwrap();
-    let journal = session.journal.unwrap().bytes;
+    let prover = get_prover_server(&ProverOpts::compact()).unwrap();
 
-    tracing::info!("identity_p254");
-    let ident_receipt = identity_p254(&succinct_receipt).unwrap();
-    let seal_bytes = ident_receipt.get_seal_bytes();
-
-    tracing::info!("stark-to-snark");
-    let seal = stark_to_snark(&seal_bytes).unwrap().to_vec();
-
-    tracing::info!("Receipt");
-    let compact_receipt = Receipt::new(
-        InnerReceipt::Compact(CompactReceipt { seal, claim }),
-        journal,
-    );
-    let image_id = Digest::from(MULTI_TEST_ID);
-    (compact_receipt, image_id)
+    prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap()
+        .receipt
 }
