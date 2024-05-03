@@ -23,7 +23,7 @@ use parking_lot::{
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use super::{tracker, Buffer, Hal};
+use super::{tracker, Buffer, Hal,BufferElem};
 use crate::{
     core::{
         digest::Digest,
@@ -260,41 +260,13 @@ impl<F: Field> Hal for CpuHal<F> {
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Debug + PartialEq> = CpuBuffer<T>;
+    type Buffer<T: BufferElem> = CpuBuffer<T>;
 
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+
+    fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T> {
         CpuBuffer::new(name, size)
     }
-
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
-        CpuBuffer::copy_from(name, slice)
-    }
-
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        CpuBuffer::new(name, size)
-    }
-
-    fn copy_from_extelem(
-        &self,
-        name: &'static str,
-        slice: &[Self::ExtElem],
-    ) -> Self::Buffer<Self::ExtElem> {
-        CpuBuffer::copy_from(name, slice)
-    }
-
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        CpuBuffer::new(name, size)
-    }
-
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        CpuBuffer::copy_from(name, slice)
-    }
-
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        CpuBuffer::new(name, size)
-    }
-
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+    fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T>{
         CpuBuffer::copy_from(name, slice)
     }
 
@@ -624,8 +596,8 @@ mod tests {
     #[should_panic]
     fn check_req() {
         let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
-        let a = hal.alloc_elem("a", 10);
-        let b = hal.alloc_elem("b", 20);
+        let a = hal.alloc("a", 10);
+        let b = hal.alloc("b", 20);
         hal.eltwise_add_elem(&a, &b, &b);
     }
 
@@ -649,9 +621,9 @@ mod tests {
         HF: Fn(&H::Buffer<H::Elem>, &H::Buffer<H::Elem>, &H::Buffer<H::Elem>),
         CF: Fn(&H::Elem, &H::Elem) -> H::Elem,
     {
-        let a = hal.alloc_elem("a", count);
-        let b = hal.alloc_elem("b", count);
-        let o = hal.alloc_elem("o", count);
+        let a = hal.alloc("a", count);
+        let b = hal.alloc("b", count);
+        let o = hal.alloc("o", count);
         let mut golden = Vec::with_capacity(count);
         let mut rng = thread_rng();
         a.view_mut(|a| {
@@ -674,8 +646,8 @@ mod tests {
     fn do_hash_rows(rows: usize, cols: usize, expected: &[&str]) {
         let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
         let matrix_size = rows * cols;
-        let matrix = hal.alloc_elem("matrix", matrix_size);
-        let output = hal.alloc_digest("output", rows);
+        let matrix = hal.alloc("matrix", matrix_size);
+        let output = hal.alloc("output", rows);
         hal.hash_rows(&output, &matrix);
         output.view(|view| {
             assert_eq!(expected.len(), view.len());
@@ -698,7 +670,7 @@ mod tests {
     fn prefix_products() {
         let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
         let io = vec![BabyBearExtElem::from_u32(2); 4];
-        let io = hal.copy_from_extelem("io", &io);
+        let io = hal.copy_from("io", &io);
         hal.prefix_products(&io);
 
         let io: Vec<_> = io.as_slice().iter().cloned().collect();

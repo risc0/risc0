@@ -160,12 +160,12 @@ pub struct CudaHashPoseidon {
 impl CudaHash for CudaHashPoseidon {
     fn new(hal: &CudaHal<Self>) -> Self {
         let round_constants =
-            hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
-        let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
+            hal.copy_from("round_constants", poseidon::consts::ROUND_CONSTANTS);
+        let mds = hal.copy_from("mds", poseidon::consts::MDS);
         let partial_comp_matrix =
-            hal.copy_from_elem("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
+            hal.copy_from("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
         let partial_comp_offset =
-            hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
+            hal.copy_from("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
         CudaHashPoseidon {
             suite: PoseidonHashSuite::new_suite(),
             round_constants,
@@ -246,8 +246,8 @@ pub struct CudaHashPoseidon2 {
 impl CudaHash for CudaHashPoseidon2 {
     fn new(hal: &CudaHal<Self>) -> Self {
         let round_constants =
-            hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
-        let m_int_diag = hal.copy_from_elem("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
+            hal.copy_from("round_constants", poseidon2::consts::ROUND_CONSTANTS);
+        let m_int_diag = hal.copy_from("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
         CudaHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
             round_constants,
@@ -765,8 +765,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         input_size: usize,
         count: usize,
     ) {
-        let mix_start = self.copy_from_extelem("mix_start", &[*mix_start]);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
+        let mix_start = self.copy_from("mix_start", &[*mix_start]);
+        let mix = self.copy_from("mix", &[*mix]);
 
         let kernel = self.module.get_function("mix_poly_coeffs").unwrap();
         let params = self.compute_simple_params(count);
@@ -870,7 +870,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
+        let mix = self.copy_from("mix", &[*mix]);
 
         let kernel = self.module.get_function("fri_fold").unwrap();
         let params = self.compute_simple_params(count);

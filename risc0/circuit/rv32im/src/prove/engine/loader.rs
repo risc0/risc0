@@ -386,7 +386,7 @@ impl<'a> Loader<'a> {
         // Make a vector & set it up with the elf data
         loader.load();
         // Copy into accel buffer
-        let coeffs = hal.copy_from_elem("coeffs", &ctrl.as_slice());
+        let coeffs = hal.copy_from("coeffs", &ctrl.as_slice());
         // Do interpolate & shift
         hal.batch_interpolate_ntt(&coeffs, ctrl_size);
         hal.zk_shift(&coeffs, ctrl_size);

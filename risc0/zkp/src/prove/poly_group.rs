@@ -68,7 +68,7 @@ impl<H: Hal> PolyGroup<H> {
         nvtx::range_push!("poly_group({name})");
         assert_eq!(coeffs.size(), count * size);
         let domain = size * INV_RATE;
-        let evaluated = hal.alloc_elem("evaluated", count * domain);
+        let evaluated = hal.alloc("evaluated", count * domain);
         hal.batch_expand_into_evaluate_ntt(&evaluated, &coeffs, count, log2_ceil(INV_RATE));
         hal.batch_bit_reverse(&coeffs, count);
         let merkle = MerkleTreeProver::new(hal, &evaluated, domain, count, QUERIES);

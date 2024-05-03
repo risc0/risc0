@@ -26,7 +26,7 @@ use risc0_core::field::{
     Elem, ExtElem, RootsOfUnity,
 };
 
-use super::{tracker, Buffer, Hal};
+use super::{tracker, Buffer, Hal,BufferElem};
 use crate::{
     core::{
         digest::Digest,
@@ -145,12 +145,12 @@ pub struct MetalHashPoseidon {
 impl MetalHash for MetalHashPoseidon {
     fn new(hal: &MetalHal<Self>) -> Self {
         let round_constants =
-            hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
-        let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
+            hal.copy_from("round_constants", poseidon::consts::ROUND_CONSTANTS);
+        let mds = hal.copy_from("mds", poseidon::consts::MDS);
         let partial_comp_matrix =
-            hal.copy_from_elem("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
+            hal.copy_from("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
         let partial_comp_offset =
-            hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
+            hal.copy_from("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
         MetalHashPoseidon {
             suite: PoseidonHashSuite::new_suite(),
             round_constants,
@@ -208,8 +208,8 @@ pub struct MetalHashPoseidon2 {
 impl MetalHash for MetalHashPoseidon2 {
     fn new(hal: &MetalHal<Self>) -> Self {
         let round_constants =
-            hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
-        let m_int_diag = hal.copy_from_elem("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
+            hal.copy_from("round_constants", poseidon2::consts::ROUND_CONSTANTS);
+        let m_int_diag = hal.copy_from("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
         MetalHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
             round_constants,
@@ -360,7 +360,7 @@ impl<T> BufferImpl<T> {
     }
 }
 
-impl<T: Clone> Buffer<T> for BufferImpl<T> {
+impl<T: BufferElem> Buffer<T> for BufferImpl<T> {
     fn name(&self) -> &'static str {
         self.name
     }
@@ -502,41 +502,12 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
     type Field = BabyBear;
-    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
+    type Buffer<T: BufferElem> = BufferImpl<T>;
 
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+    fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T> {
         BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
-
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
-        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
-    }
-
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
-    }
-
-    fn copy_from_extelem(
-        &self,
-        name: &'static str,
-        slice: &[Self::ExtElem],
-    ) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
-    }
-
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
-    }
-
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
-    }
-
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
-    }
-
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+    fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T> {
         BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
@@ -598,7 +569,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             assert_eq!(row_size, 1 << n_bits);
             assert!(n_bits >= expand_bits);
             assert!(n_bits < Self::Elem::MAX_ROU_PO2);
-            let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
+            let rou = self.copy_from("rou", Self::Elem::ROU_FWD);
             let kernel = self.kernels.get("multi_ntt_fwd_step").unwrap();
             for s_bits in 1 + expand_bits..=n_bits {
                 let args = &[
@@ -623,7 +594,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         assert_eq!(row_size, 1 << n_bits);
         assert!(n_bits < Self::Elem::MAX_ROU_PO2);
 
-        let rou = self.copy_from_elem("rou", Self::Elem::ROU_REV);
+        let rou = self.copy_from("rou", Self::Elem::ROU_REV);
         let kernel = self.kernels.get("multi_ntt_rev_step").unwrap();
         for s_bits in (1..=n_bits).rev() {
             let args = &[
@@ -637,7 +608,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             self.dispatch(kernel, args, count as u64, Some(params));
         }
 
-        let norm = self.copy_from_elem("norm", &[Self::Elem::new(row_size as u32).inv()]);
+        let norm = self.copy_from("norm", &[Self::Elem::new(row_size as u32).inv()]);
         let args = &[io.as_arg(), norm.as_arg()];
         self.dispatch_by_name("eltwise_mul_factor_fp", args, io.size() as u64);
     }
@@ -724,7 +695,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
+        let mix = self.copy_from("mix", &[*mix]);
         let args = &[
             output.as_arg(),
             input.as_arg(),
@@ -751,8 +722,8 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             combos.size(),
         );
 
-        let mix_start = self.copy_from_extelem("mix_start", &[*mix_start]);
-        let mix = self.copy_from_extelem("mix", &[*mix]);
+        let mix_start = self.copy_from("mix_start", &[*mix_start]);
+        let mix = self.copy_from("mix", &[*mix]);
         let args = &[
             output.as_arg(),
             input.as_arg(),
@@ -820,7 +791,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         let threads_per_threadgroup = MTLSize::new(block_size, 1, 1);
         let params = Params::ThreadGroups(threadgroups_per_grid, threads_per_threadgroup);
 
-        let partial_products = self.alloc_extelem("partial_products", block_size as usize);
+        let partial_products = self.alloc("partial_products", block_size as usize);
 
         let kernel = self.kernels.get("reduce").unwrap();
         let args = &[partial_products.as_arg(), io.as_arg()];
@@ -1015,7 +986,7 @@ mod tests {
             let io: Vec<_> = (0..size)
                 .map(|_| BabyBearExtElem::random(&mut rng))
                 .collect();
-            let io = hal.copy_from_extelem("io", io.as_slice());
+            let io = hal.copy_from("io", io.as_slice());
 
             hal.prefix_products(&io);
         }

@@ -16,7 +16,7 @@ use std::{fmt::Debug, marker::PhantomData, rc::Rc};
 
 use risc0_core::field::Field;
 
-use super::{Buffer, CircuitHal, Hal};
+use super::{Buffer, CircuitHal, Hal,BufferElem};
 use crate::core::{digest::Digest, hash::HashSuite};
 
 #[derive(Clone)]
@@ -56,7 +56,7 @@ where
 
 impl<T, L, R> Buffer<T> for BufferImpl<T, L, R>
 where
-    T: Clone + Debug + PartialEq,
+    T: BufferElem,
     L: Buffer<T>,
     R: Buffer<T>,
 {
@@ -121,61 +121,22 @@ where
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
+    type Buffer<T: BufferElem> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
+
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.lhs.get_hash_suite()
     }
 
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        let lhs = self.lhs.alloc_digest(name, size);
-        let rhs = self.rhs.alloc_digest(name, size);
+    fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T> {
+        let lhs = self.lhs.alloc(name, size);
+        let rhs = self.rhs.alloc(name, size);
         BufferImpl::new(lhs, rhs)
     }
-
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        let lhs = self.lhs.alloc_elem(name, size);
-        let rhs = self.rhs.alloc_elem(name, size);
-        BufferImpl::new(lhs, rhs)
-    }
-
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        let lhs = self.lhs.alloc_extelem(name, size);
-        let rhs = self.rhs.alloc_extelem(name, size);
-        BufferImpl::new(lhs, rhs)
-    }
-
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        let lhs = self.lhs.alloc_u32(name, size);
-        let rhs = self.rhs.alloc_u32(name, size);
-        BufferImpl::new(lhs, rhs)
-    }
-
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        let lhs = self.lhs.copy_from_digest(name, slice);
-        let rhs = self.rhs.copy_from_digest(name, slice);
-        BufferImpl::new(lhs, rhs)
-    }
-
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
-        let lhs = self.lhs.copy_from_elem(name, slice);
-        let rhs = self.rhs.copy_from_elem(name, slice);
-        BufferImpl::new(lhs, rhs)
-    }
-
-    fn copy_from_extelem(
-        &self,
-        name: &'static str,
-        slice: &[Self::ExtElem],
-    ) -> Self::Buffer<Self::ExtElem> {
-        let lhs = self.lhs.copy_from_extelem(name, slice);
-        let rhs = self.rhs.copy_from_extelem(name, slice);
-        BufferImpl::new(lhs, rhs)
-    }
-
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
-        let lhs = self.lhs.copy_from_u32(name, slice);
-        let rhs = self.rhs.copy_from_u32(name, slice);
+    
+    fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T> {
+        let lhs = self.lhs.copy_from(name, slice);
+        let rhs = self.rhs.copy_from(name, slice);
         BufferImpl::new(lhs, rhs)
     }
 

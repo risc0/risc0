@@ -114,16 +114,16 @@ where
             prover.set_po2(segment.po2);
 
             nvtx::range_push!("copy(io)");
-            let io = self.hal.copy_from_elem("io", &witgen.io.as_slice());
+            let io = self.hal.copy_from("io", &witgen.io.as_slice());
             nvtx::range_pop!();
 
             nvtx::range_push!("copy(ctrl)");
-            let ctrl = self.hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());
+            let ctrl = self.hal.copy_from("ctrl", &witgen.ctrl.as_slice());
             nvtx::range_pop!();
             prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
 
             nvtx::range_push!("copy(data)");
-            let data = self.hal.copy_from_elem("data", &witgen.data.as_slice());
+            let data = self.hal.copy_from("data", &witgen.data.as_slice());
             nvtx::range_pop!();
             prover.commit_group(REGISTER_GROUP_DATA, &data);
 
@@ -135,7 +135,7 @@ where
             nvtx::range_pop!();
 
             nvtx::range_push!("copy(mix)");
-            let mix = self.hal.copy_from_elem("mix", mix.as_slice());
+            let mix = self.hal.copy_from("mix", mix.as_slice());
             nvtx::range_pop!();
 
             nvtx::range_push!("alloc(accum)");
@@ -153,7 +153,7 @@ where
             nvtx::range_pop!();
 
             nvtx::range_push!("copy(accum)");
-            let accum = self.hal.copy_from_elem("accum", accum.as_slice());
+            let accum = self.hal.copy_from("accum", accum.as_slice());
             nvtx::range_pop!();
 
             self.circuit_hal

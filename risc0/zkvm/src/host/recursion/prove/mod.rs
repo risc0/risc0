@@ -678,17 +678,17 @@ impl Prover {
         } else {
             prover.set_po2(adapter.po2() as usize);
 
-            let ctrl = hal.copy_from_elem("ctrl", &adapter.get_code().as_slice());
+            let ctrl = hal.copy_from("ctrl", &adapter.get_code().as_slice());
             prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
 
-            let data = hal.copy_from_elem("data", &adapter.get_data().as_slice());
+            let data = hal.copy_from("data", &adapter.get_data().as_slice());
             prover.commit_group(REGISTER_GROUP_DATA, &data);
 
             // Make the mixing values
             let mix: Vec<_> = (0..CircuitImpl::MIX_SIZE)
                 .map(|_| prover.iop().random_elem())
                 .collect();
-            let mix = hal.copy_from_elem("mix", mix.as_slice());
+            let mix = hal.copy_from("mix", mix.as_slice());
 
             let steps = adapter.get_steps();
             let mut accum = vec![BabyBearElem::INVALID; steps * CIRCUIT.accum_size()];
@@ -701,8 +701,8 @@ impl Prover {
                 }
             }
 
-            let io = hal.copy_from_elem("io", &adapter.get_io().as_slice());
-            let accum = hal.copy_from_elem("accum", accum.as_slice());
+            let io = hal.copy_from("io", &adapter.get_io().as_slice());
+            let accum = hal.copy_from("accum", accum.as_slice());
 
             circuit_hal.accumulate(&ctrl, &io, &data, &mix, &accum, steps);
 

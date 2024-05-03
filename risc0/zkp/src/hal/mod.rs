@@ -47,11 +47,16 @@ pub trait Buffer<T>: Clone {
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);
 }
 
+// Wrapper "BufferElem" trait so we don't have to write out all the
+// required traits whenever we use a buffere element.
+pub trait BufferElem : Clone + Debug + PartialEq + Default {}
+impl<T> BufferElem for T where T: Clone + Debug + PartialEq+ Default {}
+
 pub trait Hal {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
-    type Buffer<T: Clone + Debug + PartialEq>: Buffer<T>;
+    type Buffer<T: BufferElem>: Buffer<T>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 
@@ -59,19 +64,39 @@ pub trait Hal {
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field>;
 
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest>;
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem>;
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem>;
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32>;
+    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        self.alloc(name, size)
+    }
+    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        self.alloc(name, size)
+    }
+    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        self.alloc(name, size)
+    }
+    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        self.alloc(name, size)
+    }
 
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest>;
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem>;
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
+        self.copy_from(name,slice)
+    }
+    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
+        self.copy_from(name,slice)
+    }
     fn copy_from_extelem(
         &self,
         name: &'static str,
         slice: &[Self::ExtElem],
-    ) -> Self::Buffer<Self::ExtElem>;
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32>;
+    ) -> Self::Buffer<Self::ExtElem> {
+        self.copy_from(name,slice)
+    }
+    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+                self.copy_from(name,slice)
+    }
+
+
+    fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T>;
+    fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T>;
 
     fn batch_expand_into_evaluate_ntt(
         &self,
@@ -225,7 +250,7 @@ mod testutil {
 
     fn generate_elem<H: Hal, R: RngCore>(hal: &H, rng: &mut R, size: usize) -> H::Buffer<H::Elem> {
         let values: Vec<H::Elem> = (0..size).map(|_| H::Elem::random(rng)).collect();
-        hal.copy_from_elem("values", &values)
+        hal.copy_from("values", &values)
     }
 
     fn generate_extelem<H: Hal, R: RngCore>(
@@ -234,7 +259,7 @@ mod testutil {
         size: usize,
     ) -> H::Buffer<H::ExtElem> {
         let values: Vec<H::ExtElem> = (0..size).map(|_| H::ExtElem::random(rng)).collect();
-        hal.copy_from_extelem("values", &values)
+        hal.copy_from("values", &values)
     }
 
     pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: H) {
@@ -265,9 +290,9 @@ mod testutil {
         let z_pow = z.pow(H::ExtElem::EXT_SIZE);
 
         let coeffs = generate_elem(&hal, &mut rng, coeffs_size);
-        let which = hal.copy_from_u32("which", &vec![0; eval_size]);
-        let xs = hal.copy_from_extelem("xs", &vec![z_pow; eval_size]);
-        let out = hal.alloc_extelem("out", eval_size);
+        let which = hal.copy_from("which", &vec![0; eval_size]);
+        let xs = hal.copy_from("xs", &vec![z_pow; eval_size]);
+        let out = hal.alloc("out", eval_size);
 
         hal.batch_evaluate_any(&coeffs, poly_count as usize, &which, &xs, &out);
     }
@@ -285,7 +310,7 @@ mod testutil {
         let output_size = count * domain;
 
         let input = generate_elem(&hal, &mut rng, input_size);
-        let output = hal.alloc_elem("output", output_size);
+        let output = hal.alloc("output", output_size);
         hal.batch_expand_into_evaluate_ntt(&output, &input, count, expand_bits);
     }
 
@@ -309,8 +334,8 @@ mod testutil {
         let cols = 900;
         let idx = 400;
         let src_size = rows * cols;
-        let src = hal.alloc_elem("src", src_size);
-        let dst = hal.alloc_elem("dst", rows);
+        let src = hal.alloc("src", src_size);
+        let dst = hal.alloc("dst", rows);
         src.view_mut(|buf| {
             for x in 0..cols {
                 for y in 0..rows {
@@ -330,16 +355,16 @@ mod testutil {
     }
 
     pub(crate) fn check_req<H: Hal>(hal: H) {
-        let a = hal.alloc_elem("a", 10);
-        let b = hal.alloc_elem("b", 20);
+        let a = hal.alloc("a", 10);
+        let b = hal.alloc("b", 20);
         hal.eltwise_add_elem(&a, &b, &b);
     }
 
     pub(crate) fn eltwise_add_elem<H: Hal>(hal_gpu: H) {
         for (x, count) in COUNTS.iter().enumerate() {
-            let a = hal_gpu.alloc_elem("a", *count);
-            let b = hal_gpu.alloc_elem("b", *count);
-            let o = hal_gpu.alloc_elem("o", *count);
+            let a = hal_gpu.alloc("a", *count);
+            let b = hal_gpu.alloc("b", *count);
+            let o = hal_gpu.alloc("o", *count);
             let mut golden = Vec::with_capacity(*count);
 
             let mut rng = thread_rng();
@@ -370,7 +395,7 @@ mod testutil {
         let mut rng = thread_rng();
         for count in COUNTS {
             let input = generate_elem(&hal_gpu, &mut rng, count);
-            let output = hal_gpu.alloc_elem("output", count);
+            let output = hal_gpu.alloc("output", count);
             hal_gpu.eltwise_copy_elem(&output, &input);
             output.view(|output| {
                 input.view(|input| assert_eq!(output, input));
@@ -386,7 +411,7 @@ mod testutil {
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
         let input = generate_extelem(&hal, &mut rng, COUNT);
-        let output = hal.alloc_elem("output", COUNT);
+        let output = hal.alloc("output", COUNT);
         hal.eltwise_sum_extelem(&output, &input);
     }
 
@@ -398,7 +423,7 @@ mod testutil {
             let output_size = count * H::ExtElem::EXT_SIZE;
             let input_size = output_size * FRI_FOLD;
 
-            let output = hal.alloc_elem("output", output_size);
+            let output = hal.alloc("output", output_size);
             let mix = H::ExtElem::random(&mut rng);
             let input = generate_elem(&hal, &mut rng, input_size);
             hal.fri_fold(&output, &input, &mix);
@@ -419,8 +444,8 @@ mod testutil {
         let mix_start = H::ExtElem::random(&mut rng);
         let mix = H::ExtElem::random(&mut rng);
 
-        let output = hal.alloc_extelem("output", output_size);
-        let combos = hal.copy_from_u32("combos", &combos);
+        let output = hal.alloc("output", output_size);
+        let combos = hal.copy_from("combos", &combos);
         let input = generate_elem(&hal, &mut rng, input_size);
 
         hal.mix_poly_coeffs(
@@ -440,7 +465,7 @@ mod testutil {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
-        let io = hal.alloc_digest("io", INPUTS * 2);
+        let io = hal.alloc("io", INPUTS * 2);
         io.view_mut(|g| {
             for i in 0..INPUTS {
                 g[i + INPUTS] = Digest::from([
@@ -468,7 +493,7 @@ mod testutil {
             for col_count in cols {
                 let matrix_size = row_count * col_count;
                 let matrix = generate_elem(&hal, &mut rng, matrix_size);
-                let output = hal.alloc_digest("output", row_count);
+                let output = hal.alloc("output", row_count);
                 hal.hash_rows(&output, &matrix);
             }
         }
@@ -483,7 +508,7 @@ mod testutil {
         let cols = 256;
         let matrix_size = rows * cols;
 
-        let nodes = hal.alloc_digest("nodes", rows * 2);
+        let nodes = hal.alloc("nodes", rows * 2);
         let matrix = generate_elem(&hal, &mut rng, matrix_size);
         hal.hash_rows(&nodes.slice(rows, rows), &matrix);
     }

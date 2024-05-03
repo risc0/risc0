@@ -186,12 +186,12 @@ pub mod testutil {
         H: Hal<Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
         C: CircuitHal<H>,
     {
-        let check = hal.alloc_elem("check", BabyBearExtElem::EXT_SIZE * params.domain);
-        let code = hal.copy_from_elem("code", &params.code);
-        let data = hal.copy_from_elem("data", &params.data);
-        let accum = hal.copy_from_elem("accum", &params.accum);
-        let mix = hal.copy_from_elem("mix", &params.mix);
-        let out = hal.copy_from_elem("out", &params.out);
+        let check = hal.alloc("check", BabyBearExtElem::EXT_SIZE * params.domain);
+        let code = hal.copy_from("code", &params.code);
+        let data = hal.copy_from("data", &params.data);
+        let accum = hal.copy_from("accum", &params.accum);
+        let mix = hal.copy_from("mix", &params.mix);
+        let out = hal.copy_from("out", &params.out);
         eval.eval_check(
             &check,
             &[&accum, &code, &data],

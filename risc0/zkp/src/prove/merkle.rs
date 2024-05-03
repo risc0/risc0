@@ -63,7 +63,7 @@ impl<H: Hal> MerkleTreeProver<H> {
         assert_eq!(matrix.size(), rows * cols);
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
-        let nodes = hal.alloc_digest("nodes", rows * 2);
+        let nodes = hal.alloc("nodes", rows * 2);
         // hash each column
         hal.hash_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, hash up the layer below
@@ -118,7 +118,7 @@ impl<H: Hal> MerkleTreeProver<H> {
                 }
             });
         } else {
-            let sample = hal.alloc_elem("sample", self.params.col_size);
+            let sample = hal.alloc("sample", self.params.col_size);
             hal.gather_sample(
                 &sample,
                 &self.matrix,
@@ -176,7 +176,7 @@ mod tests {
         for val in 0..size {
             data.push(H::Elem::from_u64((u32::MAX / 2) as u64 - val as u64));
         }
-        let matrix = hal.copy_from_elem("matrix", data.as_slice());
+        let matrix = hal.copy_from("matrix", data.as_slice());
 
         MerkleTreeProver::new(hal, &matrix, rows, cols, queries)
     }

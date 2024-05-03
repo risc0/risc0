@@ -35,7 +35,7 @@ pub struct Prover<'a, H: Hal> {
 
 fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
     nvtx::range_push!("make_coeffs");
-    let coeffs = hal.alloc_elem("coeffs", witness.size());
+    let coeffs = hal.alloc("coeffs", witness.size());
     hal.eltwise_copy_elem(&coeffs, witness);
     // Do interpolate
     hal.batch_interpolate_ntt(&coeffs, count);
@@ -126,7 +126,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         // The check polynomial is the core of the STARK: if the constraints are
         // satisfied, the check polynomial will be a low-degree polynomial. See
         // DEEP-ALI paper for details on the construction of the check_poly.
-        let check_poly = self.hal.alloc_elem("check_poly", ext_size * domain);
+        let check_poly = self.hal.alloc("check_poly", ext_size * domain);
 
         let groups: Vec<&_> = self
             .groups
@@ -208,9 +208,9 @@ impl<'a, H: Hal> Prover<'a, H> {
                     xs.push(x);
                     all_xs.push(x);
                 }
-                let which = self.hal.copy_from_u32("which", which.as_slice());
-                let xs = self.hal.copy_from_extelem("xs", xs.as_slice());
-                let out = self.hal.alloc_extelem("out", which.size());
+                let which = self.hal.copy_from("which", which.as_slice());
+                let xs = self.hal.copy_from("xs", xs.as_slice());
+                let out = self.hal.alloc("out", which.size());
                 self.hal
                     .batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
                 out.view(|view| {
@@ -242,9 +242,9 @@ impl<'a, H: Hal> Prover<'a, H> {
         let z_pow = z.pow(ext_size);
         let which = Vec::from_iter(0u32..H::CHECK_SIZE as u32);
         let xs = vec![z_pow; H::CHECK_SIZE];
-        let out = self.hal.alloc_extelem("out", H::CHECK_SIZE);
-        let which = self.hal.copy_from_u32("which", which.as_slice());
-        let xs = self.hal.copy_from_extelem("xs", xs.as_slice());
+        let out = self.hal.alloc("out", H::CHECK_SIZE);
+        let which = self.hal.copy_from("which", which.as_slice());
+        let xs = self.hal.copy_from("xs", xs.as_slice());
         self.hal
             .batch_evaluate_any(&check_group.coeffs, H::CHECK_SIZE, &which, &xs, &out);
         out.view(|view| {
@@ -272,7 +272,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         let combos = vec![H::ExtElem::ZERO; self.cycles * (combo_count + 1)];
         nvtx::range_pop!();
         nvtx::range_push!("copy(combos)");
-        let combos = self.hal.copy_from_extelem("combos", combos.as_slice());
+        let combos = self.hal.copy_from("combos", combos.as_slice());
         nvtx::range_pop!();
 
         tracing::info_span!("mix_poly_coeffs").in_scope(|| {
@@ -287,7 +287,7 @@ impl<'a, H: Hal> Prover<'a, H> {
                 for reg in self.taps.group_regs(id) {
                     which.push(reg.combo_id() as u32);
                 }
-                let which = self.hal.copy_from_u32("which", which.as_slice());
+                let which = self.hal.copy_from("which", which.as_slice());
                 self.hal.mix_poly_coeffs(
                     &combos,
                     &cur_mix,
@@ -301,7 +301,7 @@ impl<'a, H: Hal> Prover<'a, H> {
             }
 
             let which = vec![combo_count as u32; H::CHECK_SIZE];
-            let which_buf = self.hal.copy_from_u32("which", which.as_slice());
+            let which_buf = self.hal.copy_from("which", which.as_slice());
             self.hal.mix_poly_coeffs(
                 &combos,
                 &cur_mix,
@@ -369,7 +369,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         nvtx::range_push!("sum");
         let final_poly_coeffs = self
             .hal
-            .alloc_elem("final_poly_coeffs", self.cycles * ext_size);
+            .alloc("final_poly_coeffs", self.cycles * ext_size);
         self.hal.eltwise_sum_extelem(&final_poly_coeffs, &combos);
         nvtx::range_pop!();
 

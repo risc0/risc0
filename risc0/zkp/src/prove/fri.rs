@@ -44,7 +44,7 @@ impl<H: Hal> ProveRoundInfo<H> {
         // Get a larger domain to interpolate over.
         let domain = size * INV_RATE;
         // Allocate space in which to put the interpolated values.
-        let evaluated = hal.alloc_elem("evaluated", domain * ext_size);
+        let evaluated = hal.alloc("evaluated", domain * ext_size);
         // Put in the coefficients, padding out with zeros so that we are left with the
         // same polynomial represented by a larger coefficient list
         // Evaluate the NTT in-place, filling the buffer with the evaluations of the
@@ -63,7 +63,7 @@ impl<H: Hal> ProveRoundInfo<H> {
         // Retrieve from the IOP verifier a random value to mix the polynomial slices.
         let fold_mix = iop.random_ext_elem();
         // Create a buffer to hold the mixture of slices.
-        let out_coeffs = hal.alloc_elem("out_coeffs", size / FRI_FOLD * ext_size);
+        let out_coeffs = hal.alloc("out_coeffs", size / FRI_FOLD * ext_size);
         // Compute the folded polynomial
         hal.fri_fold(&out_coeffs, coeffs, &fold_mix);
         ProveRoundInfo {
@@ -103,7 +103,7 @@ pub fn fri_prove<H: Hal, F>(
         rounds.push(round);
     }
     // Put the final coefficients into natural order
-    let final_coeffs = hal.alloc_elem("final_coeffs", coeffs.size());
+    let final_coeffs = hal.alloc("final_coeffs", coeffs.size());
     hal.eltwise_copy_elem(&final_coeffs, &coeffs);
     hal.batch_bit_reverse(&final_coeffs, ext_size);
     // Dump final polynomial + commit

@@ -94,9 +94,9 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
 
-        let rou = self.hal.copy_from_elem("rou", &[rou]);
-        let po2 = self.hal.copy_from_u32("po2", &[po2 as u32]);
-        let size = self.hal.copy_from_u32("size", &[domain as u32]);
+        let rou = self.hal.copy_from("rou", &[rou]);
+        let po2 = self.hal.copy_from("po2", &[po2 as u32]);
+        let size = self.hal.copy_from("size", &[domain as u32]);
 
         let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
         let poly_mix_pows: &[u32; BabyBearExtElem::EXT_SIZE * crate::info::NUM_POLY_MIX_POWERS] =

@@ -74,7 +74,7 @@ impl Program {
                 code[cycles * i + cycle] = *elem;
             }
         }
-        let coeffs = hal.copy_from_elem("coeffs", &code);
+        let coeffs = hal.copy_from("coeffs", &code);
         // Do interpolate & shift
         hal.batch_interpolate_ntt(&coeffs, self.code_size);
         hal.zk_shift(&coeffs, self.code_size);
