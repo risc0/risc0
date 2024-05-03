@@ -946,7 +946,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bonsai-sdk",
@@ -1653,18 +1653,18 @@ dependencies = [
 
 [[package]]
 name = "enum-iterator"
-version = "2.0.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e0b48d2b80ff6b002339547442496ea29d66a8c66ce8e1a6bd8c58b9cec7cf3"
+checksum = "c280b9e6b3ae19e152d8e31cf47f18389781e119d4013a2a2bb0180e5facc635"
 dependencies = [
  "enum-iterator-derive",
 ]
 
 [[package]]
 name = "enum-iterator-derive"
-version = "1.3.1"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c19cbb53d33b57ac4df1f0af6b92c38c107cded663c4aea9fae1189dcfc17cf5"
+checksum = "a1ab991c1362ac86c61ab6f556cff143daa22e5a15e4e189df818b2fd19fe65b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4183,7 +4183,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "elf",
@@ -4198,7 +4198,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "cargo-platform",
@@ -4215,7 +4215,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "cc",
  "directories",
@@ -4226,7 +4226,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4251,7 +4251,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -4260,7 +4260,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4288,7 +4288,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -4297,7 +4297,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "rand",
@@ -4306,7 +4306,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -4328,7 +4328,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -4357,7 +4357,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "cc",
  "cust",
@@ -4367,7 +4367,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-tools"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -4377,7 +4377,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -4407,7 +4407,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -4460,7 +4460,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
@@ -4471,7 +4471,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -4480,7 +4480,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 
 [[package]]
 name = "rrs-lib"
@@ -4634,18 +4634,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.199"
+version = "1.0.200"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c9f6e76df036c77cd94996771fb40db98187f096dd0b9af39c6c6e452ba966a"
+checksum = "ddc6f9cc94d67c0e21aaf7eda3a010fd3af78ebf6e096aa6e2e13c79749cce4f"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.199"
+version = "1.0.200"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11bd257a6541e141e42ca6d24ae26f7714887b47e89aa739099104c7e4d3b7fc"
+checksum = "856f046b9400cee3c8c94ed572ecdb752444c24528c035cd35882aad6f492bcb"
 dependencies = [
  "proc-macro2",
  "quote",
