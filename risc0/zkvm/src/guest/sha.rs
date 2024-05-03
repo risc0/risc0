@@ -26,7 +26,6 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-
 // FIP 180-4 specifies that the bit-string being hashed should have a `1`
 // appended to it before padding.
 const END_MARKER: u8 = 0x80;

@@ -46,9 +46,7 @@ use crate::{
 #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
 pub use self::compact::CompactReceipt;
 
-pub use self::{
-    composite::CompositeReceipt, segment::SegmentReceipt, succinct::SuccinctReceipt
-};
+pub use self::{composite::CompositeReceipt, segment::SegmentReceipt, succinct::SuccinctReceipt};
 
 /// A receipt attesting to the execution of a guest program.
 ///

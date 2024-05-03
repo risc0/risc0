@@ -18,12 +18,12 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use super::{HalPair, ProverServer};
 use crate::{
-    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
     },
+    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     sha::Digestible,
     CompositeReceipt, Receipt, Segment, Session, VerifierContext,
 };

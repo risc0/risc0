@@ -28,12 +28,11 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
+    host::prove_info::ProveInfo,
+    is_dev_mode,
     receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    host::{
-        prove_info::ProveInfo,
-    },
-    is_dev_mode, stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt,
-    ReceiptKind, Segment, Session, VerifierContext,
+    stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptKind,
+    Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]

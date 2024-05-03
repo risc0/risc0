@@ -28,8 +28,8 @@ use test_log::test;
 
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    receipt::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts,
-    Receipt, SegmentReceipt, SessionInfo, VerifierContext,
+    receipt::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts, Receipt,
+    SegmentReceipt, SessionInfo, VerifierContext,
 };
 
 struct TestClientConnector {

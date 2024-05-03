@@ -26,11 +26,9 @@ mod tests;
 pub use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 
 #[cfg(feature = "prove")]
-pub use self::{
-    prove::{
-        identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, ProverOpts,
-        RECURSION_PO2,
-    },
+pub use self::prove::{
+    identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, ProverOpts,
+    RECURSION_PO2,
 };
 
 //const CIRCUIT: risc0_circuit_recursion::CircuitImpl = risc0_circuit_recursion::CircuitImpl::new();
