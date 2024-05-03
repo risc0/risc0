@@ -125,11 +125,11 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
 
  library ControlID {
 "#;
-    // TODO(victor): Use bytes32 here
-    let control_root = format!("uint256 public constant CONTROL_ROOT = 0x{ALLOWED_CONTROL_ROOT};");
-    let bn254_control_id = format!("0x{}", Bootstrap::generate_identity_bn254_control_id());
+    let control_root =
+        format!(r#"bytes32 public constant CONTROL_ROOT = hex"{ALLOWED_CONTROL_ROOT}";"#);
+    let bn254_control_id = hex::encode(Bootstrap::generate_identity_bn254_control_id());
     let bn254_control_id =
-        format!("uint256 public constant BN254_CONTROL_ID = {bn254_control_id};");
+        format!(r#"bytes32 public constant BN254_CONTROL_ID = hex"{bn254_control_id}";"#);
     let content = &format!("{SOL_HEADER}{LIB_HEADER}\n{control_root}\n{bn254_control_id}\n}}");
     let solidity_control_id_path = risc0_ethereum_path.join(SOLIDITY_CONTROL_ID_PATH);
     fs::write(&solidity_control_id_path, content).unwrap_or_else(|_| {
