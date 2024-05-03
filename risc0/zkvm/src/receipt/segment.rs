@@ -72,7 +72,7 @@ impl SegmentReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        //tracing::debug!("SegmentReceipt::verify_integrity_with_context");
+        tracing::debug!("SegmentReceipt::verify_integrity_with_context");
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             Self::allowed_control_ids()
                 .find(|x| x == control_id)
