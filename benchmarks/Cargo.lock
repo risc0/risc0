@@ -2283,7 +2283,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "elf",
@@ -2295,7 +2295,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "cargo-platform",
@@ -2312,7 +2312,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "cc",
  "directories",
@@ -2323,7 +2323,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -2344,7 +2344,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -2353,7 +2353,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -2379,7 +2379,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -2388,7 +2388,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -2396,7 +2396,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -2427,7 +2427,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "cc",
  "cust",
@@ -2437,7 +2437,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -2464,7 +2464,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -2502,7 +2502,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.3"
 dependencies = [
  "bytemuck",
  "getrandom",
