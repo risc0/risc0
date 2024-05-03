@@ -30,5 +30,3 @@ pub use self::prove::{
     identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, ProverOpts,
     RECURSION_PO2,
 };
-
-//const CIRCUIT: risc0_circuit_recursion::CircuitImpl = risc0_circuit_recursion::CircuitImpl::new();
