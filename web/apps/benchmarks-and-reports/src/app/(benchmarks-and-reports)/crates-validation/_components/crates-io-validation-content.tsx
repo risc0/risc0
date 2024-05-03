@@ -4,11 +4,10 @@ import { CratesIoValidationSummary } from "./crates-io-validation-summary";
 import { CratesIoValidationSummaryHeader } from "./crates-io-validation-summary-header";
 import { CratesIoValidationTable } from "./crates-io-validation-table";
 import { cratesIoValidationTableColumns } from "./crates-io-validation-table-columns";
-import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
 export async function CratesIoValidationContent() {
   const hash = await findMostRecentHash();
-  const cratesValidationResults: CratesIoValidationTableSchema[] = await fetchCratesValidationResults({
+  const cratesValidationResults = await fetchCratesValidationResults({
     hash,
   });
 

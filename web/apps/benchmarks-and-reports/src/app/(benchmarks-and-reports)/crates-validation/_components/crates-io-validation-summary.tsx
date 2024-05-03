@@ -1,7 +1,7 @@
 import { Badge } from "@risc0/ui/badge";
 import { cn } from "@risc0/ui/cn";
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@risc0/ui/tooltip";
-import { joinWords } from "shared/utils/join-words";
+import { joinWords } from "@risc0/ui/utils/join-words";
 import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
 export function CratesIoValidationSummary({ data }: { data: CratesIoValidationTableSchema[] }) {
