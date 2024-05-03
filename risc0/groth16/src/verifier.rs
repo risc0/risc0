@@ -232,13 +232,12 @@ mod serde_ark {
     }
 }
 
-// Wrap the verifying key as a lazy_static to avoid loading it if it is not used.
-lazy_static::lazy_static! {
-    /// Default verifying key for RISC Zero recursive verification.
-    pub static ref VERIFYING_KEY: VerifyingKey = try_verifying_key().unwrap();
+/// Default verifying key for RISC Zero recursive verification.
+pub fn verifying_key() -> VerifyingKey {
+    try_verifying_key().unwrap()
 }
 
-// try_verifying_key executes entirely over const data and so should never panic.
+// try_verifying_key executes entirely over const data and so should never error.
 fn try_verifying_key() -> Result<VerifyingKey, Error> {
     let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
     let beta_g2 = g2_from_bytes(&[

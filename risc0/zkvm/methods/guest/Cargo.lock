@@ -865,7 +865,6 @@ dependencies = [
  "ark-serialize",
  "bytemuck",
  "hex",
- "lazy_static",
  "num-bigint",
  "num-derive",
  "risc0-binfmt",

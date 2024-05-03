@@ -15,7 +15,6 @@ ark-groth16 = { version = "0.4", default-features = false }
 ark-serialize = { version = "0.4", default-features = false }
 bytemuck = { version = "1.14" }
 hex = { version = "0.4", default-features = false, features = ["alloc"] }
-lazy_static = "1.4"
 num-bigint = { version = "0.4", default-features = false }
 num-derive = { version = "0.4" }
 num-traits = { version = "0.2", default-features = false, optional = true }

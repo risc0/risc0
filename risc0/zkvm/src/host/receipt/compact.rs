@@ -46,7 +46,7 @@ impl CompactReceipt {
         CompactReceiptVerifierInfo {
             control_root: Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap(),
             bn254_control_id: Digest::from_hex(BN254_CONTROL_ID).unwrap(),
-            verifying_key: risc0_groth16::VERIFYING_KEY.clone(),
+            verifying_key: risc0_groth16::verifying_key(),
         }
     }
 
@@ -65,7 +65,7 @@ impl CompactReceipt {
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,
             &[a0, a1, c0, c1, id_p254_hash],
-            &risc0_groth16::VERIFYING_KEY,
+            &risc0_groth16::verifying_key(),
         )
         .map_err(|_| VerificationError::ReceiptFormatError)?
         .verify()
