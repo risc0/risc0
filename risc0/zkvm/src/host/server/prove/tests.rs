@@ -615,9 +615,9 @@ mod docker {
     fn verify_in_guest() {
         let composite_receipt = generate_receipt(ProverOpts::composite());
         exec_verify(&composite_receipt);
-        let succinct_receipt = get_prover_server(&ProverOpts::succinct()).compress(&ProverOpts::succinct(), &composite_receipt).unwrap();
+        let succinct_receipt = get_prover_server(&ProverOpts::succinct()).unwrap().compress(&ProverOpts::succinct(), &composite_receipt).unwrap();
         exec_verify(&succinct_receipt);
-        let compact_receipt = get_prover_server(&ProverOpts::compact()).compress(&ProverOpts::compact(), &succinct_receipt).unwrap();
+        let compact_receipt = get_prover_server(&ProverOpts::compact()).unwrap().compress(&ProverOpts::compact(), &succinct_receipt).unwrap();
         exec_verify(&compact_receipt);
         compact_receipt.inner.compact().unwrap();
     }
