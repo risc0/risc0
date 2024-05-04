@@ -19,7 +19,7 @@ export function TablePagination<TData>({ table }: { table: Table<TData> }) {
           </SelectTrigger>
           <SelectContent side="top">
             {[100, 250, 500, 1000].map((pageSize) => (
-              <SelectItem key={pageSize} value={`${pageSize}`}>
+              <SelectItem className="cursor-pointer" key={pageSize} value={`${pageSize}`}>
                 {pageSize}
               </SelectItem>
             ))}
