@@ -14,9 +14,11 @@
 
 //! Manages the output and cryptographic data for a proven computation.
 
+#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
 pub(crate) mod compact;
 pub(crate) mod composite;
 pub(crate) mod segment;
+pub(crate) mod succinct;
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
@@ -41,8 +43,10 @@ use crate::{
     Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
-pub use self::{compact::CompactReceipt, composite::CompositeReceipt, segment::SegmentReceipt};
-pub use super::recursion::SuccinctReceipt;
+#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
+pub use self::compact::CompactReceipt;
+
+pub use self::{composite::CompositeReceipt, segment::SegmentReceipt, succinct::SuccinctReceipt};
 
 /// A receipt attesting to the execution of a guest program.
 ///
@@ -284,6 +288,7 @@ pub enum InnerReceipt {
     Succinct(SuccinctReceipt),
 
     /// The [CompactReceipt].
+    #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
     Compact(CompactReceipt),
 
     /// A fake receipt for testing and development.
@@ -312,6 +317,7 @@ impl InnerReceipt {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
+            #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
             InnerReceipt::Compact(x) => x.verify_integrity(),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
@@ -334,6 +340,7 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Compact] arm.
+    #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
     pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
         if let InnerReceipt::Compact(x) = self {
             Ok(x)
@@ -355,6 +362,7 @@ impl InnerReceipt {
     pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.claim(),
+            #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
             InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
             InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),

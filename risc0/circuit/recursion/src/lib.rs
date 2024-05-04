@@ -54,6 +54,7 @@ impl CircuitImpl {
         CircuitImpl
     }
 }
+pub const CIRCUIT: CircuitImpl = CircuitImpl::new();
 
 impl TapsProvider for CircuitImpl {
     fn get_taps(&self) -> &'static TapSet<'static> {

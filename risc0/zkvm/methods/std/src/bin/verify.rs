@@ -12,21 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This module implements the verifier for the recursion circuit.
-//!
-//! This module implements receipts that are generated from the recursion
-//! circuit as well as verification functions for each type of receipt.
+use risc0_zkvm::{guest::env, sha::Digest, Receipt};
 
-#[cfg(feature = "prove")]
-mod prove;
-#[cfg(test)]
-#[cfg(feature = "prove")]
-mod tests;
-
-pub use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
-
-#[cfg(feature = "prove")]
-pub use self::prove::{
-    identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, ProverOpts,
-    RECURSION_PO2,
-};
+fn main() {
+    let (receipt, image_id): (Receipt, Digest) = env::read();
+    receipt.verify(image_id).unwrap();
+}
