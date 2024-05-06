@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #[test]
-fn test_verify_help() {
+fn test_verify_command() {
     let t = trycmd::TestCases::new();
     let binary = trycmd::cargo::cargo_bin("cargo-risczero");
     t.register_bin("risczero", &binary);
