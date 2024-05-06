@@ -60,8 +60,8 @@
 //! [`cargo risczero` tool]: https://crates.io/crates/cargo-risczero
 //! [dev-docs]: https://dev.risczero.com
 //! [examples]: https://dev.risczero.com/api/zkvm/examples
-//! [receipt]: crate::host::receipt::Receipt
-//! [receipt-verify]: crate::host::receipt::Receipt::verify
+//! [receipt]: crate::receipt::Receipt
+//! [receipt-verify]: crate::receipt::Receipt::verify
 //! [rust guest workarounds]:
 //!     https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22
 //! [YouTube]: https://www.youtube.com/@risczero
@@ -74,6 +74,7 @@ extern crate alloc;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
+mod receipt;
 mod receipt_claim;
 pub mod serde;
 pub mod sha;
@@ -132,15 +133,18 @@ pub use {
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        receipt::{
-            Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
-            SegmentReceipt, SuccinctReceipt, VerifierContext,
-        },
         recursion::ALLOWED_CONTROL_ROOT,
     },
     risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
     risc0_groth16::Seal as Groth16Seal,
+};
+
+#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
+pub use receipt::CompactReceipt;
+pub use receipt::{
+    Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt, SuccinctReceipt,
+    VerifierContext,
 };
 
 use semver::Version;

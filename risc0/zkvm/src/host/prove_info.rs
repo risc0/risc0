@@ -25,6 +25,7 @@ pub struct ProveInfo {
 }
 
 /// Struct containing information about a prover's cycle count after running the guest program
+#[derive(Debug)]
 pub struct SessionStats {
     /// Count of segments in this proof request
     pub segments: usize,
