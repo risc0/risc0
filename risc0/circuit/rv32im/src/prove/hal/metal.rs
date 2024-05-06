@@ -178,7 +178,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     }
 }
 
-pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+pub fn segment_prover() -> Box<dyn SegmentProver> {
     let hal = Rc::new(MetalHalSha256::new());
     let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
     Box::new(SegmentProverImpl::new(hal, circuit_hal))

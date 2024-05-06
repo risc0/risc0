@@ -12,40 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use rayon::prelude::*;
 use risc0_circuit_rv32im_sys::ffi::{RawMemoryTransaction, RawPreflightCycle, RawPreflightTrace};
-use risc0_zkp::{field::baby_bear::BabyBearElem, hal::cpu::SyncSlice};
+use risc0_zkp::field::baby_bear::BabyBearElem;
 
-use crate::{
-    prove::{
-        emu::{
-            addr::{ByteAddr, WordAddr},
-            mux::{Major, TopMux},
-            preflight::{Back, PreflightCycle, PreflightStage, PreflightTrace},
-        },
-        hal::cpp::SyncMachineContext,
-    },
-    CIRCUIT,
+use crate::prove::emu::{
+    addr::{ByteAddr, WordAddr},
+    mux::{Major, TopMux},
+    preflight::{Back, PreflightCycle, PreflightStage, PreflightTrace},
 };
 
 struct Injector<'a> {
     steps: usize,
     cycle: usize,
-    data: &'a SyncSlice<'a, BabyBearElem>,
+    data: &'a mut [BabyBearElem],
 }
 
 pub struct MachineContext {
     trace: PreflightTrace,
-    raw_machine_ctx: SyncMachineContext,
-    _raw_trace: Box<RawPreflightTrace>,
+    pub raw_trace: Box<RawPreflightTrace>,
     _raw_cycles: Vec<RawPreflightCycle>,
     _raw_txns: Vec<RawMemoryTransaction>,
     _raw_extras: Vec<u32>,
 }
 
 impl<'a> Injector<'a> {
-    fn new(steps: usize, cycle: usize, data: &'a SyncSlice<'a, BabyBearElem>) -> Self {
+    fn new(steps: usize, cycle: usize, data: &'a mut [BabyBearElem]) -> Self {
         Self { steps, cycle, data }
     }
 
@@ -53,36 +44,47 @@ impl<'a> Injector<'a> {
         reg * self.steps + self.cycle - 1
     }
 
-    fn set_pc(&self, pc: ByteAddr) {
+    fn set_pc(&mut self, pc: ByteAddr) {
         let pc = pc + 4u32;
         let bytes = pc.0.to_le_bytes();
         let bot2 = bytes[3] & 0b11;
         let top2 = bytes[3] >> 2 & 0b11;
-        self.data.set(self.get_idx(6), (bytes[0] as u32).into()); // body->pc.bytes[0]
-        self.data.set(self.get_idx(7), (bytes[1] as u32).into()); // body->pc.bytes[1]
-        self.data.set(self.get_idx(8), (bytes[2] as u32).into()); // body->pc.bytes[2]
-        self.data.set(self.get_idx(70), (bot2 as u32).into()); // body->pc.twits[0]
-        self.data.set(self.get_idx(71), (top2 as u32).into()); // body->pc.twits[1]
+        self.data[self.get_idx(6)] = (bytes[0] as u32).into(); // body->pc.bytes[0]
+        self.data[self.get_idx(7)] = (bytes[1] as u32).into(); // body->pc.bytes[1]
+        self.data[self.get_idx(8)] = (bytes[2] as u32).into(); // body->pc.bytes[2]
+        self.data[self.get_idx(70)] = (bot2 as u32).into(); // body->pc.twits[0]
+        self.data[self.get_idx(71)] = (top2 as u32).into(); // body->pc.twits[1]
     }
 
-    fn set_next_major(&self, major: Major) {
-        self.data.set(self.get_idx(99), major.as_u32().into()); // body->nextMajor
+    fn set_next_major(&mut self, major: Major) {
+        self.data[self.get_idx(99)] = major.as_u32().into(); // body->nextMajor
     }
 
-    fn set_halt(&self, sys_exit_code: u8, user_exit_code: u8, write_addr: WordAddr) {
-        self.data.set(self.get_idx(108), 0u32.into()); // body->majorSelect->at(MajorType::kECall): 8
-        self.data.set(self.get_idx(112), 0u32.into()); // body->majorSelect->at(MajorType::kPageFault): 12
-        self.data.set(self.get_idx(115), 1u32.into()); // body->majorSelect->at(MajorType::kHalt): 15
-        self.data
-            .set(self.get_idx(116), (sys_exit_code as u32).into()); // HaltCycle::sysExitCode
-        self.data
-            .set(self.get_idx(117), (user_exit_code as u32).into()); // HaltCycle::userExitCode
-        self.data.set(self.get_idx(118), write_addr.0.into()); // HaltCycle::writeAddr
+    fn set_halt(&mut self, sys_exit_code: u8, user_exit_code: u8, write_addr: WordAddr) {
+        self.data[self.get_idx(108)] = 0u32.into(); // body->majorSelect->at(MajorType::kECall): 8
+        self.data[self.get_idx(112)] = 0u32.into(); // body->majorSelect->at(MajorType::kPageFault): 12
+        self.data[self.get_idx(115)] = 1u32.into(); // body->majorSelect->at(MajorType::kHalt): 15
+        self.data[self.get_idx(116)] = (sys_exit_code as u32).into(); // HaltCycle::sysExitCode
+        self.data[self.get_idx(117)] = (user_exit_code as u32).into(); // HaltCycle::userExitCode
+        self.data[self.get_idx(118)] = write_addr.0.into(); // HaltCycle::writeAddr
+    }
+}
+
+impl TopMux {
+    fn is_safe_verify_mem(&self) -> bool {
+        match self {
+            TopMux::Body(Major::VerifyAnd, _) => false,
+            TopMux::Body(Major::VerifyDivide, _) => false,
+            TopMux::Body(Major::PageFault, _) => false,
+            TopMux::Body(Major::Halt, _) => false,
+            TopMux::Body(_, _) => true,
+            _ => false,
+        }
     }
 }
 
 impl MachineContext {
-    pub fn new(steps: usize, trace: PreflightTrace) -> Self {
+    pub fn new(trace: PreflightTrace) -> Self {
         nvtx::range_push!("prepare_trace");
         let _raw_cycles: Vec<_> = trace
             .pre
@@ -91,19 +93,23 @@ impl MachineContext {
             .map(|x| {
                 let (major, minor) = x.mux.as_body().unwrap_or((Major::Compute0, 0));
                 RawPreflightCycle {
-                    major: major.as_u32(),
-                    minor,
-                    mem_idx: x.mem_idx,
-                    extra_idx: x.extra_idx,
+                    major: major.as_u32() as u8,
+                    minor: minor as u8,
+                    is_safe_exec: if x.back.is_some() { 1 } else { 0 },
+                    is_safe_verify_mem: if x.mux.is_safe_verify_mem() { 1 } else { 0 },
+                    mem_idx: x.mem_idx as u32,
+                    extra_idx: x.extra_idx as u32,
                 }
             })
             .chain(trace.body.cycles.iter().map(|x| {
                 let (major, minor) = x.mux.as_body().unwrap_or((Major::Compute0, 0));
                 RawPreflightCycle {
-                    major: major.as_u32(),
-                    minor,
-                    mem_idx: x.mem_idx + trace.pre.txns.len(),
-                    extra_idx: x.extra_idx + trace.pre.extras.len(),
+                    major: major.as_u32() as u8,
+                    minor: minor as u8,
+                    is_safe_exec: if x.back.is_some() { 1 } else { 0 },
+                    is_safe_verify_mem: if x.mux.is_safe_verify_mem() { 1 } else { 0 },
+                    mem_idx: (x.mem_idx + trace.pre.txns.len()) as u32,
+                    extra_idx: (x.extra_idx + trace.pre.extras.len()) as u32,
                 }
             }))
             .collect();
@@ -112,12 +118,12 @@ impl MachineContext {
             .txns
             .iter()
             .map(|x| RawMemoryTransaction {
-                cycle: x.cycle,
+                cycle: x.cycle as u32,
                 addr: x.addr.0,
                 data: x.data,
             })
             .chain(trace.body.txns.iter().map(|x| RawMemoryTransaction {
-                cycle: x.cycle + trace.pre.cycles.len(),
+                cycle: (x.cycle + trace.pre.cycles.len()) as u32,
                 addr: x.addr.0,
                 data: x.data,
             }))
@@ -137,19 +143,20 @@ impl MachineContext {
             false => 0,
         };
 
-        let _raw_trace = Box::new(RawPreflightTrace {
+        let raw_trace = Box::new(RawPreflightTrace {
             cycles: _raw_cycles.as_ptr(),
             txns: _raw_txns.as_ptr(),
             extras: _raw_extras.as_ptr(),
+            num_cycles: _raw_cycles.len() as u32,
+            num_txns: _raw_txns.len() as u32,
+            num_extras: _raw_extras.len() as u32,
             is_trace,
         });
-        let raw_machine_ctx = CIRCUIT.alloc_machine_ctx(_raw_trace.as_ref(), steps);
         nvtx::range_pop!();
 
         Self {
             trace,
-            raw_machine_ctx,
-            _raw_trace,
+            raw_trace,
             _raw_cycles,
             _raw_txns,
             _raw_extras,
@@ -163,10 +170,10 @@ impl MachineContext {
         cur_cycle.back.is_some()
     }
 
-    pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: &SyncSlice<BabyBearElem>) {
+    pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: &mut [BabyBearElem]) {
         let cur_cycle = self.get_cycle(cycle);
         if let Some(back) = &cur_cycle.back {
-            let injector = Injector::new(steps, cycle, data);
+            let mut injector = Injector::new(steps, cycle, data);
             match back {
                 Back::Null => (),
                 Back::Body { pc } => {
@@ -187,172 +194,16 @@ impl MachineContext {
         }
     }
 
-    #[tracing::instrument(skip_all)]
-    pub fn sort(&mut self, name: &str) -> Result<()> {
-        nvtx::range_push!("sort({name})");
-        match name {
-            "ram" => CIRCUIT.sort_ram(&self.raw_machine_ctx)?,
-            "bytes" => CIRCUIT.sort_bytes(&self.raw_machine_ctx)?,
-            _ => unimplemented!("Unknown argument type {name}"),
-        };
-        nvtx::range_pop!();
-        Ok(())
-    }
-
-    pub fn step_exec(
-        &self,
-        steps: usize,
-        cycle: usize,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        // let cur_cycle = self.get_cycle(cycle);
-        // tracing::debug!("[{cycle}] {:?}", cur_cycle);
-        CIRCUIT.par_step_exec(steps, cycle, &self.raw_machine_ctx, args)
-    }
-
-    fn next_step_exec(
-        &self,
-        steps: usize,
-        last_cycle: usize,
-        cycle: usize,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        if cycle == 0 || self.is_exec_par_safe(cycle) {
-            // tracing::debug!("step_exec: {cycle}");
-            self.step_exec(steps, cycle, args)?;
-
-            let mut seq_cycle = cycle + 1;
-            while seq_cycle < last_cycle && !self.is_exec_par_safe(seq_cycle) {
-                self.step_exec(steps, seq_cycle, args)?;
-                seq_cycle += 1;
-            }
-
-            // if let Some(counts) = counts {
-            //     let cycles = seq_cycle - cycle;
-            //     counts[cycles].fetch_add(1, Ordering::SeqCst);
-            // }
-        }
-        Ok(())
-    }
-
-    pub fn rev_step_exec(
-        &self,
-        steps: usize,
-        last_cycle: usize,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        (0..last_cycle)
-            .rev()
-            .try_for_each(|cycle| self.next_step_exec(steps, last_cycle, cycle, args))
-    }
-
-    pub fn par_step_exec(
-        &self,
-        steps: usize,
-        last_cycle: usize,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        // let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
-
-        (0..last_cycle)
-            .into_par_iter()
-            .try_for_each(|cycle| self.next_step_exec(steps, last_cycle, cycle, args))?;
-
-        // for (cycles, count) in counts.iter().enumerate() {
-        //     let count = count.load(Ordering::Relaxed);
-        //     if count > 0 {
-        //         tracing::debug!("cycles: {cycles} -> {count}");
-        //     }
-        // }
-
-        Ok(())
-    }
-
-    pub fn step_verify_mem(
-        &self,
-        steps: usize,
-        cycle: usize,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        // let cur_cycle = self.get_cycle(cycle);
-        // tracing::debug!("[{cycle}] {cur_cycle:?}");
-        CIRCUIT.par_step_verify_mem(steps, cycle, &self.raw_machine_ctx, args)
-    }
-
-    fn is_verify_mem_par_safe(&self, cycle: usize) -> bool {
-        let cur_cycle = self.get_cycle(cycle);
-        match cur_cycle.mux {
-            TopMux::Body(Major::VerifyAnd, _) => false,
-            TopMux::Body(Major::VerifyDivide, _) => false,
-            TopMux::Body(Major::PageFault, _) => false,
-            TopMux::Body(Major::Halt, _) => false,
-            TopMux::Body(_, _) => true,
-            _ => false,
-        }
-    }
-
-    pub fn inject_verify_mem_backs(
-        &self,
-        steps: usize,
-        cycle: usize,
-        data: SyncSlice<BabyBearElem>,
-    ) -> Result<()> {
-        if self.is_verify_mem_par_safe(cycle) {
-            CIRCUIT.inject_backs_ram(&self.raw_machine_ctx, steps, cycle, data)?;
-        }
-        Ok(())
-    }
-
-    pub fn par_step_verify_mem(
-        &self,
-        steps: usize,
-        last_cycle: usize,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        // let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
-
-        (0..last_cycle).into_par_iter().try_for_each(|cycle| {
-            if cycle == 0 || self.is_verify_mem_par_safe(cycle) {
-                // tracing::trace!("step_verify_mem({cycle})");
-                self.step_verify_mem(steps, cycle, args)?;
-
-                let mut seq_cycle = cycle + 1;
-                while seq_cycle < last_cycle && !self.is_verify_mem_par_safe(seq_cycle) {
-                    self.step_verify_mem(steps, seq_cycle, args)?;
-                    seq_cycle += 1;
-                }
-
-                // let cycles = seq_cycle - cycle;
-                // counts.get(cycles).unwrap().fetch_add(1, Ordering::SeqCst);
-            }
-            Ok(())
-        })
-
-        // for (cycles, count) in counts.iter().enumerate() {
-        //     let count = count.load(Ordering::Relaxed);
-        //     if count > 0 {
-        //         tracing::debug!("cycles: {cycles} -> {count}");
-        //     }
-        // }
-    }
-
-    pub fn inject_verify_bytes_backs(
-        &self,
-        steps: usize,
-        cycle: usize,
-        data: SyncSlice<BabyBearElem>,
-    ) -> Result<()> {
-        CIRCUIT.inject_backs_bytes(&self.raw_machine_ctx, steps, cycle, data)
-    }
-
-    pub fn step_verify_bytes(
-        &self,
-        steps: usize,
-        cycle: usize,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        CIRCUIT.par_step_verify_bytes(steps, cycle, &self.raw_machine_ctx, args)
-    }
+    // pub fn rev_step_exec(
+    //     &self,
+    //     steps: usize,
+    //     last_cycle: usize,
+    //     args: &[SyncSlice<BabyBearElem>],
+    // ) -> Result<()> {
+    //     (0..last_cycle)
+    //         .rev()
+    //         .try_for_each(|cycle| self.next_step_exec(steps, last_cycle, cycle, args))
+    // }
 }
 
 impl MachineContext {

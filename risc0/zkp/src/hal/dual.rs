@@ -291,6 +291,12 @@ where
         output.assert_eq();
     }
 
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        self.lhs.eltwise_zeroize_elem(&elems.lhs);
+        self.rhs.eltwise_zeroize_elem(&elems.rhs);
+        elems.assert_eq();
+    }
+
     fn fri_fold(
         &self,
         output: &Self::Buffer<Self::Elem>,

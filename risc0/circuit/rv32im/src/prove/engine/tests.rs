@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::{
@@ -30,7 +32,8 @@ use crate::{
             exec::{execute, DEFAULT_SEGMENT_LIMIT_PO2},
             testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         },
-        get_segment_prover,
+        hal::cpu::CpuCircuitHal,
+        segment_prover,
     },
     CIRCUIT,
 };
@@ -68,15 +71,22 @@ fn fwd_rev_ab_test(program: Program) {
         None,
     )
     .unwrap();
+
+    let suite = Sha256HashSuite::new_suite();
+    let hal = Rc::new(CpuHal::new(suite));
+    let circuit_hal = CpuCircuitHal::new();
+
     let segments = result.segments;
     for segment in segments {
         let trace = segment.preflight().unwrap();
         let io = segment.prepare_globals();
 
-        let mut fwd_witgen = WitnessGenerator::new(segment.po2, &io);
+        let mut fwd_witgen =
+            WitnessGenerator::new(hal.as_ref(), &circuit_hal, segment.po2, &io, trace.clone());
         let fwd_data = fwd_witgen.test_step_execute(trace.clone(), true);
 
-        let mut rev_witgen = WitnessGenerator::new(segment.po2, &io);
+        let mut rev_witgen =
+            WitnessGenerator::new(hal.as_ref(), &circuit_hal, segment.po2, &io, trace.clone());
         let rev_data = rev_witgen.test_step_execute(trace.clone(), false);
 
         assert!(fwd_data == rev_data);
@@ -99,7 +109,7 @@ fn basic() {
     let segments = result.segments;
     let segment = segments.first().unwrap();
 
-    let prover = get_segment_prover();
+    let prover = segment_prover("sha-256").unwrap();
     let seal = prover.prove_segment(&segment).unwrap();
 
     let suite = Sha256HashSuite::new_suite();
@@ -122,7 +132,7 @@ fn system_split() {
     )
     .unwrap();
 
-    let prover = get_segment_prover();
+    let prover = segment_prover("sha-256").unwrap();
     let suite = Sha256HashSuite::new_suite();
     let hal = CpuHal::new(suite.clone());
 

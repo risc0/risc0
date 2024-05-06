@@ -41,22 +41,27 @@ constexpr size_t kBitWidth = 256;
 constexpr size_t kByteWidth = kBitWidth / 8;
 
 struct MemoryTransaction {
-  size_t cycle;
+  uint32_t cycle;
   uint32_t addr;
   uint32_t data;
 };
 
 struct PreflightCycle {
-  uint32_t major;
-  uint32_t minor;
-  size_t memIdx;
-  size_t extraIdx;
+  uint8_t major;
+  uint8_t minor;
+  uint8_t isSafeExec;
+  uint8_t isSafeVerifyMem;
+  uint32_t memIdx;
+  uint32_t extraIdx;
 };
 
 struct PreflightTrace {
   PreflightCycle* cycles;
   MemoryTransaction* txns;
   uint32_t* extras;
+  uint32_t numCycles;
+  uint32_t numTxns;
+  uint32_t numExtras;
   uint32_t isTrace;
 };
 
@@ -73,7 +78,7 @@ struct RamArgumentRow {
 
 struct MachineContext {
   PreflightTrace* trace;
-  size_t steps;
+  uint32_t steps;
 
   std::vector<RamArgumentRow> ramRows;
   std::vector<RamArgumentRow> ramSorted;
@@ -86,6 +91,9 @@ struct MachineContext {
 
   void sortRam();
   void sortBytes();
+
+  bool isParSafeExec(uint32_t cycle) { return trace->cycles[cycle].isSafeExec; }
+  bool isParSafeVerifyMem(uint32_t cycle) { return trace->cycles[cycle].isSafeVerifyMem; }
 };
 
 struct AccumCell {
@@ -110,12 +118,15 @@ void extern_trace(void* ctx, size_t cycle, const char* extra, std::array<Fp, 1> 
 
 Fp extern_getMajor(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> args) {
   PreflightTrace* trace = static_cast<MachineContext*>(ctx)->trace;
-  return Fp(trace->cycles[cycle].major);
+  uint32_t major = trace->cycles[cycle].major;
+  // printf("[%lu] getMajor: %u\n", cycle, major);
+  return major;
 }
 
 Fp extern_getMinor(void* ctx, size_t cycle, const char* extra, std::array<Fp, 4> args) {
+  // printf("getMinor\n");
   PreflightTrace* trace = static_cast<MachineContext*>(ctx)->trace;
-  return Fp(trace->cycles[cycle].minor);
+  return trace->cycles[cycle].minor;
 }
 
 std::array<Fp, 3>
@@ -142,7 +153,7 @@ extern_ramRead(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> arg
   size_t memIdx = trace->cycles[cycle].memIdx++;
   MemoryTransaction& txn = trace->txns[memIdx];
   if (trace->isTrace) {
-    printf("ramRead(%lu, 0x%x): txn(%lu, 0x%x)\n", cycle, addr, txn.cycle, txn.addr);
+    printf("ramRead(%lu, 0x%x): txn(%u, 0x%x)\n", cycle, addr, txn.cycle, txn.addr);
   }
   if (cycle != txn.cycle) {
     throw std::runtime_error("Mismatched memory txn cycle");
@@ -443,7 +454,7 @@ void extern_plonkWrite_ram(void* ctx, size_t cycle, const char* extra, std::arra
 }
 
 void MachineContext::sortRam() {
-  // printf("sortRam\n");
+  printf("sortRam\n");
   {
     nvtx3::scoped_range range("prepare");
     for (size_t i = 0; i < steps; i++) {
@@ -538,7 +549,7 @@ void extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, std::ar
 }
 
 void MachineContext::sortBytes() {
-  // printf("sortBytes\n");
+  printf("sortBytes\n");
   size_t pos = 0;
   auto next = [&]() {
     while (!bytePairs[pos]) {
@@ -630,20 +641,62 @@ extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, std::arr
 
 extern "C" {
 
-MachineContext* risc0_circuit_rv32im_machine_context_alloc(PreflightTrace* trace, size_t steps) {
-  MachineContext* ctx = new MachineContext;
-  ctx->trace = trace;
-  ctx->steps = steps;
-  ctx->ramRows.resize(steps * kMaxRamRowsPerCycle);
-  ctx->ramIndex.resize(steps);
-  ctx->byteSorted.resize(steps * kMaxBytePairsPerCycle);
-  ctx->byteWrites.resize(steps);
-  ctx->byteReads.resize(steps);
-  return ctx;
-}
+extern "C" const char* risc0_circuit_rv32im_cpu_witgen(
+    PreflightTrace* trace, uint32_t steps, uint32_t last_cycle, Fp* ctrl, Fp* io, Fp* data) {
+  try {
+    printf("risc0_circuit_rv32im_cpu_witgen\n");
 
-void risc0_circuit_rv32im_machine_context_free(MachineContext* ctx) {
-  delete ctx;
+    MachineContext ctx;
+    ctx.trace = trace;
+    ctx.steps = steps;
+    ctx.ramRows.resize(steps * kMaxRamRowsPerCycle);
+    ctx.ramIndex.resize(steps);
+    ctx.byteSorted.resize(steps * kMaxBytePairsPerCycle);
+    ctx.byteWrites.resize(steps);
+    ctx.byteReads.resize(steps);
+
+    auto begin = poolstl::iota_iter<uint32_t>(0);
+    auto end = poolstl::iota_iter<uint32_t>(last_cycle);
+    std::array<Fp*, 3> args{ctrl, io, data};
+
+    printf("step_exec\n");
+    std::for_each(poolstl::seq, begin, end, [&](uint32_t cycle) {
+      if (cycle == 0 || ctx.isParSafeExec(cycle)) {
+        // printf("step_exec(%u)\n", cycle);
+        step_exec(&ctx, steps, cycle++, args.data());
+        while (cycle < last_cycle && !ctx.isParSafeExec(cycle)) {
+          // printf("next, step_exec(%u)\n", cycle);
+          step_exec(&ctx, steps, cycle++, args.data());
+        }
+      }
+    });
+
+    // ctx.ctx->sortRam();
+    printf("inject_backs_ram\n");
+    // inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+
+    printf("step_verify_mem\n");
+    // par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
+    //     ctx.ctx, steps, last_cycle, ctrl, io, data);
+
+    // ctx.ctx->sortBytes();
+    printf("inject_backs_bytes\n");
+    // inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+
+    printf("step_verify_bytes\n");
+    // step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
+    //     ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
+
+    // zeroize<<<cfg.grid, cfg.block, 0, stream>>>(data);
+    // std::for_each(poolstl::seq, begin, end, [&](uint32_t cycle) {
+    //   Fp val = data[cycle];
+    //   elems[idx] = val.zeroize();
+    // });
+
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  }
+  return nullptr;
 }
 
 void risc0_circuit_rv32im_sort_ram(risc0_error* err, MachineContext* ctx) {

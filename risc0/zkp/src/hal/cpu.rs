@@ -519,6 +519,12 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        elems.as_slice_mut().par_iter_mut().for_each(|elem| {
+            *elem = elem.valid_or_zero();
+        });
+    }
+
     #[tracing::instrument(skip_all)]
     fn fri_fold(
         &self,

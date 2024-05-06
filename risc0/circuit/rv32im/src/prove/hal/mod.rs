@@ -19,3 +19,20 @@ pub mod cuda;
 #[cfg(feature = "metal")]
 pub mod metal;
 pub mod testutil;
+
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
+use risc0_zkp::hal::Hal;
+
+pub(crate) trait CircuitWitnessGenerator<H: Hal> {
+    fn generate_witness(
+        &self,
+        _trace: &RawPreflightTrace,
+        _steps: usize,
+        _count: usize,
+        _ctrl: &H::Buffer<H::Elem>,
+        _io: &H::Buffer<H::Elem>,
+        _data: &H::Buffer<H::Elem>,
+    ) {
+        todo!();
+    }
+}

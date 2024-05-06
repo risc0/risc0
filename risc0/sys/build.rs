@@ -12,16 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, path::Path};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
+        println!(
+            "cargo:cuda_root={}",
+            manifest_dir.join("kernels/zkp/cuda").to_string_lossy()
+        );
         build_cuda_kernels();
     }
 
     if env::var("CARGO_FEATURE_METAL").is_ok() {
+        println!(
+            "cargo:metal_root={}",
+            manifest_dir.join("kernels/zkp/metal").to_string_lossy()
+        );
         build_metal_kernels();
     }
 }

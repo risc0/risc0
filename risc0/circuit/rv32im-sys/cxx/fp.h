@@ -19,7 +19,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 
 namespace risc0 {
 
@@ -179,8 +178,8 @@ constexpr inline Fp pow(Fp x, size_t n) {
 /// Compute the multiplicative inverse of x, or `1/x` in finite field terms.  Since `x^(P-1) == 1
 /// (mod P)` for any x != 0 (as a consequence of Fermat's little theorem), it follows that `x *
 /// x^(P-2) == 1 (mod P)` for x != 0.  That is, `x^(P-2)` is the multiplicative inverse of x.
-/// Computed this way, the 'inverse' of zero comes out as zero, which is convenient in many cases, so
-/// we leave it.
+/// Computed this way, the 'inverse' of zero comes out as zero, which is convenient in many cases,
+/// so we leave it.
 constexpr inline Fp inv(Fp x) {
   return pow(x, Fp::P - 2);
 }

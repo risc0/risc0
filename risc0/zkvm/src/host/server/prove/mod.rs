@@ -22,7 +22,6 @@ mod tests;
 use std::rc::Rc;
 
 use anyhow::{anyhow, bail, Result};
-use cfg_if::cfg_if;
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::hal::{CircuitHal, Hal};
 
@@ -207,110 +206,110 @@ impl Session {
     }
 }
 
-#[cfg(feature = "cuda")]
-mod cuda {
-    use std::rc::Rc;
+// #[cfg(feature = "cuda")]
+// mod cuda {
+//     use std::rc::Rc;
 
-    use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::prove::hal::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
-    use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
+//     use anyhow::{bail, Result};
+//     use risc0_circuit_rv32im::prove::hal::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+//     use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
-    use super::{HalPair, ProverImpl, ProverServer};
-    use crate::ProverOpts;
+//     use super::{HalPair, ProverImpl, ProverServer};
+//     use crate::ProverOpts;
 
-    pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
-        match opts.hashfn.as_str() {
-            "sha-256" => {
-                let hal = Rc::new(CudaHalSha256::new());
-                let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new(
-                    "cuda",
-                    HalPair { hal, circuit_hal },
-                    opts.receipt_kind.clone(),
-                )))
-            }
-            "poseidon2" => {
-                let hal = Rc::new(CudaHalPoseidon2::new());
-                let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new(
-                    "cuda",
-                    HalPair { hal, circuit_hal },
-                    opts.receipt_kind.clone(),
-                )))
-            }
-            _ => bail!("Unsupported hashfn: {}", opts.hashfn),
-        }
-    }
-}
+//     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
+//         match opts.hashfn.as_str() {
+//             "sha-256" => {
+//                 let hal = Rc::new(CudaHalSha256::new());
+//                 let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+//                 Ok(Rc::new(ProverImpl::new(
+//                     "cuda",
+//                     HalPair { hal, circuit_hal },
+//                     opts.receipt_kind.clone(),
+//                 )))
+//             }
+//             "poseidon2" => {
+//                 let hal = Rc::new(CudaHalPoseidon2::new());
+//                 let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+//                 Ok(Rc::new(ProverImpl::new(
+//                     "cuda",
+//                     HalPair { hal, circuit_hal },
+//                     opts.receipt_kind.clone(),
+//                 )))
+//             }
+//             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
+//         }
+//     }
+// }
 
-#[cfg(feature = "metal")]
-mod metal {
-    use std::rc::Rc;
+// #[cfg(feature = "metal")]
+// mod metal {
+//     use std::rc::Rc;
 
-    use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::prove::hal::metal::MetalCircuitHal;
-    use risc0_zkp::hal::metal::{
-        MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
-    };
+//     use anyhow::{bail, Result};
+//     use risc0_circuit_rv32im::prove::hal::metal::MetalCircuitHal;
+//     use risc0_zkp::hal::metal::{
+//         MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
+//     };
 
-    use super::{HalPair, ProverImpl, ProverServer};
-    use crate::ProverOpts;
+//     use super::{HalPair, ProverImpl, ProverServer};
+//     use crate::ProverOpts;
 
-    pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
-        match opts.hashfn.as_str() {
-            "sha-256" => {
-                let hal = Rc::new(MetalHalSha256::new());
-                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new(
-                    "metal",
-                    HalPair { hal, circuit_hal },
-                    opts.receipt_kind.clone(),
-                )))
-            }
-            "poseidon2" => {
-                let hal = Rc::new(MetalHalPoseidon2::new());
-                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new(
-                    "metal",
-                    HalPair { hal, circuit_hal },
-                    opts.receipt_kind.clone(),
-                )))
-            }
-            _ => bail!("Unsupported hashfn: {}", opts.hashfn),
-        }
-    }
-}
+//     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
+//         match opts.hashfn.as_str() {
+//             "sha-256" => {
+//                 let hal = Rc::new(MetalHalSha256::new());
+//                 let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
+//                 Ok(Rc::new(ProverImpl::new(
+//                     "metal",
+//                     HalPair { hal, circuit_hal },
+//                     opts.receipt_kind.clone(),
+//                 )))
+//             }
+//             "poseidon2" => {
+//                 let hal = Rc::new(MetalHalPoseidon2::new());
+//                 let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
+//                 Ok(Rc::new(ProverImpl::new(
+//                     "metal",
+//                     HalPair { hal, circuit_hal },
+//                     opts.receipt_kind.clone(),
+//                 )))
+//             }
+//             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
+//         }
+//     }
+// }
 
-#[allow(dead_code)]
-mod cpu {
-    use std::rc::Rc;
+// #[allow(dead_code)]
+// mod cpu {
+//     use std::rc::Rc;
 
-    use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::prove::hal::cpu::CpuCircuitHal;
-    use risc0_zkp::{
-        core::hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
-        hal::cpu::CpuHal,
-    };
+//     use anyhow::{bail, Result};
+//     use risc0_circuit_rv32im::prove::hal::cpu::CpuCircuitHal;
+//     use risc0_zkp::{
+//         core::hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
+//         hal::cpu::CpuHal,
+//     };
 
-    use super::{HalPair, ProverImpl, ProverServer};
-    use crate::ProverOpts;
+//     use super::{HalPair, ProverImpl, ProverServer};
+//     use crate::ProverOpts;
 
-    pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
-        let suite = match opts.hashfn.as_str() {
-            "sha-256" => Sha256HashSuite::new_suite(),
-            "poseidon2" => Poseidon2HashSuite::new_suite(),
-            _ => bail!("Unsupported hashfn: {}", opts.hashfn),
-        };
-        let hal = Rc::new(CpuHal::new(suite));
-        let circuit_hal = Rc::new(CpuCircuitHal::new());
-        let hal_pair = HalPair { hal, circuit_hal };
-        Ok(Rc::new(ProverImpl::new(
-            "cpu",
-            hal_pair,
-            opts.receipt_kind.clone(),
-        )))
-    }
-}
+//     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
+//         let suite = match opts.hashfn.as_str() {
+//             "sha-256" => Sha256HashSuite::new_suite(),
+//             "poseidon2" => Poseidon2HashSuite::new_suite(),
+//             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
+//         };
+//         let hal = Rc::new(CpuHal::new(suite));
+//         let circuit_hal = Rc::new(CpuCircuitHal::new());
+//         let hal_pair = HalPair { hal, circuit_hal };
+//         Ok(Rc::new(ProverImpl::new(
+//             "cpu",
+//             hal_pair,
+//             opts.receipt_kind.clone(),
+//         )))
+//     }
+// }
 
 /// Select a [ProverServer] based on the specified [ProverOpts] and currently
 /// compiled features.
@@ -320,13 +319,5 @@ pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         return Ok(Rc::new(DevModeProver));
     }
 
-    cfg_if! {
-        if #[cfg(feature = "cuda")] {
-            cuda::get_prover_server(opts)
-        } else if #[cfg(feature = "metal")] {
-            metal::get_prover_server(opts)
-        } else {
-            cpu::get_prover_server(opts)
-        }
-    }
+    Ok(Rc::new(ProverImpl::new(opts.clone())))
 }

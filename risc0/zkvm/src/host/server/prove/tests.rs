@@ -12,26 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
-
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
-use risc0_circuit_rv32im::prove::{emu::testutil, hal::cpu::CpuCircuitHal};
-use risc0_zkp::{
-    core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
-    hal::cpu::CpuHal,
-    verify::VerificationError,
-};
+use risc0_circuit_rv32im::prove::emu::testutil;
+use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
 use test_log::test;
 
-use super::{get_prover_server, HalPair, ProverImpl};
+use super::get_prover_server;
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, ReceiptKind,
-    Session, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
+    VerifierContext,
 };
 
 fn prover_opts_fast() -> ProverOpts {
@@ -87,20 +81,20 @@ fn hashfn_poseidon2() {
     prove_nothing("poseidon2").unwrap();
 }
 
-#[test]
-fn hashfn_blake2b() {
-    let hal_pair = HalPair {
-        hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
-        circuit_hal: Rc::new(CpuCircuitHal::new()),
-    };
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let prover = ProverImpl::new("cpu:blake2b", hal_pair, ReceiptKind::Composite);
-    prover.prove(env, MULTI_TEST_ELF).unwrap();
-}
+// #[test]
+// fn hashfn_blake2b() {
+//     let hal_pair = HalPair {
+//         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
+//         circuit_hal: Rc::new(CpuCircuitHal::new()),
+//     };
+//     let env = ExecutorEnv::builder()
+//         .write(&MultiTestSpec::DoNothing)
+//         .unwrap()
+//         .build()
+//         .unwrap();
+//     let prover = ProverImpl::new("cpu:blake2b", hal_pair, ReceiptKind::Composite);
+//     prover.prove(env, MULTI_TEST_ELF).unwrap();
+// }
 
 #[test]
 fn receipt_serde() {

@@ -8,14 +8,13 @@
 constexpr size_t INV_RATE = 4;
 __constant__ FpExt poly_mix[210];
 
-__device__
-FpExt poly_fp(uint32_t idx,
-              uint32_t size,
-              const Fp* ctrl,
-              const Fp* out,
-              const Fp* data,
-              const Fp* mix,
-              const Fp* accum) {
+__device__ FpExt poly_fp(uint32_t idx,
+                         uint32_t size,
+                         const Fp* ctrl,
+                         const Fp* out,
+                         const Fp* data,
+                         const Fp* mix,
+                         const Fp* accum) {
   uint32_t mask = size - 1;
   Fp x0(1);
   Fp x1(0);
@@ -18837,16 +18836,15 @@ FpExt poly_fp(uint32_t idx,
   return x18816;
 }
 
-extern "C" __global__
-void eval_check(Fp* check,
-                const Fp* ctrl,
-                const Fp* data,
-                const Fp* accum,
-                const Fp* mix,
-                const Fp* out,
-                const Fp& rou,
-                const uint32_t& po2,
-                const uint32_t& domain) {
+__global__ void eval_check(Fp* check,
+                           const Fp* ctrl,
+                           const Fp* data,
+                           const Fp* accum,
+                           const Fp* mix,
+                           const Fp* out,
+                           const Fp rou,
+                           uint32_t po2,
+                           uint32_t domain) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle < domain) {
     FpExt tot = poly_fp(cycle, domain, ctrl, out, data, mix, accum);
