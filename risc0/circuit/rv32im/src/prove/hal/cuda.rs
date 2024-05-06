@@ -288,12 +288,12 @@ pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
         "sha-256" => {
             let hal = Rc::new(CudaHalSha256::new());
             let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-            Box::new(SegmentProverImpl::new(hal, circuit_hal))
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
         }
         "poseidon2" => {
             let hal = Rc::new(CudaHalPoseidon2::new());
             let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
-            Box::new(SegmentProverImpl::new(hal, circuit_hal))
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
         }
         _ => bail!("Unsupported hashfn: {hashfn}"),
     }

@@ -32,6 +32,7 @@ fn build_cpu_kernels() {
     KernelBuild::new(KernelType::Cpp)
         .files(glob::glob("cxx/*.cpp").unwrap().map(|x| x.unwrap()))
         .deps(glob::glob("cxx/*.h").unwrap().map(|x| x.unwrap()))
+        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("circuit");
 }
 
@@ -39,6 +40,7 @@ fn build_cuda_kernels() {
     KernelBuild::new(KernelType::CudaLink)
         .files(glob::glob("kernels/cuda/*.cu").unwrap().map(|x| x.unwrap()))
         .deps(glob::glob("kernels/cuda/*.h").unwrap().map(|x| x.unwrap()))
+        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .compile("risc0_rv32im_cuda");
 }

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <atomic>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-function"
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -28,6 +27,8 @@
 #include "fpext.h"
 #include "kernels.h"
 
+#include "vendor/nvtx3/nvtx3.hpp"
+
 #include <assert.h>
 #include <cstdint>
 #include <cuda/std/array>
@@ -36,8 +37,6 @@
 #include <thrust/sort.h>
 #include <thrust/tuple.h>
 #include <vector>
-
-// #include <nvtx3/nvtx3.hpp>
 
 constexpr size_t kBabyBearExtSize = 4;
 constexpr size_t kMaxRamRowsPerCycle = 5;
@@ -276,6 +275,8 @@ __global__ void inject_backs_bytes(void* ctx, size_t steps, size_t count, Fp* da
 extern "C" const char* risc0_circuit_rv32im_cuda_witgen(
     PreflightTrace* trace, uint32_t steps, uint32_t last_cycle, Fp* ctrl, Fp* io, Fp* data) {
   try {
+    nvtx3::scoped_range range("witgen");
+
     // printf("risc0_circuit_rv32im_cuda_witgen\n");
     CUDA_OK(cudaDeviceSynchronize());
 
@@ -284,31 +285,46 @@ extern "C" const char* risc0_circuit_rv32im_cuda_witgen(
     CudaStream stream;
     LaunchConfig cfg = getSimpleConfig(last_cycle);
 
-    // printf("step_exec\n");
-    par_step_exec<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, ctrl, io, data);
-    CUDA_OK(cudaStreamSynchronize(stream));
+    {
+      // printf("step_exec\n");
+      nvtx3::scoped_range range("step_exec");
+      par_step_exec<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, ctrl, io, data);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
 
     ctx.ctx->sortRam();
 
-    // printf("inject_backs_ram\n");
-    inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
-    CUDA_OK(cudaStreamSynchronize(stream));
+    {
+      // printf("inject_backs_ram\n");
+      nvtx3::scoped_range range("inject_backs_ram");
+      inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
 
-    // printf("step_verify_mem\n");
-    par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
-        ctx.ctx, steps, last_cycle, ctrl, io, data);
-    CUDA_OK(cudaStreamSynchronize(stream));
+    {
+      // printf("step_verify_mem\n");
+      nvtx3::scoped_range range("step_verify_mem");
+      par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
+          ctx.ctx, steps, last_cycle, ctrl, io, data);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
 
     ctx.ctx->sortBytes();
 
-    // printf("inject_backs_bytes\n");
-    inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
-    CUDA_OK(cudaStreamSynchronize(stream));
+    {
+      // printf("inject_backs_bytes\n");
+      nvtx3::scoped_range range("inject_backs_bytes");
+      inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
 
-    // printf("step_verify_bytes\n");
-    step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
-        ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
-    CUDA_OK(cudaStreamSynchronize(stream));
+    {
+      // printf("step_verify_bytes\n");
+      nvtx3::scoped_range range("step_verify_bytes");
+      step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
+          ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
 
   } catch (const std::exception& err) {
     return strdup(err.what());
@@ -473,9 +489,10 @@ extern_plonkWrite_ram(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* 
 
 void MachineContext::sortRam() {
   // printf("sortRam\n");
+  nvtx3::scoped_range range("sortRam");
   std::vector<RamArgumentRow> compact;
   {
-    // nvtx3::scoped_range range("prepare");
+    nvtx3::scoped_range range("prepare");
     for (size_t cycle = 0; cycle < steps; cycle++) {
       size_t count = ramIndex[cycle];
       for (size_t i = 0; i < count; i++) {
@@ -491,12 +508,12 @@ void MachineContext::sortRam() {
   }
 
   {
-    // nvtx3::scoped_range range("sort");
+    nvtx3::scoped_range range("sort");
     thrust::sort(thrust::device, ramSorted, ramSorted + compact.size());
   }
 
   {
-    // nvtx3::scoped_range range("dirty");
+    nvtx3::scoped_range range("dirty");
     uint32_t prevDirty = 0;
     for (size_t i = 0; i < compact.size(); i++) {
       RamArgumentRow& row = ramSorted[i];
@@ -516,7 +533,7 @@ void MachineContext::sortRam() {
   }
 
   {
-    // nvtx3::scoped_range range("update");
+    nvtx3::scoped_range range("update");
     thrust::exclusive_scan(thrust::device, ramIndex, ramIndex + steps, ramIndex, 0);
   }
 }
@@ -545,6 +562,7 @@ extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, Fp* args, Fp
 }
 
 void MachineContext::sortBytes() {
+  nvtx3::scoped_range range("sortBytes");
   // printf("sortBytes\n");
 
   size_t pos = 0;

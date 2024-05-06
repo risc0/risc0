@@ -21,6 +21,10 @@ use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    println!(
+        "cargo:cxx_root={}",
+        manifest_dir.join("cxx").to_string_lossy()
+    );
 
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
         println!(

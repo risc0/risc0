@@ -134,6 +134,7 @@ impl KernelBuild {
             .cpp(true)
             .debug(false)
             .files(&self.files)
+            .includes(&self.inc_dirs)
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .flag_if_supported("-fno-var-tracking")
@@ -206,6 +207,7 @@ impl KernelBuild {
                 for inc_dir in self.inc_dirs.iter() {
                     cmd.arg("-I").arg(inc_dir);
                 }
+
                 cmd.arg(src);
                 cmd.arg("-o").arg(&obj_path);
                 println!("Running: {:?}", cmd);
