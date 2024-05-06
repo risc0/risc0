@@ -74,7 +74,6 @@ impl ExitCode {
         }
     }
 
-    #[cfg(not(target_os = "zkvm"))]
     pub fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,

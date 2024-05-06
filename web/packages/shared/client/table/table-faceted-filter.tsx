@@ -12,10 +12,10 @@ import {
 } from "@risc0/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@risc0/ui/popover";
 import { Separator } from "@risc0/ui/separator";
+import { joinWords } from "@risc0/ui/utils/join-words";
 import type { Column } from "@tanstack/react-table";
 import { CheckIcon, PlusCircleIcon } from "lucide-react";
 import type { ComponentType } from "react";
-import { joinWords } from "../../utils/join-words";
 
 interface TableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
