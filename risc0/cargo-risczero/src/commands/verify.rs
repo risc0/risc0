@@ -114,8 +114,6 @@ impl VerifyCommand {
 }
 
 fn parse_receipt(receipt_raw: Vec<u8>) -> Result<Receipt> {
-    trace!("Parsing receipt");
     let receipt: Receipt = bincode::deserialize(&receipt_raw)?;
-    trace!("Parsed receipt");
     Ok(receipt)
 }
