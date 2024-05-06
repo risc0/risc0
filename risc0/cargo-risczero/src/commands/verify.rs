@@ -59,19 +59,19 @@ impl VerifyCommand {
         debug!("Running verify command");
         let receipt = self.get_receipt()?;
         let image_id = self.get_image_id()?;
-
-        match receipt.verify(image_id) {
+        let result = receipt.verify(image_id);
+        match result {
             Ok(_) => {
                 info!("Receipt verified successfully");
                 println!("✅ Receipt is valid!");
             }
-            Err(error) => {
+            Err(ref error) => {
                 error!(?error, "Receipt verification failed");
-                eprintln!("❌ Receipt is not valid: {error}");
+                eprintln!("❌ Receipt is not valid");
             }
         }
 
-        Ok(())
+        Ok(result?)
     }
 
     fn get_image_id(&self) -> Result<Digest> {
