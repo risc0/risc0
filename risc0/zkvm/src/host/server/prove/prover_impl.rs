@@ -13,19 +13,18 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_circuit_rv32im::prove::segment_prover;
+use risc0_circuit_rv32im::prove::SegmentProver;
 
 use super::ProverServer;
 use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{
-            segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
-        },
         recursion::{identity_p254, join, lift, resolve},
     },
-    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt::{
+        segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+    },
     sha::Digestible,
     CompositeReceipt, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
@@ -33,12 +32,16 @@ use crate::{
 /// An implementation of a Prover that runs locally.
 pub struct ProverImpl {
     opts: ProverOpts,
+    segment_prover: Box<dyn SegmentProver>,
 }
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts) -> Self {
-        Self { opts }
+    pub fn new(opts: ProverOpts, segment_prover: Box<dyn SegmentProver>) -> Self {
+        Self {
+            opts,
+            segment_prover,
+        }
     }
 }
 
@@ -129,9 +132,7 @@ impl ProverServer for ProverImpl {
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        let hashfn = &self.opts.hashfn;
-        let prover = segment_prover(hashfn.as_str())?;
-        let seal = prover.prove_segment(&segment.inner)?;
+        let seal = self.segment_prover.prove_segment(&segment.inner)?;
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();
@@ -139,7 +140,7 @@ impl ProverServer for ProverImpl {
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
-            hashfn: hashfn.clone(),
+            hashfn: self.opts.hashfn.clone(),
             claim,
         };
         receipt.verify_integrity_with_context(ctx)?;

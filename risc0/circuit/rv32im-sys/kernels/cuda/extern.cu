@@ -41,7 +41,7 @@
 constexpr size_t kBabyBearExtSize = 4;
 constexpr size_t kMaxRamRowsPerCycle = 5;
 constexpr size_t kMaxBytePairsPerCycle = 21;
-constexpr size_t kTotalBytePairs = 256 * 256;
+constexpr uint32_t kInvalidPattern = 0xffffffff;
 
 constexpr size_t kWordSize = sizeof(uint32_t);
 constexpr size_t kBitWidth = 256;
@@ -95,13 +95,10 @@ struct MachineContext {
   size_t steps;
 
   RamArgumentRow* ramRows;
-  RamArgumentRow* ramSorted;
   uint32_t* ramIndex;
 
-  cuda::std::atomic<uint32_t>* bytePairs;
-  uint32_t* byteSorted;
-  uint32_t* byteWrites;
-  uint32_t* byteReads;
+  uint32_t* pairs;
+  uint32_t* pairsIndex;
 
   void sortRam();
   void sortBytes();
@@ -151,16 +148,15 @@ struct HostContext {
                        cudaMemcpyHostToDevice));
 
     CUDA_OK(cudaMallocManaged(&ctx->ramRows, steps * kMaxRamRowsPerCycle * sizeof(RamArgumentRow)));
-    ctx->ramSorted = nullptr; // allocated later in sortRam
-    CUDA_OK(cudaMallocManaged(&ctx->ramIndex, steps * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(
+        ctx->ramRows, kInvalidPattern, steps * kMaxRamRowsPerCycle * sizeof(RamArgumentRow)));
+    CUDA_OK(cudaMalloc(&ctx->ramIndex, steps * sizeof(uint32_t)));
     CUDA_OK(cudaMemset(ctx->ramIndex, 0, steps * sizeof(uint32_t)));
-    CUDA_OK(cudaMallocManaged(&ctx->bytePairs, kTotalBytePairs * sizeof(uint32_t)));
-    CUDA_OK(cudaMemset(ctx->bytePairs, 0, kTotalBytePairs * sizeof(uint32_t)));
-    CUDA_OK(cudaMalloc(&ctx->byteSorted, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
-    CUDA_OK(cudaMallocManaged(&ctx->byteWrites, steps * sizeof(uint32_t)));
-    CUDA_OK(cudaMemset(ctx->byteWrites, 0, steps * sizeof(uint32_t)));
-    CUDA_OK(cudaMalloc(&ctx->byteReads, steps * sizeof(uint32_t)));
-    CUDA_OK(cudaMemset(ctx->byteReads, 0, steps * sizeof(uint32_t)));
+    CUDA_OK(cudaMalloc(&ctx->pairs, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
+    CUDA_OK(
+        cudaMemset(ctx->pairs, kInvalidPattern, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
+    CUDA_OK(cudaMalloc(&ctx->pairsIndex, steps * sizeof(uint32_t)));
+    CUDA_OK(cudaMemset(ctx->pairsIndex, 0, steps * sizeof(uint32_t)));
   }
 
   ~HostContext() {
@@ -170,10 +166,9 @@ struct HostContext {
     cudaFree(ctx->trace->extras);
     cudaFree(ctx->trace);
     cudaFree(ctx->ramRows);
-    cudaFree(ctx->ramSorted);
     cudaFree(ctx->ramIndex);
-    cudaFree(ctx->byteSorted);
-    cudaFree(ctx->byteReads);
+    cudaFree(ctx->pairs);
+    cudaFree(ctx->pairsIndex);
     cudaFree(ctx);
   }
 };
@@ -215,29 +210,6 @@ par_step_exec(void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp*
   }
 }
 
-__global__ void inject_backs_ram(void* ctx, uint32_t steps, uint32_t count, Fp* data) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
-
-  if (cycle > 0 && is_par_safe_verify_mem(ctx, cycle)) {
-    MachineContext* mctx = static_cast<MachineContext*>(ctx);
-    size_t idx = mctx->ramIndex[cycle];
-    assert(idx != 0);
-
-    const RamArgumentRow& row = mctx->ramSorted[idx - 1];
-    data[89 * steps + cycle - 1] = row.addr;
-    data[90 * steps + cycle - 1] = row.getMemCycle();     // a->cycle
-    data[91 * steps + cycle - 1] = row.getMemOp();        // a->memOp
-    data[92 * steps + cycle - 1] = row.word & 0xff;       // a->data[0]
-    data[93 * steps + cycle - 1] = row.word >> 8 & 0xff;  // a->data[1]
-    data[94 * steps + cycle - 1] = row.word >> 16 & 0xff; // a->data[2]
-    data[95 * steps + cycle - 1] = row.word >> 24 & 0xff; // a->data[3]
-    data[97 * steps + cycle - 1] = row.dirty;             // prevVerifier->dirty
-  }
-}
-
 __global__ void
 par_step_verify_mem(void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
@@ -253,89 +225,6 @@ par_step_verify_mem(void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg
       step_verify_mem(ctx, steps, cycle++, arg0, arg1, arg2, nullptr, nullptr);
     }
   }
-}
-
-__global__ void inject_backs_bytes(void* ctx, size_t steps, size_t count, Fp* data) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle == 0 || cycle >= count) {
-    return;
-  }
-
-  MachineContext* mctx = static_cast<MachineContext*>(ctx);
-  uint32_t writeCount = mctx->byteWrites[cycle - 1];
-  // printf("inject> cycle: %u, writeCount: %u\n", cycle, writeCount);
-  if (writeCount) {
-    uint32_t pair = mctx->byteSorted[(cycle - 1) * kMaxBytePairsPerCycle + writeCount - 1];
-    // printf("inject> pair: %x\n", pair);
-    data[0 * steps + cycle - 1] = pair >> 8 & 0xff;
-    data[1 * steps + cycle - 1] = pair & 0xff;
-  }
-}
-
-extern "C" const char* risc0_circuit_rv32im_cuda_witgen(
-    PreflightTrace* trace, uint32_t steps, uint32_t last_cycle, Fp* ctrl, Fp* io, Fp* data) {
-  try {
-    nvtx3::scoped_range range("witgen");
-
-    // printf("risc0_circuit_rv32im_cuda_witgen\n");
-    CUDA_OK(cudaDeviceSynchronize());
-
-    HostContext ctx(trace, steps);
-
-    CudaStream stream;
-    LaunchConfig cfg = getSimpleConfig(last_cycle);
-
-    {
-      // printf("step_exec\n");
-      nvtx3::scoped_range range("step_exec");
-      par_step_exec<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, ctrl, io, data);
-      CUDA_OK(cudaStreamSynchronize(stream));
-    }
-
-    {
-      nvtx3::scoped_range range("verify_ram");
-      ctx.ctx->sortRam();
-
-      {
-        // printf("inject_backs_ram\n");
-        nvtx3::scoped_range range("inject_backs_ram");
-        inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
-        CUDA_OK(cudaStreamSynchronize(stream));
-      }
-
-      {
-        // printf("step_verify_mem\n");
-        nvtx3::scoped_range range("step_verify_mem");
-        par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
-            ctx.ctx, steps, last_cycle, ctrl, io, data);
-        CUDA_OK(cudaStreamSynchronize(stream));
-      }
-    }
-
-    {
-      nvtx3::scoped_range range("verify_bytes");
-      ctx.ctx->sortBytes();
-
-      {
-        // printf("inject_backs_bytes\n");
-        nvtx3::scoped_range range("inject_backs_bytes");
-        inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
-        CUDA_OK(cudaStreamSynchronize(stream));
-      }
-
-      {
-        // printf("step_verify_bytes\n");
-        nvtx3::scoped_range range("step_verify_bytes");
-        step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
-            ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
-        CUDA_OK(cudaStreamSynchronize(stream));
-      }
-    }
-
-  } catch (const std::exception& err) {
-    return strdup(err.what());
-  }
-  return nullptr;
 }
 
 __device__ void extern_halt(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
@@ -496,33 +385,16 @@ extern_plonkWrite_ram(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* 
 void MachineContext::sortRam() {
   // printf("sortRam\n");
   nvtx3::scoped_range range("sortRam");
-  std::vector<RamArgumentRow> compact;
-  {
-    nvtx3::scoped_range range("prepare");
-    for (size_t cycle = 0; cycle < steps; cycle++) {
-      size_t count = ramIndex[cycle];
-      for (size_t i = 0; i < count; i++) {
-        compact.push_back(ramRows[cycle * kMaxRamRowsPerCycle + i]);
-      }
-    }
-
-    CUDA_OK(cudaMallocManaged(&ramSorted, compact.size() * sizeof(RamArgumentRow)));
-    CUDA_OK(cudaMemcpy(ramSorted,
-                       compact.data(),
-                       compact.size() * sizeof(RamArgumentRow),
-                       cudaMemcpyHostToDevice));
-  }
-
   {
     nvtx3::scoped_range range("sort");
-    thrust::sort(thrust::device, ramSorted, ramSorted + compact.size());
+    thrust::sort(thrust::device, ramRows, ramRows + steps * kMaxRamRowsPerCycle);
   }
 
   {
     nvtx3::scoped_range range("dirty");
     uint32_t prevDirty = 0;
-    for (size_t i = 0; i < compact.size(); i++) {
-      RamArgumentRow& row = ramSorted[i];
+    for (size_t i = 0; i < steps * kMaxRamRowsPerCycle; i++) {
+      RamArgumentRow& row = ramRows[i];
       switch (row.getMemOp()) {
       case 0: // pageIo
         row.dirty = 0;
@@ -539,8 +411,31 @@ void MachineContext::sortRam() {
   }
 
   {
-    nvtx3::scoped_range range("update");
+    nvtx3::scoped_range range("scan");
     thrust::exclusive_scan(thrust::device, ramIndex, ramIndex + steps, ramIndex, 0);
+  }
+}
+
+__global__ void inject_backs_ram(void* ctx, uint32_t steps, uint32_t count, Fp* data) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= count) {
+    return;
+  }
+
+  if (cycle > 0 && is_par_safe_verify_mem(ctx, cycle)) {
+    MachineContext* mctx = static_cast<MachineContext*>(ctx);
+    size_t idx = mctx->ramIndex[cycle];
+    assert(idx != 0);
+
+    const RamArgumentRow& row = mctx->ramRows[idx - 1];
+    data[89 * steps + cycle - 1] = row.addr;
+    data[90 * steps + cycle - 1] = row.getMemCycle();     // a->cycle
+    data[91 * steps + cycle - 1] = row.getMemOp();        // a->memOp
+    data[92 * steps + cycle - 1] = row.word & 0xff;       // a->data[0]
+    data[93 * steps + cycle - 1] = row.word >> 8 & 0xff;  // a->data[1]
+    data[94 * steps + cycle - 1] = row.word >> 16 & 0xff; // a->data[2]
+    data[95 * steps + cycle - 1] = row.word >> 24 & 0xff; // a->data[3]
+    data[97 * steps + cycle - 1] = row.dirty;             // prevVerifier->dirty
   }
 }
 
@@ -548,7 +443,7 @@ __device__ void
 extern_plonkRead_ram(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
   MachineContext* mctx = static_cast<MachineContext*>(ctx);
   uint32_t idx = mctx->ramIndex[cycle]++;
-  const RamArgumentRow& row = mctx->ramSorted[idx];
+  const RamArgumentRow& row = mctx->ramRows[idx];
   outs[0] = row.addr;
   outs[1] = row.getMemCycle();
   outs[2] = row.getMemOp();
@@ -563,43 +458,48 @@ extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, Fp* args, Fp
   // printf("plonkWrite_bytes\n");
   MachineContext* mctx = static_cast<MachineContext*>(ctx);
   uint32_t pair = args[0].asUInt32() << 8 | args[1].asUInt32();
-  mctx->bytePairs[pair]++;
-  mctx->byteWrites[cycle]++;
+  uint32_t idx = mctx->pairsIndex[cycle]++;
+  assert(idx < kMaxBytePairsPerCycle);
+  mctx->pairs[cycle * kMaxBytePairsPerCycle + idx] = pair;
 }
 
 void MachineContext::sortBytes() {
   nvtx3::scoped_range range("sortBytes");
-  // printf("sortBytes\n");
-  std::vector<uint32_t> h_byteSorted(steps * kMaxBytePairsPerCycle);
 
-  size_t pos = 0;
-  auto next = [&]() {
-    while (!bytePairs[pos]) {
-      pos++;
-    }
-    bytePairs[pos]--;
-    return pos;
-  };
-
-  for (size_t cycle = 0; cycle < steps; cycle++) {
-    uint32_t count = byteWrites[cycle];
-    assert(count <= kMaxBytePairsPerCycle);
-    for (size_t i = 0; i < count; i++) {
-      h_byteSorted[cycle * kMaxBytePairsPerCycle + i] = next();
-    }
+  {
+    nvtx3::scoped_range range("sort");
+    thrust::sort(thrust::device, pairs, pairs + steps * kMaxBytePairsPerCycle);
   }
 
-  cudaMemcpy(byteSorted,
-             h_byteSorted.data(),
-             h_byteSorted.size() * sizeof(uint32_t),
-             cudaMemcpyHostToDevice);
+  {
+    nvtx3::scoped_range range("scan");
+    thrust::exclusive_scan(thrust::device, pairsIndex, pairsIndex + steps, pairsIndex, 0);
+  }
+}
+
+__global__ void inject_backs_bytes(void* ctx, size_t steps, size_t count, Fp* data) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle == 0 || cycle >= count) {
+    return;
+  }
+
+  MachineContext* mctx = static_cast<MachineContext*>(ctx);
+  uint32_t idx = mctx->pairsIndex[cycle];
+  uint32_t writeCount = idx - mctx->pairsIndex[cycle - 1];
+  // printf("inject> cycle: %u, writeCount: %lu\n", cycle, writeCount);
+  if (writeCount) {
+    uint32_t pair = mctx->pairs[idx - 1];
+    // printf("inject> pair: %x\n", pair);
+    data[0 * steps + cycle - 1] = pair >> 8 & 0xff;
+    data[1 * steps + cycle - 1] = pair & 0xff;
+  }
 }
 
 __device__ void
 extern_plonkRead_bytes(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
   MachineContext* mctx = static_cast<MachineContext*>(ctx);
-  uint32_t idx = mctx->byteReads[cycle]++;
-  uint32_t pair = mctx->byteSorted[cycle * kMaxBytePairsPerCycle + idx];
+  uint32_t idx = mctx->pairsIndex[cycle]++;
+  uint32_t pair = mctx->pairs[idx];
   // printf("plonkReadBytes> cycle: %lu, idx: %u, pair: %x\n", cycle, idx, pair);
   outs[0] = pair >> 8 & 0xff;
   outs[1] = pair & 0xff;
@@ -641,4 +541,70 @@ extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, Fp* args
 
 __device__ void extern_log(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
   // printf("%s\n", extra);
+}
+
+extern "C" const char* risc0_circuit_rv32im_cuda_witgen(
+    PreflightTrace* trace, uint32_t steps, uint32_t last_cycle, Fp* ctrl, Fp* io, Fp* data) {
+  try {
+    nvtx3::scoped_range range("witgen");
+
+    // printf("risc0_circuit_rv32im_cuda_witgen\n");
+    CUDA_OK(cudaDeviceSynchronize());
+
+    HostContext ctx(trace, steps);
+
+    CudaStream stream;
+    LaunchConfig cfg = getSimpleConfig(last_cycle);
+
+    {
+      // printf("step_exec\n");
+      nvtx3::scoped_range range("step_exec");
+      par_step_exec<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, ctrl, io, data);
+      CUDA_OK(cudaStreamSynchronize(stream));
+    }
+
+    {
+      nvtx3::scoped_range range("verify_ram");
+      ctx.ctx->sortRam();
+
+      {
+        // printf("inject_backs_ram\n");
+        nvtx3::scoped_range range("inject_backs_ram");
+        inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
+
+      {
+        // printf("step_verify_mem\n");
+        nvtx3::scoped_range range("step_verify_mem");
+        par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
+            ctx.ctx, steps, last_cycle, ctrl, io, data);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
+    }
+
+    {
+      nvtx3::scoped_range range("verify_bytes");
+      ctx.ctx->sortBytes();
+
+      {
+        // printf("inject_backs_bytes\n");
+        nvtx3::scoped_range range("inject_backs_bytes");
+        inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
+
+      {
+        // printf("step_verify_bytes\n");
+        nvtx3::scoped_range range("step_verify_bytes");
+        step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
+            ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
+    }
+
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  }
+  return nullptr;
 }

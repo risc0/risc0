@@ -28,16 +28,8 @@ use crate::{
     VerifierContext,
 };
 
-fn prover_opts_fast() -> ProverOpts {
-    ProverOpts {
-        hashfn: "sha-256".to_string(),
-        prove_guest_errors: false,
-        receipt_kind: ReceiptKind::Composite,
-    }
-}
-
 fn prove_session_fast(session: &Session) -> Receipt {
-    let prover = get_prover_server(&prover_opts_fast()).unwrap();
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
     prover
         .prove_session(&VerifierContext::default(), session)
         .unwrap()
@@ -643,14 +635,14 @@ mod sys_verify {
     };
     use test_log::test;
 
-    use super::{get_prover_server, prover_opts_fast};
+    use super::get_prover_server;
     use crate::{
         serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
         Receipt,
     };
 
     fn prove_hello_commit() -> Receipt {
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
             .unwrap()
@@ -705,7 +697,7 @@ mod sys_verify {
             .add_assumption(hello_commit_receipt().clone())
             .build()
             .unwrap();
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
@@ -728,7 +720,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -751,7 +743,7 @@ mod sys_verify {
             .unwrap();
 
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -777,7 +769,7 @@ mod sys_verify {
             .add_assumption(hello_commit_receipt().clone())
             .build()
             .unwrap();
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
@@ -792,7 +784,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -806,7 +798,7 @@ mod sys_verify {
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -829,7 +821,7 @@ mod sys_verify {
             .add_assumption(halt_receipt)
             .build()
             .unwrap();
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
