@@ -46,14 +46,14 @@ text_io = "0.1.12"
 tokio = { version = "1", features = ["rt"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 xz = "0.1.0"
-zip = { version = "0.6", optional = true }
+zip = { version = "1.2", optional = true }
 
 [build-dependencies]
 risc0-build = { workspace = true, optional = true }
 tracing-subscriber = { version = "0.3", features = [
   "env-filter",
 ], optional = true }
-zip = { version = "0.6", optional = true }
+zip = { version = "1.2", optional = true }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
