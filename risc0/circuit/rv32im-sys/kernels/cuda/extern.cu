@@ -156,7 +156,7 @@ struct HostContext {
     CUDA_OK(cudaMemset(ctx->ramIndex, 0, steps * sizeof(uint32_t)));
     CUDA_OK(cudaMallocManaged(&ctx->bytePairs, kTotalBytePairs * sizeof(uint32_t)));
     CUDA_OK(cudaMemset(ctx->bytePairs, 0, kTotalBytePairs * sizeof(uint32_t)));
-    CUDA_OK(cudaMallocManaged(&ctx->byteSorted, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
+    CUDA_OK(cudaMalloc(&ctx->byteSorted, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
     CUDA_OK(cudaMallocManaged(&ctx->byteWrites, steps * sizeof(uint32_t)));
     CUDA_OK(cudaMemset(ctx->byteWrites, 0, steps * sizeof(uint32_t)));
     CUDA_OK(cudaMalloc(&ctx->byteReads, steps * sizeof(uint32_t)));
@@ -292,38 +292,44 @@ extern "C" const char* risc0_circuit_rv32im_cuda_witgen(
       CUDA_OK(cudaStreamSynchronize(stream));
     }
 
-    ctx.ctx->sortRam();
-
     {
-      // printf("inject_backs_ram\n");
-      nvtx3::scoped_range range("inject_backs_ram");
-      inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
-      CUDA_OK(cudaStreamSynchronize(stream));
+      nvtx3::scoped_range range("verify_ram");
+      ctx.ctx->sortRam();
+
+      {
+        // printf("inject_backs_ram\n");
+        nvtx3::scoped_range range("inject_backs_ram");
+        inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
+
+      {
+        // printf("step_verify_mem\n");
+        nvtx3::scoped_range range("step_verify_mem");
+        par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
+            ctx.ctx, steps, last_cycle, ctrl, io, data);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
     }
 
     {
-      // printf("step_verify_mem\n");
-      nvtx3::scoped_range range("step_verify_mem");
-      par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
-          ctx.ctx, steps, last_cycle, ctrl, io, data);
-      CUDA_OK(cudaStreamSynchronize(stream));
-    }
+      nvtx3::scoped_range range("verify_bytes");
+      ctx.ctx->sortBytes();
 
-    ctx.ctx->sortBytes();
+      {
+        // printf("inject_backs_bytes\n");
+        nvtx3::scoped_range range("inject_backs_bytes");
+        inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
 
-    {
-      // printf("inject_backs_bytes\n");
-      nvtx3::scoped_range range("inject_backs_bytes");
-      inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
-      CUDA_OK(cudaStreamSynchronize(stream));
-    }
-
-    {
-      // printf("step_verify_bytes\n");
-      nvtx3::scoped_range range("step_verify_bytes");
-      step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
-          ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
-      CUDA_OK(cudaStreamSynchronize(stream));
+      {
+        // printf("step_verify_bytes\n");
+        nvtx3::scoped_range range("step_verify_bytes");
+        step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
+            ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
+        CUDA_OK(cudaStreamSynchronize(stream));
+      }
     }
 
   } catch (const std::exception& err) {
@@ -564,6 +570,7 @@ extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, Fp* args, Fp
 void MachineContext::sortBytes() {
   nvtx3::scoped_range range("sortBytes");
   // printf("sortBytes\n");
+  std::vector<uint32_t> h_byteSorted(steps * kMaxBytePairsPerCycle);
 
   size_t pos = 0;
   auto next = [&]() {
@@ -578,9 +585,14 @@ void MachineContext::sortBytes() {
     uint32_t count = byteWrites[cycle];
     assert(count <= kMaxBytePairsPerCycle);
     for (size_t i = 0; i < count; i++) {
-      byteSorted[cycle * kMaxBytePairsPerCycle + i] = next();
+      h_byteSorted[cycle * kMaxBytePairsPerCycle + i] = next();
     }
   }
+
+  cudaMemcpy(byteSorted,
+             h_byteSorted.data(),
+             h_byteSorted.size() * sizeof(uint32_t),
+             cudaMemcpyHostToDevice);
 }
 
 __device__ void

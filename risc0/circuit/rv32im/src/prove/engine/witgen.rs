@@ -63,11 +63,16 @@ where
         nvtx::range_pop!();
         tracing::debug!("last_cycle: {last_cycle}");
 
+        nvtx::range_push!("alloc(data)");
         let mut data = vec![BabyBearElem::INVALID; steps * CIRCUIT.data_size()];
+        nvtx::range_pop!();
+
         let machine = MachineContext::new(trace);
+        nvtx::range_push!("inject_exec_backs");
         for cycle in 0..last_cycle {
             machine.inject_exec_backs(steps, cycle, &mut data);
         }
+        nvtx::range_pop!();
 
         {
             nvtx::range_push!("noise");
