@@ -2,6 +2,7 @@
 
 import { Input } from "@risc0/ui/input";
 import type { Table } from "@tanstack/react-table";
+import { SearchIcon } from "lucide-react";
 import type { ComponentType, Dispatch, SetStateAction } from "react";
 import { TableFacetedFilter } from "./table-faceted-filter";
 import { TableViewOptions } from "./table-view-options";
@@ -33,6 +34,7 @@ export function TableToolbar<TData>({
     <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
       {setGlobalFilter && (
         <Input
+          startIcon={<SearchIcon className="top-2" />}
           placeholder="Search…"
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(String(event.target.value))}

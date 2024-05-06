@@ -44,8 +44,8 @@ Note that in order to use `risc0-zkvm` in the guest, you must disable the
 [`cargo risczero` tool]: https://crates.io/crates/cargo-risczero
 [dev-docs]: https://dev.risczero.com
 [examples]: https://dev.risczero.com/api/zkvm/examples
-[receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/host/receipt/struct.Receipt.html
-[receipt-verify]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/host/receipt/struct.Receipt.html#method.verify
+[receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html
+[receipt-verify]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html#method.verify
 [rust guest workarounds]: https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22
 [YouTube]: https://www.youtube.com/@risczero
 [zero-knowledge proofs]: https://en.wikipedia.org/wiki/Zero-knowledge_proof
