@@ -69,3 +69,6 @@ experimental = [
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
+
+[dev-dependencies]
+trycmd = { version = "0.15", features = ["color"] }

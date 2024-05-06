@@ -1,0 +1,19 @@
+bin.name = "risczero"
+args = ["risczero", "verify", "--help"]
+status.code = 0
+stdout = """
+Verifies if a receipt is valid
+
+Usage: cargo risczero verify [OPTIONS] <--path <PATH>|--id <ID>> <IMAGE_ID>
+
+Arguments:
+  <IMAGE_ID>  The hex-encoded image ID to verify the receipt against
+
+Options:
+      --path <PATH>        The path to the receipt file
+      --id <ID>            The Bonsai ID of the receipt to download and verify
+      --api-url <API_URL>  API URL for Bonsai
+      --api-key <API_KEY>  API key for Bonsai
+  -h, --help               Print help
+"""
+stderr = ""

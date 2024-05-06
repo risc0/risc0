@@ -1,0 +1,7 @@
+bin.name = "risczero"
+args = ["risczero", "verify", "979e6a3e0611115750ae8a92b674c2e0fb0cb1b3d006c7326b30ec9c7e748542", "--path", "receipt.bin"]
+status.code = 0
+stdout = """
+✅ Receipt is valid!
+"""
+stderr = ""
