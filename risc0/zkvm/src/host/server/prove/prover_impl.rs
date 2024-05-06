@@ -20,9 +20,12 @@ use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        receipt::{
+            segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        },
         recursion::{identity_p254, join, lift, resolve},
     },
+    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     sha::Digestible,
     CompositeReceipt, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
@@ -83,6 +86,7 @@ impl ProverServer for ProverImpl {
             );
         }
 
+        // Compress the receipt to the requested level.
         let receipt = match self.opts.receipt_kind {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
