@@ -14,6 +14,11 @@
 
 //! Groth16 prover and verifier integration for RISC Zero.
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate alloc;
+
+use alloc::vec::Vec;
 use core::str::FromStr;
 
 use anyhow::{anyhow, Error, Result};
@@ -42,14 +47,14 @@ pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
     let middle = big_endian.len() / 2;
     let (b, a) = big_endian.split_at(middle);
     Ok((
-        fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(a)))?)?,
-        fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(b)))?)?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(a))?)?,
+        fr_from_bytes(&from_u256_hex(&hex::encode(b))?)?,
     ))
 }
 
 /// Creates an [Fr] from a hex string
 pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
-    fr_from_bytes(&from_u256(&format!("0x{}", val))?)
+    fr_from_bytes(&from_u256_hex(val)?)
 }
 
 // Deserialize a scalar field from bytes in big-endian format
@@ -94,19 +99,25 @@ pub(crate) fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
 
 // Convert the U256 value to a byte array in big-endian format
 pub(crate) fn from_u256(value: &str) -> Result<Vec<u8>, Error> {
-    let value = if let Some(stripped) = value.strip_prefix("0x") {
-        to_fixed_array(hex::decode(stripped).map_err(|_| anyhow!("conversion from u256 failed"))?)
-            .to_vec()
+    if let Some(stripped) = value.strip_prefix("0x") {
+        from_u256_hex(stripped)
     } else {
-        to_fixed_array(
+        Ok(to_fixed_array(
             BigInt::from_str(value)
                 .map_err(|_| anyhow!("conversion from u256 failed"))?
                 .to_bytes_be()
                 .1,
         )
-        .to_vec()
-    };
-    Ok(value)
+        .to_vec())
+    }
+}
+
+// Convert the U256 value to a byte array in big-endian format
+fn from_u256_hex(value: &str) -> Result<Vec<u8>, Error> {
+    Ok(
+        to_fixed_array(hex::decode(value).map_err(|_| anyhow!("conversion from u256 failed"))?)
+            .to_vec(),
+    )
 }
 
 fn to_fixed_array(input: Vec<u8>) -> [u8; 32] {

@@ -14,7 +14,7 @@
 
 extern crate alloc;
 
-use alloc::{vec, vec::Vec};
+use alloc::{string::String, vec, vec::Vec};
 
 use anyhow::{anyhow, Error, Result};
 use ark_bn254::Bn254;

@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+
+use alloc::{vec, vec::Vec};
+
 use anyhow::{anyhow, Error, Result};
 use ark_bn254::{Bn254, G1Projective};
 use ark_ec::AffineRepr;
@@ -207,6 +211,8 @@ impl Digestible for VerifyingKey {
 
 /// Compatibility module providing simple serde interop
 mod serde_ark {
+    use alloc::vec::Vec;
+
     use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
     use serde::{
         de::Error as _, ser::Error as _, Deserialize, Deserializer, Serialize, Serializer,
