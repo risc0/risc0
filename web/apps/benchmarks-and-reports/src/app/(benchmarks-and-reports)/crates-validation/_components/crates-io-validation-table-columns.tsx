@@ -4,12 +4,12 @@ import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dialog";
+import { joinWords } from "@risc0/ui/utils/join-words";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { Highlight, themes } from "prism-react-renderer";
 import { TableColumnHeader } from "shared/client/table/table-column-header";
-import { joinWords } from "shared/utils/join-words";
 import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
 const columnHelper = createColumnHelper<CratesIoValidationTableSchema>();

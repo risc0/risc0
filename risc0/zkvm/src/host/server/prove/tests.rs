@@ -500,9 +500,12 @@ mod docker {
     use crate::{
         get_prover_server,
         host::server::prove::{DevModeProver, ProverServer},
-        ExecutorEnv, InnerReceipt, ProverOpts, Receipt, ReceiptKind,
+        ExecutorEnv, ExecutorImpl, ExitCode, InnerReceipt, ProverOpts, Receipt, ReceiptKind,
     };
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+    use risc0_zkp::core::digest::Digest;
+    use risc0_zkvm_methods::{
+        multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, VERIFY_ELF,
+    };
 
     #[test]
     fn stark2snark() {
@@ -578,6 +581,38 @@ mod docker {
             .unwrap();
         let prover = get_prover_server(&opts).unwrap();
         prover.prove(env, MULTI_TEST_ELF).unwrap().receipt
+    }
+
+    fn exec_verify(receipt: &Receipt) {
+        let input: (Receipt, Digest) = (receipt.clone(), MULTI_TEST_ID.into());
+        let env = ExecutorEnv::builder()
+            .write(&input)
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, VERIFY_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
+        assert_eq!(session.exit_code, ExitCode::Halted(0));
+        println!("{:?}", session.stats());
+    }
+
+    #[test]
+    fn verify_in_guest() {
+        let composite_receipt = generate_receipt(ProverOpts::composite());
+        exec_verify(&composite_receipt);
+        let succinct_receipt = get_prover_server(&ProverOpts::succinct())
+            .unwrap()
+            .compress(&ProverOpts::succinct(), &composite_receipt)
+            .unwrap();
+        exec_verify(&succinct_receipt);
+        let compact_receipt = get_prover_server(&ProverOpts::compact())
+            .unwrap()
+            .compress(&ProverOpts::compact(), &succinct_receipt)
+            .unwrap();
+        exec_verify(&compact_receipt);
+        compact_receipt.inner.compact().unwrap();
     }
 
     #[test]

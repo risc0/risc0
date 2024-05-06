@@ -18,7 +18,7 @@ use hex::FromHex;
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{
     control_id::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
-    CircuitImpl,
+    CircuitImpl, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{
@@ -28,8 +28,7 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::CIRCUIT;
-use crate::{host::receipt::VerifierContext, sha, ReceiptClaim};
+use crate::{receipt::VerifierContext, sha, ReceiptClaim};
 
 /// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
