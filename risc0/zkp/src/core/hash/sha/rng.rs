@@ -19,7 +19,7 @@ use alloc::boxed::Box;
 use rand_core::{impls, Error, RngCore};
 use risc0_core::field::{Elem, Field};
 
-use super::{Impl, Digest, Sha256, DIGEST_WORDS};
+use super::{Digest, Impl, Sha256, DIGEST_WORDS};
 use crate::core::hash::Rng;
 
 /// A random number generator driven by a [Sha256].
