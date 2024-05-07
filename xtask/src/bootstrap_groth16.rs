@@ -17,8 +17,8 @@ use std::{fs, path::Path, process::Command};
 use clap::Parser;
 use regex::Regex;
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt,
-    VerifierContext, ALLOWED_CONTROL_ROOT,
+    get_prover_server, sha::Digestible, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts,
+    Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
@@ -154,13 +154,18 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 "#;
     let receipt = generate_receipt();
     let image_id = receipt.claim().unwrap().pre.digest();
+    let verifier_info_digest = CompactReceipt::verifier_info().digest();
+    let selector = hex::encode(&verifier_info_digest.as_bytes()[..4]);
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
     let post_digest = hex::encode(receipt.claim().unwrap().post.digest().as_bytes());
     let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
 
-    // TODO(victor): add the selector here.
-    let seal = format!(r#"bytes public constant SEAL = hex"00000000{seal}";"#);
+    // NOTE: Selector value is the fist four bytes of the verifier info digest. It is added as part
+    // of ABI encoding and used for routing to the correct verifier on-chain. We do not use the
+    // full ABI encoding implementation here because its part of risc0-ethereum-contracts, which
+    // would be a hassle to import.
+    let seal = format!(r#"bytes public constant SEAL = hex"{selector}{seal}";"#);
     let post_digest = format!(r#"bytes32 public constant POST_DIGEST = hex"{post_digest}";"#);
     let journal = format!(r#"bytes public constant JOURNAL = hex"{journal}";"#);
     let image_id = format!(r#"bytes32 public constant IMAGE_ID = hex"{image_id}";"#);
