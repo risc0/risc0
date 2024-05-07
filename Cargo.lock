@@ -4382,6 +4382,7 @@ dependencies = [
  "anyhow",
  "blake2",
  "bytemuck",
+ "cfg-if",
  "criterion",
  "cust",
  "digest",
