@@ -25,8 +25,9 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    CompactReceipt, CompactReceiptVerifierInfo, InnerReceipt, SegmentReceipt,
-    SegmentReceiptVerifierInfo, SuccinctReceipt, SuccinctReceiptVerifierInfo, VerifierContext,
+    CompactReceipt, CompactReceiptVerifierParameters, InnerReceipt, SegmentReceipt,
+    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+    VerifierContext,
 };
 use crate::{sha, Assumptions, MaybePruned, Output, ReceiptClaim};
 
@@ -58,11 +59,11 @@ pub struct CompositeReceipt {
 impl CompositeReceipt {
     /// Information about the parameters used to verify the receipt. Includes parameters that are
     /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_info() -> CompositeReceiptVerifierInfo {
-        CompositeReceiptVerifierInfo {
-            segment: SegmentReceipt::verifier_info(),
-            succinct: SuccinctReceipt::verifier_info(),
-            compact: CompactReceipt::verifier_info(),
+    pub fn verifier_parameters() -> CompositeReceiptVerifierParameters {
+        CompositeReceiptVerifierParameters {
+            segment: SegmentReceipt::verifier_parameters(),
+            succinct: SuccinctReceipt::verifier_parameters(),
+            compact: CompactReceipt::verifier_parameters(),
         }
     }
 
@@ -242,27 +243,27 @@ impl CompositeReceipt {
     }
 }
 
-/// Verifier info for [CompositeReceipt][super::CompositeReceipt].
+/// Verifier parameters for [CompositeReceipt][super::CompositeReceipt].
 ///
 /// [CompositeReceipt][super::CompositeReceipt] is a collection of individual receipts that
 /// collectively  prove a claim. It can contain any of the individual receipt types, and so it's
 /// verifier is a combination of the verifiers for every other receipt type.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
-pub struct CompositeReceiptVerifierInfo {
-    /// Verifier info related to [SegmentReceipt].
-    pub segment: SegmentReceiptVerifierInfo,
-    /// Verifier info related to [SuccinctReceipt].
-    pub succinct: SuccinctReceiptVerifierInfo,
-    /// Verifier info related to [CompactReceipt].
-    pub compact: CompactReceiptVerifierInfo,
+pub struct CompositeReceiptVerifierParameters {
+    /// Verifier parameters related to [SegmentReceipt].
+    pub segment: SegmentReceiptVerifierParameters,
+    /// Verifier parameters related to [SuccinctReceipt].
+    pub succinct: SuccinctReceiptVerifierParameters,
+    /// Verifier parameters related to [CompactReceipt].
+    pub compact: CompactReceiptVerifierParameters,
 }
 
-impl Digestible for CompositeReceiptVerifierInfo {
-    /// Hash the [CompactReceiptVerifierInfo] to get a digest of the struct.
+impl Digestible for CompositeReceiptVerifierParameters {
+    /// Hash the [CompactReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
-            "risc0.CompositeReceiptVerifierInfo",
+            "risc0.CompositeReceiptVerifierParameters",
             &[
                 &self.segment.digest::<S>(),
                 &self.succinct.digest::<S>(),
@@ -279,14 +280,14 @@ mod tests {
     use crate::sha::{Digest, Digestible};
     use hex::FromHex;
 
-    // Check that the verifier info has a stable digest (and therefore a stable value). This struct
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This struct
     // encodes parameters used in verification, and so this value should be updated if and only if
-    // a change to the verifier parameters is expected. Updating the verifier info will result in
+    // a change to the verifier parameters is expected. Updating the verifier parameters will result in
     // incompatibility with previous versions.
     #[test]
-    fn composite_receipt_verifier_info_is_stable() {
+    fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            CompositeReceipt::verifier_info().digest(),
+            CompositeReceipt::verifier_parameters().digest(),
             Digest::from_hex("fd1150d059fc3b7b233c190fe6d24917260967dfc70ac49ae2566d1e5083def9")
                 .unwrap()
         );

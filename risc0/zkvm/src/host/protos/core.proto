@@ -23,7 +23,7 @@ message Receipt {
 }
 
 message ReceiptMetadata {
-  Digest verifier_info = 1;
+  Digest verifier_parameters = 1;
 }
 
 message InnerReceipt {

@@ -43,12 +43,12 @@ use crate::{
     Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
-pub use self::compact::{CompactReceipt, CompactReceiptVerifierInfo};
+pub use self::compact::{CompactReceipt, CompactReceiptVerifierParameters};
 
 pub use self::{
-    composite::{CompositeReceipt, CompositeReceiptVerifierInfo},
-    segment::{SegmentReceipt, SegmentReceiptVerifierInfo},
-    succinct::{SuccinctReceipt, SuccinctReceiptVerifierInfo},
+    composite::{CompositeReceipt, CompositeReceiptVerifierParameters},
+    segment::{SegmentReceipt, SegmentReceiptVerifierParameters},
+    succinct::{SuccinctReceipt, SuccinctReceiptVerifierParameters},
 };
 
 /// A receipt attesting to the execution of a guest program.
@@ -130,7 +130,7 @@ impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
         let metadata = ReceiptMetadata {
-            verifier_info: inner.verifier_info(),
+            verifier_parameters: inner.verifier_parameters(),
         };
         Self {
             inner,
@@ -164,10 +164,10 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
-        if self.inner.verifier_info() != self.metadata.verifier_info {
-            return Err(VerificationError::VerifierInfoMismatch {
-                expected: self.inner.verifier_info(),
-                received: self.metadata.verifier_info,
+        if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: self.inner.verifier_parameters(),
+                received: self.metadata.verifier_parameters,
             });
         }
 
@@ -226,10 +226,10 @@ impl Receipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        if self.inner.verifier_info() != self.metadata.verifier_info {
-            return Err(VerificationError::VerifierInfoMismatch {
-                expected: self.inner.verifier_info(),
-                received: self.metadata.verifier_info,
+        if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: self.inner.verifier_parameters(),
+                received: self.metadata.verifier_parameters,
             });
         }
 
@@ -392,12 +392,12 @@ impl InnerReceipt {
         }
     }
 
-    /// Return the digest of the verifier info struct for the appropriate receipt verifier.
-    pub fn verifier_info(&self) -> Digest {
+    /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
+    pub fn verifier_parameters(&self) -> Digest {
         match self {
-            InnerReceipt::Composite(_) => CompositeReceipt::verifier_info().digest(),
-            InnerReceipt::Compact(_) => CompactReceipt::verifier_info().digest(),
-            InnerReceipt::Succinct(_) => SuccinctReceipt::verifier_info().digest(),
+            InnerReceipt::Composite(_) => CompositeReceipt::verifier_parameters().digest(),
+            InnerReceipt::Compact(_) => CompactReceipt::verifier_parameters().digest(),
+            InnerReceipt::Succinct(_) => SuccinctReceipt::verifier_parameters().digest(),
             InnerReceipt::Fake { .. } => Digest::ZERO,
         }
     }
@@ -416,7 +416,7 @@ pub struct ReceiptMetadata {
     /// It is intended to be used when there are multiple verifier implementations (e.g.
     /// corresponding to multiple versions of a proof system or circuit) and it is ambiguous which
     /// one should be used to attempt verification of a receipt.
-    pub verifier_info: Digest,
+    pub verifier_parameters: Digest,
 }
 
 /// An assumption attached to a guest execution as a result of calling
@@ -525,11 +525,11 @@ mod tests {
             vec![],
         );
         let ones_digest = Digest::from([1u8; DIGEST_BYTES]);
-        mangled_receipt.metadata.verifier_info = ones_digest;
+        mangled_receipt.metadata.verifier_parameters = ones_digest;
 
         assert_eq!(
             mangled_receipt.verify(Digest::ZERO).err().unwrap(),
-            VerificationError::VerifierInfoMismatch {
+            VerificationError::VerifierParametersMismatch {
                 expected: Digest::ZERO,
                 received: ones_digest
             }
@@ -539,7 +539,7 @@ mod tests {
                 .verify_with_context(&Default::default(), Digest::ZERO)
                 .err()
                 .unwrap(),
-            VerificationError::VerifierInfoMismatch {
+            VerificationError::VerifierParametersMismatch {
                 expected: Digest::ZERO,
                 received: ones_digest
             }
@@ -549,7 +549,7 @@ mod tests {
                 .verify_integrity_with_context(&Default::default())
                 .err()
                 .unwrap(),
-            VerificationError::VerifierInfoMismatch {
+            VerificationError::VerifierParametersMismatch {
                 expected: Digest::ZERO,
                 received: ones_digest
             }

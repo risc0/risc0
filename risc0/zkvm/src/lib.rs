@@ -143,12 +143,12 @@ pub use {
 };
 
 pub use receipt::{
-    Assumption, CompositeReceipt, CompositeReceiptVerifierInfo, InnerReceipt, Journal, Receipt,
-    SegmentReceipt, SegmentReceiptVerifierInfo, SuccinctReceipt, SuccinctReceiptVerifierInfo,
-    VerifierContext,
+    Assumption, CompositeReceipt, CompositeReceiptVerifierParameters, InnerReceipt, Journal,
+    Receipt, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::{CompactReceipt, CompactReceiptVerifierInfo};
+pub use receipt::{CompactReceipt, CompactReceiptVerifierParameters};
 
 use semver::Version;
 

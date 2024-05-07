@@ -318,7 +318,7 @@ impl TryFrom<pb::core::Receipt> for Receipt {
 impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
     fn from(value: ReceiptMetadata) -> Self {
         Self {
-            verifier_info: Some(value.verifier_info.into()),
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
@@ -328,7 +328,10 @@ impl TryFrom<pb::core::ReceiptMetadata> for ReceiptMetadata {
 
     fn try_from(value: pb::core::ReceiptMetadata) -> Result<Self> {
         Ok(Self {
-            verifier_info: value.verifier_info.ok_or(malformed_err())?.try_into()?,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }

@@ -38,7 +38,7 @@ use crate::{
 #[derive(PartialEq)]
 #[non_exhaustive]
 pub enum VerificationError {
-    VerifierInfoMismatch { expected: Digest, received: Digest },
+    VerifierParametersMismatch { expected: Digest, received: Digest },
     ReceiptFormatError,
     ControlVerificationError { control_id: Digest },
     ImageVerificationError,
@@ -58,7 +58,7 @@ impl fmt::Debug for VerificationError {
 impl fmt::Display for VerificationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            VerificationError::VerifierInfoMismatch { expected, received } => {
+            VerificationError::VerifierParametersMismatch { expected, received } => {
                 write!(f, "receipt was produced for a version of the verifier with info digest {received}; expected {expected}")
             }
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),

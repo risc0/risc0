@@ -71,8 +71,8 @@ impl SegmentReceipt {
 
     /// Information about the parameters used to verify the receipt. Includes parameters that are
     /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_info() -> SegmentReceiptVerifierInfo {
-        SegmentReceiptVerifierInfo {
+    pub fn verifier_parameters() -> SegmentReceiptVerifierParameters {
+        SegmentReceiptVerifierParameters {
             control_ids: BTreeSet::from_iter(Self::allowed_control_ids()),
             proof_system_info: PROOF_SYSTEM_INFO,
             circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
@@ -123,7 +123,7 @@ impl SegmentReceipt {
 /// Verifier parameters used to verify a [SegmentReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct SegmentReceiptVerifierInfo {
+pub struct SegmentReceiptVerifierParameters {
     /// Set of control ID with which the receipt is expected to verify.
     pub control_ids: BTreeSet<Digest>,
     /// Protocol info string distinguishing the proof system under which the receipt should verify.
@@ -132,11 +132,11 @@ pub struct SegmentReceiptVerifierInfo {
     pub circuit_info: ProtocolInfo,
 }
 
-impl Digestible for SegmentReceiptVerifierInfo {
-    /// Hash the [SegmentReceiptVerifierInfo] to get a digest of the struct.
+impl Digestible for SegmentReceiptVerifierParameters {
+    /// Hash the [SegmentReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
-            "risc0.SegmentReceiptVerifierInfo",
+            "risc0.SegmentReceiptVerifierParameters",
             &[
                 tagged_iter::<S>("risc0.ControlIdSet", self.control_ids.iter()),
                 *S::hash_bytes(&self.proof_system_info.0),
@@ -204,14 +204,14 @@ mod tests {
     use crate::sha::{Digest, Digestible};
     use hex::FromHex;
 
-    // Check that the verifier info has a stable digest (and therefore a stable value). This struct
-    // encodes parameters used in verification, and so this value should be updated if and only if
-    // a change to the verifier parameters is expected. Updating the verifier info will result in
-    // incompatibility with previous versions.
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This
+    // struct encodes parameters used in verification, and so this value should be updated if and
+    // only if a change to the verifier parameters is expected. Updating the verifier parameters
+    // will result in incompatibility with previous versions.
     #[test]
-    fn segment_receipt_verifier_info_is_stable() {
+    fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            SegmentReceipt::verifier_info().digest(),
+            SegmentReceipt::verifier_parameters().digest(),
             Digest::from_hex("1054ac6a9748f4c255d47f3716cf4e7336291eb96aaecf3fef60d7f9e4e371a3")
                 .unwrap()
         );

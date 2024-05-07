@@ -42,8 +42,8 @@ pub struct CompactReceipt {
 impl CompactReceipt {
     /// Information about the parameters used to verify the receipt. Includes parameters that are
     /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_info() -> CompactReceiptVerifierInfo {
-        CompactReceiptVerifierInfo {
+    pub fn verifier_parameters() -> CompactReceiptVerifierParameters {
+        CompactReceiptVerifierParameters {
             control_root: Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap(),
             bn254_control_id: Digest::from_hex(BN254_CONTROL_ID).unwrap(),
             verifying_key: risc0_groth16::verifying_key(),
@@ -79,7 +79,7 @@ impl CompactReceipt {
 /// Verifier parameters used to verify a [CompactReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
-pub struct CompactReceiptVerifierInfo {
+pub struct CompactReceiptVerifierParameters {
     /// Control root with which the receipt is expected to verify.
     pub control_root: Digest,
     /// Control ID, calculated with Poseidon over BN254 scalar field, with which the receipt is
@@ -89,11 +89,11 @@ pub struct CompactReceiptVerifierInfo {
     pub verifying_key: VerifyingKey,
 }
 
-impl Digestible for CompactReceiptVerifierInfo {
-    /// Hash the [CompactReceiptVerifierInfo] to get a digest of the struct.
+impl Digestible for CompactReceiptVerifierParameters {
+    /// Hash the [CompactReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
-            "risc0.CompactReceiptVerifierInfo",
+            "risc0.CompactReceiptVerifierParameters",
             &[
                 self.control_root,
                 self.bn254_control_id,
@@ -110,14 +110,14 @@ mod tests {
     use crate::sha::{Digest, Digestible};
     use hex::FromHex;
 
-    // Check that the verifier info has a stable digest (and therefore a stable value). This struct
-    // encodes parameters used in verification, and so this value should be updated if and only if
-    // a change to the verifier parameters is expected. Updating the verifier info will result in
-    // incompatibility with previous versions.
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This
+    // struct encodes parameters used in verification, and so this value should be updated if and
+    // only if a change to the verifier parameters is expected. Updating the verifier parameters
+    // will result in incompatibility with previous versions.
     #[test]
-    fn compact_receipt_verifier_info_is_stable() {
+    fn compact_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            CompactReceipt::verifier_info().digest(),
+            CompactReceipt::verifier_parameters().digest(),
             Digest::from_hex("7beca6121859410d1e284f61d6144f69bd6945e9f24a3f2fe0ae247430ed6bf9")
                 .unwrap()
         );

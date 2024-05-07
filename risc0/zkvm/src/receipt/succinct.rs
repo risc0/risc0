@@ -61,8 +61,8 @@ pub struct SuccinctReceipt {
 impl SuccinctReceipt {
     /// Information about the parameters used to verify the receipt. Includes parameters that are
     /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_info() -> SuccinctReceiptVerifierInfo {
-        SuccinctReceiptVerifierInfo {
+    pub fn verifier_parameters() -> SuccinctReceiptVerifierParameters {
+        SuccinctReceiptVerifierParameters {
             control_root: Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap(),
             proof_system_info: PROOF_SYSTEM_INFO,
             circuit_info: risc0_circuit_recursion::CircuitImpl::CIRCUIT_INFO,
@@ -158,7 +158,7 @@ impl SuccinctReceipt {
 /// Verifier parameters used to verify a [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct SuccinctReceiptVerifierInfo {
+pub struct SuccinctReceiptVerifierParameters {
     /// Control root with which the receipt is expected to verify.
     pub control_root: Digest,
     /// Protocol info string distinguishing the proof system under which the receipt should verify.
@@ -167,11 +167,11 @@ pub struct SuccinctReceiptVerifierInfo {
     pub circuit_info: ProtocolInfo,
 }
 
-impl Digestible for SuccinctReceiptVerifierInfo {
-    /// Hash the [SuccinctReceiptVerifierInfo] to get a digest of the struct.
+impl Digestible for SuccinctReceiptVerifierParameters {
+    /// Hash the [SuccinctReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
-            "risc0.SuccinctReceiptVerifierInfo",
+            "risc0.SuccinctReceiptVerifierParameters",
             &[
                 self.control_root,
                 *S::hash_bytes(&self.proof_system_info.0),
@@ -188,14 +188,14 @@ mod tests {
     use crate::sha::{Digest, Digestible};
     use hex::FromHex;
 
-    // Check that the verifier info has a stable digest (and therefore a stable value). This struct
-    // encodes parameters used in verification, and so this value should be updated if and only if
-    // a change to the verifier parameters is expected. Updating the verifier info will result in
-    // incompatibility with previous versions.
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This
+    // struct encodes parameters used in verification, and so this value should be updated if and
+    // only if a change to the verifier parameters is expected. Updating the verifier parameters
+    // will result in incompatibility with previous versions.
     #[test]
-    fn succinct_receipt_verifier_info_is_stable() {
+    fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            SuccinctReceipt::verifier_info().digest(),
+            SuccinctReceipt::verifier_parameters().digest(),
             Digest::from_hex("c511cb5680ef5c2e4a8323fffe48975dca5d4b2754fe7c58e86968ea3687db6e")
                 .unwrap()
         );
