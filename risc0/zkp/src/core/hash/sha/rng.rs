@@ -19,7 +19,16 @@ use alloc::boxed::Box;
 use rand_core::{impls, Error, RngCore};
 use risc0_core::field::{Elem, Field};
 
-use super::{cpu::Impl, Digest, Sha256, DIGEST_WORDS};
+// Pick the appropriate implementation of SHA-256 depending on whether we are
+// in the zkVM guest.
+cfg_if::cfg_if! {
+    if #[cfg(target_os = "zkvm")] {
+        use crate::core::hash::sha::guest::Impl;
+    } else {
+        use crate::core::hash::sha::cpu::Impl;
+    }
+}
+use super::{Digest, Sha256, DIGEST_WORDS};
 use crate::core::hash::Rng;
 
 /// A random number generator driven by a [Sha256].
@@ -42,8 +51,8 @@ impl ShaRng {
     /// Create a new [ShaRng] from a given [Sha256].
     pub fn new() -> Self {
         Self {
-            pool0: Impl::hash_bytes(b"Hello"),
-            pool1: Impl::hash_bytes(b"World"),
+            pool0: (*Impl::hash_bytes(b"Hello")).into(),
+            pool1: (*Impl::hash_bytes(b"World")).into(),
             pool_used: 0,
         }
     }
@@ -57,8 +66,8 @@ impl ShaRng {
     }
 
     fn step(&mut self) {
-        self.pool0 = Impl::hash_pair(&self.pool0, &self.pool1);
-        self.pool1 = Impl::hash_pair(&self.pool0, &self.pool1);
+        self.pool0 = (*Impl::hash_pair(&self.pool0, &self.pool1)).into();
+        self.pool1 = (*Impl::hash_pair(&self.pool0, &self.pool1)).into();
         self.pool_used = 0;
     }
 }

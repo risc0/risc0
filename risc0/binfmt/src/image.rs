@@ -19,7 +19,7 @@ use alloc::{collections::BTreeMap, vec, vec::Vec};
 use anyhow::{ensure, Result};
 use risc0_zkp::core::{
     digest::Digest,
-    hash::sha::{cpu::Impl, Sha256, BLOCK_BYTES, SHA256_INIT},
+    hash::sha::{Impl, Sha256, BLOCK_BYTES, SHA256_INIT},
 };
 use risc0_zkvm_platform::{
     memory::{GUEST_MAX_MEM, MEM_SIZE, PAGE_TABLE},

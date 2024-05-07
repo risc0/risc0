@@ -51,15 +51,9 @@ pub use risc0_zkp::core::{
     hash::sha::{Block, Sha256, BLOCK_BYTES, BLOCK_WORDS, SHA256_INIT, WORD_SIZE},
 };
 
-// Pick the appropriate implementation of SHA-256 depending on whether we are
+// This Impl selects the approperiate implementation of SHA-256 depending on whether we are
 // in the zkVM guest. Users can simply `use risc0_zkvm::sha::Impl`.
-cfg_if::cfg_if! {
-    if #[cfg(target_os = "zkvm")] {
-        pub use crate::guest::sha::Impl;
-    } else {
-        pub use risc0_zkp::core::hash::sha::cpu::Impl;
-    }
-}
+pub use risc0_zkp::core::hash::sha::Impl;
 
 /// Defines a collision resistant hash for the typed and structured data.
 pub trait Digestible {

@@ -16,16 +16,15 @@
 
 use alloc::vec::Vec;
 
-use risc0_zkp::core::{
+use crate::core::{
     digest::Digest,
     hash::sha::{Block, BLOCK_WORDS, SHA256_INIT},
 };
 use risc0_zkvm_platform::{
+    align_up,
     syscall::{sys_sha_buffer, sys_sha_compress},
     WORD_SIZE,
 };
-
-use crate::align_up;
 
 // FIP 180-4 specifies that the bit-string being hashed should have a `1`
 // appended to it before padding.
@@ -226,7 +225,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
 #[derive(Debug, Clone, Default)]
 pub struct Impl {}
 
-impl risc0_zkp::core::hash::sha::Sha256 for Impl {
+impl crate::core::hash::sha::Sha256 for Impl {
     type DigestPtr = &'static mut Digest;
 
     fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr {
