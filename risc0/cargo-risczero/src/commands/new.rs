@@ -76,7 +76,7 @@ pub struct NewCommand {
     /// Toggles the `#![no_std]` in the guest main() and the `std` feature flag
     /// on the `risc0_zkvm` crate.
     #[arg(long, global = false)]
-    pub std: bool,
+    pub no_std: bool,
 
     /// Use a path dependency for risc0.
     #[arg(long)]
@@ -162,7 +162,7 @@ impl NewCommand {
         template_variables.push(format!("guest_id={guest_name_const}_ID"));
         template_variables.push(format!("guest_elf={guest_name_const}_ELF"));
 
-        if self.std {
+        if !self.no_std {
             template_variables.push("risc0_std=true".to_string());
             template_variables.push("risc0_feature_std=, features = ['std']".to_string());
         }
