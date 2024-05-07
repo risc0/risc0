@@ -19,16 +19,7 @@ use alloc::boxed::Box;
 use rand_core::{impls, Error, RngCore};
 use risc0_core::field::{Elem, Field};
 
-// Pick the appropriate implementation of SHA-256 depending on whether we are
-// in the zkVM guest.
-cfg_if::cfg_if! {
-    if #[cfg(target_os = "zkvm")] {
-        use crate::core::hash::sha::guest::Impl;
-    } else {
-        use crate::core::hash::sha::cpu::Impl;
-    }
-}
-use super::{Digest, Sha256, DIGEST_WORDS};
+use super::{Impl, Digest, Sha256, DIGEST_WORDS};
 use crate::core::hash::Rng;
 
 /// A random number generator driven by a [Sha256].
