@@ -268,7 +268,7 @@ mod tests {
             &proj_path.join("host/Cargo.toml")
         ));
 
-        assert!(find_in_file(
+        assert!(!find_in_file(
             "#![no_std]",
             &proj_path.join("methods/guest/src/main.rs")
         ));
@@ -309,7 +309,7 @@ mod tests {
     }
 
     #[test]
-    fn generate_std() {
+    fn generate_no_std() {
         let (tmpdir, template_path, proj_name) = make_test_env();
 
         let new = NewCommand::parse_from([
@@ -322,7 +322,7 @@ mod tests {
             "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
-            "--std",
+            "--no-std",
             "--guest-name",
             "method",
             proj_name,
@@ -332,7 +332,7 @@ mod tests {
 
         let proj_path = tmpdir.path().join(proj_name);
 
-        assert!(!find_in_file(
+        assert!(find_in_file(
             "#![no_std]",
             &proj_path.join("methods/guest/src/main.rs")
         ));
