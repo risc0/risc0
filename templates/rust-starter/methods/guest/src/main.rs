@@ -2,9 +2,7 @@
 #![no_main]
 #![no_std]
 {% endunless %}
-
 use risc0_zkvm::guest::env;
-
 {% unless risc0_std -%}
 risc0_zkvm::guest::entry!(main);
 {% endunless %}
