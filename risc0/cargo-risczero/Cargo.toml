@@ -71,4 +71,6 @@ metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
 
 [dev-dependencies]
-trycmd = { version = "0.15", features = ["color"] }
+assert_cmd = { version = "2.0", features = ["color", "color-auto"] }
+predicates = { version = "3.1", features = ["regex"] }
+rstest = "0.19"

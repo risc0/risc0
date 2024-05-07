@@ -12,10 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[test]
-fn test_verify_command() {
-    let t = trycmd::TestCases::new();
-    let binary = trycmd::cargo::cargo_bin("cargo-risczero");
-    t.register_bin("risczero", &binary);
-    t.case("tests/cmd/*.toml");
+use assert_cmd::prelude::*;
+use predicates::str::{contains, is_empty, is_match};
+use predicates::Predicate;
+use rstest::*;
+use std::env;
+use std::ffi::OsStr;
+use std::process::Command;
+
+const RECEIPT: &str = "tests/data/receipt.bin";
+
+#[rstest]
+#[case(
+    // Valid receipt
+    RECEIPT,
+    "979e6a3e0611115750ae8a92b674c2e0fb0cb1b3d006c7326b30ec9c7e748542",
+    is_match("^✅ Receipt is valid!\n$").unwrap(),
+    is_empty(),
+    0
+)]
+#[case(
+    // Invalid image id
+    RECEIPT,
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    is_match("Receipt verification failed.*error.*=.*image_id mismatch").unwrap(),
+    contains("❌ Receipt is not valid\nError: image_id mismatch\n"),
+    1
+)]
+#[case(
+    // Inexistent receipt
+    "inexistent.bin",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    is_empty(),
+    contains("Error: No such file or directory (os error 2)\n"),
+    1
+)]
+fn test_verify(
+    #[case] receipt: impl AsRef<OsStr>,
+    #[case] image_id: impl AsRef<OsStr>,
+    #[case] stdout: impl Predicate<str>,
+    #[case] stderr: impl Predicate<str>,
+    #[case] code: i32,
+) {
+    Command::cargo_bin(env!("CARGO_PKG_NAME"))
+        .unwrap()
+        .arg("risczero")
+        .arg("verify")
+        .arg(image_id)
+        .arg("--path")
+        .arg(receipt)
+        .assert()
+        .code(code)
+        .stdout(stdout)
+        .stderr(stderr);
 }
