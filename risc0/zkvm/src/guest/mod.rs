@@ -80,7 +80,7 @@
 #![deny(missing_docs)]
 
 pub mod env;
-pub mod sha;
+pub use risc0_zkp::core::hash::sha;
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
