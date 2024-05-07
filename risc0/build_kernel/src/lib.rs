@@ -45,6 +45,7 @@ pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
     files: Vec<PathBuf>,
+    files_opt: Vec<(PathBuf, usize)>,
     inc_dirs: Vec<PathBuf>,
     deps: Vec<PathBuf>,
 }
@@ -55,6 +56,7 @@ impl KernelBuild {
             kernel_type,
             flags: Vec::new(),
             files: Vec::new(),
+            files_opt: Vec::new(),
             inc_dirs: Vec::new(),
             deps: Vec::new(),
         }
@@ -90,6 +92,24 @@ impl KernelBuild {
         self
     }
 
+    /// Add a file which will be compiled
+    pub fn file_opt<P: AsRef<Path>>(&mut self, p: P, opt: usize) -> &mut KernelBuild {
+        self.files_opt.push((p.as_ref().to_path_buf(), opt));
+        self
+    }
+
+    /// Add files which will be compiled
+    pub fn files_opt<P>(&mut self, p: P, opt: usize) -> &mut KernelBuild
+    where
+        P: IntoIterator,
+        P::Item: AsRef<Path>,
+    {
+        for file in p.into_iter() {
+            self.file_opt(file, opt);
+        }
+        self
+    }
+
     /// Add a dependency
     pub fn dep<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
         self.deps.push(p.as_ref().to_path_buf());
@@ -114,6 +134,9 @@ impl KernelBuild {
         }
 
         for src in self.files.iter() {
+            println!("cargo:rerun-if-changed={}", src.display());
+        }
+        for (src, _) in self.files_opt.iter() {
             println!("cargo:rerun-if-changed={}", src.display());
         }
         for dep in self.deps.iter() {
@@ -164,10 +187,15 @@ impl KernelBuild {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
         let out_path = out_dir.join(format!("lib{output}.a"));
 
-        let files: Vec<_> = self.files.iter().map(|x| x.as_path()).collect();
+        let files: Vec<_> = self
+            .files
+            .iter()
+            .map(|x| (x.as_path(), 3usize))
+            .chain(self.files_opt.iter().map(|(x, y)| (x.as_path(), *y)))
+            .collect();
         let obj_paths: Vec<_> = files
             .into_par_iter()
-            .map(|src| {
+            .map(|(src, opt_level)| {
                 let obj_path = out_dir.join(src).with_extension("").with_extension("o");
                 if let Some(parent) = obj_path.parent() {
                     fs::create_dir_all(parent).unwrap();
@@ -196,12 +224,9 @@ impl KernelBuild {
                 if enable_debug(output) {
                     cmd.arg("-G");
                 } else {
-                    // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
-                    // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-                    // decrease in performance but a compile time in the minutes. Use
-                    // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
-                    let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".into());
-                    cmd.arg("-Xptxas").arg(format!("-O{ptx_opt_level}"));
+                    let opt_level = env::var("RISC0_CUDA_OPT").unwrap_or(opt_level.to_string());
+                    cmd.arg(format!("-O{opt_level}"));
+                    cmd.arg("-Xptxas").arg(format!("-O{opt_level}"));
                 }
 
                 for inc_dir in self.inc_dirs.iter() {

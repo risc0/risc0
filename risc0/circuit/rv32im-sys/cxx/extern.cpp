@@ -466,7 +466,7 @@ void extern_plonkWrite_ram(void* ctx, size_t cycle, const char* extra, std::arra
 }
 
 void MachineContext::sortRam() {
-  printf("sortRam\n");
+  // printf("sortRam\n");
   {
     nvtx3::scoped_range range("prepare");
     for (size_t i = 0; i < steps; i++) {
@@ -561,7 +561,7 @@ void extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, std::ar
 }
 
 void MachineContext::sortBytes() {
-  printf("sortBytes\n");
+  // printf("sortBytes\n");
   size_t pos = 0;
   auto next = [&]() {
     while (!bytePairs[pos]) {
@@ -653,11 +653,10 @@ extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, std::arr
 
 extern "C" {
 
-extern "C" const char* risc0_circuit_rv32im_cpu_witgen(
+const char* risc0_circuit_rv32im_cpu_witgen(
     PreflightTrace* trace, uint32_t steps, uint32_t last_cycle, Fp* ctrl, Fp* io, Fp* data) {
   try {
-    printf("risc0_circuit_rv32im_cpu_witgen\n");
-
+    // printf("risc0_circuit_rv32im_cpu_witgen\n");
     MachineContext ctx;
     ctx.trace = trace;
     ctx.steps = steps;
@@ -667,12 +666,12 @@ extern "C" const char* risc0_circuit_rv32im_cpu_witgen(
     ctx.byteWrites.resize(steps);
     ctx.byteReads.resize(steps);
 
-    auto begin = poolstl::iota_iter<uint32_t>(0);
+    auto begin = []() { return poolstl::iota_iter<uint32_t>(0); };
     auto end = poolstl::iota_iter<uint32_t>(last_cycle);
     std::array<Fp*, 3> args{ctrl, io, data};
 
-    printf("step_exec\n");
-    std::for_each(poolstl::seq, begin, end, [&](uint32_t cycle) {
+    // printf("step_exec\n");
+    std::for_each(poolstl::par, begin(), end, [&](uint32_t cycle) {
       if (cycle == 0 || ctx.isParSafeExec(cycle)) {
         // printf("step_exec(%u)\n", cycle);
         step_exec(&ctx, steps, cycle++, args.data());
@@ -683,46 +682,48 @@ extern "C" const char* risc0_circuit_rv32im_cpu_witgen(
       }
     });
 
-    // ctx.ctx->sortRam();
-    printf("inject_backs_ram\n");
-    // inject_backs_ram<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+    ctx.sortRam();
 
-    printf("step_verify_mem\n");
-    // par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
-    //     ctx.ctx, steps, last_cycle, ctrl, io, data);
+    // printf("inject_backs_ram\n");
+    std::for_each(poolstl::par, begin(), end, [&](uint32_t cycle) {
+      if (cycle > 0 && ctx.isParSafeVerifyMem(cycle)) {
+        // printf("inject_backs_ram(%u)\n", cycle);
+        inject_backs_ram(&ctx, steps, cycle, data);
+      }
+    });
 
-    // ctx.ctx->sortBytes();
-    printf("inject_backs_bytes\n");
-    // inject_backs_bytes<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, steps, last_cycle, data);
+    // printf("step_verify_mem\n");
+    std::for_each(poolstl::par, begin(), end, [&](uint32_t cycle) {
+      if (cycle == 0 || ctx.isParSafeVerifyMem(cycle)) {
+        // printf("step_verify_mem(%u)\n", cycle);
+        step_verify_mem(&ctx, steps, cycle++, args.data());
+        while (cycle < last_cycle && !ctx.isParSafeVerifyMem(cycle)) {
+          // printf("next, step_verify_mem(%u)\n", cycle);
+          step_verify_mem(&ctx, steps, cycle++, args.data());
+        }
+      }
+    });
 
-    printf("step_verify_bytes\n");
-    // step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
-    //     ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
+    ctx.sortBytes();
 
-    // zeroize<<<cfg.grid, cfg.block, 0, stream>>>(data);
-    // std::for_each(poolstl::seq, begin, end, [&](uint32_t cycle) {
-    //   Fp val = data[cycle];
-    //   elems[idx] = val.zeroize();
-    // });
+    // printf("inject_backs_bytes\n");
+    std::for_each(poolstl::par, begin(), end, [&](uint32_t cycle) {
+      if (cycle == 0) {
+        return;
+      }
+      inject_backs_bytes(&ctx, steps, cycle, data);
+    });
 
+    // printf("step_verify_bytes\n");
+    std::for_each(poolstl::par, begin(), end, [&](uint32_t cycle) {
+      step_verify_bytes(&ctx, steps, cycle++, args.data());
+    });
+
+    std::for_each(poolstl::par, data, data + steps, [](Fp& data) { data = data.zeroize(); });
   } catch (const std::exception& err) {
     return strdup(err.what());
   }
   return nullptr;
-}
-
-void risc0_circuit_rv32im_sort_ram(risc0_error* err, MachineContext* ctx) {
-  ffi_wrap<uint32_t>(err, 0, [&] {
-    ctx->sortRam();
-    return 0;
-  });
-}
-
-void risc0_circuit_rv32im_sort_bytes(risc0_error* err, MachineContext* ctx) {
-  ffi_wrap<uint32_t>(err, 0, [&] {
-    ctx->sortBytes();
-    return 0;
-  });
 }
 
 AccumContext* risc0_circuit_rv32im_accum_context_alloc(size_t steps) {

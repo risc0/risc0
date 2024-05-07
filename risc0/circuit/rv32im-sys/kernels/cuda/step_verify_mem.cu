@@ -14,10 +14,7 @@
 
 // This code is automatically generated
 
-#include "extern.h"
-#include "fp.h"
-
-#include <assert.h>
+#include "extern.cuh"
 
 __device__ void step_verify_mem(
     void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4) {

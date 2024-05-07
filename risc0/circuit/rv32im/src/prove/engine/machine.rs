@@ -71,14 +71,14 @@ impl<'a> Injector<'a> {
 }
 
 impl TopMux {
-    fn is_safe_verify_mem(&self) -> bool {
+    fn is_safe_verify_mem(&self) -> u8 {
         match self {
-            TopMux::Body(Major::VerifyAnd, _) => false,
-            TopMux::Body(Major::VerifyDivide, _) => false,
-            TopMux::Body(Major::PageFault, _) => false,
-            TopMux::Body(Major::Halt, _) => false,
-            TopMux::Body(_, _) => true,
-            _ => false,
+            TopMux::Body(Major::VerifyAnd, _) => 0,
+            TopMux::Body(Major::VerifyDivide, _) => 0,
+            TopMux::Body(Major::PageFault, _) => 0,
+            TopMux::Body(Major::Halt, _) => 2,
+            TopMux::Body(_, _) => 1,
+            _ => 0,
         }
     }
 }
@@ -96,7 +96,7 @@ impl MachineContext {
                     major: major.as_u32() as u8,
                     minor: minor as u8,
                     is_safe_exec: if x.back.is_some() { 1 } else { 0 },
-                    is_safe_verify_mem: if x.mux.is_safe_verify_mem() { 1 } else { 0 },
+                    is_safe_verify_mem: x.mux.is_safe_verify_mem(),
                     mem_idx: x.mem_idx as u32,
                     extra_idx: x.extra_idx as u32,
                 }
@@ -107,12 +107,13 @@ impl MachineContext {
                     major: major.as_u32() as u8,
                     minor: minor as u8,
                     is_safe_exec: if x.back.is_some() { 1 } else { 0 },
-                    is_safe_verify_mem: if x.mux.is_safe_verify_mem() { 1 } else { 0 },
+                    is_safe_verify_mem: x.mux.is_safe_verify_mem(),
                     mem_idx: (x.mem_idx + trace.pre.txns.len()) as u32,
                     extra_idx: (x.extra_idx + trace.pre.extras.len()) as u32,
                 }
             }))
             .collect();
+
         let _raw_txns: Vec<_> = trace
             .pre
             .txns
@@ -128,6 +129,7 @@ impl MachineContext {
                 data: x.data,
             }))
             .collect();
+
         let _raw_extras: Vec<_> = trace
             .pre
             .extras

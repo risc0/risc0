@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
 #include "fp.h"
 #include "fpext.h"
 
-#pragma once
+#include <cstdio>
 
 extern __constant__ FpExt poly_mix[210];
 

@@ -14,10 +14,7 @@
 
 // This code is automatically generated
 
-#include "extern.h"
-#include "fp.h"
-
-#include <assert.h>
+#include "extern.cuh"
 
 __global__ void step_verify_accum(
     void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4) {
