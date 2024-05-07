@@ -202,7 +202,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: risc0/RustCrypto-crypto-bigint
-          path: RustCrypto-crypto-bigint
+          path: "RustCrypto-crypto-bigint"
       - if: matrix.feature == 'cuda'
         uses: ./risc0/.github/actions/cuda
       - uses: ./risc0/.github/actions/rustup
@@ -233,8 +233,8 @@ jobs:
         if: matrix.device == 'cpu'
       - run: cargo install --force --path risc0/cargo-risczero -F experimental
         working-directory: risc0
-      - name: run cargo risczero test
-        working-directory: RustCrypto-crypto-bigint
+      - name: run cargo risczero test from ${{ github.workspace }}/RustCrypto-crypto-bigint
+        working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
         run: cargo risczero test
         if: matrix.device == 'cpu'
       - run: cargo run -F $FEATURE -- fibonacci
