@@ -221,7 +221,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
 
 /// A guest-side [Sha256] implementation.
 ///
-/// [Sha256]: risc0_zkp::core::hash::sha::Sha256
+/// [Sha256]: crate::core::hash::sha::Sha256
 #[derive(Debug, Clone, Default)]
 pub struct Impl {}
 
