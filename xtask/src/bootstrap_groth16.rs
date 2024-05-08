@@ -15,12 +15,10 @@
 use std::{fs, path::Path, process::Command};
 
 use clap::Parser;
-use hex::FromHex;
 use regex::Regex;
 use risc0_zkvm::{
-    get_prover_server,
-    sha::{Digest, Digestible},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
+    get_prover_server, sha::Digestible, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts,
+    Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
@@ -127,16 +125,12 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
 
  library ControlID {
 "#;
-    let (control_id_0, control_id_1) =
-        split_digest(Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap());
-    let bn254_control_id = format!("0x{}", Bootstrap::generate_identity_bn254_control_id());
-    let control_id_0 = format!("uint256 public constant CONTROL_ID_0 = {control_id_0};");
-    let control_id_1 = format!("uint256 public constant CONTROL_ID_1 = {control_id_1};");
+    let control_root =
+        format!(r#"bytes32 public constant CONTROL_ROOT = hex"{ALLOWED_CONTROL_ROOT}";"#);
+    let bn254_control_id = hex::encode(Bootstrap::generate_identity_bn254_control_id());
     let bn254_control_id =
-        format!("uint256 public constant BN254_CONTROL_ID = {bn254_control_id};");
-    let content = &format!(
-        "{SOL_HEADER}{LIB_HEADER}\n{control_id_0}\n{control_id_1}\n{bn254_control_id}\n}}"
-    );
+        format!(r#"bytes32 public constant BN254_CONTROL_ID = hex"{bn254_control_id}";"#);
+    let content = &format!("{SOL_HEADER}{LIB_HEADER}\n{control_root}\n{bn254_control_id}\n}}");
     let solidity_control_id_path = risc0_ethereum_path.join(SOLIDITY_CONTROL_ID_PATH);
     fs::write(&solidity_control_id_path, content).unwrap_or_else(|_| {
         panic!(
@@ -160,18 +154,21 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 "#;
     let receipt = generate_receipt();
     let image_id = receipt.claim().unwrap().pre.digest();
+    let verifier_info_digest = CompactReceipt::verifier_info().digest();
+    let selector = hex::encode(&verifier_info_digest.as_bytes()[..4]);
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
-    let post_digest = format!(
-        "0x{}",
-        hex::encode(receipt.claim().unwrap().post.digest().as_bytes())
-    );
-    let image_id = format!("0x{}", hex::encode(image_id.as_bytes()));
+    let post_digest = hex::encode(receipt.claim().unwrap().post.digest().as_bytes());
+    let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
 
-    let seal = format!("bytes public constant SEAL = hex\"{seal}\";");
-    let post_digest = format!("bytes32 public constant POST_DIGEST = bytes32({post_digest});");
-    let journal = format!("bytes public constant JOURNAL = hex\"{journal}\";");
-    let image_id = format!("bytes32 public constant IMAGE_ID = bytes32({image_id});");
+    // NOTE: Selector value is the fist four bytes of the verifier info digest. It is added as part
+    // of ABI encoding and used for routing to the correct verifier on-chain. We do not use the
+    // full ABI encoding implementation here because its part of risc0-ethereum-contracts, which
+    // would be a hassle to import.
+    let seal = format!(r#"bytes public constant SEAL = hex"{selector}{seal}";"#);
+    let post_digest = format!(r#"bytes32 public constant POST_DIGEST = hex"{post_digest}";"#);
+    let journal = format!(r#"bytes public constant JOURNAL = hex"{journal}";"#);
+    let image_id = format!(r#"bytes32 public constant IMAGE_ID = hex"{image_id}";"#);
 
     let solidity_test_receipt_path = risc0_ethereum_path.join(SOLIDITY_TEST_RECEIPT_PATH);
     let content =
@@ -186,22 +183,13 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
         .unwrap();
 }
 
-// Splits the digest in half returning the two halves as big endian
-fn split_digest(d: Digest) -> (String, String) {
-    let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
-    let middle = big_endian.len() / 2;
-    let (control_id_1, control_id_0) = big_endian.split_at(middle);
-    (
-        format!("0x{}", hex::encode(control_id_0)),
-        format!("0x{}", hex::encode(control_id_1)),
-    )
-}
-
 // Return a Compact `Receipt` and the imageID used to generate the proof.
 // Requires running Docker on an x86 architecture.
 fn generate_receipt() -> Receipt {
     let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::BusyLoop { cycles: 0 })
+        .write(&MultiTestSpec::Echo {
+            bytes: b"just a simple receipt".to_vec(),
+        })
         .unwrap()
         .build()
         .unwrap();

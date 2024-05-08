@@ -148,6 +148,7 @@ impl Bootstrap {
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_control_root = merkle_group.calc_root(hashfn);
+        tracing::info!("Computed allowed_control_root: {allowed_control_root}");
 
         let mut zkr_control_ids_str = String::new();
         for (name, digest) in zkr_control_ids.iter() {
@@ -155,6 +156,7 @@ impl Bootstrap {
         }
 
         let bn254_control_id = Self::generate_identity_bn254_control_id();
+        tracing::info!("Computed bn254_control_id: {bn254_control_id}");
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
             allowed_control_ids_str,
