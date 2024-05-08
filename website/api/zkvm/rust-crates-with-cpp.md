@@ -5,6 +5,11 @@ from Rust and for projects such as [BLST] that implement core algorithms in C++
 and create bindings to work across many languages. The RISC Zero supports these
 crates by providing a toolchain to build C++ code.
 
+## How to Install the C++ toolchain
+
+The C++ toolchain is installed alongside the Rust toolchain. Installation
+instructions can be found [here][install].
+
 ## How to Build and Run these crates
 
 RISC Zero has a GCC-based C++ toolchain to enable these crates to build and run
@@ -37,8 +42,15 @@ suitable for the zkVM. As an example, the BLST crate defines a `no_threads`
 feature. The RISC Zero zkVM executes on a single thread, so using this feature
 of the BLST crate allows it to build and run successfully. Troubleshooting these
 crates requires an understanding of the characteristics of [the RISC Zero
-zkVM][zkvm_spec]. If there is a crate that does not work, [file an issue here][risc0-gh-issues]
+zkVM][zkvm_spec]. If there is a crate that does not work, [file an issue here][risc0-gh-issues].
+
+## Notes on versioning
+
+At this time, there is only one version of the C++ toolchain and it is intended
+to work with any guest rust toolchain. We will provide more information on
+versioning and compatibility in the future.
 
 [BLST]: https://github.com/supranational/blst
+[install]: ./install.md#install
 [risc0-gh-issues]: https://github.com/risc0/risc0/issues/
 [zkvm_spec]: ./zkvm-specification.md#the-zkvm-execution-model
