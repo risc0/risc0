@@ -15,4 +15,4 @@
 
 ## Packages 📦
 
-- [`shared`](./apps/shared) → shared code between apps
+- [`shared`](./packages/shared) → shared code between apps

@@ -1,11 +1,8 @@
 {% unless risc0_std -%}
 #![no_main]
-// If you want to try std support, also update the guest Cargo.toml file
-#![no_std]  // std support is experimental
+#![no_std]
 {% endunless %}
-
 use risc0_zkvm::guest::env;
-
 {% unless risc0_std -%}
 risc0_zkvm::guest::entry!(main);
 {% endunless %}
