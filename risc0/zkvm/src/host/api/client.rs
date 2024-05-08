@@ -25,7 +25,7 @@ use super::{
 use crate::{
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path},
-    receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
+    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
     ExecutorEnv, Journal, ProveInfo, ProverOpts,
 };
 
@@ -411,8 +411,8 @@ impl Client {
                 .iter()
                 .map(|a| {
                     Ok(match a {
-                        Assumption::Proven(receipt) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Proven(
+                        AssumptionReceipt::Proven(receipt) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
                                     pb::core::Receipt::from(receipt.clone())
                                         .encode_to_vec()
@@ -421,8 +421,8 @@ impl Client {
                                 .try_into()?,
                             )),
                         },
-                        Assumption::Unresolved(claim) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Unresolved(
+                        AssumptionReceipt::Unresolved(claim) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
                                     pb::core::MaybePruned::from(claim.clone())
                                         .encode_to_vec()

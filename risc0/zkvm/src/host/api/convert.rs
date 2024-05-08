@@ -25,8 +25,8 @@ use crate::{
         segment::decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt,
         SuccinctReceipt,
     },
-    Assumptions, ExitCode, Journal, MaybePruned, Output, ProveInfo, ProverOpts, Receipt,
-    ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    Assumption, Assumptions, ExitCode, Journal, MaybePruned, Output, ProveInfo, ProverOpts,
+    Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
 mod ver {
@@ -579,6 +579,35 @@ impl TryFrom<pb::core::Output> for Output {
         Ok(Self {
             journal: value.journal.ok_or(malformed_err())?.try_into()?,
             assumptions: value.assumptions.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
+impl Name for pb::core::Assumption {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "Assumption";
+}
+
+impl AssociatedMessage for Assumption {
+    type Message = pb::core::Assumption;
+}
+
+impl From<Assumption> for pb::core::Assumption {
+    fn from(value: Assumption) -> Self {
+        Self {
+            claim: value.claim.into(),
+            control_root: value.control_root.into(),
+        }
+    }
+}
+
+impl TryFrom<pb::core::Assumption> for Assumption {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::Assumption) -> Result<Self> {
+        Ok(Self {
+            claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            control_root: value.control_root.ok_or(malformed_err())?.try_into()?,
         })
     }
 }

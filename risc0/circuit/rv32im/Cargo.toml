@@ -13,6 +13,7 @@ harness = false
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+hex-literal = "0.4.1"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }

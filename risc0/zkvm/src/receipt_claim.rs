@@ -179,14 +179,41 @@ impl Digestible for Output {
     }
 }
 
-/// A list of assumptions, each a [Digest] of a [ReceiptClaim].
+/// An [assumption] made in the course of proving program execution. Assumptions are generated when
+/// the guest makes a recursive verification call. Each assumption commits the statement, such that
+/// only a receipt proving that statement can be used to resolve and remove the assumption.
+///
+/// [assumption]: https://dev.risczero.com/terminology#assumption
+#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Assumption {
+    /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
+    /// be the digest of the claim for a different circuit such as an accelerator.
+    pub claim: Digest,
+
+    /// Commitment to the set of [recursion programs] that can be used to resolve this assumption.
+    /// Binding the set of recursion programs also binds the circuits that can be run (e.g. rv32im
+    /// or keccak) because those circuits are lifted into the recursion domain via a program that
+    /// contains their constraint set and verifier.
+    ///
+    /// [recursion programs]: https://dev.risczero.com/terminology#recursion-program
+    pub control_root: Digest,
+}
+
+impl Digestible for Assumption {
+    /// Hash the [Assumption] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>("risc0.Assumption", &[self.claim, self.control_root], &[])
+    }
+}
+
+/// A list of assumptions, each a [Digest] or populated value of an [Assumption].
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Assumptions(pub Vec<MaybePruned<ReceiptClaim>>);
+pub struct Assumptions(pub Vec<MaybePruned<Assumption>>);
 
 impl Assumptions {
     /// Add an assumption to the head of the assumptions list.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
+    pub fn add(&mut self, assumption: MaybePruned<Assumption>) {
         self.0.insert(0, assumption);
     }
 
@@ -213,7 +240,7 @@ impl Assumptions {
 }
 
 impl Deref for Assumptions {
-    type Target = [MaybePruned<ReceiptClaim>];
+    type Target = [MaybePruned<Assumption>];
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -242,7 +269,7 @@ impl MaybePruned<Assumptions> {
     /// Add an assumption to the head of the assumptions list.
     ///
     /// If this value is pruned, then the result will also be a pruned value.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
+    pub fn add(&mut self, assumption: MaybePruned<Assumption>) {
         match self {
             MaybePruned::Value(list) => list.add(assumption),
             MaybePruned::Pruned(list_digest) => {
@@ -459,6 +486,7 @@ impl std::error::Error for MergeInequalityError {}
 trait MergeLeaf: Digestible + PartialEq + Clone + Sized {}
 
 impl MergeLeaf for SystemState {}
+impl MergeLeaf for Assumption {}
 impl MergeLeaf for Vec<u8> {}
 
 impl<T: MergeLeaf> Merge for T {

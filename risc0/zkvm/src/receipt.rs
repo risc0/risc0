@@ -40,7 +40,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use crate::{
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
-    Assumptions, MaybePruned, Output, ReceiptClaim,
+    Assumption, Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
 #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
@@ -373,7 +373,7 @@ impl InnerReceipt {
 /// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum Assumption {
+pub enum AssumptionReceipt {
     /// A [Receipt] for a proven assumption.
     ///
     /// Upon proving, this receipt will be used as proof of the assumption that results from a call
@@ -381,6 +381,7 @@ pub enum Assumption {
     /// [Receipt::verify] will return true and the verifier will accept the receipt.
     Proven(Receipt),
 
+    // TODO(victor): Adjust comment
     /// [ReceiptClaim] digest for an assumption that is not directly proven
     /// to be true.
     ///
@@ -388,11 +389,11 @@ pub enum Assumption {
     /// conditional receipt. In order for the verifier to accept a
     /// conditional receipt, they must be given a [Receipt] proving the
     /// assumption, or explicitly accept the assumption without proof.
-    Unresolved(MaybePruned<ReceiptClaim>),
+    Unresolved(MaybePruned<Assumption>),
 }
 
-impl Assumption {
-    /// Returns the [ReceiptClaim] for this [Assumption].
+impl AssumptionReceipt {
+    /// Returns the [ReceiptClaim] for this [AssumptionReceipt].
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
             Self::Proven(receipt) => Ok(receipt.claim()?.into()),
@@ -411,21 +412,21 @@ impl Assumption {
     }
 }
 
-impl From<Receipt> for Assumption {
+impl From<Receipt> for AssumptionReceipt {
     /// Create a proven assumption from a [Receipt].
     fn from(receipt: Receipt) -> Self {
         Self::Proven(receipt)
     }
 }
 
-impl From<MaybePruned<ReceiptClaim>> for Assumption {
+impl From<MaybePruned<ReceiptClaim>> for AssumptionReceipt {
     /// Create an unresolved assumption from a [MaybePruned] [ReceiptClaim].
     fn from(claim: MaybePruned<ReceiptClaim>) -> Self {
         Self::Unresolved(claim)
     }
 }
 
-impl From<ReceiptClaim> for Assumption {
+impl From<ReceiptClaim> for AssumptionReceipt {
     /// Create an unresolved assumption from a [ReceiptClaim].
     fn from(claim: ReceiptClaim) -> Self {
         Self::Unresolved(claim.into())

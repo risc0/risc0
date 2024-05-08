@@ -83,8 +83,13 @@ message Output {
   MaybePruned assumptions = 2; // MaybePruned<Assumptions>
 }
 
+message Assumption {
+  Digest claim = 1;
+  Digest control_root = 2;
+}
+
 message Assumptions {
-  repeated MaybePruned inner = 1; // MaybePruned<ReceiptClaim>
+  repeated MaybePruned inner = 1; // MaybePruned<Assumption>
 }
 
 message FakeReceipt {
