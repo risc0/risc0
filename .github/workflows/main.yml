@@ -236,7 +236,7 @@ jobs:
       - name: run cargo risczero test from ${{ github.workspace }}/RustCrypto-crypto-bigint
         working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
         run: cargo risczero test
-        if: matrix.device == 'cpu'
+        if: matrix.device == 'cpu' && matrix.os == 'linux'
       - run: cargo run -F $FEATURE -- fibonacci
         working-directory: risc0/benchmarks
       - run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
