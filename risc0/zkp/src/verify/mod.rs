@@ -59,7 +59,7 @@ impl fmt::Display for VerificationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             VerificationError::VerifierParametersMismatch { expected, received } => {
-                write!(f, "receipt was produced for a version of the verifier with info digest {received}; expected {expected}")
+                write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
             }
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
             VerificationError::ControlVerificationError { control_id } => {
