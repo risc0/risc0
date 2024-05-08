@@ -409,6 +409,10 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
             .0
             .did_modify_range(NSRange::new(offset as u64, size as u64));
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        todo!()
+    }
 }
 
 impl<MH: MetalHash> Default for MetalHal<MH> {

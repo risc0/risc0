@@ -12,22 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// #if defined(__clang__)
-// #pragma clang diagnostic ignored "-Wunused-function"
-// #pragma clang diagnostic ignored "-Wunused-parameter"
-// #pragma clang diagnostic ignored "-Wunused-variable"
-// #elif defined(__GNUC__)
-// #pragma GCC diagnostic ignored "-Wunused-function"
-// #pragma GCC diagnostic ignored "-Wunused-parameter"
-// #pragma GCC diagnostic ignored "-Wunused-variable"
-// #endif
-
 #include "context.h"
 #include "fp.h"
 
 #include <assert.h>
 #include <cstdio>
 #include <cuda_runtime.h>
+
+#include "bigint.cu"
 
 inline __device__ void extern_halt(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
   // no-op
@@ -166,9 +158,13 @@ extern_divide(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
   outs[7] = rem >> 24 & 0xff;
 }
 
+inline __device__ void extern_log(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
+  // printf("%s\n", extra);
+}
+
 inline __device__ void
-extern_bigintQuotient(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
-  printf("bigintQuotient\n");
+extern_syscallInit(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
+  // no-op
 }
 
 inline __device__ void
@@ -228,11 +224,6 @@ extern_plonkRead_bytes(void* ctx, size_t cycle, const char* extra, Fp* args, Fp*
 }
 
 inline __device__ void
-extern_syscallInit(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
-  // no-op
-}
-
-inline __device__ void
 extern_plonkWriteAccum_ram(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
   AccumContext* actx = static_cast<AccumContext*>(ctx);
   actx->ram[cycle] = FpExt(args[0], args[1], args[2], args[3]);
@@ -260,8 +251,4 @@ extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, Fp* args
   for (size_t i = 0; i < 4; i++) {
     outs[i] = x.elems[i];
   }
-}
-
-inline __device__ void extern_log(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
-  // printf("%s\n", extra);
 }

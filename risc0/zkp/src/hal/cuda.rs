@@ -470,6 +470,13 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         buf.buf.copy_from(&host_buf).unwrap();
         nvtx::range_pop!();
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        let buf = self.buffer.borrow_mut();
+        let host_buf = buf.buf.as_host_vec().unwrap();
+        let slice = unchecked_cast(&host_buf);
+        slice.to_vec()
+    }
 }
 
 impl<CH: CudaHash> CudaHal<CH> {

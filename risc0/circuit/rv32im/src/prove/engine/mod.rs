@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod argument;
 pub mod loader;
 pub mod machine;
 #[cfg(test)]
@@ -36,7 +35,10 @@ use risc0_zkp::{
 
 use self::witgen::WitnessGenerator;
 use super::{hal::CircuitWitnessGenerator, segment::Segment, Seal, SegmentProver};
-use crate::{CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA};
+use crate::{
+    prove::hal::StepMode, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
+    REGISTER_GROUP_DATA,
+};
 
 struct Twin(Elem, Elem);
 
@@ -85,6 +87,7 @@ where
             segment.po2,
             &io,
             trace,
+            StepMode::Parallel,
         );
         nvtx::range_pop!();
         let steps = witgen.steps;

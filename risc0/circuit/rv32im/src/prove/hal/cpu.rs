@@ -41,7 +41,7 @@ use crate::{
     REGISTER_GROUP_DATA,
 };
 
-use super::CircuitWitnessGenerator;
+use super::{CircuitWitnessGenerator, StepMode};
 
 #[derive(Default)]
 pub struct CpuCircuitHal;
@@ -55,6 +55,7 @@ impl CpuCircuitHal {
 impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
     fn generate_witness(
         &self,
+        mode: StepMode,
         trace: &RawPreflightTrace,
         steps: usize,
         count: usize,
@@ -65,6 +66,7 @@ impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
         tracing::debug!("witgen: {steps}, {count}");
         extern "C" {
             fn risc0_circuit_rv32im_cpu_witgen(
+                mode: u32,
                 trace: *const RawPreflightTrace,
                 steps: u32,
                 count: u32,
@@ -75,6 +77,7 @@ impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
         }
         unsafe {
             risc0_circuit_rv32im_cpu_witgen(
+                mode as u32,
                 trace,
                 steps as u32,
                 count as u32,

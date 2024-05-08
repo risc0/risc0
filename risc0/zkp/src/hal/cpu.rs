@@ -254,6 +254,10 @@ impl<T: Clone> Buffer<T> for CpuBuffer<T> {
         let mut buf = self.buf.write();
         f(&mut buf.0[self.region.range()]);
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        self.buf.read().0.clone()
+    }
 }
 
 impl<F: Field> Hal for CpuHal<F> {

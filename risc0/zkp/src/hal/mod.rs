@@ -45,6 +45,8 @@ pub trait Buffer<T>: Clone {
     fn view<F: FnOnce(&[T])>(&self, f: F);
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);
+
+    fn to_vec(&self) -> Vec<T>;
 }
 
 pub trait Hal {

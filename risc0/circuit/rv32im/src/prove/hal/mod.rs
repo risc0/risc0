@@ -23,9 +23,18 @@ pub mod testutil;
 use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_zkp::hal::Hal;
 
+#[derive(PartialEq)]
+pub(crate) enum StepMode {
+    Parallel,
+    SeqForward,
+    #[allow(dead_code)]
+    SeqReverse,
+}
+
 pub(crate) trait CircuitWitnessGenerator<H: Hal> {
     fn generate_witness(
         &self,
+        _mode: StepMode,
         _trace: &RawPreflightTrace,
         _steps: usize,
         _count: usize,

@@ -91,6 +91,10 @@ where
             self.lhs.view(|src| dst.clone_from_slice(src));
         })
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        self.lhs.to_vec()
+    }
 }
 
 pub struct DualHal<F, L, R>

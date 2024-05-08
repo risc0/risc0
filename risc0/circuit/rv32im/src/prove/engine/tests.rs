@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
-
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::{
     core::{digest::Digest, hash::sha::Sha256HashSuite},
     field::baby_bear::BabyBearElem,
-    hal::{cpu::CpuHal, Hal},
+    hal::{cpu::CpuHal, Buffer, Hal},
     verify::VerificationError,
 };
 use risc0_zkvm_platform::PAGE_SIZE;
@@ -32,7 +30,7 @@ use crate::{
             exec::{execute, DEFAULT_SEGMENT_LIMIT_PO2},
             testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         },
-        hal::cpu::CpuCircuitHal,
+        hal::{cpu::CpuCircuitHal, StepMode},
         segment_prover,
     },
     CIRCUIT,
@@ -73,23 +71,31 @@ fn fwd_rev_ab_test(program: Program) {
     .unwrap();
 
     let suite = Sha256HashSuite::new_suite();
-    let hal = Rc::new(CpuHal::new(suite));
+
+    let hal = CpuHal::new(suite);
     let circuit_hal = CpuCircuitHal::new();
 
     let segments = result.segments;
     for segment in segments {
         let trace = segment.preflight().unwrap();
         let io = segment.prepare_globals();
-
-        let mut fwd_witgen =
-            WitnessGenerator::new(hal.as_ref(), &circuit_hal, segment.po2, &io, trace.clone());
-        let fwd_data = fwd_witgen.test_step_execute(trace.clone(), true);
-
-        let mut rev_witgen =
-            WitnessGenerator::new(hal.as_ref(), &circuit_hal, segment.po2, &io, trace.clone());
-        let rev_data = rev_witgen.test_step_execute(trace.clone(), false);
-
-        assert!(fwd_data == rev_data);
+        let fwd_witgen = WitnessGenerator::new(
+            &hal,
+            &circuit_hal,
+            segment.po2,
+            &io,
+            trace.clone(),
+            StepMode::SeqForward,
+        );
+        let rev_witgen = WitnessGenerator::new(
+            &hal,
+            &circuit_hal,
+            segment.po2,
+            &io,
+            trace.clone(),
+            StepMode::SeqReverse,
+        );
+        assert!(fwd_witgen.data.to_vec() == rev_witgen.data.to_vec());
     }
 }
 

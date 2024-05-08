@@ -51,7 +51,7 @@ fn build_cuda_kernels() {
         // decrease in performance but a compile time in the minutes.
         // Use RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing.
         .file_opt("kernels/cuda/eval_check.cu", 1)
-        .deps(["kernels/cuda/extern.cuh"])
+        .deps(["kernels/cuda/bigint.cu", "kernels/cuda/extern.cuh"])
         .deps(glob::glob("kernels/cuda/*.h").unwrap().map(|x| x.unwrap()))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())

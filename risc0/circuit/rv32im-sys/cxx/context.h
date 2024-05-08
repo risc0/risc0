@@ -16,10 +16,10 @@
 
 #include "fpext.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <thrust/host_vector.h>
-#include <thrust/tuple.h>
+#include <tuple>
+#include <vector>
+
+namespace risc0::circuit::rv32im {
 
 constexpr size_t kBabyBearExtSize = 4;
 constexpr size_t kMaxRamRowsPerCycle = 5;
@@ -57,37 +57,45 @@ struct RamArgumentRow {
   uint32_t word;
   uint32_t dirty;
 
-  __device__ void setCyclop(uint32_t memCycle, uint32_t memOp) { cyclop = (memCycle << 2) | memOp; }
-  __device__ uint32_t getMemCycle() const { return cyclop >> 2; }
-  __host__ __device__ uint32_t getMemOp() const { return cyclop & 0b11; }
+  void setCyclop(uint32_t memCycle, uint32_t memOp) { cyclop = (memCycle << 2) | memOp; }
+  uint32_t getMemCycle() const { return cyclop >> 2; }
+  uint32_t getMemOp() const { return cyclop & 0b11; }
 
-  __device__ bool operator<(const RamArgumentRow& other) const {
-    thrust::tuple<uint32_t, uint32_t, uint32_t, uint32_t> lhs(addr, cyclop, word, dirty);
-    thrust::tuple<uint32_t, uint32_t, uint32_t, uint32_t> rhs(
-        other.addr, other.cyclop, other.word, other.dirty);
-    return lhs < rhs;
+  bool operator<(const RamArgumentRow& other) const {
+    return std::tie(addr, cyclop, word, dirty) <
+           std::tie(other.addr, other.cyclop, other.word, other.dirty);
   }
 };
 
 struct MachineContext {
   PreflightTrace* trace;
-  size_t steps;
+  uint32_t steps;
 
-  thrust::host_vector<RamArgumentRow> h_ramRows;
-  RamArgumentRow* ramRows;
-  uint32_t* ramIndex;
+  std::vector<RamArgumentRow> ramRows;
+  std::vector<uint32_t> ramIndex;
 
-  uint32_t* pairs;
-  uint32_t* pairsIndex;
+  std::vector<uint32_t> pairs;
+  std::vector<uint32_t> pairsIndex;
+
+  MachineContext(PreflightTrace* trace, uint32_t steps);
 
   void sortRam();
   void sortBytes();
 
-  __device__ bool isParSafeExec(uint32_t cycle) const;
-  __device__ uint8_t isParSafeVerifyMem(uint32_t cycle) const;
+  bool isParSafeExec(uint32_t cycle) const { return trace->cycles[cycle].isSafeExec; }
+  uint8_t isParSafeVerifyMem(uint32_t cycle) const { return trace->cycles[cycle].isSafeVerifyMem; }
+};
+
+struct AccumCell {
+  FpExt ram;
+  FpExt bytes;
 };
 
 struct AccumContext {
-  FpExt* ram;
-  FpExt* bytes;
+  size_t steps;
+  std::vector<AccumCell> cells;
+
+  void calcPrefixProducts();
 };
+
+} // namespace risc0::circuit::rv32im

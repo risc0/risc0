@@ -40,7 +40,7 @@ use risc0_zkp::{
 
 use crate::{
     info::{NUM_POLY_MIX_POWERS, POLY_MIX_POWERS},
-    prove::{engine::SegmentProverImpl, SegmentProver},
+    prove::{engine::SegmentProverImpl, hal::StepMode, SegmentProver},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
@@ -66,6 +66,7 @@ struct AccumContext {
 
 extern "C" {
     fn risc0_circuit_rv32im_cuda_witgen(
+        mode: u32,
         trace: *const RawPreflightTrace,
         steps: u32,
         count: u32,
@@ -113,6 +114,7 @@ extern "C" {
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
     fn generate_witness(
         &self,
+        mode: StepMode,
         trace: &RawPreflightTrace,
         steps: usize,
         count: usize,
@@ -123,6 +125,7 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         tracing::debug!("witgen: {steps}, {count}");
         unsafe {
             risc0_circuit_rv32im_cuda_witgen(
+                mode as u32,
                 trace,
                 steps as u32,
                 count as u32,
