@@ -6,9 +6,9 @@ While all of the [zkVM examples][zkvm-examples] can be run on Bonsai by [configu
 
 The [RISC Zero Foundry Template][foundry-template] provides a minimal application that can act as a template for developing your application.
 
-### STEEL
+### Steel
 
-[STEEL] is a library for [view call proofs], which enables users to easily integrate claims about Ethereum state into zkVM applications.
+[Steel] is a library for [view call proofs], which enables users to easily integrate claims about Ethereum state into zkVM applications.
 
 ### Zeth
 
@@ -27,5 +27,5 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
-[STEEL]: https://crates.io/crates/risc0-steel
+[Steel]: https://crates.io/crates/risc0-steel
 [view call proofs]: https://www.risczero.com/blog/introducing-steel
