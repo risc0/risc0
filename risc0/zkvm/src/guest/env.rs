@@ -217,7 +217,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), V
     // post_state_digest and fix all fields that are required to have a certain
     // value. This assumption will only be resolvable if there exists a receipt
     // matching this claim.
-    let assumption_claim = ReceiptClaim {
+    let _assumption_claim = ReceiptClaim {
         pre: MaybePruned::Pruned(image_id),
         post: MaybePruned::Pruned(post_state_digest),
         exit_code,
@@ -228,7 +228,8 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), V
         })
         .into(),
     };
-    unsafe { ASSUMPTIONS_DIGEST.add(assumption_claim.into()) };
+    // DO NOT MERGE
+    //unsafe { ASSUMPTIONS_DIGEST.add(todo!()) };
 
     Ok(())
 }

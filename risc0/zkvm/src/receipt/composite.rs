@@ -16,13 +16,15 @@ use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
+use hex::FromHex;
 use risc0_binfmt::ExitCode;
+use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{InnerReceipt, SegmentReceipt, VerifierContext};
-use crate::{sha::Digestible, Assumptions, MaybePruned, Output, ReceiptClaim};
+use crate::{sha::Digestible, Assumption, Assumptions, MaybePruned, Output, ReceiptClaim};
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
 /// continuations, and zero or more [Receipt](crate::Receipt) structs proving any assumptions.
@@ -216,7 +218,13 @@ impl CompositeReceipt {
         Ok(Assumptions(
             self.assumptions
                 .iter()
-                .map(|a| Ok(a.claim()?.into()))
+                .map(|a| {
+                    Ok(Assumption {
+                        claim: a.claim()?.digest(),
+                        control_root: Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap(),
+                    }
+                    .into())
+                })
                 .collect::<Result<Vec<_>, _>>()?,
         ))
     }

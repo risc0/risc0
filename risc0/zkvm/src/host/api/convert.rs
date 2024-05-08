@@ -595,8 +595,8 @@ impl AssociatedMessage for Assumption {
 impl From<Assumption> for pb::core::Assumption {
     fn from(value: Assumption) -> Self {
         Self {
-            claim: value.claim.into(),
-            control_root: value.control_root.into(),
+            claim: Some(value.claim.into()),
+            control_root: Some(value.control_root.into()),
         }
     }
 }

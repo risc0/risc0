@@ -397,7 +397,7 @@ impl AssumptionReceipt {
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
             Self::Proven(receipt) => Ok(receipt.claim()?.into()),
-            Self::Unresolved(claim) => Ok(claim.clone()),
+            Self::Unresolved(_assumption) => todo!("DO NOT MERGE drop support for unresolved?"),
         }
     }
 
@@ -419,6 +419,7 @@ impl From<Receipt> for AssumptionReceipt {
     }
 }
 
+/*
 impl From<MaybePruned<ReceiptClaim>> for AssumptionReceipt {
     /// Create an unresolved assumption from a [MaybePruned] [ReceiptClaim].
     fn from(claim: MaybePruned<ReceiptClaim>) -> Self {
@@ -432,6 +433,7 @@ impl From<ReceiptClaim> for AssumptionReceipt {
         Self::Unresolved(claim.into())
     }
 }
+*/
 
 /// Context available to the verification process.
 pub struct VerifierContext {

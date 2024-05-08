@@ -66,8 +66,10 @@ impl Prover for BonsaiProver {
         let mut receipts_ids: Vec<String> = vec![];
         for assumption in &env.assumptions.borrow().cached {
             let serialized_receipt = match assumption {
-                crate::Assumption::Proven(receipt) => bincode::serialize(receipt)?,
-                crate::Assumption::Unresolved(_) => bail!("Only proven receipts can be uploaded."), //TODO: improve the message
+                crate::AssumptionReceipt::Proven(receipt) => bincode::serialize(receipt)?,
+                crate::AssumptionReceipt::Unresolved(_) => {
+                    bail!("Only proven receipts can be uploaded.")
+                } //TODO: improve the message
             };
             let receipt_id = client.upload_receipt(serialized_receipt)?;
             receipts_ids.push(receipt_id);
