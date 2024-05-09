@@ -10,9 +10,9 @@ export default function ReportsPage({ params }) {
         <Link
           key={href}
           href={`${showVersionSelect ? `/${params.version}` : ""}${href}`}
-          className="group transition-opacity hover:opacity-70"
+          className="group transition-opacity hover:opacity-80"
         >
-          <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 border-2 border-primary px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12 dark:bg-neutral-900">
+          <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 border-2 border-border px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12 hover:border-primary dark:bg-neutral-900">
             <div>
               <CardTitle className="text-xl">{label}</CardTitle>
               <CardDescription className="text-sm">{description}</CardDescription>
