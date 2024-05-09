@@ -23,6 +23,7 @@
     "@types/react-dom": "18.3.0",
     "@vercel/analytics": "1.2.2",
     "@vercel/edge-config": "1.1.0",
+    "@vercel/speed-insights": "1.0.10",
     "chart.js": "2.9.4",
     "deepmerge": "4.3.1",
     "lucide-react": "0.378.0",
@@ -36,6 +37,6 @@
     "string-ts": "2.1.1",
     "turbo": "1.13.3",
     "typescript": "5.4.5",
-    "zod": "3.23.7"
+    "zod": "3.23.8"
   }
 }
