@@ -53,7 +53,7 @@ Some use cases for composition include:
 
 [`env::verify`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.verify.html
 
-[`src/main.rs`]: /src/main.rs
+[`src/main.rs`]: src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [host]: https://dev.risczero.com/terminology#host
 [guest]: https://dev.risczero.com/terminology#guest-program
