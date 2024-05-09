@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     host::{client::env::SegmentPath, prove_info::SessionStats},
     sha::Digest,
-    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
+    AssumptionReceipt, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -60,7 +60,7 @@ pub struct Session {
     pub post_image: MemoryImage,
 
     /// The list of assumptions made by the guest and resolved by the host.
-    pub assumptions: Vec<Assumption>,
+    pub assumptions: Vec<AssumptionReceipt>,
 
     /// The hooks to be called during the proving phase.
     pub hooks: Vec<Box<dyn SessionEvents>>,
@@ -136,7 +136,7 @@ impl Session {
         journal: Option<Vec<u8>>,
         exit_code: ExitCode,
         post_image: MemoryImage,
-        assumptions: Vec<Assumption>,
+        assumptions: Vec<AssumptionReceipt>,
         user_cycles: u64,
         total_cycles: u64,
         pre_state: SystemState,
@@ -179,8 +179,8 @@ impl Session {
                             self.assumptions
                                 .iter()
                                 .filter_map(|a| match a {
-                                    Assumption::Proven(_) => None,
-                                    Assumption::Unresolved(r) => Some(r.clone()),
+                                    AssumptionReceipt::Proven(_) => None,
+                                    AssumptionReceipt::Unresolved(r) => Some(r.clone()),
                                 })
                                 .collect::<Vec<_>>(),
                         )

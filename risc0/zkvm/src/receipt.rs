@@ -435,10 +435,57 @@ impl From<ReceiptClaim> for AssumptionReceipt {
 }
 */
 
+// TODO(victor) Replace all the unit types with the real thing.
 /// Context available to the verification process.
+#[non_exhaustive]
 pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
     pub suites: BTreeMap<String, HashSuite<BabyBear>>,
+
+    /// Parameters for verification of [SegmentReceipt].
+    pub segment_verifier_parameters: Option<()>,
+
+    /// Parameters for verification of [SuccinctReceipt].
+    pub succinct_verifier_parameters: Option<()>,
+
+    /// Parameters for verification of [CompactReceipt].
+    pub compact_verifier_parameters: Option<()>,
+}
+
+impl VerifierContext {
+    /// Create an empty [VerifierContext].
+    pub fn new() -> Self {
+        Self {
+            suites: BTreeMap::default(),
+            segment_verifier_parameters: None,
+            succinct_verifier_parameters: None,
+            compact_verifier_parameters: None,
+        }
+    }
+
+    /// Return [VerifierContext] with the given map of hash suites.
+    pub fn with_suites(mut self, suites: BTreeMap<String, HashSuite<BabyBear>>) -> Self {
+        self.suites = suites;
+        self
+    }
+
+    /// Return [VerifierContext] with the given [SegmentReceiptVerifierParameters] set.
+    pub fn with_segment_verifier_parameters(mut self, params: ()) -> Self {
+        self.segment_verifier_parameters = Some(params);
+        self
+    }
+
+    /// Return [VerifierContext] with the given [SuccinctReceiptVerifierParameters] set.
+    pub fn with_succinct_verifier_parameters(mut self, params: ()) -> Self {
+        self.succinct_verifier_parameters = Some(params);
+        self
+    }
+
+    /// Return [VerifierContext] with the given [CompactReceiptVerifierParameters] set.
+    pub fn with_compact_verifier_parameters(mut self, params: ()) -> Self {
+        self.compact_verifier_parameters = Some(params);
+        self
+    }
 }
 
 impl Default for VerifierContext {
@@ -449,6 +496,9 @@ impl Default for VerifierContext {
                 ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
+            segment_verifier_parameters: Some(()),
+            succinct_verifier_parameters: Some(()),
+            compact_verifier_parameters: Some(()),
         }
     }
 }

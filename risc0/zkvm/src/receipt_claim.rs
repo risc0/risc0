@@ -191,9 +191,14 @@ pub struct Assumption {
     pub claim: Digest,
 
     /// Commitment to the set of [recursion programs] that can be used to resolve this assumption.
-    /// Binding the set of recursion programs also binds the circuits that can be run (e.g. rv32im
-    /// or keccak) because those circuits are lifted into the recursion domain via a program that
-    /// contains their constraint set and verifier.
+    ///
+    /// Binding the set of recursion programs also binds the circuits, and creates an assumption
+    /// resolved by independent set of circuits (e.g. keccak or Groth16). Proofs of these external
+    /// claims are verified by a "lift" program implemented for the recursion VM which brings the
+    /// claim into the recursion system. This lift program is committed to in the control root.
+    ///
+    /// A special value of all zeroes indicates "self-composition", where the control root used to
+    /// verify this claim is also used to verify the assumption.
     ///
     /// [recursion programs]: https://dev.risczero.com/terminology#recursion-program
     pub control_root: Digest,

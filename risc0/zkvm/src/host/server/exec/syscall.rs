@@ -33,12 +33,12 @@ use risc0_zkvm_platform::{
 
 use crate::{
     host::client::{
-        env::{Assumptions, ExecutorEnv},
+        env::{AssumptionReceipts, ExecutorEnv},
         posix_io::PosixIo,
         slice_io::SliceIo,
     },
     sha::{Digest, Digestible},
-    Assumption, MaybePruned, PrunedValueError, ReceiptClaim,
+    AssumptionReceipt, MaybePruned, PrunedValueError, ReceiptClaim,
 };
 
 /// A host-side implementation of a system call.
@@ -196,11 +196,11 @@ impl Syscall for SysRandom {
 
 #[derive(Clone)]
 pub(crate) struct SysVerify {
-    pub(crate) assumptions: Rc<RefCell<Assumptions>>,
+    pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
 }
 
 impl SysVerify {
-    pub(crate) fn new(assumptions: Rc<RefCell<Assumptions>>) -> Self {
+    pub(crate) fn new(assumptions: Rc<RefCell<AssumptionReceipts>>) -> Self {
         Self { assumptions }
     }
 
@@ -212,7 +212,7 @@ impl SysVerify {
         tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(claim_digest));
 
         // Iterate over the list looking for a matching assumption.
-        let mut assumption: Option<Assumption> = None;
+        let mut assumption: Option<AssumptionReceipt> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             if cached_assumption.claim()?.digest() == claim_digest {
                 assumption = Some(cached_assumption.clone());
@@ -263,7 +263,7 @@ impl SysVerify {
 
         // Iterate over the list looking for a matching assumption. If found, return the
         // post state digest and system exit code.
-        let mut assumption: Option<Assumption> = None;
+        let mut assumption: Option<AssumptionReceipt> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             let assumption_claim = cached_assumption.claim()?;
             let cmp_result = Self::sys_verify_cmp(&assumption_claim, &image_id, &journal_digest);

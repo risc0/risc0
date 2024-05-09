@@ -26,7 +26,6 @@ use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, Tcp
 use crate::{
     get_prover_server, get_version,
     host::{client::slice_io::SliceIo, server::session::NullSegmentRef},
-    receipt_claim::{MaybePruned, ReceiptClaim},
     ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SuccinctReceipt,
     TraceCallback, TraceEvent, VerifierContext,
 };
@@ -614,14 +613,17 @@ fn build_env<'a>(
 
     for assumption in request.assumptions.iter() {
         match assumption.kind.as_ref().ok_or(malformed_err())? {
-            pb::api::assumption::Kind::Proven(asset) => {
+            pb::api::assumption_receipt::Kind::Proven(asset) => {
                 let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
                 env_builder.add_assumption(receipt)
             }
-            pb::api::assumption::Kind::Unresolved(asset) => {
+            pb::api::assumption_receipt::Kind::Unresolved(_asset) => {
+                todo!()
+                /* DO NOT MERGE
                 let claim: MaybePruned<ReceiptClaim> =
                     pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
                 env_builder.add_assumption(claim)
+                */
             }
         };
     }

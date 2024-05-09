@@ -28,8 +28,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::client::env::SegmentPath, Assumption, Assumptions, ExecutorEnv, FileSegmentRef, Output,
-    Segment, SegmentRef, Session,
+    host::client::env::SegmentPath, sha::Digestible, Assumption, AssumptionReceipt, Assumptions,
+    ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef, Session,
 };
 
 use super::{
@@ -164,8 +164,19 @@ impl<'a> ExecutorImpl<'a> {
                                         .iter()
                                         .map(|a| {
                                             Ok(match a {
-                                                Assumption::Proven(r) => r.claim()?.into(),
-                                                Assumption::Unresolved(r) => r.clone(),
+                                                AssumptionReceipt::Proven(r) => Assumption {
+                                                    claim: r.claim()?.digest(),
+                                                    // TODO(victor): This is possibly a bad
+                                                    // assumption. Revisit when integrating support
+                                                    // for independent control roots.
+                                                    control_root: Digest::ZERO,
+                                                }
+                                                .into(),
+                                                AssumptionReceipt::Unresolved(r) => Assumption {
+                                                    claim: r.digest(),
+                                                    control_root: Digest::ZERO,
+                                                }
+                                                .into(),
                                             })
                                         })
                                         .collect::<Result<Vec<_>>>()?,
