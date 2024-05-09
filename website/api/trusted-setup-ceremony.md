@@ -21,7 +21,7 @@ To ensure that the circuit itself does not have security holes, we have used a m
 
 ## The Transcript Matches the Circuit
 
-Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][TODO].) You can verify it matches the circuit using Circom and snarkjs:
+Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. You can verify it matches the circuit using Circom and snarkjs:
 
 1. Install [Circom][install-circom] and [snarkjs][snarkjs].
 1. Download the [`stark_verify.circom`][stark-verify-circom] and [`risc0.circom`][risc0-circom-library] source files.
