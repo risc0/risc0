@@ -24,7 +24,7 @@ pub mod baby_bear;
 pub mod goldilocks;
 
 /// A pair of fields, one of which is an extension field of the other.
-pub trait Field {
+pub trait Field: 'static {
     /// An element of the base field
     type Elem: Elem + RootsOfUnity;
     /// An element of the extension field

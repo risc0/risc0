@@ -16,14 +16,13 @@
 
 use std::{fmt::Debug, ops::Range, sync::Arc};
 
-use ndarray::{ArrayView, ArrayViewMut, Axis};
 use parking_lot::{
     MappedRwLockReadGuard, MappedRwLockWriteGuard, RwLock, RwLockReadGuard, RwLockWriteGuard,
 };
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use super::{tracker, Buffer, Hal,BufferElem};
+use super::{tracker, AnyBuffer, Buffer, BufferElem, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -86,7 +85,7 @@ impl<T> Drop for TrackedVec<T> {
 }
 
 #[derive(Clone)]
-pub struct CpuBuffer<T> {
+pub struct CpuBuffer<T: 'static> {
     name: &'static str,
     buf: Arc<RwLock<TrackedVec<T>>>,
     region: Region,
@@ -108,6 +107,19 @@ pub struct SyncSlice<'a, T: Default + Clone> {
     _buf: SyncSliceRef<'a, T>,
     ptr: *mut T,
     size: usize,
+}
+
+impl<'a, T: Default + Clone> core::ops::Deref for SyncSlice<'a, T> {
+    type Target = [T];
+    fn deref(&self) -> &[T] {
+        unsafe { core::slice::from_raw_parts(self.ptr, self.size) }
+    }
+}
+
+impl<'a, T: Default + Clone> core::ops::DerefMut for SyncSlice<'a, T> {
+    fn deref_mut(&mut self) -> &mut [T] {
+        unsafe { core::slice::from_raw_parts_mut(self.ptr, self.size) }
+    }
 }
 
 // SAFETY: SyncSlice keeps a MappedRwLockWriteGuard to the original CpuBuffer, so
@@ -221,15 +233,25 @@ impl<T: Default + Clone> From<Vec<T>> for CpuBuffer<T> {
     }
 }
 
-impl<T: Clone> Buffer<T> for CpuBuffer<T> {
+impl<T: BufferElem> AnyBuffer<T> for CpuBuffer<T> {
     fn name(&self) -> &'static str {
         self.name
+    }
+
+    fn as_any(&self) -> &dyn core::any::Any {
+        self
+    }
+
+    fn as_sync_slice(&self) -> SyncSlice<T> {
+        self.as_slice_sync()
     }
 
     fn size(&self) -> usize {
         self.region.size()
     }
+}
 
+impl<T: BufferElem> Buffer<T> for CpuBuffer<T> {
     fn slice(&self, offset: usize, size: usize) -> CpuBuffer<T> {
         assert!(offset + size <= self.size());
         let region = Region(self.region.offset() + offset, size);
@@ -256,17 +278,16 @@ impl<T: Clone> Buffer<T> for CpuBuffer<T> {
     }
 }
 
-impl<F: Field> Hal for CpuHal<F> {
+impl<F: Field + 'static> Hal for CpuHal<F> {
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
     type Buffer<T: BufferElem> = CpuBuffer<T>;
 
-
     fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T> {
         CpuBuffer::new(name, size)
     }
-    fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T>{
+    fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T> {
         CpuBuffer::copy_from(name, slice)
     }
 
@@ -428,53 +449,6 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn eltwise_add_elem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input1: &Self::Buffer<Self::Elem>,
-        input2: &Self::Buffer<Self::Elem>,
-    ) {
-        assert_eq!(output.size(), input1.size());
-        assert_eq!(output.size(), input2.size());
-        let mut output = output.as_slice_mut();
-        let input1 = input1.as_slice();
-        let input2 = input2.as_slice();
-        (&mut output[..], &input1[..], &input2[..])
-            .into_par_iter()
-            .for_each(|(o, a, b)| {
-                *o = *a + *b;
-            });
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn eltwise_sum_extelem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input: &Self::Buffer<Self::ExtElem>,
-    ) {
-        let count = output.size() / Self::ExtElem::EXT_SIZE;
-        let to_add = input.size() / count;
-        assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
-        assert_eq!(input.size(), count * to_add);
-        let mut output = output.as_slice_mut();
-        let mut output =
-            ArrayViewMut::from_shape((Self::ExtElem::EXT_SIZE, count), &mut output).unwrap();
-        let output = output.axis_iter_mut(Axis(1)).into_par_iter();
-        let input = input.as_slice();
-        let input = ArrayView::from_shape((to_add, count), &input).unwrap();
-        let input = input.axis_iter(Axis(1)).into_par_iter();
-        output.zip(input).for_each(|(mut output, input)| {
-            let mut sum = Self::ExtElem::ZERO;
-            for i in input {
-                sum += *i;
-            }
-            for i in 0..Self::ExtElem::EXT_SIZE {
-                output[i] = sum.subelems()[i]
-            }
-        });
-    }
-
-    #[tracing::instrument(skip_all)]
     fn eltwise_copy_elem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -591,6 +565,7 @@ mod tests {
 
     use super::*;
     use crate::core::hash::sha::Sha256HashSuite;
+    use crate::hal::Eltwise;
 
     #[test]
     #[should_panic]
@@ -598,17 +573,19 @@ mod tests {
         let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
         let a = hal.alloc("a", 10);
         let b = hal.alloc("b", 20);
-        hal.eltwise_add_elem(&a, &b, &b);
+        let eltwise = hal.get_interface::<dyn Eltwise<BabyBear>>();
+        eltwise.eltwise_add_elem(&a, &b, &b);
     }
 
     #[test]
     fn fp() {
         let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let eltwise = hal.get_interface::<dyn Eltwise<BabyBear>>();
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
             |o, a, b| {
-                hal.eltwise_add_elem(o, a, b);
+                eltwise.eltwise_add_elem(o, a, b);
             },
             |a, b| *a + *b,
             COUNT,

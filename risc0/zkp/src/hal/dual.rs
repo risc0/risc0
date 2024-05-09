@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fmt::Debug, marker::PhantomData, rc::Rc};
+use std::{marker::PhantomData, rc::Rc};
 
 use risc0_core::field::Field;
 
-use super::{Buffer, CircuitHal, Hal,BufferElem};
+use super::{AnyBuffer, Buffer, BufferElem, CircuitHal, Hal};
 use crate::core::{digest::Digest, hash::HashSuite};
 
 #[derive(Clone)]
 pub struct BufferImpl<T, L, R>
 where
+    T: BufferElem,
     L: Buffer<T>,
     R: Buffer<T>,
 {
@@ -32,7 +33,7 @@ where
 
 impl<T, L, R> BufferImpl<T, L, R>
 where
-    T: Debug + PartialEq,
+    T: BufferElem,
     L: Buffer<T>,
     R: Buffer<T>,
 {
@@ -60,8 +61,42 @@ where
     L: Buffer<T>,
     R: Buffer<T>,
 {
+    fn slice(&self, offset: usize, size: usize) -> Self {
+        let lhs = self.lhs.slice(offset, size);
+        let rhs = self.rhs.slice(offset, size);
+        BufferImpl::new(lhs, rhs)
+    }
+
+    fn view<F: FnOnce(&[T])>(&self, f: F) {
+        self.lhs.view(f)
+    }
+    fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
+        self.lhs.view_mut(f);
+        self.rhs.view_mut(|dst| {
+            self.lhs.view(|src| dst.clone_from_slice(src));
+        })
+    }
+    fn get_at(&self, idx: usize) -> T {
+        self.lhs.get_at(idx)
+    }
+}
+
+impl<T, L, R> AnyBuffer<T> for BufferImpl<T, L, R>
+where
+    T: BufferElem,
+    L: Buffer<T>,
+    R: Buffer<T>,
+{
     fn name(&self) -> &'static str {
         "dual"
+    }
+
+    fn as_sync_slice(&self) -> super::cpu::SyncSlice<T> {
+        self.lhs.as_sync_slice()
+    }
+
+    fn as_any(&self) -> &dyn core::any::Any {
+        self
     }
 
     fn size(&self) -> usize {
@@ -69,27 +104,6 @@ where
         let rhs = self.rhs.size();
         assert_eq!(lhs, rhs);
         lhs
-    }
-
-    fn slice(&self, offset: usize, size: usize) -> Self {
-        let lhs = self.lhs.slice(offset, size);
-        let rhs = self.rhs.slice(offset, size);
-        BufferImpl::new(lhs, rhs)
-    }
-
-    fn get_at(&self, idx: usize) -> T {
-        self.lhs.get_at(idx)
-    }
-
-    fn view<F: FnOnce(&[T])>(&self, f: F) {
-        self.lhs.view(f)
-    }
-
-    fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
-        self.lhs.view_mut(f);
-        self.rhs.view_mut(|dst| {
-            self.lhs.view(|src| dst.clone_from_slice(src));
-        })
     }
 }
 
@@ -114,7 +128,7 @@ where
 
 impl<F, L, R> Hal for DualHal<F, L, R>
 where
-    F: Field,
+    F: Field + 'static,
     L: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
     R: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
 {
@@ -122,7 +136,6 @@ where
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
     type Buffer<T: BufferElem> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
-
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.lhs.get_hash_suite()
@@ -133,7 +146,7 @@ where
         let rhs = self.rhs.alloc(name, size);
         BufferImpl::new(lhs, rhs)
     }
-    
+
     fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T> {
         let lhs = self.lhs.copy_from(name, slice);
         let rhs = self.rhs.copy_from(name, slice);
@@ -217,29 +230,6 @@ where
             count,
         );
         out.assert_eq();
-    }
-
-    fn eltwise_add_elem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input1: &Self::Buffer<Self::Elem>,
-        input2: &Self::Buffer<Self::Elem>,
-    ) {
-        self.lhs
-            .eltwise_add_elem(&output.lhs, &input1.lhs, &input2.lhs);
-        self.rhs
-            .eltwise_add_elem(&output.rhs, &input1.rhs, &input2.rhs);
-        output.assert_eq();
-    }
-
-    fn eltwise_sum_extelem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input: &Self::Buffer<Self::ExtElem>,
-    ) {
-        self.lhs.eltwise_sum_extelem(&output.lhs, &input.lhs);
-        self.rhs.eltwise_sum_extelem(&output.rhs, &input.rhs);
-        output.assert_eq();
     }
 
     fn eltwise_copy_elem(

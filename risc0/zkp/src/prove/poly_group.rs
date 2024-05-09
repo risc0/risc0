@@ -14,7 +14,7 @@
 
 use crate::{
     core::log2_ceil,
-    hal::{Buffer, Hal},
+    hal::{AnyBuffer, Hal},
     prove::merkle::MerkleTreeProver,
     INV_RATE, QUERIES,
 };

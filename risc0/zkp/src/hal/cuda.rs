@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
+use std::{cell::RefCell, marker::PhantomData, rc::Rc, sync::OnceLock};
 
 use cust::{
     device::DeviceAttribute,
@@ -27,7 +27,7 @@ use risc0_core::field::{
 };
 use risc0_sys::cuda::*;
 
-use super::{tracker, Buffer, Hal};
+use super::{cpu::SyncSlice, tracker, AnyBuffer, Buffer, BufferElem, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -65,7 +65,7 @@ pub struct DeviceExtElem(pub BabyBearExtElem);
 
 unsafe impl DeviceCopy for DeviceExtElem {}
 
-pub trait CudaHash {
+pub trait CudaHash: 'static {
     /// Create a hash implementation
     fn new(hal: &CudaHal<Self>) -> Self;
 
@@ -159,8 +159,7 @@ pub struct CudaHashPoseidon {
 
 impl CudaHash for CudaHashPoseidon {
     fn new(hal: &CudaHal<Self>) -> Self {
-        let round_constants =
-            hal.copy_from("round_constants", poseidon::consts::ROUND_CONSTANTS);
+        let round_constants = hal.copy_from("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from("mds", poseidon::consts::MDS);
         let partial_comp_matrix =
             hal.copy_from("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
@@ -245,8 +244,7 @@ pub struct CudaHashPoseidon2 {
 
 impl CudaHash for CudaHashPoseidon2 {
     fn new(hal: &CudaHal<Self>) -> Self {
-        let round_constants =
-            hal.copy_from("round_constants", poseidon2::consts::ROUND_CONSTANTS);
+        let round_constants = hal.copy_from("round_constants", poseidon2::consts::ROUND_CONSTANTS);
         let m_int_diag = hal.copy_from("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
         CudaHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
@@ -411,7 +409,7 @@ impl<T> BufferImpl<T> {
     }
 }
 
-impl<T: Clone> Buffer<T> for BufferImpl<T> {
+impl<T: BufferElem> AnyBuffer<T> for BufferImpl<T> {
     fn name(&self) -> &'static str {
         self.buffer.borrow().name
     }
@@ -420,6 +418,16 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         self.size
     }
 
+    fn as_any(&self) -> &dyn core::any::Any {
+        self
+    }
+
+    fn as_sync_slice(&self) -> SyncSlice<T> {
+        todo!("Copy buffer to CPU and make it available, or return a reference to global memory")
+    }
+}
+
+impl<T: BufferElem> Buffer<T> for BufferImpl<T> {
     fn slice(&self, offset: usize, size: usize) -> BufferImpl<T> {
         assert!(offset + size <= self.size());
         BufferImpl {
@@ -542,41 +550,13 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
+    type Buffer<T: BufferElem> = BufferImpl<T>;
 
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+    fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T> {
         BufferImpl::new(name, size)
     }
 
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
-        BufferImpl::copy_from(name, slice)
-    }
-
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::new(name, size)
-    }
-
-    fn copy_from_extelem(
-        &self,
-        name: &'static str,
-        slice: &[Self::ExtElem],
-    ) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::copy_from(name, slice)
-    }
-
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        BufferImpl::new(name, size)
-    }
-
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        BufferImpl::copy_from(name, slice)
-    }
-
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        BufferImpl::new(name, size)
-    }
-
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+    fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T> {
         BufferImpl::copy_from(name, slice)
     }
 
@@ -783,58 +763,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
             ))
             .unwrap();
         }
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn eltwise_add_elem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input1: &Self::Buffer<Self::Elem>,
-        input2: &Self::Buffer<Self::Elem>,
-    ) {
-        assert_eq!(output.size(), input1.size());
-        assert_eq!(output.size(), input2.size());
-        let count = output.size();
-
-        let kernel = self.module.get_function("eltwise_add_fp").unwrap();
-        let params = self.compute_simple_params(count);
-        unsafe {
-            let stream = &self.stream;
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                output.as_device_ptr(),
-                input1.as_device_ptr(),
-                input2.as_device_ptr(),
-                count
-            ))
-            .unwrap();
-        }
-        self.stream.synchronize().unwrap();
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn eltwise_sum_extelem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input: &Self::Buffer<Self::ExtElem>,
-    ) {
-        let count = output.size() / Self::ExtElem::EXT_SIZE;
-        let to_add = input.size() / count;
-        assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
-        assert_eq!(input.size(), count * to_add);
-
-        let kernel = self.module.get_function("eltwise_sum_fpext").unwrap();
-        let params = self.compute_simple_params(output.size());
-        unsafe {
-            let stream = &self.stream;
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                output.as_device_ptr(),
-                input.as_device_ptr(),
-                to_add,
-                count
-            ))
-            .unwrap();
-        }
-        self.stream.synchronize().unwrap();
     }
 
     #[tracing::instrument(skip_all)]

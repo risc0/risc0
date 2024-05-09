@@ -18,14 +18,23 @@ pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
 pub mod dual;
+mod eltwise;
+#[cfg(feature = "cuda")]
+mod eltwise_cuda;
 #[cfg(feature = "metal")]
 pub mod metal;
 
 use std::{
+    any::{Any, TypeId},
+    borrow::Cow,
+    collections::{btree_map, BTreeMap},
     fmt::Debug,
     sync::{Mutex, OnceLock},
 };
 
+use linkme::distributed_slice;
+
+pub use eltwise::Eltwise;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
@@ -33,26 +42,117 @@ use crate::{
     INV_RATE,
 };
 
-pub trait Buffer<T>: Clone {
+// Wrapper "BufferElem" trait so we don't have to write out all the
+// required traits whenever we use a buffere element.
+pub trait BufferElem: Clone + Debug + PartialEq + Default + 'static {}
+impl<T> BufferElem for T where T: Clone + Debug + PartialEq + Default + 'static {}
+
+// WIP: get rid of view and view_mut on `Buffer' so the whole thing can be object safe.
+pub trait AnyBuffer<T: BufferElem>: Any {
     fn name(&self) -> &'static str;
 
     fn size(&self) -> usize;
 
-    fn slice(&self, offset: usize, size: usize) -> Self;
+    /// Make this buffer available on the CPU.  This may involve copying the whole buffer.
+    fn as_sync_slice(&self) -> cpu::SyncSlice<T>;
 
-    fn get_at(&self, idx: usize) -> T;
+    // TODO: remove as_any when trait upcasting is stabalized
+    fn as_any(&self) -> &dyn Any;
+}
+
+pub trait Buffer<T: BufferElem>: Clone + AnyBuffer<T> {
+    fn slice(&self, offset: usize, size: usize) -> Self;
 
     fn view<F: FnOnce(&[T])>(&self, f: F);
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);
+
+    fn get_at(&self, idx: usize) -> T;
 }
 
-// Wrapper "BufferElem" trait so we don't have to write out all the
-// required traits whenever we use a buffere element.
-pub trait BufferElem : Clone + Debug + PartialEq + Default {}
-impl<T> BufferElem for T where T: Clone + Debug + PartialEq+ Default {}
+struct Registry {
+    interfaces: BTreeMap</*interface=*/ TypeId, BTreeMap</*hal=*/ TypeId, Registration>>,
+}
+static REGISTRY: Mutex<Registry> = Mutex::new(Registry {
+    interfaces: BTreeMap::new(),
+});
 
-pub trait Hal {
+impl Registry {
+    fn get_interface<'a, H: Hal, I: Any + ?Sized + 'a>(&mut self, hal: &'a H) -> Box<I> {
+        if self.interfaces.is_empty() {
+            // Initial population of registered interfaces from distributed slice
+            for interface in REGISTERED_INTERFACES {
+                let r = interface();
+                let iface_entry = self.interfaces.entry(r.interface).or_default();
+                match iface_entry.entry(r.hal) {
+                    btree_map::Entry::Occupied(_) => {
+                        panic!(
+                            "Duplicate hal interface registration for {:?} on {:?}",
+                            TypeId::of::<I>(),
+                            TypeId::of::<H>()
+                        );
+                    }
+                    btree_map::Entry::Vacant(entry) => {
+                        entry.insert(r);
+                    }
+                }
+            }
+            assert!(
+                !self.interfaces.is_empty(),
+                "No hal interface registrations found!"
+            );
+        }
+
+        let iface_entry = self
+            .interfaces
+            .get(&TypeId::of::<I>())
+            .unwrap_or_else(|| panic!("Unregistered interface {:?} requested", TypeId::of::<I>()));
+        if let Some(entry) = iface_entry.get(&TypeId::of::<H>()) {
+            let construct: fn(&H) -> Box<I> = *entry
+                .construct
+                .downcast_ref()
+                .expect("Unable to downcast matching entry");
+            return construct(hal);
+        }
+
+        // No hal-specific implementation; attempt to use CPU hal
+        if let Some(entry) = iface_entry.get(&TypeId::of::<cpu::CpuHal<H::Field>>()) {
+            let construct: fn(&cpu::CpuHal<H::Field>) -> Box<I> = *entry
+                .construct
+                .downcast_ref()
+                .expect("Unable to downcast cpu entry");
+            let cpu_hal = cpu::CpuHal::<H::Field>::new(hal.get_hash_suite().clone());
+            return construct(&cpu_hal);
+        }
+
+        panic!(
+            "Interface {:?} registered but no {:?} or cpu implementation present",
+            TypeId::of::<I>(),
+            TypeId::of::<H>()
+        );
+    }
+}
+
+#[distributed_slice]
+pub static REGISTERED_INTERFACES: [fn() -> Registration];
+
+pub struct Registration {
+    hal: TypeId,
+    interface: TypeId,
+    construct: Box<dyn Any + Send>,
+}
+
+impl Registration {
+    pub fn new<H: Hal, I: Any + ?Sized>(f: fn(&H) -> Box<I>) -> Registration {
+        Registration {
+            hal: TypeId::of::<H>(),
+            interface: TypeId::of::<I>(),
+            construct: Box::new(f),
+        }
+    }
+}
+
+pub trait Hal: Any + Sized {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
@@ -64,39 +164,19 @@ pub trait Hal {
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field>;
 
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        self.alloc(name, size)
-    }
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        self.alloc(name, size)
-    }
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        self.alloc(name, size)
-    }
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
-        self.alloc(name, size)
-    }
-
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        self.copy_from(name,slice)
-    }
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
-        self.copy_from(name,slice)
-    }
-    fn copy_from_extelem(
-        &self,
-        name: &'static str,
-        slice: &[Self::ExtElem],
-    ) -> Self::Buffer<Self::ExtElem> {
-        self.copy_from(name,slice)
-    }
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
-                self.copy_from(name,slice)
-    }
-
-
     fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T>;
     fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T>;
+    fn get_buffer<'a, T: BufferElem>(&self, buf: &'a dyn AnyBuffer<T>) -> Cow<'a, Self::Buffer<T>> {
+        if let Some(our_buf) = buf.as_any().downcast_ref::<Self::Buffer<T>>() {
+            Cow::Borrowed(our_buf)
+        } else {
+            panic!("Incompatible buffer type")
+        }
+    }
+
+    fn get_interface<'a, I: Any + ?Sized + 'a>(&'a self) -> Box<I> {
+        REGISTRY.lock().unwrap().get_interface::<Self, I>(self)
+    }
 
     fn batch_expand_into_evaluate_ntt(
         &self,
@@ -131,19 +211,6 @@ pub trait Hal {
         combos: &Self::Buffer<u32>,
         input_size: usize,
         count: usize,
-    );
-
-    fn eltwise_add_elem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input1: &Self::Buffer<Self::Elem>,
-        input2: &Self::Buffer<Self::Elem>,
-    );
-
-    fn eltwise_sum_extelem(
-        &self,
-        output: &Self::Buffer<Self::Elem>,
-        input: &Self::Buffer<Self::ExtElem>,
     );
 
     fn eltwise_copy_elem(
@@ -238,7 +305,7 @@ mod testutil {
         Elem, ExtElem,
     };
 
-    use super::{dual::DualHal, Hal};
+    use super::{dual::DualHal, Eltwise, Hal};
     use crate::{
         core::digest::Digest,
         hal::{cpu::CpuHal, Buffer},
@@ -357,7 +424,8 @@ mod testutil {
     pub(crate) fn check_req<H: Hal>(hal: H) {
         let a = hal.alloc("a", 10);
         let b = hal.alloc("b", 20);
-        hal.eltwise_add_elem(&a, &b, &b);
+        let eltwise = hal.get_interface::<dyn Eltwise<H::Field>>();
+        eltwise.eltwise_add_elem(&a, &b, &b);
     }
 
     pub(crate) fn eltwise_add_elem<H: Hal>(hal_gpu: H) {
@@ -381,7 +449,8 @@ mod testutil {
                 });
             });
 
-            hal_gpu.eltwise_add_elem(&o, &a, &b);
+            let eltwise = hal_gpu.get_interface::<dyn Eltwise<H::Field>>();
+            eltwise.eltwise_add_elem(&o, &a, &b);
 
             o.view(|o| {
                 for i in 0..o.len() {
@@ -412,7 +481,8 @@ mod testutil {
 
         let input = generate_extelem(&hal, &mut rng, COUNT);
         let output = hal.alloc("output", COUNT);
-        hal.eltwise_sum_extelem(&output, &input);
+        let eltwise = hal.get_interface::<dyn Eltwise<H::Field>>();
+        eltwise.eltwise_sum_extelem(&output, &input);
     }
 
     pub(crate) fn fri_fold<H: Hal>(hal_gpu: H) {

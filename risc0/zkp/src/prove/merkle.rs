@@ -19,7 +19,7 @@ use tracing::debug;
 
 use crate::{
     core::digest::Digest,
-    hal::{Buffer, Hal},
+    hal::{AnyBuffer, Buffer, Hal},
     merkle::MerkleTreeParams,
     prove::write_iop::WriteIOP,
 };

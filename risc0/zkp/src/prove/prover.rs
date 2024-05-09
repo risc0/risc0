@@ -17,7 +17,7 @@ use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use crate::{
     core::poly::{poly_divide, poly_interpolate},
-    hal::{Buffer, CircuitHal, Hal},
+    hal::{AnyBuffer, Buffer, CircuitHal, Eltwise, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,
     INV_RATE,
@@ -367,10 +367,9 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Sum the combos up into one final polynomial + make it into 4 Fp polys.
         // Additionally, it needs to be bit reversed to make everyone happy
         nvtx::range_push!("sum");
-        let final_poly_coeffs = self
-            .hal
-            .alloc("final_poly_coeffs", self.cycles * ext_size);
-        self.hal.eltwise_sum_extelem(&final_poly_coeffs, &combos);
+        let final_poly_coeffs = self.hal.alloc("final_poly_coeffs", self.cycles * ext_size);
+        let eltwise = self.hal.get_interface::<dyn Eltwise<H::Field>>();
+        eltwise.eltwise_sum_extelem(&final_poly_coeffs, &combos);
         nvtx::range_pop!();
 
         // Finally do the FRI protocol to prove the degree of the polynomial

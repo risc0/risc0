@@ -26,7 +26,7 @@ use risc0_zkp::{
             prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHalSha256, CudaHash,
             CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
         },
-        Buffer, CircuitHal, Hal,
+        AnyBuffer, CircuitHal, Hal,
     },
     INV_RATE, ZK_CYCLES,
 };

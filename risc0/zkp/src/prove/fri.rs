@@ -19,7 +19,7 @@ use tracing::debug;
 
 use crate::{
     core::log2_ceil,
-    hal::{Buffer, Hal},
+    hal::{AnyBuffer, Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };

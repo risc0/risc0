@@ -26,7 +26,7 @@ use risc0_core::field::{
     Elem, ExtElem, RootsOfUnity,
 };
 
-use super::{tracker, Buffer, Hal,BufferElem};
+use super::{tracker, Buffer, BufferElem, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -144,8 +144,7 @@ pub struct MetalHashPoseidon {
 
 impl MetalHash for MetalHashPoseidon {
     fn new(hal: &MetalHal<Self>) -> Self {
-        let round_constants =
-            hal.copy_from("round_constants", poseidon::consts::ROUND_CONSTANTS);
+        let round_constants = hal.copy_from("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from("mds", poseidon::consts::MDS);
         let partial_comp_matrix =
             hal.copy_from("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
@@ -207,8 +206,7 @@ pub struct MetalHashPoseidon2 {
 
 impl MetalHash for MetalHashPoseidon2 {
     fn new(hal: &MetalHal<Self>) -> Self {
-        let round_constants =
-            hal.copy_from("round_constants", poseidon2::consts::ROUND_CONSTANTS);
+        let round_constants = hal.copy_from("round_constants", poseidon2::consts::ROUND_CONSTANTS);
         let m_int_diag = hal.copy_from("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
         MetalHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
