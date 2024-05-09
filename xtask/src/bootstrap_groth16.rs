@@ -154,14 +154,14 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 "#;
     let receipt = generate_receipt();
     let image_id = receipt.claim().unwrap().pre.digest();
-    let verifier_info_digest = CompactReceipt::verifier_info().digest();
-    let selector = hex::encode(&verifier_info_digest.as_bytes()[..4]);
+    let verifier_parameters_digest = CompactReceipt::verifier_parameters().digest();
+    let selector = hex::encode(&verifier_parameters_digest.as_bytes()[..4]);
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
     let post_digest = hex::encode(receipt.claim().unwrap().post.digest().as_bytes());
     let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
 
-    // NOTE: Selector value is the fist four bytes of the verifier info digest. It is added as part
+    // NOTE: Selector value is the fist four bytes of the verifier param digest. It is added as part
     // of ABI encoding and used for routing to the correct verifier on-chain. We do not use the
     // full ABI encoding implementation here because its part of risc0-ethereum-contracts, which
     // would be a hassle to import.
