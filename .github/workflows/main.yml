@@ -37,6 +37,7 @@ jobs:
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       test: ${{ steps.filter.outputs.test }}
+      test-crates: ${{ steps.filter.outputs.test-crates }}
       web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
@@ -78,6 +79,9 @@ jobs:
               - compact_proof/**
               - external/**
               - risc0/**
+            test-crates:
+              - *base
+              - risc0/**
             web:
               - *base
               - examples/browser-verify/**
@@ -97,6 +101,7 @@ jobs:
       - examples
       - docker
       - test
+      - test-crates
       - web
     runs-on: ubuntu-latest
     steps:
@@ -197,10 +202,6 @@ jobs:
       RUST_BACKTRACE: full
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: risc0/RustCrypto-crypto-bigint
-          path: 'RustCrypto-crypto-bigint'
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
@@ -222,11 +223,6 @@ jobs:
       - name: test risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
-        if: matrix.device == 'cpu'
-      - run: cargo install --force --path risc0/cargo-risczero -F experimental
-      - name: run cargo risczero test
-        working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
-        run: cargo risczero test
         if: matrix.device == 'cpu'
       - run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
@@ -286,6 +282,36 @@ jobs:
         env:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
+      - run: sccache --show-stats
+
+  test-crates:
+    if: needs.changes.outputs.test-crates == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'risc0'
+      - uses: actions/checkout@v4
+        with:
+          repository: risc0/RustCrypto-crypto-bigint
+          path: 'RustCrypto-crypto-bigint'
+      - uses: ./risc0/.github/actions/rustup
+      - uses: ./risc0/.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-default
+      - name: Install risczero toolchain
+        run: |
+          cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+          cargo install --force --path risc0/cargo-risczero -F experimental
+        working-directory: risc0
+      - name: run cargo risczero test
+        working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
+        run: cargo risczero test
       - run: sccache --show-stats
 
   doc:
