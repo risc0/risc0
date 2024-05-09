@@ -204,9 +204,9 @@ jobs:
           repository: risc0/RustCrypto-crypto-bigint
           path: RustCrypto-crypto-bigint
       - if: matrix.feature == 'cuda'
-        uses: ./risc0/.github/actions/cuda
-      - uses: ./risc0/.github/actions/rustup
-      - uses: ./risc0/.github/actions/sccache
+        uses: ./.github/actions/cuda
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
