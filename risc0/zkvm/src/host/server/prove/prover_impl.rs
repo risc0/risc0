@@ -21,9 +21,9 @@ use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
     },
+    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     sha::Digestible,
     CompositeReceipt, Receipt, Segment, Session, VerifierContext,
 };
@@ -103,6 +103,7 @@ where
             );
         }
 
+        // Compress the receipt to the requested level.
         let receipt = match self.receipt_kind {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
@@ -147,7 +148,7 @@ where
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
 
-        use crate::host::receipt::decode_receipt_claim_from_seal;
+        use crate::receipt::segment::decode_receipt_claim_from_seal;
 
         let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
 

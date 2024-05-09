@@ -15,6 +15,7 @@ harness = false
 anyhow = { version = "1.0", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }
+cfg-if = "1.0"
 cust = { version = "0.3", optional = true }
 digest = { version = "0.10", features = ["oid"] }
 ff = { version = "0.13", features = ["derive", "bits"], optional = true }
@@ -26,6 +27,7 @@ rand_core = "0.6"
 risc0-core = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
+sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -36,7 +38,6 @@ parking_lot = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-sys = { workspace = true, optional = true }
-sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 
 [dev-dependencies]
 criterion = "0.5"

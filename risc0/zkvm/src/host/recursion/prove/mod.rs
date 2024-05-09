@@ -26,7 +26,8 @@ use hex::FromHex;
 use merkle::MerkleGroup;
 use rand::thread_rng;
 use risc0_circuit_recursion::{
-    cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    cpu::CpuCircuitHal, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
+    REGISTER_GROUP_DATA,
 };
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
@@ -47,10 +48,9 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 pub use self::program::Program;
-use super::CIRCUIT;
 use crate::{
+    receipt::{succinct::valid_control_ids, SuccinctReceipt},
     receipt_claim::{Merge, Output},
-    recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
     HalPair, ReceiptClaim, SegmentReceipt,
 };

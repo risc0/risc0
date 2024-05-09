@@ -1,10 +1,11 @@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@risc0/ui/command";
+import { joinWords } from "@risc0/ui/utils/join-words";
 import Link from "next/link";
 
 export function ChartsList({ charts, selectedPlatform }) {
   return (
     <Command className="border">
-      <CommandInput placeholder={`${selectedPlatform} Benchmarks`} />
+      <CommandInput className="capitalize" placeholder={`${joinWords(selectedPlatform)} Benchmarks`} />
       <CommandList className="max-h-[calc(100dvh-19.5rem)] overscroll-contain">
         <CommandEmpty>No Results</CommandEmpty>
         {charts.flatMap((chart) =>

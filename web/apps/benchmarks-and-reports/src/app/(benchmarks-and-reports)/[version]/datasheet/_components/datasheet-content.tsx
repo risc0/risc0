@@ -18,7 +18,7 @@ const FILENAMES_TO_TITLES = {
   ),
 } as const;
 
-export default async function DatasheetContent({ version }: { version: string }) {
+export async function DatasheetContent({ version }: { version: string }) {
   const urls = Object.keys(FILENAMES_TO_TITLES);
   const dataPromises = urls.map((url) => fetchDatasheet({ version, url }));
   const data: DatasheetTableSchema[][] = await Promise.all(dataPromises);

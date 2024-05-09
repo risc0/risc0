@@ -17,13 +17,17 @@ depends on the [rustup] tool specifically.
 ## Install
 
 Next, install the [`cargo risczero`][cargo-risczero] tool and use its [`install`
-command][cargo-risczero] to install the toolchain by running:
+command][cargo-risczero] to install the Rust and C++ toolchains by running:
 
 ```bash
 cargo install cargo-binstall
 cargo binstall cargo-risczero
 cargo risczero install
 ```
+
+> Note: To install a specific version instead of using the latest stable version, use `cargo binstall cargo-risczero@<version>`, where the version is a [release tag](https://github.com/risc0/risc0/releases).
+>
+> The version used must match the `risc0-zkvm` version from your guest and host.
 
 For x86-64 macOS, you must run `cargo risczero build-toolchain` instead of
 `cargo risczero install`.
