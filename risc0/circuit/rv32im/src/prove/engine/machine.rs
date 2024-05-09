@@ -166,10 +166,7 @@ impl MachineContext {
     }
 
     pub fn is_exec_par_safe(&self, cycle: usize) -> bool {
-        let cur_cycle = self.get_cycle(cycle);
-        // let is_safe = cur_cycle.back.is_some();
-        // tracing::debug!("is_exec_par_safe: {cycle} <= {is_safe}");
-        cur_cycle.back.is_some()
+        self.get_cycle(cycle).back.is_some()
     }
 
     pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: &mut [BabyBearElem]) {
@@ -196,19 +193,6 @@ impl MachineContext {
         }
     }
 
-    // pub fn rev_step_exec(
-    //     &self,
-    //     steps: usize,
-    //     last_cycle: usize,
-    //     args: &[SyncSlice<BabyBearElem>],
-    // ) -> Result<()> {
-    //     (0..last_cycle)
-    //         .rev()
-    //         .try_for_each(|cycle| self.next_step_exec(steps, last_cycle, cycle, args))
-    // }
-}
-
-impl MachineContext {
     fn get_stage_offset(&self, cycle: usize) -> (&PreflightStage, usize) {
         if cycle < self.trace.pre.cycles.len() {
             (&self.trace.pre, 0)

@@ -25,7 +25,7 @@ use rand::thread_rng;
 use risc0_zkp::{
     adapter::{CircuitInfo, TapsProvider, PROOF_SYSTEM_INFO},
     field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem as _,
     },
     hal::{Buffer as _, CircuitHal, Hal},
@@ -39,10 +39,6 @@ use crate::{
     prove::hal::StepMode, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
     REGISTER_GROUP_DATA,
 };
-
-struct Twin(Elem, Elem);
-
-struct Quad(Elem, Elem, Elem, Elem);
 
 pub(crate) struct SegmentProverImpl<H, C>
 where
@@ -173,40 +169,5 @@ where
 
         nvtx::range_pop!();
         Ok(seal)
-    }
-}
-
-impl From<Twin> for u32 {
-    fn from(value: Twin) -> Self {
-        let x0: u32 = value.0.into();
-        let x1: u32 = value.1.into();
-        x0 << 8 | x1
-    }
-}
-
-impl From<u32> for Twin {
-    fn from(value: u32) -> Self {
-        Self(Elem::new(value >> 8 & 0xff), Elem::new(value & 0xff))
-    }
-}
-
-impl From<Quad> for u32 {
-    fn from(value: Quad) -> Self {
-        let x0: u32 = value.0.into();
-        let x1: u32 = value.1.into();
-        let x2: u32 = value.2.into();
-        let x3: u32 = value.3.into();
-        x0 | x1 << 8 | x2 << 16 | x3 << 24
-    }
-}
-
-impl From<u32> for Quad {
-    fn from(value: u32) -> Self {
-        Self(
-            Elem::new(value & 0xff),
-            Elem::new(value >> 8 & 0xff),
-            Elem::new(value >> 16 & 0xff),
-            Elem::new(value >> 24 & 0xff),
-        )
     }
 }

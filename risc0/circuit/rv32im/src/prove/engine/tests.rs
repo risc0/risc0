@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use anyhow::Result;
+use cfg_if::cfg_if;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::{
     core::{digest::Digest, hash::sha::Sha256HashSuite},
     field::baby_bear::BabyBearElem,
-    hal::{cpu::CpuHal, Buffer, Hal},
+    hal::{cpu::CpuHal, Buffer as _, Hal},
     verify::VerificationError,
 };
 use risc0_zkvm_platform::PAGE_SIZE;
@@ -30,7 +33,7 @@ use crate::{
             exec::{execute, DEFAULT_SEGMENT_LIMIT_PO2},
             testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         },
-        hal::{cpu::CpuCircuitHal, StepMode},
+        hal::StepMode,
         segment_prover,
     },
     CIRCUIT,
@@ -70,17 +73,28 @@ fn fwd_rev_ab_test(program: Program) {
     )
     .unwrap();
 
-    let suite = Sha256HashSuite::new_suite();
-
-    let hal = CpuHal::new(suite);
-    let circuit_hal = CpuCircuitHal::new();
+    cfg_if! {
+        if #[cfg(feature = "cuda")] {
+            use risc0_zkp::hal::cuda::CudaHalSha256;
+            use crate::prove::hal::cuda::CudaCircuitHalSha256;
+            let hal = Rc::new(CudaHalSha256::new());
+            let circuit_hal = CudaCircuitHalSha256::new(hal.clone());
+        } else if #[cfg(feature = "metal")] {
+            // self::hal::metal::segment_prover()
+        } else {
+            use crate::prove::hal::cpu::CpuCircuitHal;
+            let suite = Sha256HashSuite::new_suite();
+            let hal = Rc::new(CpuHal::new(suite));
+            let circuit_hal = CpuCircuitHal::new();
+        }
+    }
 
     let segments = result.segments;
     for segment in segments {
         let trace = segment.preflight().unwrap();
         let io = segment.prepare_globals();
         let fwd_witgen = WitnessGenerator::new(
-            &hal,
+            hal.as_ref(),
             &circuit_hal,
             segment.po2,
             &io,
@@ -88,7 +102,7 @@ fn fwd_rev_ab_test(program: Program) {
             StepMode::SeqForward,
         );
         let rev_witgen = WitnessGenerator::new(
-            &hal,
+            hal.as_ref(),
             &circuit_hal,
             segment.po2,
             &io,
@@ -152,7 +166,7 @@ fn system_split() {
 }
 
 #[test]
-fn fwd_rev_ab() {
+fn fwd_rev_ab_basic() {
     fwd_rev_ab_test(testutil::basic());
 }
 

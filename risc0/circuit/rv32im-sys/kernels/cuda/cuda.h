@@ -45,7 +45,7 @@ private:
   cudaStream_t stream;
 
 public:
-  CudaStream() { cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking); }
+  CudaStream() { cudaStreamCreate(&stream); }
   ~CudaStream() { cudaStreamDestroy(stream); }
 
   inline operator cudaStream_t() const { return stream; }

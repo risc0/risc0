@@ -24,6 +24,7 @@
 #include <cuda_runtime.h>
 #include <stdexcept>
 #include <thrust/execution_policy.h>
+#include <thrust/host_vector.h>
 #include <thrust/sort.h>
 
 constexpr size_t kStepModeSeqParallel = 0;
@@ -55,7 +56,7 @@ struct HostContext {
     CUDA_OK(cudaMallocManaged(&ctx->trace, sizeof(PreflightTrace)));
     ctx->trace->isTrace = trace->isTrace;
 
-    // ctx->trace->numCycles = trace->numCycles;
+    ctx->trace->numCycles = trace->numCycles;
     // printf("numCycles: %u\n", trace->numCycles);
     CUDA_OK(cudaMalloc(&ctx->trace->cycles, trace->numCycles * sizeof(PreflightCycle)));
     CUDA_OK(cudaMemcpy(ctx->trace->cycles,
@@ -63,7 +64,7 @@ struct HostContext {
                        trace->numCycles * sizeof(PreflightCycle),
                        cudaMemcpyHostToDevice));
 
-    // ctx->trace->numTxns = trace->numTxns;
+    ctx->trace->numTxns = trace->numTxns;
     // printf("numTxns: %u\n", trace->numTxns);
     CUDA_OK(cudaMalloc(&ctx->trace->txns, trace->numTxns * sizeof(MemoryTransaction)));
     CUDA_OK(cudaMemcpy(ctx->trace->txns,
@@ -71,7 +72,7 @@ struct HostContext {
                        trace->numTxns * sizeof(MemoryTransaction),
                        cudaMemcpyHostToDevice));
 
-    // ctx->trace->numExtras = trace->numExtras;
+    ctx->trace->numExtras = trace->numExtras;
     // printf("numExtras: %u\n", trace->numExtras);
     CUDA_OK(cudaMalloc(&ctx->trace->extras, trace->numExtras * sizeof(uint32_t)));
     CUDA_OK(cudaMemcpy(ctx->trace->extras,
@@ -79,15 +80,17 @@ struct HostContext {
                        trace->numExtras * sizeof(uint32_t),
                        cudaMemcpyHostToDevice));
 
-    ctx->h_ramRows.resize(steps * kMaxRamRowsPerCycle);
     CUDA_OK(cudaMalloc(&ctx->ramRows, steps * kMaxRamRowsPerCycle * sizeof(RamArgumentRow)));
     CUDA_OK(cudaMemset(
         ctx->ramRows, kInvalidPattern, steps * kMaxRamRowsPerCycle * sizeof(RamArgumentRow)));
+
     CUDA_OK(cudaMalloc(&ctx->ramIndex, steps * sizeof(uint32_t)));
     CUDA_OK(cudaMemset(ctx->ramIndex, 0, steps * sizeof(uint32_t)));
+
     CUDA_OK(cudaMalloc(&ctx->pairs, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
     CUDA_OK(
         cudaMemset(ctx->pairs, kInvalidPattern, steps * kMaxBytePairsPerCycle * sizeof(uint32_t)));
+
     CUDA_OK(cudaMalloc(&ctx->pairsIndex, steps * sizeof(uint32_t)));
     CUDA_OK(cudaMemset(ctx->pairsIndex, 0, steps * sizeof(uint32_t)));
   }
@@ -114,25 +117,74 @@ __device__ uint8_t MachineContext::isParSafeVerifyMem(uint32_t cycle) const {
   return trace->cycles[cycle].isSafeVerifyMem;
 }
 
-__global__ void
-par_step_exec(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
+struct StepExec {
+  __host__ __device__ static const char* name() { return "step_exec"; }
+
+  __device__ static bool is_safe(MachineContext* ctx, uint32_t cycle) {
+    return ctx->isParSafeExec(cycle);
   }
 
-  if (cycle == 0 || ctx->isParSafeExec(cycle)) {
-    // printf("step_exec(%u)\n", cycle);
-    step_exec(ctx, steps, cycle++, arg0, arg1, arg2, nullptr, nullptr);
-    while (cycle < count && !ctx->isParSafeExec(cycle)) {
-      // printf("step_exec(%u)\n", cycle);
-      step_exec(ctx, steps, cycle++, arg0, arg1, arg2, nullptr, nullptr);
+  __device__ static void
+  step(MachineContext* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2) {
+    step_exec(ctx, steps, cycle, arg0, arg1, arg2, nullptr, nullptr);
+  }
+};
+
+struct StepVerifyMem {
+  __host__ __device__ static const char* name() { return "step_verify_mem"; }
+
+  __device__ static bool is_safe(MachineContext* ctx, uint32_t cycle) {
+    return ctx->isParSafeVerifyMem(cycle);
+  }
+
+  __device__ static void
+  step(MachineContext* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2) {
+    step_verify_mem(ctx, steps, cycle, arg0, arg1, arg2, nullptr, nullptr);
+  }
+};
+
+struct StepVerifyBytes {
+  __host__ __device__ static const char* name() { return "step_verify_bytes"; }
+
+  __device__ static bool is_safe(MachineContext* ctx, uint32_t cycle) { return true; }
+
+  __device__ static void
+  step(MachineContext* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2) {
+    step_verify_bytes(ctx, steps, cycle, arg0, arg1, arg2, nullptr, nullptr);
+  }
+};
+
+template <typename Stage>
+__device__ void next_step(MachineContext* ctx,
+                          uint32_t steps,
+                          uint32_t count,
+                          uint32_t cycle,
+                          Fp* arg0,
+                          Fp* arg1,
+                          Fp* arg2) {
+  if (cycle == 0 || Stage::is_safe(ctx, cycle)) {
+    // printf("%s(%u)\n", Stage::name(), cycle);
+    Stage::step(ctx, steps, cycle++, arg0, arg1, arg2);
+    while (cycle < count && !Stage::is_safe(ctx, cycle)) {
+      // printf("next, %s(%u)\n", Stage::name(), cycle);
+      Stage::step(ctx, steps, cycle++, arg0, arg1, arg2);
     }
   }
 }
 
+template <typename Stage>
 __global__ void
-fwd_step_exec(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
+par_step(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= count) {
+    return;
+  }
+  next_step<Stage>(ctx, steps, count, cycle, arg0, arg1, arg2);
+}
+
+template <typename Stage>
+__global__ void
+fwd_step(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
@@ -140,14 +192,14 @@ fwd_step_exec(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp*
 
   if (cycle == 0) {
     while (cycle < count) {
-      // printf("step_exec(%u)\n", cycle);
-      step_exec(ctx, steps, cycle++, arg0, arg1, arg2, nullptr, nullptr);
+      Stage::step(ctx, steps, cycle++, arg0, arg1, arg2);
     }
   }
 }
 
+template <typename Stage>
 __global__ void
-rev_step_exec(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
+rev_step(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
@@ -156,29 +208,7 @@ rev_step_exec(MachineContext* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp*
   if (cycle == count - 1) {
     for (uint32_t i = 0; i < count; i++) {
       uint32_t cycle = count - i - 1;
-
-      // printf("step_exec(%u)\n", cycle);
-      step_exec(ctx, steps, cycle++, arg0, arg1, arg2, nullptr, nullptr);
-      while (cycle < count && !ctx->isParSafeExec(cycle)) {
-        // printf("step_exec(%u)\n", cycle);
-        step_exec(ctx, steps, cycle++, arg0, arg1, arg2, nullptr, nullptr);
-      }
-    }
-  }
-}
-
-__global__ void par_step_verify_mem(
-    MachineContext* ctx, uint32_t steps, uint32_t count, Fp* ctrl, Fp* io, Fp* data) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
-
-  if (cycle == 0 || ctx->isParSafeVerifyMem(cycle)) {
-    // printf("step_verify_mem(%u)\n", cycle);
-    step_verify_mem(ctx, steps, cycle++, ctrl, io, data, nullptr, nullptr);
-    while (cycle < count && !ctx->isParSafeVerifyMem(cycle)) {
-      step_verify_mem(ctx, steps, cycle++, ctrl, io, data, nullptr, nullptr);
+      next_step<Stage>(ctx, steps, count, cycle, arg0, arg1, arg2);
     }
   }
 }
@@ -192,6 +222,8 @@ void MachineContext::sortRam() {
   }
 
   {
+    thrust::host_vector<RamArgumentRow> h_ramRows(steps * kMaxRamRowsPerCycle);
+
     nvtx3::scoped_range range("dirty");
     CUDA_OK(cudaMemcpy(h_ramRows.data(),
                        ramRows,
@@ -223,7 +255,7 @@ void MachineContext::sortRam() {
 
   {
     nvtx3::scoped_range range("scan");
-    thrust::exclusive_scan(thrust::device, ramIndex, ramIndex + steps, ramIndex, 0);
+    thrust::exclusive_scan(thrust::device, ramIndex, ramIndex + steps, ramIndex);
   }
 }
 
@@ -235,7 +267,7 @@ __global__ void inject_backs_ram(MachineContext* ctx, uint32_t steps, uint32_t c
 
   uint8_t kind = ctx->isParSafeVerifyMem(cycle);
   if (cycle > 2 && kind) {
-    size_t idx = ctx->ramIndex[cycle];
+    uint32_t idx = ctx->ramIndex[cycle];
     assert(idx != 0);
 
     const RamArgumentRow& back1 = ctx->ramRows[idx - 1];
@@ -282,7 +314,7 @@ void MachineContext::sortBytes() {
 
   {
     nvtx3::scoped_range range("scan");
-    thrust::exclusive_scan(thrust::device, pairsIndex, pairsIndex + steps, pairsIndex, 0);
+    thrust::exclusive_scan(thrust::device, pairsIndex, pairsIndex + steps, pairsIndex);
   }
 }
 
@@ -293,38 +325,45 @@ __global__ void inject_backs_bytes(MachineContext* ctx, size_t steps, size_t cou
   }
 
   uint32_t idx = ctx->pairsIndex[cycle];
-  uint32_t writeCount = idx - ctx->pairsIndex[cycle - 1];
-  // printf("inject> cycle: %u, writeCount: %lu\n", cycle, writeCount);
-  if (writeCount) {
-    uint32_t pair = ctx->pairs[idx - 1];
-    // printf("inject> pair: %x\n", pair);
-    data[0 * steps + cycle - 1] = pair >> 8 & 0xff;
-    data[1 * steps + cycle - 1] = pair & 0xff;
+  uint32_t pair;
+  if (idx) {
+    pair = ctx->pairs[idx - 1];
+  } else {
+    pair = 0;
   }
+  // printf("inject_backs_bytes[%u]> 0x%x\n", cycle, pair);
+  data[0 * steps + cycle - 1] = pair >> 8 & 0xff;
+  data[1 * steps + cycle - 1] = pair & 0xff;
 }
 
-void do_step_exec(CudaStream& stream,
-                  LaunchConfig& cfg,
-                  MachineContext* ctx,
-                  uint32_t mode,
-                  uint32_t last_cycle,
-                  Fp* ctrl,
-                  Fp* io,
-                  Fp* data) {
-  // printf("step_exec\n");
-  nvtx3::scoped_range range("step_exec");
+template <typename Stage>
+void run_stage(CudaStream& stream,
+               LaunchConfig& cfg,
+               MachineContext* ctx,
+               uint32_t mode,
+               uint32_t last_cycle,
+               Fp* ctrl,
+               Fp* io,
+               Fp* data) {
+  // printf("%s\n", stage);
+  nvtx3::scoped_range range(Stage::name());
   switch (mode) {
   case kStepModeSeqParallel: {
-    par_step_exec<<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
+    par_step<Stage>
+        <<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
+    CUDA_OK(cudaStreamSynchronize(stream));
   } break;
   case kStepModeSeqForward: {
-    fwd_step_exec<<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
+    fwd_step<Stage>
+        <<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
+    CUDA_OK(cudaStreamSynchronize(stream));
   } break;
   case kStepModeSeqReverse: {
-    rev_step_exec<<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
+    rev_step<Stage>
+        <<<cfg.grid, cfg.block, 0, stream>>>(ctx, ctx->steps, last_cycle, ctrl, io, data);
+    CUDA_OK(cudaStreamSynchronize(stream));
   } break;
   }
-  CUDA_OK(cudaStreamSynchronize(stream));
 }
 
 extern "C" {
@@ -347,7 +386,7 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
     CudaStream stream;
     LaunchConfig cfg = getSimpleConfig(last_cycle);
 
-    do_step_exec(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
+    run_stage<StepExec>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
 
     {
       nvtx3::scoped_range range("verify_ram");
@@ -360,13 +399,7 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
         CUDA_OK(cudaStreamSynchronize(stream));
       }
 
-      {
-        // printf("step_verify_mem\n");
-        nvtx3::scoped_range range("step_verify_mem");
-        par_step_verify_mem<<<cfg.grid, cfg.block, 0, stream>>>(
-            ctx.ctx, steps, last_cycle, ctrl, io, data);
-        CUDA_OK(cudaStreamSynchronize(stream));
-      }
+      run_stage<StepVerifyMem>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
     }
 
     {
@@ -380,15 +413,8 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
         CUDA_OK(cudaStreamSynchronize(stream));
       }
 
-      {
-        // printf("step_verify_bytes\n");
-        nvtx3::scoped_range range("step_verify_bytes");
-        step_verify_bytes<<<cfg.grid, cfg.block, 0, stream>>>(
-            ctx.ctx, steps, last_cycle, ctrl, io, data, nullptr, nullptr);
-        CUDA_OK(cudaStreamSynchronize(stream));
-      }
+      run_stage<StepVerifyBytes>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
     }
-
   } catch (const std::runtime_error& err) {
     return strdup(err.what());
   }

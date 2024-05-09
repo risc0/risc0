@@ -18,7 +18,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <thrust/host_vector.h>
 #include <thrust/tuple.h>
 
 constexpr size_t kBabyBearExtSize = 4;
@@ -73,7 +72,6 @@ struct MachineContext {
   PreflightTrace* trace;
   size_t steps;
 
-  thrust::host_vector<RamArgumentRow> h_ramRows;
   RamArgumentRow* ramRows;
   uint32_t* ramIndex;
 

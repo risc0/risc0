@@ -24,13 +24,13 @@ extern __constant__ FpExt poly_mix[210];
 __device__ bool is_exec_par_safe(void* ctx, uint32_t cycle);
 
 __device__ void step_exec(
-    void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
 __device__ void step_verify_mem(
-    void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
-__global__ void step_verify_bytes(
-    void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
+__device__ void step_verify_bytes(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
 __global__ void step_compute_accum(
     void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
