@@ -75,15 +75,17 @@ impl Drop for Error {
     }
 }
 
-impl Error {
-    pub fn new() -> Self {
+impl Default for Error {
+    fn default() -> Self {
         Self {
             msg: std::ptr::null(),
         }
     }
+}
 
+impl Error {
     pub fn unwrap(self) {
-        if self.msg != std::ptr::null() {
+        if !self.msg.is_null() {
             let c_str = unsafe { std::ffi::CStr::from_ptr(self.msg) };
             panic!("{}", c_str.to_str().unwrap_or("unknown error"));
         }

@@ -32,6 +32,7 @@ pub(crate) enum StepMode {
 }
 
 pub(crate) trait CircuitWitnessGenerator<H: Hal> {
+    #[allow(clippy::too_many_arguments)]
     fn generate_witness(
         &self,
         _mode: StepMode,

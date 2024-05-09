@@ -443,8 +443,7 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, item_size) };
         let host_buf = device_slice.as_host_vec().unwrap();
         let slice: &[T] = unchecked_cast(&host_buf);
-        let item = slice[0].clone();
-        item
+        slice[0].clone()
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
