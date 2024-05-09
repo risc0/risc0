@@ -8,7 +8,7 @@ The [RISC Zero Foundry Template][foundry-template] provides a minimal applicatio
 
 ### Steel
 
-[Steel] is a library for [view call proofs], which enables users to easily integrate claims about Ethereum state into zkVM applications.
+[Steel][steel-repo] is a library for [view call proofs][steel-blog], which enables users to easily integrate claims about Ethereum state into zkVM applications.
 
 ### Zeth
 
