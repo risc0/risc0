@@ -3,6 +3,7 @@
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@risc0/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from "@risc0/ui/dropdown-menu";
+import { joinWords } from "@risc0/ui/utils/join-words";
 import type { Table } from "@tanstack/react-table";
 import { Settings2Icon } from "lucide-react";
 
@@ -25,11 +26,11 @@ export function TableViewOptions<TData>({ table }: TableViewOptionsProps<TData>)
           .map((column) => (
             <DropdownMenuCheckboxItem
               key={column.id}
-              className="cursor-pointer"
+              className="cursor-pointer capitalize"
               checked={column.getIsVisible()}
               onCheckedChange={(value) => column.toggleVisibility(!!value)}
             >
-              {column.id}
+              {joinWords(column.id)}
             </DropdownMenuCheckboxItem>
           ))}
       </DropdownMenuContent>

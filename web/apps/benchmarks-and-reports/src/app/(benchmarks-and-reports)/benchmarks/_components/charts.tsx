@@ -5,6 +5,7 @@ import { useMounted } from "@risc0/ui/hooks/use-mounted";
 import { Separator } from "@risc0/ui/separator";
 import { Skeleton } from "@risc0/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
+import { joinWords } from "@risc0/ui/utils/join-words";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { Fragment, useEffect, useState } from "react";
@@ -97,8 +98,8 @@ export function Charts() {
           <div className="flex items-center overflow-auto">
             <TabsList>
               {names.map((name) => (
-                <TabsTrigger key={name} value={name}>
-                  {name}
+                <TabsTrigger className="capitalize" key={name} value={name}>
+                  {joinWords(name)}
                 </TabsTrigger>
               ))}
             </TabsList>
