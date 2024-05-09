@@ -2,6 +2,7 @@
 
 import { TooltipProvider } from "@risc0/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "next-themes";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "../toaster/toaster";
@@ -13,6 +14,7 @@ export function Providers({ children }: PropsWithChildren) {
       <TooltipProvider>{children}</TooltipProvider>
       <Toaster visibleToasts={3} richColors duration={8000} />
       <Analytics />
+      <SpeedInsights />
     </ThemeProvider>
   );
 }
