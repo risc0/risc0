@@ -48,7 +48,6 @@ pub struct Risczero {
     pub command: RisczeroCmd,
 }
 
-#[non_exhaustive]
 #[derive(Subcommand)]
 /// Primary commands  of `cargo risczero`.
 pub enum RisczeroCmd {
