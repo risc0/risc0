@@ -1,6 +1,8 @@
+import Link from "next/link";
+
 export const FILENAMES_TO_TITLES = {
   "macOS-apple_m2_pro.csv": "Metal on Apple M2 Pro",
-  "Linux-nvidia_rtx_a5000.csv": "CUDA on NVIDIA RTX A5000",
+  "Linux-nvidia_rtx_a5000.csv": "CUDA on NVIDIA RTX 3090 Ti",
   "macOS-cpu.csv": "CPU only on Apple M2 Pro",
-  "Linux-cpu.csv": "CPU only on TBD [Linux]",
+  "Linux-cpu.csv": "CPU only on c6i.8xlarge",
 } as const;

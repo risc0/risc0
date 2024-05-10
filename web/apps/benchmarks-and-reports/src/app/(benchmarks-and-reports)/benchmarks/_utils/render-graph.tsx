@@ -118,7 +118,7 @@ export function renderGraph({
   };
 
   return (
-    <div className="relative w-full min-h-80">
+    <div className="relative min-h-80 w-full">
       <Chart id={`${platformName}-${benchName}`} type="line" data={data} options={options} />
     </div>
   );

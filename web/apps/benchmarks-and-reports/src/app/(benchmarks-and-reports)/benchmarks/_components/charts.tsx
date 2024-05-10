@@ -4,7 +4,7 @@ import { Button } from "@risc0/ui/button";
 import { useMounted } from "@risc0/ui/hooks/use-mounted";
 import { Separator } from "@risc0/ui/separator";
 import { Skeleton } from "@risc0/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsOverflowWrapper, TabsTrigger } from "@risc0/ui/tabs";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
@@ -95,13 +95,15 @@ export function Charts() {
           defaultValue={names[0]}
           className="mt-6"
         >
-          <TabsList>
-            {names.map((name) => (
-              <TabsTrigger className="capitalize" key={name} value={name}>
-                {joinWords(name)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <TabsOverflowWrapper>
+            <TabsList>
+              {names.map((name) => (
+                <TabsTrigger className="capitalize" key={name} value={name}>
+                  {joinWords(name)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </TabsOverflowWrapper>
 
           <div className="mt-4 flex flex-row gap-8">
             <div className="sticky top-6 hidden min-w-[240px] self-start lg:block">
