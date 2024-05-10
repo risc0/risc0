@@ -104,7 +104,7 @@ fn basic() {
 
     let suite = Sha256HashSuite::new_suite();
     let hal = CpuHal::new(suite.clone());
-    let checker = ControlCheck::new(&hal, segment.po2);
+    let checker = ControlCheck::new(&*hal, segment.po2);
     risc0_zkp::verify::verify(&CIRCUIT, &suite, &seal, |x, y| checker.check_ctrl(x, y)).unwrap();
 }
 
@@ -129,7 +129,7 @@ fn system_split() {
     let segments = result.segments;
     for segment in segments {
         let seal = prover.prove_segment(&segment).unwrap();
-        let checker = ControlCheck::new(&hal, segment.po2);
+        let checker = ControlCheck::new(&*hal, segment.po2);
         risc0_zkp::verify::verify(&CIRCUIT, &suite, &seal, |x, y| checker.check_ctrl(x, y))
             .unwrap();
     }

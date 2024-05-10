@@ -19,7 +19,7 @@ use tracing::debug;
 
 use crate::{
     core::digest::Digest,
-    hal::{AnyBuffer, Buffer, Hal},
+    hal::{Buffer, Hal},
     merkle::MerkleTreeParams,
     prove::write_iop::WriteIOP,
 };
@@ -183,9 +183,9 @@ mod tests {
 
     fn bad_row_access(suite: HashSuite<BabyBear>, rows: usize, cols: usize, queries: usize) {
         let hal = CpuHal::new(suite);
-        let prover = init_prover(&hal, rows, cols, queries);
+        let prover = init_prover(&*hal, rows, cols, queries);
         let mut iop = WriteIOP::new(hal.get_hash_suite().rng.as_ref());
-        prover.prove(&hal, &mut iop, rows);
+        prover.prove(&*hal, &mut iop, rows);
     }
 
     fn bad_row_access_all(rows: usize, cols: usize, queries: usize) {
@@ -205,13 +205,13 @@ mod tests {
         let hal = CpuHal::new(suite);
         let hashfn = hal.get_hash_suite().hashfn.as_ref();
         let rng = hal.get_hash_suite().rng.as_ref();
-        let prover = init_prover(&hal, rows, cols, queries);
+        let prover = init_prover(&*hal, rows, cols, queries);
 
         let mut iop = WriteIOP::new(rng);
         prover.commit(&mut iop);
         for _query in 0..queries {
             let r_idx = iop.rng.random_bits(log2_ceil(rows)) as usize;
-            let col = prover.prove(&hal, &mut iop, r_idx);
+            let col = prover.prove(&*hal, &mut iop, r_idx);
             for c_idx in 0..cols {
                 assert_eq!(
                     col[c_idx],

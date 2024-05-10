@@ -106,7 +106,7 @@ pub mod testutil {
             baby_bear::{BabyBearElem, BabyBearExtElem},
             Elem, ExtElem,
         },
-        hal::{AnyBuffer, Buffer, CircuitHal, Hal},
+        hal::{Buffer, CircuitHal, Hal},
         INV_RATE,
     };
 

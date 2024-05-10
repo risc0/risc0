@@ -29,7 +29,7 @@ pub fn eval_check(c: &mut Criterion) {
         let circuit_hal = CpuCircuitHal::new();
         group.bench_function(BenchmarkId::new("cpu", po2), |b| {
             b.iter(|| {
-                eval_check_impl(&params, &hal, &circuit_hal);
+                eval_check_impl(&params, &*hal, &circuit_hal);
             });
         });
     }
@@ -37,12 +37,12 @@ pub fn eval_check(c: &mut Criterion) {
     #[cfg(feature = "cuda")]
     for po2 in [2, 8, 16, 20, 21].iter() {
         let params = EvalCheckParams::new(*po2);
-        let hal = std::rc::Rc::new(risc0_zkp::hal::cuda::CudaHalSha256::new());
+        let hal = risc0_zkp::hal::cuda::CudaHalSha256::new();
         let circuit_hal =
             risc0_circuit_rv32im::prove::hal::cuda::CudaCircuitHalSha256::new(hal.clone());
         group.bench_function(BenchmarkId::new("cuda", po2), |b| {
             b.iter(|| {
-                eval_check_impl(&params, hal.as_ref(), &circuit_hal);
+                eval_check_impl(&params, &*hal, &circuit_hal);
             });
         });
     }
@@ -56,7 +56,7 @@ pub fn eval_check(c: &mut Criterion) {
         >::new(hal.clone());
         group.bench_function(BenchmarkId::new("metal", po2), |b| {
             b.iter(|| {
-                eval_check_impl(&params, hal.as_ref(), &circuit_hal);
+                eval_check_impl(&params, &*hal, &circuit_hal);
             });
         });
     }

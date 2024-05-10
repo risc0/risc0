@@ -26,7 +26,7 @@ use risc0_zkp::{
             prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHalSha256, CudaHash,
             CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
         },
-        AnyBuffer, CircuitHal, Hal,
+        Buffer, CircuitHal, Hal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -224,15 +224,13 @@ pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
 pub fn get_segment_prover() -> Box<dyn SegmentProver> {
-    let hal = Rc::new(CudaHalSha256::new());
+    let hal = CudaHalSha256::new();
     let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
     Box::new(SegmentProverImpl::new(hal, circuit_hal))
 }
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
-
     use risc0_core::field::baby_bear::BabyBear;
     use risc0_zkp::{
         core::hash::sha::Sha256HashSuite,
@@ -245,16 +243,10 @@ mod tests {
     #[test]
     fn eval_check() {
         const PO2: usize = 4;
-        let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let cpu_hal = CpuHal::<BabyBear>::new(Sha256HashSuite::new_suite());
         let cpu_eval = CpuCircuitHal::new();
-        let gpu_hal = Rc::new(CudaHalSha256::new());
+        let gpu_hal = CudaHalSha256::new();
         let gpu_eval = super::CudaCircuitHal::new(gpu_hal.clone());
-        crate::prove::hal::testutil::eval_check(
-            &cpu_hal,
-            cpu_eval,
-            gpu_hal.as_ref(),
-            gpu_eval,
-            PO2,
-        );
+        crate::prove::hal::testutil::eval_check(&*cpu_hal, cpu_eval, &*gpu_hal, gpu_eval, PO2);
     }
 }

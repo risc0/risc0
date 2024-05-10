@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{marker::PhantomData, rc::Rc};
+use std::{
+    marker::PhantomData,
+    rc::{Rc, Weak},
+};
 
 use risc0_core::field::Field;
 
-use super::{AnyBuffer, Buffer, BufferElem, CircuitHal, Hal};
+use super::{Buffer, BufferElem, CircuitHal, Hal};
 use crate::core::{digest::Digest, hash::HashSuite};
 
 #[derive(Clone)]
@@ -41,7 +44,7 @@ where
         Self {
             lhs,
             rhs,
-            phantom: PhantomData,
+            phantom: PhantomData::default(),
         }
     }
 
@@ -79,14 +82,7 @@ where
     fn get_at(&self, idx: usize) -> T {
         self.lhs.get_at(idx)
     }
-}
 
-impl<T, L, R> AnyBuffer<T> for BufferImpl<T, L, R>
-where
-    T: BufferElem,
-    L: Buffer<T>,
-    R: Buffer<T>,
-{
     fn name(&self) -> &'static str {
         "dual"
     }
@@ -114,6 +110,7 @@ where
 {
     lhs: Rc<L>,
     rhs: Rc<R>,
+    rc: Weak<Self>,
 }
 
 impl<F, L, R> DualHal<F, L, R>
@@ -121,8 +118,12 @@ where
     L: Hal<Field = F>,
     R: Hal<Field = F>,
 {
-    pub fn new(lhs: Rc<L>, rhs: Rc<R>) -> Self {
-        Self { lhs, rhs }
+    pub fn new(lhs: Rc<L>, rhs: Rc<R>) -> Rc<Self> {
+        Rc::new_cyclic(|rc| Self {
+            lhs,
+            rhs,
+            rc: rc.clone(),
+        })
     }
 }
 
@@ -132,6 +133,10 @@ where
     L: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
     R: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
 {
+    fn as_rc(&self) -> Rc<Self> {
+        self.rc.upgrade().unwrap()
+    }
+
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
@@ -382,3 +387,46 @@ where
         todo!()
     }
 }
+
+/*pub struct EltwiseImp<'a, H: Hal> {
+    hal: &'a H,
+}
+
+impl<
+        'a,
+        F: Field,
+        L: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
+        R: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
+    > Eltwise<F> for EltwiseImp<'a, DualHal<F, L, R>>
+{
+    fn eltwise_add_elem(
+        &self,
+        output: &dyn Buffer<F::Elem>,
+        input1: &dyn Buffer<F::Elem>,
+        input2: &dyn Buffer<F::Elem>,
+    ) {
+        let output = self.hal.get_buffer(output);
+        let input1 = self.hal.get_buffer(input1);
+        let input2 = self.hal.get_buffer(input2);
+
+        let lhs_eltwise = self.hal.lhs.get_interface::<dyn Eltwise<F>>();
+        let rhs_eltwise = self.hal.rhs.get_interface::<dyn Eltwise<F>>();
+
+        lhs_eltwise.eltwise_add_elem(&output.lhs, &input1.lhs, &input2.lhs);
+        rhs_eltwise.eltwise_add_elem(&output.rhs, &input1.rhs, &input2.rhs);
+        output.assert_eq();
+    }
+
+    fn eltwise_sum_extelem(&self, output: &dyn Buffer<F::Elem>, input: &dyn Buffer<F::ExtElem>) {
+        let output = self.hal.get_buffer(output);
+        let input = self.hal.get_buffer(input);
+
+        let lhs_eltwise = self.hal.lhs.get_interface::<dyn Eltwise<F>>();
+        let rhs_eltwise = self.hal.rhs.get_interface::<dyn Eltwise<F>>();
+
+        lhs_eltwise.eltwise_sum_extelem(&output.lhs, &input.lhs);
+        rhs_eltwise.eltwise_sum_extelem(&output.rhs, &input.rhs);
+        output.assert_eq();
+    }
+}
+*/

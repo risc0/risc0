@@ -14,7 +14,13 @@
 
 //! CPU implementation of the HAL.
 
-use std::{fmt::Debug, ops::Range, sync::Arc};
+use std::{
+    any::Any,
+    fmt::Debug,
+    ops::Range,
+    rc::{Rc, Weak},
+    sync::Arc,
+};
 
 use parking_lot::{
     MappedRwLockReadGuard, MappedRwLockWriteGuard, RwLock, RwLockReadGuard, RwLockWriteGuard,
@@ -22,7 +28,7 @@ use parking_lot::{
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use super::{tracker, AnyBuffer, Buffer, BufferElem, Hal};
+use super::{tracker, Buffer, BufferElem, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -35,11 +41,15 @@ use crate::{
 
 pub struct CpuHal<F: Field> {
     suite: HashSuite<F>,
+    rc: Weak<Self>,
 }
 
 impl<F: Field> CpuHal<F> {
-    pub fn new(suite: HashSuite<F>) -> Self {
-        Self { suite }
+    pub fn new(suite: HashSuite<F>) -> Rc<Self> {
+        Rc::new_cyclic(|rc| Self {
+            suite,
+            rc: rc.clone(),
+        })
     }
 }
 
@@ -98,6 +108,9 @@ enum SyncSliceRef<'a, T: Default + Clone> {
     FromSlice {
         _inner: &'a SyncSlice<'a, T>,
     },
+    FromResource {
+        _inner: Box<dyn Any>,
+    },
 }
 
 /// A buffer which can be used across multiple threads.  Users are
@@ -137,6 +150,14 @@ impl<'a, T: Default + Clone> SyncSlice<'a, T> {
             ptr,
             size,
             _buf: SyncSliceRef::FromBuf { _inner: buf },
+        }
+    }
+
+    pub unsafe fn from_resource(ptr: *mut T, size: usize, resource: Box<dyn Any>) -> Self {
+        SyncSlice {
+            ptr,
+            size,
+            _buf: SyncSliceRef::FromResource { _inner: resource },
         }
     }
 
@@ -233,7 +254,7 @@ impl<T: Default + Clone> From<Vec<T>> for CpuBuffer<T> {
     }
 }
 
-impl<T: BufferElem> AnyBuffer<T> for CpuBuffer<T> {
+impl<T: BufferElem> Buffer<T> for CpuBuffer<T> {
     fn name(&self) -> &'static str {
         self.name
     }
@@ -249,9 +270,7 @@ impl<T: BufferElem> AnyBuffer<T> for CpuBuffer<T> {
     fn size(&self) -> usize {
         self.region.size()
     }
-}
 
-impl<T: BufferElem> Buffer<T> for CpuBuffer<T> {
     fn slice(&self, offset: usize, size: usize) -> CpuBuffer<T> {
         assert!(offset + size <= self.size());
         let region = Region(self.region.offset() + offset, size);
@@ -283,6 +302,10 @@ impl<F: Field + 'static> Hal for CpuHal<F> {
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
     type Buffer<T: BufferElem> = CpuBuffer<T>;
+
+    fn as_rc(&self) -> Rc<Self> {
+        self.rc.upgrade().unwrap()
+    }
 
     fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T> {
         CpuBuffer::new(name, size)
@@ -570,7 +593,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_req() {
-        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let hal = CpuHal::<BabyBear>::new(Sha256HashSuite::new_suite());
         let a = hal.alloc("a", 10);
         let b = hal.alloc("b", 20);
         let eltwise = hal.get_interface::<dyn Eltwise<BabyBear>>();
@@ -579,7 +602,7 @@ mod tests {
 
     #[test]
     fn fp() {
-        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let hal = CpuHal::<BabyBear>::new(Sha256HashSuite::new_suite());
         let eltwise = hal.get_interface::<dyn Eltwise<BabyBear>>();
         const COUNT: usize = 1024 * 1024;
         test_binary(
@@ -592,7 +615,7 @@ mod tests {
         );
     }
 
-    fn test_binary<H, HF, CF>(hal: &H, hal_fn: HF, cpu_fn: CF, count: usize)
+    fn test_binary<H, HF, CF>(hal: &Rc<H>, hal_fn: HF, cpu_fn: CF, count: usize)
     where
         H: Hal,
         HF: Fn(&H::Buffer<H::Elem>, &H::Buffer<H::Elem>, &H::Buffer<H::Elem>),
@@ -621,7 +644,7 @@ mod tests {
     }
 
     fn do_hash_rows(rows: usize, cols: usize, expected: &[&str]) {
-        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let hal = CpuHal::<BabyBear>::new(Sha256HashSuite::new_suite());
         let matrix_size = rows * cols;
         let matrix = hal.alloc("matrix", matrix_size);
         let output = hal.alloc("output", rows);
@@ -645,7 +668,7 @@ mod tests {
 
     #[test]
     fn prefix_products() {
-        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let hal = CpuHal::<BabyBear>::new(Sha256HashSuite::new_suite());
         let io = vec![BabyBearExtElem::from_u32(2); 4];
         let io = hal.copy_from("io", &io);
         hal.prefix_products(&io);

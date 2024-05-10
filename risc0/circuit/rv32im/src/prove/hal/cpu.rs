@@ -159,7 +159,7 @@ where
 
 pub fn get_segment_prover() -> Box<dyn SegmentProver> {
     let suite = Sha256HashSuite::new_suite();
-    let hal = Rc::new(CpuHal::new(suite.clone()));
+    let hal = CpuHal::new(suite.clone());
     let circuit_hal = Rc::new(CpuCircuitHal::new());
     Box::new(SegmentProverImpl::new(hal, circuit_hal))
 }

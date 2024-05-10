@@ -1,15 +1,14 @@
-use std::rc::Rc;
-
 use super::{
     cuda::{CudaHal, CudaHash},
     eltwise::Eltwise,
-    AnyBuffer, Hal,
+    Buffer, Hal,
 };
 use cust::prelude::*;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     ExtElem,
 };
+use std::rc::Rc;
 
 struct EltwiseImp<H: Hal> {
     hal: Rc<H>,
@@ -20,9 +19,9 @@ impl<CH: CudaHash> Eltwise<BabyBear> for EltwiseImp<CudaHal<CH>> {
     #[tracing::instrument(skip_all)]
     fn eltwise_add_elem(
         &self,
-        output: &dyn AnyBuffer<BabyBearElem>,
-        input1: &dyn AnyBuffer<BabyBearElem>,
-        input2: &dyn AnyBuffer<BabyBearElem>,
+        output: &dyn Buffer<BabyBearElem>,
+        input1: &dyn Buffer<BabyBearElem>,
+        input2: &dyn Buffer<BabyBearElem>,
     ) {
         let output = self.hal.get_buffer(output);
         let input1 = self.hal.get_buffer(input1);
@@ -50,8 +49,8 @@ impl<CH: CudaHash> Eltwise<BabyBear> for EltwiseImp<CudaHal<CH>> {
     #[tracing::instrument(skip_all)]
     fn eltwise_sum_extelem(
         &self,
-        output: &dyn AnyBuffer<BabyBearElem>,
-        input: &dyn AnyBuffer<BabyBearExtElem>,
+        output: &dyn Buffer<BabyBearElem>,
+        input: &dyn Buffer<BabyBearExtElem>,
     ) {
         let output = self.hal.get_buffer(output);
         let input = self.hal.get_buffer(input);

@@ -239,19 +239,19 @@ mod cuda {
     use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
-        let hal = Rc::new(CudaHalSha256::new());
+        let hal = CudaHalSha256::new();
         let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
     pub fn poseidon_hal_pair() -> HalPair<CudaHalPoseidon, CudaCircuitHalPoseidon> {
-        let hal = Rc::new(CudaHalPoseidon::new());
+        let hal = CudaHalPoseidon::new();
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
     pub fn poseidon2_hal_pair() -> HalPair<CudaHalPoseidon2, CudaCircuitHalPoseidon2> {
-        let hal = Rc::new(CudaHalPoseidon2::new());
+        let hal = CudaHalPoseidon2::new();
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
@@ -296,21 +296,21 @@ mod cpu {
 
     #[allow(dead_code)]
     pub fn sha256_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-        let hal = Rc::new(CpuHal::new(Sha256HashSuite::new_suite()));
+        let hal = CpuHal::new(Sha256HashSuite::new_suite());
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
 
     #[allow(dead_code)]
     pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new_suite()));
+        let hal = CpuHal::new(PoseidonHashSuite::new_suite());
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
 
     #[allow(dead_code)]
     pub fn poseidon2_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-        let hal = Rc::new(CpuHal::new(Poseidon2HashSuite::new_suite()));
+        let hal = CpuHal::new(Poseidon2HashSuite::new_suite());
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
@@ -318,7 +318,7 @@ mod cpu {
     #[allow(dead_code)]
     pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
     {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
+        let hal = CpuHal::new(Poseidon254HashSuite::new_suite());
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }

@@ -1,35 +1,31 @@
-use super::{cpu::CpuHal, AnyBuffer, Hal, Registration};
+use super::{cpu::CpuHal, Buffer, Hal, Registration};
 use linkme::distributed_slice;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
 use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
-use std::marker::PhantomData;
+use std::rc::Rc;
 
 pub trait Eltwise<F: Field> {
     fn eltwise_add_elem(
         &self,
-        out: &dyn AnyBuffer<F::Elem>,
-        a: &dyn AnyBuffer<F::Elem>,
-        b: &dyn AnyBuffer<F::Elem>,
+        out: &dyn Buffer<F::Elem>,
+        a: &dyn Buffer<F::Elem>,
+        b: &dyn Buffer<F::Elem>,
     );
-    fn eltwise_sum_extelem(
-        &self,
-        output: &dyn AnyBuffer<F::Elem>,
-        input: &dyn AnyBuffer<F::ExtElem>,
-    );
+    fn eltwise_sum_extelem(&self, output: &dyn Buffer<F::Elem>, input: &dyn Buffer<F::ExtElem>);
 }
 
 struct EltwiseImp<H: Hal> {
-    phantom: PhantomData<H>,
+    _hal: Rc<H>,
 }
 
 impl<F: Field> Eltwise<F> for EltwiseImp<CpuHal<F>> {
     #[tracing::instrument(skip_all)]
     fn eltwise_add_elem(
         &self,
-        output: &dyn AnyBuffer<F::Elem>,
-        input1: &dyn AnyBuffer<F::Elem>,
-        input2: &dyn AnyBuffer<F::Elem>,
+        output: &dyn Buffer<F::Elem>,
+        input1: &dyn Buffer<F::Elem>,
+        input2: &dyn Buffer<F::Elem>,
     ) {
         assert_eq!(output.size(), input1.size());
         assert_eq!(output.size(), input2.size());
@@ -44,11 +40,7 @@ impl<F: Field> Eltwise<F> for EltwiseImp<CpuHal<F>> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn eltwise_sum_extelem(
-        &self,
-        output: &dyn AnyBuffer<F::Elem>,
-        input: &dyn AnyBuffer<F::ExtElem>,
-    ) {
+    fn eltwise_sum_extelem(&self, output: &dyn Buffer<F::Elem>, input: &dyn Buffer<F::ExtElem>) {
         let mut output = output.as_sync_slice();
         let input = input.as_sync_slice();
 
@@ -76,8 +68,6 @@ impl<F: Field> Eltwise<F> for EltwiseImp<CpuHal<F>> {
 #[distributed_slice(super::REGISTERED_INTERFACES)]
 static BABYBEAR_CPU: fn() -> Registration = || {
     Registration::new::<CpuHal<BabyBear>, dyn Eltwise<BabyBear>>(|_hal| {
-        Box::new(EltwiseImp {
-            phantom: PhantomData::default(),
-        })
+        Box::new(EltwiseImp { _hal })
     })
 };

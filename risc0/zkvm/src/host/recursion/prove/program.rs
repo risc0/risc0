@@ -79,7 +79,7 @@ impl Program {
         hal.batch_interpolate_ntt(&coeffs, self.code_size);
         hal.zk_shift(&coeffs, self.code_size);
         // Make the poly-group & extract the root
-        let code_group = PolyGroup::new(&hal, coeffs, self.code_size, cycles, "code");
+        let code_group = PolyGroup::new(&*hal, coeffs, self.code_size, cycles, "code");
         let root = *code_group.merkle.root();
         tracing::trace!("Computed recursion code: {root:?}");
         root

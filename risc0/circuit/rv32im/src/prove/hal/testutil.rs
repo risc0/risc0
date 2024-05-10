@@ -19,7 +19,7 @@ use risc0_core::field::{
 };
 use risc0_zkp::{
     adapter::{CircuitInfo, TapsProvider},
-    hal::{AnyBuffer, Buffer, CircuitHal, Hal},
+    hal::{Buffer, CircuitHal, Hal},
     INV_RATE,
 };
 

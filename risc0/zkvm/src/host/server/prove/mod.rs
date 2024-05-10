@@ -223,7 +223,7 @@ mod cuda {
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         match opts.hashfn.as_str() {
             "sha-256" => {
-                let hal = Rc::new(CudaHalSha256::new());
+                let hal = CudaHalSha256::new();
                 let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
@@ -232,7 +232,7 @@ mod cuda {
                 )))
             }
             "poseidon2" => {
-                let hal = Rc::new(CudaHalPoseidon2::new());
+                let hal = CudaHalPoseidon2::new();
                 let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
@@ -303,7 +303,7 @@ mod cpu {
             "poseidon2" => Poseidon2HashSuite::new_suite(),
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         };
-        let hal = Rc::new(CpuHal::new(suite));
+        let hal = CpuHal::new(suite);
         let circuit_hal = Rc::new(CpuCircuitHal::new());
         let hal_pair = HalPair { hal, circuit_hal };
         Ok(Rc::new(ProverImpl::new("cpu", hal_pair, opts.receipt_kind)))

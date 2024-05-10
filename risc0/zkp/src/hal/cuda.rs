@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, marker::PhantomData, rc::Rc, sync::OnceLock};
+use std::{
+    cell::RefCell,
+    marker::PhantomData,
+    rc::{Rc, Weak},
+    sync::OnceLock,
+};
 
 use cust::{
     device::DeviceAttribute,
@@ -27,7 +32,7 @@ use risc0_core::field::{
 };
 use risc0_sys::cuda::*;
 
-use super::{cpu::SyncSlice, tracker, AnyBuffer, Buffer, BufferElem, Hal};
+use super::{cpu::SyncSlice, tracker, Buffer, BufferElem, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -318,6 +323,7 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
     _context: Context,
     _lock: ReentrantMutexGuard<'static, ()>,
     pub stream: Stream,
+    rc: Weak<Self>,
 }
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
@@ -409,7 +415,7 @@ impl<T> BufferImpl<T> {
     }
 }
 
-impl<T: BufferElem> AnyBuffer<T> for BufferImpl<T> {
+impl<T: BufferElem> Buffer<T> for BufferImpl<T> {
     fn name(&self) -> &'static str {
         self.buffer.borrow().name
     }
@@ -423,11 +429,22 @@ impl<T: BufferElem> AnyBuffer<T> for BufferImpl<T> {
     }
 
     fn as_sync_slice(&self) -> SyncSlice<T> {
-        todo!("Copy buffer to CPU and make it available, or return a reference to global memory")
+        nvtx::range_push!("view");
+        let item_size = std::mem::size_of::<T>();
+        let buf = self.buffer.borrow_mut();
+        let offset = self.offset * item_size;
+        let len = self.size * item_size;
+        let ptr = unsafe { buf.buf.as_device_ptr().offset(offset as isize) };
+        let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, len) };
+        let mut host_buf = device_slice.as_host_vec().unwrap();
+        let slice = unchecked_cast_mut(&mut host_buf);
+        let sync_slice = unsafe {
+            SyncSlice::from_resource(slice.as_mut_ptr(), slice.len(), Box::new(host_buf))
+        };
+        nvtx::range_pop!();
+        sync_slice
     }
-}
 
-impl<T: BufferElem> Buffer<T> for BufferImpl<T> {
     fn slice(&self, offset: usize, size: usize) -> BufferImpl<T> {
         assert!(offset + size <= self.size());
         BufferImpl {
@@ -477,7 +494,7 @@ impl<T: BufferElem> Buffer<T> for BufferImpl<T> {
 
 impl<CH: CudaHash> CudaHal<CH> {
     #[tracing::instrument(name = "CudaHal::new", skip_all)]
-    pub fn new() -> Self {
+    pub fn new() -> Rc<Self> {
         let _lock = singleton().lock();
 
         let err = unsafe { sppark_init() };
@@ -493,16 +510,17 @@ impl<CH: CudaHash> CudaHal<CH> {
         let _context = context().clone();
         let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let mut hal = Self {
+        let mut hal = Rc::new_cyclic(|rc| Self {
             max_threads: max_threads as u32,
             module,
             _context,
             hash: None,
             _lock,
             stream,
-        };
+            rc: rc.clone(),
+        });
         let hash = Box::new(CH::new(&hal));
-        hal.hash = Some(hash);
+        Rc::get_mut(&mut hal).unwrap().hash = Some(hash);
         hal
     }
 
@@ -551,6 +569,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
     type Buffer<T: BufferElem> = BufferImpl<T>;
+
+    fn as_rc(&self) -> Rc<Self> {
+        self.rc.upgrade().unwrap()
+    }
 
     fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T> {
         BufferImpl::new(name, size)

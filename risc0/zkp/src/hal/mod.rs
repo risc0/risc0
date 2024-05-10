@@ -26,9 +26,9 @@ pub mod metal;
 
 use std::{
     any::{Any, TypeId},
-    borrow::Cow,
     collections::{btree_map, BTreeMap},
     fmt::Debug,
+    rc::Rc,
     sync::{Mutex, OnceLock},
 };
 
@@ -47,8 +47,7 @@ use crate::{
 pub trait BufferElem: Clone + Debug + PartialEq + Default + 'static {}
 impl<T> BufferElem for T where T: Clone + Debug + PartialEq + Default + 'static {}
 
-// WIP: get rid of view and view_mut on `Buffer' so the whole thing can be object safe.
-pub trait AnyBuffer<T: BufferElem>: Any {
+pub trait Buffer<T: BufferElem>: Any {
     fn name(&self) -> &'static str;
 
     fn size(&self) -> usize;
@@ -58,14 +57,18 @@ pub trait AnyBuffer<T: BufferElem>: Any {
 
     // TODO: remove as_any when trait upcasting is stabalized
     fn as_any(&self) -> &dyn Any;
-}
 
-pub trait Buffer<T: BufferElem>: Clone + AnyBuffer<T> {
-    fn slice(&self, offset: usize, size: usize) -> Self;
+    fn slice(&self, offset: usize, size: usize) -> Self
+    where
+        Self: Sized;
 
-    fn view<F: FnOnce(&[T])>(&self, f: F);
+    fn view<F: FnOnce(&[T])>(&self, f: F)
+    where
+        Self: Sized;
 
-    fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);
+    fn view_mut<F: FnOnce(&mut [T])>(&self, f: F)
+    where
+        Self: Sized;
 
     fn get_at(&self, idx: usize) -> T;
 }
@@ -73,42 +76,41 @@ pub trait Buffer<T: BufferElem>: Clone + AnyBuffer<T> {
 struct Registry {
     interfaces: BTreeMap</*interface=*/ TypeId, BTreeMap</*hal=*/ TypeId, Registration>>,
 }
-static REGISTRY: Mutex<Registry> = Mutex::new(Registry {
-    interfaces: BTreeMap::new(),
-});
 
 impl Registry {
-    fn get_interface<'a, H: Hal, I: Any + ?Sized + 'a>(&mut self, hal: &'a H) -> Box<I> {
-        if self.interfaces.is_empty() {
-            // Initial population of registered interfaces from distributed slice
-            for interface in REGISTERED_INTERFACES {
-                let r = interface();
-                let iface_entry = self.interfaces.entry(r.interface).or_default();
-                match iface_entry.entry(r.hal) {
-                    btree_map::Entry::Occupied(_) => {
-                        panic!(
-                            "Duplicate hal interface registration for {:?} on {:?}",
-                            TypeId::of::<I>(),
-                            TypeId::of::<H>()
-                        );
-                    }
-                    btree_map::Entry::Vacant(entry) => {
-                        entry.insert(r);
-                    }
+    fn build() -> Self {
+        let mut interfaces: BTreeMap<TypeId, BTreeMap<TypeId, Registration>> = BTreeMap::new();
+        for interface in REGISTERED_INTERFACES {
+            let r = interface();
+            let iface_entry = interfaces.entry(r.interface).or_default();
+            match iface_entry.entry(r.hal) {
+                btree_map::Entry::Occupied(_) => {
+                    panic!("Duplicate hal interface registration");
+                }
+                btree_map::Entry::Vacant(entry) => {
+                    entry.insert(r);
                 }
             }
-            assert!(
-                !self.interfaces.is_empty(),
-                "No hal interface registrations found!"
-            );
         }
+        assert!(
+            !interfaces.is_empty(),
+            "No hal interface registrations found!"
+        );
+        Registry { interfaces }
+    }
+}
 
-        let iface_entry = self
-            .interfaces
+static REGISTRY: OnceLock<Registry> = OnceLock::new();
+
+impl Registry {
+    fn get_interface<H: Hal, I: Any + ?Sized + 'static>(hal: Rc<H>) -> Box<I> {
+        let interfaces = &REGISTRY.get_or_init(Registry::build).interfaces;
+
+        let iface_entry = interfaces
             .get(&TypeId::of::<I>())
             .unwrap_or_else(|| panic!("Unregistered interface {:?} requested", TypeId::of::<I>()));
         if let Some(entry) = iface_entry.get(&TypeId::of::<H>()) {
-            let construct: fn(&H) -> Box<I> = *entry
+            let construct: fn(Rc<H>) -> Box<I> = *entry
                 .construct
                 .downcast_ref()
                 .expect("Unable to downcast matching entry");
@@ -117,12 +119,12 @@ impl Registry {
 
         // No hal-specific implementation; attempt to use CPU hal
         if let Some(entry) = iface_entry.get(&TypeId::of::<cpu::CpuHal<H::Field>>()) {
-            let construct: fn(&cpu::CpuHal<H::Field>) -> Box<I> = *entry
+            let construct: fn(Rc<cpu::CpuHal<H::Field>>) -> Box<I> = *entry
                 .construct
                 .downcast_ref()
                 .expect("Unable to downcast cpu entry");
             let cpu_hal = cpu::CpuHal::<H::Field>::new(hal.get_hash_suite().clone());
-            return construct(&cpu_hal);
+            return construct(cpu_hal);
         }
 
         panic!(
@@ -139,11 +141,11 @@ pub static REGISTERED_INTERFACES: [fn() -> Registration];
 pub struct Registration {
     hal: TypeId,
     interface: TypeId,
-    construct: Box<dyn Any + Send>,
+    construct: Box<dyn Any + Send + Sync + 'static>,
 }
 
 impl Registration {
-    pub fn new<H: Hal, I: Any + ?Sized>(f: fn(&H) -> Box<I>) -> Registration {
+    pub fn new<H: Hal, I: Any + ?Sized>(f: fn(Rc<H>) -> Box<I>) -> Registration {
         Registration {
             hal: TypeId::of::<H>(),
             interface: TypeId::of::<I>(),
@@ -156,26 +158,28 @@ pub trait Hal: Any + Sized {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
-    type Buffer<T: BufferElem>: Buffer<T>;
+    type Buffer<T: BufferElem>: Buffer<T> + Clone;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 
     fn has_unified_memory(&self) -> bool;
 
+    fn as_rc(&self) -> Rc<Self>;
+
     fn get_hash_suite(&self) -> &HashSuite<Self::Field>;
 
     fn alloc<T: BufferElem>(&self, name: &'static str, size: usize) -> Self::Buffer<T>;
     fn copy_from<T: BufferElem>(&self, name: &'static str, slice: &[T]) -> Self::Buffer<T>;
-    fn get_buffer<'a, T: BufferElem>(&self, buf: &'a dyn AnyBuffer<T>) -> Cow<'a, Self::Buffer<T>> {
+    fn get_buffer<'a, T: BufferElem>(&self, buf: &'a dyn Buffer<T>) -> &'a Self::Buffer<T> {
         if let Some(our_buf) = buf.as_any().downcast_ref::<Self::Buffer<T>>() {
-            Cow::Borrowed(our_buf)
+            our_buf
         } else {
             panic!("Incompatible buffer type")
         }
     }
 
-    fn get_interface<'a, I: Any + ?Sized + 'a>(&'a self) -> Box<I> {
-        REGISTRY.lock().unwrap().get_interface::<Self, I>(self)
+    fn get_interface<'a, I: Any + ?Sized + 'static>(&self) -> Box<I> {
+        Registry::get_interface::<Self, I>(self.as_rc())
     }
 
     fn batch_expand_into_evaluate_ntt(
@@ -329,24 +333,24 @@ mod testutil {
         hal.copy_from("values", &values)
     }
 
-    pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: H) {
+    pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
 
         let steps = 1 << 12;
         let count = DATA_SIZE;
         let domain = steps * INV_RATE;
         let io_size = count * domain;
 
-        let io = generate_elem(&hal, &mut rng, io_size);
+        let io = generate_elem(&*hal, &mut rng, io_size);
         hal.batch_bit_reverse(&io, count);
     }
 
-    pub(crate) fn batch_evaluate_any<H: Hal>(hal_gpu: H) {
+    pub(crate) fn batch_evaluate_any<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
 
         let eval_size = 865;
         let poly_count = 223;
@@ -356,7 +360,7 @@ mod testutil {
         let z = H::ExtElem::random(&mut rng);
         let z_pow = z.pow(H::ExtElem::EXT_SIZE);
 
-        let coeffs = generate_elem(&hal, &mut rng, coeffs_size);
+        let coeffs = generate_elem(&*hal, &mut rng, coeffs_size);
         let which = hal.copy_from("which", &vec![0; eval_size]);
         let xs = hal.copy_from("xs", &vec![z_pow; eval_size]);
         let out = hal.alloc("out", eval_size);
@@ -364,10 +368,10 @@ mod testutil {
         hal.batch_evaluate_any(&coeffs, poly_count as usize, &which, &xs, &out);
     }
 
-    pub(crate) fn batch_expand_into_evaluate_ntt<H: Hal>(hal_gpu: H) {
+    pub(crate) fn batch_expand_into_evaluate_ntt<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
 
         let count = DATA_SIZE;
         let expand_bits = 2;
@@ -376,26 +380,26 @@ mod testutil {
         let input_size = count * steps;
         let output_size = count * domain;
 
-        let input = generate_elem(&hal, &mut rng, input_size);
+        let input = generate_elem(&*hal, &mut rng, input_size);
         let output = hal.alloc("output", output_size);
         hal.batch_expand_into_evaluate_ntt(&output, &input, count, expand_bits);
     }
 
-    pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: H) {
+    pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
 
         let count = DATA_SIZE;
         let steps = 1 << 16;
         let domain = steps * INV_RATE;
         let io_size = count * domain;
 
-        let io = generate_elem(&hal, &mut rng, io_size);
+        let io = generate_elem(&*hal, &mut rng, io_size);
         hal.batch_interpolate_ntt(&io, count);
     }
 
-    pub(crate) fn gather_sample<H: Hal>(hal: H) {
+    pub(crate) fn gather_sample<H: Hal>(hal: Rc<H>) {
         let mut rng = thread_rng();
         let rows = 1000;
         let cols = 900;
@@ -421,14 +425,14 @@ mod testutil {
         });
     }
 
-    pub(crate) fn check_req<H: Hal>(hal: H) {
+    pub(crate) fn check_req<H: Hal>(hal: Rc<H>) {
         let a = hal.alloc("a", 10);
         let b = hal.alloc("b", 20);
         let eltwise = hal.get_interface::<dyn Eltwise<H::Field>>();
         eltwise.eltwise_add_elem(&a, &b, &b);
     }
 
-    pub(crate) fn eltwise_add_elem<H: Hal>(hal_gpu: H) {
+    pub(crate) fn eltwise_add_elem<H: Hal>(hal_gpu: Rc<H>) {
         for (x, count) in COUNTS.iter().enumerate() {
             let a = hal_gpu.alloc("a", *count);
             let b = hal_gpu.alloc("b", *count);
@@ -460,10 +464,10 @@ mod testutil {
         }
     }
 
-    pub(crate) fn eltwise_copy_elem<H: Hal>(hal_gpu: H) {
+    pub(crate) fn eltwise_copy_elem<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         for count in COUNTS {
-            let input = generate_elem(&hal_gpu, &mut rng, count);
+            let input = generate_elem(&*hal_gpu, &mut rng, count);
             let output = hal_gpu.alloc("output", count);
             hal_gpu.eltwise_copy_elem(&output, &input);
             output.view(|output| {
@@ -472,38 +476,38 @@ mod testutil {
         }
     }
 
-    pub(crate) fn eltwise_sum_extelem<H: Hal>(hal_gpu: H) {
+    pub(crate) fn eltwise_sum_extelem<H: Hal>(hal_gpu: Rc<H>) {
         const COUNT: usize = 1024 * 1024;
 
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
 
-        let input = generate_extelem(&hal, &mut rng, COUNT);
+        let input = generate_extelem(&*hal, &mut rng, COUNT);
         let output = hal.alloc("output", COUNT);
         let eltwise = hal.get_interface::<dyn Eltwise<H::Field>>();
         eltwise.eltwise_sum_extelem(&output, &input);
     }
 
-    pub(crate) fn fri_fold<H: Hal>(hal_gpu: H) {
+    pub(crate) fn fri_fold<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
         for count in COUNTS {
             let output_size = count * H::ExtElem::EXT_SIZE;
             let input_size = output_size * FRI_FOLD;
 
             let output = hal.alloc("output", output_size);
             let mix = H::ExtElem::random(&mut rng);
-            let input = generate_elem(&hal, &mut rng, input_size);
+            let input = generate_elem(&*hal, &mut rng, input_size);
             hal.fri_fold(&output, &input, &mix);
         }
     }
 
-    pub(crate) fn mix_poly_coeffs<H: Hal>(hal_gpu: H) {
+    pub(crate) fn mix_poly_coeffs<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
 
         let combo_count = 100;
         let steps = 1 << 12;
@@ -516,7 +520,7 @@ mod testutil {
 
         let output = hal.alloc("output", output_size);
         let combos = hal.copy_from("combos", &combos);
-        let input = generate_elem(&hal, &mut rng, input_size);
+        let input = generate_elem(&*hal, &mut rng, input_size);
 
         hal.mix_poly_coeffs(
             &output,
@@ -529,12 +533,12 @@ mod testutil {
         );
     }
 
-    pub(crate) fn hash_fold<H: Hal>(hal_gpu: H) {
+    pub(crate) fn hash_fold<H: Hal>(hal_gpu: Rc<H>) {
         const INPUTS: usize = 1024;
         const OUTPUTS: usize = INPUTS / 2;
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
         let io = hal.alloc("io", INPUTS * 2);
         io.view_mut(|g| {
             for i in 0..INPUTS {
@@ -553,44 +557,44 @@ mod testutil {
         hal.hash_fold(&io, INPUTS, OUTPUTS);
     }
 
-    pub(crate) fn hash_rows<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
+    pub(crate) fn hash_rows<H: Hal<Elem = BabyBearElem>>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
         let rows = [1, 2, 3, 4, 10];
         let cols = [16, 32, 64, 128];
         for row_count in rows {
             for col_count in cols {
                 let matrix_size = row_count * col_count;
-                let matrix = generate_elem(&hal, &mut rng, matrix_size);
+                let matrix = generate_elem(&*hal, &mut rng, matrix_size);
                 let output = hal.alloc("output", row_count);
                 hal.hash_rows(&output, &matrix);
             }
         }
     }
 
-    pub(crate) fn slice<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
+    pub(crate) fn slice<H: Hal<Elem = BabyBearElem>>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
 
         let rows = 4096;
         let cols = 256;
         let matrix_size = rows * cols;
 
         let nodes = hal.alloc("nodes", rows * 2);
-        let matrix = generate_elem(&hal, &mut rng, matrix_size);
+        let matrix = generate_elem(&*hal, &mut rng, matrix_size);
         hal.hash_rows(&nodes.slice(rows, rows), &matrix);
     }
 
-    pub(crate) fn zk_shift<H: Hal>(hal_gpu: H) {
+    pub(crate) fn zk_shift<H: Hal>(hal_gpu: Rc<H>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let hal = DualHal::new(hal_cpu, hal_gpu);
         let counts = [(1000, (1 << 8)), (900, (1 << 12))];
         for (poly_count, steps) in counts {
             let count = poly_count * steps;
-            let io = generate_elem(&hal, &mut rng, count);
+            let io = generate_elem(&*hal, &mut rng, count);
             hal.zk_shift(&io, poly_count);
         }
     }

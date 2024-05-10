@@ -90,7 +90,7 @@ fn hashfn_poseidon2() {
 #[test]
 fn hashfn_blake2b() {
     let hal_pair = HalPair {
-        hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
+        hal: CpuHal::new(Blake2bCpuHashSuite::new_suite()),
         circuit_hal: Rc::new(CpuCircuitHal::new()),
     };
     let env = ExecutorEnv::builder()
