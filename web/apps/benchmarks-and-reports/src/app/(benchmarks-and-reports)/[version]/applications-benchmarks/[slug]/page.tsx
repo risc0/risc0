@@ -31,21 +31,17 @@ export function generateMetadata({ params }) {
 export default function ApplicationsBenchmarksPage({ params }) {
   return (
     <Tabs className="mt-6" defaultValue={params.slug}>
-      <div className="flex items-center overflow-auto">
-        <TabsList>
-          {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-            <Link
-              tabIndex={-1}
-              key={filename}
-              href={`/${params.version}/applications-benchmarks/${replace(filename, ".csv", "")}`}
-            >
-              <TabsTrigger value={replace(filename, ".csv", "")}>
-                {Object.values(FILENAMES_TO_TITLES)[index]}
-              </TabsTrigger>
-            </Link>
-          ))}
-        </TabsList>
-      </div>
+      <TabsList>
+        {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
+          <Link
+            tabIndex={-1}
+            key={filename}
+            href={`/${params.version}/applications-benchmarks/${replace(filename, ".csv", "")}`}
+          >
+            <TabsTrigger value={replace(filename, ".csv", "")}>{Object.values(FILENAMES_TO_TITLES)[index]}</TabsTrigger>
+          </Link>
+        ))}
+      </TabsList>
 
       <div className="mt-4">
         <Suspense fallback={<SuspenseLoader />}>
