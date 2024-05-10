@@ -12,14 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use linkme::distributed_slice;
 use std::{
+    any::type_name,
+    any::Any,
     marker::PhantomData,
     rc::{Rc, Weak},
 };
 
-use risc0_core::field::Field;
+use risc0_core::field::{baby_bear::BabyBear, Field};
 
-use super::{Buffer, BufferElem, CircuitHal, Hal};
+use super::{
+    cpu::CpuHal, cuda::CudaHal, cuda::CudaHashSha256, Buffer, BufferElem, CircuitHal, Eltwise, Hal,
+    Registration,
+};
 use crate::core::{digest::Digest, hash::HashSuite};
 
 #[derive(Clone)]
@@ -64,23 +70,32 @@ where
     L: Buffer<T>,
     R: Buffer<T>,
 {
+    fn size(&self) -> usize {
+        let lhs = self.lhs.size();
+        let rhs = self.rhs.size();
+        assert_eq!(lhs, rhs);
+        lhs
+    }
+
     fn slice(&self, offset: usize, size: usize) -> Self {
         let lhs = self.lhs.slice(offset, size);
         let rhs = self.rhs.slice(offset, size);
         BufferImpl::new(lhs, rhs)
     }
 
+    fn get_at(&self, idx: usize) -> T {
+        self.lhs.get_at(idx)
+    }
+
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         self.lhs.view(f)
     }
+
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         self.lhs.view_mut(f);
         self.rhs.view_mut(|dst| {
             self.lhs.view(|src| dst.clone_from_slice(src));
         })
-    }
-    fn get_at(&self, idx: usize) -> T {
-        self.lhs.get_at(idx)
     }
 
     fn name(&self) -> &'static str {
@@ -93,13 +108,6 @@ where
 
     fn as_any(&self) -> &dyn core::any::Any {
         self
-    }
-
-    fn size(&self) -> usize {
-        let lhs = self.lhs.size();
-        let rhs = self.rhs.size();
-        assert_eq!(lhs, rhs);
-        lhs
     }
 }
 
@@ -135,6 +143,15 @@ where
 {
     fn as_rc(&self) -> Rc<Self> {
         self.rc.upgrade().unwrap()
+    }
+
+    fn get_interface<I: Any + ?Sized + 'static>(&self) -> Box<I> {
+        crate::hal::Registry::get_interface::<Self, I>(&self.as_rc()).unwrap_or_else(||
+            panic!("DualHal requires all interfaces to be implemented so it can compare data.  Please register an implementation for DualHal<{:?}, {:?}, {:?}>",
+                   type_name::<F>(),
+                   type_name::<L>(),
+                   type_name::<R>())
+        )
     }
 
     type Field = F;
@@ -388,16 +405,15 @@ where
     }
 }
 
-/*pub struct EltwiseImp<'a, H: Hal> {
-    hal: &'a H,
+pub struct EltwiseImp<H: Hal> {
+    hal: Rc<H>,
 }
 
 impl<
-        'a,
         F: Field,
         L: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
         R: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
-    > Eltwise<F> for EltwiseImp<'a, DualHal<F, L, R>>
+    > Eltwise<F> for EltwiseImp<DualHal<F, L, R>>
 {
     fn eltwise_add_elem(
         &self,
@@ -429,4 +445,11 @@ impl<
         output.assert_eq();
     }
 }
-*/
+
+#[distributed_slice(super::REGISTERED_INTERFACES)]
+static BABYBEAR_DUAL_: fn() -> Registration = || {
+    Registration::new::<
+        DualHal<BabyBear, CpuHal<BabyBear>, CudaHal<CudaHashSha256>>,
+        dyn Eltwise<BabyBear>,
+    >(|hal| Box::new(EltwiseImp { hal }))
+};

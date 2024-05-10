@@ -25,7 +25,7 @@ mod eltwise_cuda;
 pub mod metal;
 
 use std::{
-    any::{Any, TypeId},
+    any::{type_name, Any, TypeId},
     collections::{btree_map, BTreeMap},
     fmt::Debug,
     rc::Rc,
@@ -103,7 +103,7 @@ impl Registry {
 static REGISTRY: OnceLock<Registry> = OnceLock::new();
 
 impl Registry {
-    fn get_interface<H: Hal, I: Any + ?Sized + 'static>(hal: Rc<H>) -> Box<I> {
+    fn get_interface<H: Hal, I: Any + ?Sized + 'static>(hal: &Rc<H>) -> Option<Box<I>> {
         let interfaces = &REGISTRY.get_or_init(Registry::build).interfaces;
 
         let iface_entry = interfaces
@@ -114,24 +114,32 @@ impl Registry {
                 .construct
                 .downcast_ref()
                 .expect("Unable to downcast matching entry");
-            return construct(hal);
+            return Some(construct(hal.clone()));
+        }
+        None
+    }
+
+    fn get_interface_or_fallback<H: Hal, I: Any + ?Sized + 'static>(hal: Rc<H>) -> Box<I> {
+        // Try specific hal
+        if let Some(iface) = Self::get_interface::<H, I>(&hal) {
+            return iface;
         }
 
-        // No hal-specific implementation; attempt to use CPU hal
-        if let Some(entry) = iface_entry.get(&TypeId::of::<cpu::CpuHal<H::Field>>()) {
-            let construct: fn(Rc<cpu::CpuHal<H::Field>>) -> Box<I> = *entry
-                .construct
-                .downcast_ref()
-                .expect("Unable to downcast cpu entry");
-            let cpu_hal = cpu::CpuHal::<H::Field>::new(hal.get_hash_suite().clone());
-            return construct(cpu_hal);
+        if true {
+            panic!("Missing interface {:?} for hal {:}; falling back to CPU.  This may impact performance.",
+                               type_name::<I>(), type_name::<H>());
+        }
+        if let Some(iface) = Self::get_interface::<cpu::CpuHal<H::Field>, I>(
+            &cpu::CpuHal::<H::Field>::new(hal.get_hash_suite().clone()),
+        ) {
+            return iface;
         }
 
         panic!(
             "Interface {:?} registered but no {:?} or cpu implementation present",
-            TypeId::of::<I>(),
-            TypeId::of::<H>()
-        );
+            type_name::<I>(),
+            type_name::<H>()
+        )
     }
 }
 
@@ -179,7 +187,7 @@ pub trait Hal: Any + Sized {
     }
 
     fn get_interface<'a, I: Any + ?Sized + 'static>(&self) -> Box<I> {
-        Registry::get_interface::<Self, I>(self.as_rc())
+        Registry::get_interface_or_fallback::<Self, I>(self.as_rc())
     }
 
     fn batch_expand_into_evaluate_ntt(

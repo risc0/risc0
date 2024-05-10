@@ -1,9 +1,11 @@
 use super::{
+    cuda::CudaHashSha256,
     cuda::{CudaHal, CudaHash},
     eltwise::Eltwise,
-    Buffer, Hal,
+    Buffer, Hal, Registration,
 };
 use cust::prelude::*;
+use linkme::distributed_slice;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     ExtElem,
@@ -76,7 +78,6 @@ impl<CH: CudaHash> Eltwise<BabyBear> for EltwiseImp<CudaHal<CH>> {
     }
 }
 
-#[cfg(cuda)]
 #[distributed_slice(super::REGISTERED_INTERFACES)]
 static BABYBEAR_CUDA_SHA256: fn() -> Registration = || {
     Registration::new::<CudaHal<CudaHashSha256>, dyn Eltwise<BabyBear>>(|hal| {

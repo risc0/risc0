@@ -429,17 +429,22 @@ impl<T: BufferElem> Buffer<T> for BufferImpl<T> {
     }
 
     fn as_sync_slice(&self) -> SyncSlice<T> {
-        nvtx::range_push!("view");
-        let item_size = std::mem::size_of::<T>();
+        nvtx::range_push!("as_sync_slice");
         let buf = self.buffer.borrow_mut();
-        let offset = self.offset * item_size;
-        let len = self.size * item_size;
-        let ptr = unsafe { buf.buf.as_device_ptr().offset(offset as isize) };
-        let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, len) };
-        let mut host_buf = device_slice.as_host_vec().unwrap();
-        let slice = unchecked_cast_mut(&mut host_buf);
+        let mut host_buf = Box::new(buf.buf.as_host_vec().unwrap());
+        let slice: &mut [T] = unchecked_cast_mut(&mut host_buf);
+        let slice = &mut slice[self.offset..];
+        let buffer = self.buffer.clone();
         let sync_slice = unsafe {
-            SyncSlice::from_resource(slice.as_mut_ptr(), slice.len(), Box::new(host_buf))
+            // TODO: make this safer
+            SyncSlice::from_resource(
+                slice.as_mut_ptr(),
+                slice.len(),
+                Box::new(move || {
+                    let mut buf = buffer.borrow_mut();
+                    buf.buf.copy_from(&*host_buf).unwrap();
+                }),
+            )
         };
         nvtx::range_pop!();
         sync_slice
@@ -510,18 +515,20 @@ impl<CH: CudaHash> CudaHal<CH> {
         let _context = context().clone();
         let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let mut hal = Rc::new_cyclic(|rc| Self {
-            max_threads: max_threads as u32,
-            module,
-            _context,
-            hash: None,
-            _lock,
-            stream,
-            rc: rc.clone(),
-        });
-        let hash = Box::new(CH::new(&hal));
-        Rc::get_mut(&mut hal).unwrap().hash = Some(hash);
-        hal
+        Rc::new_cyclic(|rc| {
+            let mut hal = Self {
+                max_threads: max_threads as u32,
+                module,
+                _context,
+                hash: None,
+                _lock,
+                stream,
+                rc: rc.clone(),
+            };
+            let hash = Box::new(CH::new(&hal));
+            hal.hash = Some(hash);
+            hal
+        })
     }
 
     pub fn compute_simple_params(&self, count: usize) -> (GridSize, BlockSize) {

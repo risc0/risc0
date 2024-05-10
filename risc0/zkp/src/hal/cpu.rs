@@ -15,7 +15,6 @@
 //! CPU implementation of the HAL.
 
 use std::{
-    any::Any,
     fmt::Debug,
     ops::Range,
     rc::{Rc, Weak},
@@ -109,7 +108,7 @@ enum SyncSliceRef<'a, T: Default + Clone> {
         _inner: &'a SyncSlice<'a, T>,
     },
     FromResource {
-        _inner: Box<dyn Any>,
+        flush: Box<dyn Fn() + 'a>,
     },
 }
 
@@ -153,11 +152,19 @@ impl<'a, T: Default + Clone> SyncSlice<'a, T> {
         }
     }
 
-    pub unsafe fn from_resource(ptr: *mut T, size: usize, resource: Box<dyn Any>) -> Self {
+    pub unsafe fn from_resource(ptr: *mut T, size: usize, flush: impl Fn() + 'a) -> Self {
         SyncSlice {
             ptr,
             size,
-            _buf: SyncSliceRef::FromResource { _inner: resource },
+            _buf: SyncSliceRef::FromResource {
+                flush: Box::new(flush),
+            },
+        }
+    }
+
+    pub fn flush(&mut self) {
+        if let SyncSliceRef::FromResource { flush: f } = &mut self._buf {
+            f();
         }
     }
 

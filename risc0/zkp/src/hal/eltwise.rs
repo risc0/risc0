@@ -37,19 +37,20 @@ impl<F: Field> Eltwise<F> for EltwiseImp<CpuHal<F>> {
             .for_each(|(o, a, b)| {
                 *o = *a + *b;
             });
+        output.flush();
     }
 
     #[tracing::instrument(skip_all)]
     fn eltwise_sum_extelem(&self, output: &dyn Buffer<F::Elem>, input: &dyn Buffer<F::ExtElem>) {
-        let mut output = output.as_sync_slice();
+        let mut output_slice = output.as_sync_slice();
         let input = input.as_sync_slice();
 
-        let count = output.size() / F::ExtElem::EXT_SIZE;
+        let count = output_slice.size() / F::ExtElem::EXT_SIZE;
         let to_add = input.size() / count;
-        assert_eq!(output.size(), count * F::ExtElem::EXT_SIZE);
+        assert_eq!(output_slice.size(), count * F::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), count * to_add);
         let mut output =
-            ArrayViewMut::from_shape((F::ExtElem::EXT_SIZE, count), &mut output[..]).unwrap();
+            ArrayViewMut::from_shape((F::ExtElem::EXT_SIZE, count), &mut output_slice[..]).unwrap();
         let output = output.axis_iter_mut(Axis(1)).into_par_iter();
         let input = ArrayView::from_shape((to_add, count), &input[..]).unwrap();
         let input = input.axis_iter(Axis(1)).into_par_iter();
@@ -62,6 +63,7 @@ impl<F: Field> Eltwise<F> for EltwiseImp<CpuHal<F>> {
                 output[i] = sum.subelems()[i]
             }
         });
+        output_slice.flush();
     }
 }
 
