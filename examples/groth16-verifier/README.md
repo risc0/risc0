@@ -23,7 +23,7 @@ RISC0_DEV_MODE=1 cargo run --release
 
 [installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 [Bonsai]: https://bonsai.xyz/apply
-[DEV_MODE]: https://dev.risczero.com/api/zkvm/dev-mode
+[DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
 [tutorial]: https://docs.circom.io/getting-started/proving-circuits/
 [ECDSA-circuit]: https://github.com/0xPARC/circom-ecdsa
 [0xPARC]: https://github.com/0xPARC

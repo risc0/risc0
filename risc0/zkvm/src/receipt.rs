@@ -326,7 +326,7 @@ pub enum InnerReceipt {
     ///
     /// This type solely exists to improve development experience, for further
     /// information about development-only mode see our [dev-mode
-    /// documentation](https://dev.risczero.com/zkvm/dev-mode).
+    /// documentation](https://dev.risczero.com/api/generating-proofs/dev-mode).
     Fake {
         /// [ReceiptClaim] for this fake receipt.
         claim: ReceiptClaim,
