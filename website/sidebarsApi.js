@@ -180,6 +180,11 @@ export default {
         },
         {
           type: "doc",
+          label: "Trusted Setup Security",
+          id: "trusted-setup-ceremony",
+        },
+        {
+          type: "doc",
           label: "zkVM technical specification",
           id: "zkvm/zkvm-specification",
         },
