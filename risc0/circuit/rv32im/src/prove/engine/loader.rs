@@ -359,7 +359,6 @@ impl Loader {
     }
 
     fn add_cycle(&mut self, row: CtrlCycle) {
-        // let mut ctrl = self.ctrl.as_slice_mut();
         self.ctrl[self.cycle] = BabyBearElem::new(self.cycle as u32);
         for i in 1..row.0.len() {
             self.ctrl[self.max_cycles * i + self.cycle] = row.0[i];
@@ -381,7 +380,6 @@ impl Loader {
         tracing::debug!("po2: {po2}");
         let cycles = 1 << po2;
         let ctrl_size = CIRCUIT.ctrl_size();
-        // let mut ctrl = CpuBuffer::from_fn("ctrl", cycles * ctrl_size, |_| BabyBearElem::ZERO);
         let mut loader = Loader::new(cycles, ctrl_size);
         // Make a vector & set it up with the elf data
         loader.load();
