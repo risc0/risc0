@@ -33,18 +33,23 @@ detect_shell() {
 }
 
 detect_shell
-
+echo "✅ Detected your preferred shell as ${PREF_SHELL}"
 
 # add rzup to PATH if it isn't already present
 if [[ ":$PATH:" != *":${RISC0_BIN_DIR}:"* ]]; then
-    echo "Adding rzup to PATH in ${PROFILE}..."
+    echo "➕Adding rzup to PATH in ${PROFILE}"
     {
         echo
         echo "export PATH=\"\$PATH:$RISC0_BIN_DIR\""
     } >> "$PROFILE"
+else
+    echo "✅ rzup found in PATH"
 fi
 
-echo "Detected your preferred shell as ${PREF_SHELL}."
-echo "Added rzup to PATH in ${PROFILE}."
-echo "Run 'source ${PROFILE}' or start a new terminal session to use rzup."
-echo "Then, run 'rzup' to install the zkVM."
+echo "🎉 rzup installed!"
+echo
+echo "▶️ Run the following commands to install the zkVM:"
+echo
+echo "source ${PROFILE}"
+echo "rzup"
+echo
