@@ -18,7 +18,6 @@ use bonsai_sdk::alpha::SessionId;
 use clap::Parser;
 use hex::FromHex;
 use risc0_zkvm::{sha::Digest, Receipt};
-use tracing::{debug, error, info, instrument, trace};
 
 /// `cargo risczero verify`
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
@@ -54,20 +53,16 @@ enum SourceType<'a> {
 }
 
 impl VerifyCommand {
-    #[instrument(skip(self))]
     pub fn run(&self) -> Result<()> {
-        debug!("Running verify command");
         let receipt = self.get_receipt()?;
         let image_id = self.get_image_id()?;
         let result = receipt.verify(image_id);
         match result {
             Ok(_) => {
-                info!("Receipt verified successfully");
                 println!("✅ Receipt is valid!");
             }
-            Err(ref error) => {
-                error!(?error, "Receipt verification failed");
-                eprintln!("❌ Receipt is not valid");
+            Err(_) => {
+                eprintln!("❌ Receipt is invalid");
             }
         }
 
@@ -75,14 +70,10 @@ impl VerifyCommand {
     }
 
     fn get_image_id(&self) -> Result<Digest> {
-        trace!("Parsing image ID");
-        let image_id = Digest::from_hex(&self.image_id)?;
-        debug!(?image_id, "Parsed image ID");
-        Ok(image_id)
+        Ok(Digest::from_hex(&self.image_id)?)
     }
 
     fn get_receipt(&self) -> Result<Receipt> {
-        trace!("Getting receipt");
         let source = self.source();
         let receipt = match source {
             SourceType::Path(path) => {
@@ -96,7 +87,6 @@ impl VerifyCommand {
                 parse_receipt(receipt_raw)?
             }
         };
-        debug!("Got receipt");
 
         Ok(receipt)
     }
