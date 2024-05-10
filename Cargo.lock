@@ -4220,9 +4220,12 @@ version = "1.0.0-rc.3"
 dependencies = [
  "cc",
  "directories",
+ "glob",
  "hex",
+ "rayon",
  "sha2",
  "tempfile",
+ "which 6.0.1",
 ]
 
 [[package]]
@@ -4294,6 +4297,7 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sys",
 ]
 
 [[package]]

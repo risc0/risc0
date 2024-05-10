@@ -14,7 +14,9 @@
 
 use std::{collections::HashMap, rc::Rc};
 
+use anyhow::{bail, Result};
 use metal::ComputePipelineDescriptor;
+use risc0_circuit_rv32im_sys::ffi::{Error, RawPreflightTrace};
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, RootsOfUnity,
@@ -24,8 +26,8 @@ use risc0_zkp::{
     field::Elem as _,
     hal::{
         metal::{
-            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalSha256, MetalHash,
-            MetalHashSha256,
+            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
+            MetalHash,
         },
         Buffer as _, CircuitHal,
     },
@@ -40,6 +42,8 @@ use crate::{
     prove::{engine::SegmentProverImpl, SegmentProver},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
+
+use super::{CircuitWitnessGenerator, StepMode};
 
 #[derive(Debug)]
 pub struct MetalCircuitHal<MH: MetalHash> {
@@ -60,6 +64,56 @@ impl<MH: MetalHash> MetalCircuitHal<MH> {
         Self { hal, kernels }
     }
 }
+
+impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH> {
+    #[allow(unused)]
+    fn generate_witness(
+        &self,
+        mode: StepMode,
+        trace: &RawPreflightTrace,
+        steps: usize,
+        count: usize,
+        ctrl: &MetalBuffer<BabyBearElem>,
+        io: &MetalBuffer<BabyBearElem>,
+        data: &MetalBuffer<BabyBearElem>,
+    ) {
+        tracing::debug!("witgen: {steps}, {count}");
+
+        // TODO: call metal kernels for witgen.
+        // For now we use the CPU implementation.
+
+        extern "C" {
+            fn risc0_circuit_rv32im_cpu_witgen(
+                mode: u32,
+                trace: *const RawPreflightTrace,
+                steps: u32,
+                count: u32,
+                ctrl: *const BabyBearElem,
+                io: *const BabyBearElem,
+                data: *const BabyBearElem,
+            ) -> Error;
+        }
+
+        unsafe {
+            risc0_circuit_rv32im_cpu_witgen(
+                mode as u32,
+                trace,
+                steps as u32,
+                count as u32,
+                ctrl.as_ptr() as *const BabyBearElem,
+                io.as_ptr() as *const BabyBearElem,
+                data.as_ptr() as *const BabyBearElem,
+            )
+            .unwrap();
+        }
+    }
+}
+
+// #[repr(C)]
+// struct AccumContext {
+//     ram: *const c_void,
+//     bytes: *const c_void,
+// }
 
 impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     #[tracing::instrument(skip_all)]
@@ -135,7 +189,33 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             &bytes,
         );
 
+        // TODO: get this working with AccumContext.
+
+        // let ctx = AccumContext {
+        //     ram: ram.as_ptr(),
+        //     bytes: bytes.as_ptr(),
+        // };
+        // let ctx_buf = self.hal.device.new_buffer_with_data(
+        //     &ctx as *const AccumContext as *const c_void,
+        //     std::mem::size_of_val(&ctx) as u64,
+        //     MTLResourceOptions::StorageModeManaged,
+        // );
+
         tracing::info_span!("step_compute_accum").in_scope(|| {
+            //     let args = [
+            //         KernelArg::Buffer {
+            //             buffer: &ctx_buf,
+            //             offset: 0,
+            //         },
+            //         KernelArg::Integer(steps as u32),
+            //         ctrl.as_arg(),
+            //         io.as_arg(),
+            //         data.as_arg(),
+            //         mix.as_arg(),
+            //         accum.as_arg(),
+            //     ];
+            //     let kernel = self.kernels.get("k_step_compute_accum").unwrap();
+            //     self.hal.dispatch(&kernel, &args, count as u64, None);
             let args = [
                 KernelArg::Integer(steps as u32),
                 ctrl.as_arg(),
@@ -155,6 +235,20 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         });
 
         tracing::info_span!("step_verify_accum").in_scope(|| {
+            // let args = [
+            //     KernelArg::Buffer {
+            //         buffer: &ctx_buf,
+            //         offset: 0,
+            //     },
+            //     KernelArg::Integer(steps as u32),
+            //     ctrl.as_arg(),
+            //     io.as_arg(),
+            //     data.as_arg(),
+            //     mix.as_arg(),
+            //     accum.as_arg(),
+            // ];
+            // let kernel = self.kernels.get("k_step_verify_accum").unwrap();
+            // self.hal.dispatch(&kernel, &args, count as u64, None);
             let args = [
                 KernelArg::Integer(steps as u32),
                 ctrl.as_arg(),
@@ -178,10 +272,20 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     }
 }
 
-pub fn get_segment_prover() -> Box<dyn SegmentProver> {
-    let hal = Rc::new(MetalHalSha256::new());
-    let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
-    Box::new(SegmentProverImpl::new(hal, circuit_hal))
+pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
+    match hashfn {
+        "sha-256" => {
+            let hal = Rc::new(MetalHalSha256::new());
+            let circuit_hal = Rc::new(MetalCircuitHal::new(hal.clone()));
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+        }
+        "poseidon2" => {
+            let hal = Rc::new(MetalHalPoseidon2::new());
+            let circuit_hal = Rc::new(MetalCircuitHal::new(hal.clone()));
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+        }
+        _ => bail!("Unsupported hashfn: {hashfn}"),
+    }
 }
 
 #[cfg(test)]
