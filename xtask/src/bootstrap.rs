@@ -140,7 +140,7 @@ impl Bootstrap {
 
         let mut allowed_control_ids_str = String::new();
         for digest in allowed_control_ids.iter() {
-            writeln!(&mut allowed_control_ids_str, r#""{digest}","#).unwrap();
+            writeln!(&mut allowed_control_ids_str, r#"digest!("{digest}"),"#).unwrap();
         }
 
         // Calculuate a Merkle root for the allowed control IDs and add it to the file.
@@ -151,7 +151,11 @@ impl Bootstrap {
 
         let mut zkr_control_ids_str = String::new();
         for (name, digest) in zkr_control_ids.iter() {
-            writeln!(&mut zkr_control_ids_str, r#"("{name}", "{digest}"),"#).unwrap();
+            writeln!(
+                &mut zkr_control_ids_str,
+                r#"("{name}", digest!("{digest}")),"#
+            )
+            .unwrap();
         }
 
         let bn254_control_id = Self::generate_identity_bn254_control_id();

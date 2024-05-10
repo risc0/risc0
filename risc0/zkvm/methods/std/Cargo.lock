@@ -803,6 +803,7 @@ dependencies = [
  "cfg-if",
  "digest",
  "hex",
+ "hex-literal",
  "paste",
  "rand_core",
  "risc0-core",

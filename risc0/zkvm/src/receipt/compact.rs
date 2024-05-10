@@ -50,7 +50,8 @@ impl CompactReceipt {
         .map_err(|_| VerificationError::ReceiptFormatError)?;
         let (c0, c1) =
             split_digest(self.claim.digest()).map_err(|_| VerificationError::ReceiptFormatError)?;
-        let id_p254_hash = fr_from_hex_string(BN254_CONTROL_ID)
+        // DO NOT MERGE: Don't hex encode just to decode.
+        let id_p254_hash = fr_from_hex_string(&hex::encode(BN254_CONTROL_ID))
             .map_err(|_| VerificationError::ReceiptFormatError)?;
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,

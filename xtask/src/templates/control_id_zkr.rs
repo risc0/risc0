@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub const ALLOWED_CONTROL_IDS: &[&str] = &[{}];
+use risc0_zkp::core::digest::Digest;
+use risc0_zkp::digest;
 
-pub const ALLOWED_CONTROL_ROOT: &str = "{}";
+pub const ALLOWED_CONTROL_IDS: &[Digest] = &[{}];
 
-pub const BN254_CONTROL_ID: &str = "{}";
+pub const ALLOWED_CONTROL_ROOT: Digest = digest!("{}");
 
-pub const ZKR_CONTROL_IDS: [(&str, &str); {}] = [{}];
+pub const BN254_CONTROL_ID: Digest = digest!("{}");
+
+pub const ZKR_CONTROL_IDS: [(&str, Digest); {}] = [{}];
