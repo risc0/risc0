@@ -58,3 +58,8 @@ a {
 .chartjs-render-monitor {
   letter-spacing: normal;
 }
+
+/* ascii */
+.responsive-ascii {
+  font-size: 8px;
+}

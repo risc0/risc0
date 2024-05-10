@@ -3,7 +3,7 @@ import { buttonVariants } from "@risc0/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AsciiArt } from "shared/components/ascii-art";
+import { AsciiArt } from "shared/server/components/ascii-art";
 
 export const metadata: Metadata = {
   title: "Page Not Found",

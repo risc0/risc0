@@ -1,6 +1,7 @@
 import { Separator } from "@risc0/ui/separator";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
+import { FooterAscii } from "../../_components/footer-ascii";
 import { ApplicationsBenchmarksCommitHashButton } from "./_components/applications-benchmarks-commit-hash-button";
 
 export default function ApplicationsBenchmarksLayout({ params, children }) {
@@ -17,6 +18,8 @@ export default function ApplicationsBenchmarksLayout({ params, children }) {
       <Separator className="mt-2" />
 
       {children}
+
+      <FooterAscii text="Applications Benchmarks" />
     </div>
   );
 }
