@@ -31,7 +31,7 @@ constexpr size_t kStepModeSeqParallel = 0;
 constexpr size_t kStepModeSeqForward = 1;
 constexpr size_t kStepModeSeqReverse = 2;
 
-constexpr size_t kVerifyMemBodyKind = 1;
+// constexpr size_t kVerifyMemBodyKind = 1;
 constexpr size_t kVerifyMemHaltKind = 2;
 
 LaunchConfig getSimpleConfig(uint32_t count) {
@@ -421,14 +421,36 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_cuda_step_compute_accum(
-    void* ctx, uint32_t steps, uint32_t count, Fp* ctrl, Fp* io, Fp* data, Fp* mix, Fp* accum) {
+__global__ void par_step_compute_accum(AccumContext* ctx,
+                                       uint32_t steps,
+                                       uint32_t count,
+                                       Fp* arg0,
+                                       Fp* arg1,
+                                       Fp* arg2,
+                                       Fp* arg3,
+                                       Fp* arg4) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= count) {
+    return;
+  }
+  step_compute_accum(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+}
+
+const char* risc0_circuit_rv32im_cuda_step_compute_accum(AccumContext* ctx,
+                                                         uint32_t steps,
+                                                         uint32_t count,
+                                                         Fp* ctrl,
+                                                         Fp* io,
+                                                         Fp* data,
+                                                         Fp* mix,
+                                                         Fp* accum) {
   try {
     CUDA_OK(cudaDeviceSynchronize());
 
     CudaStream stream;
     auto cfg = getSimpleConfig(count);
-    step_compute_accum<<<cfg.grid, cfg.block, 0, stream>>>(
+
+    par_step_compute_accum<<<cfg.grid, cfg.block, 0, stream>>>(
         ctx, steps, count, ctrl, io, data, mix, accum);
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::runtime_error& err) {
@@ -437,14 +459,35 @@ const char* risc0_circuit_rv32im_cuda_step_compute_accum(
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_cuda_step_verify_accum(
-    void* ctx, uint32_t steps, uint32_t count, Fp* ctrl, Fp* io, Fp* data, Fp* mix, Fp* accum) {
+__global__ void par_step_verify_accum(AccumContext* ctx,
+                                      uint32_t steps,
+                                      uint32_t count,
+                                      Fp* arg0,
+                                      Fp* arg1,
+                                      Fp* arg2,
+                                      Fp* arg3,
+                                      Fp* arg4) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= count) {
+    return;
+  }
+  step_verify_accum(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+}
+
+const char* risc0_circuit_rv32im_cuda_step_verify_accum(AccumContext* ctx,
+                                                        uint32_t steps,
+                                                        uint32_t count,
+                                                        Fp* ctrl,
+                                                        Fp* io,
+                                                        Fp* data,
+                                                        Fp* mix,
+                                                        Fp* accum) {
   try {
     CUDA_OK(cudaDeviceSynchronize());
 
     CudaStream stream;
     auto cfg = getSimpleConfig(count);
-    step_verify_accum<<<cfg.grid, cfg.block, 0, stream>>>(
+    par_step_verify_accum<<<cfg.grid, cfg.block, 0, stream>>>(
         ctx, steps, count, ctrl, io, data, mix, accum);
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::runtime_error& err) {

@@ -32,11 +32,11 @@ __device__ void step_verify_mem(
 __device__ void step_verify_bytes(
     void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
-__global__ void step_compute_accum(
-    void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
+__device__ void step_compute_accum(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
-__global__ void step_verify_accum(
-    void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
+__device__ void step_verify_accum(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4);
 
 __global__ void eval_check(Fp* check,
                            const Fp* ctrl,

@@ -7963,12 +7963,7 @@ __device__ void step_exec(
       extern_args[26] = x1437;
       extern_args[27] = x1444;
       extern_args[28] = x1443;
-      extern_log(ctx,
-                 cycle,
-                 "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, "
-                 "EQ:%u, LT:%u, LTU:%u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", extern_args, extern_outs);
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
       auto x1445 = x1189 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
@@ -12624,12 +12619,7 @@ __device__ void step_exec(
       extern_args[26] = x2127;
       extern_args[27] = x2134;
       extern_args[28] = x2133;
-      extern_log(ctx,
-                 cycle,
-                 "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, "
-                 "EQ:%u, LT:%u, LTU:%u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", extern_args, extern_outs);
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
       auto x2135 = x1793 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
@@ -17338,12 +17328,7 @@ __device__ void step_exec(
       extern_args[26] = x2882;
       extern_args[27] = x2889;
       extern_args[28] = x2888;
-      extern_log(ctx,
-                 cycle,
-                 "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, "
-                 "EQ:%u, LT:%u, LTU:%u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, inA = %w, inB = %w, ALU output = %w, EQ:%u, LT:%u, LTU:%u", extern_args, extern_outs);
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
       auto x2890 = x2577 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":45:0)
@@ -21424,11 +21409,7 @@ __device__ void step_exec(
       extern_args[17] = x3579;
       extern_args[18] = x3580;
       extern_args[19] = x3581;
-      extern_log(ctx,
-                 cycle,
-                 "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, Addr = %10x, lowBits = %u, loaded = %w",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "  imm=%w, rs1=x%u -> %w, rs2=x%u -> %w, Addr = %10x, lowBits = %u, loaded = %w", extern_args, extern_outs);
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":92:0)
       auto x3582 = x959 + x77;
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":14:0)
@@ -24462,11 +24443,7 @@ __device__ void step_exec(
       extern_args[2] = x95;
       extern_args[3] = x95;
       extern_args[4] = x95;
-      extern_log(ctx,
-                 cycle,
-                 "  useImm=%u, usePo2=%u, signedA=%u, signedB=%u, useHigh=%u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "  useImm=%u, usePo2=%u, signedA=%u, signedB=%u, useHigh=%u", extern_args, extern_outs);
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[1](Reg)"("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":102:0))
       auto x4091 = arg2[182 * steps + ((cycle - 0) & mask)];
       assert(x4091 != Fp::invalid());
@@ -26472,11 +26449,7 @@ __device__ void step_exec(
       extern_args[2] = x4559;
       extern_args[3] = x4558;
       extern_args[4] = x4546;
-      extern_log(ctx,
-                 cycle,
-                 "  useImm=%u, usePo2=%u, signed=%u, onesComp=%u, useRem=%u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "  useImm=%u, usePo2=%u, signed=%u, onesComp=%u, useRem=%u", extern_args, extern_outs);
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":37:0)
       auto x4560 = x4473 * x93;
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":37:0)
@@ -30170,8 +30143,7 @@ __device__ void step_exec(
       extern_args[2] = x5522;
       extern_args[3] = x5526;
       extern_args[4] = x5525;
-      extern_log(
-          ctx, cycle, "  mul->getOut() = %w, denomRemCheck->carry = %u", extern_args, extern_outs);
+      extern_log(ctx, cycle, "  mul->getOut() = %w, denomRemCheck->carry = %u", extern_args, extern_outs);
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":161:0)
       auto x5527 = x5484 - x5276;
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":161:0)
@@ -32022,11 +31994,7 @@ __device__ void step_exec(
         extern_args[0] = x5826;
         extern_args[1] = x5827;
         extern_args[2] = x5828;
-        extern_log(ctx,
-                   cycle,
-                   "Calculated orig = %u, output chunks = %u, first cycle-1 = %u",
-                   extern_args,
-                   extern_outs);
+        extern_log(ctx, cycle, "Calculated orig = %u, output chunks = %u, first cycle-1 = %u", extern_args, extern_outs);
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":95:0)
         auto x5829 = x5828 + x96;
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":95:0)
@@ -33039,8 +33007,7 @@ __device__ void step_exec(
       extern_args[0] = x68;
       extern_args[1] = x6019;
       extern_args[2] = x5954;
-      extern_log(
-          ctx, cycle, "SHA_INIT: major = %u, minor = %u, count = %u", extern_args, extern_outs);
+      extern_log(ctx, cycle, "SHA_INIT: major = %u, minor = %u, count = %u", extern_args, extern_outs);
       if (x5946 != 0) {
         {
           extern_args[0] = x25;
@@ -33390,12 +33357,7 @@ __device__ void step_exec(
         extern_args[2] = x6085;
         extern_args[3] = x6083;
         extern_args[4] = x6090;
-        extern_log(
-            ctx,
-            cycle,
-            "  FromEcall: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, repeat: %u",
-            extern_args,
-            extern_outs);
+        extern_log(ctx, cycle, "  FromEcall: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, repeat: %u", extern_args, extern_outs);
       }
       if (x5947 != 0) {
         // loc("zirgen/components/ram.cpp":43:0)
@@ -33573,12 +33535,7 @@ __device__ void step_exec(
         extern_args[2] = x6102;
         extern_args[3] = x6100;
         extern_args[4] = x6107;
-        extern_log(ctx,
-                   cycle,
-                   "  FromPageFault: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, "
-                   "repeat: %u",
-                   extern_args,
-                   extern_outs);
+        extern_log(ctx, cycle, "  FromPageFault: stateOut = %10x, stateIn = %10x, data0 = %10x, data1 = %10x, repeat: %u", extern_args, extern_outs);
       }
       if (x5950 != 0) {
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("zirgen/circuit/rv32im/v1/edsl/sha.cpp":230:0))
@@ -36044,12 +36001,7 @@ __device__ void step_exec(
       extern_args[4] = x6723;
       extern_args[5] = x6721;
       extern_args[6] = x6712;
-      extern_log(ctx,
-                 cycle,
-                 "SHA_LOAD: major = %u, minor = %u, count = %u, data0 = %10x, data1 = %10x, state "
-                 "= %10x, repeat: %u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "SHA_LOAD: major = %u, minor = %u, count = %u, data0 = %10x, data1 = %10x, state = %10x, repeat: %u", extern_args, extern_outs);
       // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":310:0)
       auto x6727 = x96 - x6726;
       if (x6727 != 0) {
@@ -42090,11 +42042,7 @@ __device__ void step_exec(
       extern_args[1] = x8932;
       extern_args[2] = x8924;
       extern_args[3] = x8938;
-      extern_log(ctx,
-                 cycle,
-                 "SHA_MAIN: major = %u, minor = %u, count = %u, repeat = %u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "SHA_MAIN: major = %u, minor = %u, count = %u, repeat = %u", extern_args, extern_outs);
       if (x8933 != 0) {
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":384:0)
         auto x8969 = x6 - x8924;
@@ -54072,11 +54020,7 @@ __device__ void step_exec(
         extern_args[0] = x13388;
         extern_args[1] = x13356;
         extern_args[2] = x13385;
-        extern_log(ctx,
-                   cycle,
-                   "  COPYIN INIT: dest=%x, remaining=%u first chunk words=%u",
-                   extern_args,
-                   extern_outs);
+        extern_log(ctx, cycle, "  COPYIN INIT: dest=%x, remaining=%u first chunk words=%u", extern_args, extern_outs);
       }
       if (x13351 != 0) {
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":199:0)
@@ -55683,11 +55627,7 @@ __device__ void step_exec(
       extern_args[1] = x13620;
       extern_args[2] = x13634;
       extern_args[3] = x13635;
-      extern_log(ctx,
-                 cycle,
-                 "BIGINT: stage = %u, stageOffset = %u, mulActive = %u, finalize = %u",
-                 extern_args,
-                 extern_outs);
+      extern_log(ctx, cycle, "BIGINT: stage = %u, stageOffset = %u, mulActive = %u, finalize = %u", extern_args, extern_outs);
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":204:0))
       auto x13636 = arg2[172 * steps + ((cycle - 0) & mask)];
       assert(x13636 != Fp::invalid());
@@ -56613,11 +56553,7 @@ __device__ void step_exec(
         extern_args[2] = x13772;
         extern_args[3] = x13766;
         extern_args[4] = x13760;
-        extern_log(ctx,
-                   cycle,
-                   "  Reading: ioAddr = 0x%x, data = { %u, %u, %u, %u }",
-                   extern_args,
-                   extern_outs);
+        extern_log(ctx, cycle, "  Reading: ioAddr = 0x%x, data = { %u, %u, %u, %u }", extern_args, extern_outs);
       }
       {
         extern_args[0] = x25;
@@ -72499,11 +72435,7 @@ __device__ void step_exec(
         extern_args[2] = x19644;
         extern_args[3] = x19638;
         extern_args[4] = x19632;
-        extern_log(ctx,
-                   cycle,
-                   "  Writing: ioAddr = 0x%x, data = { %u, %u, %u, %u }",
-                   extern_args,
-                   extern_outs);
+        extern_log(ctx, cycle, "  Writing: ioAddr = 0x%x, data = { %u, %u, %u, %u }", extern_args, extern_outs);
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":453:0)
       auto x19652 = x96 - x13635;

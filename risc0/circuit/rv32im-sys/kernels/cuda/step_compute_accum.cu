@@ -16,12 +16,8 @@
 
 #include "extern.cuh"
 
-__global__ void step_compute_accum(
-    void* ctx, uint32_t steps, uint32_t count, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4) {
-  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
-  if (cycle >= count) {
-    return;
-  }
+__device__ void step_compute_accum(
+    void* ctx, uint32_t steps, uint32_t cycle, Fp* arg0, Fp* arg1, Fp* arg2, Fp* arg3, Fp* arg4) {
   uint32_t mask = steps - 1;
   Fp extern_args[96];
   Fp extern_outs[32];
