@@ -29,6 +29,10 @@
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
 [quickstart]: https://dev.risczero.com/api/zkvm/quickstart
 [zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
+[zksummit10-talk]: https://www.youtube.com/watch?v=wkIBN2CGJdc
+[security-model]: https://dev.risczero.com/api/security-model
+[proof-system-in-detail]: https://dev.risczero.com/proof-system-in-detail.pdf
+[soundness.rs]: risc0/zkp/src/prove/soundness.rs
 
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
@@ -82,16 +86,13 @@ execution of the code).
 
 ## Security
 
-This code is based on the well studied zk-STARK protocol, which has been proven
-secure under the random oracle model, with the only assumption being the
-security of the cryptographic hash used.  Our implementation uses SHA-256 for
-that hash and targets 100 bits of security.
+This code implements a [three-layer recursive proof system][zksummit10-talk], based on the well-studied
+zk-STARK protocol and Groth16 protocol. An overview of the underlying cryptographic assumptions can be found on our
+[Security Model][security-model] page. With default parameters, this system achieves perfect zero-knowledgeness and 98 bits of conjectured security. Our STARK protocol is described in [Scalable, Transparent Arguments of RISC-V Integrity][proof-system-in-detail], and a soundness/security calculator is included in the [soundness.rs][soundness.rs] file.
 
-That said, this code is still under heavy development and has not been audited.
-There may be bugs in the zk-STARK implementation, the arithmetic circuit used to
-instantiate the RISC-V zkVM, or any other element of the code's implementation.
-Such bugs may impact the security of receipts, leak information, or cause any
-other manner of problems.  Caveat emptor.
+To run the calculator, use `RUST_LOG=risc0_zkp=info cargo run --release`.
+
+
 
 ## Getting Started
 
