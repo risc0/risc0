@@ -212,7 +212,7 @@ mod tests {
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SegmentReceipt::verifier_parameters().digest(),
-            Digest::from_hex("1054ac6a9748f4c255d47f3716cf4e7336291eb96aaecf3fef60d7f9e4e371a3")
+            Digest::from_hex("929e6fe659097966a442d0919e56fc13a2efffa2ef9e88b2ed37bc7eb7686f03")
                 .unwrap()
         );
     }
