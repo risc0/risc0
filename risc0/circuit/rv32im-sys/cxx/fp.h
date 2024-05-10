@@ -19,7 +19,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 
 namespace risc0 {
 
@@ -45,6 +44,7 @@ public:
   static constexpr uint32_t P = 15 * (uint32_t(1) << 27) + 1;
   static constexpr uint32_t M = 0x88000001;
   static constexpr uint32_t R2 = 1172168163;
+  static constexpr uint32_t INVALID = 0xffffffff;
 
 private:
   // The actual value, always < P.
@@ -100,7 +100,14 @@ public:
   static constexpr inline Fp maxVal() { return P - 1; }
 
   /// Get an 'invalid' Fp value
-  static constexpr inline Fp invalid() { return Fp(0xfffffffful, true); }
+  static constexpr inline Fp invalid() { return Fp(INVALID, true); }
+
+  constexpr inline Fp zeroize() {
+    if (val == INVALID) {
+      val = 0;
+    }
+    return *this;
+  }
 
   // Implement all the various overloads
   constexpr inline Fp operator+(Fp rhs) const { return Fp(add(val, rhs.val), true); }
@@ -179,8 +186,8 @@ constexpr inline Fp pow(Fp x, size_t n) {
 /// Compute the multiplicative inverse of x, or `1/x` in finite field terms.  Since `x^(P-1) == 1
 /// (mod P)` for any x != 0 (as a consequence of Fermat's little theorem), it follows that `x *
 /// x^(P-2) == 1 (mod P)` for x != 0.  That is, `x^(P-2)` is the multiplicative inverse of x.
-/// Computed this way, the 'inverse' of zero comes out as zero, which is convenient in many cases, so
-/// we leave it.
+/// Computed this way, the 'inverse' of zero comes out as zero, which is convenient in many cases,
+/// so we leave it.
 constexpr inline Fp inv(Fp x) {
   return pow(x, Fp::P - 2);
 }

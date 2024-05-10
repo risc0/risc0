@@ -17,14 +17,9 @@ use std::ffi::CStr;
 use anyhow::{anyhow, Result};
 use risc0_circuit_rv32im_sys::ffi::{
     risc0_circuit_rv32im_accum_context_alloc, risc0_circuit_rv32im_accum_context_free,
-    risc0_circuit_rv32im_calc_prefix_products, risc0_circuit_rv32im_inject_backs_bytes,
-    risc0_circuit_rv32im_inject_backs_ram, risc0_circuit_rv32im_machine_context_alloc,
-    risc0_circuit_rv32im_machine_context_free, risc0_circuit_rv32im_poly_fp,
-    risc0_circuit_rv32im_sort_bytes, risc0_circuit_rv32im_sort_ram,
-    risc0_circuit_rv32im_step_compute_accum, risc0_circuit_rv32im_step_exec,
-    risc0_circuit_rv32im_step_verify_accum, risc0_circuit_rv32im_step_verify_bytes,
-    risc0_circuit_rv32im_step_verify_mem, risc0_circuit_string_free, risc0_circuit_string_ptr,
-    RawAccumContext, RawError, RawMachineContext, RawPreflightTrace,
+    risc0_circuit_rv32im_calc_prefix_products, risc0_circuit_rv32im_poly_fp,
+    risc0_circuit_rv32im_step_compute_accum, risc0_circuit_rv32im_step_verify_accum,
+    risc0_circuit_string_free, risc0_circuit_string_ptr, RawAccumContext, RawError,
 };
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{adapter::PolyFp, hal::cpu::SyncSlice};
@@ -32,16 +27,8 @@ use risc0_zkp::{adapter::PolyFp, hal::cpu::SyncSlice};
 use crate::CircuitImpl;
 
 pub struct SyncAccumContext(pub *const RawAccumContext);
-pub struct SyncMachineContext(pub *const RawMachineContext);
 
-unsafe impl Sync for SyncMachineContext {}
 unsafe impl Sync for SyncAccumContext {}
-
-impl Drop for SyncMachineContext {
-    fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_machine_context_free(self.0) };
-    }
-}
 
 impl Drop for SyncAccumContext {
     fn drop(&mut self) {
@@ -63,83 +50,8 @@ impl PolyFp<BabyBear> for CircuitImpl {
 }
 
 impl CircuitImpl {
-    pub fn alloc_machine_ctx(&self, trace: &RawPreflightTrace, steps: usize) -> SyncMachineContext {
-        SyncMachineContext(unsafe { risc0_circuit_rv32im_machine_context_alloc(trace, steps) })
-    }
-
     pub fn alloc_accum_ctx(&self, steps: usize) -> SyncAccumContext {
         SyncAccumContext(unsafe { risc0_circuit_rv32im_accum_context_alloc(steps) })
-    }
-
-    pub fn par_step_exec(
-        &self,
-        steps: usize,
-        cycle: usize,
-        ctx: &SyncMachineContext,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
-        self.wrap_ffi(|err| unsafe {
-            risc0_circuit_rv32im_step_exec(err, ctx.0, steps, cycle, args.as_ptr())
-        })
-    }
-
-    pub fn par_step_verify_mem(
-        &self,
-        steps: usize,
-        cycle: usize,
-        ctx: &SyncMachineContext,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
-        self.wrap_ffi(|err| unsafe {
-            risc0_circuit_rv32im_step_verify_mem(err, ctx.0, steps, cycle, args.as_ptr())
-        })
-    }
-
-    pub fn par_step_verify_bytes(
-        &self,
-        steps: usize,
-        cycle: usize,
-        ctx: &SyncMachineContext,
-        args: &[SyncSlice<BabyBearElem>],
-    ) -> Result<()> {
-        let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
-        self.wrap_ffi(|err| unsafe {
-            risc0_circuit_rv32im_step_verify_bytes(err, ctx.0, steps, cycle, args.as_ptr())
-        })
-    }
-
-    pub fn sort_ram(&self, ctx: &SyncMachineContext) -> Result<()> {
-        self.wrap_ffi(|err| unsafe { risc0_circuit_rv32im_sort_ram(err, ctx.0) })
-    }
-
-    pub fn inject_backs_ram(
-        &self,
-        ctx: &SyncMachineContext,
-        steps: usize,
-        cycle: usize,
-        data: SyncSlice<BabyBearElem>,
-    ) -> Result<()> {
-        self.wrap_ffi(|err| unsafe {
-            risc0_circuit_rv32im_inject_backs_ram(err, ctx.0, steps, cycle, data.get_ptr())
-        })
-    }
-
-    pub fn sort_bytes(&self, ctx: &SyncMachineContext) -> Result<()> {
-        self.wrap_ffi(|err| unsafe { risc0_circuit_rv32im_sort_bytes(err, ctx.0) })
-    }
-
-    pub fn inject_backs_bytes(
-        &self,
-        ctx: &SyncMachineContext,
-        steps: usize,
-        cycle: usize,
-        data: SyncSlice<BabyBearElem>,
-    ) -> Result<()> {
-        self.wrap_ffi(|err| unsafe {
-            risc0_circuit_rv32im_inject_backs_bytes(err, ctx.0, steps, cycle, data.get_ptr())
-        })
     }
 
     pub fn par_step_compute_accum(

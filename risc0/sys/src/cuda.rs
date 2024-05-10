@@ -17,7 +17,7 @@ use cust::memory::DevicePointer;
 extern "C" {
     pub fn sppark_init() -> sppark::Error;
 
-    pub fn batch_expand(
+    pub fn sppark_batch_expand(
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,
         lg_domain_size: u32,

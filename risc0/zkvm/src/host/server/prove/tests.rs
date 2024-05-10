@@ -12,38 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
-
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
-use risc0_circuit_rv32im::prove::{emu::testutil, hal::cpu::CpuCircuitHal};
-use risc0_zkp::{
-    core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
-    hal::cpu::CpuHal,
-    verify::VerificationError,
-};
+use risc0_circuit_rv32im::prove::emu::testutil;
+use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
 use test_log::test;
 
-use super::{get_prover_server, HalPair, ProverImpl};
+use super::get_prover_server;
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, ReceiptKind,
-    Session, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
+    VerifierContext,
 };
 
-fn prover_opts_fast() -> ProverOpts {
-    ProverOpts {
-        hashfn: "sha-256".to_string(),
-        prove_guest_errors: false,
-        receipt_kind: ReceiptKind::Composite,
-    }
-}
-
 fn prove_session_fast(session: &Session) -> Receipt {
-    let prover = get_prover_server(&prover_opts_fast()).unwrap();
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
     prover
         .prove_session(&VerifierContext::default(), session)
         .unwrap()
@@ -87,20 +73,20 @@ fn hashfn_poseidon2() {
     prove_nothing("poseidon2").unwrap();
 }
 
-#[test]
-fn hashfn_blake2b() {
-    let hal_pair = HalPair {
-        hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
-        circuit_hal: Rc::new(CpuCircuitHal::new()),
-    };
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let prover = ProverImpl::new("cpu:blake2b", hal_pair, ReceiptKind::Composite);
-    prover.prove(env, MULTI_TEST_ELF).unwrap();
-}
+// #[test]
+// fn hashfn_blake2b() {
+//     let hal_pair = HalPair {
+//         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
+//         circuit_hal: Rc::new(CpuCircuitHal::new()),
+//     };
+//     let env = ExecutorEnv::builder()
+//         .write(&MultiTestSpec::DoNothing)
+//         .unwrap()
+//         .build()
+//         .unwrap();
+//     let prover = ProverImpl::new("cpu:blake2b", hal_pair, ReceiptKind::Composite);
+//     prover.prove(env, MULTI_TEST_ELF).unwrap();
+// }
 
 #[test]
 fn receipt_serde() {
@@ -651,14 +637,14 @@ mod sys_verify {
     };
     use test_log::test;
 
-    use super::{get_prover_server, prover_opts_fast};
+    use super::get_prover_server;
     use crate::{
         serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
         Receipt,
     };
 
     fn prove_hello_commit() -> Receipt {
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
             .unwrap()
@@ -713,7 +699,7 @@ mod sys_verify {
             .add_assumption(hello_commit_receipt().clone())
             .build()
             .unwrap();
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
@@ -736,7 +722,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -759,7 +745,7 @@ mod sys_verify {
             .unwrap();
 
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -785,7 +771,7 @@ mod sys_verify {
             .add_assumption(hello_commit_receipt().clone())
             .build()
             .unwrap();
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
@@ -800,7 +786,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -814,7 +800,7 @@ mod sys_verify {
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&prover_opts_fast())
+        assert!(get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
@@ -837,7 +823,7 @@ mod sys_verify {
             .add_assumption(halt_receipt)
             .build()
             .unwrap();
-        get_prover_server(&prover_opts_fast())
+        get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()

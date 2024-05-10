@@ -61,6 +61,11 @@ fn singleton() -> &'static ReentrantMutex<()> {
 }
 
 #[derive(Clone, Copy)]
+#[repr(transparent)]
+pub struct DeviceElem(pub BabyBearElem);
+
+#[derive(Clone, Copy)]
+#[repr(transparent)]
 pub struct DeviceExtElem(pub BabyBearExtElem);
 
 unsafe impl DeviceCopy for DeviceExtElem {}
@@ -438,8 +443,7 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, item_size) };
         let host_buf = device_slice.as_host_vec().unwrap();
         let slice: &[T] = unchecked_cast(&host_buf);
-        let item = slice[0].clone();
-        item
+        slice[0].clone()
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
@@ -464,6 +468,13 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         f(&mut slice[self.offset..]);
         buf.buf.copy_from(&host_buf).unwrap();
         nvtx::range_pop!();
+    }
+
+    fn to_vec(&self) -> Vec<T> {
+        let buf = self.buffer.borrow_mut();
+        let host_buf = buf.buf.as_host_vec().unwrap();
+        let slice = unchecked_cast(&host_buf);
+        slice.to_vec()
     }
 }
 
@@ -598,7 +609,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
             assert_eq!(out_size, in_size * (1 << expand_bits));
             let in_bits = log2_ceil(in_size);
             let err = unsafe {
-                batch_expand(
+                sppark_batch_expand(
                     output.as_device_ptr(),
                     input.as_device_ptr(),
                     in_bits.try_into().unwrap(),
@@ -860,6 +871,16 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         self.stream.synchronize().unwrap();
     }
 
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        let kernel = self.module.get_function("eltwise_zeroize_fp").unwrap();
+        let params = self.compute_simple_params(elems.size());
+        unsafe {
+            let stream = &self.stream;
+            launch!(kernel<<<params.0, params.1, 0, stream>>>(elems.as_device_ptr())).unwrap();
+        }
+        self.stream.synchronize().unwrap();
+    }
+
     #[tracing::instrument(skip_all)]
     fn fri_fold(
         &self,
@@ -916,8 +937,10 @@ fn div_ceil(a: u32, b: u32) -> u32 {
 
 pub fn prefix_products(io: &mut UnifiedBuffer<DeviceExtElem>) {
     let len = io.len();
+    // println!("len: {len}");
     let io = io.as_mut_slice();
     for i in 1..len {
+        // println!("[{i}]: {:?}", io[i].0);
         io[i].0 *= io[i - 1].0;
     }
 }
