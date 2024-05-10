@@ -142,12 +142,10 @@ impl Prover for ExternalProver {
             }
             (InnerReceipt::Composite(composite), ReceiptKind::Succinct) => {
                 let client = ApiClient::new_sub_process(&self.r0vm_path)?;
-                Ok(Receipt {
-                    inner: InnerReceipt::Succinct(Self::composite_to_succinct(
-                        &client, opts, composite,
-                    )?),
-                    journal: receipt.journal.clone(),
-                })
+                Ok(Receipt::new(
+                    InnerReceipt::Succinct(Self::composite_to_succinct(&client, opts, composite)?),
+                    receipt.journal.bytes.clone(),
+                ))
             }
             (_, ReceiptKind::Compact) => {
                 // TODO(#1760) Support compression to compact receipt in client/server API.

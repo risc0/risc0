@@ -14,7 +14,6 @@
 
 //! Manages the output and cryptographic data for a proven computation.
 
-#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
 pub(crate) mod compact;
 pub(crate) mod composite;
 pub(crate) mod segment;
@@ -37,16 +36,20 @@ use risc0_zkp::{
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
+// Make succinct receipt available through this `receipt` module.
 use crate::{
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
-#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use self::compact::CompactReceipt;
+pub use self::compact::{CompactReceipt, CompactReceiptVerifierParameters};
 
-pub use self::{composite::CompositeReceipt, segment::SegmentReceipt, succinct::SuccinctReceipt};
+pub use self::{
+    composite::{CompositeReceipt, CompositeReceiptVerifierParameters},
+    segment::{SegmentReceipt, SegmentReceiptVerifierParameters},
+    succinct::{SuccinctReceipt, SuccinctReceiptVerifierParameters},
+};
 
 /// A receipt attesting to the execution of a guest program.
 ///
@@ -113,17 +116,26 @@ pub struct Receipt {
 
     /// The public commitment written by the guest.
     ///
-    /// This data is cryptographically authenticated in
-    /// [Receipt::verify].
+    /// This data is cryptographically authenticated in [Receipt::verify].
     pub journal: Journal,
+
+    /// Metadata providing context on the receipt, about the proving system, SDK versions, and other
+    /// information to help with interoperability. It is not cryptographically bound to the receipt,
+    /// and should not be used for security-relevant decisions, such as choosing whether or not to
+    /// accept a receipt based on it's stated version.
+    pub metadata: ReceiptMetadata,
 }
 
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
+        let metadata = ReceiptMetadata {
+            verifier_parameters: inner.verifier_parameters(),
+        };
         Self {
             inner,
             journal: Journal::new(journal),
+            metadata,
         }
     }
 
@@ -152,6 +164,13 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
+        if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: self.inner.verifier_parameters(),
+                received: self.metadata.verifier_parameters,
+            });
+        }
+
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
@@ -207,6 +226,13 @@ impl Receipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        if self.inner.verifier_parameters() != self.metadata.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: self.inner.verifier_parameters(),
+                received: self.metadata.verifier_parameters,
+            });
+        }
+
         tracing::debug!("Receipt::verify_integrity_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
@@ -280,6 +306,7 @@ impl AsRef<[u8]> for Journal {
 /// [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
 pub enum InnerReceipt {
     /// A non-succinct [CompositeReceipt].
     Composite(CompositeReceipt),
@@ -288,7 +315,6 @@ pub enum InnerReceipt {
     Succinct(SuccinctReceipt),
 
     /// The [CompactReceipt].
-    #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
     Compact(CompactReceipt),
 
     /// A fake receipt for testing and development.
@@ -317,7 +343,6 @@ impl InnerReceipt {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
-            #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
             InnerReceipt::Compact(x) => x.verify_integrity(),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
@@ -340,7 +365,6 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Compact] arm.
-    #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
     pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
         if let InnerReceipt::Compact(x) = self {
             Ok(x)
@@ -362,12 +386,37 @@ impl InnerReceipt {
     pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.claim(),
-            #[cfg(any(not(target_os = "zkvm"), feature = "std"))]
             InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
             InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }
     }
+
+    /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
+    pub fn verifier_parameters(&self) -> Digest {
+        match self {
+            InnerReceipt::Composite(_) => CompositeReceipt::verifier_parameters().digest(),
+            InnerReceipt::Compact(_) => CompactReceipt::verifier_parameters().digest(),
+            InnerReceipt::Succinct(_) => SuccinctReceipt::verifier_parameters().digest(),
+            InnerReceipt::Fake { .. } => Digest::ZERO,
+        }
+    }
+}
+
+/// Metadata providing context on the receipt, about the proving system, SDK versions, and other
+/// information to help with interoperability. It is not cryptographically bound to the receipt,
+/// and should not be used for security-relevant decisions, such as choosing whether or not to
+/// accept a receipt based on it's stated version.
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct ReceiptMetadata {
+    /// Information which can be used to decide whether a given verifier is compatible with this
+    /// receipt (i.e. that it may be able to verify it).
+    ///
+    /// It is intended to be used when there are multiple verifier implementations (e.g.
+    /// corresponding to multiple versions of a proof system or circuit) and it is ambiguous which
+    /// one should be used to attempt verification of a receipt.
+    pub verifier_parameters: Digest,
 }
 
 /// An assumption attached to a guest execution as a result of calling
@@ -447,5 +496,63 @@ impl Default for VerifierContext {
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{InnerReceipt, Receipt};
+    use crate::{
+        sha::{Digest, DIGEST_BYTES},
+        ExitCode, MaybePruned, ReceiptClaim,
+    };
+    use risc0_zkp::verify::VerificationError;
+
+    #[test]
+    fn mangled_version_info_should_error() {
+        let claim = ReceiptClaim {
+            pre: MaybePruned::Pruned(Digest::ZERO),
+            post: MaybePruned::Pruned(Digest::ZERO),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: None.into(),
+        };
+
+        let mut mangled_receipt = Receipt::new(
+            InnerReceipt::Fake {
+                claim: claim.clone(),
+            },
+            vec![],
+        );
+        let ones_digest = Digest::from([1u8; DIGEST_BYTES]);
+        mangled_receipt.metadata.verifier_parameters = ones_digest;
+
+        assert_eq!(
+            mangled_receipt.verify(Digest::ZERO).err().unwrap(),
+            VerificationError::VerifierParametersMismatch {
+                expected: Digest::ZERO,
+                received: ones_digest
+            }
+        );
+        assert_eq!(
+            mangled_receipt
+                .verify_with_context(&Default::default(), Digest::ZERO)
+                .err()
+                .unwrap(),
+            VerificationError::VerifierParametersMismatch {
+                expected: Digest::ZERO,
+                received: ones_digest
+            }
+        );
+        assert_eq!(
+            mangled_receipt
+                .verify_integrity_with_context(&Default::default())
+                .err()
+                .unwrap(),
+            VerificationError::VerifierParametersMismatch {
+                expected: Digest::ZERO,
+                received: ones_digest
+            }
+        );
     }
 }

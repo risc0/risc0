@@ -4315,6 +4315,7 @@ version = "1.0.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
+ "ark-ec",
  "ark-groth16",
  "ark-serialize",
  "bytemuck",
@@ -4322,6 +4323,7 @@ dependencies = [
  "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
+ "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
  "serde",
