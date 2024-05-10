@@ -28,10 +28,7 @@ use crate::{receipt::VerifierContext, sha::Digestible, ReceiptClaim};
 
 /// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
-    ALLOWED_CONTROL_IDS
-        .iter()
-        .map(|x| Digest::from_hex(x).unwrap())
-        .collect()
+    ALLOWED_CONTROL_IDS.to_vec()
 }
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM.
@@ -110,10 +107,9 @@ impl SuccinctReceipt {
             .collect::<Vec<_>>()
             .try_into()
             .map_err(|_| VerificationError::ReceiptFormatError)?;
-        let allowed_root = Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap();
-        if control_root != allowed_root {
+        if control_root != ALLOWED_CONTROL_ROOT {
             tracing::debug!(
-                "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {allowed_root:?}",
+                "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {ALLOWED_CONTROL_ROOT:?}",
                 control_root,
             );
             return Err(VerificationError::ControlVerificationError {

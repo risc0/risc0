@@ -300,7 +300,7 @@ fn stable_root() {
     // If you have _intentionally_ changed control IDs, update this hash.
 
     assert_eq!(
-        ALLOWED_CONTROL_ROOT,
+        hex::encode(ALLOWED_CONTROL_ROOT),
         "75310e05f78b6d149d87c66ea5e2eb0b3d5afc45f0581017319c9f4cfd865113"
     );
 }

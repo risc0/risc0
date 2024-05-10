@@ -221,7 +221,7 @@ impl CompositeReceipt {
                 .map(|a| {
                     Ok(Assumption {
                         claim: a.claim()?.digest(),
-                        control_root: Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap(),
+                        control_root: ALLOWED_CONTROL_ROOT,
                     }
                     .into())
                 })

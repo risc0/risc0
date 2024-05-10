@@ -503,7 +503,7 @@ impl Prover {
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
         let which = po2 - MIN_CYCLES_PO2;
-        let inner_control_id = Digest::from_hex(POSEIDON2_CONTROL_ID[which]).unwrap();
+        let inner_control_id = POSEIDON2_CONTROL_ID[which];
         prover.add_seal(seal, &inner_control_id, &allowed_ids)?;
 
         Ok(prover)

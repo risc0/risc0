@@ -35,11 +35,7 @@ fn get_zkr(name: &str) -> Result<(Program, Digest)> {
         ZKR_CONTROL_IDS
             .iter()
             .copied()
-            .find_map(|(n, id)| {
-                (n == name)
-                    .then_some(id)
-                    .map(|hex| Digest::from_hex(hex).context("malformed entry in control id list"))
-            })
+            .find_map(|(n, id)| (n == name).then_some(id))
             .ok_or(anyhow!("failed to find {name} in the list of control IDs"))??,
     ))
 }

@@ -16,12 +16,11 @@ use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use hex::FromHex;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_CONTROL_ID};
 use risc0_groth16::{
     fr_from_hex_string, split_digest, verifier::prepared_verifying_key, Seal, Verifier,
 };
-use risc0_zkp::{core::digest::Digest, verify::VerificationError};
+use risc0_zkp::verify::VerificationError;
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
@@ -43,11 +42,8 @@ impl CompactReceipt {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
-        let (a0, a1) = split_digest(
-            Digest::from_hex(ALLOWED_CONTROL_ROOT)
-                .map_err(|_| VerificationError::ReceiptFormatError)?,
-        )
-        .map_err(|_| VerificationError::ReceiptFormatError)?;
+        let (a0, a1) = split_digest(ALLOWED_CONTROL_ROOT)
+            .map_err(|_| VerificationError::ReceiptFormatError)?;
         let (c0, c1) =
             split_digest(self.claim.digest()).map_err(|_| VerificationError::ReceiptFormatError)?;
         // DO NOT MERGE: Don't hex encode just to decode.

@@ -63,7 +63,6 @@ impl SegmentReceipt {
             .into_iter()
             .chain(SHA256_CONTROL_ID)
             .chain(BLAKE2B_CONTROL_ID)
-            .map(|x| Digest::from_hex(x).unwrap())
     }
 
     /// Verify the integrity of this receipt, ensuring the claim is attested
