@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, path::Path};
+use std::env;
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -51,24 +51,36 @@ fn build_cuda_kernels() {
         // decrease in performance but a compile time in the minutes.
         // Use RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing.
         .file_opt("kernels/cuda/eval_check.cu", 1)
-        .deps(["kernels/cuda/bigint.cu", "kernels/cuda/extern.cuh"])
-        .deps(glob::glob("kernels/cuda/*.h").unwrap().map(|x| x.unwrap()))
+        .deps([
+            "kernels/cuda/bigint.cu",
+            "kernels/cuda/context.h",
+            "kernels/cuda/cuda.h",
+            "kernels/cuda/extern.h",
+            "kernels/cuda/extern.cuh",
+            "kernels/cuda/kernels.h",
+        ])
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .compile("risc0_rv32im_cuda");
 }
 
 fn build_metal_kernels() {
-    const SRCS: &[&str] = &[
-        "eval_check.metal",
-        "step_compute_accum.metal",
-        "step_verify_accum.metal",
-    ];
-
-    let dir = Path::new("kernels").join("metal");
-    let src_paths = SRCS.iter().map(|x| dir.join(x));
-
     KernelBuild::new(KernelType::Metal)
-        .files(src_paths)
+        .files([
+            // "kernels/metal/bigint.metal",
+            // "kernels/metal/extern.metal",
+            "kernels/metal/eval_check.metal",
+            // "kernels/metal/ffi.metal",
+            "kernels/metal/step_compute_accum.metal",
+            // "kernels/metal/step_exec.metal",
+            "kernels/metal/step_verify_accum.metal",
+            // "kernels/metal/step_verify_bytes.metal",
+            // "kernels/metal/step_verify_mem.metal",
+        ])
+        // .deps([
+        //     "kernels/metal/context.h",
+        //     "kernels/metal/extern.h",
+        //     "kernels/metal/kernels.h",
+        // ])
         .compile("metal_kernel");
 }

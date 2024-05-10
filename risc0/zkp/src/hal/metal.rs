@@ -21,6 +21,7 @@ use metal::{
     MTLSize, NSRange,
 };
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
+use rayon::prelude::*;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
@@ -292,6 +293,7 @@ pub struct BufferImpl<T> {
 }
 
 pub enum KernelArg<'a> {
+    Null,
     Buffer {
         buffer: &'a MetalBuffer,
         offset: u64,
@@ -358,6 +360,14 @@ impl<T> BufferImpl<T> {
         cmd_buffer.commit();
         cmd_buffer.wait_until_completed();
     }
+
+    pub fn as_device_ptr(&self) -> *mut c_void {
+        self.buffer.0.gpu_address() as *mut c_void
+    }
+
+    pub fn as_ptr(&self) -> *mut c_void {
+        self.buffer.0.contents()
+    }
 }
 
 impl<T: Clone> Buffer<T> for BufferImpl<T> {
@@ -411,7 +421,10 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn to_vec(&self) -> Vec<T> {
-        todo!()
+        let ptr = self.buffer.0.contents() as *const T;
+        let len = self.buffer.0.length() as usize / mem::size_of::<T>();
+        let slice = unsafe { slice::from_raw_parts(ptr, len) };
+        Vec::from(slice)
     }
 }
 
@@ -477,6 +490,9 @@ impl<MH: MetalHash> MetalHal<MH> {
                         mem::size_of_val(value) as u64,
                         value.to_le_bytes().as_ptr() as *const c_void,
                     );
+                }
+                KernelArg::Null => {
+                    cmd_encoder.set_buffer(index as u64, None, 0);
                 }
             }
         }
@@ -862,6 +878,14 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
                 io[i] = io[i] * io[i - 1];
             }
         });
+    }
+
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        elems.view_mut(|slice| {
+            slice.par_iter_mut().for_each(|elem| {
+                *elem = elem.valid_or_zero();
+            });
+        })
     }
 }
 

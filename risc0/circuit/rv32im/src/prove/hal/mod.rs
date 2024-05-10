@@ -35,14 +35,12 @@ pub(crate) trait CircuitWitnessGenerator<H: Hal> {
     #[allow(clippy::too_many_arguments)]
     fn generate_witness(
         &self,
-        _mode: StepMode,
-        _trace: &RawPreflightTrace,
-        _steps: usize,
-        _count: usize,
-        _ctrl: &H::Buffer<H::Elem>,
-        _io: &H::Buffer<H::Elem>,
-        _data: &H::Buffer<H::Elem>,
-    ) {
-        todo!();
-    }
+        mode: StepMode,
+        trace: &RawPreflightTrace,
+        steps: usize,
+        count: usize,
+        ctrl: &H::Buffer<H::Elem>,
+        io: &H::Buffer<H::Elem>,
+        data: &H::Buffer<H::Elem>,
+    );
 }

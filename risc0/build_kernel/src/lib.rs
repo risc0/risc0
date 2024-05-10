@@ -338,28 +338,33 @@ impl KernelBuild {
             METAL_INCS,
             &[],
             |out_dir, out_path, sys_inc_dir, _flags| {
-                let mut air_paths = vec![];
-                for src in self.files.iter() {
-                    let out_path = out_dir.join(src).with_extension("").with_extension("air");
-                    if let Some(parent) = out_path.parent() {
-                        fs::create_dir_all(parent).unwrap();
-                    }
-                    let mut cmd = Command::new("xcrun");
-                    cmd.args(["--sdk", "macosx"]);
-                    cmd.arg("metal");
-                    cmd.arg("-o").arg(&out_path);
-                    cmd.arg("-c").arg(src);
-                    cmd.arg("-I").arg(sys_inc_dir);
-                    for inc_dir in self.inc_dirs.iter() {
-                        cmd.arg("-I").arg(inc_dir);
-                    }
-                    println!("Running: {:?}", cmd);
-                    let status = cmd.status().unwrap();
-                    if !status.success() {
-                        panic!("Could not build metal kernels");
-                    }
-                    air_paths.push(out_path);
-                }
+                let files: Vec<_> = self.files.iter().map(|x| x.as_path()).collect();
+
+                let air_paths: Vec<_> = files
+                    .into_par_iter()
+                    .map(|src| {
+                        let air_path = out_dir.join(src).with_extension("").with_extension("air");
+                        if let Some(parent) = air_path.parent() {
+                            fs::create_dir_all(parent).unwrap();
+                        }
+                        let mut cmd = Command::new("xcrun");
+                        cmd.args(["--sdk", "macosx"]);
+                        cmd.arg("metal");
+                        cmd.arg("-o").arg(&air_path);
+                        cmd.arg("-c").arg(src);
+                        cmd.arg("-I").arg(sys_inc_dir);
+                        cmd.arg("-Wno-unused-variable");
+                        for inc_dir in self.inc_dirs.iter() {
+                            cmd.arg("-I").arg(inc_dir);
+                        }
+                        println!("Running: {:?}", cmd);
+                        let status = cmd.status().unwrap();
+                        if !status.success() {
+                            panic!("Could not build metal kernels");
+                        }
+                        air_path
+                    })
+                    .collect();
 
                 let result = Command::new("xcrun")
                     .args(["--sdk", "macosx"])

@@ -80,7 +80,10 @@ fn fwd_rev_ab_test(program: Program) {
             let hal = Rc::new(CudaHalSha256::new());
             let circuit_hal = CudaCircuitHalSha256::new(hal.clone());
         } else if #[cfg(feature = "metal")] {
-            // self::hal::metal::segment_prover()
+            use risc0_zkp::hal::metal::MetalHalSha256;
+            use crate::prove::hal::metal::MetalCircuitHal;
+            let hal = Rc::new(MetalHalSha256::new());
+            let circuit_hal = MetalCircuitHal::new(hal.clone());
         } else {
             use crate::prove::hal::cpu::CpuCircuitHal;
             let suite = Sha256HashSuite::new_suite();

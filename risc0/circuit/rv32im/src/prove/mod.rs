@@ -33,7 +33,7 @@ pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
         if #[cfg(feature = "cuda")] {
             self::hal::cuda::segment_prover(hashfn)
         } else if #[cfg(feature = "metal")] {
-            self::hal::metal::segment_prover()
+            self::hal::metal::segment_prover(hashfn)
         } else {
             self::hal::cpu::segment_prover(hashfn)
         }
