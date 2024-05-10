@@ -4,8 +4,9 @@ Install, update, or revert to a specific RISC Zero version.
 
 ## Install
 
+<!-- TODO: Replace this friendly redirect URL once set up -->
 ```sh
-curl -L https://raw.githubusercontent.com/risc0/risc0/main/rzup/install | bash
+curl -L https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/install | bash
 ```
 
 ## Usage
