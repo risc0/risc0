@@ -45,7 +45,6 @@ tar = "0.4"
 tempfile = "3"
 text_io = "0.1.12"
 tokio = { version = "1", features = ["rt"] }
-tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 xz = "0.1.0"
 zip = { version = "0.6", optional = true }
@@ -69,8 +68,3 @@ experimental = [
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
-
-[dev-dependencies]
-assert_cmd = { version = "2.0", features = ["color", "color-auto"] }
-predicates = { version = "3.1", features = ["regex"] }
-rstest = "0.19"

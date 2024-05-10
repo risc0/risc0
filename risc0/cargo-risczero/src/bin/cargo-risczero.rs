@@ -36,6 +36,5 @@ fn main() -> Result<()> {
         RisczeroCmd::BuildCrate(build) => build.run(BuildSubcommand::Build),
         #[cfg(feature = "experimental")]
         RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
-        _ => unimplemented!("Command not implemented"),
     }
 }
