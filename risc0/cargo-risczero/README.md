@@ -53,8 +53,8 @@ The `new` command will create a new project from an existing template. It defaul
 # Create a project from the main template
 cargo risczero new my_project
 
-# Create a project with 'std' support in the guest
-cargo risczero new my_project --std
+# Create a project with 'no_std' in the guest
+cargo risczero new my_project --no-std
 
 # Disable git initialization
 cargo risczero new my_project --no-git

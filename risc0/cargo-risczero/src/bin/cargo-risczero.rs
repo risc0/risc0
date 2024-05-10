@@ -31,9 +31,11 @@ fn main() -> Result<()> {
         RisczeroCmd::Install(cmd) => cmd.run(),
         RisczeroCmd::New(cmd) => cmd.run(),
         RisczeroCmd::Deploy(cmd) => cmd.run(),
+        RisczeroCmd::Verify(cmd) => cmd.run(),
         #[cfg(feature = "experimental")]
         RisczeroCmd::BuildCrate(build) => build.run(BuildSubcommand::Build),
         #[cfg(feature = "experimental")]
         RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
+        _ => unimplemented!("Command not implemented"),
     }
 }

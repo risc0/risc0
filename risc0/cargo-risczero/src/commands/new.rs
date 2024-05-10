@@ -76,7 +76,7 @@ pub struct NewCommand {
     /// Toggles the `#![no_std]` in the guest main() and the `std` feature flag
     /// on the `risc0_zkvm` crate.
     #[arg(long, global = false)]
-    pub std: bool,
+    pub no_std: bool,
 
     /// Use a path dependency for risc0.
     #[arg(long)]
@@ -162,7 +162,7 @@ impl NewCommand {
         template_variables.push(format!("guest_id={guest_name_const}_ID"));
         template_variables.push(format!("guest_elf={guest_name_const}_ELF"));
 
-        if self.std {
+        if !self.no_std {
             template_variables.push("risc0_std=true".to_string());
             template_variables.push("risc0_feature_std=, features = ['std']".to_string());
         }
@@ -268,7 +268,7 @@ mod tests {
             &proj_path.join("host/Cargo.toml")
         ));
 
-        assert!(find_in_file(
+        assert!(!find_in_file(
             "#![no_std]",
             &proj_path.join("methods/guest/src/main.rs")
         ));
@@ -309,7 +309,7 @@ mod tests {
     }
 
     #[test]
-    fn generate_std() {
+    fn generate_no_std() {
         let (tmpdir, template_path, proj_name) = make_test_env();
 
         let new = NewCommand::parse_from([
@@ -322,7 +322,7 @@ mod tests {
             "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
-            "--std",
+            "--no-std",
             "--guest-name",
             "method",
             proj_name,
@@ -332,7 +332,7 @@ mod tests {
 
         let proj_path = tmpdir.path().join(proj_name);
 
-        assert!(!find_in_file(
+        assert!(find_in_file(
             "#![no_std]",
             &proj_path.join("methods/guest/src/main.rs")
         ));

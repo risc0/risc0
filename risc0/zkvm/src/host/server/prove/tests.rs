@@ -586,6 +586,8 @@ mod docker {
 
     #[test]
     fn verify_in_guest() {
+        let composite_receipt_sha256 = generate_receipt(ProverOpts::fast());
+        exec_verify(&composite_receipt_sha256);
         let composite_receipt = generate_receipt(ProverOpts::composite());
         exec_verify(&composite_receipt);
         let succinct_receipt = get_prover_server(&ProverOpts::succinct())
