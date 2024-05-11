@@ -57,7 +57,7 @@ Please exercise good judgment about whether a missing or edited attestation repr
 
 ## Ceremony Security
 
-We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony, and our ceremony was coordinated by the [PSE] team. This gave us tools that had been battle-tested by prior ceremonies, and moreover, by using tools written by an external team, we put substantial limits on our own ability to maliciously manipulate the ceremony software.
+We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony, and our ceremony was coordinated with the [PSE] team. This gave us tools that had been battle-tested by prior ceremonies, and moreover, by using tools written by an external team, we put substantial limits on our own ability to maliciously manipulate the ceremony software.
 
 
 
