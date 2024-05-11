@@ -12,6 +12,7 @@ const config = deepmerge(tailwindConfig, {
       fontFamily: {
         sans: ["var(--font-europa-sans)", "system-ui"],
         mono: ["var(--font-jetbrains-mono)"],
+        "mono-raw": ["monospace"],
       },
     },
   },

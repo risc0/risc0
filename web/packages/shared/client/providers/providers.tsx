@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "next-themes";
 import type { PropsWithChildren } from "react";
-import { Toaster } from "../toaster/toaster";
+import { Toaster } from "../components/toaster";
 
 // Client-side providers
 export function Providers({ children }: PropsWithChildren) {
