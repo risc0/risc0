@@ -22,10 +22,10 @@ use risc0_zkp::core::digest::Digest;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     receipt::{
-        segment::decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt,
-        SuccinctReceipt,
+        segment::decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, ReceiptMetadata,
+        SegmentReceipt, SuccinctReceipt,
     },
-    Assumptions, ExitCode, Journal, MaybePruned, Output, ProveInfo, ProverOpts, Receipt,
+    Assumptions, ExitCode, Input, Journal, MaybePruned, Output, ProveInfo, ProverOpts, Receipt,
     ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
@@ -294,6 +294,7 @@ impl From<Receipt> for pb::core::Receipt {
             version: Some(ver::RECEIPT),
             inner: Some(value.inner.into()),
             journal: value.journal.bytes,
+            metadata: Some(value.metadata.into()),
         }
     }
 }
@@ -309,6 +310,28 @@ impl TryFrom<pb::core::Receipt> for Receipt {
         Ok(Self {
             inner: value.inner.ok_or(malformed_err())?.try_into()?,
             journal: Journal::new(value.journal),
+            metadata: value.metadata.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
+impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
+    fn from(value: ReceiptMetadata) -> Self {
+        Self {
+            verifier_parameters: Some(value.verifier_parameters.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::ReceiptMetadata> for ReceiptMetadata {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::ReceiptMetadata) -> Result<Self> {
+        Ok(Self {
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }
@@ -492,7 +515,13 @@ impl From<ReceiptClaim> for pb::core::ReceiptClaim {
             pre: Some(value.pre.into()),
             post: Some(value.post.into()),
             exit_code: Some(value.exit_code.into()),
-            input: Some(value.input.into()),
+            // Translate MaybePruned<Option<Input>>> to Option<MaybePruned<Input>>.
+            input: match value.input {
+                MaybePruned::Value(optional) => {
+                    optional.map(|input| MaybePruned::Value(input).into())
+                }
+                MaybePruned::Pruned(digest) => Some(MaybePruned::<Input>::Pruned(digest).into()),
+            },
             // Translate MaybePruned<Option<Output>>> to Option<MaybePruned<Output>>.
             output: match value.output {
                 MaybePruned::Value(optional) => {
@@ -512,7 +541,14 @@ impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
             pre: value.pre.ok_or(malformed_err())?.try_into()?,
             post: value.post.ok_or(malformed_err())?.try_into()?,
             exit_code: value.exit_code.ok_or(malformed_err())?.try_into()?,
-            input: value.input.ok_or(malformed_err())?.try_into()?,
+            // Translate Option<MaybePruned<Input>> to MaybePruned<Option<Input>>.
+            input: match value.input {
+                None => MaybePruned::Value(None),
+                Some(x) => match MaybePruned::<Input>::try_from(x)? {
+                    MaybePruned::Value(input) => MaybePruned::Value(Some(input)),
+                    MaybePruned::Pruned(digest) => MaybePruned::Pruned(digest),
+                },
+            },
             // Translate Option<MaybePruned<Output>> to MaybePruned<Option<Output>>.
             output: match value.output {
                 None => MaybePruned::Value(None),
@@ -551,6 +587,29 @@ impl TryFrom<pb::core::SystemState> for SystemState {
             pc: value.pc,
             merkle_root: value.merkle_root.ok_or(malformed_err())?.try_into()?,
         })
+    }
+}
+
+impl Name for pb::core::Input {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "Input";
+}
+
+impl AssociatedMessage for Input {
+    type Message = pb::core::Input;
+}
+
+impl From<Input> for pb::core::Input {
+    fn from(value: Input) -> Self {
+        match value.x { /* unreachable  */ }
+    }
+}
+
+impl TryFrom<pb::core::Input> for Input {
+    type Error = anyhow::Error;
+
+    fn try_from(_value: pb::core::Input) -> Result<Self> {
+        Err(malformed_err())
     }
 }
 

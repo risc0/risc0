@@ -31,7 +31,7 @@ extern "C" RustError::by_value sppark_init() {
   return RustError{cudaSuccess};
 }
 
-extern "C" RustError::by_value batch_expand(
+extern "C" RustError::by_value sppark_batch_expand(
     fr_t* d_out, fr_t* d_in, uint32_t lg_domain_size, uint32_t lg_blowup, uint32_t poly_count) {
   if (lg_domain_size == 0)
     return RustError{cudaSuccess};

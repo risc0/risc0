@@ -12,22 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
-use risc0_groth16::Verifier;
-use risc0_zkvm::{guest::env, sha::Digest};
-use sha2::{Digest as _, Sha256};
-
-risc0_zkvm::guest::entry!(main);
+use risc0_groth16::{Fr, Seal, Verifier, VerifyingKey};
+use risc0_zkvm::{guest::env, sha::Digestible};
 
 pub fn main() {
-    let verifier: Verifier = env::read();
-    verifier.verify().unwrap();
-    let mut hasher = Sha256::new();
-    hasher.update(verifier.encoded_pvk);
-    hasher.update(verifier.encoded_proof);
-    hasher.update(verifier.encoded_prepared_inputs);
-    let digest = hasher.finalize();
-    let digest = Digest::try_from(digest.as_slice()).unwrap();
-    env::commit(&digest);
+    let (seal, public_inputs, verifying_key): (Seal, Vec<Fr>, VerifyingKey) = env::read();
+
+    Verifier::new(&seal, &public_inputs, &verifying_key)
+        .unwrap()
+        .verify()
+        .unwrap();
+
+    env::commit(&(verifying_key.digest(), public_inputs.digest()));
 }

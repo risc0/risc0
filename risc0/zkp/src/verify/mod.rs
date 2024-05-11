@@ -38,6 +38,7 @@ use crate::{
 #[derive(PartialEq)]
 #[non_exhaustive]
 pub enum VerificationError {
+    VerifierParametersMismatch { expected: Digest, received: Digest },
     ReceiptFormatError,
     ControlVerificationError { control_id: Digest },
     ImageVerificationError,
@@ -57,6 +58,9 @@ impl fmt::Debug for VerificationError {
 impl fmt::Display for VerificationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            VerificationError::VerifierParametersMismatch { expected, received } => {
+                write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
+            }
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
             VerificationError::ControlVerificationError { control_id } => {
                 write!(f, "control_id mismatch: {control_id}")
@@ -64,14 +68,14 @@ impl fmt::Display for VerificationError {
             VerificationError::ImageVerificationError => write!(f, "image_id mismatch"),
             VerificationError::MerkleQueryOutOfRange { idx, rows } => write!(
                 f,
-                "Requested Merkle validation on row {idx}, but only {rows} rows exist",
+                "requested Merkle validation on row {idx}, but only {rows} rows exist",
             ),
-            VerificationError::InvalidProof => write!(f, "Verification indicates proof is invalid"),
+            VerificationError::InvalidProof => write!(f, "verification indicates proof is invalid"),
             VerificationError::JournalDigestMismatch => {
-                write!(f, "Journal digest mismatch detected")
+                write!(f, "journal digest mismatch detected")
             }
-            VerificationError::UnexpectedExitCode => write!(f, "Unexpected exit_code"),
-            VerificationError::InvalidHashSuite => write!(f, "Invalid hash suite"),
+            VerificationError::UnexpectedExitCode => write!(f, "unexpected exit_code"),
+            VerificationError::InvalidHashSuite => write!(f, "invalid hash suite"),
         }
     }
 }

@@ -254,6 +254,10 @@ impl<T: Clone> Buffer<T> for CpuBuffer<T> {
         let mut buf = self.buf.write();
         f(&mut buf.0[self.region.range()]);
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        self.buf.read().0.clone()
+    }
 }
 
 impl<F: Field> Hal for CpuHal<F> {
@@ -517,6 +521,12 @@ impl<F: Field> Hal for CpuHal<F> {
             .for_each(|(output, input)| {
                 *output = *input;
             });
+    }
+
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        elems.as_slice_mut().par_iter_mut().for_each(|elem| {
+            *elem = elem.valid_or_zero();
+        });
     }
 
     #[tracing::instrument(skip_all)]

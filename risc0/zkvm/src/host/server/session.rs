@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     host::{client::env::SegmentPath, prove_info::SessionStats},
     sha::Digest,
-    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
+    Assumption, Assumptions, ExitCode, Journal, MaybePruned, Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -206,7 +206,7 @@ impl Session {
             pre: self.pre_state.clone().into(),
             post: self.post_state.clone().into(),
             exit_code: self.exit_code,
-            input: self.input,
+            input: MaybePruned::Pruned(self.input),
             output: output.into(),
         })
     }

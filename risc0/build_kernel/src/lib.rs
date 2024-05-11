@@ -18,8 +18,10 @@ use std::{
     process::Command,
 };
 
+use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 use tempfile::tempdir_in;
+use which::which;
 
 const CUDA_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/cuda/fp.h")),
@@ -35,6 +37,7 @@ const METAL_INCS: &[(&str, &str)] = &[
 pub enum KernelType {
     Cpp,
     Cuda,
+    CudaLink,
     Metal,
 }
 
@@ -42,6 +45,7 @@ pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
     files: Vec<PathBuf>,
+    files_opt: Vec<(PathBuf, usize)>,
     inc_dirs: Vec<PathBuf>,
     deps: Vec<PathBuf>,
 }
@@ -52,6 +56,7 @@ impl KernelBuild {
             kernel_type,
             flags: Vec::new(),
             files: Vec::new(),
+            files_opt: Vec::new(),
             inc_dirs: Vec::new(),
             deps: Vec::new(),
         }
@@ -87,6 +92,24 @@ impl KernelBuild {
         self
     }
 
+    /// Add a file which will be compiled
+    pub fn file_opt<P: AsRef<Path>>(&mut self, p: P, opt: usize) -> &mut KernelBuild {
+        self.files_opt.push((p.as_ref().to_path_buf(), opt));
+        self
+    }
+
+    /// Add files which will be compiled
+    pub fn files_opt<P>(&mut self, p: P, opt: usize) -> &mut KernelBuild
+    where
+        P: IntoIterator,
+        P::Item: AsRef<Path>,
+    {
+        for file in p.into_iter() {
+            self.file_opt(file, opt);
+        }
+        self
+    }
+
     /// Add a dependency
     pub fn dep<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
         self.deps.push(p.as_ref().to_path_buf());
@@ -106,7 +129,14 @@ impl KernelBuild {
     }
 
     pub fn compile(&mut self, output: &str) {
+        if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+            return;
+        }
+
         for src in self.files.iter() {
+            println!("cargo:rerun-if-changed={}", src.display());
+        }
+        for (src, _) in self.files_opt.iter() {
             println!("cargo:rerun-if-changed={}", src.display());
         }
         for dep in self.deps.iter() {
@@ -115,6 +145,7 @@ impl KernelBuild {
         match &self.kernel_type {
             KernelType::Cpp => self.compile_cpp(output),
             KernelType::Cuda => self.compile_cuda(output),
+            KernelType::CudaLink => self.compile_cuda_link(output),
             KernelType::Metal => self.compile_metal(output),
         }
     }
@@ -126,12 +157,120 @@ impl KernelBuild {
             .cpp(true)
             .debug(false)
             .files(&self.files)
+            .includes(&self.inc_dirs)
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .flag_if_supported("-fno-var-tracking")
             .flag_if_supported("-fno-var-tracking-assignments")
             .flag_if_supported("-g0")
             .compile(output);
+    }
+
+    fn compile_cuda_link(&mut self, output: &str) {
+        fn enable_debug(output: &str) -> bool {
+            if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
+                return debug.contains(output);
+            }
+            false
+        }
+
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
+        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
+
+        for inc_dir in self.inc_dirs.iter() {
+            for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
+                println!("cargo:rerun-if-changed={}", inc.unwrap().display());
+            }
+        }
+
+        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
+        let out_path = out_dir.join(format!("lib{output}.a"));
+
+        let files: Vec<_> = self
+            .files
+            .iter()
+            .map(|x| (x.as_path(), 3usize))
+            .chain(self.files_opt.iter().map(|(x, y)| (x.as_path(), *y)))
+            .collect();
+        let obj_paths: Vec<_> = files
+            .into_par_iter()
+            .map(|(src, opt_level)| {
+                let obj_path = out_dir.join(src).with_extension("").with_extension("o");
+                if let Some(parent) = obj_path.parent() {
+                    fs::create_dir_all(parent).unwrap();
+                }
+
+                let sccache = which("sccache");
+                let mut cmd = if let Ok(sccache) = sccache {
+                    let mut cmd = Command::new(sccache);
+                    cmd.arg("nvcc");
+                    cmd
+                } else {
+                    println!("cargo:warning=It is highly recommended to install sccache when building CUDA kernels.");
+                    Command::new("nvcc")
+                };
+
+                cmd.arg("-c");
+
+                if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
+                    cmd.args(nvcc_flags.split(' '));
+                } else {
+                    cmd.arg("-arch=native");
+                }
+
+                cmd.arg("--device-c");
+
+                if enable_debug(output) {
+                    cmd.arg("-G");
+                } else {
+                    let opt_level = env::var("RISC0_CUDA_OPT").unwrap_or(opt_level.to_string());
+                    cmd.arg(format!("-O{opt_level}"));
+                    cmd.arg("-Xptxas").arg(format!("-O{opt_level}"));
+                }
+
+                for inc_dir in self.inc_dirs.iter() {
+                    cmd.arg("-I").arg(inc_dir);
+                }
+
+                cmd.arg(src);
+                cmd.arg("-o").arg(&obj_path);
+                println!("Running: {:?}", cmd);
+                let status = cmd.status().unwrap();
+                if !status.success() {
+                    panic!("CUDA kernels: compilation failed");
+                }
+                obj_path
+            })
+            .collect();
+
+        let dlink = out_dir.join(format!("{output}_dlink.o"));
+        let mut cmd = Command::new("nvcc");
+        cmd.arg("--device-link");
+        cmd.arg("-o");
+        cmd.arg(&dlink);
+        cmd.args(&obj_paths);
+        println!("Running: {:?}", cmd);
+        let status = cmd.status().unwrap();
+        if !status.success() {
+            panic!("CUDA kernels: device linking failed");
+        }
+
+        let mut cmd = Command::new("ar");
+        cmd.arg("crs");
+        cmd.arg(&out_path);
+        cmd.args(&obj_paths);
+        cmd.arg(&dlink);
+        println!("Running: {:?}", cmd);
+        let status = cmd.status().unwrap();
+        if !status.success() {
+            panic!("CUDA kernels: archive creation failed");
+        }
+
+        println!("cargo:rustc-link-lib=static={output}");
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
+        println!("cargo:rustc-link-lib=cudart_static");
+        println!("cargo:{}={}", output, out_path.display());
     }
 
     fn compile_cuda(&mut self, output: &str) {
@@ -199,28 +338,33 @@ impl KernelBuild {
             METAL_INCS,
             &[],
             |out_dir, out_path, sys_inc_dir, _flags| {
-                let mut air_paths = vec![];
-                for src in self.files.iter() {
-                    let out_path = out_dir.join(src).with_extension("").with_extension("air");
-                    if let Some(parent) = out_path.parent() {
-                        fs::create_dir_all(parent).unwrap();
-                    }
-                    let mut cmd = Command::new("xcrun");
-                    cmd.args(["--sdk", "macosx"]);
-                    cmd.arg("metal");
-                    cmd.arg("-o").arg(&out_path);
-                    cmd.arg("-c").arg(src);
-                    cmd.arg("-I").arg(sys_inc_dir);
-                    for inc_dir in self.inc_dirs.iter() {
-                        cmd.arg("-I").arg(inc_dir);
-                    }
-                    println!("Running: {:?}", cmd);
-                    let status = cmd.status().unwrap();
-                    if !status.success() {
-                        panic!("Could not build metal kernels");
-                    }
-                    air_paths.push(out_path);
-                }
+                let files: Vec<_> = self.files.iter().map(|x| x.as_path()).collect();
+
+                let air_paths: Vec<_> = files
+                    .into_par_iter()
+                    .map(|src| {
+                        let air_path = out_dir.join(src).with_extension("").with_extension("air");
+                        if let Some(parent) = air_path.parent() {
+                            fs::create_dir_all(parent).unwrap();
+                        }
+                        let mut cmd = Command::new("xcrun");
+                        cmd.args(["--sdk", "macosx"]);
+                        cmd.arg("metal");
+                        cmd.arg("-o").arg(&air_path);
+                        cmd.arg("-c").arg(src);
+                        cmd.arg("-I").arg(sys_inc_dir);
+                        cmd.arg("-Wno-unused-variable");
+                        for inc_dir in self.inc_dirs.iter() {
+                            cmd.arg("-I").arg(inc_dir);
+                        }
+                        println!("Running: {:?}", cmd);
+                        let status = cmd.status().unwrap();
+                        if !status.success() {
+                            panic!("Could not build metal kernels");
+                        }
+                        air_path
+                    })
+                    .collect();
 
                 let result = Command::new("xcrun")
                     .args(["--sdk", "macosx"])

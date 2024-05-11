@@ -28,7 +28,7 @@ pub use self::image::{MemoryImage, PageTableInfo};
 pub use crate::{
     elf::Program,
     exit_code::{ExitCode, InvalidExitCodeError},
-    hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
+    hash::{tagged_iter, tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
 };
 

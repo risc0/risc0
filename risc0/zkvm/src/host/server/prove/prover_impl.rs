@@ -13,56 +13,42 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::hal::{CircuitHal, Hal};
+use risc0_circuit_rv32im::prove::SegmentProver;
 
-use super::{HalPair, ProverServer};
+use super::ProverServer;
 use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
     },
-    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt::{
+        segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+    },
     sha::Digestible,
-    CompositeReceipt, Receipt, Segment, Session, VerifierContext,
+    CompositeReceipt, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
-pub struct ProverImpl<H, C>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    C: CircuitHal<H>,
-{
-    name: String,
-    hal_pair: HalPair<H, C>,
-    receipt_kind: ReceiptKind,
+pub struct ProverImpl {
+    opts: ProverOpts,
+    segment_prover: Box<dyn SegmentProver>,
 }
 
-impl<H, C> ProverImpl<H, C>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    C: CircuitHal<H>,
-{
-    /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_kind: ReceiptKind) -> Self {
+impl ProverImpl {
+    /// Construct a [ProverImpl].
+    pub fn new(opts: ProverOpts, segment_prover: Box<dyn SegmentProver>) -> Self {
         Self {
-            name: name.to_string(),
-            hal_pair,
-            receipt_kind,
+            opts,
+            segment_prover,
         }
     }
 }
 
-impl<H, C> ProverServer for ProverImpl<H, C>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    C: CircuitHal<H>,
-{
+impl ProverServer for ProverImpl {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         tracing::debug!(
-            "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
-            self.name,
+            "prove_session: exit_code = {:?}, journal = {:?}, segments: {}",
             session.exit_code,
             session.journal.as_ref().map(hex::encode),
             session.segments.len()
@@ -104,7 +90,7 @@ where
         }
 
         // Compress the receipt to the requested level.
-        let receipt = match self.receipt_kind {
+        let receipt = match self.opts.receipt_kind {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
@@ -146,15 +132,7 @@ where
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
-
-        use crate::receipt::segment::decode_receipt_claim_from_seal;
-
-        let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
-
-        let prover =
-            SegmentProverImpl::new(self.hal_pair.hal.clone(), self.hal_pair.circuit_hal.clone());
-        let seal = prover.prove_segment(&segment.inner)?;
+        let seal = self.segment_prover.prove_segment(&segment.inner)?;
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();
@@ -162,7 +140,7 @@ where
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
-            hashfn,
+            hashfn: self.opts.hashfn.clone(),
             claim,
         };
         receipt.verify_integrity_with_context(ctx)?;
