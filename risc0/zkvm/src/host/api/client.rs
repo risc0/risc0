@@ -439,6 +439,7 @@ impl Client {
                 .as_ref()
                 .map(|x| x.path().to_string_lossy().into())
                 .unwrap_or_default(),
+            segment_limit_ram_storage: env.segment_limit_ram_storage,
         })
     }
 

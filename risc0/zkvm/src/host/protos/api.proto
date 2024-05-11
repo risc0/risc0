@@ -140,6 +140,7 @@ message ExecutorEnv {
   string pprof_out = 10;
   repeated Assumption assumptions = 11;
   string segment_path = 12;
+  optional uint32 segment_limit_ram_storage = 13;
 }
 
 message Assumption {
