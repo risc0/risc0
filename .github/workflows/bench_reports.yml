@@ -71,7 +71,7 @@ jobs:
           name: benchmark-result-${{ matrix.os }}-${{ matrix.device }}
           path: |
             benchmarks/COMMIT_HASH.txt
-            benchmarks/${{ matrix.os }}-${{ matrix.device }}.json
+            benchmarks/${{ matrix.os }}-${{ matrix.device }}.csv
 
       - if: matrix.feature == 'cuda'
         run: echo "EXTRA=-F docker" >> $GITHUB_ENV
