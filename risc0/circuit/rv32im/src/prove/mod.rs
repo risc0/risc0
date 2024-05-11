@@ -28,14 +28,14 @@ pub trait SegmentProver {
     fn prove_segment(&self, segment: &Segment) -> Result<Seal>;
 }
 
-pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
     cfg_if! {
         if #[cfg(feature = "cuda")] {
-            self::hal::cuda::get_segment_prover()
+            self::hal::cuda::segment_prover(hashfn)
         } else if #[cfg(feature = "metal")] {
-            self::hal::metal::get_segment_prover()
+            self::hal::metal::segment_prover(hashfn)
         } else {
-            self::hal::cpu::get_segment_prover()
+            self::hal::cpu::segment_prover(hashfn)
         }
     }
 }

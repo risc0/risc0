@@ -31,5 +31,5 @@ uuid = { version = "1.8", features = ["v4"] }
 
 [features]
 default = ["std"]
-std = []
+std = ["risc0-groth16/std"]
 async = ["dep:tokio"]

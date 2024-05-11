@@ -14,46 +14,126 @@
 
 use std::rc::Rc;
 
-use cust::{memory::GpuBuffer as _, prelude::*};
+use anyhow::{bail, Result};
+use cust::{
+    memory::{DeviceBox, GpuBuffer as _},
+    prelude::*,
+    DeviceCopy,
+};
+use risc0_circuit_rv32im_sys::ffi::{Error, RawPreflightTrace};
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
-    map_pow, Elem, ExtElem, RootsOfUnity,
+    map_pow, Elem, RootsOfUnity,
 };
 use risc0_zkp::{
     core::log2_ceil,
+    field::ExtElem as _,
     hal::{
         cuda::{
-            prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHalSha256, CudaHash,
-            CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
+            prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHalPoseidon2, CudaHalSha256,
+            CudaHash, CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
         },
-        Buffer, CircuitHal, Hal,
+        Buffer, CircuitHal,
     },
     INV_RATE, ZK_CYCLES,
 };
 
 use crate::{
-    prove::{engine::SegmentProverImpl, SegmentProver},
+    info::{NUM_POLY_MIX_POWERS, POLY_MIX_POWERS},
+    prove::{engine::SegmentProverImpl, hal::StepMode, SegmentProver},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
-const EVAL_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_EVAL_PATH"));
-const STEPS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_STEPS_PATH"));
+use super::CircuitWitnessGenerator;
 
 pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
-    eval_module: Module,
-    steps_module: Module,
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     #[tracing::instrument(name = "CudaCircuitHal::new", skip_all)]
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
-        let eval_module = Module::from_fatbin(EVAL_FATBIN, &[]).unwrap();
-        let steps_module = Module::from_fatbin(STEPS_FATBIN, &[]).unwrap();
-        Self {
-            hal,
-            eval_module,
-            steps_module,
+        Self { hal }
+    }
+}
+
+#[derive(Clone, Copy, DeviceCopy)]
+#[repr(C)]
+struct AccumContext {
+    ram: DevicePointer<DeviceExtElem>,
+    bytes: DevicePointer<DeviceExtElem>,
+}
+
+extern "C" {
+    fn risc0_circuit_rv32im_cuda_witgen(
+        mode: u32,
+        trace: *const RawPreflightTrace,
+        steps: u32,
+        count: u32,
+        ctrl: DevicePointer<u8>,
+        io: DevicePointer<u8>,
+        data: DevicePointer<u8>,
+    ) -> Error;
+
+    fn risc0_circuit_rv32im_cuda_step_compute_accum(
+        ctx: DevicePointer<AccumContext>,
+        steps: u32,
+        count: u32,
+        ctrl: DevicePointer<u8>,
+        io: DevicePointer<u8>,
+        data: DevicePointer<u8>,
+        mix: DevicePointer<u8>,
+        accum: DevicePointer<u8>,
+    ) -> Error;
+
+    fn risc0_circuit_rv32im_cuda_step_verify_accum(
+        ctx: DevicePointer<AccumContext>,
+        steps: u32,
+        count: u32,
+        ctrl: DevicePointer<u8>,
+        io: DevicePointer<u8>,
+        data: DevicePointer<u8>,
+        mix: DevicePointer<u8>,
+        accum: DevicePointer<u8>,
+    ) -> Error;
+
+    fn risc0_circuit_rv32im_cuda_eval_check(
+        check: DevicePointer<u8>,
+        ctrl: DevicePointer<u8>,
+        data: DevicePointer<u8>,
+        accum: DevicePointer<u8>,
+        mix: DevicePointer<u8>,
+        io: DevicePointer<u8>,
+        rou: *const BabyBearElem,
+        po2: u32,
+        domain: u32,
+        poly_mix_pows: *const u32,
+    ) -> Error;
+}
+
+impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
+    fn generate_witness(
+        &self,
+        mode: StepMode,
+        trace: &RawPreflightTrace,
+        steps: usize,
+        count: usize,
+        ctrl: &CudaBuffer<BabyBearElem>,
+        io: &CudaBuffer<BabyBearElem>,
+        data: &CudaBuffer<BabyBearElem>,
+    ) {
+        tracing::debug!("witgen: {steps}, {count}");
+        unsafe {
+            risc0_circuit_rv32im_cuda_witgen(
+                mode as u32,
+                trace,
+                steps as u32,
+                count as u32,
+                ctrl.as_device_ptr(),
+                io.as_device_ptr(),
+                data.as_device_ptr(),
+            )
+            .unwrap();
         }
     }
 }
@@ -94,41 +174,27 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
 
-        let rou = self.hal.copy_from_elem("rou", &[rou]);
-        let po2 = self.hal.copy_from_u32("po2", &[po2 as u32]);
-        let size = self.hal.copy_from_u32("size", &[domain as u32]);
-
-        let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
-        let poly_mix_pows: &[u32; BabyBearExtElem::EXT_SIZE * crate::info::NUM_POLY_MIX_POWERS] =
+        let poly_mix_pows = map_pow(poly_mix, POLY_MIX_POWERS);
+        let poly_mix_pows: &[u32; BabyBearExtElem::EXT_SIZE * NUM_POLY_MIX_POWERS] =
             BabyBearExtElem::as_u32_slice(poly_mix_pows.as_slice())
                 .try_into()
                 .unwrap();
 
-        let mix_pows_name = std::ffi::CString::new("poly_mix").unwrap();
-        self.eval_module
-            .get_global(&mix_pows_name)
-            .unwrap()
-            .copy_from(poly_mix_pows)
-            .unwrap();
-
-        let kernel = self.eval_module.get_function("eval_check").unwrap();
-        let params = self.hal.compute_simple_params(domain);
         unsafe {
-            let stream = &self.hal.stream;
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+            risc0_circuit_rv32im_cuda_eval_check(
                 check.as_device_ptr(),
                 ctrl.as_device_ptr(),
                 data.as_device_ptr(),
                 accum.as_device_ptr(),
                 mix.as_device_ptr(),
                 out.as_device_ptr(),
-                rou.as_device_ptr(),
-                po2.as_device_ptr(),
-                size.as_device_ptr()
-            ))
+                &rou as *const BabyBearElem,
+                po2 as u32,
+                domain as u32,
+                poly_mix_pows.as_ptr(),
+            )
             .unwrap();
-        }
-        self.hal.stream.synchronize().unwrap();
+        };
 
         nvtx::range_pop!();
     }
@@ -146,7 +212,6 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         nvtx::range_push!("accumulate");
 
         let count = steps - ZK_CYCLES;
-        let params = self.hal.compute_simple_params(count);
 
         let ram = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
         let mut ram = UnifiedBuffer::from_slice(&ram).unwrap();
@@ -154,25 +219,26 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let bytes = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
         let mut bytes = UnifiedBuffer::from_slice(&bytes).unwrap();
 
+        let ctx = AccumContext {
+            ram: ram.as_device_ptr(),
+            bytes: bytes.as_device_ptr(),
+        };
+        let ctx = DeviceBox::new(&ctx).unwrap();
+
         tracing::info_span!("step_compute_accum").in_scope(|| {
-            let kernel = self
-                .steps_module
-                .get_function("step_compute_accum")
-                .unwrap();
             unsafe {
-                let stream = &self.hal.stream;
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                    ctrl.as_device_ptr(),
-                    data.as_device_ptr(),
-                    mix.as_device_ptr(),
-                    ram.as_device_ptr(),
-                    bytes.as_device_ptr(),
+                risc0_circuit_rv32im_cuda_step_compute_accum(
+                    ctx.as_device_ptr(),
                     steps as u32,
                     count as u32,
-                ))
+                    ctrl.as_device_ptr(),
+                    io.as_device_ptr(),
+                    data.as_device_ptr(),
+                    mix.as_device_ptr(),
+                    accum.as_device_ptr(),
+                )
                 .unwrap();
-            }
-            self.hal.stream.synchronize().unwrap();
+            };
         });
 
         tracing::info_span!("prefix_products").in_scope(|| {
@@ -181,22 +247,19 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         });
 
         tracing::info_span!("step_verify_accum").in_scope(|| {
-            let kernel = self.steps_module.get_function("step_verify_accum").unwrap();
             unsafe {
-                let stream = &self.hal.stream;
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                    ctrl.as_device_ptr(),
-                    data.as_device_ptr(),
-                    mix.as_device_ptr(),
-                    ram.as_device_ptr(),
-                    bytes.as_device_ptr(),
-                    accum.as_device_ptr(),
+                risc0_circuit_rv32im_cuda_step_verify_accum(
+                    ctx.as_device_ptr(),
                     steps as u32,
                     count as u32,
-                ))
+                    ctrl.as_device_ptr(),
+                    io.as_device_ptr(),
+                    data.as_device_ptr(),
+                    mix.as_device_ptr(),
+                    accum.as_device_ptr(),
+                )
                 .unwrap();
-            }
-            self.hal.stream.synchronize().unwrap();
+            };
         });
 
         tracing::info_span!("zeroize").in_scope(|| {
@@ -223,10 +286,20 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
-pub fn get_segment_prover() -> Box<dyn SegmentProver> {
-    let hal = Rc::new(CudaHalSha256::new());
-    let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-    Box::new(SegmentProverImpl::new(hal, circuit_hal))
+pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
+    match hashfn {
+        "sha-256" => {
+            let hal = Rc::new(CudaHalSha256::new());
+            let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+        }
+        "poseidon2" => {
+            let hal = Rc::new(CudaHalPoseidon2::new());
+            let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+        }
+        _ => bail!("Unsupported hashfn: {hashfn}"),
+    }
 }
 
 #[cfg(test)]

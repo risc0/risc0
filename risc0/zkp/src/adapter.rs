@@ -18,6 +18,7 @@ use alloc::vec::Vec;
 
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
+use serde::{Deserialize, Serialize};
 
 use crate::{hal::cpu::SyncSlice, taps::TapSet};
 
@@ -128,8 +129,8 @@ pub trait TapsProvider {
 }
 
 /// A protocol info string for the proof system and circuits. Used to seed the Fiat-Shamir transcript and provide domain separation between different protocol and circuit versions.
-#[derive(Debug)]
-pub struct ProtocolInfo(pub &'static [u8; 16]);
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProtocolInfo(pub [u8; 16]);
 
 impl ProtocolInfo {
     /// Encode a fixed context byte-string to elements, with one element per byte.
@@ -148,7 +149,7 @@ impl ProtocolInfo {
 ///
 /// NOTE: This string should be bumped with every change to the proof system, as defined by a
 /// change to checks applied by the verifier.
-pub const PROOF_SYSTEM_INFO: ProtocolInfo = ProtocolInfo(b"RISC0_STARK:v1__");
+pub const PROOF_SYSTEM_INFO: ProtocolInfo = ProtocolInfo(*b"RISC0_STARK:v1__");
 
 pub trait CircuitInfo {
     const CIRCUIT_INFO: ProtocolInfo;

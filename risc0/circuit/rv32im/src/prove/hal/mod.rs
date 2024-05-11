@@ -19,3 +19,28 @@ pub mod cuda;
 #[cfg(feature = "metal")]
 pub mod metal;
 pub mod testutil;
+
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
+use risc0_zkp::hal::Hal;
+
+#[derive(PartialEq)]
+pub(crate) enum StepMode {
+    Parallel,
+    SeqForward,
+    #[allow(dead_code)]
+    SeqReverse,
+}
+
+pub(crate) trait CircuitWitnessGenerator<H: Hal> {
+    #[allow(clippy::too_many_arguments)]
+    fn generate_witness(
+        &self,
+        mode: StepMode,
+        trace: &RawPreflightTrace,
+        steps: usize,
+        count: usize,
+        ctrl: &H::Buffer<H::Elem>,
+        io: &H::Buffer<H::Elem>,
+        data: &H::Buffer<H::Elem>,
+    );
+}

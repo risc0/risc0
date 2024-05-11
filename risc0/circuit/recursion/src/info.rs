@@ -20,7 +20,7 @@ use super::CircuitImpl;
 
 impl CircuitInfo for CircuitImpl {
     #[rustfmt::skip]
-    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(b"RECURSION:rev1v1");
+    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(*b"RECURSION:rev1v1");
 
     #[rustfmt::skip]
     const OUTPUT_SIZE: usize = 32;

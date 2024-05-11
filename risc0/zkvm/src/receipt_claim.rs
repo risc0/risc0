@@ -27,16 +27,17 @@ use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
+use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::{self, Digest, Sha256},
+    sha::{self, Sha256},
     SystemState,
 };
 
 // TODO(victor): Add functions to handle the `ReceiptClaim` transformations conducted as part of
 // join, resolve, and eventually resume calls. This will allow these to be used for recursion, as
-// well as deve mode recursion, and composite receipts.
+// well as dev mode recursion, and composite receipts.
 
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 ///
@@ -57,7 +58,7 @@ pub struct ReceiptClaim {
     pub exit_code: ExitCode,
 
     /// Input to the guest.
-    pub input: Digest,
+    pub input: MaybePruned<Option<Input>>,
 
     /// [Output] of the guest, including the journal and assumptions set during execution.
     pub output: MaybePruned<Option<Output>>,
@@ -79,7 +80,7 @@ impl ReceiptClaim {
         let output = read_sha_halfs(flat)?;
 
         Ok(Self {
-            input,
+            input: MaybePruned::Pruned(input),
             pre: pre.into(),
             post: post.into(),
             exit_code,
@@ -89,7 +90,7 @@ impl ReceiptClaim {
 
     /// Encode a [ReceiptClaim] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), PrunedValueError> {
-        write_sha_halfs(flat, &self.input);
+        write_sha_halfs(flat, &self.input.digest::<sha::Impl>());
         self.pre.as_value()?.encode(flat);
         self.post.as_value()?.encode(flat);
         let (sys_exit, user_exit) = self.exit_code.into_pair();
@@ -107,7 +108,7 @@ impl Digestible for ReceiptClaim {
         tagged_struct::<S>(
             "risc0.ReceiptClaim",
             &[
-                self.input,
+                self.input.digest::<S>(),
                 self.pre.digest::<S>(),
                 self.post.digest::<S>(),
                 self.output.digest::<S>(),
@@ -149,6 +150,31 @@ impl From<InvalidExitCodeError> for DecodeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
+
+/// Private never type, similar to !
+/// https://doc.rust-lang.org/std/primitive.never.html
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub(crate) enum Never {}
+
+/// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
+/// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
+/// is accessible. It may become inhabited in a future release.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct Input {
+    // Private field to ensure this type cannot be constructed.
+    // By making this type uninhabited, it can be populated later without breaking backwards
+    // compatibility.
+    pub(crate) x: Never,
+}
+
+impl Digestible for Input {
+    /// Hash the [Output] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        match self.x { /* unreachable  */ }
+    }
+}
 
 /// Output field in the [ReceiptClaim], committing to a claimed journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -510,6 +536,19 @@ where
     }
 }
 
+impl<T: Merge> Merge for Option<T> {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        match (self, other) {
+            (Some(left), Some(right)) => Some(left.merge(right)).transpose(),
+            (None, None) => Ok(None),
+            _ => Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            )),
+        }
+    }
+}
+
 impl Merge for Assumptions {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         if self.0.len() != other.0.len() {
@@ -528,6 +567,12 @@ impl Merge for Assumptions {
     }
 }
 
+impl Merge for Input {
+    fn merge(&self, _other: &Self) -> Result<Self, MergeInequalityError> {
+        match self.x { /* unreachable  */ }
+    }
+}
+
 impl Merge for Output {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         Ok(Self {
@@ -537,22 +582,9 @@ impl Merge for Output {
     }
 }
 
-impl Merge for Option<Output> {
-    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
-        match (self, other) {
-            (Some(left), Some(right)) => Some(left.merge(right)).transpose(),
-            (None, None) => Ok(None),
-            _ => Err(MergeInequalityError(
-                self.digest::<sha::Impl>(),
-                other.digest::<sha::Impl>(),
-            )),
-        }
-    }
-}
-
 impl Merge for ReceiptClaim {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
-        if self.exit_code != other.exit_code || self.input != other.input {
+        if self.exit_code != other.exit_code {
             return Err(MergeInequalityError(
                 self.digest::<sha::Impl>(),
                 other.digest::<sha::Impl>(),
@@ -562,7 +594,7 @@ impl Merge for ReceiptClaim {
             pre: self.pre.merge(&other.pre)?,
             post: self.post.merge(&other.post)?,
             exit_code: self.exit_code,
-            input: self.input,
+            input: self.input.merge(&other.input)?,
             output: self.output.merge(&other.output)?,
         })
     }
@@ -588,7 +620,7 @@ mod tests {
                     pre: x.pre.rand_prune(),
                     post: x.post.rand_prune(),
                     exit_code: x.exit_code,
-                    input: x.input,
+                    input: x.input.clone(),
                     output: x.output.rand_prune(),
                 }
                 .into(),
@@ -667,7 +699,7 @@ mod tests {
             }
             .into(),
             exit_code: ExitCode::Halted(0),
-            input: Digest::ZERO,
+            input: None.into(),
             output: MaybePruned::Value(Some(Output {
                 journal: MaybePruned::Value(b"hello world".to_vec()),
                 assumptions: MaybePruned::Value(Assumptions(vec![

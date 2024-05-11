@@ -10,13 +10,15 @@ repository = { workspace = true }
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 ark-bn254 = { version = "0.4" }
+ark-ec = { version = "0.4" }
 ark-groth16 = { version = "0.4", default-features = false }
 ark-serialize = { version = "0.4", default-features = false }
-bytemuck = { version = "1.14", optional = true }
+bytemuck = { version = "1.14" }
 hex = { version = "0.4", default-features = false, features = ["alloc"] }
 num-bigint = { version = "0.4", default-features = false }
 num-derive = { version = "0.4" }
 num-traits = { version = "0.2", default-features = false, optional = true }
+risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }
 serde = { version = "1.0", default-features = false, features = [
@@ -35,7 +37,6 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 default = ["std"]
 docker = ["prove"]
 prove = [
-  "dep:bytemuck",
   "dep:num-traits",
   "dep:risc0-core",
   "dep:serde_json",

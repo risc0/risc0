@@ -91,6 +91,10 @@ where
             self.lhs.view(|src| dst.clone_from_slice(src));
         })
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        self.lhs.to_vec()
+    }
 }
 
 pub struct DualHal<F, L, R>
@@ -289,6 +293,12 @@ where
         self.lhs.eltwise_copy_elem(&output.lhs, &input.lhs);
         self.rhs.eltwise_copy_elem(&output.rhs, &input.rhs);
         output.assert_eq();
+    }
+
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        self.lhs.eltwise_zeroize_elem(&elems.lhs);
+        self.rhs.eltwise_zeroize_elem(&elems.rhs);
+        elems.assert_eq();
     }
 
     fn fri_fold(

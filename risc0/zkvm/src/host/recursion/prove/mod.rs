@@ -113,7 +113,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         pre: a.claim.pre.clone(),
         post: b.claim.post.clone(),
         exit_code: b.claim.exit_code,
-        input: a.claim.input,
+        input: a.claim.input.clone(),
         output: b.claim.output.clone(),
     };
 

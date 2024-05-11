@@ -221,7 +221,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), V
         pre: MaybePruned::Pruned(image_id),
         post: MaybePruned::Pruned(post_state_digest),
         exit_code,
-        input: Digest::ZERO,
+        input: None.into(),
         output: Some(Output {
             journal: MaybePruned::Pruned(journal_digest),
             assumptions: MaybePruned::Pruned(Digest::ZERO),

@@ -21,7 +21,15 @@ pub struct Install;
 
 impl Install {
     pub fn run(&self) {
+        install_sccache();
         install_wasm_tools();
+    }
+}
+
+fn install_sccache() {
+    if which("sccache").is_err() {
+        let sh = Shell::new().unwrap();
+        cmd!(sh, "cargo install --locked sccache").run().unwrap();
     }
 }
 
