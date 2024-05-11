@@ -395,7 +395,6 @@ dependencies = [
 name = "exponentiate"
 version = "0.1.0"
 dependencies = [
- "bytemuck",
  "hello-world-methods",
  "risc0-zkvm",
 ]
@@ -507,17 +506,6 @@ dependencies = [
  "autocfg",
  "num-integer",
  "num-traits",
-]
-
-[[package]]
-name = "num-derive"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfb77679af88f8b125209d354a202862602672222e7f2313fdd6dc349bad4712"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.39",
 ]
 
 [[package]]
@@ -650,7 +638,6 @@ name = "risc0-build"
 version = "1.0.0-rc.4"
 dependencies = [
  "anyhow",
- "cargo-platform",
  "cargo_metadata",
  "dirs",
  "docker-generate",
@@ -707,7 +694,6 @@ dependencies = [
  "bytemuck",
  "hex",
  "num-bigint",
- "num-derive",
  "num-traits",
  "risc0-binfmt",
  "risc0-zkp",

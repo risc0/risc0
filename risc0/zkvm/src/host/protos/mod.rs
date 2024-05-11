@@ -12,23 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    #[cfg(feature = "prove")]
-    {
-        std::env::set_var("PROTOC", protobuf_src::protoc());
-        prost_build::compile_protos(
-            &["src/host/server/exec/profile.proto"],
-            &["src/host/server/exec"],
-        )
-        .unwrap();
-    }
-    #[cfg(any(feature = "client", feature = "prove"))]
-    {
-        std::env::set_var("PROTOC", protobuf_src::protoc());
-        prost_build::compile_protos(
-            &["src/host/protos/api.proto", "src/host/protos/core.proto"],
-            &["src/host/protos"],
-        )
-        .unwrap();
-    }
-}
+pub(crate) mod api;
+pub(crate) mod base;
+pub(crate) mod core;
