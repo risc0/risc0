@@ -163,7 +163,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             size.as_arg(),
         ];
         let kernel = self.kernels.get("eval_check").unwrap();
-        self.hal.dispatch(&kernel, &args, domain as u64, None);
+        self.hal.dispatch(kernel, &args, domain as u64, None);
     }
 
     #[tracing::instrument(skip_all)]
@@ -215,7 +215,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             //         accum.as_arg(),
             //     ];
             //     let kernel = self.kernels.get("k_step_compute_accum").unwrap();
-            //     self.hal.dispatch(&kernel, &args, count as u64, None);
+            //     self.hal.dispatch(kernel, &args, count as u64, None);
             let args = [
                 KernelArg::Integer(steps as u32),
                 ctrl.as_arg(),
@@ -225,7 +225,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
                 bytes.as_arg(),
             ];
             let kernel = self.kernels.get("step_compute_accum").unwrap();
-            self.hal.dispatch(&kernel, &args, count as u64, None);
+            self.hal.dispatch(kernel, &args, count as u64, None);
         });
 
         tracing::info_span!("prefix_products").in_scope(|| {
@@ -248,7 +248,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             //     accum.as_arg(),
             // ];
             // let kernel = self.kernels.get("k_step_verify_accum").unwrap();
-            // self.hal.dispatch(&kernel, &args, count as u64, None);
+            // self.hal.dispatch(kernel, &args, count as u64, None);
             let args = [
                 KernelArg::Integer(steps as u32),
                 ctrl.as_arg(),
@@ -259,7 +259,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
                 accum.as_arg(),
             ];
             let kernel = self.kernels.get("step_verify_accum").unwrap();
-            self.hal.dispatch(&kernel, &args, count as u64, None);
+            self.hal.dispatch(kernel, &args, count as u64, None);
         });
 
         tracing::info_span!("zeroize").in_scope(|| {

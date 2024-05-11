@@ -322,7 +322,7 @@ impl<T> BufferImpl<T> {
         cmd_queue: CommandQueue,
         slice: &[T],
     ) -> Self {
-        let bytes_len = slice.len() * mem::size_of::<T>();
+        let bytes_len = slice.len() * mem::size_of_val(slice);
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer =
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
@@ -875,7 +875,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
         io.view_mut(|io| {
             for i in 1..io.len() {
-                io[i] = io[i] * io[i - 1];
+                io[i] *= io[i - 1];
             }
         });
     }
