@@ -22,7 +22,7 @@ kernel void k_step_exec(device void* ctx,
                         device Fp* arg2,
                         device Fp* arg3,
                         device Fp* arg4) {
-  step_exec(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+  // step_exec(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
 }
 
 kernel void k_step_verify_mem(device void* ctx,
@@ -33,7 +33,7 @@ kernel void k_step_verify_mem(device void* ctx,
                         device Fp* arg2,
                         device Fp* arg3,
                         device Fp* arg4) {
-  step_verify_mem(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+  // step_verify_mem(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
 }
 
 kernel void k_step_verify_bytes(device void* ctx,
@@ -44,10 +44,10 @@ kernel void k_step_verify_bytes(device void* ctx,
                         device Fp* arg2,
                         device Fp* arg3,
                         device Fp* arg4) {
-  step_verify_bytes(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+  // step_verify_bytes(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
 }
 
-kernel void k_step_compute_accum(device AccumContext* ctx,
+kernel void k_step_compute_accum(device void* ctx,
                                  const device uint32_t& steps,
                                  uint32_t cycle [[thread_position_in_grid]],
                                  device Fp* arg0,

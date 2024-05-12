@@ -68,19 +68,19 @@ fn build_metal_kernels() {
     KernelBuild::new(KernelType::Metal)
         .files([
             // "kernels/metal/bigint.metal",
-            // "kernels/metal/extern.metal",
+            "kernels/metal/extern.metal",
             "kernels/metal/eval_check.metal",
-            // "kernels/metal/ffi.metal",
+            "kernels/metal/ffi.metal",
             "kernels/metal/step_compute_accum.metal",
             // "kernels/metal/step_exec.metal",
             "kernels/metal/step_verify_accum.metal",
             // "kernels/metal/step_verify_bytes.metal",
             // "kernels/metal/step_verify_mem.metal",
         ])
-        // .deps([
-        //     "kernels/metal/context.h",
-        //     "kernels/metal/extern.h",
-        //     "kernels/metal/kernels.h",
-        // ])
+        .deps([
+            "kernels/metal/context.h",
+            "kernels/metal/extern.h",
+            "kernels/metal/kernels.h",
+        ])
         .compile("metal_kernel");
 }

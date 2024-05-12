@@ -16,8 +16,6 @@
 
 #include "fp.h"
 
-struct AccumContext;
-
 void extern_halt(
     device void* ctx, uint32_t cycle, const constant char* extra, Fp args[96], Fp outs[32]);
 
@@ -69,17 +67,11 @@ void extern_syscallBody(
 void extern_syscallFini(
     device void* ctx, uint32_t cycle, const constant char* extra, Fp args[96], Fp outs[32]);
 
-void extern_plonkWriteAccum_ram(device void* AccumContext,
-                                uint32_t cycle,
-                                const constant char* extra,
-                                Fp args[96],
-                                Fp outs[32]);
+void extern_plonkWriteAccum_ram(
+    device void* ctx, uint32_t cycle, const constant char* extra, Fp args[96], Fp outs[32]);
 
-void extern_plonkWriteAccum_bytes(device void* AccumContext,
-                                  uint32_t cycle,
-                                  const constant char* extra,
-                                  Fp args[96],
-                                  Fp outs[32]);
+void extern_plonkWriteAccum_bytes(
+    device void* ctx, uint32_t cycle, const constant char* extra, Fp args[96], Fp outs[32]);
 
 void extern_plonkReadAccum_ram(
     device void* ctx, uint32_t cycle, const constant char* extra, Fp args[96], Fp outs[32]);
