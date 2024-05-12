@@ -322,7 +322,7 @@ impl<T> BufferImpl<T> {
         cmd_queue: CommandQueue,
         slice: &[T],
     ) -> Self {
-        let bytes_len = slice.len() * mem::size_of_val(slice);
+        let bytes_len = mem::size_of_val(slice);
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer =
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
