@@ -20,7 +20,7 @@ bonsai-sdk = { workspace = true }
 cargo-generate = { version = "0.21", features = ["vendored-openssl"] }
 cargo_metadata = { version = "0.18" }
 clap = { version = "4.5", features = ["derive"] }
-const_format = "0.2.20"
+const_format = "0.2"
 dirs = "5.0"
 downloader = { version = "0.2", default-features = false, features = [
   "rustls-tls",
