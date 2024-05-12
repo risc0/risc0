@@ -36,7 +36,7 @@ jobs:
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
-      test: ${{ steps.filter.outputs.risc0 }}
+      risc0: ${{ steps.filter.outputs.risc0 }}
       test: ${{ steps.filter.outputs.test }}
       test-crates: ${{ steps.filter.outputs.test-crates }}
       web: ${{ steps.filter.outputs.web }}
