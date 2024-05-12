@@ -17,8 +17,8 @@ use std::{
 };
 
 use metal::{
-    Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
-    MTLSize, NSRange,
+    Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
+    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize, NSRange,
 };
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use rayon::prelude::*;
@@ -368,6 +368,10 @@ impl<T> BufferImpl<T> {
     pub fn as_ptr(&self) -> *mut c_void {
         self.buffer.0.contents()
     }
+
+    pub fn as_buf(&self) -> MetalBuffer {
+        self.buffer.0.clone()
+    }
 }
 
 impl<T: Clone> Buffer<T> for BufferImpl<T> {
@@ -438,6 +442,10 @@ impl<MH: MetalHash> MetalHal<MH> {
     pub fn new() -> Self {
         let lock = singleton().lock();
         let device = Device::system_default().expect("no device found");
+        assert_eq!(
+            device.argument_buffers_support(),
+            MTLArgumentBuffersTier::Tier2
+        );
         let library = device.new_library_with_data(METAL_LIB).unwrap();
         let cmd_queue = device.new_command_queue();
         let mut kernels = HashMap::new();
@@ -470,8 +478,21 @@ impl<MH: MetalHash> MetalHal<MH> {
         count: u64,
         opts: Option<(MTLSize, MTLSize)>,
     ) {
+        self.dispatch_with_resources(kernel, args, count, opts, |_| {});
+    }
+
+    pub fn dispatch_with_resources<F: Fn(&ComputeCommandEncoderRef)>(
+        &self,
+        kernel: &ComputePipelineDescriptor,
+        args: &[KernelArg],
+        count: u64,
+        opts: Option<(MTLSize, MTLSize)>,
+        callback: F,
+    ) {
         let cmd_buffer = self.cmd_queue.new_command_buffer();
         let cmd_encoder = cmd_buffer.new_compute_command_encoder();
+
+        callback(cmd_encoder);
 
         let pipeline_state = self
             .device
