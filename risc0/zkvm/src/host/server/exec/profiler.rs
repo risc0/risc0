@@ -40,13 +40,8 @@ use risc0_zkvm_platform::memory::TEXT_START;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
 
-use self::proto::Line;
+use super::proto;
 use crate::{TraceCallback, TraceEvent};
-
-mod proto {
-    // Generated proto interface.
-    include!(concat!(env!("OUT_DIR"), "/perftools.profiles.rs"));
-}
 
 /// Operations effecting the function call stack.
 #[derive(Debug)]
@@ -565,7 +560,7 @@ impl ProfileBuilder {
 
 struct LocationKey {
     address: u64,
-    lines: Vec<Line>,
+    lines: Vec<proto::Line>,
 }
 
 impl Hash for LocationKey {

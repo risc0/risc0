@@ -101,12 +101,8 @@ impl NewCommand {
         let mut template_path = TemplatePath {
             auto_path: Some(self.template.clone()),
             subfolder: Some(self.templ_subdir.clone()),
-            git: None,
-            branch: None,
-            path: None,
-            favorite: None,
             tag: Some(self.tag.clone()),
-            test: false,
+            ..TemplatePath::default()
         };
 
         if !self.branch.is_empty() {
@@ -169,28 +165,17 @@ impl NewCommand {
 
         cargo_generate::generate(GenerateArgs {
             template_path,
-            list_favorites: false,
             name: Some(self.name.clone()),
             force: true,
             verbose: true,
-            template_values_file: None,
-            silent: false,
-            config: None,
             vcs: if self.no_git {
                 Some(Vcs::None)
             } else {
                 Some(Vcs::Git)
             },
-            lib: false,
-            bin: false,
-            ssh_identity: None,
             define: template_variables,
-            init: false,
             destination: Some(dest_dir),
-            force_git_init: false,
-            allow_commands: false,
-            overwrite: false,
-            other_args: None,
+            ..GenerateArgs::default()
         })
         .expect("Failed to generate project");
 

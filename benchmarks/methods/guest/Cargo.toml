@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 blake3 = { version = "1.4", default-features = false }
 ed25519-dalek = { version = "2.0.0-rc.3", default-features = false }
-hex-literal = "0.4"
 k256 = { version = "=0.13.1", features = [
   "arithmetic",
   "serde",
