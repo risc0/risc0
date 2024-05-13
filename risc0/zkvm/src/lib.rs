@@ -144,7 +144,7 @@ pub use {
 
 pub use receipt::{
     Assumption, CompositeReceipt, CompositeReceiptVerifierParameters, InnerReceipt, Journal,
-    Receipt, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
+    Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
