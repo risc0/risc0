@@ -8,7 +8,7 @@ We support two options for on-chain verification:
 1. Use the [`IRiscZeroVerifier` interface][IRiscZeroVerifier.sol@v0.10]. <br/>
    Each verifier contract we release implements this interface. The interface will route your `verify()` call to the appropriate base verifier contract.
 
-1. Use a [base verifier contract](https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol) directly. <br/>
+1. Use a base verifier contract, such as [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol@v0.10] directly. <br/>
    Base verifier contracts are stateless and immutable. When new versions of the RISC Zero proof system are released, a new verifier contract will be deployed.
    The base verifier contracts we have deployed are enumerated in the [Addresses](#addresses) section below.
 
@@ -82,3 +82,4 @@ You can choose to use this contract or deploy your own.
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm-program]: /terminology#zkvm-program
+[VersionManagement@main]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
