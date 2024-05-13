@@ -655,15 +655,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
 
 [[package]]
-name = "autotools"
-version = "0.2.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef941527c41b0fc0dd48511a8154cd5fc7e29200a0ff8b7203c5d777dbc795cf"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.71"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4045,11 +4036,11 @@ dependencies = [
 
 [[package]]
 name = "protobuf-src"
-version = "1.1.0+21.5"
+version = "2.0.0+26.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7ac8852baeb3cc6fb83b93646fb93c0ffe5d14bf138c945ceb4b9948ee0e3c1"
+checksum = "9617ed8dcac13e32d6814bb9bed744b45bb9a9535876abc90a3eda43f98e1617"
 dependencies = [
- "autotools",
+ "cmake",
 ]
 
 [[package]]
