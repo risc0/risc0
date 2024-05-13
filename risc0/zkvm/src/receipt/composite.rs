@@ -241,6 +241,7 @@ impl CompositeReceipt {
                 .map(|a| {
                     Ok(Assumption {
                         claim: a.claim()?.digest::<sha::Impl>(),
+                        // TODO(victor): Revisit what the right value is here.
                         control_root: ALLOWED_CONTROL_ROOT,
                     }
                     .into())
