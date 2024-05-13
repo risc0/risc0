@@ -2,8 +2,8 @@ import { Badge } from "@risc0/ui/badge";
 import { buttonVariants } from "@risc0/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import { AsciiArt } from "shared/server/components/ascii-art";
 
 export const metadata: Metadata = {
   title: "Page Not Found",
@@ -28,7 +28,19 @@ export default function NotFoundPage() {
         </CardFooter>
       </div>
 
-      <Image className="lg:mx-auto lg:w-1/2" width="480" height="480" src="/404.svg" alt="Page Not Found" priority />
+      <AsciiArt
+        label="404"
+        withWrapper
+        className="text-sm"
+        code={`// Code
+  ___   ___  ________  ___   ___
+ |\\  \\ |\\  \\|\\   __  \\|\\  \\ |\\  \\
+ \\ \\  \\\\_\\  \\ \\  \\|\\  \\ \\  \\\\_\\  \\
+  \\ \\______  \\ \\  \\\\\\  \\ \\______  \\
+   \\|_____|\\  \\ \\  \\\\\\  \\|_____|\\  \\
+          \\ \\__\\ \\_______\\     \\ \\__\\
+           \\|__|\\|_______|      \\|__|`}
+      />
     </div>
   );
 }

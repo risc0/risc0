@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "base.proto";
 
-package protos.api;
+package api;
 
 message ServerRequest {
   oneof kind {
@@ -18,7 +18,7 @@ message ServerRequest {
 }
 
 message HelloRequest {
-  protos.base.SemanticVersion version = 1;
+  base.SemanticVersion version = 1;
 }
 
 message HelloReply {
@@ -29,7 +29,7 @@ message HelloReply {
 }
 
 message HelloResult {
-  protos.base.SemanticVersion version = 1;
+  base.SemanticVersion version = 1;
 }
 
 message ExecuteRequest {
@@ -164,7 +164,7 @@ enum ReceiptKind {
 message SessionInfo {
   uint32 segments = 1;
   bytes journal = 2;
-  protos.base.ExitCode exit_code = 3;
+  base.ExitCode exit_code = 3;
 }
 
 message SegmentInfo {

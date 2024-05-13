@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Context, Result};
-use hex::FromHex;
+use anyhow::{anyhow, bail, Result};
 use risc0_circuit_recursion::{control_id::ZKR_CONTROL_IDS, REGISTER_GROUP_CODE};
 use risc0_zkp::{
     adapter::TapsProvider, core::digest::Digest, field::baby_bear::BabyBearElem, MAX_CYCLES_PO2,
@@ -36,7 +35,7 @@ fn get_zkr(name: &str) -> Result<(Program, Digest)> {
             .iter()
             .copied()
             .find_map(|(n, id)| (n == name).then_some(id))
-            .ok_or(anyhow!("failed to find {name} in the list of control IDs"))??,
+            .ok_or(anyhow!("failed to find {name} in the list of control IDs"))?,
     ))
 }
 

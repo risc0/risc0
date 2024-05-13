@@ -1,6 +1,7 @@
 import { Separator } from "@risc0/ui/separator";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
+import { FooterAscii } from "../../_components/footer-ascii";
 import { DatasheetCommitHashButton } from "./_components/datasheet-commit-hash-button";
 
 export default function DatasheetLayout({ children, params }) {
@@ -17,6 +18,8 @@ export default function DatasheetLayout({ children, params }) {
       <Separator className="mt-2" />
 
       {children}
+
+      <FooterAscii text="Datasheet" />
     </div>
   );
 }

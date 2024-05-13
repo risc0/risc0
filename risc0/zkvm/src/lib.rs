@@ -93,7 +93,7 @@ pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
-    Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 #[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
 pub use {
@@ -142,12 +142,13 @@ pub use {
     risc0_groth16::Seal as Groth16Seal,
 };
 
-#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::CompactReceipt;
 pub use receipt::{
-    AssumptionReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
-    SuccinctReceipt, VerifierContext,
+    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, InnerReceipt, Journal,
+    Receipt, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
+//#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
+pub use receipt::{CompactReceipt, CompactReceiptVerifierParameters};
 
 use semver::Version;
 

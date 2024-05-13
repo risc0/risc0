@@ -14,17 +14,20 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use hex::FromHex;
-use risc0_binfmt::read_sha_halfs;
+use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{
     control_id::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
     CircuitImpl, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
+use risc0_zkp::{
+    adapter::{CircuitInfo, ProtocolInfo, PROOF_SYSTEM_INFO},
+    core::{digest::Digest, hash::sha::Sha256},
+    verify::VerificationError,
+};
 use serde::{Deserialize, Serialize};
 
-use crate::{receipt::VerifierContext, sha::Digestible, ReceiptClaim};
+use crate::{receipt::VerifierContext, sha, ReceiptClaim};
 
 /// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
@@ -52,6 +55,16 @@ pub struct SuccinctReceipt {
 }
 
 impl SuccinctReceipt {
+    /// Information about the parameters used to verify the receipt. Includes parameters that are
+    /// useful in deciding whether the verifier is compatible with a given receipt.
+    pub fn verifier_parameters() -> SuccinctReceiptVerifierParameters {
+        SuccinctReceiptVerifierParameters {
+            control_root: ALLOWED_CONTROL_ROOT,
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_recursion::CircuitImpl::CIRCUIT_INFO,
+        }
+    }
+
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
@@ -120,7 +133,7 @@ impl SuccinctReceipt {
         // Verify the output hash matches that data
         let output_hash =
             read_sha_halfs(&mut seal_claim).map_err(|_| VerificationError::ReceiptFormatError)?;
-        if output_hash != self.claim.digest() {
+        if output_hash != self.claim.digest::<sha::Impl>() {
             tracing::debug!(
                 "succinct receipt claim does not match the output digest: claim: {:#?}, digest expected: {output_hash:?}",
                 self.claim,
@@ -134,5 +147,51 @@ impl SuccinctReceipt {
     /// Return the seal for this receipt, as a vector of bytes.
     pub fn get_seal_bytes(&self) -> Vec<u8> {
         self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
+    }
+}
+
+/// Verifier parameters used to verify a [SuccinctReceipt].
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct SuccinctReceiptVerifierParameters {
+    /// Control root with which the receipt is expected to verify.
+    pub control_root: Digest,
+    /// Protocol info string distinguishing the proof system under which the receipt should verify.
+    pub proof_system_info: ProtocolInfo,
+    /// Protocol info string distinguishing circuit with which the receipt should verify.
+    pub circuit_info: ProtocolInfo,
+}
+
+impl Digestible for SuccinctReceiptVerifierParameters {
+    /// Hash the [SuccinctReceiptVerifierParameters] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>(
+            "risc0.SuccinctReceiptVerifierParameters",
+            &[
+                self.control_root,
+                *S::hash_bytes(&self.proof_system_info.0),
+                *S::hash_bytes(&self.circuit_info.0),
+            ],
+            &[],
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SuccinctReceipt;
+    use crate::sha::Digestible;
+    use risc0_zkp::core::digest::digest;
+
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This
+    // struct encodes parameters used in verification, and so this value should be updated if and
+    // only if a change to the verifier parameters is expected. Updating the verifier parameters
+    // will result in incompatibility with previous versions.
+    #[test]
+    fn succinct_receipt_verifier_parameters_is_stable() {
+        assert_eq!(
+            SuccinctReceipt::verifier_parameters().digest(),
+            digest!("716d552dd69961bd4b87c8426eaacbe5b53bf0ec812d732129796c05ce467173")
+        );
     }
 }

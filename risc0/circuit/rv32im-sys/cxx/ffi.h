@@ -14,11 +14,9 @@
 
 #pragma once
 
-#include "extern.h"
 #include "fp.h"
 #include "fpext.h"
 
-#include <cstdint>
 #include <exception>
 #include <string>
 

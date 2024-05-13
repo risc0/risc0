@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "base.proto";
 
-package protos.core;
+package core;
 
 message ProveInfo {
   Receipt receipt = 1;
@@ -16,9 +16,14 @@ message SessionStats {
 }
 
 message Receipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   InnerReceipt inner = 2;
   bytes journal = 3;
+  ReceiptMetadata metadata = 4;
+}
+
+message ReceiptMetadata {
+  Digest verifier_parameters = 1;
 }
 
 message InnerReceipt {
@@ -37,7 +42,7 @@ message CompositeReceipt {
 }
 
 message SegmentReceipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   bytes seal = 2;
   uint32 index = 3;
   string hashfn = 4;
@@ -45,14 +50,14 @@ message SegmentReceipt {
 }
 
 message SuccinctReceipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   bytes seal = 2;
   Digest control_id = 3;
   ReceiptClaim claim = 4;
 }
 
 message Groth16Receipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   bytes seal = 2;
   ReceiptClaim claim = 3;
 }
@@ -60,8 +65,8 @@ message Groth16Receipt {
 message ReceiptClaim {
   MaybePruned pre = 1;  // MaybePruned<SystemState>
   MaybePruned post = 2; // MaybePruned<SystemState>
-  protos.base.ExitCode exit_code = 3;
-  Digest input = 4;
+  base.ExitCode exit_code = 3;
+  MaybePruned input = 4;  // Option<MaybePruned<Input>>
   MaybePruned output = 5; // Option<MaybePruned<Output>>
 }
 
@@ -77,6 +82,8 @@ message SystemState {
   uint32 pc = 1;
   Digest merkle_root = 2;
 }
+
+message Input {}
 
 message Output {
   MaybePruned journal = 1;     // MaybePruned<bytes>

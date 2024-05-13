@@ -2,6 +2,7 @@ import { Separator } from "@risc0/ui/separator";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
+import { FooterAscii } from "../_components/footer-ascii";
 import { CratesIoValidationHashButton } from "./_components/creates-io-validation-hash-button";
 
 export default function CratesIoValidationLayout({ children }) {
@@ -27,6 +28,8 @@ export default function CratesIoValidationLayout({ children }) {
       <Separator className="mt-2" />
 
       {children}
+
+      <FooterAscii text="Crates.io Validation" />
     </div>
   );
 }

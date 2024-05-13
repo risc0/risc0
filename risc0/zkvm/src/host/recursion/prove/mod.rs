@@ -22,7 +22,6 @@ pub mod zkr;
 use std::{collections::VecDeque, mem::take, rc::Rc};
 
 use anyhow::{anyhow, Context, Result};
-use hex::FromHex;
 use merkle::MerkleGroup;
 use rand::thread_rng;
 use risc0_circuit_recursion::{
@@ -113,7 +112,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         pre: a.claim.pre.clone(),
         post: b.claim.post.clone(),
         exit_code: b.claim.exit_code,
-        input: a.claim.input,
+        input: a.claim.input.clone(),
         output: b.claim.output.clone(),
     };
 

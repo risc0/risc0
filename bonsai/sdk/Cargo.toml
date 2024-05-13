@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-reqwest = { version = "0.11", default-features = false, features = [
+reqwest = { version = "0.12", default-features = false, features = [
   "blocking",
   "json",
   "rustls-tls",
@@ -31,5 +31,5 @@ uuid = { version = "1.8", features = ["v4"] }
 
 [features]
 default = ["std"]
-std = []
+std = ["risc0-groth16/std"]
 async = ["dep:tokio"]

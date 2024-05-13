@@ -45,6 +45,8 @@ pub trait Buffer<T>: Clone {
     fn view<F: FnOnce(&[T])>(&self, f: F);
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);
+
+    fn to_vec(&self) -> Vec<T>;
 }
 
 pub trait Hal {
@@ -127,6 +129,8 @@ pub trait Hal {
         input: &Self::Buffer<Self::Elem>,
     );
 
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>);
+
     fn fri_fold(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -151,6 +155,16 @@ pub trait Hal {
 }
 
 pub trait CircuitHal<H: Hal> {
+    fn accumulate(
+        &self,
+        ctrl: &H::Buffer<H::Elem>,
+        io: &H::Buffer<H::Elem>,
+        data: &H::Buffer<H::Elem>,
+        mix: &H::Buffer<H::Elem>,
+        accum: &H::Buffer<H::Elem>,
+        steps: usize,
+    );
+
     /// Compute check polynomial.
     fn eval_check(
         &self,
@@ -161,16 +175,6 @@ pub trait CircuitHal<H: Hal> {
         globals: &[&H::Buffer<H::Elem>],
         poly_mix: H::ExtElem,
         po2: usize,
-        steps: usize,
-    );
-
-    fn accumulate(
-        &self,
-        ctrl: &H::Buffer<H::Elem>,
-        io: &H::Buffer<H::Elem>,
-        data: &H::Buffer<H::Elem>,
-        mix: &H::Buffer<H::Elem>,
-        accum: &H::Buffer<H::Elem>,
         steps: usize,
     );
 }

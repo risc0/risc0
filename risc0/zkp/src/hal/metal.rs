@@ -17,10 +17,11 @@ use std::{
 };
 
 use metal::{
-    Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
-    MTLSize, NSRange,
+    Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
+    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize, NSRange,
 };
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
+use rayon::prelude::*;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
@@ -292,6 +293,7 @@ pub struct BufferImpl<T> {
 }
 
 pub enum KernelArg<'a> {
+    Null,
     Buffer {
         buffer: &'a MetalBuffer,
         offset: u64,
@@ -320,7 +322,7 @@ impl<T> BufferImpl<T> {
         cmd_queue: CommandQueue,
         slice: &[T],
     ) -> Self {
-        let bytes_len = slice.len() * mem::size_of::<T>();
+        let bytes_len = mem::size_of_val(slice);
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer =
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
@@ -357,6 +359,18 @@ impl<T> BufferImpl<T> {
         blit_encoder.end_encoding();
         cmd_buffer.commit();
         cmd_buffer.wait_until_completed();
+    }
+
+    pub fn as_device_ptr(&self) -> *mut c_void {
+        self.buffer.0.gpu_address() as *mut c_void
+    }
+
+    pub fn as_ptr(&self) -> *mut c_void {
+        self.buffer.0.contents()
+    }
+
+    pub fn as_buf(&self) -> MetalBuffer {
+        self.buffer.0.clone()
     }
 }
 
@@ -409,6 +423,13 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
             .0
             .did_modify_range(NSRange::new(offset as u64, size as u64));
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        let ptr = self.buffer.0.contents() as *const T;
+        let len = self.buffer.0.length() as usize / mem::size_of::<T>();
+        let slice = unsafe { slice::from_raw_parts(ptr, len) };
+        Vec::from(slice)
+    }
 }
 
 impl<MH: MetalHash> Default for MetalHal<MH> {
@@ -421,6 +442,10 @@ impl<MH: MetalHash> MetalHal<MH> {
     pub fn new() -> Self {
         let lock = singleton().lock();
         let device = Device::system_default().expect("no device found");
+        assert_eq!(
+            device.argument_buffers_support(),
+            MTLArgumentBuffersTier::Tier2
+        );
         let library = device.new_library_with_data(METAL_LIB).unwrap();
         let cmd_queue = device.new_command_queue();
         let mut kernels = HashMap::new();
@@ -453,8 +478,21 @@ impl<MH: MetalHash> MetalHal<MH> {
         count: u64,
         opts: Option<(MTLSize, MTLSize)>,
     ) {
+        self.dispatch_with_resources(kernel, args, count, opts, |_| {});
+    }
+
+    pub fn dispatch_with_resources<F: Fn(&ComputeCommandEncoderRef)>(
+        &self,
+        kernel: &ComputePipelineDescriptor,
+        args: &[KernelArg],
+        count: u64,
+        opts: Option<(MTLSize, MTLSize)>,
+        callback: F,
+    ) {
         let cmd_buffer = self.cmd_queue.new_command_buffer();
         let cmd_encoder = cmd_buffer.new_compute_command_encoder();
+
+        callback(cmd_encoder);
 
         let pipeline_state = self
             .device
@@ -473,6 +511,9 @@ impl<MH: MetalHash> MetalHal<MH> {
                         mem::size_of_val(value) as u64,
                         value.to_le_bytes().as_ptr() as *const c_void,
                     );
+                }
+                KernelArg::Null => {
+                    cmd_encoder.set_buffer(index as u64, None, 0);
                 }
             }
         }
@@ -855,9 +896,17 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
         io.view_mut(|io| {
             for i in 1..io.len() {
-                io[i] = io[i] * io[i - 1];
+                io[i] *= io[i - 1];
             }
         });
+    }
+
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        elems.view_mut(|slice| {
+            slice.par_iter_mut().for_each(|elem| {
+                *elem = elem.valid_or_zero();
+            });
+        })
     }
 }
 
