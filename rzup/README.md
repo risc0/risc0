@@ -23,7 +23,9 @@ To install a specific release version:
 rzup --version <VERSION>
 ```
 
-Where `VERSION` can be replaced with specified RISC Zero release (e.g., `1.0.0-rc.3`). See our [releases](https://github.com/risc0/risc0/releases) for more information.
+Where `VERSION` can be replaced with specified RISC Zero release (e.g.,
+`1.0.0`). See our [releases](https://github.com/risc0/risc0/releases) for more
+information.
 
 
 To enable verbose installation logs:

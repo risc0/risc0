@@ -15,6 +15,7 @@
 mod bootstrap;
 mod bootstrap_groth16;
 mod bootstrap_poseidon;
+mod bootstrap_protos;
 mod gen_receipt;
 mod install;
 
@@ -23,7 +24,8 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 use self::{
     bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16,
-    bootstrap_poseidon::BootstrapPoseidon, gen_receipt::GenReceipt, install::Install,
+    bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
+    gen_receipt::GenReceipt, install::Install,
 };
 
 #[derive(Parser)]
@@ -37,6 +39,7 @@ enum Commands {
     Bootstrap(Bootstrap),
     BootstrapGroth16(BootstrapGroth16),
     BootstrapPoseidon(BootstrapPoseidon),
+    BootstrapProtos(BootstrapProtos),
     GenReceipt(GenReceipt),
     Install(Install),
 }
@@ -47,6 +50,7 @@ impl Commands {
             Commands::Bootstrap(cmd) => cmd.run(),
             Commands::BootstrapGroth16(cmd) => cmd.run(),
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
+            Commands::BootstrapProtos(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
             Commands::GenReceipt(cmd) => cmd.run(),
         }

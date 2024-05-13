@@ -16,8 +16,6 @@
 
 #include "fp.h"
 
-struct AccumContext;
-
 void step_exec(device void* ctx,
                uint32_t steps,
                uint32_t cycle,
@@ -45,7 +43,7 @@ void step_verify_bytes(device void* ctx,
                        device Fp* arg3,
                        device Fp* arg4);
 
-void step_compute_accum(device AccumContext* ctx,
+void step_compute_accum(device void* ctx,
                         uint32_t steps,
                         uint32_t cycle,
                         device Fp* arg0,

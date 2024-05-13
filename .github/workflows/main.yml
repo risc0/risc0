@@ -36,6 +36,7 @@ jobs:
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
+      risc0: ${{ steps.filter.outputs.risc0 }}
       test: ${{ steps.filter.outputs.test }}
       test-crates: ${{ steps.filter.outputs.test-crates }}
       web: ${{ steps.filter.outputs.web }}
@@ -72,6 +73,9 @@ jobs:
             examples:
               - *base
               - examples/**
+              - risc0/**
+            risc0:
+              - *base
               - risc0/**
             test:
               - *base
@@ -155,6 +159,8 @@ jobs:
         run: bash ./.github/scripts/circom_stable.sh
 
   clippy:
+    if: needs.changes.outputs.risc0 == 'true'
+    needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
@@ -177,7 +183,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: python3 -u clippy.py
+      - run: python3 -u clippy.py -F $FEATURE
 
   test:
     if: needs.changes.outputs.test == 'true'

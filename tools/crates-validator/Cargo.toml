@@ -6,7 +6,7 @@ default-run = "main"
 
 [dependencies]
 anyhow = "1.0"
-clap = { version = "4.0", features = ["derive"] }
+clap = { version = "4.5", features = ["derive"] }
 colored = "2"
 db-dump = "0.7.0"
 handlebars = "4.3"

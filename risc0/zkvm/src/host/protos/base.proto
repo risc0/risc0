@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-package protos.base;
+package base;
 
 message SemanticVersion {
   uint64 major = 1;

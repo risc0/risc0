@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, ffi::c_void, rc::Rc};
 
 use anyhow::{bail, Result};
-use metal::ComputePipelineDescriptor;
+use metal::{ComputePipelineDescriptor, MTLResourceOptions, MTLResourceUsage};
 use risc0_circuit_rv32im_sys::ffi::{Error, RawPreflightTrace};
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
@@ -36,7 +36,7 @@ use risc0_zkp::{
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
 
-const KERNEL_NAMES: &[&str] = &["eval_check", "step_compute_accum", "step_verify_accum"];
+const KERNEL_NAMES: &[&str] = &["eval_check", "k_step_compute_accum", "k_step_verify_accum"];
 
 use crate::{
     prove::{engine::SegmentProverImpl, SegmentProver},
@@ -109,11 +109,11 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
     }
 }
 
-// #[repr(C)]
-// struct AccumContext {
-//     ram: *const c_void,
-//     bytes: *const c_void,
-// }
+#[repr(C)]
+struct AccumContext {
+    ram: *const c_void,
+    bytes: *const c_void,
+}
 
 impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     #[tracing::instrument(skip_all)]
@@ -163,7 +163,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             size.as_arg(),
         ];
         let kernel = self.kernels.get("eval_check").unwrap();
-        self.hal.dispatch(&kernel, &args, domain as u64, None);
+        self.hal.dispatch(kernel, &args, domain as u64, None);
     }
 
     #[tracing::instrument(skip_all)]
@@ -189,43 +189,36 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             &bytes,
         );
 
-        // TODO: get this working with AccumContext.
-
-        // let ctx = AccumContext {
-        //     ram: ram.as_ptr(),
-        //     bytes: bytes.as_ptr(),
-        // };
-        // let ctx_buf = self.hal.device.new_buffer_with_data(
-        //     &ctx as *const AccumContext as *const c_void,
-        //     std::mem::size_of_val(&ctx) as u64,
-        //     MTLResourceOptions::StorageModeManaged,
-        // );
+        let ctx = AccumContext {
+            ram: ram.as_device_ptr(),
+            bytes: bytes.as_device_ptr(),
+        };
+        let ctx_buffer = self.hal.device.new_buffer_with_data(
+            &ctx as *const AccumContext as *const c_void,
+            std::mem::size_of_val(&ctx) as u64,
+            MTLResourceOptions::StorageModeManaged,
+        );
+        let args = [
+            KernelArg::Buffer {
+                buffer: &ctx_buffer,
+                offset: 0,
+            },
+            KernelArg::Integer(steps as u32),
+            ctrl.as_arg(),
+            io.as_arg(),
+            data.as_arg(),
+            mix.as_arg(),
+            accum.as_arg(),
+        ];
 
         tracing::info_span!("step_compute_accum").in_scope(|| {
-            //     let args = [
-            //         KernelArg::Buffer {
-            //             buffer: &ctx_buf,
-            //             offset: 0,
-            //         },
-            //         KernelArg::Integer(steps as u32),
-            //         ctrl.as_arg(),
-            //         io.as_arg(),
-            //         data.as_arg(),
-            //         mix.as_arg(),
-            //         accum.as_arg(),
-            //     ];
-            //     let kernel = self.kernels.get("k_step_compute_accum").unwrap();
-            //     self.hal.dispatch(&kernel, &args, count as u64, None);
-            let args = [
-                KernelArg::Integer(steps as u32),
-                ctrl.as_arg(),
-                data.as_arg(),
-                mix.as_arg(),
-                ram.as_arg(),
-                bytes.as_arg(),
-            ];
-            let kernel = self.kernels.get("step_compute_accum").unwrap();
-            self.hal.dispatch(&kernel, &args, count as u64, None);
+            let kernel = self.kernels.get("k_step_compute_accum").unwrap();
+
+            self.hal
+                .dispatch_with_resources(kernel, &args, count as u64, None, |cmd_encoder| {
+                    cmd_encoder.use_resource(&ram.as_buf(), MTLResourceUsage::Write);
+                    cmd_encoder.use_resource(&bytes.as_buf(), MTLResourceUsage::Write);
+                });
         });
 
         tracing::info_span!("prefix_products").in_scope(|| {
@@ -235,31 +228,12 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         });
 
         tracing::info_span!("step_verify_accum").in_scope(|| {
-            // let args = [
-            //     KernelArg::Buffer {
-            //         buffer: &ctx_buf,
-            //         offset: 0,
-            //     },
-            //     KernelArg::Integer(steps as u32),
-            //     ctrl.as_arg(),
-            //     io.as_arg(),
-            //     data.as_arg(),
-            //     mix.as_arg(),
-            //     accum.as_arg(),
-            // ];
-            // let kernel = self.kernels.get("k_step_verify_accum").unwrap();
-            // self.hal.dispatch(&kernel, &args, count as u64, None);
-            let args = [
-                KernelArg::Integer(steps as u32),
-                ctrl.as_arg(),
-                data.as_arg(),
-                mix.as_arg(),
-                ram.as_arg(),
-                bytes.as_arg(),
-                accum.as_arg(),
-            ];
-            let kernel = self.kernels.get("step_verify_accum").unwrap();
-            self.hal.dispatch(&kernel, &args, count as u64, None);
+            let kernel = self.kernels.get("k_step_verify_accum").unwrap();
+            self.hal
+                .dispatch_with_resources(kernel, &args, count as u64, None, |cmd_encoder| {
+                    cmd_encoder.use_resource(&ram.as_buf(), MTLResourceUsage::Read);
+                    cmd_encoder.use_resource(&bytes.as_buf(), MTLResourceUsage::Read);
+                });
         });
 
         tracing::info_span!("zeroize").in_scope(|| {

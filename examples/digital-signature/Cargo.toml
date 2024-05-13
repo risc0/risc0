@@ -8,7 +8,6 @@ clap = { version = "4.4", features = ["derive"] }
 digital-signature-core = { path = "core" }
 digital-signature-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
-serde = "1.0"
 sha2 = "0.10"
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

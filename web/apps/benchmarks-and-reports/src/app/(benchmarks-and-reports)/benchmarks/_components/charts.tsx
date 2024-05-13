@@ -9,6 +9,7 @@ import { joinWords } from "@risc0/ui/utils/join-words";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { Fragment, useEffect, useState } from "react";
+import { FooterAscii } from "../../_components/footer-ascii";
 import { type FormattedDataSetEntry, collectBenchesPerTestCase } from "../_utils/collect-benches-per-test-case";
 import { renderGraph } from "../_utils/render-graph";
 import { ChartsList } from "./charts-list";
@@ -95,22 +96,20 @@ export function Charts() {
           defaultValue={names[0]}
           className="mt-6"
         >
-          <div className="flex items-center overflow-auto">
-            <TabsList>
-              {names.map((name) => (
-                <TabsTrigger className="capitalize" key={name} value={name}>
-                  {joinWords(name)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
+          <TabsList>
+            {names.map((name) => (
+              <TabsTrigger className="capitalize" key={name} value={name}>
+                {joinWords(name)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
           <div className="mt-4 flex flex-row gap-8">
-            <div className="sticky top-6 hidden min-w-[280px] self-start lg:block">
+            <div className="sticky top-6 hidden min-w-[240px] self-start lg:block">
               {benchSet && selectedPlatform && <ChartsList charts={benchSet} selectedPlatform={selectedPlatform} />}
             </div>
 
-            <div className="w-full">
+            <div className="w-full lg:w-[calc(100%-240px-32px)]">
               {benchSet &&
                 names.map((name) => (
                   <TabsContent tabIndex={-1} id={`chart-${name}`} key={name} value={name}>
@@ -121,7 +120,7 @@ export function Charts() {
                           key={`${platformName}-${index}`}
                         >
                           {platformName === name && (
-                            <div className="mt-6 flex flex-row flex-wrap gap-10 [&>*]:tracking-normal dark:invert">
+                            <div className="mt-6 flex flex-col gap-10 dark:invert">
                               {Array.from(dataSet, ([key, value]) =>
                                 renderGraph({
                                   platformName,
@@ -140,6 +139,8 @@ export function Charts() {
           </div>
         </Tabs>
       )}
+
+      <FooterAscii text="Benchmarks" />
 
       <Script
         src="https://risc0.github.io/ghpages/dev/bench/data.js"
