@@ -13,7 +13,6 @@
 // limitations under the License.
 
 mod exec;
-pub mod merkle;
 mod plonk;
 pub mod preflight;
 mod program;
@@ -22,7 +21,6 @@ pub mod zkr;
 use std::{collections::VecDeque, mem::take, rc::Rc};
 
 use anyhow::{anyhow, Context, Result};
-use merkle::MerkleGroup;
 use rand::thread_rng;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
@@ -48,7 +46,11 @@ use serde::{Deserialize, Serialize};
 
 pub use self::program::Program;
 use crate::{
-    receipt::{succinct::valid_control_ids, SuccinctReceipt},
+    receipt::{
+        merkle::{MerkleGroup, MerkleProof},
+        succinct::valid_control_ids,
+        SuccinctReceipt,
+    },
     receipt_claim::{Merge, Output},
     sha::Digestible,
     HalPair, ReceiptClaim, SegmentReceipt,
@@ -69,6 +71,7 @@ const RECURSION_CODE_SIZE: usize = 23;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {
     pub control_id: Digest,
+    pub control_inclusion_proof: MerkleProof,
     pub seal: Vec<u32>,
     pub output: Vec<u32>,
 }
@@ -90,6 +93,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
+        control_inclusion_proof: receipt.control_inclusion_proof,
         claim: claim_decoded.merge(&segment_receipt.claim)?,
     })
 }
@@ -121,6 +125,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
+        control_inclusion_proof: receipt.control_inclusion_proof,
         claim: claim_decoded.merge(&ab_claim)?,
     })
 }
@@ -169,6 +174,7 @@ pub fn resolve(
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
+        control_inclusion_proof: receipt.control_inclusion_proof,
         claim: claim_decoded.merge(&resolved_claim)?,
     })
 }
@@ -189,6 +195,7 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
+        control_inclusion_proof: receipt.control_inclusion_proof,
         claim,
     })
 }
@@ -222,6 +229,7 @@ impl Default for ProverOpts {
 pub struct Prover {
     program: Program,
     control_id: Digest,
+    allowed_ids: MerkleGroup,
     opts: ProverOpts,
     input: VecDeque<u32>,
     split_points: Vec<usize>,
@@ -408,10 +416,16 @@ enum DigestKind {
 }
 
 impl Prover {
-    fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
+    fn new(
+        program: Program,
+        control_id: Digest,
+        allowed_ids: MerkleGroup,
+        opts: ProverOpts,
+    ) -> Self {
         Self {
             program,
             control_id,
+            allowed_ids,
             opts,
             input: VecDeque::new(),
             split_points: Vec::new(),
@@ -419,6 +433,7 @@ impl Prover {
         }
     }
 
+    // TODO(victor): These two functions probably need to be adjusted.
     /// Construct a Merkle tree encoding the set of accepted control IDs.
     ///
     /// This set of control IDs forms the closure of recursion programs that can be applied to the
@@ -426,7 +441,7 @@ impl Prover {
     /// those programs in its processing of receipts.
     pub fn make_allowed_tree() -> MerkleGroup {
         MerkleGroup {
-            depth: ALLOWED_CODE_MERKLE_DEPTH,
+            depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
             leaves: valid_control_ids(),
         }
     }
@@ -436,7 +451,7 @@ impl Prover {
     /// Provide the set of allowed IDs during the bootstrapping process.
     pub fn bootstrap_allowed_tree(leaves: Vec<Digest>) -> MerkleGroup {
         MerkleGroup {
-            depth: ALLOWED_CODE_MERKLE_DEPTH,
+            depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
             leaves,
         }
     }
@@ -445,7 +460,11 @@ impl Prover {
     /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
         let (program, control_id) = zkr::test_recursion_circuit()?;
-        let mut prover = Prover::new(program, control_id, opts);
+        let allowed_ids = MerkleGroup {
+            depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
+            leaves: vec![control_id],
+        };
+        let mut prover = Prover::new(program, control_id, allowed_ids, opts);
 
         for digest in digests {
             prover.add_input_digest(digest, DigestKind::Poseidon2);
@@ -459,23 +478,18 @@ impl Prover {
         &mut self,
         seal: &[u32],
         control_id: &Digest,
-        allowed_ids: &MerkleGroup,
+        control_inclusion_proof: &MerkleProof,
     ) -> Result<()> {
         tracing::debug!("Control ID = {:?}", control_id);
         self.add_input(seal);
-        let proof = allowed_ids.get_proof(control_id, self.opts.suite.hashfn.as_ref())?;
-        tracing::debug!("index = {:?}", proof.index);
+        tracing::debug!("index = {:?}", control_inclusion_proof.index);
         self.add_input(bytemuck::cast_slice(&[BabyBearElem::new(
-            proof.index as u32,
+            control_inclusion_proof.index as u32,
         )]));
-        for digest in proof.digests {
+        for digest in &control_inclusion_proof.digests {
             tracing::debug!("path = {:?}", digest);
             self.add_input_digest(&digest, DigestKind::Poseidon2);
         }
-        tracing::debug!(
-            "root = {:?}",
-            allowed_ids.calc_root(self.opts.suite.hashfn.as_ref())
-        );
         Ok(())
     }
 
@@ -497,13 +511,14 @@ impl Prover {
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
         let (program, control_id) = zkr::lift(po2)?;
-        let mut prover = Prover::new(program, control_id, opts);
+        let control_inclusion_proof = allowed_ids.get_proof(&control_id, hashfn)?;
+        let mut prover = Prover::new(program, control_id, allowed_ids, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
         let which = po2 - MIN_CYCLES_PO2;
         let inner_control_id = POSEIDON2_CONTROL_ID[which];
-        prover.add_seal(seal, &inner_control_id, &allowed_ids)?;
+        prover.add_seal(seal, &inner_control_id, &control_inclusion_proof)?;
 
         Ok(prover)
     }
@@ -511,9 +526,9 @@ impl Prover {
     fn add_segment_receipt(
         &mut self,
         a: &SuccinctReceipt,
-        allowed_ids: &MerkleGroup,
+        control_inclusion_proof: &MerkleProof,
     ) -> Result<()> {
-        self.add_seal(&a.seal, &a.control_id, allowed_ids)?;
+        self.add_seal(&a.seal, &a.control_id, control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();
         a.claim.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
@@ -532,11 +547,13 @@ impl Prover {
         let merkle_root = allowed_ids.calc_root(hashfn);
 
         let (program, control_id) = zkr::join()?;
-        let mut prover = Prover::new(program, control_id, opts);
+        let control_inclusion_proof_a = allowed_ids.get_proof(&a.control_id, hashfn)?;
+        let control_inclusion_proof_b = allowed_ids.get_proof(&b.control_id, hashfn)?;
+        let mut prover = Prover::new(program, control_id, allowed_ids, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(a, &allowed_ids)?;
-        prover.add_segment_receipt(b, &allowed_ids)?;
+        prover.add_segment_receipt(a, &control_inclusion_proof_a)?;
+        prover.add_segment_receipt(b, &control_inclusion_proof_b)?;
         Ok(prover)
     }
 
@@ -558,14 +575,16 @@ impl Prover {
 
         // Load the resolve predicate as a Program and construct the prover.
         let (program, control_id) = zkr::resolve()?;
-        let mut prover = Prover::new(program, control_id, opts);
+        let control_inclusion_proof_cond = allowed_ids.get_proof(&cond.control_id, hashfn)?;
+        let control_inclusion_proof_assum = allowed_ids.get_proof(&assum.control_id, hashfn)?;
+        let mut prover = Prover::new(program, control_id, allowed_ids, opts);
 
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(cond, &allowed_ids)?;
-        prover.add_segment_receipt(assum, &allowed_ids)?;
+        prover.add_segment_receipt(cond, &control_inclusion_proof_cond)?;
+        prover.add_segment_receipt(assum, &control_inclusion_proof_assum)?;
 
         let Output {
             assumptions,
@@ -601,10 +620,11 @@ impl Prover {
         let merkle_root = allowed_ids.calc_root(hashfn);
 
         let (program, control_id) = zkr::identity()?;
-        let mut prover = Prover::new(program, control_id, opts);
+        let control_inclusion_proof = allowed_ids.get_proof(&control_id, hashfn)?;
+        let mut prover = Prover::new(program, control_id, allowed_ids, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(a, &allowed_ids)?;
+        prover.add_segment_receipt(a, &control_inclusion_proof)?;
         Ok(prover)
     }
 
@@ -712,6 +732,9 @@ impl Prover {
 
         Ok(RecursionReceipt {
             control_id: self.control_id,
+            control_inclusion_proof: self
+                .allowed_ids
+                .get_proof(&self.control_id, hashfn.as_ref())?,
             seal,
             output: self.output.clone(),
         })

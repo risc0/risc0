@@ -27,8 +27,12 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{receipt::VerifierContext, sha, ReceiptClaim};
+use crate::{
+    receipt::{merkle::MerkleProof, VerifierContext},
+    sha, ReceiptClaim,
+};
 
+// TODO(victor): Remove this function?
 /// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
     ALLOWED_CONTROL_IDS.to_vec()
@@ -52,19 +56,12 @@ pub struct SuccinctReceipt {
 
     /// [ReceiptClaim] containing information about the execution that this receipt proves.
     pub claim: ReceiptClaim,
+
+    /// Merkle inclusion proof for control_id against the control root for this receipt.
+    pub(crate) control_inclusion_proof: MerkleProof,
 }
 
 impl SuccinctReceipt {
-    /// Information about the parameters used to verify the receipt. Includes parameters that are
-    /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_parameters() -> SuccinctReceiptVerifierParameters {
-        SuccinctReceiptVerifierParameters {
-            control_root: ALLOWED_CONTROL_ROOT,
-            proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_recursion::CircuitImpl::CIRCUIT_INFO,
-        }
-    }
-
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
@@ -77,6 +74,27 @@ impl SuccinctReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        let params = ctx
+            .succinct_verifier_parameters
+            .as_ref()
+            .ok_or(VerificationError::VerifierParametersMissing)?;
+
+        // Check that the proof system and circuit info strings match what is implemented by this
+        // function. Info strings are used a version identifiers, and this verify implementation
+        // supports exactly one proof systema and circuit version at a time.
+        if params.proof_system_info != PROOF_SYSTEM_INFO {
+            return Err(VerificationError::ProofSystemInfoMismatch {
+                expected: PROOF_SYSTEM_INFO,
+                received: params.proof_system_info,
+            });
+        }
+        if params.circuit_info != CircuitImpl::CIRCUIT_INFO {
+            return Err(VerificationError::CircuitInfoMismatch {
+                expected: CircuitImpl::CIRCUIT_INFO,
+                received: params.circuit_info,
+            });
+        }
+
         // Assemble the list of control IDs, and therefore circuit variants, we will
         // accept.
         let valid_ids = valid_control_ids();
@@ -120,6 +138,7 @@ impl SuccinctReceipt {
             .collect::<Vec<_>>()
             .try_into()
             .map_err(|_| VerificationError::ReceiptFormatError)?;
+        // TODO(victor): This is not really a format error.
         if control_root != ALLOWED_CONTROL_ROOT {
             tracing::debug!(
                 "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {ALLOWED_CONTROL_ROOT:?}",
@@ -177,9 +196,20 @@ impl Digestible for SuccinctReceiptVerifierParameters {
     }
 }
 
+impl Default for SuccinctReceiptVerifierParameters {
+    /// Default set of parameters used to verify a [SuccinctReceipt].
+    fn default() -> Self {
+        Self {
+            control_root: ALLOWED_CONTROL_ROOT,
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_recursion::CircuitImpl::CIRCUIT_INFO,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::SuccinctReceipt;
+    use super::SuccinctReceiptVerifierParameters;
     use crate::sha::Digestible;
     use risc0_zkp::core::digest::digest;
 
@@ -190,7 +220,7 @@ mod tests {
     #[test]
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            SuccinctReceipt::verifier_parameters().digest(),
+            SuccinctReceiptVerifierParameters::default().digest(),
             digest!("716d552dd69961bd4b87c8426eaacbe5b53bf0ec812d732129796c05ce467173")
         );
     }

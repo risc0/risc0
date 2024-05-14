@@ -26,9 +26,8 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    CompactReceipt, CompactReceiptVerifierParameters, InnerReceipt, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext,
+    CompactReceiptVerifierParameters, InnerReceipt, SegmentReceipt,
+    SegmentReceiptVerifierParameters, SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{sha, Assumption, Assumptions, MaybePruned, Output, ReceiptClaim};
 
@@ -58,16 +57,6 @@ pub struct CompositeReceipt {
 }
 
 impl CompositeReceipt {
-    /// Information about the parameters used to verify the receipt. Includes parameters that are
-    /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_parameters() -> CompositeReceiptVerifierParameters {
-        CompositeReceiptVerifierParameters {
-            segment: SegmentReceipt::verifier_parameters(),
-            succinct: SuccinctReceipt::verifier_parameters(),
-            compact: CompactReceipt::verifier_parameters(),
-        }
-    }
-
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(
@@ -282,9 +271,20 @@ impl Digestible for CompositeReceiptVerifierParameters {
     }
 }
 
+impl Default for CompositeReceiptVerifierParameters {
+    /// Default set of parameters used to verify a [CompositeReceipt].
+    fn default() -> Self {
+        Self {
+            segment: Default::default(),
+            succinct: Default::default(),
+            compact: Default::default(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::CompositeReceipt;
+    use super::CompositeReceiptVerifierParameters;
     use crate::sha::Digestible;
     use risc0_zkp::core::digest::digest;
 
@@ -295,7 +295,7 @@ mod tests {
     #[test]
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            CompositeReceipt::verifier_parameters().digest(),
+            CompositeReceiptVerifierParameters::default().digest(),
             digest!("26c5446a183430b3dbd8ecf7de1b0f56727f0f6704ea5deb804a7d6ac552742b")
         );
     }

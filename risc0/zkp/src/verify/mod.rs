@@ -27,7 +27,7 @@ use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
     adapter::{
-        CircuitCoreDef, PROOF_SYSTEM_INFO, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
+        CircuitCoreDef, ProtocolInfo, PROOF_SYSTEM_INFO, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
         REGISTER_GROUP_DATA,
     },
     core::{digest::Digest, hash::HashSuite, log2_ceil},
@@ -38,15 +38,33 @@ use crate::{
 #[derive(PartialEq)]
 #[non_exhaustive]
 pub enum VerificationError {
-    VerifierParametersMismatch { expected: Digest, received: Digest },
     ReceiptFormatError,
-    ControlVerificationError { control_id: Digest },
+    ControlVerificationError {
+        control_id: Digest,
+    },
     ImageVerificationError,
-    MerkleQueryOutOfRange { idx: usize, rows: usize },
+    MerkleQueryOutOfRange {
+        idx: usize,
+        rows: usize,
+    },
     InvalidProof,
     JournalDigestMismatch,
     UnexpectedExitCode,
     InvalidHashSuite,
+    // TODO(victor): Extract these errors to zkVM and refactor error handling there more generally.
+    VerifierParametersMissing,
+    VerifierParametersMismatch {
+        expected: Digest,
+        received: Digest,
+    },
+    ProofSystemInfoMismatch {
+        expected: ProtocolInfo,
+        received: ProtocolInfo,
+    },
+    CircuitInfoMismatch {
+        expected: ProtocolInfo,
+        received: ProtocolInfo,
+    },
 }
 
 impl fmt::Debug for VerificationError {
@@ -58,9 +76,6 @@ impl fmt::Debug for VerificationError {
 impl fmt::Display for VerificationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            VerificationError::VerifierParametersMismatch { expected, received } => {
-                write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
-            }
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
             VerificationError::ControlVerificationError { control_id } => {
                 write!(f, "control_id mismatch: {control_id}")
@@ -76,6 +91,18 @@ impl fmt::Display for VerificationError {
             }
             VerificationError::UnexpectedExitCode => write!(f, "unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "invalid hash suite"),
+            VerificationError::VerifierParametersMissing => {
+                write!(f, "verifier paramters were not found in verifier context for the given receipt type")
+            }
+            VerificationError::VerifierParametersMismatch { expected, received } => {
+                write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
+            }
+            VerificationError::ProofSystemInfoMismatch { expected, received } => {
+                write!(f, "receipt was produced for a version of the verifier with proof system info {received}; expected {expected}")
+            }
+            VerificationError::CircuitInfoMismatch { expected, received } => {
+                write!(f, "receipt was produced for a version of the verifier with circuit info {received}; expected {expected}")
+            }
         }
     }
 }

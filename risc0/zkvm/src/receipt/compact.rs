@@ -29,6 +29,7 @@ use crate::{sha, ReceiptClaim};
 /// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
 pub struct CompactReceipt {
     /// A Groth16 proof of a zkVM execution with the associated claim.
     pub seal: Vec<u8>,
@@ -39,16 +40,6 @@ pub struct CompactReceipt {
 }
 
 impl CompactReceipt {
-    /// Information about the parameters used to verify the receipt. Includes parameters that are
-    /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_parameters() -> CompactReceiptVerifierParameters {
-        CompactReceiptVerifierParameters {
-            control_root: ALLOWED_CONTROL_ROOT,
-            bn254_control_id: BN254_CONTROL_ID,
-            verifying_key: risc0_groth16::verifying_key(),
-        }
-    }
-
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
@@ -101,9 +92,20 @@ impl Digestible for CompactReceiptVerifierParameters {
     }
 }
 
+impl Default for CompactReceiptVerifierParameters {
+    /// Default set of parameters used to verify a [CompactReceipt].
+    fn default() -> Self {
+        Self {
+            control_root: ALLOWED_CONTROL_ROOT,
+            bn254_control_id: BN254_CONTROL_ID,
+            verifying_key: risc0_groth16::verifying_key(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::CompactReceipt;
+    use super::CompactReceiptVerifierParameters;
     use crate::sha::Digestible;
     use risc0_zkp::core::digest::digest;
 
@@ -114,7 +116,7 @@ mod tests {
     #[test]
     fn compact_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            CompactReceipt::verifier_parameters().digest(),
+            CompactReceiptVerifierParameters::default().digest(),
             digest!("ac59b966dd33a5fa85f1d052f163faa942208671c4175949bffa51934d5ee439")
         );
     }

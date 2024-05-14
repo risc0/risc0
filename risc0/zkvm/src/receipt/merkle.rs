@@ -12,35 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+//! Minimal Merkle tree implementation used in the recursion system for committing to a group of
+//! control IDs.
+
+// NOTE: Types in this crate are intentionally left out of the public API surface.
+
+use alloc::vec::Vec;
+
+use anyhow::{bail, ensure, Result};
 use risc0_core::field::baby_bear::BabyBear;
-use risc0_zkp::core::{
-    digest::{Digest, DIGEST_WORDS},
-    hash::HashFn,
-};
+use risc0_zkp::core::{digest::Digest, hash::HashFn};
+use serde::{Deserialize, Serialize};
 
-static EMPTY_DIGEST: Digest = Digest::new([0; DIGEST_WORDS]);
-
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MerkleGroup {
-    pub depth: usize,
+    pub depth: u32,
     pub leaves: Vec<Digest>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct MerkleProof {
-    pub index: usize,
+    pub index: u32,
     pub digests: Vec<Digest>,
 }
 
 impl MerkleGroup {
+    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn calc_root(&self, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         self.calc_range_root(0, 1 << self.depth, hashfn)
     }
 
-    fn leaf_or_empty(&self, index: usize) -> &Digest {
-        self.leaves.get(index).unwrap_or(&EMPTY_DIGEST)
+    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
+    fn leaf_or_empty(&self, index: u32) -> &Digest {
+        self.leaves.get(index as usize).unwrap_or(&Digest::ZERO)
     }
 
-    fn calc_range_root(&self, start: usize, end: usize, hashfn: &dyn HashFn<BabyBear>) -> Digest {
+    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
+    fn calc_range_root(&self, start: u32, end: u32, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         assert!(start < end);
         let res = if start + 1 == end {
             *self.leaf_or_empty(start)
@@ -55,6 +64,7 @@ impl MerkleGroup {
         res
     }
 
+    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn get_proof(
         &self,
         control_id: &Digest,
@@ -63,34 +73,52 @@ impl MerkleGroup {
         let Some(index) = self.leaves.iter().position(|elem| elem == control_id) else {
             bail!("Unable to find {control_id:?} in merkle group");
         };
-        Ok(MerkleProof {
-            index,
-            digests: self.get_proof_by_index(index, hashfn),
-        })
+        Ok(self.get_proof_by_index(index as u32, hashfn))
     }
 
-    pub fn get_proof_by_index(
-        &self,
-        mut index: usize,
-        hashfn: &dyn HashFn<BabyBear>,
-    ) -> Vec<Digest> {
-        let mut proof: Vec<Digest> = Vec::with_capacity(self.depth);
+    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
+    pub fn get_proof_by_index(&self, index: u32, hashfn: &dyn HashFn<BabyBear>) -> MerkleProof {
+        let mut digests: Vec<Digest> = Vec::with_capacity(self.depth as usize);
 
-        let mut cur: Digest = self.leaves[index];
+        let mut cur: Digest = self.leaves[index as usize];
+        let mut cur_index = index;
         for i in 0..self.depth {
-            let sibling_start = (index ^ 1) << i;
+            let sibling_start = (cur_index ^ 1) << i;
             let sibling_end = sibling_start + (1 << i);
             let sibling = self.calc_range_root(sibling_start, sibling_end, hashfn);
-            cur = if index & 1 == 0 {
+            cur = if cur_index & 1 == 0 {
                 *hashfn.hash_pair(&cur, &sibling)
             } else {
                 *hashfn.hash_pair(&sibling, &cur)
             };
-            proof.push(sibling);
-            index >>= 1;
+            digests.push(sibling);
+            cur_index >>= 1;
         }
 
-        proof
+        MerkleProof { digests, index }
+    }
+}
+
+impl MerkleProof {
+    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
+    pub fn verify(
+        &self,
+        leaf: &Digest,
+        root: &Digest,
+        hashfn: &dyn HashFn<BabyBear>,
+    ) -> Result<()> {
+        let mut cur = *leaf;
+        let mut cur_index = self.index;
+        for sibling in &self.digests {
+            cur = if cur_index & 1 == 0 {
+                *hashfn.hash_pair(&cur, sibling)
+            } else {
+                *hashfn.hash_pair(sibling, &cur)
+            };
+            cur_index >>= 1;
+        }
+        ensure!(&cur == root, "merkle proof verify failed");
+        Ok(())
     }
 }
 
@@ -100,12 +128,13 @@ mod tests {
 
     use super::*;
 
-    fn shared_levels(a: &[Digest], b: &[Digest]) -> usize {
-        a.iter()
+    fn shared_levels(a: &MerkleProof, b: &MerkleProof) -> usize {
+        a.digests
+            .iter()
             .rev()
-            .zip(b.iter().rev())
+            .zip(b.digests.iter().rev())
             .position(|(a_elem, b_elem)| a_elem != b_elem)
-            .unwrap_or(std::cmp::min(a.len(), b.len()))
+            .unwrap_or(std::cmp::min(a.digests.len(), b.digests.len()))
     }
 
     #[test]
@@ -129,6 +158,10 @@ mod tests {
         tracing::trace!("Proof2: {proof2:?}");
         let proof3 = grp.get_proof_by_index(2, hashfn);
         tracing::trace!("Proof3: {proof3:?}");
+
+        proof1.verify(&digest1, &root, hashfn).unwrap();
+        proof1.verify(&digest1, &root, hashfn).unwrap();
+        proof1.verify(&digest1, &root, hashfn).unwrap();
 
         // Digest1 and digest2 should share 3 levels of proof, whereas proof2 and proof3
         // should only share 2

@@ -54,6 +54,12 @@ message SuccinctReceipt {
   bytes seal = 2;
   Digest control_id = 3;
   ReceiptClaim claim = 4;
+  MerkleProof control_inclusion_proof = 5;
+}
+
+message MerkleProof {
+  uint32 index = 1;
+  repeated Digest digests = 2;
 }
 
 message Groth16Receipt {

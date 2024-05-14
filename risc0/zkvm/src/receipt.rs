@@ -16,6 +16,7 @@
 
 pub(crate) mod compact;
 pub(crate) mod composite;
+pub(crate) mod merkle;
 pub(crate) mod segment;
 pub(crate) mod succinct;
 
@@ -130,7 +131,8 @@ impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
         let metadata = ReceiptMetadata {
-            verifier_parameters: inner.verifier_parameters(),
+            // DO NOT MERGE
+            verifier_parameters: Digest::ZERO,
         };
         Self {
             inner,
@@ -394,12 +396,8 @@ impl InnerReceipt {
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
-        match self {
-            InnerReceipt::Composite(_) => CompositeReceipt::verifier_parameters().digest(),
-            InnerReceipt::Compact(_) => CompactReceipt::verifier_parameters().digest(),
-            InnerReceipt::Succinct(_) => SuccinctReceipt::verifier_parameters().digest(),
-            InnerReceipt::Fake { .. } => Digest::ZERO,
-        }
+        // DO NOT MERGE
+        Digest::ZERO
     }
 }
 
@@ -419,6 +417,7 @@ pub struct ReceiptMetadata {
     pub verifier_parameters: Digest,
 }
 
+// TODO(victor): AssumptionReceipt is not the best name
 /// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -468,42 +467,72 @@ impl From<Receipt> for AssumptionReceipt {
     }
 }
 
-/*
+impl From<MaybePruned<Assumption>> for AssumptionReceipt {
+    /// Create an unresolved assumption from a [MaybePruned] [Assumption].
+    fn from(assumption: MaybePruned<Assumption>) -> Self {
+        Self::Unresolved(assumption)
+    }
+}
+
+impl From<Assumption> for AssumptionReceipt {
+    /// Create an unresolved assumption from an [Assumption].
+    fn from(assumption: Assumption) -> Self {
+        Self::Unresolved(assumption.into())
+    }
+}
+
 impl From<MaybePruned<ReceiptClaim>> for AssumptionReceipt {
     /// Create an unresolved assumption from a [MaybePruned] [ReceiptClaim].
     fn from(claim: MaybePruned<ReceiptClaim>) -> Self {
-        Self::Unresolved(claim)
+        Self::Unresolved(
+            Assumption {
+                claim: claim.digest(),
+                control_root: Digest::ZERO,
+            }
+            .into(),
+        )
     }
 }
 
 impl From<ReceiptClaim> for AssumptionReceipt {
     /// Create an unresolved assumption from a [ReceiptClaim].
     fn from(claim: ReceiptClaim) -> Self {
-        Self::Unresolved(claim.into())
+        Self::Unresolved(
+            Assumption {
+                claim: claim.digest(),
+                control_root: Digest::ZERO,
+            }
+            .into(),
+        )
     }
 }
-*/
 
-// TODO(victor) Replace all the unit types with the real thing.
 /// Context available to the verification process.
 #[non_exhaustive]
 pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
     pub suites: BTreeMap<String, HashSuite<BabyBear>>,
 
+    // TODO(victor): Should I actually use verifier parameters here? The info string, for instance,
+    // is currently hard coded. Also we don't actually need folks to touch those parameters
+    // anyway. Really, the protocol info strings are stand-ins for all the code required for e.g. a
+    // procing system or a circuit's contraints. If the value is no recognized by the
+    // implementation, then there is no amount of data they could pass in here to have it be
+    // supported. In the future, when multiple versions are supported, maybe this string will be
+    // used to e.g. differentiate proof system and circuit revisions.
     /// Parameters for verification of [SegmentReceipt].
-    pub segment_verifier_parameters: Option<()>,
+    pub segment_verifier_parameters: Option<SegmentReceiptVerifierParameters>,
 
     /// Parameters for verification of [SuccinctReceipt].
-    pub succinct_verifier_parameters: Option<()>,
+    pub succinct_verifier_parameters: Option<SuccinctReceiptVerifierParameters>,
 
     /// Parameters for verification of [CompactReceipt].
-    pub compact_verifier_parameters: Option<()>,
+    pub compact_verifier_parameters: Option<CompactReceiptVerifierParameters>,
 }
 
 impl VerifierContext {
     /// Create an empty [VerifierContext].
-    pub fn new() -> Self {
+    pub fn empty() -> Self {
         Self {
             suites: BTreeMap::default(),
             segment_verifier_parameters: None,
@@ -519,19 +548,28 @@ impl VerifierContext {
     }
 
     /// Return [VerifierContext] with the given [SegmentReceiptVerifierParameters] set.
-    pub fn with_segment_verifier_parameters(mut self, params: ()) -> Self {
+    pub fn with_segment_verifier_parameters(
+        mut self,
+        params: SegmentReceiptVerifierParameters,
+    ) -> Self {
         self.segment_verifier_parameters = Some(params);
         self
     }
 
     /// Return [VerifierContext] with the given [SuccinctReceiptVerifierParameters] set.
-    pub fn with_succinct_verifier_parameters(mut self, params: ()) -> Self {
+    pub fn with_succinct_verifier_parameters(
+        mut self,
+        params: SuccinctReceiptVerifierParameters,
+    ) -> Self {
         self.succinct_verifier_parameters = Some(params);
         self
     }
 
     /// Return [VerifierContext] with the given [CompactReceiptVerifierParameters] set.
-    pub fn with_compact_verifier_parameters(mut self, params: ()) -> Self {
+    pub fn with_compact_verifier_parameters(
+        mut self,
+        params: CompactReceiptVerifierParameters,
+    ) -> Self {
         self.compact_verifier_parameters = Some(params);
         self
     }
@@ -545,9 +583,9 @@ impl Default for VerifierContext {
                 ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
-            segment_verifier_parameters: Some(()),
-            succinct_verifier_parameters: Some(()),
-            compact_verifier_parameters: Some(()),
+            segment_verifier_parameters: Some(Default::default()),
+            succinct_verifier_parameters: Some(Default::default()),
+            compact_verifier_parameters: Some(Default::default()),
         }
     }
 }

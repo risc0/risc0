@@ -22,8 +22,8 @@ use risc0_zkp::core::digest::Digest;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     receipt::{
-        segment::decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, ReceiptMetadata,
-        SegmentReceipt, SuccinctReceipt,
+        merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
+        InnerReceipt, ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
     Assumption, Assumptions, ExitCode, Input, Journal, MaybePruned, Output, ProveInfo, ProverOpts,
     Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
@@ -386,6 +386,7 @@ impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
             version: Some(ver::SUCCINCT_RECEIPT),
             seal: value.get_seal_bytes(),
             control_id: Some(value.control_id.into()),
+            control_inclusion_proof: Some(value.control_inclusion_proof.into()),
             claim: Some(value.claim.into()),
         }
     }
@@ -410,7 +411,35 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
         Ok(Self {
             seal,
             control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
+            control_inclusion_proof: value
+                .control_inclusion_proof
+                .ok_or(malformed_err())?
+                .try_into()?,
             claim: value.claim.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
+impl From<MerkleProof> for pb::core::MerkleProof {
+    fn from(value: MerkleProof) -> Self {
+        Self {
+            index: value.index as u32,
+            digests: value.digests.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl TryFrom<pb::core::MerkleProof> for MerkleProof {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::MerkleProof) -> Result<Self> {
+        Ok(Self {
+            index: value.index.try_into()?,
+            digests: value
+                .digests
+                .into_iter()
+                .map(TryInto::try_into)
+                .collect::<Result<_>>()?,
         })
     }
 }

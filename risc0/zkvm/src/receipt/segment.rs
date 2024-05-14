@@ -39,6 +39,7 @@ use crate::{sha, MaybePruned, ReceiptClaim};
 /// consistent with the [ReceiptClaim] included in the receipt.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
@@ -60,37 +61,40 @@ pub struct SegmentReceipt {
 }
 
 impl SegmentReceipt {
-    fn allowed_control_ids() -> impl Iterator<Item = Digest> {
-        POSEIDON2_CONTROL_ID
-            .into_iter()
-            .chain(SHA256_CONTROL_ID)
-            .chain(BLAKE2B_CONTROL_ID)
-    }
-
-    /// Information about the parameters used to verify the receipt. Includes parameters that are
-    /// useful in deciding whether the verifier is compatible with a given receipt.
-    pub fn verifier_parameters() -> SegmentReceiptVerifierParameters {
-        SegmentReceiptVerifierParameters {
-            control_ids: BTreeSet::from_iter(Self::allowed_control_ids()),
-            proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-        }
-    }
-
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        let params = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or(VerificationError::VerifierParametersMissing)?;
+
+        // Check that the proof system and circuit info strings match what is implemented by this
+        // function. Info strings are used a version identifiers, and this verify implementation
+        // supports exactly one proof systema and circuit version at a time.
+        if params.proof_system_info != PROOF_SYSTEM_INFO {
+            return Err(VerificationError::ProofSystemInfoMismatch {
+                expected: PROOF_SYSTEM_INFO,
+                received: params.proof_system_info,
+            });
+        }
+        if params.circuit_info != CircuitImpl::CIRCUIT_INFO {
+            return Err(VerificationError::CircuitInfoMismatch {
+                expected: CircuitImpl::CIRCUIT_INFO,
+                received: params.circuit_info,
+            });
+        }
+
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            Self::allowed_control_ids()
-                .find(|x| x == control_id)
-                .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError {
+            params.control_ids.contains(control_id).then_some(()).ok_or(
+                VerificationError::ControlVerificationError {
                     control_id: *control_id,
-                })
+                },
+            )
         };
         let suite = ctx
             .suites
@@ -107,7 +111,8 @@ impl SegmentReceipt {
                 decoded_claim,
                 self.claim,
             );
-            return Err(VerificationError::ReceiptFormatError);
+            return Err(VerificationError::ReceiptFormatError); // TODO(victor): This is not really
+                                                               // a format error.
         }
         Ok(())
     }
@@ -142,6 +147,22 @@ impl Digestible for SegmentReceiptVerifierParameters {
             ],
             &[],
         )
+    }
+}
+
+impl Default for SegmentReceiptVerifierParameters {
+    /// Default set of parameters used to verify a [SegmentReceipt].
+    fn default() -> Self {
+        Self {
+            control_ids: BTreeSet::from_iter(
+                POSEIDON2_CONTROL_ID
+                    .into_iter()
+                    .chain(SHA256_CONTROL_ID)
+                    .chain(BLAKE2B_CONTROL_ID),
+            ),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
+        }
     }
 }
 
@@ -198,7 +219,7 @@ pub(crate) fn decode_receipt_claim_from_seal(
 
 #[cfg(test)]
 mod tests {
-    use super::SegmentReceipt;
+    use super::SegmentReceiptVerifierParameters;
     use crate::sha::Digestible;
     use risc0_zkp::core::digest::digest;
 
@@ -209,7 +230,7 @@ mod tests {
     #[test]
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            SegmentReceipt::verifier_parameters().digest(),
+            SegmentReceiptVerifierParameters::default().digest(),
             digest!("929e6fe659097966a442d0919e56fc13a2efffa2ef9e88b2ed37bc7eb7686f03")
         );
     }

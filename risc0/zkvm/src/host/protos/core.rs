@@ -91,6 +91,16 @@ pub struct SuccinctReceipt {
     pub control_id: ::core::option::Option<Digest>,
     #[prost(message, optional, tag = "4")]
     pub claim: ::core::option::Option<ReceiptClaim>,
+    #[prost(message, optional, tag = "5")]
+    pub control_inclusion_proof: ::core::option::Option<MerkleProof>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MerkleProof {
+    #[prost(uint32, tag = "1")]
+    pub index: u32,
+    #[prost(message, repeated, tag = "2")]
+    pub digests: ::prost::alloc::vec::Vec<Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
