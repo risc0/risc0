@@ -15,10 +15,7 @@
 use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
-use risc0_circuit_recursion::{
-    control_id::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
-    CircuitImpl, CIRCUIT,
-};
+use risc0_circuit_recursion::{control_id::ALLOWED_CONTROL_ROOT, CircuitImpl, CIRCUIT};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{
     adapter::{CircuitInfo, ProtocolInfo, PROOF_SYSTEM_INFO},
@@ -31,12 +28,6 @@ use crate::{
     receipt::{merkle::MerkleProof, VerifierContext},
     sha, ReceiptClaim,
 };
-
-// TODO(victor): Remove this function?
-/// Return the allowed Control IDs that can be used by a zkr program.
-pub fn valid_control_ids() -> Vec<Digest> {
-    ALLOWED_CONTROL_IDS.to_vec()
-}
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM.
 ///
@@ -95,25 +86,20 @@ impl SuccinctReceipt {
             });
         }
 
-        // Assemble the list of control IDs, and therefore circuit variants, we will
-        // accept.
-        let valid_ids = valid_control_ids();
-        let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            valid_ids
-                .iter()
-                .find(|x| *x == control_id)
-                .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError {
-                    control_id: *control_id,
-                })
-        };
-
         // All receipts from the recursion circuit use Poseidon2 as the FRI hash
         // function.
         let suite = ctx
             .suites
             .get("poseidon2")
             .ok_or(VerificationError::InvalidHashSuite)?;
+
+        let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
+            self.control_inclusion_proof
+                .verify(control_id, &params.control_root, suite.hashfn.as_ref())
+                .map_err(|_| VerificationError::ControlVerificationError {
+                    control_id: *control_id,
+                })
+        };
 
         // Verify the receipt itself is correct, and therefore the encoded globals are
         // reliable.
@@ -138,11 +124,13 @@ impl SuccinctReceipt {
             .collect::<Vec<_>>()
             .try_into()
             .map_err(|_| VerificationError::ReceiptFormatError)?;
+
         // TODO(victor): This is not really a format error.
-        if control_root != ALLOWED_CONTROL_ROOT {
+        if control_root != params.control_root {
             tracing::debug!(
-                "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {ALLOWED_CONTROL_ROOT:?}",
+                "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {:?}",
                 control_root,
+                params.control_root,
             );
             return Err(VerificationError::ControlVerificationError {
                 control_id: control_root,

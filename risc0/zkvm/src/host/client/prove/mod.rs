@@ -174,7 +174,7 @@ impl ProverOpts {
         }
     }
 
-    /// Choose the prover that enables composite receipts.
+    /// Choose the prover that generates composite receipts.
     pub fn composite() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
@@ -183,7 +183,7 @@ impl ProverOpts {
         }
     }
 
-    /// Choose the prover that enables succinct receipts.
+    /// Choose the prover that generates succinct receipts.
     pub fn succinct() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
@@ -192,7 +192,7 @@ impl ProverOpts {
         }
     }
 
-    /// Choose the prover that enables compact, snark receipts, only supported for x86_64 linux
+    /// Choose the prover that generates compact, Groth16 receipts, only supported for x86_64 Linux
     pub fn compact() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
