@@ -46,16 +46,20 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     std::fs::write(seal_path, seal_json)?;
 
     tracing::debug!("risc0-groth16-prover");
-    let status = Command::new("docker")
+    let output = Command::new("docker")
         .arg("run")
         .arg("--rm")
         .arg("-v")
         .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
         .arg("risczero/risc0-groth16-prover:v2024-04-03.2")
-        .stdout(Stdio::null())
-        .status()?;
-    if !status.success() {
-        bail!("docker returned failure exit code: {:?}", status.code());
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()?;
+    if !output.status.success() {
+        bail!(
+            "docker returned failure exit code: {:?}",
+            output.status.code()
+        );
     }
 
     tracing::debug!("Parsing proof");
