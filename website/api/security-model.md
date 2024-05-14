@@ -21,7 +21,6 @@ RISC Zero offers the following components, each of which is ready for use on tes
 4. The **STARK-to-SNARK Prover**, which verifies proofs from the RISC Zero Recursion Prover, compressing the STARK into a Groth16 SNARK.
    The [control root] is passed to as a public input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.
 
-
 5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
    The control root is hard-coded into the on-chain verifier contract.
    Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the designs for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc.
