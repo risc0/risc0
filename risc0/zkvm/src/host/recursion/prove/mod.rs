@@ -420,31 +420,6 @@ impl Prover {
         }
     }
 
-    // TODO(victor): These two functions probably need to be adjusted.
-    /*
-    /// Construct a Merkle tree encoding the set of accepted control IDs.
-    ///
-    /// This set of control IDs forms the closure of recursion programs that can be applied to the
-    /// receipts. Verifiers will use the root of this tree to constrain the Prover to only apply
-    /// those programs in its processing of receipts.
-    pub fn make_allowed_tree() -> MerkleGroup {
-        MerkleGroup {
-            depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
-            leaves: valid_control_ids(),
-        }
-    }
-
-    /// Construct a Merkle tree encoding the set of accepted control IDs.
-    ///
-    /// Provide the set of allowed IDs during the bootstrapping process.
-    pub fn bootstrap_allowed_tree(leaves: Vec<Digest>) -> MerkleGroup {
-        MerkleGroup {
-            depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
-            leaves,
-        }
-    }
-    */
-
     /// Initialize a recursion prover with the test recursion program. This program is used in
     /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
@@ -503,6 +478,7 @@ impl Prover {
     /// By repeated application of the join program, any number of receipts for execution spans
     /// within the same session can be compressed into a single receipt for the entire session.
     pub fn new_join(a: &SuccinctReceipt, b: &SuccinctReceipt, opts: ProverOpts) -> Result<Self> {
+        // TODO(victor): Take the merkle root from the attached succinct receipt merkle proofs.
         let hash_suite = opts.hash_suite()?;
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
@@ -511,14 +487,8 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(
-            a,
-            &allowed_ids.get_proof(&a.control_id, hash_suite.hashfn.as_ref())?,
-        )?;
-        prover.add_segment_receipt(
-            b,
-            &allowed_ids.get_proof(&b.control_id, hash_suite.hashfn.as_ref())?,
-        )?;
+        prover.add_segment_receipt(a)?;
+        prover.add_segment_receipt(b)?;
         Ok(prover)
     }
 
@@ -546,14 +516,8 @@ impl Prover {
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(
-            cond,
-            &allowed_ids.get_proof(&cond.control_id, hash_suite.hashfn.as_ref())?,
-        )?;
-        prover.add_segment_receipt(
-            assum,
-            &allowed_ids.get_proof(&assum.control_id, hash_suite.hashfn.as_ref())?,
-        )?;
+        prover.add_segment_receipt(cond)?;
+        prover.add_segment_receipt(assum)?;
 
         let Output {
             assumptions,
@@ -593,10 +557,7 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        prover.add_segment_receipt(
-            a,
-            &allowed_ids.get_proof(&control_id, hash_suite.hashfn.as_ref())?,
-        )?;
+        prover.add_segment_receipt(a)?;
         Ok(prover)
     }
 
@@ -643,12 +604,8 @@ impl Prover {
         Ok(())
     }
 
-    fn add_segment_receipt(
-        &mut self,
-        a: &SuccinctReceipt,
-        control_inclusion_proof: &MerkleProof,
-    ) -> Result<()> {
-        self.add_seal(&a.seal, &a.control_id, control_inclusion_proof)?;
+    fn add_segment_receipt(&mut self, a: &SuccinctReceipt) -> Result<()> {
+        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();
         a.claim.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
@@ -660,6 +617,7 @@ impl Prover {
     /// program and input.
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<RecursionReceipt> {
+        // TODO(victor): Determine this from prover opts.
         let hal_pair = poseidon2_hal_pair();
         let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
         self.run_with_hal(hal, circuit_hal)

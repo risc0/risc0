@@ -33,21 +33,31 @@ use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
 use serde::{Deserialize, Serialize};
 
+/// DO NOT MERGE add docs
+#[non_exhaustive]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MerkleGroup {
+    /// DO NOT MERGE add docs
     pub depth: u32,
+    /// DO NOT MERGE add docs
     pub leaves: Vec<Digest>,
 }
 
+/// DO NOT MERGE add docs
+#[non_exhaustive]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct MerkleProof {
+    /// DO NOT MERGE add docs
     pub index: u32,
+    /// DO NOT MERGE add docs
     pub digests: Vec<Digest>,
 }
 
 // TODO(victor): Remove these allow(dead_code) annotations.
+/// DO NOT MERGE add docs
 impl MerkleGroup {
+    /// DO NOT MERGE add docs
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn new(leaves: Vec<Digest>) -> Result<Self> {
         let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
@@ -61,6 +71,7 @@ impl MerkleGroup {
         })
     }
 
+    /// DO NOT MERGE add docs
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn calc_root(&self, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         self.calc_range_root(0, 1 << self.depth, hashfn)
@@ -87,6 +98,7 @@ impl MerkleGroup {
         res
     }
 
+    /// DO NOT MERGE add docs
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn get_proof(
         &self,
@@ -99,6 +111,7 @@ impl MerkleGroup {
         Ok(self.get_proof_by_index(index as u32, hashfn))
     }
 
+    /// DO NOT MERGE add docs
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn get_proof_by_index(&self, index: u32, hashfn: &dyn HashFn<BabyBear>) -> MerkleProof {
         let mut digests: Vec<Digest> = Vec::with_capacity(self.depth as usize);
@@ -123,6 +136,7 @@ impl MerkleGroup {
 }
 
 impl MerkleProof {
+    /// DO NOT MERGE add docs
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn verify(
         &self,
@@ -130,6 +144,15 @@ impl MerkleProof {
         root: &Digest,
         hashfn: &dyn HashFn<BabyBear>,
     ) -> Result<()> {
+        ensure!(
+            self.root(leaf, hashfn) == *root,
+            "merkle proof verify failed"
+        );
+        Ok(())
+    }
+
+    /// Calculate the root of this branch by iteratively hashing, starting from the leaf.
+    pub fn root(&self, leaf: &Digest, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         let mut cur = *leaf;
         let mut cur_index = self.index;
         for sibling in &self.digests {
@@ -140,8 +163,7 @@ impl MerkleProof {
             };
             cur_index >>= 1;
         }
-        ensure!(&cur == root, "merkle proof verify failed");
-        Ok(())
+        cur
     }
 }
 
