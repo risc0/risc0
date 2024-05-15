@@ -77,7 +77,7 @@ pub struct RecursionReceipt {
 /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
     tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
-    let opts = ProverOpts::default();
+    let opts = ProverOpts::succinct();
     let mut prover = Prover::new_lift(&segment_receipt.seal, opts.clone())?;
 
     let receipt = prover.run()?;
@@ -105,7 +105,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
     tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
     tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
 
-    let opts = ProverOpts::default();
+    let opts = ProverOpts::succinct();
     let mut prover = Prover::new_join(a, b, opts.clone())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
@@ -168,7 +168,7 @@ pub fn resolve(
         .context("conditional receipt assumptions are pruned")?
         .resolve(&assumption.claim.digest())?;
 
-    let opts = ProverOpts::default();
+    let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
@@ -197,10 +197,9 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
-    // TODO(victor) Options should probably not be default here. It should probably use the
-    // poseidon_254 hash function.
-    let opts = ProverOpts::default();
+    let opts = ProverOpts::succinct().with_hashfn("poseidon_254".to_string());
     let mut prover = Prover::new_identity(a, opts.clone())?;
+    // TODO(victor) Use run by having it support varying hash functions.
     let receipt = prover.run_with_hal(hal, circuit_hal)?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
@@ -466,7 +465,7 @@ impl Prover {
         prover.add_seal(
             seal,
             &inner_control_id,
-            &allowed_ids.get_proof(&control_id, hash_suite.hashfn.as_ref())?,
+            &allowed_ids.get_proof(&inner_control_id, hash_suite.hashfn.as_ref())?,
         )?;
 
         Ok(prover)
