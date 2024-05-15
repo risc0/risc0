@@ -216,7 +216,7 @@ impl Prover for BonsaiProver {
                 );
                 Ok(receipt.clone())
             }
-            // NOTE: Bonsai always returns a SuccinctReceipt, and does not currenly support
+            // NOTE: Bonsai always returns a SuccinctReceipt, and does not currently support
             // compression of existing receipts uploaded by clients.
             (_, ReceiptKind::Succinct) => {
                 bail!("BonsaiProver does not support compression on existing receipts");
