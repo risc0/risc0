@@ -1171,7 +1171,11 @@ mod tests {
         assert_eq!(quota.cycle_budget, response.cycle_budget);
         assert_eq!(quota.cycle_usage, response.cycle_usage);
         assert_eq!(quota.exec_cycle_limit, response.exec_cycle_limit);
-        assert_eq!(quota.max_parallelism, response.max_parallelism);
+        assert_eq!(quota.be_mult, response.be_mult);
+        assert_eq!(quota.reserved_aux, response.reserved_aux);
+        assert_eq!(quota.reserved_cpu, response.reserved_cpu);
+        assert_eq!(quota.reserved_gpu, response.reserved_gpu);
+        assert_eq!(quota.reserved_snark, response.reserved_snark);
 
         get_mock.assert();
     }
