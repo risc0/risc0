@@ -23,12 +23,10 @@ use test_log::test;
 
 use super::{
     identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, Prover,
-    ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext,
-    ALLOWED_CONTROL_ROOT,
+    default_prover, get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts,
+    Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -50,8 +48,7 @@ fn test_recursion_poseidon254() {
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
     let expected = suite.hashfn.hash_pair(&digest1, &digest2);
     let mut prover =
-        Prover::new_test_recursion_circuit([&digest1, &digest2], RecursionProverOpts::default())
-            .unwrap();
+        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
     let receipt = prover
         .run_with_hal(hal, circuit_hal)
         .expect("Running prover failed");
@@ -89,8 +86,7 @@ fn test_recursion_poseidon2() {
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
     let expected = suite.hashfn.hash_pair(&digest1, &digest2);
     let mut prover =
-        Prover::new_test_recursion_circuit([&digest1, &digest2], RecursionProverOpts::default())
-            .unwrap();
+        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
 
     tracing::info!("Begin");
     let receipt = prover
@@ -171,11 +167,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
-    let opts = ProverOpts {
-        hashfn: hashfn.to_string(),
-        prove_guest_errors: false,
-        receipt_kind: ReceiptKind::Composite,
-    };
+    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
     let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving rv32im");

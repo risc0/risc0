@@ -15,7 +15,16 @@
 //! Minimal Merkle tree implementation used in the recursion system for committing to a group of
 //! control IDs.
 
+// TODO(victor): Actually, they _do_ appear to leak to the public API when -Fprove is set. Mostly,
+// this is ok. Need to either "fix" that or improve the docs.
 // NOTE: Types in this crate are intentionally left out of the public API surface.
+
+/// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
+// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
+// change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
+// that we are unlikely to need more.
+#[cfg_attr(target_os = "zkvm", allow(dead_code))]
+pub const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 
 use alloc::vec::Vec;
 
@@ -37,7 +46,21 @@ pub struct MerkleProof {
     pub digests: Vec<Digest>,
 }
 
+// TODO(victor): Remove these allow(dead_code) annotations.
 impl MerkleGroup {
+    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
+    pub fn new(leaves: Vec<Digest>) -> Result<Self> {
+        let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
+        ensure!(
+            leaves.len() < max_len,
+            "a maximum of {max_len} leaves can be added to a MerkleGroup"
+        );
+        Ok(Self {
+            depth: ALLOWED_CODE_MERKLE_DEPTH as u32,
+            leaves,
+        })
+    }
+
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn calc_root(&self, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         self.calc_range_root(0, 1 << self.depth, hashfn)

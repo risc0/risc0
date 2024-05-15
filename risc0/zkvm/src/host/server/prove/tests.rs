@@ -24,8 +24,7 @@ use super::get_prover_server;
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
-    VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, Session, VerifierContext,
 };
 
 fn prove_session_fast(session: &Session) -> Receipt {
@@ -42,11 +41,7 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
         .unwrap()
         .build()
         .unwrap();
-    let opts = ProverOpts {
-        hashfn: hashfn.to_string(),
-        prove_guest_errors: false,
-        receipt_kind: ReceiptKind::Composite,
-    };
+    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
 
@@ -631,7 +626,6 @@ mod docker {
 mod sys_verify {
     use std::sync::OnceLock;
 
-    use crate::ReceiptKind;
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
@@ -652,11 +646,7 @@ mod sys_verify {
     }
 
     fn prove_halt(exit_code: u8) -> Receipt {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: true,
-            receipt_kind: ReceiptKind::Composite,
-        };
+        let opts = ProverOpts::fast().with_prove_guest_errors(true);
 
         let env = ExecutorEnvBuilder::default()
             .write(&MultiTestSpec::Halt(exit_code))

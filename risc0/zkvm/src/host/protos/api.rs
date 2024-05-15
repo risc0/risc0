@@ -296,6 +296,8 @@ pub struct ProverOpts {
     pub prove_guest_errors: bool,
     #[prost(enumeration = "ReceiptKind", tag = "3")]
     pub receipt_kind: i32,
+    #[prost(message, repeated, tag = "4")]
+    pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

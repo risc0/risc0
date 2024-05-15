@@ -194,9 +194,11 @@ impl From<pb::api::GenericError> for anyhow::Error {
     }
 }
 
-impl From<pb::api::ProverOpts> for ProverOpts {
-    fn from(opts: pb::api::ProverOpts) -> Self {
-        Self {
+impl TryFrom<pb::api::ProverOpts> for ProverOpts {
+    type Error = anyhow::Error;
+
+    fn try_from(opts: pb::api::ProverOpts) -> Result<Self> {
+        Ok(Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: match opts.receipt_kind {
@@ -205,7 +207,12 @@ impl From<pb::api::ProverOpts> for ProverOpts {
                 2 => ReceiptKind::Compact,
                 value => panic!("Unknown receipt kind number: {value}"),
             },
-        }
+            control_ids: opts
+                .control_ids
+                .into_iter()
+                .map(TryInto::try_into)
+                .collect::<Result<_>>()?,
+        })
     }
 }
 
@@ -215,6 +222,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: opts.receipt_kind as i32,
+            control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -510,7 +518,7 @@ impl TryFrom<pb::core::CompositeReceipt> for CompositeReceipt {
     }
 }
 
-impl From<Digest> for pb::core::Digest {
+impl From<Digest> for pb::base::Digest {
     fn from(value: Digest) -> Self {
         Self {
             words: value.as_words().to_vec(),
@@ -518,10 +526,10 @@ impl From<Digest> for pb::core::Digest {
     }
 }
 
-impl TryFrom<pb::core::Digest> for Digest {
+impl TryFrom<pb::base::Digest> for Digest {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::Digest) -> Result<Self> {
+    fn try_from(value: pb::base::Digest) -> Result<Self> {
         value
             .words
             .try_into()

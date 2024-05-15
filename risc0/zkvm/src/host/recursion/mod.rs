@@ -27,6 +27,5 @@ pub use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 
 #[cfg(feature = "prove")]
 pub use self::prove::{
-    identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, ProverOpts,
-    RECURSION_PO2,
+    identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, RECURSION_PO2,
 };
