@@ -204,14 +204,22 @@ pub mod responses {
     pub struct Quotas {
         /// Executor cycle limit, in millions of cycles
         pub exec_cycle_limit: u64,
-        /// Max parallel proving units
-        pub max_parallelism: u64,
         /// Max concurrent proofs
         pub concurrent_proofs: u64,
         /// Current cycle budget remaining
         pub cycle_budget: u64,
         /// Lifetime cycles used
         pub cycle_usage: u64,
+        ///
+        pub be_mult: f32,
+        /// Reserved Aux
+        pub reserved_aux: i32,
+        /// Reserved CPU
+        pub reserved_cpu: i32,
+        /// Reserved GPU
+        pub reserved_gpu: i32,
+        /// Reserved Snark
+        pub reserved_snark: i32,
     }
 }
 
