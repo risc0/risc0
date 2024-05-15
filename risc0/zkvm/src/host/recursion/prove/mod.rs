@@ -20,7 +20,7 @@ pub mod zkr;
 
 use std::{collections::VecDeque, mem::take, rc::Rc};
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, ensure, Context, Result};
 use rand::thread_rng;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
@@ -31,7 +31,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
-        hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite},
+        hash::{hash_suit_from_name, poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite},
     },
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -48,11 +48,11 @@ pub use self::program::Program;
 use crate::{
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
-        SuccinctReceipt,
+        SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{Merge, Output},
     sha::Digestible,
-    HalPair, ProverOpts, ReceiptClaim, SegmentReceipt,
+    HalPair, ProverOpts, ReceiptClaim,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without
@@ -78,7 +78,7 @@ pub struct RecursionReceipt {
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
     tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
     let opts = ProverOpts::succinct();
-    let mut prover = Prover::new_lift(&segment_receipt.seal, opts.clone())?;
+    let mut prover = Prover::new_lift(segment_receipt, opts.clone())?;
 
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
@@ -91,6 +91,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
         .get_proof(&receipt.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
+        hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&segment_receipt.claim)?,
@@ -128,6 +129,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         .get_proof(&receipt.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
+        hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&ab_claim)?,
@@ -182,6 +184,7 @@ pub fn resolve(
         .get_proof(&receipt.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
+        hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&resolved_claim)?,
@@ -210,6 +213,7 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
         .get_proof(&receipt.control_id, opts.hash_suite()?.hashfn.as_ref())?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
+        hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim,
@@ -440,16 +444,21 @@ impl Prover {
     /// constant-time verification procedure, with respect to the original segment length, and is
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
-    pub fn new_lift(seal: &[u32], opts: ProverOpts) -> Result<Self> {
-        // TODO(victor) Using opts.hash_suite doesn't quite make sense here, since the program we
-        // are loading assumes the Poseidon2 hash function. This should probably be a fixed value.
-        let hash_suite = opts.hash_suite()?;
+    pub fn new_lift(segment: &SegmentReceipt, opts: ProverOpts) -> Result<Self> {
+        ensure!(
+            segment.hashfn == "poseidon2",
+            "lift recursion program only supports poseidon2 hashfn; received {}",
+            segment.hashfn
+        );
+
+        let inner_hash_suite = hash_suit_from_name(segment.hashfn)
+            .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
-        let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
+        let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
         // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
         // which lift program we are going to run.
-        let mut iop = ReadIOP::new(seal, hash_suite.rng.as_ref());
+        let mut iop = ReadIOP::new(&segment.seal, inner_hash_suite.rng.as_ref());
         iop.read_field_elem_slice::<BabyBearElem>(risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE);
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
@@ -463,9 +472,9 @@ impl Prover {
         let which = po2 - MIN_CYCLES_PO2;
         let inner_control_id = POSEIDON2_CONTROL_ID[which];
         prover.add_seal(
-            seal,
+            &segment.seal,
             &inner_control_id,
-            &allowed_ids.get_proof(&inner_control_id, hash_suite.hashfn.as_ref())?,
+            &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
         )?;
 
         Ok(prover)
@@ -477,15 +486,37 @@ impl Prover {
     /// By repeated application of the join program, any number of receipts for execution spans
     /// within the same session can be compressed into a single receipt for the entire session.
     pub fn new_join(a: &SuccinctReceipt, b: &SuccinctReceipt, opts: ProverOpts) -> Result<Self> {
-        // TODO(victor): Take the merkle root from the attached succinct receipt merkle proofs.
-        let hash_suite = opts.hash_suite()?;
-        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
-        let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
+        ensure!(
+            a.hashfn == "poseidon2",
+            "join recursion program only supports poseidon2 hashfn; received {}",
+            a.hashfn
+        );
+        ensure!(
+            b.hashfn == "poseidon2",
+            "join recursion program only supports poseidon2 hashfn; received {}",
+            b.hashfn
+        );
 
         let (program, control_id) = zkr::join()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        // Join checks both a and b for inclusion against a control root. Determine the control
+        // root from the receipts themselves, and ensure they are equal. If the determined control
+        // root does not match what the downstream verifier expects, they will reject.
+        let inner_hash_suite = hash_suit_from_name(a.hashfn)
+            .ok_or_else(|| anyhow!("unsupported hash function: {}", a.hashfn))?;
+        let merkle_root_a = a
+            .control_inclusion_proof
+            .root(&a.control_id, inner_hash_suite.hashfn.as_ref());
+        let merkle_root_b = b
+            .control_inclusion_proof
+            .root(&b.control_id, inner_hash_suite.hashfn.as_ref());
+        ensure!(
+            merkle_root_a == merkle_root_b,
+            "merkle roots for a and b do not match: {merkle_root_a} != {merkle_root_b}"
+        );
+
+        prover.add_input_digest(&merkle_root_a, DigestKind::Poseidon2);
         prover.add_segment_receipt(a)?;
         prover.add_segment_receipt(b)?;
         Ok(prover)
@@ -502,19 +533,41 @@ impl Prover {
         assum: &SuccinctReceipt,
         opts: ProverOpts,
     ) -> Result<Self> {
-        // Construct the Merkle tree of all acceptable recursion predicate control IDs.
-        let hash_suite = opts.hash_suite()?;
-        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
-        let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
+        ensure!(
+            cond.hashfn == "poseidon2",
+            "resolve recursion program only supports poseidon2 hashfn; received {}",
+            cond.hashfn
+        );
+        ensure!(
+            assum.hashfn == "poseidon2",
+            "resolve recursion program only supports poseidon2 hashfn; received {}",
+            assum.hashfn
+        );
 
         // Load the resolve predicate as a Program and construct the prover.
         let (program, control_id) = zkr::resolve()?;
         let mut prover = Prover::new(program, control_id, opts);
 
+        // Resolve checks both cond and assum for inclusion against a control root. Determine the
+        // control root from the receipts themselves, and ensure they are equal. If the determined
+        // control root does not match what the downstream verifier expects, they will reject.
+        let inner_hash_suite = hash_suit_from_name(assum.hashfn)
+            .ok_or_else(|| anyhow!("unsupported hash function: {}", assum.hashfn))?;
+        let merkle_root_assum = assum
+            .control_inclusion_proof
+            .root(&assum.control_id, inner_hash_suite.hashfn.as_ref());
+        let merkle_root_cond = cond
+            .control_inclusion_proof
+            .root(&cond.control_id, inner_hash_suite.hashfn.as_ref());
+        ensure!(
+            merkle_root_assum == merkle_root_cond,
+            "merkle roots for cond and assum do not match: {merkle_root_cond} != {merkle_root_assum}"
+        );
+
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_input_digest(&merkle_root_cond, DigestKind::Poseidon2);
         prover.add_segment_receipt(cond)?;
         prover.add_segment_receipt(assum)?;
 
@@ -547,13 +600,20 @@ impl Prover {
     /// The primary use for this program is to transform the receipt itself, e.g. using a different
     /// hash function for FRI. See [identity_p254] for more information.
     pub fn new_identity(a: &SuccinctReceipt, opts: ProverOpts) -> Result<Self> {
-        // Construct the Merkle tree of all acceptable recursion predicate control IDs.
-        let hash_suite = opts.hash_suite()?;
-        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
-        let merkle_root = allowed_ids.calc_root(hash_suite.hashfn.as_ref());
+        ensure!(
+            a.hashfn == "poseidon2",
+            "identity recursion program only supports poseidon2 hashfn; received {}",
+            a.hashfn
+        );
 
         let (program, control_id) = zkr::identity()?;
         let mut prover = Prover::new(program, control_id, opts);
+
+        let inner_hash_suite = hash_suit_from_name(a.hashfn)
+            .ok_or_else(|| anyhow!("unsupported hash function: {}", a.hashfn))?;
+        let merkle_root = a
+            .control_inclusion_proof
+            .root(&a.control_id, inner_hash_suite.hashfn.as_ref());
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(a)?;

@@ -286,6 +286,7 @@ impl ProverOpts {
         }
     }
 
+    // TODO(victor): Keep this function?
     pub(crate) fn hash_suite(&self) -> Result<HashSuite<BabyBear>> {
         Ok(match self.hashfn.as_ref() {
             "sha-256" => Sha256HashSuite::new_suite(),

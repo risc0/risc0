@@ -48,6 +48,9 @@ pub struct SuccinctReceipt {
     /// [ReceiptClaim] containing information about the execution that this receipt proves.
     pub claim: ReceiptClaim,
 
+    /// Name of the hash function used to create this receipt.
+    pub hashfn: String,
+
     /// Merkle inclusion proof for control_id against the control root for this receipt.
     pub(crate) control_inclusion_proof: MerkleProof,
 }
