@@ -1146,7 +1146,11 @@ mod tests {
             cycle_budget: 100000,
             cycle_usage: 1000000,
             exec_cycle_limit: 500,
-            max_parallelism: 2,
+            be_mult: 1.0,
+            reserved_aux: 0,
+            reserved_cpu: 0,
+            reserved_gpu: 0,
+            reserved_snark: 0,
         };
 
         let get_mock = server.mock(|when, then| {
