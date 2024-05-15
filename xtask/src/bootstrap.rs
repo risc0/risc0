@@ -28,7 +28,7 @@ use risc0_zkp::{
     hal::cpu::CpuHal,
 };
 use risc0_zkvm::{
-    recursion::{Program, Prover as RecursionProver},
+    recursion::{MerkleGroup, Program},
     Loader,
 };
 
@@ -144,7 +144,7 @@ impl Bootstrap {
         }
 
         // Calculuate a Merkle root for the allowed control IDs and add it to the file.
-        let merkle_group = RecursionProver::bootstrap_allowed_tree(allowed_control_ids);
+        let merkle_group = MerkleGroup::new(allowed_control_ids).unwrap();
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_control_root = merkle_group.calc_root(hashfn);

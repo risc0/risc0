@@ -17,8 +17,8 @@ use std::{fs, path::Path, process::Command};
 use clap::Parser;
 use regex::Regex;
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts,
-    Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
+    get_prover_server, sha::Digestible, CompactReceiptVerifierParameters, ExecutorEnv,
+    ExecutorImpl, ProverOpts, Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
@@ -154,7 +154,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 "#;
     let receipt = generate_receipt();
     let image_id = receipt.claim().unwrap().pre.digest();
-    let verifier_parameters_digest = CompactReceipt::verifier_parameters().digest();
+    let verifier_parameters_digest = CompactReceiptVerifierParameters::default().digest();
     let selector = hex::encode(&verifier_parameters_digest.as_bytes()[..4]);
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
     let post_digest = hex::encode(receipt.claim().unwrap().post.digest().as_bytes());
