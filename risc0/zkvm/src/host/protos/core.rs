@@ -93,6 +93,8 @@ pub struct SuccinctReceipt {
     pub claim: ::core::option::Option<ReceiptClaim>,
     #[prost(message, optional, tag = "5")]
     pub control_inclusion_proof: ::core::option::Option<MerkleProof>,
+    #[prost(string, tag = "6")]
+    pub hashfn: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

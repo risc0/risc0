@@ -23,8 +23,8 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::{anyhow, ensure, Context, Result};
 use rand::thread_rng;
 use risc0_circuit_recursion::{
-    cpu::CpuCircuitHal, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
-    REGISTER_GROUP_DATA,
+    control_id::BN254_CONTROL_ID, cpu::CpuCircuitHal, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM,
+    REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
@@ -200,7 +200,10 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
-    let opts = ProverOpts::succinct().with_hashfn("poseidon_254".to_string());
+    let opts = ProverOpts::succinct()
+        .with_hashfn("poseidon_254".to_string())
+        .with_control_ids(vec![BN254_CONTROL_ID]);
+
     let mut prover = Prover::new_identity(a, opts.clone())?;
     // TODO(victor) Use run by having it support varying hash functions.
     let receipt = prover.run_with_hal(hal, circuit_hal)?;
@@ -451,7 +454,7 @@ impl Prover {
             segment.hashfn
         );
 
-        let inner_hash_suite = hash_suit_from_name(segment.hashfn)
+        let inner_hash_suite = hash_suit_from_name(&segment.hashfn)
             .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
@@ -500,23 +503,18 @@ impl Prover {
         let (program, control_id) = zkr::join()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        // Join checks both a and b for inclusion against a control root. Determine the control
-        // root from the receipts themselves, and ensure they are equal. If the determined control
-        // root does not match what the downstream verifier expects, they will reject.
-        let inner_hash_suite = hash_suit_from_name(a.hashfn)
-            .ok_or_else(|| anyhow!("unsupported hash function: {}", a.hashfn))?;
-        let merkle_root_a = a
-            .control_inclusion_proof
-            .root(&a.control_id, inner_hash_suite.hashfn.as_ref());
-        let merkle_root_b = b
-            .control_inclusion_proof
-            .root(&b.control_id, inner_hash_suite.hashfn.as_ref());
+        // Determine the control root from the receipts themselves, and ensure they are equal. If
+        // the determined control root does not match what the downstream verifier expects, they
+        // will reject.
+        let merkle_root = a.control_root()?;
         ensure!(
-            merkle_root_a == merkle_root_b,
-            "merkle roots for a and b do not match: {merkle_root_a} != {merkle_root_b}"
+            merkle_root == b.control_root()?,
+            "merkle roots for a and b do not match: {} != {}",
+            merkle_root,
+            b.control_root()?
         );
 
-        prover.add_input_digest(&merkle_root_a, DigestKind::Poseidon2);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(a)?;
         prover.add_segment_receipt(b)?;
         Ok(prover)
@@ -548,26 +546,21 @@ impl Prover {
         let (program, control_id) = zkr::resolve()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        // Resolve checks both cond and assum for inclusion against a control root. Determine the
-        // control root from the receipts themselves, and ensure they are equal. If the determined
-        // control root does not match what the downstream verifier expects, they will reject.
-        let inner_hash_suite = hash_suit_from_name(assum.hashfn)
-            .ok_or_else(|| anyhow!("unsupported hash function: {}", assum.hashfn))?;
-        let merkle_root_assum = assum
-            .control_inclusion_proof
-            .root(&assum.control_id, inner_hash_suite.hashfn.as_ref());
-        let merkle_root_cond = cond
-            .control_inclusion_proof
-            .root(&cond.control_id, inner_hash_suite.hashfn.as_ref());
+        // Determine the control root from the receipts themselves, and ensure they are equal. If
+        // the determined control root does not match what the downstream verifier expects, they
+        // will reject.
+        let merkle_root = cond.control_root()?;
         ensure!(
-            merkle_root_assum == merkle_root_cond,
-            "merkle roots for cond and assum do not match: {merkle_root_cond} != {merkle_root_assum}"
+            merkle_root == assum.control_root()?,
+            "merkle roots for a and b do not match: {} != {}",
+            merkle_root,
+            assum.control_root()?
         );
 
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
-        prover.add_input_digest(&merkle_root_cond, DigestKind::Poseidon2);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(cond)?;
         prover.add_segment_receipt(assum)?;
 
@@ -609,13 +602,7 @@ impl Prover {
         let (program, control_id) = zkr::identity()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        let inner_hash_suite = hash_suit_from_name(a.hashfn)
-            .ok_or_else(|| anyhow!("unsupported hash function: {}", a.hashfn))?;
-        let merkle_root = a
-            .control_inclusion_proof
-            .root(&a.control_id, inner_hash_suite.hashfn.as_ref());
-
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_input_digest(&a.control_root()?, DigestKind::Poseidon2);
         prover.add_segment_receipt(a)?;
         Ok(prover)
     }

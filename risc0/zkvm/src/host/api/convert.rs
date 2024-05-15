@@ -396,6 +396,7 @@ impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
             control_id: Some(value.control_id.into()),
             control_inclusion_proof: Some(value.control_inclusion_proof.into()),
             claim: Some(value.claim.into()),
+            hashfn: value.hashfn,
         }
     }
 }
@@ -424,6 +425,7 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
                 .ok_or(malformed_err())?
                 .try_into()?,
             claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            hashfn: value.hashfn,
         })
     }
 }

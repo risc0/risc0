@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{collections::VecDeque, vec::Vec};
+use alloc::{collections::VecDeque, string::String, vec::Vec};
 
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{control_id::ALLOWED_CONTROL_ROOT, CircuitImpl, CIRCUIT};
@@ -157,6 +157,15 @@ impl SuccinctReceipt {
     /// Return the seal for this receipt, as a vector of bytes.
     pub fn get_seal_bytes(&self) -> Vec<u8> {
         self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
+    }
+
+    #[cfg(not(target_os = "zkvm"))]
+    pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
+        let hash_suite = risc0_zkp::core::hash::hash_suit_from_name(&self.hashfn)
+            .ok_or_else(|| anyhow::anyhow!("unsupported hash function: {}", self.hashfn))?;
+        Ok(self
+            .control_inclusion_proof
+            .root(&self.control_id, hash_suite.hashfn.as_ref()))
     }
 }
 
