@@ -8,8 +8,7 @@ chess-core = { path = "core" }
 chess-methods = { path = "methods" }
 clap = { version = "4.0", features = ["derive"] }
 risc0-zkvm = { path = "../../risc0/zkvm" }
-serde = "1.0"
-shakmaty = "0.22"
+shakmaty = "0.27"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

@@ -81,6 +81,11 @@ export default {
           id: "zkvm/rust-resources",
         },
         {
+          type: "doc",
+          label: "Rust Crates that Use C++",
+          id: "zkvm/rust-crates-with-cpp",
+        },
+        {
           type: "link",
           label: "API Reference Docs",
           href: "https://docs.rs/risc0-zkvm/",
@@ -172,6 +177,11 @@ export default {
           type: "doc",
           label: "Security Model",
           id: "security-model",
+        },
+        {
+          type: "doc",
+          label: "Trusted Setup Security",
+          id: "trusted-setup-ceremony",
         },
         {
           type: "doc",

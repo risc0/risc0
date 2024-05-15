@@ -26,7 +26,7 @@ use risc0_zkp::{
         digest::{Digest, DIGEST_WORDS},
         hash::sha::SHA256_INIT,
     },
-    hal::{cpu::CpuBuffer, Hal},
+    hal::Hal,
     prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
@@ -243,9 +243,9 @@ impl<'a> Iterator for TripleWordIter<'a> {
     }
 }
 
-pub struct Loader<'a> {
+pub struct Loader {
     max_cycles: usize,
-    ctrl: &'a mut CpuBuffer<BabyBearElem>,
+    pub ctrl: Vec<BabyBearElem>,
     cycle: usize,
     ram_load_cycles: Vec<CtrlCycle>,
 }
@@ -273,13 +273,13 @@ pub fn ram_load_cycles() -> Vec<CtrlCycle> {
         .collect()
 }
 
-impl<'a> Loader<'a> {
-    pub fn new(max_cycles: usize, ctrl: &'a mut CpuBuffer<BabyBearElem>) -> Self {
+impl Loader {
+    pub fn new(max_cycles: usize, ctrl_size: usize) -> Self {
         let ram_load_cycles = ram_load_cycles();
         assert_eq!(ram_load_cycles.len(), RAM_LOAD_CYCLES);
         Self {
             max_cycles,
-            ctrl,
+            ctrl: vec![BabyBearElem::ZERO; max_cycles * ctrl_size],
             cycle: 0,
             ram_load_cycles,
         }
@@ -359,10 +359,9 @@ impl<'a> Loader<'a> {
     }
 
     fn add_cycle(&mut self, row: CtrlCycle) {
-        let mut ctrl = self.ctrl.as_slice_mut();
-        ctrl[self.cycle] = BabyBearElem::new(self.cycle as u32);
+        self.ctrl[self.cycle] = BabyBearElem::new(self.cycle as u32);
         for i in 1..row.0.len() {
-            ctrl[self.max_cycles * i + self.cycle] = row.0[i];
+            self.ctrl[self.max_cycles * i + self.cycle] = row.0[i];
         }
         self.cycle += 1;
     }
@@ -381,12 +380,11 @@ impl<'a> Loader<'a> {
         tracing::debug!("po2: {po2}");
         let cycles = 1 << po2;
         let ctrl_size = CIRCUIT.ctrl_size();
-        let mut ctrl = CpuBuffer::from_fn("ctrl", cycles * ctrl_size, |_| BabyBearElem::ZERO);
-        let mut loader = Loader::new(cycles, &mut ctrl);
+        let mut loader = Loader::new(cycles, ctrl_size);
         // Make a vector & set it up with the elf data
         loader.load();
         // Copy into accel buffer
-        let coeffs = hal.copy_from_elem("coeffs", &ctrl.as_slice());
+        let coeffs = hal.copy_from_elem("coeffs", &loader.ctrl);
         // Do interpolate & shift
         hal.batch_interpolate_ntt(&coeffs, ctrl_size);
         hal.zk_shift(&coeffs, ctrl_size);

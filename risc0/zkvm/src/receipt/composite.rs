@@ -16,16 +16,24 @@ use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use risc0_binfmt::ExitCode;
-use risc0_zkp::{core::digest::Digest, verify::VerificationError};
+use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
+use risc0_zkp::{
+    core::{digest::Digest, hash::sha::Sha256},
+    verify::VerificationError,
+};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use super::{InnerReceipt, SegmentReceipt, VerifierContext};
-use crate::{sha::Digestible, Assumptions, MaybePruned, Output, ReceiptClaim};
+use super::{
+    CompactReceipt, CompactReceiptVerifierParameters, InnerReceipt, SegmentReceipt,
+    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+    VerifierContext,
+};
+use crate::{sha, Assumptions, MaybePruned, Output, ReceiptClaim};
 
-/// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
-/// continuations, and zero or more [Receipt](crate::Receipt) structs proving any assumptions.
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single
+/// execution with continuations, and zero or more [Receipt](crate::Receipt) structs proving any
+/// assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct CompositeReceipt {
@@ -49,6 +57,16 @@ pub struct CompositeReceipt {
 }
 
 impl CompositeReceipt {
+    /// Information about the parameters used to verify the receipt. Includes parameters that are
+    /// useful in deciding whether the verifier is compatible with a given receipt.
+    pub fn verifier_parameters() -> CompositeReceiptVerifierParameters {
+        CompositeReceiptVerifierParameters {
+            segment: SegmentReceipt::verifier_parameters(),
+            succinct: SuccinctReceipt::verifier_parameters(),
+            compact: CompactReceipt::verifier_parameters(),
+        }
+    }
+
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(
@@ -69,7 +87,7 @@ impl CompositeReceipt {
             receipt.verify_integrity_with_context(ctx)?;
             tracing::debug!("claim: {:#?}", receipt.claim);
             if let Some(id) = expected_pre_state_digest {
-                if id != receipt.claim.pre.digest() {
+                if id != receipt.claim.pre.digest::<sha::Impl>() {
                     return Err(VerificationError::ImageVerificationError);
                 }
             }
@@ -85,7 +103,7 @@ impl CompositeReceipt {
                     .post
                     .as_value()
                     .map_err(|_| VerificationError::ReceiptFormatError)?
-                    .digest(),
+                    .digest::<sha::Impl>(),
             );
         }
 
@@ -93,14 +111,17 @@ impl CompositeReceipt {
         final_receipt.verify_integrity_with_context(ctx)?;
         tracing::debug!("final: {:#?}", final_receipt.claim);
         if let Some(id) = expected_pre_state_digest {
-            if id != final_receipt.claim.pre.digest() {
+            if id != final_receipt.claim.pre.digest::<sha::Impl>() {
                 return Err(VerificationError::ImageVerificationError);
             }
         }
 
         // Verify all assumption receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
-            tracing::debug!("verifying assumption: {:?}", receipt.claim()?.digest());
+            tracing::debug!(
+                "verifying assumption: {:?}",
+                receipt.claim()?.digest::<sha::Impl>()
+            );
             receipt.verify_integrity_with_context(ctx)?;
         }
 
@@ -149,7 +170,7 @@ impl CompositeReceipt {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
-            input: first_claim.input,
+            input: first_claim.input.clone(),
             output: output.into(),
         })
     }
@@ -172,12 +193,12 @@ impl CompositeReceipt {
             };
 
             // If these digests do not match, this receipt is internally inconsistent.
-            if self_output.digest() != claim.output.digest() {
+            if self_output.digest::<sha::Impl>() != claim.output.digest::<sha::Impl>() {
                 let empty_output = claim.output.is_none()
                     && self
                         .journal_digest
                         .ok_or(VerificationError::ReceiptFormatError)?
-                        == Vec::<u8>::new().digest();
+                        == Vec::<u8>::new().digest::<sha::Impl>();
                 if !empty_output {
                     tracing::debug!(
                         "output digest does not match: expected {:?}; decoded {:?}",
@@ -219,5 +240,56 @@ impl CompositeReceipt {
                 .map(|a| Ok(a.claim()?.into()))
                 .collect::<Result<Vec<_>, _>>()?,
         ))
+    }
+}
+
+/// Verifier parameters for [CompositeReceipt][super::CompositeReceipt].
+///
+/// [CompositeReceipt][super::CompositeReceipt] is a collection of individual receipts that
+/// collectively  prove a claim. It can contain any of the individual receipt types, and so it's
+/// verifier is a combination of the verifiers for every other receipt type.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct CompositeReceiptVerifierParameters {
+    /// Verifier parameters related to [SegmentReceipt].
+    pub segment: SegmentReceiptVerifierParameters,
+    /// Verifier parameters related to [SuccinctReceipt].
+    pub succinct: SuccinctReceiptVerifierParameters,
+    /// Verifier parameters related to [CompactReceipt].
+    pub compact: CompactReceiptVerifierParameters,
+}
+
+impl Digestible for CompositeReceiptVerifierParameters {
+    /// Hash the [CompactReceiptVerifierParameters] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>(
+            "risc0.CompositeReceiptVerifierParameters",
+            &[
+                &self.segment.digest::<S>(),
+                &self.succinct.digest::<S>(),
+                &self.compact.digest::<S>(),
+            ],
+            &[],
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CompositeReceipt;
+    use crate::sha::{Digest, Digestible};
+    use hex::FromHex;
+
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This struct
+    // encodes parameters used in verification, and so this value should be updated if and only if
+    // a change to the verifier parameters is expected. Updating the verifier parameters will result in
+    // incompatibility with previous versions.
+    #[test]
+    fn composite_receipt_verifier_parameters_is_stable() {
+        assert_eq!(
+            CompositeReceipt::verifier_parameters().digest(),
+            Digest::from_hex("26c5446a183430b3dbd8ecf7de1b0f56727f0f6704ea5deb804a7d6ac552742b")
+                .unwrap()
+        );
     }
 }

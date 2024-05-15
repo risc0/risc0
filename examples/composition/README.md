@@ -3,7 +3,8 @@
 This example demonstrates a basic usage of the proof composition feature.
 It builds upon the [hello world example], where the [guest program] verified that the prover knows a factorization of a composite number.
 
-See the [`src/main.rs`] file for the [host] side implementation of composition, and [`methods/guest/src/main.rs`] for the guest side.
+To use proof composition, you'll need to use `add_assumption()` in the [host] side implementation (see the [`src/main.rs`] file), 
+and `env::verify()` for the [guest] side (see [`methods/guest/src/main.rs`]). 
 
 [hello world example]: ../hello-world
 
@@ -52,8 +53,9 @@ Some use cases for composition include:
 
 [`env::verify`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.verify.html
 
-[`src/main.rs`]: /src/main.rs
+[`src/main.rs`]: src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [host]: https://dev.risczero.com/terminology#host
+[guest]: https://dev.risczero.com/terminology#guest-program
 [guest program]: https://dev.risczero.com/terminology#guest-program
 [receipts]: https://dev.risczero.com/terminology#receipt

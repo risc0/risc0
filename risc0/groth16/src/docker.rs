@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env::consts::ARCH, path::Path, process::Command};
+use std::{
+    env::consts::ARCH,
+    path::Path,
+    process::{Command, Stdio},
+};
 
 use anyhow::{bail, Result};
 use tempfile::tempdir;
@@ -42,15 +46,20 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     std::fs::write(seal_path, seal_json)?;
 
     tracing::debug!("risc0-groth16-prover");
-    let status = Command::new("docker")
+    let output = Command::new("docker")
         .arg("run")
         .arg("--rm")
         .arg("-v")
         .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
         .arg("risczero/risc0-groth16-prover:v2024-04-03.2")
-        .status()?;
-    if !status.success() {
-        bail!("docker returned failure exit code: {:?}", status.code());
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()?;
+    if !output.status.success() {
+        bail!(
+            "docker returned failure exit code: {:?}",
+            output.status.code()
+        );
     }
 
     tracing::debug!("Parsing proof");

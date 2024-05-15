@@ -279,12 +279,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.cycles.total += 1 << po2;
 
         // NOTE: When a segment ends in a Halted(_) state, the post_state will be null.
-        let post_state = SystemState {
-            pc: post_state.pc,
-            merkle_root: match exit_code {
-                ExitCode::Halted(_) => Digest::ZERO,
-                _ => post_state.merkle_root,
+        let post_state = match exit_code {
+            ExitCode::Halted(_) => SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
             },
+            _ => post_state,
         };
 
         Ok(ExecutorResult {

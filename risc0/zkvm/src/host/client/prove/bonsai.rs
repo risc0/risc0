@@ -178,9 +178,9 @@ impl Prover for BonsaiProver {
         // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
         // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
         // this error condition and report a better message. Constructing the receipt here will all
-        // the verifier info for this version of risc0-zkvm, which may be different than Bonsai. By
-        // verifying the receipt though, we at least know the proving key used on Bonsai matches
-        // the verifying key used here.
+        // the verifier parameters for this version of risc0-zkvm, which may be different than
+        // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
+        // matches the verifying key used here.
         let compact_receipt = Receipt::new(
             InnerReceipt::Compact(CompactReceipt {
                 seal: snark_receipt.snark.to_vec(),
@@ -216,7 +216,7 @@ impl Prover for BonsaiProver {
                 );
                 Ok(receipt.clone())
             }
-            // NOTE: Bonsai always returns a SuccinctReceipt, and does not currenly support
+            // NOTE: Bonsai always returns a SuccinctReceipt, and does not currently support
             // compression of existing receipts uploaded by clients.
             (_, ReceiptKind::Succinct) => {
                 bail!("BonsaiProver does not support compression on existing receipts");

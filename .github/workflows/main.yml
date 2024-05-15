@@ -36,7 +36,9 @@ jobs:
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
+      risc0: ${{ steps.filter.outputs.risc0 }}
       test: ${{ steps.filter.outputs.test }}
+      test-crates: ${{ steps.filter.outputs.test-crates }}
       web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
@@ -72,11 +74,17 @@ jobs:
               - *base
               - examples/**
               - risc0/**
+            risc0:
+              - *base
+              - risc0/**
             test:
               - *base
               - bonsai/sdk/**
               - compact_proof/**
               - external/**
+              - risc0/**
+            test-crates:
+              - *base
               - risc0/**
             web:
               - *base
@@ -97,6 +105,7 @@ jobs:
       - examples
       - docker
       - test
+      # - test-crates
       - web
     runs-on: ubuntu-latest
     steps:
@@ -150,6 +159,8 @@ jobs:
         run: bash ./.github/scripts/circom_stable.sh
 
   clippy:
+    if: needs.changes.outputs.risc0 == 'true'
+    needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
@@ -172,7 +183,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: python3 -u clippy.py
+      - run: python3 -u clippy.py -F $FEATURE
 
   test:
     if: needs.changes.outputs.test == 'true'
@@ -278,6 +289,34 @@ jobs:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
       - run: sccache --show-stats
+
+  # test-crates:
+  #   if: needs.changes.outputs.test-crates == 'true'
+  #   needs: changes
+  #   runs-on: [self-hosted, prod, Linux, cpu]
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         path: 'risc0'
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         repository: risc0/RustCrypto-crypto-bigint
+  #         path: 'RustCrypto-crypto-bigint'
+  #     - uses: ./risc0/.github/actions/rustup
+  #     - uses: ./risc0/.github/actions/sccache
+  #       with:
+  #         key: Linux-default
+  #     - name: Install risczero toolchain
+  #       run: |
+  #         cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+  #         cargo install --force --path risc0/cargo-risczero -F experimental
+  #       working-directory: risc0
+  #     - name: run cargo risczero test
+  #       working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
+  #       run: cargo risczero test
+  #     - run: sccache --show-stats
 
   doc:
     if: needs.changes.outputs.doc == 'true'

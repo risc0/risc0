@@ -95,7 +95,6 @@ fn poseidon_mix(cells: &mut [Fr; CELLS]) {
 struct Poseidon254HashFn;
 
 /// Returns the field representation of a given digest.
-// TODO(victor): Is this map injective?
 pub fn digest_to_fr(digest: &Digest) -> Fr {
     let mut repr: FrRepr = FrRepr::default();
     repr.as_mut().clone_from_slice(digest.as_bytes());

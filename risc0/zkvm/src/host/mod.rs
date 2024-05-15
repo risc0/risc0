@@ -16,25 +16,9 @@
 pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
+#[cfg(any(feature = "client", feature = "prove"))]
+mod protos;
 pub(crate) mod prove_info;
 pub(crate) mod recursion;
 #[cfg(feature = "prove")]
 pub(crate) mod server;
-
-#[cfg(any(feature = "client", feature = "prove"))]
-mod protos {
-    pub(crate) mod api {
-        #![allow(non_snake_case)]
-        include!(concat!(env!("OUT_DIR"), "/protos.api.rs"));
-    }
-
-    pub(crate) mod base {
-        #![allow(non_snake_case)]
-        include!(concat!(env!("OUT_DIR"), "/protos.base.rs"));
-    }
-
-    pub(crate) mod core {
-        #![allow(non_snake_case)]
-        include!(concat!(env!("OUT_DIR"), "/protos.core.rs"));
-    }
-}

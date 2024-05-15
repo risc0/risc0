@@ -17,7 +17,7 @@ depends on the [rustup] tool specifically.
 ## Install
 
 Next, install the [`cargo risczero`][cargo-risczero] tool and use its [`install`
-command][cargo-risczero] to install the toolchain by running:
+command][cargo-risczero] to install the Rust and C++ toolchains by running:
 
 ```bash
 cargo install cargo-binstall

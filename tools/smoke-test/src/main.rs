@@ -25,6 +25,6 @@ fn main() {
         .unwrap();
 
     let prover = default_prover();
-    let receipt = prover.prove(env, GUEST_ELF).unwrap();
+    let receipt = prover.prove(env, GUEST_ELF).unwrap().receipt;
     receipt.verify(GUEST_ID).unwrap();
 }
