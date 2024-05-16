@@ -21,7 +21,7 @@ To ensure that the circuit itself does not have security holes, we have used a m
 
 ## The Transcript Matches the Circuit
 
-Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][zkey_mirror].) You can verify it matches the circuit using Circom and snarkjs:
+Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][zkey_mirror], and have a compressed version [here][zkey-compressed]) You can verify it matches the circuit using Circom and snarkjs:
 
 1. Install [Circom][install-circom] and [snarkjs][snarkjs].
 1. Download the [`stark_verify.circom`][stark-verify-circom] and [`risc0.circom`][risc0-circom-library] source files.
@@ -69,3 +69,4 @@ We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony
 [snarkjs]: https://github.com/iden3/snarkjs
 [stark-verify-circom]: https://github.com/risc0/risc0/blob/d4e427283027c28b38b8eda1562e8e0e68d1b0e2/compact_proof/groth16/stark_verify.circom
 [zkey-mirror]: https://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify_final.zkey
+[zkey-compressed]: https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-05-16/stark_verify_final.zkey.gz
