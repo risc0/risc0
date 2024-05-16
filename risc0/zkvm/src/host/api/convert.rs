@@ -25,8 +25,8 @@ use crate::{
         merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
         InnerReceipt, ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
-    Assumption, Assumptions, ExitCode, Input, Journal, MaybePruned, Output, ProveInfo, ProverOpts,
-    Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    Assumption, Assumptions, CompactReceipt, ExitCode, Input, Journal, MaybePruned, Output,
+    ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
 mod ver {
@@ -35,6 +35,7 @@ mod ver {
     pub const RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const SEGMENT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const SUCCINCT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
+    pub const COMPACT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
 }
 
 impl TryFrom<AssetRequest> for pb::api::AssetRequest {
@@ -464,6 +465,32 @@ impl TryFrom<pb::core::MerkleProof> for MerkleProof {
     }
 }
 
+impl From<CompactReceipt> for pb::core::Groth16Receipt {
+    fn from(value: CompactReceipt) -> Self {
+        Self {
+            version: Some(ver::COMPACT_RECEIPT),
+            seal: value.seal,
+            claim: Some(value.claim.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::Groth16Receipt> for CompactReceipt {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::Groth16Receipt) -> Result<Self> {
+        let version = value.version.ok_or(malformed_err())?.value;
+        if version > ver::COMPACT_RECEIPT.value {
+            bail!("Incompatible CompactReceipt version: {version}");
+        }
+
+        Ok(Self {
+            seal: value.seal,
+            claim: value.claim.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
 impl From<InnerReceipt> for pb::core::InnerReceipt {
     fn from(value: InnerReceipt) -> Self {
         Self {
@@ -479,7 +506,9 @@ impl From<InnerReceipt> for pb::core::InnerReceipt {
                         claim: Some(claim.into()),
                     })
                 }
-                InnerReceipt::Compact(_) => unimplemented!(),
+                InnerReceipt::Compact(inner) => {
+                    pb::core::inner_receipt::Kind::Groth16(inner.into())
+                }
             }),
         }
     }
@@ -491,7 +520,7 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
     fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
-            pb::core::inner_receipt::Kind::Groth16(_) => unimplemented!(),
+            pb::core::inner_receipt::Kind::Groth16(inner) => Self::Compact(inner.try_into()?),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
             pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake {
                 claim: inner.claim.ok_or(malformed_err())?.try_into()?,

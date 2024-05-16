@@ -161,7 +161,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
 
-    // NOTE: Selector value is the fist four bytes of the verifier param digest. It is added as part
+    // NOTE: Selector value is the first four bytes of the verifier param digest. It is added as part
     // of ABI encoding and used for routing to the correct verifier on-chain. We do not use the
     // full ABI encoding implementation here because its part of risc0-ethereum-contracts, which
     // would be a hassle to import.

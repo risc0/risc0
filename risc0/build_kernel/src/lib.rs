@@ -174,9 +174,10 @@ impl KernelBuild {
             false
         }
 
+        println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+        println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
 
         for inc_dir in self.inc_dirs.iter() {
             for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
@@ -213,9 +214,7 @@ impl KernelBuild {
 
                 cmd.arg("-c");
 
-                if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
-                    cmd.args(nvcc_flags.split(' '));
-                } else {
+                if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
                     cmd.arg("-arch=native");
                 }
 
@@ -274,12 +273,13 @@ impl KernelBuild {
     }
 
     fn compile_cuda(&mut self, output: &str) {
+        println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+        println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
 
         let mut flags = vec![];
-        if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
+        if let Ok(nvcc_flags) = env::var("NVCC_PREPEND_FLAGS") {
             for flag in nvcc_flags.split(' ') {
                 flags.push(flag.to_string());
             }
@@ -303,6 +303,12 @@ impl KernelBuild {
             // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
             let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".into());
             flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
+        }
+
+        if let Ok(nvcc_flags) = env::var("NVCC_APPEND_FLAGS") {
+            for flag in nvcc_flags.split(' ') {
+                flags.push(flag.to_string());
+            }
         }
 
         self.cached_compile(
