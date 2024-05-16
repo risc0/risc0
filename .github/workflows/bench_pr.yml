@@ -36,7 +36,10 @@ jobs:
         include:
           - os: Linux
             feature: cuda
-            device: [nvidia_rtx_3090_ti,g4dn.xlarge]
+            device: nvidia_rtx_3090_ti
+          - os: Linux
+            feature: cuda
+            device: g4dn.xlarge
           - os: macOS
             feature: metal
             device: apple_m2_pro
