@@ -23,7 +23,7 @@ RISC Zero offers the following components, each of which is ready for use on tes
 
 5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
    The control root is hard-coded into the on-chain verifier contract.
-   Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the designs for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc.
+   Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc.
 
 Together, these components allow developers to integrate proofs of arbitrary Rust code into their on-chain applications.
 In order to use these components, developers provide:
