@@ -131,8 +131,7 @@ impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
         let metadata = ReceiptMetadata {
-            // DO NOT MERGE
-            verifier_parameters: Digest::ZERO,
+            verifier_parameters: inner.verifier_parameters(),
         };
         Self {
             inner,
@@ -396,8 +395,12 @@ impl InnerReceipt {
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
-        // DO NOT MERGE
-        Digest::ZERO
+        match self {
+            InnerReceipt::Composite(ref inner) => inner.verifier_parameters,
+            InnerReceipt::Compact(ref inner) => inner.verifier_parameters,
+            InnerReceipt::Succinct(ref inner) => inner.verifier_parameters,
+            InnerReceipt::Fake { .. } => Digest::ZERO,
+        }
     }
 }
 
@@ -417,7 +420,8 @@ pub struct ReceiptMetadata {
     pub verifier_parameters: Digest,
 }
 
-// TODO(victor): AssumptionReceipt is not the best name
+// TODO(victor): AssumptionReceipt is not the best name. Also, it needs to encode the control root
+// for proven assumptions somehow.
 /// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
