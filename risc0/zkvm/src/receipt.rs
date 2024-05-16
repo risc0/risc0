@@ -423,6 +423,8 @@ pub struct ReceiptMetadata {
 
 // TODO(victor): AssumptionReceipt is not the best name. Also, it needs to encode the control root
 // for proven assumptions somehow.
+// TODO(victor): Top-level receipt type can only be inhabited by inner receipts with claims of type
+// ReceiptClaim. Need a way to add (inner) receipts for assumptions that are not of that type.
 /// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]

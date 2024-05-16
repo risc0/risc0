@@ -444,7 +444,7 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt<ReceiptClaim> {
 impl From<MerkleProof> for pb::core::MerkleProof {
     fn from(value: MerkleProof) -> Self {
         Self {
-            index: value.index as u32,
+            index: value.index,
             digests: value.digests.into_iter().map(Into::into).collect(),
         }
     }
@@ -455,7 +455,7 @@ impl TryFrom<pb::core::MerkleProof> for MerkleProof {
 
     fn try_from(value: pb::core::MerkleProof) -> Result<Self> {
         Ok(Self {
-            index: value.index.try_into()?,
+            index: value.index,
             digests: value
                 .digests
                 .into_iter()
@@ -465,17 +465,18 @@ impl TryFrom<pb::core::MerkleProof> for MerkleProof {
     }
 }
 
-impl From<CompactReceipt> for pb::core::Groth16Receipt {
-    fn from(value: CompactReceipt) -> Self {
+impl From<CompactReceipt<ReceiptClaim>> for pb::core::Groth16Receipt {
+    fn from(value: CompactReceipt<ReceiptClaim>) -> Self {
         Self {
             version: Some(ver::COMPACT_RECEIPT),
             seal: value.seal,
             claim: Some(value.claim.into()),
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
 
-impl TryFrom<pb::core::Groth16Receipt> for CompactReceipt {
+impl TryFrom<pb::core::Groth16Receipt> for CompactReceipt<ReceiptClaim> {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::Groth16Receipt) -> Result<Self> {
@@ -487,6 +488,10 @@ impl TryFrom<pb::core::Groth16Receipt> for CompactReceipt {
         Ok(Self {
             seal: value.seal,
             claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }

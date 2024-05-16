@@ -68,14 +68,14 @@
 //! [proof composition]:https://www.risczero.com/blog/proof-composition
 //! [guest-optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
-use core::{cell::OnceCell, fmt, mem::MaybeUninit};
+use core::{cell::OnceCell, convert::Infallible, fmt};
 
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
         self, sys_alloc_words, sys_cycle_count, sys_halt, sys_input, sys_log, sys_pause, sys_read,
-        sys_read_words, sys_verify, sys_verify_integrity, sys_write, syscall_2, SyscallName,
+        sys_read_words, sys_verify_integrity, sys_write, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -85,10 +85,9 @@ use crate::{
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
-        Digest, Digestible, DIGEST_WORDS,
+        Digest, Digestible,
     },
-    Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
-    ReceiptClaim,
+    Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 
 static mut HASHER: OnceCell<Sha256> = OnceCell::new();
@@ -182,89 +181,20 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// ```
 ///
 /// [composition]: https://dev.risczero.com/terminology#composition
-pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), VerifyError> {
-    let image_id: Digest = image_id.into();
+pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), Infallible> {
     let journal_digest: Digest = bytemuck::cast_slice::<_, u8>(journal).digest();
-    let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
+    let assumption_claim = ReceiptClaim::ok(image_id, MaybePruned::Pruned(journal_digest));
 
+    let claim_digest = assumption_claim.digest();
+
+    // DO NOT MERGE: This value should be a hash an assumption, not of a receipt claim.
     unsafe {
-        sys_verify(
-            image_id.as_ref(),
-            journal_digest.as_ref(),
-            from_host_buf.as_mut_ptr(),
-        )
-    };
-
-    // Split the host buffer into the Digest and system exit code portions. This is statically
-    // known to succeed, but the array APIs that would allow compile-time checked splitting are
-    // unstable.
-    let (post_state_digest, sys_exit_code): (Digest, u32) = {
-        let buf = unsafe { from_host_buf.assume_init() };
-        let (digest_buf, code_buf) = buf.split_at(DIGEST_WORDS);
-        (digest_buf.try_into().unwrap(), code_buf[0])
-    };
-
-    // Require that the exit code is either Halted(0) or Paused(0).
-    let exit_code = ExitCode::from_pair(sys_exit_code, 0)?;
-    if !exit_code.is_ok() {
-        return Err(VerifyError::BadExitCodeResponse(InvalidExitCodeError(
-            sys_exit_code,
-            0,
-        )));
-    };
-
-    // Construct the ReceiptClaim for this assumption. Use the host provided
-    // post_state_digest and fix all fields that are required to have a certain
-    // value. This assumption will only be resolvable if there exists a receipt
-    // matching this claim.
-    let _assumption_claim = ReceiptClaim {
-        pre: MaybePruned::Pruned(image_id),
-        post: MaybePruned::Pruned(post_state_digest),
-        exit_code,
-        input: None.into(),
-        output: Some(Output {
-            journal: MaybePruned::Pruned(journal_digest),
-            assumptions: MaybePruned::Pruned(Digest::ZERO),
-        })
-        .into(),
-    };
-    // DO NOT MERGE
-    //unsafe { ASSUMPTIONS_DIGEST.add(todo!()) };
+        sys_verify_integrity(claim_digest.as_ref());
+        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(claim_digest));
+    }
 
     Ok(())
 }
-
-/// Error encountered during a call to [verify].
-///
-/// Note that an error is only returned for "provable" errors. In particular, if
-/// the host fails to find a receipt matching the requested image_id and
-/// journal, this is not a provable error. In this case, the [verify] call
-/// will not return.
-#[derive(Debug)]
-#[non_exhaustive]
-pub enum VerifyError {
-    /// Error returned when the host responds to `sys_verify` with an invalid exit code.
-    BadExitCodeResponse(InvalidExitCodeError),
-}
-
-impl From<InvalidExitCodeError> for VerifyError {
-    fn from(err: InvalidExitCodeError) -> Self {
-        Self::BadExitCodeResponse(err)
-    }
-}
-
-impl fmt::Display for VerifyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::BadExitCodeResponse(err) => {
-                write!(f, "bad response from host to sys_verify: {}", err)
-            }
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for VerifyError {}
 
 /// Verify that there exists a valid receipt with the specified
 /// [crate::ReceiptClaim].
@@ -295,6 +225,7 @@ pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError
 
     let claim_digest = claim.digest();
 
+    // DO NOT MERGE: This value should be a hash an assumption, not of a receipt claim.
     unsafe {
         sys_verify_integrity(claim_digest.as_ref());
         ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(claim_digest));

@@ -65,6 +65,50 @@ pub struct ReceiptClaim {
 }
 
 impl ReceiptClaim {
+    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded normally (i.e.
+    /// Halted(0)) with the given image ID and journal.
+    pub fn ok(
+        image_id: impl Into<Digest>,
+        journal: impl Into<MaybePruned<Vec<u8>>>,
+    ) -> ReceiptClaim {
+        Self {
+            pre: MaybePruned::Pruned(image_id.into()),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: journal.into(),
+                assumptions: MaybePruned::Pruned(Digest::ZERO),
+            })
+            .into(),
+        }
+    }
+
+    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded in a normal paused
+    /// state (i.e. Paused(0)) with the given image ID and journal.
+    pub fn paused(
+        image_id: impl Into<Digest>,
+        journal: impl Into<MaybePruned<Vec<u8>>>,
+    ) -> ReceiptClaim {
+        Self {
+            pre: MaybePruned::Pruned(image_id.into()),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::Paused(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: journal.into(),
+                assumptions: MaybePruned::Pruned(Digest::ZERO),
+            })
+            .into(),
+        }
+    }
+
     /// Decode a [ReceiptClaim] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
         let input = read_sha_halfs(flat)?;
@@ -170,7 +214,7 @@ pub struct Input {
 }
 
 impl Digestible for Input {
-    /// Hash the [Output] to get a digest of the struct.
+    /// Hash the [Input] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         match self.x { /* unreachable  */ }
     }

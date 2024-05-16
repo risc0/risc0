@@ -262,9 +262,9 @@ fn test_recursion_lift_resolve_e2e() {
         .build()
         .unwrap();
 
-    tracing::info!("Proving: sys_verify");
+    tracing::info!("Proving: env::verify");
     let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
-    tracing::info!("Done proving: sys_verify");
+    tracing::info!("Done proving: env::verify");
 
     let succinct_receipt = prover
         .compsite_to_succinct(&composition_receipt.inner.composite().unwrap())

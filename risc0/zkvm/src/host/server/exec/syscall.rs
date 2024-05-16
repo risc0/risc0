@@ -23,10 +23,10 @@ use risc0_zkvm_platform::{
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
-            SYS_READ, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
-        SyscallName, DIGEST_BYTES, DIGEST_WORDS,
+        SyscallName,
     },
     WORD_SIZE,
 };
@@ -38,7 +38,7 @@ use crate::{
         slice_io::SliceIo,
     },
     sha::{Digest, Digestible},
-    AssumptionReceipt, MaybePruned, PrunedValueError, ReceiptClaim,
+    AssumptionReceipt,
 };
 
 /// A host-side implementation of a system call.
@@ -94,7 +94,6 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io)
-            .with_syscall(SYS_VERIFY, sys_verify.clone())
             .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
             .with_syscall(SYS_ARGC, Args(env.args.clone()))
             .with_syscall(SYS_ARGV, Args(env.args.clone()));
@@ -230,120 +229,6 @@ impl SysVerify {
         self.assumptions.borrow_mut().accessed.insert(0, assumption);
         Ok((0, 0))
     }
-
-    fn sys_verify(&mut self, mut from_guest: Vec<u8>, to_guest: &mut [u32]) -> Result<(u32, u32)> {
-        if from_guest.len() != DIGEST_BYTES * 2 {
-            bail!(
-                "sys_verify call with input of length {} bytes; expected {}",
-                from_guest.len(),
-                DIGEST_BYTES * 2
-            );
-        }
-        if to_guest.len() != DIGEST_WORDS + 1 {
-            bail!(
-                "sys_verify call with output of length {} words; expected {}",
-                to_guest.len(),
-                DIGEST_WORDS + 1
-            );
-        }
-
-        let journal_digest: Digest = from_guest
-            .split_off(DIGEST_BYTES)
-            .try_into()
-            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
-        let image_id: Digest = from_guest
-            .try_into()
-            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
-
-        tracing::debug!(
-            "SYS_VERIFY: {}, {}",
-            hex::encode(image_id),
-            hex::encode(journal_digest)
-        );
-
-        // Iterate over the list looking for a matching assumption. If found, return the
-        // post state digest and system exit code.
-        let mut assumption: Option<AssumptionReceipt> = None;
-        for cached_assumption in self.assumptions.borrow().cached.iter() {
-            let assumption_claim = cached_assumption.claim()?;
-            let cmp_result = Self::sys_verify_cmp(&assumption_claim, &image_id, &journal_digest);
-            let (post_state_digest, sys_exit_code) = match cmp_result {
-                Ok(None) => continue,
-                // If the required values to compare were pruned, go the next assumption.
-                Err(e) => {
-                    tracing::debug!(
-                        "sys_verify: pruned values in assumption prevented comparison: {e} : {assumption_claim:?}"
-                    );
-                    continue;
-                }
-                Ok(Some(out)) => out,
-            };
-
-            // Write the post_state_digest to the guest buffer as a result.
-            to_guest[..DIGEST_WORDS].copy_from_slice(post_state_digest.as_words());
-            to_guest[DIGEST_WORDS] = sys_exit_code;
-            assumption = Some(cached_assumption.clone());
-            break;
-        }
-
-        let Some(assumption) = assumption else {
-            return Err(anyhow!(
-                "sys_verify_integrity: failed to resolve journal_digest and image_id: {journal_digest}, {image_id}"
-            ));
-        };
-
-        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
-        self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        Ok((0, 0))
-    }
-
-    /// Check whether the claim satisfies the requirements to return for sys_verify.
-    fn sys_verify_cmp(
-        claim: &MaybePruned<ReceiptClaim>,
-        image_id: &Digest,
-        journal_digest: &Digest,
-    ) -> Result<Option<(Digest, u32)>, PrunedValueError> {
-        let assumption_journal_digest = claim
-            .as_value()?
-            .output
-            .as_value()?
-            .as_ref()
-            .map(|output| output.journal.digest())
-            .unwrap_or(Digest::ZERO);
-        let assumption_image_id = claim.as_value()?.pre.digest();
-
-        if &assumption_journal_digest != journal_digest || &assumption_image_id != image_id {
-            return Ok(None);
-        }
-
-        // Check that the exit code is either Halted(0) or Paused(0).
-        if !claim.as_value()?.exit_code.is_ok() {
-            tracing::debug!("sys_verify: ignoring matching claim with error exit code: {claim:?}");
-            return Ok(None);
-        };
-
-        // Check that the assumption has no assumptions.
-        let assumption_assumptions_digest = claim
-            .as_value()?
-            .output
-            .as_value()?
-            .as_ref()
-            .map(|output| output.assumptions.digest())
-            .unwrap_or(Digest::ZERO);
-
-        if assumption_assumptions_digest != Digest::ZERO {
-            tracing::debug!(
-                "sys_verify: ignoring matching claim with non-empty assumptions: {claim:?}"
-            );
-            return Ok(None);
-        }
-
-        // Return the post state digest and exit code.
-        Ok(Some((
-            claim.as_value()?.post.digest(),
-            claim.as_value()?.exit_code.into_pair().0,
-        )))
-    }
 }
 
 impl Syscall for SysVerify {
@@ -351,15 +236,13 @@ impl Syscall for SysVerify {
         &mut self,
         syscall: &str,
         ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
+        _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         let from_guest_ptr = ctx.load_register(REG_A3);
         let from_guest_len = ctx.load_register(REG_A4);
         let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
-        if syscall == SYS_VERIFY.as_str() {
-            self.sys_verify(from_guest, to_guest)
-        } else if syscall == SYS_VERIFY_INTEGRITY.as_str() {
+        if syscall == SYS_VERIFY_INTEGRITY.as_str() {
             self.sys_verify_integrity(from_guest)
         } else {
             bail!("SysVerify received unrecognized syscall: {syscall}")
