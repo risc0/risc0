@@ -78,22 +78,22 @@ jobs:
       - name: Run benchmarks
         run: cargo bench --bench fib -F $FEATURE
 
-      #- name: Analyze benchmark results
-      #  uses: risc0/github-action-benchmark@v1.19.3
-      #  with:
-      #    name: "${{ matrix.os }}-${{ matrix.device }}"
-      #    tool: 'customBiggerIsBetter'
-      #    output-file-path: target/hotbench/fib/benchmark.json
-      #    #external-data-json-path: ./cache/external.json
-      #    external-data-json-path: target/hotbench/fib/benchmark.json
-      #    github-token: ${{ secrets.GITHUB_TOKEN }}
-      #    alert-threshold: '120%'
-      #    comment-on-alert: true
-      #    fail-on-alert: true
-      #    summary-always: true
+      - name: Analyze benchmark results
+        uses: risc0/github-action-benchmark@v1.19.3
+        with:
+          name: "${{ matrix.os }}-${{ matrix.device }}"
+          tool: 'customBiggerIsBetter'
+          output-file-path: target/hotbench/fib/benchmark.json
+          #external-data-json-path: ./cache/external.json
+          external-data-json-path: target/hotbench/fib/benchmark.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alert-threshold: '120%'
+          comment-on-alert: true
+          fail-on-alert: true
+          summary-always: true
 
       - name: Save current benchmark data
-        if: github.event_name == 'push'
+        #if: github.event_name == 'push'
         run: aws s3 cp ./cache/external.json $S3_BENCH_PATH/external.json
 
   # see: https://github.com/orgs/community/discussions/26822
