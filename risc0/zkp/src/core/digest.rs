@@ -252,7 +252,6 @@ impl Debug for Digest {
     }
 }
 
-// TODO(victor): Also add a macro that helps construct range-checked poseidon2 digests.
 /// Macro for constructing a Digest from a hex string.
 #[macro_export]
 macro_rules! digest {

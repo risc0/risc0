@@ -18,7 +18,7 @@ use core::fmt::Debug;
 use anyhow::Result;
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
 use risc0_circuit_rv32im::{
-    control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
+    control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
     layout, CircuitImpl, CIRCUIT,
 };
 use risc0_zkp::{
@@ -155,10 +155,10 @@ impl Default for SegmentReceiptVerifierParameters {
     fn default() -> Self {
         Self {
             control_ids: BTreeSet::from_iter(
-                POSEIDON2_CONTROL_ID
+                POSEIDON2_CONTROL_IDS
                     .into_iter()
-                    .chain(SHA256_CONTROL_ID)
-                    .chain(BLAKE2B_CONTROL_ID),
+                    .chain(SHA256_CONTROL_IDS)
+                    .chain(BLAKE2B_CONTROL_IDS),
             ),
             proof_system_info: PROOF_SYSTEM_INFO,
             circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,

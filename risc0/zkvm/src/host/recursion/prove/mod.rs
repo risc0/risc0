@@ -20,13 +20,13 @@ pub mod zkr;
 
 use std::{collections::VecDeque, mem::take, rc::Rc};
 
-use anyhow::{anyhow, ensure, Context, Result};
+use anyhow::{anyhow, bail, ensure, Context, Result};
 use rand::thread_rng;
 use risc0_circuit_recursion::{
-    control_id::BN254_CONTROL_ID, cpu::CpuCircuitHal, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM,
-    REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    control_id::BN254_IDENTITY_CONTROL_ID, cpu::CpuCircuitHal, CircuitImpl, CIRCUIT,
+    REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
-use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
@@ -197,16 +197,12 @@ pub fn resolve(
 /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
 /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
 pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
-    let hal_pair = poseidon254_hal_pair();
-    let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
-
     let opts = ProverOpts::succinct()
         .with_hashfn("poseidon_254".to_string())
-        .with_control_ids(vec![BN254_CONTROL_ID]);
+        .with_control_ids(vec![BN254_IDENTITY_CONTROL_ID]);
 
     let mut prover = Prover::new_identity(a, opts.clone())?;
-    // TODO(victor) Use run by having it support varying hash functions.
-    let receipt = prover.run_with_hal(hal, circuit_hal)?;
+    let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
     let claim = ReceiptClaim::decode(&mut out_stream)?.merge(&a.claim)?;
@@ -429,7 +425,7 @@ impl Prover {
     /// Initialize a recursion prover with the test recursion program. This program is used in
     /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
-        let (program, control_id) = zkr::test_recursion_circuit()?;
+        let (program, control_id) = zkr::test_recursion_circuit(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         for digest in digests {
@@ -466,14 +462,14 @@ impl Prover {
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
 
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift(po2)?;
+        let (program, control_id) = zkr::lift(po2, &opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
         // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
         let which = po2 - MIN_CYCLES_PO2;
-        let inner_control_id = POSEIDON2_CONTROL_ID[which];
+        let inner_control_id = POSEIDON2_CONTROL_IDS[which];
         prover.add_seal(
             &segment.seal,
             &inner_control_id,
@@ -500,7 +496,7 @@ impl Prover {
             b.hashfn
         );
 
-        let (program, control_id) = zkr::join()?;
+        let (program, control_id) = zkr::join(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         // Determine the control root from the receipts themselves, and ensure they are equal. If
@@ -543,7 +539,7 @@ impl Prover {
         );
 
         // Load the resolve predicate as a Program and construct the prover.
-        let (program, control_id) = zkr::resolve()?;
+        let (program, control_id) = zkr::resolve(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         // Determine the control root from the receipts themselves, and ensure they are equal. If
@@ -599,7 +595,7 @@ impl Prover {
             a.hashfn
         );
 
-        let (program, control_id) = zkr::identity()?;
+        let (program, control_id) = zkr::identity(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&a.control_root()?, DigestKind::Poseidon2);
@@ -663,10 +659,25 @@ impl Prover {
     /// program and input.
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<RecursionReceipt> {
-        // TODO(victor): Determine this from prover opts.
-        let hal_pair = poseidon2_hal_pair();
-        let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
-        self.run_with_hal(hal, circuit_hal)
+        // NOTE: Code is repeated across match arms to satisfy generics.
+        match self.opts.hashfn.as_ref() {
+            "poseidon2" => {
+                let hal_pair = poseidon2_hal_pair();
+                let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
+                self.run_with_hal(hal, circuit_hal)
+            }
+            "poseidon_254" => {
+                let hal_pair = poseidon254_hal_pair();
+                let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
+                self.run_with_hal(hal, circuit_hal)
+            }
+            "sha-256" => {
+                let hal_pair = sha256_hal_pair();
+                let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
+                self.run_with_hal(hal, circuit_hal)
+            }
+            _ => bail!("no hal found for {}", self.opts.hashfn),
+        }
     }
 
     /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded

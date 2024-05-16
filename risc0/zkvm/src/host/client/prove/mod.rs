@@ -23,7 +23,7 @@ use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
-use risc0_circuit_rv32im::control_id::SHA256_CONTROL_ID;
+use risc0_circuit_rv32im::control_id::SHA256_CONTROL_IDS;
 #[cfg(feature = "prove")]
 use risc0_zkp::core::hash::poseidon_254::Poseidon254HashSuite;
 use risc0_zkp::{
@@ -59,15 +59,14 @@ use crate::{
 /// # #[cfg(not(feature = "cuda"))]
 /// # {
 /// // A straightforward case with an ELF binary
-/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
+/// let env = ExecutorEnv::builder().write(&20u32).unwrap().build().unwrap();
 /// let receipt = default_prover().prove(env, FIB_ELF).unwrap();
 ///
 /// // Or you can specify a context and options
-/// // (Using the defaults as we do here is equivalent to the above code.)
-/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
-/// let ctx = VerifierContext::default();
-/// let opts = ProverOpts::default();
-/// let receipt = default_prover().prove_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
+/// // Here we are using ProverOpts::succinct() to get a constant size proof through recursion.
+/// let env = ExecutorEnv::builder().write(&20u32).unwrap().build().unwrap();
+/// let opts = ProverOpts::succinct();
+/// let receipt = default_prover().prove_with_opts(env, FIB_ELF, &opts).unwrap();
 /// # }
 /// ```
 pub trait Prover {
@@ -215,7 +214,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             // TODO(victor): This is not currently used.
-            control_ids: SHA256_CONTROL_ID.to_vec(),
+            control_ids: SHA256_CONTROL_IDS.to_vec(),
         }
     }
 

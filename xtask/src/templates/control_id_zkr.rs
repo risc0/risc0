@@ -15,10 +15,18 @@
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
+/// Control IDs allowed in the default set of recursion programs. Includes control IDs for the base
+/// set of recursion programs, and each power-of-two of the rv32im circuit, using Poseidon2.
 pub const ALLOWED_CONTROL_IDS: &[Digest] = &[{}];
 
+/// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest = digest!("{}");
 
-pub const BN254_CONTROL_ID: Digest = digest!("{}");
+/// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
+pub const BN254_IDENTITY_CONTROL_ID: Digest = digest!("{}");
 
-pub const ZKR_CONTROL_IDS: [(&str, Digest); {}] = [{}];
+/// Control IDs for included recursion programs (ZKRs), using Poseidon2 over BabyBear.
+pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); {}] = [{}];
+
+/// Control IDs for included recursion programs (ZKRs), using SHA-256.
+pub const SHA256_CONTROL_IDS: [(&str, Digest); {}] = [{}];

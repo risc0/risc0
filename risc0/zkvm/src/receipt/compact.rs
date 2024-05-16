@@ -17,7 +17,7 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::{tagged_struct, Digestible};
-use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_CONTROL_ID};
+use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_groth16::{fr_from_hex_string, split_digest, Seal, Verifier, VerifyingKey};
 use risc0_zkp::core::hash::sha::Sha256;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
@@ -48,7 +48,7 @@ impl CompactReceipt {
         let (c0, c1) = split_digest(self.claim.digest::<sha::Impl>())
             .map_err(|_| VerificationError::ReceiptFormatError)?;
         // DO NOT MERGE: Don't hex encode just to decode.
-        let id_p254_hash = fr_from_hex_string(&hex::encode(BN254_CONTROL_ID))
+        let id_p254_hash = fr_from_hex_string(&hex::encode(BN254_IDENTITY_CONTROL_ID))
             .map_err(|_| VerificationError::ReceiptFormatError)?;
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,
@@ -97,7 +97,7 @@ impl Default for CompactReceiptVerifierParameters {
     fn default() -> Self {
         Self {
             control_root: ALLOWED_CONTROL_ROOT,
-            bn254_control_id: BN254_CONTROL_ID,
+            bn254_control_id: BN254_IDENTITY_CONTROL_ID,
             verifying_key: risc0_groth16::verifying_key(),
         }
     }

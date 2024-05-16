@@ -15,6 +15,8 @@
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
+/// Control IDs allowed in the default set of recursion programs. Includes control IDs for the base
+/// set of recursion programs, and each power-of-two of the rv32im circuit, using Poseidon2.
 pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("bebb4c5f19d4973b590313766e476d3d7cce5c18b2d600188d7476767a4a8614"),
     digest!("0296f8241298c95f780501761519030966b9902bc508b539881b0c49bf326b6e"),
@@ -43,13 +45,16 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("ea9f2c0e3d0fd2047a6f1b2c96f1dc15c3a9b6712b253f587a804511b9430248"),
 ];
 
+/// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
     digest!("f20ad519aa71da4673c7392b30706a563380b81dabcb753babd679312397ac6e");
 
-pub const BN254_CONTROL_ID: Digest =
+/// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
+pub const BN254_IDENTITY_CONTROL_ID: Digest =
     digest!("10ff834dbef62ccbba201ecd26a772e3036a075aacbaf47200679a11dcdcf10d");
 
-pub const ZKR_CONTROL_IDS: [(&str, Digest); 15] = [
+/// Control IDs for included recursion programs (ZKRs), using Poseidon2 over BabyBear.
+pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [
     (
         "identity.zkr",
         digest!("4882cd253cc9c775ca50d63162756140aa910608886b9c3f97d0d55653a86671"),
@@ -109,5 +114,69 @@ pub const ZKR_CONTROL_IDS: [(&str, Digest); 15] = [
     (
         "test_recursion_circuit.zkr",
         digest!("ca7ade1f42976e5e103ad45c97e42963515f5b4b33076418e0a9390a576edd4e"),
+    ),
+];
+
+/// Control IDs for included recursion programs (ZKRs), using SHA-256.
+pub const SHA256_CONTROL_IDS: [(&str, Digest); 15] = [
+    (
+        "identity.zkr",
+        digest!("1cc1b80bd6a3c76b7be88844d9983351148bc6fa102e527c7746733581297f02"),
+    ),
+    (
+        "join.zkr",
+        digest!("37eaae1dff32c34e83d7a5e38b4882c6a63b11b8f71add29ec5f37278cb9831b"),
+    ),
+    (
+        "lift_14.zkr",
+        digest!("a09cf821cee406dfd57d846ab36a677d509c6b8180dc23c22391405c8c05be90"),
+    ),
+    (
+        "lift_15.zkr",
+        digest!("f90bdc6ee9bad51a0b24732ddc4c50c2bcc54b2ee3deb0697b6965f2bb927c4d"),
+    ),
+    (
+        "lift_16.zkr",
+        digest!("f52da1c8cc73d1b801ef0947d1ac7ccccd936f2c65ca49feebcfdfe9cbaf4529"),
+    ),
+    (
+        "lift_17.zkr",
+        digest!("9026f4e8a9475ba6f879bc9ef312d33fd5f227a28c6791121e10afbec2df4eb9"),
+    ),
+    (
+        "lift_18.zkr",
+        digest!("84ac989092a65bb93b5831d33e99d92288fc2f4d5447d3a73e5e90b9d2eabc8c"),
+    ),
+    (
+        "lift_19.zkr",
+        digest!("86032eac3303844abc762fb3a784b7cbc68c1c24bd457d4df86d89d591c56402"),
+    ),
+    (
+        "lift_20.zkr",
+        digest!("6ab2d0ba2d824c701fca30d24dcabd7e843b95d97f874a8b9cdf3992ab7e35fd"),
+    ),
+    (
+        "lift_21.zkr",
+        digest!("447842a828cf6bdf0a12067ef5abfdb73e536a00ec02c6af7076a3767989e1af"),
+    ),
+    (
+        "lift_22.zkr",
+        digest!("198e6867803679ceb2de85f98a01d79ad51208770dc9213f68bdc88a77e2950e"),
+    ),
+    (
+        "lift_23.zkr",
+        digest!("cfbe814692e8ab0c87b531e73f8650882c40bb302471f871b5ff40242bd66c87"),
+    ),
+    (
+        "lift_24.zkr",
+        digest!("eac11081209fd98bcde51632315afc0c6ab91397ab83880be9ccf08e3c061439"),
+    ),
+    (
+        "resolve.zkr",
+        digest!("21a11e006519ed31f60a8794b2c2a984cd23c403a2e474eafeaa8ff19d61f7f3"),
+    ),
+    (
+        "test_recursion_circuit.zkr",
+        digest!("05255dcac3b74ce14ce5708edfc33634bccf12f93b7fd2ac5efe570cbc1a02bc"),
     ),
 ];

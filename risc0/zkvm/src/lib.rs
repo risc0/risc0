@@ -140,7 +140,7 @@ pub use {
         recursion::ALLOWED_CONTROL_ROOT,
     },
     risc0_binfmt::compute_image_id,
-    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
+    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS,
     risc0_groth16::Seal as Groth16Seal,
 };
 

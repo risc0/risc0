@@ -17,10 +17,10 @@ use risc0_zkp::digest;
 
 const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2;
 
-pub type ControlId = [Digest; CONTROL_ID_ENTRIES];
+pub type ControlIds = [Digest; CONTROL_ID_ENTRIES];
 
-/// Control ID for SHA-256
-pub const SHA256_CONTROL_ID: ControlId = [
+/// Control IDs for each power-of-two of the rv32im circuit using SHA-256.
+pub const SHA256_CONTROL_IDS: ControlIds = [
     digest!("eab745d650de7f5f837a3fe5f1cb23b4bef2d190b7a470453f92dbdf7083c7a0"), //
     digest!("09b42cb611dcaeae5606d6309b1b1aeb8482163cacc3225573c915eb5c28abcc"), //
     digest!("dc9424cbe65a98cd160f1450c17ce9a3419b50aea1967f7fedb65e3f3a1db38e"), //
@@ -34,8 +34,8 @@ pub const SHA256_CONTROL_ID: ControlId = [
     digest!("97be9ed7e5f1f24c3e527c07ded11418900b128725480e179156b5dd6b032cae"), //
 ];
 
-/// Control ID for Poseidon2
-pub const POSEIDON2_CONTROL_ID: ControlId = [
+/// Control IDs for each power-of-two of the rv32im circuit using Poseidon2.
+pub const POSEIDON2_CONTROL_IDS: ControlIds = [
     digest!("bebb4c5f19d4973b590313766e476d3d7cce5c18b2d600188d7476767a4a8614"), //
     digest!("0296f8241298c95f780501761519030966b9902bc508b539881b0c49bf326b6e"), //
     digest!("b3b5d8727f259c31dfa971583c8db640a4a78b5b791fd76c15e90d2c5a85e45b"), //
@@ -49,8 +49,8 @@ pub const POSEIDON2_CONTROL_ID: ControlId = [
     digest!("da824e2ecc179c2c1359bb75b154f8490086cd0f85e3391cc96ffc3b8e3afa11"), //
 ];
 
-/// Control ID for Blake2b
-pub const BLAKE2B_CONTROL_ID: ControlId = [
+/// Control IDs for each power-of-two of the rv32im circuit using Blake2b.
+pub const BLAKE2B_CONTROL_IDS: ControlIds = [
     digest!("f68c89b078e1a360c7b3d4b9c7de5d47e3f46ce92e8ddf65b8c6ca32befb45fe"), //
     digest!("5be8f08be4f88aef8928da60b240832aa73c8e22be2cc06271a5b53b07636a2a"), //
     digest!("3a8089e20f6f7cd55d09c861b32fedc4ccd34283ea597a5c98b5de19efc3cca5"), //
