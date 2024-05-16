@@ -30,7 +30,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
+        #os: [Linux, macOS]
+        os: [Linux]
         feature: [prove]
         device: [cpu]
         include:
@@ -40,6 +41,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: g4dn.xlarge
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_l4
           #- os: macOS
           #  feature: metal
           #  device: apple_m2_pro
@@ -55,16 +59,16 @@ jobs:
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
-          disable_s3: ${{ env.DISABLE_S3 }}
+      #- uses: ./.github/actions/sccache
+      #  with:
+      #    key: ${{ matrix.os }}-${{ matrix.feature }}
+      #    disable_s3: ${{ env.DISABLE_S3 }}
 
-      - id: aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
+      #- id: aws-creds
+      #  uses: aws-actions/configure-aws-credentials@v4
+      #  with:
+      #    aws-region: us-west-2
+      #    role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
 
       #- name: Download previous benchmark data
       #  run: aws s3 cp $S3_BENCH_PATH/external.json ./cache/external.json
@@ -74,19 +78,19 @@ jobs:
       - name: Run benchmarks
         run: cargo bench --bench fib -F $FEATURE
 
-      - name: Analyze benchmark results
-        uses: risc0/github-action-benchmark@v1.19.3
-        with:
-          name: "${{ matrix.os }}-${{ matrix.device }}"
-          tool: 'customBiggerIsBetter'
-          output-file-path: target/hotbench/fib/benchmark.json
-          #external-data-json-path: ./cache/external.json
-          external-data-json-path: target/hotbench/fib/benchmark.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          alert-threshold: '120%'
-          comment-on-alert: true
-          fail-on-alert: true
-          summary-always: true
+      #- name: Analyze benchmark results
+      #  uses: risc0/github-action-benchmark@v1.19.3
+      #  with:
+      #    name: "${{ matrix.os }}-${{ matrix.device }}"
+      #    tool: 'customBiggerIsBetter'
+      #    output-file-path: target/hotbench/fib/benchmark.json
+      #    #external-data-json-path: ./cache/external.json
+      #    external-data-json-path: target/hotbench/fib/benchmark.json
+      #    github-token: ${{ secrets.GITHUB_TOKEN }}
+      #    alert-threshold: '120%'
+      #    comment-on-alert: true
+      #    fail-on-alert: true
+      #    summary-always: true
 
       - name: Save current benchmark data
         if: github.event_name == 'push'
