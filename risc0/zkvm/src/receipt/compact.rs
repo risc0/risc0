@@ -24,19 +24,22 @@ use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use crate::{sha, ReceiptClaim};
+use crate::sha;
 
 /// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct CompactReceipt {
+pub struct CompactReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
     /// A Groth16 proof of a zkVM execution with the associated claim.
     pub seal: Vec<u8>,
 
     /// [ReceiptClaim] containing information about the execution that this
     /// receipt proves.
-    pub claim: ReceiptClaim,
+    pub claim: Claim,
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
     ///
@@ -46,7 +49,10 @@ pub struct CompactReceipt {
     pub verifier_parameters: Digest,
 }
 
-impl CompactReceipt {
+impl<Claim> CompactReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {

@@ -317,7 +317,7 @@ pub enum InnerReceipt {
     Succinct(SuccinctReceipt<ReceiptClaim>),
 
     /// A [CompactReceipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK..
-    Compact(CompactReceipt),
+    Compact(CompactReceipt<ReceiptClaim>),
 
     /// A fake receipt for testing and development.
     ///
@@ -367,7 +367,7 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Compact] arm.
-    pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
+    pub fn compact(&self) -> Result<&CompactReceipt<ReceiptClaim>, VerificationError> {
         if let InnerReceipt::Compact(x) = self {
             Ok(x)
         } else {
