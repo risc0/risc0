@@ -134,7 +134,6 @@ pub mod nr {
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
-    declare_syscall!(pub SYS_VERIFY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
 }

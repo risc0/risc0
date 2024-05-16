@@ -135,8 +135,6 @@ pub use {
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        // TODO(victor): Should I remove these from the public API surface, and make them available
-        // only on the default prover options and default verifier parameters?
         recursion::ALLOWED_CONTROL_ROOT,
     },
     risc0_binfmt::compute_image_id,
