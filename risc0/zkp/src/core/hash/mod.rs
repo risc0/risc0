@@ -89,7 +89,7 @@ impl<F: Field> Clone for HashSuite<F> {
 
 /// Construct a supported hash function given it's name. Returns None is the name does not
 /// correspond to a supported hash function.
-pub fn hash_suit_from_name(name: impl AsRef<str>) -> Option<HashSuite<BabyBear>> {
+pub fn hash_suite_from_name(name: impl AsRef<str>) -> Option<HashSuite<BabyBear>> {
     match name.as_ref() {
         "sha-256" => Some(sha::Sha256HashSuite::new_suite()),
         "poseidon2" => Some(poseidon2::Poseidon2HashSuite::new_suite()),

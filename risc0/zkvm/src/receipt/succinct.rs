@@ -161,7 +161,7 @@ impl SuccinctReceipt {
 
     #[cfg(not(target_os = "zkvm"))]
     pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
-        let hash_suite = risc0_zkp::core::hash::hash_suit_from_name(&self.hashfn)
+        let hash_suite = risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
             .ok_or_else(|| anyhow::anyhow!("unsupported hash function: {}", self.hashfn))?;
         Ok(self
             .control_inclusion_proof

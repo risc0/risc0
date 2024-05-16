@@ -19,18 +19,13 @@ pub(crate) mod local;
 
 use std::{path::PathBuf, rc::Rc};
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
 use risc0_circuit_rv32im::control_id::SHA256_CONTROL_IDS;
-#[cfg(feature = "prove")]
-use risc0_zkp::core::hash::poseidon_254::Poseidon254HashSuite;
 use risc0_zkp::{
-    core::{
-        digest::Digest,
-        hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite, HashSuite},
-    },
+    core::{digest::Digest, hash::HashSuite},
     field::baby_bear::BabyBear,
 };
 
@@ -285,15 +280,9 @@ impl ProverOpts {
         }
     }
 
-    // TODO(victor): Keep this function?
     pub(crate) fn hash_suite(&self) -> Result<HashSuite<BabyBear>> {
-        Ok(match self.hashfn.as_ref() {
-            "sha-256" => Sha256HashSuite::new_suite(),
-            "poseidon2" => Poseidon2HashSuite::new_suite(),
-            #[cfg(feature = "prove")]
-            "poseidon_254" => Poseidon254HashSuite::new_suite(),
-            s => bail!("Unsupported hashfn: {s}"),
-        })
+        risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
+            .ok_or_else(|| anyhow!("unsupported hash suite: {}", self.hashfn))
     }
 }
 

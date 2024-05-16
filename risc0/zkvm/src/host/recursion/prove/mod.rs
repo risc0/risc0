@@ -31,7 +31,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
-        hash::{hash_suit_from_name, poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite},
+        hash::{hash_suite_from_name, poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite},
     },
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -448,7 +448,7 @@ impl Prover {
             segment.hashfn
         );
 
-        let inner_hash_suite = hash_suit_from_name(&segment.hashfn)
+        let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
             .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());

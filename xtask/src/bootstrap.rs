@@ -20,7 +20,7 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, hash_suit_from_name, poseidon2::Poseidon2HashSuite,
+            blake2b::Blake2bCpuHashSuite, hash_suite_from_name, poseidon2::Poseidon2HashSuite,
             poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
         },
     },
@@ -182,7 +182,7 @@ impl Bootstrap {
         zkrs: &[(String, Vec<u32>)],
         hashfn: &str,
     ) -> Vec<(String, Digest)> {
-        let hash_suite = hash_suit_from_name(hashfn).unwrap();
+        let hash_suite = hash_suite_from_name(hashfn).unwrap();
 
         zkrs.into_iter()
             .map(|(name, encoded_program)| {
