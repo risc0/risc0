@@ -223,8 +223,6 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
 pub struct Prover {
     program: Program,
     control_id: Digest,
-    // TODO(victor): Should this be removed?
-    #[allow(dead_code)]
     opts: ProverOpts,
     input: VecDeque<u32>,
     split_points: Vec<usize>,
@@ -625,7 +623,6 @@ impl Prover {
         }
     }
 
-    // TODO(victor): Take the inclusion proof from the SuccinctReceipt.
     /// Add a recursion seal (i.e. STARK proof) to input tape of the recursion program.
     pub fn add_seal(
         &mut self,
