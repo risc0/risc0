@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::{collections::VecDeque, string::String, vec::Vec};
+use core::fmt::Debug;
 
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{control_id::ALLOWED_CONTROL_ROOT, CircuitImpl, CIRCUIT};
@@ -26,10 +27,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     receipt::{merkle::MerkleProof, VerifierContext},
-    sha, ReceiptClaim,
+    sha,
 };
 
-/// A succinct receipt, produced via recursion, proving the execution of the zkVM.
+/// A succinct receipt, produced via recursion, proving the execution of the zkVM with a STARK.
 ///
 /// Using recursion, a [crate::CompositeReceipt] can be compressed to form a [SuccinctReceipt]. In this
 /// way, a constant sized proof can be generated for arbitrarily long computations, and with an
@@ -37,7 +38,10 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct SuccinctReceipt {
+pub struct SuccinctReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
     /// The cryptographic seal of this receipt. This seal is a STARK proving an execution of the
     /// recursion circuit.
     pub seal: Vec<u32>,
@@ -46,8 +50,10 @@ pub struct SuccinctReceipt {
     /// join, or resolve).
     pub control_id: Digest,
 
-    /// [ReceiptClaim] containing information about the execution that this receipt proves.
-    pub claim: ReceiptClaim,
+    /// Claim containing information about the computation that this receipt proves.
+    ///
+    /// The standard claim type is [ReceiptClaim], which represents a RISC-V zkVM execution.
+    pub claim: Claim,
 
     /// Name of the hash function used to create this receipt.
     pub hashfn: String,
@@ -63,7 +69,10 @@ pub struct SuccinctReceipt {
     pub(crate) control_inclusion_proof: MerkleProof,
 }
 
-impl SuccinctReceipt {
+impl<Claim> SuccinctReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {

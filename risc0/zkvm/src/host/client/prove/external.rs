@@ -19,8 +19,8 @@ use anyhow::{anyhow, bail, ensure, Result};
 use super::{Executor, Prover, ProverOpts};
 use crate::{
     compute_image_id, host::api::AssetRequest, is_dev_mode, sha::Digestible, ApiClient, Asset,
-    CompositeReceipt, ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SegmentReceipt,
-    SessionInfo, SuccinctReceipt, VerifierContext,
+    CompositeReceipt, ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptClaim, ReceiptKind,
+    SegmentReceipt, SessionInfo, SuccinctReceipt, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -44,14 +44,16 @@ impl ExternalProver {
         client: &ApiClient,
         opts: &ProverOpts,
         receipt: &CompositeReceipt,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         // Compress all receipts in the top-level session into one succinct receipt for the session.
         let continuation_receipt = receipt
             .segments
             .iter()
             .try_fold(
                 None,
-                |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
+                |left: Option<SuccinctReceipt<ReceiptClaim>>,
+                 right: &SegmentReceipt|
+                 -> Result<_> {
                     Ok(Some(match left {
                         Some(left) => client.join(
                             opts,
@@ -74,7 +76,7 @@ impl ExternalProver {
         // Compress assumptions and resolve them to get the final succinct receipt.
         receipt.assumptions.iter().try_fold(
             continuation_receipt,
-            |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
+            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerReceipt| match assumption {
                 InnerReceipt::Succinct(assumption) => client.resolve(opts, conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
                 InnerReceipt::Composite(assumption) => {
                     client.resolve(opts, conditional.try_into()?, Self::composite_to_succinct(client, opts, assumption)?.try_into()?, AssetRequest::Inline)

@@ -65,10 +65,10 @@ impl TryFrom<Asset> for pb::api::Asset {
     }
 }
 
-impl TryFrom<SuccinctReceipt> for Asset {
+impl TryFrom<SuccinctReceipt<ReceiptClaim>> for Asset {
     type Error = anyhow::Error;
 
-    fn try_from(succinct_receipt: SuccinctReceipt) -> Result<Self> {
+    fn try_from(succinct_receipt: SuccinctReceipt<ReceiptClaim>) -> Result<Self> {
         Ok(Asset::Inline(bincode::serialize(&succinct_receipt)?.into()))
     }
 }
@@ -393,8 +393,8 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
     }
 }
 
-impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
-    fn from(value: SuccinctReceipt) -> Self {
+impl From<SuccinctReceipt<ReceiptClaim>> for pb::core::SuccinctReceipt {
+    fn from(value: SuccinctReceipt<ReceiptClaim>) -> Self {
         Self {
             version: Some(ver::SUCCINCT_RECEIPT),
             seal: value.get_seal_bytes(),
@@ -407,7 +407,7 @@ impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
     }
 }
 
-impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
+impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt<ReceiptClaim> {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::SuccinctReceipt) -> Result<Self> {

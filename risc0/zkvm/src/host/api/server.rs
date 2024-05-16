@@ -26,8 +26,8 @@ use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, Tcp
 use crate::{
     get_prover_server, get_version,
     host::{client::slice_io::SliceIo, server::session::NullSegmentRef},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SuccinctReceipt,
-    TraceCallback, TraceEvent, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptClaim, Segment, SegmentReceipt,
+    SuccinctReceipt, TraceCallback, TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -451,9 +451,10 @@ impl Server {
         fn inner(request: pb::api::JoinRequest) -> Result<pb::api::JoinReply> {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
             let left_receipt_bytes = request.left_receipt.ok_or(malformed_err())?.as_bytes()?;
-            let left_succinct_receipt: SuccinctReceipt = bincode::deserialize(&left_receipt_bytes)?;
+            let left_succinct_receipt: SuccinctReceipt<ReceiptClaim> =
+                bincode::deserialize(&left_receipt_bytes)?;
             let right_receipt_bytes = request.right_receipt.ok_or(malformed_err())?.as_bytes()?;
-            let right_succinct_receipt: SuccinctReceipt =
+            let right_succinct_receipt: SuccinctReceipt<ReceiptClaim> =
                 bincode::deserialize(&right_receipt_bytes)?;
 
             let prover = get_prover_server(&opts)?;
@@ -495,13 +496,13 @@ impl Server {
                 .conditional_receipt
                 .ok_or(malformed_err())?
                 .as_bytes()?;
-            let conditional_succinct_receipt: SuccinctReceipt =
+            let conditional_succinct_receipt: SuccinctReceipt<ReceiptClaim> =
                 bincode::deserialize(&conditional_receipt_bytes)?;
             let assumption_receipt_bytes = request
                 .assumption_receipt
                 .ok_or(malformed_err())?
                 .as_bytes()?;
-            let assumption_succinct_receipt: SuccinctReceipt =
+            let assumption_succinct_receipt: SuccinctReceipt<ReceiptClaim> =
                 bincode::deserialize(&assumption_receipt_bytes)?;
 
             let prover = get_prover_server(&opts)?;
@@ -541,7 +542,8 @@ impl Server {
         fn inner(request: pb::api::IdentityP254Request) -> Result<pb::api::IdentityP254Reply> {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
             let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
-            let succinct_receipt: SuccinctReceipt = bincode::deserialize(&receipt_bytes)?;
+            let succinct_receipt: SuccinctReceipt<ReceiptClaim> =
+                bincode::deserialize(&receipt_bytes)?;
 
             let prover = get_prover_server(&opts)?;
             let receipt = prover.identity_p254(&succinct_receipt)?;

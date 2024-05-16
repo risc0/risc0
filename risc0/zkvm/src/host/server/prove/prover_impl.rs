@@ -26,7 +26,7 @@ use crate::{
         segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     sha::Digestible,
-    CompositeReceipt, ProverOpts, Receipt, Segment, Session, VerifierContext,
+    CompositeReceipt, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -163,23 +163,30 @@ impl ProverServer for ProverImpl {
         Ok(receipt)
     }
 
-    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
         lift(receipt)
     }
 
-    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+        b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         join(a, b)
     }
 
     fn resolve(
         &self,
-        conditional: &SuccinctReceipt,
-        assumption: &SuccinctReceipt,
-    ) -> Result<SuccinctReceipt> {
+        conditional: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         resolve(conditional, assumption)
     }
 
-    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn identity_p254(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         identity_p254(a)
     }
 }

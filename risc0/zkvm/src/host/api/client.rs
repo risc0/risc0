@@ -26,7 +26,7 @@ use crate::{
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path},
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts,
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -183,7 +183,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -225,7 +225,7 @@ impl Client {
         left_receipt: Asset,
         right_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -270,7 +270,7 @@ impl Client {
         conditional_receipt: Asset,
         assumption_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -315,7 +315,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {

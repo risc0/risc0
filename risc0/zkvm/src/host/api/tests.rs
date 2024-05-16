@@ -29,7 +29,7 @@ use test_log::test;
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
     receipt::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts, Receipt,
-    SegmentReceipt, SessionInfo, VerifierContext,
+    ReceiptClaim, SegmentReceipt, SessionInfo, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -97,7 +97,7 @@ impl TestClient {
         })
     }
 
-    fn lift(&self, opts: &ProverOpts, receipt: Asset) -> SuccinctReceipt {
+    fn lift(&self, opts: &ProverOpts, receipt: Asset) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.lift(opts, receipt, receipt_out)
@@ -109,7 +109,7 @@ impl TestClient {
         opts: &ProverOpts,
         left_receipt: Asset,
         right_receipt: Asset,
-    ) -> SuccinctReceipt {
+    ) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client
@@ -122,7 +122,7 @@ impl TestClient {
         opts: &ProverOpts,
         conditional_receipt: Asset,
         assumption_receipt: Asset,
-    ) -> SuccinctReceipt {
+    ) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client
@@ -130,7 +130,7 @@ impl TestClient {
         })
     }
 
-    fn identity_p254(&self, opts: &ProverOpts, receipt: Asset) -> SuccinctReceipt {
+    fn identity_p254(&self, opts: &ProverOpts, receipt: Asset) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.identity_p254(opts, receipt, receipt_out)

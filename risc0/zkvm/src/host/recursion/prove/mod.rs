@@ -75,7 +75,7 @@ pub struct RecursionReceipt {
 /// resulting in a recursion circuit STARK proof. This recursion proof has a single
 /// constant-time verification procedure, with respect to the original segment length, and is then
 /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
-pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
     tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_lift(segment_receipt, opts.clone())?;
@@ -103,7 +103,10 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
 ///
 /// By repeated application of the join program, any number of receipts for execution spans within
 /// the same session can be compressed into a single receipt for the entire session.
-pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+pub fn join(
+    a: &SuccinctReceipt<ReceiptClaim>,
+    b: &SuccinctReceipt<ReceiptClaim>,
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
     tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
     tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
 
@@ -144,9 +147,9 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
 /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution using
 /// the `env::verify` API to logically verify a receipt) can be made into an unconditional receipt.
 pub fn resolve(
-    conditional: &SuccinctReceipt,
-    assumption: &SuccinctReceipt,
-) -> Result<SuccinctReceipt> {
+    conditional: &SuccinctReceipt<ReceiptClaim>,
+    assumption: &SuccinctReceipt<ReceiptClaim>,
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
     tracing::debug!(
         "Proving resolve: conditional.claim = {:#?}",
         conditional.claim,
@@ -199,7 +202,7 @@ pub fn resolve(
 /// The identity_p254 program is used as the last step in the prover pipeline before running the
 /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
 /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
-pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceipt<ReceiptClaim>> {
     let opts = ProverOpts::succinct()
         .with_hashfn("poseidon_254".to_string())
         .with_control_ids(vec![BN254_IDENTITY_CONTROL_ID]);
@@ -494,7 +497,11 @@ impl Prover {
     ///
     /// By repeated application of the join program, any number of receipts for execution spans
     /// within the same session can be compressed into a single receipt for the entire session.
-    pub fn new_join(a: &SuccinctReceipt, b: &SuccinctReceipt, opts: ProverOpts) -> Result<Self> {
+    pub fn new_join(
+        a: &SuccinctReceipt<ReceiptClaim>,
+        b: &SuccinctReceipt<ReceiptClaim>,
+        opts: ProverOpts,
+    ) -> Result<Self> {
         ensure!(
             a.hashfn == "poseidon2",
             "join recursion program only supports poseidon2 hashfn; received {}",
@@ -533,8 +540,8 @@ impl Prover {
     /// using the `env::verify` API to logically verify a receipt) can be made into an
     /// unconditional receipt.
     pub fn new_resolve(
-        cond: &SuccinctReceipt,
-        assum: &SuccinctReceipt,
+        cond: &SuccinctReceipt<ReceiptClaim>,
+        assum: &SuccinctReceipt<ReceiptClaim>,
         opts: ProverOpts,
     ) -> Result<Self> {
         ensure!(
@@ -598,7 +605,7 @@ impl Prover {
     ///
     /// The primary use for this program is to transform the receipt itself, e.g. using a different
     /// hash function for FRI. See [identity_p254] for more information.
-    pub fn new_identity(a: &SuccinctReceipt, opts: ProverOpts) -> Result<Self> {
+    pub fn new_identity(a: &SuccinctReceipt<ReceiptClaim>, opts: ProverOpts) -> Result<Self> {
         ensure!(
             a.hashfn == "poseidon2",
             "identity recursion program only supports poseidon2 hashfn; received {}",
@@ -655,7 +662,7 @@ impl Prover {
         Ok(())
     }
 
-    fn add_segment_receipt(&mut self, a: &SuccinctReceipt) -> Result<()> {
+    fn add_segment_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();
         a.claim.encode(&mut data)?;

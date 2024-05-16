@@ -35,8 +35,8 @@ use crate::{
         SegmentReceipt, SuccinctReceipt,
     },
     sha::Digestible,
-    stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptKind, Segment, Session,
-    VerifierContext,
+    stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
+    Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
@@ -66,21 +66,28 @@ pub trait ProverServer {
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
 
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
-    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt>;
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
     /// Join two [SuccinctReceipt] into a [SuccinctReceipt]
-    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>;
+    fn join(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+        b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
     /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a [SuccinctReceipt]
     /// proving the validity of the assumption.
     fn resolve(
         &self,
-        conditional: &SuccinctReceipt,
-        assumption: &SuccinctReceipt,
-    ) -> Result<SuccinctReceipt>;
+        conditional: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
     /// Convert a [SuccinctReceipt] with a Poseidon hash function that uses a 254-bit field
-    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt>;
+    fn identity_p254(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
     /// Compress a [CompositeReceipt] into a single [SuccinctReceipt].
     ///
@@ -90,14 +97,19 @@ pub trait ProverServer {
     /// [CompositeReceipt] into a single [SuccinctReceipt] that proves the same top-level claim. It
     /// accomplishes this by iterative application of the recursion programs including lift, join,
     /// and resolve.
-    fn compsite_to_succinct(&self, receipt: &CompositeReceipt) -> Result<SuccinctReceipt> {
+    fn compsite_to_succinct(
+        &self,
+        receipt: &CompositeReceipt,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         // Compress all receipts in the top-level session into one succinct receipt for the session.
         let continuation_receipt = receipt
             .segments
             .iter()
             .try_fold(
                 None,
-                |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
+                |left: Option<SuccinctReceipt<ReceiptClaim>>,
+                 right: &SegmentReceipt|
+                 -> Result<_> {
                     Ok(Some(match left {
                         Some(left) => self.join(&left, &self.lift(right)?)?,
                         None => self.lift(right)?,
@@ -111,7 +123,7 @@ pub trait ProverServer {
         // Compress assumptions and resolve them to get the final succinct receipt.
         receipt.assumptions.iter().try_fold(
             continuation_receipt,
-            |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
+            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerReceipt| match assumption {
                 InnerReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
                 InnerReceipt::Composite(assumption) => {
                     self.resolve(&conditional, &self.compsite_to_succinct(assumption)?)
@@ -127,7 +139,10 @@ pub trait ProverServer {
     }
 
     /// Compress a [SuccinctReceipt] into a [CompactReceipt].
-    fn succinct_to_compact(&self, receipt: &SuccinctReceipt) -> Result<CompactReceipt> {
+    fn succinct_to_compact(
+        &self,
+        receipt: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<CompactReceipt> {
         let ident_receipt = self.identity_p254(receipt).unwrap();
         let seal_bytes = ident_receipt.get_seal_bytes();
 

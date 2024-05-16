@@ -303,19 +303,20 @@ impl AsRef<[u8]> for Journal {
     }
 }
 
-/// An inner receipt can take the form of a [CompositeReceipt] or a
-/// [SuccinctReceipt].
+/// A lower level receipt, containing the cryptographic seal (i.e. zero-knowledge proof) and
+/// verification logic for a specific proof system and circuit. All inner receipt types are
+/// zero-knowledge proofs of execution for a RISC-V zkVM.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerReceipt {
-    /// A non-succinct [CompositeReceipt].
+    /// A non-succinct [CompositeReceipt], made up of one inner receipt per segment.
     Composite(CompositeReceipt),
 
-    /// The [SuccinctReceipt].
-    Succinct(SuccinctReceipt),
+    /// A [SuccinctReceipt], proving arbitrarily long zkVM computions with a single STARK.
+    Succinct(SuccinctReceipt<ReceiptClaim>),
 
-    /// The [CompactReceipt].
+    /// A [CompactReceipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK..
     Compact(CompactReceipt),
 
     /// A fake receipt for testing and development.
@@ -375,7 +376,7 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Succinct] arm.
-    pub fn succinct(&self) -> Result<&SuccinctReceipt, VerificationError> {
+    pub fn succinct(&self) -> Result<&SuccinctReceipt<ReceiptClaim>, VerificationError> {
         if let InnerReceipt::Succinct(x) = self {
             Ok(x)
         } else {
