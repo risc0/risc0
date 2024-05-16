@@ -316,23 +316,53 @@ pub enum InnerReceipt {
     /// A [SuccinctReceipt], proving arbitrarily long zkVM computions with a single STARK.
     Succinct(SuccinctReceipt<ReceiptClaim>),
 
-    /// A [CompactReceipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK..
+    /// A [CompactReceipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK.
     Compact(CompactReceipt<ReceiptClaim>),
 
-    /// A fake receipt for testing and development.
+    /// A [FakeReceipt], with no cryptographic integrity, used only for development.
+    Fake(FakeReceipt<ReceiptClaim>),
+}
+
+/// A fake receipt for testing and development.
+///
+/// This receipt is not valid and will fail verification unless the
+/// environment variable `RISC0_DEV_MODE` is set to `true`, in which case a
+/// pass-through 'verification' will be performed, but it *does not*
+/// represent any meaningful attestation of receipt's integrity.
+///
+/// This type solely exists to improve development experience, for further
+/// information about development-only mode see our [dev-mode
+/// documentation](https://dev.risczero.com/api/generating-proofs/dev-mode).
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
+pub struct FakeReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
+    /// Claim containing information about the computation that this receipt pretends to prove.
     ///
-    /// This receipt is not valid and will fail verification unless the
-    /// environment variable `RISC0_DEV_MODE` is set to `true`, in which case a
-    /// pass-through 'verification' will be performed, but it *does not*
-    /// represent any meaningful attestation of receipt's integrity.
-    ///
-    /// This type solely exists to improve development experience, for further
-    /// information about development-only mode see our [dev-mode
-    /// documentation](https://dev.risczero.com/api/generating-proofs/dev-mode).
-    Fake {
-        /// [ReceiptClaim] for this fake receipt.
-        claim: ReceiptClaim,
-    },
+    /// The standard claim type is [ReceiptClaim], which represents a RISC-V zkVM execution.
+    pub claim: Claim,
+}
+
+impl<Claim> FakeReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
+    /// Create a new [FakeReceipt] for the given claim.
+    pub fn new(claim: Claim) -> Self {
+        Self { claim }
+    }
+
+    /// Pretend to verify the integrity of this receipt. If not in dev mode (i.e. the RISC0_DEV_MODE environment variable is not set) this will always reject. When in dev mode, this will always pass.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        #[cfg(feature = "std")]
+        if crate::is_dev_mode() {
+            return Ok(());
+        }
+        Err(VerificationError::InvalidProof)
+    }
 }
 
 impl InnerReceipt {
@@ -344,16 +374,10 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
-            InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Compact(x) => x.verify_integrity(),
-            InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Fake { .. } => {
-                #[cfg(feature = "std")]
-                if crate::is_dev_mode() {
-                    return Ok(());
-                }
-                Err(VerificationError::InvalidProof)
-            }
+            InnerReceipt::Composite(inner) => inner.verify_integrity_with_context(ctx),
+            InnerReceipt::Compact(inner) => inner.verify_integrity(),
+            InnerReceipt::Succinct(inner) => inner.verify_integrity_with_context(ctx),
+            InnerReceipt::Fake(inner) => inner.verify_integrity(),
         }
     }
 
@@ -387,10 +411,10 @@ impl InnerReceipt {
     /// Extract the [ReceiptClaim] from this receipt.
     pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
-            InnerReceipt::Composite(ref receipt) => receipt.claim(),
-            InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
-            InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
-            InnerReceipt::Fake { claim } => Ok(claim.clone()),
+            InnerReceipt::Composite(ref inner) => inner.claim(),
+            InnerReceipt::Compact(ref inner) => Ok(inner.claim.clone()),
+            InnerReceipt::Succinct(ref inner) => Ok(inner.claim.clone()),
+            InnerReceipt::Fake(ref inner) => Ok(inner.claim.clone()),
         }
     }
 
@@ -400,7 +424,7 @@ impl InnerReceipt {
             InnerReceipt::Composite(ref inner) => inner.verifier_parameters,
             InnerReceipt::Compact(ref inner) => inner.verifier_parameters,
             InnerReceipt::Succinct(ref inner) => inner.verifier_parameters,
-            InnerReceipt::Fake { .. } => Digest::ZERO,
+            InnerReceipt::Fake(_) => Digest::ZERO,
         }
     }
 }
@@ -611,7 +635,7 @@ impl Default for VerifierContext {
 
 #[cfg(test)]
 mod tests {
-    use super::{InnerReceipt, Receipt};
+    use super::{FakeReceipt, InnerReceipt, Receipt};
     use crate::{
         sha::{Digest, DIGEST_BYTES},
         ExitCode, MaybePruned, ReceiptClaim,
@@ -629,9 +653,9 @@ mod tests {
         };
 
         let mut mangled_receipt = Receipt::new(
-            InnerReceipt::Fake {
+            InnerReceipt::Fake(FakeReceipt {
                 claim: claim.clone(),
-            },
+            }),
             vec![],
         );
         let ones_digest = Digest::from([1u8; DIGEST_BYTES]);

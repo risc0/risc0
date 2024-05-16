@@ -194,7 +194,7 @@ pub trait ProverServer {
                     Ok(receipt.clone())
                 }
             },
-            InnerReceipt::Fake { claim: _ } => {
+            InnerReceipt::Fake(_) => {
                 ensure!(
                     is_dev_mode(),
                     "dev mode must be enabled to compress fake receipts"

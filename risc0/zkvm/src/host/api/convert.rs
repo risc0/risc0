@@ -23,7 +23,7 @@ use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     receipt::{
         merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
-        InnerReceipt, ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
+        FakeReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt, SuccinctReceipt,
     },
     Assumption, Assumptions, CompactReceipt, ExitCode, Input, Journal, MaybePruned, Output,
     ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
@@ -506,9 +506,9 @@ impl From<InnerReceipt> for pb::core::InnerReceipt {
                 InnerReceipt::Succinct(inner) => {
                     pb::core::inner_receipt::Kind::Succinct(inner.into())
                 }
-                InnerReceipt::Fake { claim } => {
+                InnerReceipt::Fake(inner) => {
                     pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {
-                        claim: Some(claim.into()),
+                        claim: Some(inner.claim.into()),
                     })
                 }
                 InnerReceipt::Compact(inner) => {
@@ -527,9 +527,25 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
             pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
             pb::core::inner_receipt::Kind::Groth16(inner) => Self::Compact(inner.try_into()?),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
-            pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake {
-                claim: inner.claim.ok_or(malformed_err())?.try_into()?,
-            },
+            pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake(inner.try_into()?),
+        })
+    }
+}
+
+impl From<FakeReceipt<ReceiptClaim>> for pb::core::FakeReceipt {
+    fn from(value: FakeReceipt<ReceiptClaim>) -> Self {
+        Self {
+            claim: Some(value.claim.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::FakeReceipt> for FakeReceipt<ReceiptClaim> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::FakeReceipt) -> Result<Self> {
+        Ok(Self {
+            claim: value.claim.ok_or(malformed_err())?.try_into()?,
         })
     }
 }

@@ -16,7 +16,7 @@ use anyhow::{bail, Result};
 
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
-    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
     VerifierContext,
 };
@@ -57,7 +57,7 @@ impl ProverServer for DevModeProver {
 
         let claim = session.claim()?;
         let receipt = Receipt::new(
-            InnerReceipt::Fake { claim },
+            InnerReceipt::Fake(FakeReceipt { claim }),
             session.journal.clone().unwrap_or_default().bytes,
         );
 
@@ -112,9 +112,9 @@ impl ProverServer for DevModeProver {
 
     fn compress(&self, _opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         Ok(Receipt::new(
-            InnerReceipt::Fake {
+            InnerReceipt::Fake(FakeReceipt {
                 claim: receipt.claim()?,
-            },
+            }),
             receipt.journal.bytes.clone(),
         ))
     }

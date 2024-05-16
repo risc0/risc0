@@ -53,6 +53,7 @@ impl<Claim> CompactReceipt<Claim>
 where
     Claim: Digestible + Debug + Clone + Serialize,
 {
+    // TODO(victor) Take in a context here.
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
