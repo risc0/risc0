@@ -573,6 +573,18 @@ impl VerifierContext {
         self.compact_verifier_parameters = Some(params);
         self
     }
+
+    /// Parameters for verification of [CompositeReceipt].
+    ///
+    /// Made up of the verifier parameters for each other receipt type. Returns none if any of the
+    /// composed verifier parameters are unavailable.
+    pub fn composite_verifier_parameters(&self) -> Option<CompositeReceiptVerifierParameters> {
+        Some(CompositeReceiptVerifierParameters {
+            segment: self.segment_verifier_parameters.as_ref()?.clone().into(),
+            succinct: self.succinct_verifier_parameters.as_ref()?.clone().into(),
+            compact: self.compact_verifier_parameters.as_ref()?.clone().into(),
+        })
+    }
 }
 
 impl Default for VerifierContext {

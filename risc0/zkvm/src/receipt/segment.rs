@@ -56,6 +56,13 @@ pub struct SegmentReceipt {
     /// Name of the hash function used to create this receipt.
     pub hashfn: String,
 
+    /// A digest of the verifier parameters that can be used to verify this receipt.
+    ///
+    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
+    /// be provided by a trusted source (e.g. packaged with the verifier code).
+    pub verifier_parameters: Digest,
+
     /// [ReceiptClaim] containing information about the execution that this receipt proves.
     pub claim: ReceiptClaim,
 }
@@ -125,7 +132,6 @@ impl SegmentReceipt {
 
 /// Verifier parameters used to verify a [SegmentReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[non_exhaustive]
 pub struct SegmentReceiptVerifierParameters {
     /// Set of control ID with which the receipt is expected to verify.
     pub control_ids: BTreeSet<Digest>,

@@ -39,6 +39,7 @@ message CompositeReceipt {
   repeated SegmentReceipt segments = 1;
   repeated InnerReceipt assumptions = 2;
   base.Digest journal_digest = 3;
+  base.Digest verifier_parameters = 4;
 }
 
 message SegmentReceipt {
@@ -47,6 +48,7 @@ message SegmentReceipt {
   uint32 index = 3;
   string hashfn = 4;
   ReceiptClaim claim = 5;
+  base.Digest verifier_parameters = 6;
 }
 
 message SuccinctReceipt {
@@ -56,6 +58,7 @@ message SuccinctReceipt {
   ReceiptClaim claim = 4;
   MerkleProof control_inclusion_proof = 5;
   string hashfn = 6;
+  base.Digest verifier_parameters = 7;
 }
 
 message MerkleProof {
@@ -67,6 +70,7 @@ message Groth16Receipt {
   base.CompatVersion version = 1;
   bytes seal = 2;
   ReceiptClaim claim = 3;
+  base.Digest verifier_parameters = 4;
 }
 
 message ReceiptClaim {

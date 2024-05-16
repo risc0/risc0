@@ -352,6 +352,7 @@ impl From<SegmentReceipt> for pb::core::SegmentReceipt {
             index: value.index,
             hashfn: value.hashfn,
             claim: Some(value.claim.into()),
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
@@ -384,6 +385,10 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal,
             index: value.index,
             hashfn: value.hashfn,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }
@@ -397,6 +402,7 @@ impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
             control_inclusion_proof: Some(value.control_inclusion_proof.into()),
             claim: Some(value.claim.into()),
             hashfn: value.hashfn,
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
@@ -426,6 +432,10 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
                 .try_into()?,
             claim: value.claim.ok_or(malformed_err())?.try_into()?,
             hashfn: value.hashfn,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }
@@ -496,6 +506,7 @@ impl From<CompositeReceipt> for pb::core::CompositeReceipt {
             segments: value.segments.into_iter().map(|s| s.into()).collect(),
             assumptions: value.assumptions.into_iter().map(|a| a.into()).collect(),
             journal_digest: value.journal_digest.map(|d| d.into()),
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
@@ -516,6 +527,10 @@ impl TryFrom<pb::core::CompositeReceipt> for CompositeReceipt {
                 .map(|a| a.try_into())
                 .collect::<Result<Vec<_>>>()?,
             journal_digest: value.journal_digest.map(|d| d.try_into()).transpose()?,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }

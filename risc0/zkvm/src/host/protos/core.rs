@@ -65,6 +65,8 @@ pub struct CompositeReceipt {
     pub assumptions: ::prost::alloc::vec::Vec<InnerReceipt>,
     #[prost(message, optional, tag = "3")]
     pub journal_digest: ::core::option::Option<super::base::Digest>,
+    #[prost(message, optional, tag = "4")]
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -79,6 +81,8 @@ pub struct SegmentReceipt {
     pub hashfn: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "5")]
     pub claim: ::core::option::Option<ReceiptClaim>,
+    #[prost(message, optional, tag = "6")]
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -95,6 +99,8 @@ pub struct SuccinctReceipt {
     pub control_inclusion_proof: ::core::option::Option<MerkleProof>,
     #[prost(string, tag = "6")]
     pub hashfn: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "7")]
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -113,6 +119,8 @@ pub struct Groth16Receipt {
     pub seal: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
     pub claim: ::core::option::Option<ReceiptClaim>,
+    #[prost(message, optional, tag = "4")]
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

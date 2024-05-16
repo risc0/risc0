@@ -17,7 +17,6 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
-use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 use risc0_zkp::{
     core::{digest::Digest, hash::sha::Sha256},
     verify::VerificationError,
@@ -46,6 +45,13 @@ pub struct CompositeReceipt {
     /// valid.
     // TODO(#982): Allow for unresolved assumptions in this list.
     pub assumptions: Vec<InnerReceipt>,
+
+    /// A digest of the verifier parameters that can be used to verify this receipt.
+    ///
+    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
+    /// be provided by a trusted source (e.g. packaged with the verifier code).
+    pub verifier_parameters: Digest,
 
     /// Digest of journal included in the final output of the continuation. Will
     /// be `None` if the continuation has no output (e.g. it ended in `Fault`).
@@ -249,11 +255,11 @@ impl CompositeReceipt {
 #[non_exhaustive]
 pub struct CompositeReceiptVerifierParameters {
     /// Verifier parameters related to [SegmentReceipt].
-    pub segment: SegmentReceiptVerifierParameters,
+    pub segment: MaybePruned<SegmentReceiptVerifierParameters>,
     /// Verifier parameters related to [SuccinctReceipt].
-    pub succinct: SuccinctReceiptVerifierParameters,
+    pub succinct: MaybePruned<SuccinctReceiptVerifierParameters>,
     /// Verifier parameters related to [CompactReceipt].
-    pub compact: CompactReceiptVerifierParameters,
+    pub compact: MaybePruned<CompactReceiptVerifierParameters>,
 }
 
 impl Digestible for CompositeReceiptVerifierParameters {
@@ -275,9 +281,9 @@ impl Default for CompositeReceiptVerifierParameters {
     /// Default set of parameters used to verify a [CompositeReceipt].
     fn default() -> Self {
         Self {
-            segment: Default::default(),
-            succinct: Default::default(),
-            compact: Default::default(),
+            segment: MaybePruned::Value(Default::default()),
+            succinct: MaybePruned::Value(Default::default()),
+            compact: MaybePruned::Value(Default::default()),
         }
     }
 }

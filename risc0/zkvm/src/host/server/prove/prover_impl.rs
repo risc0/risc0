@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use risc0_circuit_rv32im::prove::SegmentProver;
 
 use super::ProverServer;
@@ -70,10 +70,17 @@ impl ProverServer for ProverImpl {
             .iter()
             .map(|x| Ok(x.as_receipt()?.inner.clone()))
             .collect::<Result<Vec<_>>>()?;
+        let verifier_parameters = ctx
+            .composite_verifier_parameters()
+            .ok_or(anyhow!(
+                "composite receipt verifier parameters missing from context"
+            ))?
+            .digest();
         let composite_receipt = CompositeReceipt {
             segments,
             assumptions,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
+            verifier_parameters,
         };
 
         // Verify the receipt to catch if something is broken in the proving process.
@@ -137,11 +144,19 @@ impl ProverServer for ProverImpl {
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();
 
+        let verifier_parameters = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or(anyhow!(
+                "segment receipt verifier parameters missing from context"
+            ))?
+            .digest();
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
             hashfn: self.opts.hashfn.clone(),
             claim,
+            verifier_parameters,
         };
         receipt.verify_integrity_with_context(ctx)?;
 

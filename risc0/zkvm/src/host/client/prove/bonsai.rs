@@ -187,6 +187,7 @@ impl Prover for BonsaiProver {
             InnerReceipt::Compact(CompactReceipt {
                 seal: snark_receipt.snark.to_vec(),
                 claim: succinct_prove_info.receipt.claim()?,
+                verifier_parameters: ctx.compact_verifier_parameters.digest(),
             }),
             succinct_prove_info.receipt.journal.bytes,
         );

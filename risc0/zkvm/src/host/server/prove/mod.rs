@@ -30,9 +30,13 @@ use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
     host::prove_info::ProveInfo,
     is_dev_mode,
-    receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptKind,
-    Segment, Session, VerifierContext,
+    receipt::{
+        CompactReceipt, CompactReceiptVerifierParameters, CompositeReceipt, InnerReceipt,
+        SegmentReceipt, SuccinctReceipt,
+    },
+    sha::Digestible,
+    stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptKind, Segment, Session,
+    VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
@@ -131,6 +135,7 @@ pub trait ProverServer {
         Ok(CompactReceipt {
             seal,
             claim: receipt.claim.clone(),
+            verifier_parameters: CompactReceiptVerifierParameters::default().digest(),
         })
     }
 

@@ -37,6 +37,13 @@ pub struct CompactReceipt {
     /// [ReceiptClaim] containing information about the execution that this
     /// receipt proves.
     pub claim: ReceiptClaim,
+
+    /// A digest of the verifier parameters that can be used to verify this receipt.
+    ///
+    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
+    /// be provided by a trusted source (e.g. packaged with the verifier code).
+    pub verifier_parameters: Digest,
 }
 
 impl CompactReceipt {
@@ -66,7 +73,6 @@ impl CompactReceipt {
 
 /// Verifier parameters used to verify a [CompactReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[non_exhaustive]
 pub struct CompactReceiptVerifierParameters {
     /// Control root with which the receipt is expected to verify.
     pub control_root: Digest,

@@ -48,7 +48,7 @@ pub use self::program::Program;
 use crate::{
     receipt::{
         merkle::{MerkleGroup, MerkleProof},
-        SegmentReceipt, SuccinctReceipt,
+        SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
     receipt_claim::{Merge, Output},
     sha::Digestible,
@@ -95,6 +95,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&segment_receipt.claim)?,
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
 
@@ -133,6 +134,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&ab_claim)?,
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
 
@@ -188,6 +190,7 @@ pub fn resolve(
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&resolved_claim)?,
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
 
@@ -208,14 +211,23 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let claim = ReceiptClaim::decode(&mut out_stream)?.merge(&a.claim)?;
 
     // Include an inclusion proof for control_id to allow verification against a root.
+    let hashfn = opts.hash_suite()?.hashfn;
     let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
-        .get_proof(&receipt.control_id, opts.hash_suite()?.hashfn.as_ref())?;
+        .get_proof(&receipt.control_id, hashfn.as_ref())?;
+    // TODO(victor): Make a receipt test the actually verifies an identity_p254 receipt.
+    let control_root = control_inclusion_proof.root(&receipt.control_id, hashfn.as_ref());
+    let params = SuccinctReceiptVerifierParameters {
+        control_root,
+        proof_system_info: PROOF_SYSTEM_INFO,
+        circuit_info: CircuitImpl::CIRCUIT_INFO,
+    };
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
         claim,
+        verifier_parameters: params.digest(),
     })
 }
 
