@@ -199,6 +199,12 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: Linux
+            feature: cuda
+            device: g4dn.xlarge
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_l4
           - os: macOS
             feature: metal
             device: apple_m2_pro

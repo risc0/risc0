@@ -59,10 +59,10 @@ jobs:
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
-      #- uses: ./.github/actions/sccache
-      #  with:
-      #    key: ${{ matrix.os }}-${{ matrix.feature }}
-      #    disable_s3: ${{ env.DISABLE_S3 }}
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+          disable_s3: ${{ env.DISABLE_S3 }}
 
       #- id: aws-creds
       #  uses: aws-actions/configure-aws-credentials@v4
