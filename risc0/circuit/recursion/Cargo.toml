@@ -51,7 +51,7 @@ cuda = [
   "risc0-zkp/cuda",
   "std",
 ]
-default = ["prove", "test", "cuda"]
+default = ["prove", "test"]
 metal = [
   "dep:metal",
   "prove",
