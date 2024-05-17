@@ -4457,6 +4457,7 @@ dependencies = [
  "rayon",
  "risc0-circuit-recursion-sys",
  "risc0-core",
+ "risc0-sys",
  "risc0-zkp",
  "sha2",
  "test-log",
@@ -4473,6 +4474,8 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sys",
+ "sppark",
 ]
 
 [[package]]
@@ -4494,6 +4497,7 @@ dependencies = [
  "risc0-binfmt",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
+ "risc0-sys",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
@@ -4510,6 +4514,7 @@ dependencies = [
  "risc0-build-kernel",
  "risc0-core",
  "risc0-sys",
+ "sppark",
 ]
 
 [[package]]
@@ -4563,23 +4568,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-sppark"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be1d1ff7fe501c9f420654bc1ff7461909b85e7f8fb3698a8812c0a8a787306"
-dependencies = [
- "cc",
- "which 4.4.2",
-]
-
-[[package]]
 name = "risc0-sys"
 version = "1.0.0-rc.4"
 dependencies = [
  "cc",
  "cust",
  "risc0-build-kernel",
- "risc0-sppark",
+ "sppark",
 ]
 
 [[package]]
@@ -5102,6 +5097,16 @@ name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
+
+[[package]]
+name = "sppark"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb266b15daead53670d477d7e136b8fc92d46e31bb9007ac46d304df23689a4b"
+dependencies = [
+ "cc",
+ "which 4.4.2",
+]
 
 [[package]]
 name = "stable_deref_trait"

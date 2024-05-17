@@ -15,12 +15,6 @@
 use std::env;
 
 fn main() {
-    if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        let cuda_bin = env::var("DEP_RISC0_SYS_CUDA_KERNELS_ZKP")
-            .expect("CARGO_FEATURE_CUDA is defined, but DEP_RISC0_SYS_CUDA_KERNELS_ZKP is not");
-        println!("cargo:rustc-env=ZKP_CUDA_PATH={cuda_bin}");
-    }
-
     if env::var("CARGO_FEATURE_METAL").is_ok() {
         let metal_bin = env::var("DEP_RISC0_SYS_METAL_KERNELS_ZKP")
             .expect("CARGO_FEATURE_METAL is defined, but DEP_RISC0_SYS_METAL_KERNELS_ZKP is not");
