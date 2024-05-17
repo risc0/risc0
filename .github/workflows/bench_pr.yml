@@ -78,8 +78,6 @@ jobs:
       - name: Run benchmarks
         run: cargo bench --bench fib -F $FEATURE
 
-      - run: cp target/hotbench/fib/benchmark.json ./cache/external.json
-
       - name: Analyze benchmark results
         uses: risc0/github-action-benchmark@v1.19.3
         with:
@@ -92,6 +90,8 @@ jobs:
           comment-on-alert: true
           fail-on-alert: true
           summary-always: true
+      
+      - run: cp target/hotbench/fib/benchmark.json ./cache/external.json
 
       - name: Save current benchmark data
         #if: github.event_name == 'push'
