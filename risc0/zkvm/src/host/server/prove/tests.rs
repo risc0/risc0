@@ -99,10 +99,10 @@ fn check_image_id() {
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
-    assert_eq!(
+    assert!(matches!(
         receipt.verify(image_id).unwrap_err(),
-        VerificationError::ImageVerificationError
-    );
+        VerificationError::ClaimDigestMismatch { .. }
+    ));
 }
 
 #[test]
