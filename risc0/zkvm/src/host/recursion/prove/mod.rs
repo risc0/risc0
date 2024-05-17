@@ -224,7 +224,6 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     let hashfn = opts.hash_suite()?.hashfn;
     let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
         .get_proof(&receipt.control_id, hashfn.as_ref())?;
-    // TODO(victor): Make a receipt test the actually verifies an identity_p254 receipt.
     let control_root = control_inclusion_proof.root(&receipt.control_id, hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
         control_root,
