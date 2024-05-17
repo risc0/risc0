@@ -93,8 +93,9 @@ pub struct SuccinctReceipt {
     pub seal: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
     pub control_id: ::core::option::Option<super::base::Digest>,
+    /// MaybePruned<ReceiptClaim>
     #[prost(message, optional, tag = "4")]
-    pub claim: ::core::option::Option<ReceiptClaim>,
+    pub claim: ::core::option::Option<MaybePruned>,
     #[prost(message, optional, tag = "5")]
     pub control_inclusion_proof: ::core::option::Option<MerkleProof>,
     #[prost(string, tag = "6")]
@@ -117,8 +118,9 @@ pub struct Groth16Receipt {
     pub version: ::core::option::Option<super::base::CompatVersion>,
     #[prost(bytes = "vec", tag = "2")]
     pub seal: ::prost::alloc::vec::Vec<u8>,
+    /// MaybePruned<ReceiptClaim>
     #[prost(message, optional, tag = "3")]
-    pub claim: ::core::option::Option<ReceiptClaim>,
+    pub claim: ::core::option::Option<MaybePruned>,
     #[prost(message, optional, tag = "4")]
     pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
@@ -197,6 +199,7 @@ pub struct Assumptions {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FakeReceipt {
+    /// MaybePruned<ReceiptClaim>
     #[prost(message, optional, tag = "1")]
-    pub claim: ::core::option::Option<ReceiptClaim>,
+    pub claim: ::core::option::Option<MaybePruned>,
 }

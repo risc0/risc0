@@ -49,6 +49,10 @@ pub enum VerificationError {
     },
     InvalidProof,
     JournalDigestMismatch,
+    ClaimDigestMismatch {
+        expected: Digest,
+        received: Digest,
+    },
     UnexpectedExitCode,
     InvalidHashSuite,
     // TODO(victor): Extract these errors to zkVM and refactor error handling there more generally.
@@ -88,6 +92,9 @@ impl fmt::Display for VerificationError {
             VerificationError::InvalidProof => write!(f, "verification indicates proof is invalid"),
             VerificationError::JournalDigestMismatch => {
                 write!(f, "journal digest mismatch detected")
+            }
+            VerificationError::ClaimDigestMismatch { expected, received } => {
+                write!(f, "claim digest does not match the expected digest {received}; expected {expected}")
             }
             VerificationError::UnexpectedExitCode => write!(f, "unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "invalid hash suite"),

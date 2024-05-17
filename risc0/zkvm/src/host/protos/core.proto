@@ -55,7 +55,7 @@ message SuccinctReceipt {
   base.CompatVersion version = 1;
   bytes seal = 2;
   base.Digest control_id = 3;
-  ReceiptClaim claim = 4;
+  MaybePruned claim = 4; // MaybePruned<ReceiptClaim>
   MerkleProof control_inclusion_proof = 5;
   string hashfn = 6;
   base.Digest verifier_parameters = 7;
@@ -69,7 +69,7 @@ message MerkleProof {
 message Groth16Receipt {
   base.CompatVersion version = 1;
   bytes seal = 2;
-  ReceiptClaim claim = 3;
+  MaybePruned claim = 3; // MaybePruned<ReceiptClaim>
   base.Digest verifier_parameters = 4;
 }
 
@@ -111,5 +111,5 @@ message Assumptions {
 }
 
 message FakeReceipt {
-  ReceiptClaim claim = 1;
+  MaybePruned claim = 1; // MaybePruned<ReceiptClaim>
 }

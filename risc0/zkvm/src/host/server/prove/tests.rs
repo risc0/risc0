@@ -202,7 +202,7 @@ fn memory_io() {
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.claim()?.exit_code)
+        Ok(receipt.claim()?.as_value()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -664,8 +664,15 @@ mod sys_verify {
             .verify_integrity_with_context(&Default::default())
             .unwrap();
         let halt_claim = halt_receipt.claim().unwrap();
-        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
+        assert_eq!(
+            halt_claim.as_value().unwrap().pre.digest(),
+            MULTI_TEST_ID.into()
+        );
+        assert_eq!(
+            halt_claim.as_value().unwrap().exit_code,
+            ExitCode::Halted(exit_code as u32)
+        );
+
         halt_receipt
     }
 

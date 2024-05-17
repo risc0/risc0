@@ -174,38 +174,20 @@ impl Receipt {
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
-        // NOTE: Post-state digest and input digest are unconstrained by this method.
-        let claim = self.inner.claim()?;
-        if claim.pre.digest() != image_id.into() {
-            return Err(VerificationError::ImageVerificationError);
-        }
-
-        // Check the exit code. This verification method requires execution to be
-        // successful.
-        if !claim.exit_code.is_ok() {
-            return Err(VerificationError::UnexpectedExitCode);
-        };
-
-        // Finally check the output hash in the decoded claim against the expected
-        // output.
-        let expected_output = Output {
-            journal: MaybePruned::Pruned(self.journal.digest()),
-            // It is expected that there are no (unresolved) assumptions.
-            assumptions: Assumptions(vec![]).into(),
-        };
-
-        if claim.output.digest() != expected_output.digest() {
-            let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
-            if !empty_output {
-                tracing::debug!(
-                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                    hex::encode(&self.journal.bytes),
-                    hex::encode(expected_output.digest()),
-                    hex::encode(claim.output.digest()),
-                );
-                return Err(VerificationError::JournalDigestMismatch);
-            }
-            tracing::debug!("accepting zero digest for output of receipt with empty journal");
+        // Check that the claim on the verified receipt matches what was expected. Since we have
+        // constrained all field in the ReceiptClaim, we can directly construct the expected digest
+        // and do not need to open the claim digest on the inner receipt.
+        let expected_claim = ReceiptClaim::ok(image_id, MaybePruned::Pruned(self.journal.digest()));
+        if expected_claim.digest() != self.inner.claim()?.digest() {
+            tracing::debug!(
+                "receipt claim does not match expected claim:\nreceipt: {:#?}\nexpected: {:#?}",
+                self.inner.claim()?,
+                expected_claim
+            );
+            return Err(VerificationError::ClaimDigestMismatch {
+                expected: expected_claim.digest(),
+                received: self.claim()?.digest(),
+            });
         }
 
         Ok(())
@@ -237,7 +219,11 @@ impl Receipt {
         self.inner.verify_integrity_with_context(ctx)?;
 
         // Check that self.journal is attested to by the inner receipt.
-        let claim = self.inner.claim()?;
+        // We need to open the claim digest to do this, so it cannot be pruned.
+        let maybe_pruned_claim = self.inner.claim()?;
+        let claim = maybe_pruned_claim
+            .as_value()
+            .map_err(|_| VerificationError::ReceiptFormatError)?;
 
         let expected_output = claim.exit_code.expects_output().then(|| Output {
             journal: MaybePruned::Pruned(self.journal.digest()),
@@ -266,7 +252,7 @@ impl Receipt {
     }
 
     /// Extract the [ReceiptClaim] from this receipt.
-    pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
+    pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         self.inner.claim()
     }
 }
@@ -330,16 +316,16 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
-            InnerReceipt::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            InnerReceipt::Compact(inner) => inner.verify_integrity(),
-            InnerReceipt::Succinct(inner) => inner.verify_integrity_with_context(ctx),
-            InnerReceipt::Fake(inner) => inner.verify_integrity(),
+            Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
+            Self::Compact(inner) => inner.verify_integrity(),
+            Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
+            Self::Fake(inner) => inner.verify_integrity(),
         }
     }
 
     /// Returns the [InnerReceipt::Composite] arm.
     pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
-        if let InnerReceipt::Composite(x) = self {
+        if let Self::Composite(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -348,7 +334,7 @@ impl InnerReceipt {
 
     /// Returns the [InnerReceipt::Compact] arm.
     pub fn compact(&self) -> Result<&CompactReceipt<ReceiptClaim>, VerificationError> {
-        if let InnerReceipt::Compact(x) = self {
+        if let Self::Compact(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -357,7 +343,7 @@ impl InnerReceipt {
 
     /// Returns the [InnerReceipt::Succinct] arm.
     pub fn succinct(&self) -> Result<&SuccinctReceipt<ReceiptClaim>, VerificationError> {
-        if let InnerReceipt::Succinct(x) = self {
+        if let Self::Succinct(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -365,22 +351,22 @@ impl InnerReceipt {
     }
 
     /// Extract the [ReceiptClaim] from this receipt.
-    pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
+    pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
-            InnerReceipt::Composite(ref inner) => inner.claim(),
-            InnerReceipt::Compact(ref inner) => Ok(inner.claim.clone()),
-            InnerReceipt::Succinct(ref inner) => Ok(inner.claim.clone()),
-            InnerReceipt::Fake(ref inner) => Ok(inner.claim.clone()),
+            Self::Composite(ref inner) => Ok(inner.claim()?.into()),
+            Self::Compact(ref inner) => Ok(inner.claim.clone()),
+            Self::Succinct(ref inner) => Ok(inner.claim.clone()),
+            Self::Fake(ref inner) => Ok(inner.claim.clone()),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            InnerReceipt::Composite(ref inner) => inner.verifier_parameters,
-            InnerReceipt::Compact(ref inner) => inner.verifier_parameters,
-            InnerReceipt::Succinct(ref inner) => inner.verifier_parameters,
-            InnerReceipt::Fake(_) => Digest::ZERO,
+            Self::Composite(ref inner) => inner.verifier_parameters,
+            Self::Compact(ref inner) => inner.verifier_parameters,
+            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Fake(_) => Digest::ZERO,
         }
     }
 }
@@ -400,7 +386,7 @@ impl InnerReceipt {
 #[non_exhaustive]
 pub struct FakeReceipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
 {
     /// Claim containing information about the computation that this receipt pretends to prove.
     ///
@@ -410,11 +396,13 @@ where
 
 impl<Claim> FakeReceipt<Claim>
 where
-    Claim: Digestible + Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
 {
     /// Create a new [FakeReceipt] for the given claim.
-    pub fn new(claim: Claim) -> Self {
-        Self { claim }
+    pub fn new(claim: impl Into<MaybePruned<Claim>>) -> Self {
+        Self {
+            claim: claim.into(),
+        }
     }
 
     /// Pretend to verify the integrity of this receipt. If not in dev mode (i.e. the
@@ -475,7 +463,7 @@ impl AssumptionReceipt {
     /// Returns the [ReceiptClaim] for this [AssumptionReceipt].
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
-            Self::Proven(receipt) => Ok(receipt.claim()?.into()),
+            Self::Proven(receipt) => Ok(receipt.claim()?),
             Self::Unresolved(_assumption) => todo!("DO NOT MERGE drop support for unresolved?"),
         }
     }
@@ -565,36 +553,36 @@ impl InnerAssumptionReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        tracing::debug!("InnerReceipt::verify_integrity_with_context");
+        tracing::debug!("InnerAssumptionReceipt::verify_integrity_with_context");
         match self {
-            InnerReceipt::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            InnerReceipt::Compact(inner) => inner.verify_integrity(),
-            InnerReceipt::Succinct(inner) => inner.verify_integrity_with_context(ctx),
-            InnerReceipt::Fake(inner) => inner.verify_integrity(),
+            Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
+            Self::Compact(inner) => inner.verify_integrity(),
+            Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
+            Self::Fake(inner) => inner.verify_integrity(),
         }
     }
 
-    /// Returns the [InnerReceipt::Composite] arm.
+    /// Returns the [InnerAssumptionReceipt::Composite] arm.
     pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
-        if let InnerReceipt::Composite(x) = self {
+        if let Self::Composite(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
     }
 
-    /// Returns the [InnerReceipt::Compact] arm.
-    pub fn compact(&self) -> Result<&CompactReceipt<ReceiptClaim>, VerificationError> {
-        if let InnerReceipt::Compact(x) = self {
+    /// Returns the [InnerAssumptionReceipt::Compact] arm.
+    pub fn compact(&self) -> Result<&CompactReceipt<Unknown>, VerificationError> {
+        if let Self::Compact(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
     }
 
-    /// Returns the [InnerReceipt::Succinct] arm.
-    pub fn succinct(&self) -> Result<&SuccinctReceipt<ReceiptClaim>, VerificationError> {
-        if let InnerReceipt::Succinct(x) = self {
+    /// Returns the [InnerAssumptionReceipt::Succinct] arm.
+    pub fn succinct(&self) -> Result<&SuccinctReceipt<Unknown>, VerificationError> {
+        if let Self::Succinct(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -602,22 +590,24 @@ impl InnerAssumptionReceipt {
     }
 
     /// Extract the claim digest from this receipt.
+    ///
+    /// Note that only the claim digest is available because the claim type may be unknown.
     pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
-            InnerReceipt::Composite(ref inner) => inner.claim()?.digest(),
-            InnerReceipt::Compact(ref inner) => Ok(inner.claim.digest()),
-            InnerReceipt::Succinct(ref inner) => Ok(inner.claim.digest()),
-            InnerReceipt::Fake(ref inner) => Ok(inner.claim.digest()),
+            Self::Composite(ref inner) => Ok(inner.claim()?.digest()),
+            Self::Compact(ref inner) => Ok(inner.claim.digest()),
+            Self::Succinct(ref inner) => Ok(inner.claim.digest()),
+            Self::Fake(ref inner) => Ok(inner.claim.digest()),
         }
     }
 
     /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
     pub fn verifier_parameters(&self) -> Digest {
         match self {
-            InnerReceipt::Composite(ref inner) => inner.verifier_parameters,
-            InnerReceipt::Compact(ref inner) => inner.verifier_parameters,
-            InnerReceipt::Succinct(ref inner) => inner.verifier_parameters,
-            InnerReceipt::Fake(_) => Digest::ZERO,
+            Self::Composite(ref inner) => inner.verifier_parameters,
+            Self::Compact(ref inner) => inner.verifier_parameters,
+            Self::Succinct(ref inner) => inner.verifier_parameters,
+            Self::Fake(_) => Digest::ZERO,
         }
     }
 }
@@ -722,23 +712,15 @@ mod tests {
     use super::{FakeReceipt, InnerReceipt, Receipt};
     use crate::{
         sha::{Digest, DIGEST_BYTES},
-        ExitCode, MaybePruned, ReceiptClaim,
+        MaybePruned,
     };
     use risc0_zkp::verify::VerificationError;
 
     #[test]
     fn mangled_version_info_should_error() {
-        let claim = ReceiptClaim {
-            pre: MaybePruned::Pruned(Digest::ZERO),
-            post: MaybePruned::Pruned(Digest::ZERO),
-            exit_code: ExitCode::Halted(0),
-            input: None.into(),
-            output: None.into(),
-        };
-
         let mut mangled_receipt = Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
-                claim: claim.clone(),
+                claim: MaybePruned::Pruned(Digest::ZERO),
             }),
             vec![],
         );

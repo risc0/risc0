@@ -50,7 +50,7 @@ use crate::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{Merge, Output},
+    receipt_claim::{MaybePruned, Merge, Output},
     sha::Digestible,
     HalPair, ProverOpts, ReceiptClaim,
 };
@@ -94,7 +94,7 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptC
         hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
-        claim: claim_decoded.merge(&segment_receipt.claim)?,
+        claim: claim_decoded.merge(&segment_receipt.claim)?.into(),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
@@ -118,11 +118,11 @@ pub fn join(
 
     // Construct the expected claim that should have result from the join.
     let ab_claim = ReceiptClaim {
-        pre: a.claim.pre.clone(),
-        post: b.claim.post.clone(),
-        exit_code: b.claim.exit_code,
-        input: a.claim.input.clone(),
-        output: b.claim.output.clone(),
+        pre: a.claim.as_value()?.pre.clone(),
+        post: b.claim.as_value()?.post.clone(),
+        exit_code: b.claim.as_value()?.exit_code,
+        input: a.claim.as_value()?.input.clone(),
+        output: b.claim.as_value()?.output.clone(),
     };
 
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
@@ -136,7 +136,7 @@ pub fn join(
         hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
-        claim: claim_decoded.merge(&ab_claim)?,
+        claim: claim_decoded.merge(&ab_claim)?.into(),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
@@ -161,7 +161,11 @@ pub fn resolve(
 
     // Construct the resolved claim by copying the conditional receipt claim and resolving
     // the head assumption. If this fails, then so would the resolve program.
-    let mut resolved_claim = conditional.claim.clone();
+    let mut resolved_claim = conditional
+        .claim
+        .as_value()
+        .context("conditional receipt claim is pruned")?
+        .clone();
     resolved_claim
         .output
         .as_value_mut()
@@ -192,7 +196,7 @@ pub fn resolve(
         hashfn: opts.hashfn,
         control_id: receipt.control_id,
         control_inclusion_proof,
-        claim: claim_decoded.merge(&resolved_claim)?,
+        claim: claim_decoded.merge(&resolved_claim)?.into(),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
@@ -211,7 +215,7 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let claim = ReceiptClaim::decode(&mut out_stream)?.merge(&a.claim)?;
+    let claim = MaybePruned::Value(ReceiptClaim::decode(&mut out_stream)?).merge(&a.claim)?;
 
     // Include an inclusion proof for control_id to allow verification against a root.
     let hashfn = opts.hash_suite()?.hashfn;
@@ -582,6 +586,8 @@ impl Prover {
             journal,
         } = cond
             .claim
+            .as_value()
+            .context("cannot resolve conditional receipt with pruned claim")?
             .output
             .as_value()
             .context("cannot resolve conditional receipt with pruned output")?
@@ -665,7 +671,7 @@ impl Prover {
     fn add_segment_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();
-        a.claim.encode(&mut data)?;
+        a.claim.as_value()?.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
         self.add_input(bytemuck::cast_slice(&data_fp));
         Ok(())
