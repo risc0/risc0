@@ -506,8 +506,10 @@ impl Server {
                 bincode::deserialize(&assumption_receipt_bytes)?;
 
             let prover = get_prover_server(&opts)?;
-            let receipt =
-                prover.resolve(&conditional_succinct_receipt, &assumption_succinct_receipt)?;
+            let receipt = prover.resolve(
+                &conditional_succinct_receipt,
+                &assumption_succinct_receipt.into_unknown(),
+            )?;
 
             let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();

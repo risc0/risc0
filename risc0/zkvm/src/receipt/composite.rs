@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    CompactReceiptVerifierParameters, InnerReceipt, SegmentReceipt,
+    CompactReceiptVerifierParameters, InnerAssumptionReceipt, SegmentReceipt,
     SegmentReceiptVerifierParameters, SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{sha, Assumption, Assumptions, MaybePruned, Output, ReceiptClaim};
@@ -44,7 +44,7 @@ pub struct CompositeReceipt {
     /// assumptions are unresolved, this receipt is only _conditionally_
     /// valid.
     // TODO(#982): Allow for unresolved assumptions in this list.
-    pub assumptions: Vec<InnerReceipt>,
+    pub assumptions: Vec<InnerAssumptionReceipt>,
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
     ///
@@ -114,10 +114,7 @@ impl CompositeReceipt {
 
         // Verify all assumption receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
-            tracing::debug!(
-                "verifying assumption: {:?}",
-                receipt.claim()?.digest::<sha::Impl>()
-            );
+            tracing::debug!("verifying assumption: {:?}", receipt.claim_digest()?);
             receipt.verify_integrity_with_context(ctx)?;
         }
 
@@ -235,7 +232,7 @@ impl CompositeReceipt {
                 .iter()
                 .map(|a| {
                     Ok(Assumption {
-                        claim: a.claim()?.digest::<sha::Impl>(),
+                        claim: a.claim_digest()?,
                         // TODO(victor): Revisit what the right value is here.
                         control_root: Digest::ZERO,
                     }

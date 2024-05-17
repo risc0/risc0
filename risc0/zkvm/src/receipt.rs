@@ -386,7 +386,7 @@ impl InnerReceipt {
 #[non_exhaustive]
 pub struct FakeReceipt<Claim>
 where
-    Claim: risc0_binfmt::Digestible + core::fmt::Debug + Clone + Serialize,
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
 {
     /// Claim containing information about the computation that this receipt pretends to prove.
     ///
@@ -414,6 +414,14 @@ where
             return Ok(());
         }
         Err(VerificationError::InvalidProof)
+    }
+
+    /// Prunes the claim, retaining its digest, and converts into a [FakeReceipt] with an unknown
+    /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
+    pub fn into_unknown(self) -> FakeReceipt<Unknown> {
+        FakeReceipt {
+            claim: MaybePruned::Pruned(self.claim.digest()),
+        }
     }
 }
 
@@ -446,7 +454,7 @@ pub enum AssumptionReceipt {
     /// Upon proving, this receipt will be used as proof of the assumption that results from a call
     /// to `env::verify`, and the resulting receipt will be unconditional. As a result,
     /// [Receipt::verify] will return true and the verifier will accept the receipt.
-    Proven(Receipt),
+    Proven(InnerAssumptionReceipt),
 
     // TODO(victor): Adjust comment
     /// [ReceiptClaim] digest for an assumption that is not directly proven
@@ -460,16 +468,18 @@ pub enum AssumptionReceipt {
 }
 
 impl AssumptionReceipt {
+    /* Do not merge
     /// Returns the [ReceiptClaim] for this [AssumptionReceipt].
-    pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
+    pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
-            Self::Proven(receipt) => Ok(receipt.claim()?),
-            Self::Unresolved(_assumption) => todo!("DO NOT MERGE drop support for unresolved?"),
+            Self::Proven(receipt) => Ok(receipt.claim_digest()?),
+            Self::Unresolved(assumption) => todo!("DO NOT MERGE drop support for unresolved?"),
         }
     }
+    */
 
     #[cfg(feature = "prove")]
-    pub(crate) fn as_receipt(&self) -> Result<&Receipt> {
+    pub(crate) fn as_receipt(&self) -> Result<&InnerAssumptionReceipt> {
         match self {
             Self::Proven(receipt) => Ok(receipt),
             Self::Unresolved(_) => Err(anyhow::anyhow!(
@@ -479,11 +489,10 @@ impl AssumptionReceipt {
     }
 }
 
-// TODO(victor) Revisit all of these conversions.
 impl From<Receipt> for AssumptionReceipt {
     /// Create a proven assumption from a [Receipt].
     fn from(receipt: Receipt) -> Self {
-        Self::Proven(receipt)
+        Self::Proven(receipt.inner.into())
     }
 }
 
@@ -503,6 +512,10 @@ impl From<Assumption> for AssumptionReceipt {
 
 impl From<MaybePruned<ReceiptClaim>> for AssumptionReceipt {
     /// Create an unresolved assumption from a [MaybePruned] [ReceiptClaim].
+    ///
+    /// The control root will be set to all zeroes, which means that the assumption must be
+    /// resolved with the same control root at the conditional receipt (i.e. that this assumption
+    /// is for the same version of zkVM as the receipt it is attached to).
     fn from(claim: MaybePruned<ReceiptClaim>) -> Self {
         Self::Unresolved(
             Assumption {
@@ -516,6 +529,10 @@ impl From<MaybePruned<ReceiptClaim>> for AssumptionReceipt {
 
 impl From<ReceiptClaim> for AssumptionReceipt {
     /// Create an unresolved assumption from a [ReceiptClaim].
+    ///
+    /// The control root will be set to all zeroes, which means that the assumption must be
+    /// resolved with the same control root at the conditional receipt (i.e. that this assumption
+    /// is for the same version of zkVM as the receipt it is attached to).
     fn from(claim: ReceiptClaim) -> Self {
         Self::Unresolved(
             Assumption {
@@ -608,6 +625,17 @@ impl InnerAssumptionReceipt {
             Self::Compact(ref inner) => inner.verifier_parameters,
             Self::Succinct(ref inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
+        }
+    }
+}
+
+impl From<InnerReceipt> for InnerAssumptionReceipt {
+    fn from(value: InnerReceipt) -> Self {
+        match value {
+            InnerReceipt::Composite(x) => InnerAssumptionReceipt::Composite(x),
+            InnerReceipt::Succinct(x) => InnerAssumptionReceipt::Succinct(x.into_unknown()),
+            InnerReceipt::Compact(x) => InnerAssumptionReceipt::Compact(x.into_unknown()),
+            InnerReceipt::Fake(x) => InnerAssumptionReceipt::Fake(x.into_unknown()),
         }
     }
 }

@@ -37,7 +37,7 @@ use crate::{
         posix_io::PosixIo,
         slice_io::SliceIo,
     },
-    sha::{Digest, Digestible},
+    sha::Digest,
     AssumptionReceipt,
 };
 
@@ -213,7 +213,8 @@ impl SysVerify {
         // Iterate over the list looking for a matching assumption.
         let mut assumption: Option<AssumptionReceipt> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            if cached_assumption.claim()?.digest() == claim_digest {
+            // DO NOT MERGE
+            if Digest::ZERO == claim_digest {
                 assumption = Some(cached_assumption.clone());
                 break;
             }

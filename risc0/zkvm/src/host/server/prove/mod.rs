@@ -31,9 +31,10 @@ use crate::{
     host::prove_info::ProveInfo,
     is_dev_mode,
     receipt::{
-        CompactReceipt, CompactReceiptVerifierParameters, CompositeReceipt, InnerReceipt,
-        SegmentReceipt, SuccinctReceipt,
+        CompactReceipt, CompactReceiptVerifierParameters, CompositeReceipt, InnerAssumptionReceipt,
+        InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
+    receipt_claim::Unknown,
     sha::Digestible,
     stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptClaim, ReceiptKind,
     Segment, Session, VerifierContext,
@@ -80,7 +81,7 @@ pub trait ProverServer {
     fn resolve(
         &self,
         conditional: &SuccinctReceipt<ReceiptClaim>,
-        assumption: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
     /// Convert a [SuccinctReceipt] with a Poseidon hash function that uses a 254-bit field
@@ -123,15 +124,15 @@ pub trait ProverServer {
         // Compress assumptions and resolve them to get the final succinct receipt.
         receipt.assumptions.iter().try_fold(
             continuation_receipt,
-            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerReceipt| match assumption {
-                InnerReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
-                InnerReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &self.compsite_to_succinct(assumption)?)
+            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerAssumptionReceipt| match assumption {
+                InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
+                InnerAssumptionReceipt::Composite(assumption) => {
+                    self.resolve(&conditional, &self.compsite_to_succinct(assumption)?.into_unknown())
                 }
-                InnerReceipt::Fake { .. } => bail!(
+                InnerAssumptionReceipt::Fake(_) => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
                 ),
-                InnerReceipt::Compact(_) => bail!(
+                InnerAssumptionReceipt::Compact(_) => bail!(
                     "compressing composite receipts with Compact receipt assumptions is not supported"
                 )
             },

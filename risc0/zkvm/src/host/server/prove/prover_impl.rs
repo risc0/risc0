@@ -25,6 +25,7 @@ use crate::{
     receipt::{
         segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
+    receipt_claim::Unknown,
     sha::Digestible,
     CompositeReceipt, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
@@ -68,7 +69,7 @@ impl ProverServer for ProverImpl {
         let assumptions = session
             .assumptions
             .iter()
-            .map(|x| Ok(x.as_receipt()?.inner.clone()))
+            .map(|x| Ok(x.as_receipt()?.clone()))
             .collect::<Result<Vec<_>>>()?;
         let verifier_parameters = ctx
             .composite_verifier_parameters()
@@ -178,7 +179,7 @@ impl ProverServer for ProverImpl {
     fn resolve(
         &self,
         conditional: &SuccinctReceipt<ReceiptClaim>,
-        assumption: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         resolve(conditional, assumption)
     }

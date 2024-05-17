@@ -26,6 +26,10 @@ message ReceiptMetadata {
   base.Digest verifier_parameters = 1;
 }
 
+// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
+// In Rust, they are distinct types becaue Rust needs to size everything on the
+// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
+// have different sizes. Protobuf handles this without issue.
 message InnerReceipt {
   oneof kind {
     CompositeReceipt composite = 1;

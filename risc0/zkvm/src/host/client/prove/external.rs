@@ -19,8 +19,8 @@ use anyhow::{anyhow, bail, ensure, Result};
 use super::{Executor, Prover, ProverOpts};
 use crate::{
     compute_image_id, host::api::AssetRequest, is_dev_mode, ApiClient, Asset, CompositeReceipt,
-    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptClaim, ReceiptKind, SegmentReceipt,
-    SessionInfo, SuccinctReceipt, VerifierContext,
+    ExecutorEnv, InnerAssumptionReceipt, InnerReceipt, ProveInfo, Receipt, ReceiptClaim,
+    ReceiptKind, SegmentReceipt, SessionInfo, SuccinctReceipt, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -76,15 +76,15 @@ impl ExternalProver {
         // Compress assumptions and resolve them to get the final succinct receipt.
         receipt.assumptions.iter().try_fold(
             continuation_receipt,
-            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerReceipt| match assumption {
-                InnerReceipt::Succinct(assumption) => client.resolve(opts, conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
-                InnerReceipt::Composite(assumption) => {
+            |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerAssumptionReceipt| match assumption {
+                InnerAssumptionReceipt::Succinct(assumption) => client.resolve(opts, conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
+                InnerAssumptionReceipt::Composite(assumption) => {
                     client.resolve(opts, conditional.try_into()?, Self::composite_to_succinct(client, opts, assumption)?.try_into()?, AssetRequest::Inline)
                 }
-                InnerReceipt::Fake { .. } => bail!(
+                InnerAssumptionReceipt::Fake { .. } => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
                 ),
-                InnerReceipt::Compact(_) => bail!(
+                InnerAssumptionReceipt::Compact(_) => bail!(
                     "compressing composite receipts with Compact receipt assumptions is not supported"
                 ),
             },

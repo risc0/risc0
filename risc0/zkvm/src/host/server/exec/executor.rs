@@ -165,7 +165,7 @@ impl<'a> ExecutorImpl<'a> {
                                         .map(|a| {
                                             Ok(match a {
                                                 AssumptionReceipt::Proven(r) => Assumption {
-                                                    claim: r.claim()?.digest(),
+                                                    claim: r.claim_digest()?,
                                                     // TODO(victor): This is possibly a bad
                                                     // assumption. Revisit when integrating support
                                                     // for independent control roots.

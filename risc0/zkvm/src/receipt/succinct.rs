@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     receipt::{merkle::MerkleProof, VerifierContext},
-    receipt_claim::MaybePruned,
+    receipt_claim::{MaybePruned, Unknown},
     sha,
 };
 
@@ -184,6 +184,19 @@ where
         Ok(self
             .control_inclusion_proof
             .root(&self.control_id, hash_suite.hashfn.as_ref()))
+    }
+
+    /// Prunes the claim, retaining its digest, and converts into a [SuccinctReceipt] with an unknown
+    /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
+    pub fn into_unknown(self) -> SuccinctReceipt<Unknown> {
+        SuccinctReceipt {
+            claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
+            seal: self.seal,
+            control_id: self.control_id,
+            hashfn: self.hashfn,
+            verifier_parameters: self.verifier_parameters,
+            control_inclusion_proof: self.control_inclusion_proof,
+        }
     }
 }
 

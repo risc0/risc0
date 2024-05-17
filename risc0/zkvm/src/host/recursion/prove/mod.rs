@@ -18,7 +18,7 @@ pub mod preflight;
 mod program;
 pub mod zkr;
 
-use std::{collections::VecDeque, mem::take, rc::Rc};
+use std::{collections::VecDeque, fmt::Debug, mem::take, rc::Rc};
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use rand::thread_rng;
@@ -146,10 +146,13 @@ pub fn join(
 ///
 /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution using
 /// the `env::verify` API to logically verify a receipt) can be made into an unconditional receipt.
-pub fn resolve(
+pub fn resolve<Claim>(
     conditional: &SuccinctReceipt<ReceiptClaim>,
-    assumption: &SuccinctReceipt<ReceiptClaim>,
-) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    assumption: &SuccinctReceipt<Claim>,
+) -> Result<SuccinctReceipt<ReceiptClaim>>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
     tracing::debug!(
         "Proving resolve: conditional.claim = {:#?}",
         conditional.claim,
@@ -543,11 +546,14 @@ impl Prover {
     /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution
     /// using the `env::verify` API to logically verify a receipt) can be made into an
     /// unconditional receipt.
-    pub fn new_resolve(
+    pub fn new_resolve<Claim>(
         cond: &SuccinctReceipt<ReceiptClaim>,
-        assum: &SuccinctReceipt<ReceiptClaim>,
+        assum: &SuccinctReceipt<Claim>,
         opts: ProverOpts,
-    ) -> Result<Self> {
+    ) -> Result<Self>
+    where
+        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    {
         ensure!(
             cond.hashfn == "poseidon2",
             "resolve recursion program only supports poseidon2 hashfn; received {}",
@@ -579,7 +585,7 @@ impl Prover {
         // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(cond)?;
-        prover.add_segment_receipt(assum)?;
+        prover.add_generic_receipt(assum)?;
 
         let Output {
             assumptions,
@@ -668,6 +674,17 @@ impl Prover {
         Ok(())
     }
 
+    // TODO(victor): In WIP, make sure to adjust resolve such that it doesn't expect the full
+    // ReceiptClaim info for the assumption.
+    /// Add a receipt covering some generic claim. Do not include any claim information.
+    fn add_generic_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
+    where
+        Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    {
+        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)
+    }
+
+    /// Add a receipt covering rv32im execution, and include the first level of ReceiptClaim.
     fn add_segment_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();

@@ -411,20 +411,20 @@ impl Client {
                 .iter()
                 .map(|a| {
                     Ok(match a {
-                        AssumptionReceipt::Proven(receipt) => pb::api::AssumptionReceipt {
+                        AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {
                             kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
-                                    pb::core::Receipt::from(receipt.clone())
+                                    pb::core::InnerReceipt::from(inner.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )
                                 .try_into()?,
                             )),
                         },
-                        AssumptionReceipt::Unresolved(claim) => pb::api::AssumptionReceipt {
+                        AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
                             kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::MaybePruned::from(claim.clone())
+                                    pb::core::MaybePruned::from(assumption.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )

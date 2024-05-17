@@ -24,7 +24,10 @@ use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use crate::{receipt_claim::MaybePruned, sha};
+use crate::{
+    receipt_claim::{MaybePruned, Unknown},
+    sha,
+};
 
 /// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -75,6 +78,16 @@ where
 
         // Everything passed
         Ok(())
+    }
+
+    /// Prunes the claim, retaining its digest, and converts into a [CompactReceipt] with an unknown
+    /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
+    pub fn into_unknown(self) -> CompactReceipt<Unknown> {
+        CompactReceipt {
+            claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
+            seal: self.seal,
+            verifier_parameters: self.verifier_parameters,
+        }
     }
 }
 

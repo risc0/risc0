@@ -17,6 +17,7 @@ use anyhow::{bail, Result};
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt_claim::Unknown,
     ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
     VerifierContext,
 };
@@ -100,7 +101,7 @@ impl ProverServer for DevModeProver {
     fn resolve(
         &self,
         _conditional: &SuccinctReceipt<ReceiptClaim>,
-        _assumption: &SuccinctReceipt<ReceiptClaim>,
+        _assumption: &SuccinctReceipt<Unknown>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         unimplemented!("This is unsupported for dev mode.")
     }
