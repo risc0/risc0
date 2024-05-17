@@ -37,8 +37,9 @@ use crate::{
         posix_io::PosixIo,
         slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
     },
+    receipt::InnerAssumptionReceipt,
     serde::to_vec,
-    AssumptionReceipt, TraceCallback,
+    Assumption, AssumptionReceipt, TraceCallback,
 };
 
 /// A builder pattern used to construct an [ExecutorEnv].
@@ -51,10 +52,10 @@ pub struct ExecutorEnvBuilder<'a> {
 #[derive(Debug, Default)]
 pub(crate) struct AssumptionReceipts {
     pub(crate) cached: Vec<AssumptionReceipt>,
-    // An ordered list of assumptions accessed during execution.
-    // Each time an assumption is used, it is cloned and pushed to the head of the list.
+    // An ordered list of assumptions accessed during execution, along a receipt if available. Each
+    // time an assumption is used, it is cloned and pushed to the head of the list.
     #[cfg(feature = "prove")]
-    pub(crate) accessed: Vec<AssumptionReceipt>,
+    pub(crate) accessed: Vec<(Option<InnerAssumptionReceipt>, Assumption)>,
 }
 
 #[allow(dead_code)]

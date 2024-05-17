@@ -28,8 +28,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::client::env::SegmentPath, sha::Digestible, Assumption, AssumptionReceipt, Assumptions,
-    ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef, Session,
+    host::client::env::SegmentPath, AssumptionReceipt, Assumptions, ExecutorEnv, FileSegmentRef,
+    Output, Segment, SegmentRef, Session,
 };
 
 use super::{
@@ -162,24 +162,8 @@ impl<'a> ExecutorImpl<'a> {
                                         .borrow()
                                         .accessed
                                         .iter()
-                                        .map(|a| {
-                                            Ok(match a {
-                                                AssumptionReceipt::Proven(r) => Assumption {
-                                                    claim: r.claim_digest()?,
-                                                    // TODO(victor): This is possibly a bad
-                                                    // assumption. Revisit when integrating support
-                                                    // for independent control roots.
-                                                    control_root: Digest::ZERO,
-                                                }
-                                                .into(),
-                                                AssumptionReceipt::Unresolved(r) => Assumption {
-                                                    claim: r.digest(),
-                                                    control_root: Digest::ZERO,
-                                                }
-                                                .into(),
-                                            })
-                                        })
-                                        .collect::<Result<Vec<_>>>()?,
+                                        .map(|(_, a)| a.clone().into())
+                                        .collect::<Vec<_>>(),
                                 )
                                 .into(),
                             })
@@ -213,7 +197,15 @@ impl<'a> ExecutorImpl<'a> {
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+        let accessed_assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+        let assumptions = accessed_assumptions
+            .into_iter()
+            .map(|(receipt, assumption)| {
+                receipt
+                    .map(Into::into)
+                    .unwrap_or(AssumptionReceipt::Unresolved(assumption))
+            })
+            .collect::<Vec<_>>();
 
         if let Some(profiler) = self.profiler.take() {
             let report = profiler.borrow_mut().finalize_to_vec();

@@ -16,7 +16,7 @@
 
 use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use risc0_zkvm_platform::{
     fileno,
@@ -37,8 +37,9 @@ use crate::{
         posix_io::PosixIo,
         slice_io::SliceIo,
     },
-    sha::Digest,
-    AssumptionReceipt,
+    receipt::InnerAssumptionReceipt,
+    sha::{Digest, DIGEST_WORDS},
+    Assumption,
 };
 
 /// A host-side implementation of a system call.
@@ -204,18 +205,31 @@ impl SysVerify {
     }
 
     fn sys_verify_integrity(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
-        let claim_digest: Digest = from_guest
+        let claim_digest: Digest = from_guest[..DIGEST_WORDS]
+            .try_into()
+            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
+        let control_root: Digest = from_guest[DIGEST_WORDS..]
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
 
-        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(claim_digest));
+        tracing::debug!("SYS_VERIFY_INTEGRITY: ({}, {})", claim_digest, control_root);
 
         // Iterate over the list looking for a matching assumption.
-        let mut assumption: Option<AssumptionReceipt> = None;
+        let mut assumption: Option<(Option<InnerAssumptionReceipt>, Assumption)> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            // DO NOT MERGE
-            if Digest::ZERO == claim_digest {
-                assumption = Some(cached_assumption.clone());
+            let cached_claim_digest = cached_assumption
+                .claim_digest()
+                .context("failed to access claim digest on cached assumption")?;
+            // DO NOT MERGE: Check also that the control roots match... but this is probably good
+            // enough to test.
+            if cached_claim_digest == claim_digest {
+                assumption = Some((
+                    cached_assumption.as_receipt().ok().map(Clone::clone),
+                    Assumption {
+                        claim: claim_digest,
+                        control_root,
+                    },
+                ));
                 break;
             }
         }

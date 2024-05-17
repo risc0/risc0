@@ -145,7 +145,7 @@ message ExecutorEnv {
 message AssumptionReceipt {
   oneof kind {
     Asset proven = 1;     // InnerReceipt
-    Asset unresolved = 2; // MaybePruned<Assumption>
+    Asset unresolved = 2; // Assumption
   }
 }
 

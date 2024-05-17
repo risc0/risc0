@@ -464,19 +464,17 @@ pub enum AssumptionReceipt {
     /// conditional receipt. In order for the verifier to accept a
     /// conditional receipt, they must be given a [Receipt] proving the
     /// assumption, or explicitly accept the assumption without proof.
-    Unresolved(MaybePruned<Assumption>),
+    Unresolved(Assumption),
 }
 
 impl AssumptionReceipt {
-    /* Do not merge
-    /// Returns the [ReceiptClaim] for this [AssumptionReceipt].
+    /// Returns the digest of the claim for this [AssumptionReceipt].
     pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
             Self::Proven(receipt) => Ok(receipt.claim_digest()?),
-            Self::Unresolved(assumption) => todo!("DO NOT MERGE drop support for unresolved?"),
+            Self::Unresolved(assumption) => Ok(assumption.claim),
         }
     }
-    */
 
     #[cfg(feature = "prove")]
     pub(crate) fn as_receipt(&self) -> Result<&InnerAssumptionReceipt> {
@@ -487,6 +485,15 @@ impl AssumptionReceipt {
             )),
         }
     }
+
+    /*
+    pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
+        match self {
+            Self::Proven(receipt) => receipt.control_root(),
+            Self::Unresolved(assumption) => Ok(assumption.control_root),
+        }
+    }
+    */
 }
 
 impl From<Receipt> for AssumptionReceipt {
@@ -496,17 +503,24 @@ impl From<Receipt> for AssumptionReceipt {
     }
 }
 
-impl From<MaybePruned<Assumption>> for AssumptionReceipt {
-    /// Create an unresolved assumption from a [MaybePruned] [Assumption].
-    fn from(assumption: MaybePruned<Assumption>) -> Self {
-        Self::Unresolved(assumption)
+impl From<InnerReceipt> for AssumptionReceipt {
+    /// Create a proven assumption from a [InnerReceipt].
+    fn from(receipt: InnerReceipt) -> Self {
+        Self::Proven(receipt.into())
+    }
+}
+
+impl From<InnerAssumptionReceipt> for AssumptionReceipt {
+    /// Create a proven assumption from a [InnerReceipt].
+    fn from(receipt: InnerAssumptionReceipt) -> Self {
+        Self::Proven(receipt)
     }
 }
 
 impl From<Assumption> for AssumptionReceipt {
     /// Create an unresolved assumption from an [Assumption].
     fn from(assumption: Assumption) -> Self {
-        Self::Unresolved(assumption.into())
+        Self::Unresolved(assumption)
     }
 }
 
@@ -627,6 +641,17 @@ impl InnerAssumptionReceipt {
             Self::Fake(_) => Digest::ZERO,
         }
     }
+
+    /*
+    pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
+        match self {
+            Self::Composite(_) => Ok(Digest::ZERO),
+            Self::Succinct(_) => todo!(),
+            Self::Compact(_) => todo!(),
+            Self::Fake(_) => todo!(),
+        }
+    }
+    */
 }
 
 impl From<InnerReceipt> for InnerAssumptionReceipt {

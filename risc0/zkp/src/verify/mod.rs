@@ -55,7 +55,6 @@ pub enum VerificationError {
     },
     UnexpectedExitCode,
     InvalidHashSuite,
-    // TODO(victor): Extract these errors to zkVM and refactor error handling there more generally.
     VerifierParametersMissing,
     VerifierParametersMismatch {
         expected: Digest,

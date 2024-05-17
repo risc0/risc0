@@ -424,7 +424,7 @@ impl Client {
                         AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
                             kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::MaybePruned::from(assumption.clone())
+                                    pb::core::Assumption::from(assumption.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )

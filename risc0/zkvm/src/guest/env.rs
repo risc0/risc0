@@ -87,7 +87,7 @@ use crate::{
         rust_crypto::{Digest as _, Sha256},
         Digest, Digestible,
     },
-    Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 
 static mut HASHER: OnceCell<Sha256> = OnceCell::new();
@@ -187,17 +187,23 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
 
     let claim_digest = assumption_claim.digest();
 
-    // DO NOT MERGE: This value should be a hash an assumption, not of a receipt claim.
     unsafe {
-        sys_verify_integrity(claim_digest.as_ref());
-        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(claim_digest));
+        // Use the zero digest as the control root, which indicates that the assumption is a zkVM
+        // assumption to be verified with the same control root as the current execution.
+        sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        ASSUMPTIONS_DIGEST.add(
+            Assumption {
+                claim: claim_digest,
+                control_root: Digest::ZERO,
+            }
+            .into(),
+        );
     }
 
     Ok(())
 }
 
-/// Verify that there exists a valid receipt with the specified
-/// [crate::ReceiptClaim].
+/// Verify that there exists a valid receipt with the specified [crate::ReceiptClaim].
 ///
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
 /// [crate::ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
@@ -207,17 +213,16 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
 /// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
-/// [verify_integrity] is called.
+/// [verify_integrity] is called and these receipts will be rejected by this function.
 ///
 /// [composition]: https://dev.risczero.com/terminology#composition
 pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
-    let assumptions_empty = claim.output.is_none()
-        || claim
-            .output
-            .as_value()?
-            .as_ref()
-            .map_or(true, |output| output.assumptions.is_empty());
+    let assumptions_empty = claim
+        .output
+        .as_value()?
+        .as_ref()
+        .map_or(true, |output| output.assumptions.is_empty());
 
     if !assumptions_empty {
         return Err(VerifyIntegrityError::NonEmptyAssumptionsList);
@@ -225,10 +230,17 @@ pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError
 
     let claim_digest = claim.digest();
 
-    // DO NOT MERGE: This value should be a hash an assumption, not of a receipt claim.
     unsafe {
-        sys_verify_integrity(claim_digest.as_ref());
-        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(claim_digest));
+        // Use the zero digest as the control root, which indicates that the assumption is a zkVM
+        // assumption to be verified with the same control root as the current execution.
+        sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        ASSUMPTIONS_DIGEST.add(
+            Assumption {
+                claim: claim_digest,
+                control_root: Digest::ZERO,
+            }
+            .into(),
+        );
     }
 
     Ok(())
@@ -276,6 +288,31 @@ impl fmt::Display for VerifyIntegrityError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyIntegrityError {}
+
+/// Verify that there exists a valid receipt with the specified claim digest and control root.
+///
+/// This function is a generalization of [verify] and [verify_integrity] to allow verification of
+/// any claim, including claims that are not claims of zkVM execution. It can be used to verify a
+/// receipt for accelerators, such as a specialized RSA verifier. The given control root is used as
+/// a commitment to the set of recursion programs allowed to resolve the resulting assumption.
+///
+/// Do not use this method if you are looking to verify a zkVM receipt. Use [verify] or
+/// [verify_integrity] instead. This method does not check anything about the claim. In the case of
+/// zkVM execution, it is important to check that e.g. there are no assumptions on the claim.
+pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
+    unsafe {
+        sys_verify_integrity(claim.as_ref(), control_root.as_ref());
+        ASSUMPTIONS_DIGEST.add(
+            Assumption {
+                claim,
+                control_root,
+            }
+            .into(),
+        );
+    }
+
+    Ok(())
+}
 
 /// Exchanges slices of plain old data with the host.
 ///

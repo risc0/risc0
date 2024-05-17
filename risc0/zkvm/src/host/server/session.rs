@@ -40,6 +40,7 @@ pub struct PageFaults {
 /// initial memory image (which includes the starting PC) and proceeds until
 /// either a sys_halt or a sys_pause syscall is encountered. This record is
 /// stored as a vector of [Segment]s.
+#[non_exhaustive]
 pub struct Session {
     /// The constituent [Segment]s of the Session. The final [Segment] will have
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
@@ -178,9 +179,9 @@ impl Session {
                         assumptions: Assumptions(
                             self.assumptions
                                 .iter()
-                                .filter_map(|a| match a {
+                                .filter_map(|ar| match ar {
                                     AssumptionReceipt::Proven(_) => None,
-                                    AssumptionReceipt::Unresolved(r) => Some(r.clone()),
+                                    AssumptionReceipt::Unresolved(a) => Some(a.clone().into()),
                                 })
                                 .collect::<Vec<_>>(),
                         )

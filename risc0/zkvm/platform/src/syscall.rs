@@ -734,17 +734,25 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// # Safety
 ///
 /// `claim_digest` must be aligned and dereferenceable.
+/// `control_root` must be aligned and dereferenceable.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_verify_integrity(claim_digest: *const [u32; DIGEST_WORDS]) {
+pub unsafe extern "C" fn sys_verify_integrity(
+    claim_digest: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
+) {
+    let mut to_host = [0u32; DIGEST_WORDS * 2];
+    to_host[..DIGEST_WORDS].copy_from_slice(claim_digest.as_ref().unwrap_unchecked());
+    to_host[DIGEST_WORDS..].copy_from_slice(control_root.as_ref().unwrap_unchecked());
+
     let Return(a0, _) = unsafe {
         // Send the claim_digest to the host via software ecall.
         syscall_2(
             nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
-            claim_digest as u32,
-            DIGEST_BYTES as u32,
+            to_host.as_ptr() as u32,
+            (DIGEST_BYTES * 2) as u32,
         )
     };
 
