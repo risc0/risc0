@@ -38,7 +38,7 @@ use crate::{
         slice_io::SliceIo,
     },
     receipt::InnerAssumptionReceipt,
-    sha::{Digest, DIGEST_WORDS},
+    sha::{Digest, DIGEST_BYTES},
     Assumption,
 };
 
@@ -205,10 +205,10 @@ impl SysVerify {
     }
 
     fn sys_verify_integrity(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
-        let claim_digest: Digest = from_guest[..DIGEST_WORDS]
+        let claim_digest: Digest = from_guest[..DIGEST_BYTES]
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
-        let control_root: Digest = from_guest[DIGEST_WORDS..]
+        let control_root: Digest = from_guest[DIGEST_BYTES..]
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
 
@@ -224,7 +224,7 @@ impl SysVerify {
             // enough to test.
             if cached_claim_digest == claim_digest {
                 assumption = Some((
-                    cached_assumption.as_receipt().ok().map(Clone::clone),
+                    cached_assumption.as_receipt().ok().cloned(),
                     Assumption {
                         claim: claim_digest,
                         control_root,

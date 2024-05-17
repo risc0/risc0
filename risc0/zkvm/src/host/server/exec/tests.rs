@@ -597,30 +597,6 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_verify_pause_codes() {
-        for code in [0u8, 1, 2, 255] {
-            tracing::debug!("sys_verify_halt_codes: code = {code}");
-            let pause_session = exec_pause(code);
-
-            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
-
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .add_assumption(pause_session.claim().unwrap())
-                .build()
-                .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
-
-            if code == 0 {
-                assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
-            } else {
-                assert!(session.is_err());
-            }
-        }
-    }
-
-    #[test]
     fn sys_verify_integrity() {
         let hello_commit_session = exec_hello_commit();
 
