@@ -27,6 +27,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     receipt::{merkle::MerkleProof, VerifierContext},
+    receipt_claim::MaybePruned,
     sha,
 };
 
@@ -53,7 +54,7 @@ where
     /// Claim containing information about the computation that this receipt proves.
     ///
     /// The standard claim type is [ReceiptClaim], which represents a RISC-V zkVM execution.
-    pub claim: Claim,
+    pub claim: MaybePruned<Claim>,
 
     /// Name of the hash function used to create this receipt.
     pub hashfn: String,

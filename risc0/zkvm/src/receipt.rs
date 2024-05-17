@@ -39,6 +39,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
+    receipt_claim::Unknown,
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumption, Assumptions, MaybePruned, Output, ReceiptClaim,
@@ -143,23 +144,21 @@ impl Receipt {
     /// Verify that this receipt proves a successful execution of the zkVM from
     /// the given `image_id`.
     ///
-    /// Uses the zero-knowledge proof system to verify the seal, and decodes the
-    /// proven [ReceiptClaim]. This method additionally ensures that the
-    /// guest exited with a successful status code (e.g. `Halted(0)` or
-    /// `Paused(0)`), the image ID is as expected, and the journal
-    /// has not been tampered with.
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the proven
+    /// [ReceiptClaim]. This method additionally ensures that the guest exited with a successful
+    /// status code (i.e. `Halted(0)`), the image ID is as expected, and the journal has not been
+    /// tampered with.
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
 
-    /// Verify that this receipt proves a successful execution of the zkVM from
-    /// the given `image_id`.
+    /// Verify that this receipt proves a successful execution of the zkVM from the given
+    /// `image_id`.
     ///
-    /// Uses the zero-knowledge proof system to verify the seal, and decodes the
-    /// proven [ReceiptClaim]. This method additionally ensures that the
-    /// guest exited with a successful status code (e.g. `Halted(0)` or
-    /// `Paused(0)`), the image ID is as expected, and the journal
-    /// has not been tampered with.
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the proven
+    /// [ReceiptClaim]. This method additionally ensures that the guest exited with a successful
+    /// status code (i.e. `Halted(0)`), the image ID is as expected, and the journal has not been
+    /// tampered with.
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
@@ -323,51 +322,8 @@ pub enum InnerReceipt {
     Fake(FakeReceipt<ReceiptClaim>),
 }
 
-/// A fake receipt for testing and development.
-///
-/// This receipt is not valid and will fail verification unless the
-/// environment variable `RISC0_DEV_MODE` is set to `true`, in which case a
-/// pass-through 'verification' will be performed, but it *does not*
-/// represent any meaningful attestation of receipt's integrity.
-///
-/// This type solely exists to improve development experience, for further
-/// information about development-only mode see our [dev-mode
-/// documentation](https://dev.risczero.com/api/generating-proofs/dev-mode).
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(test, derive(PartialEq))]
-#[non_exhaustive]
-pub struct FakeReceipt<Claim>
-where
-    Claim: Digestible + Debug + Clone + Serialize,
-{
-    /// Claim containing information about the computation that this receipt pretends to prove.
-    ///
-    /// The standard claim type is [ReceiptClaim], which represents a RISC-V zkVM execution.
-    pub claim: Claim,
-}
-
-impl<Claim> FakeReceipt<Claim>
-where
-    Claim: Digestible + Debug + Clone + Serialize,
-{
-    /// Create a new [FakeReceipt] for the given claim.
-    pub fn new(claim: Claim) -> Self {
-        Self { claim }
-    }
-
-    /// Pretend to verify the integrity of this receipt. If not in dev mode (i.e. the RISC0_DEV_MODE environment variable is not set) this will always reject. When in dev mode, this will always pass.
-    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
-        #[cfg(feature = "std")]
-        if crate::is_dev_mode() {
-            return Ok(());
-        }
-        Err(VerificationError::InvalidProof)
-    }
-}
-
 impl InnerReceipt {
-    /// Verify the integrity of this receipt, ensuring the claim is attested
-    /// to by the seal.
+    /// Verify the integrity of this receipt, ensuring the claim is attested to by the seal.
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -426,6 +382,50 @@ impl InnerReceipt {
             InnerReceipt::Succinct(ref inner) => inner.verifier_parameters,
             InnerReceipt::Fake(_) => Digest::ZERO,
         }
+    }
+}
+
+/// A fake receipt for testing and development.
+///
+/// This receipt is not valid and will fail verification unless the
+/// environment variable `RISC0_DEV_MODE` is set to `true`, in which case a
+/// pass-through 'verification' will be performed, but it *does not*
+/// represent any meaningful attestation of receipt's integrity.
+///
+/// This type solely exists to improve development experience, for further
+/// information about development-only mode see our [dev-mode
+/// documentation](https://dev.risczero.com/api/generating-proofs/dev-mode).
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
+pub struct FakeReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
+    /// Claim containing information about the computation that this receipt pretends to prove.
+    ///
+    /// The standard claim type is [ReceiptClaim], which represents a RISC-V zkVM execution.
+    pub claim: MaybePruned<Claim>,
+}
+
+impl<Claim> FakeReceipt<Claim>
+where
+    Claim: Digestible + Debug + Clone + Serialize,
+{
+    /// Create a new [FakeReceipt] for the given claim.
+    pub fn new(claim: Claim) -> Self {
+        Self { claim }
+    }
+
+    /// Pretend to verify the integrity of this receipt. If not in dev mode (i.e. the
+    /// RISC0_DEV_MODE environment variable is not set) this will always reject. When in dev mode,
+    /// this will always pass.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        #[cfg(feature = "std")]
+        if crate::is_dev_mode() {
+            return Ok(());
+        }
+        Err(VerificationError::InvalidProof)
     }
 }
 
@@ -491,6 +491,7 @@ impl AssumptionReceipt {
     }
 }
 
+// TODO(victor) Revisit all of these conversions.
 impl From<Receipt> for AssumptionReceipt {
     /// Create a proven assumption from a [Receipt].
     fn from(receipt: Receipt) -> Self {
@@ -535,6 +536,89 @@ impl From<ReceiptClaim> for AssumptionReceipt {
             }
             .into(),
         )
+    }
+}
+
+/// An enumeration of receipt types simmilar to [InnerReceipt], but for use in [AssumptionReceipt].
+/// Instead of proving only RISC-V execution with [ReceiptClaim], this type can prove any claim
+/// implemented by one of its inner types.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
+pub enum InnerAssumptionReceipt {
+    /// A non-succinct [CompositeReceipt], made up of one inner receipt per segment and assumption.
+    Composite(CompositeReceipt),
+
+    /// A [SuccinctReceipt], proving arbitrarily the claim with a single STARK.
+    Succinct(SuccinctReceipt<Unknown>),
+
+    /// A [CompactReceipt], proving arbitrarily the claim with a single Groth16 SNARK.
+    Compact(CompactReceipt<Unknown>),
+
+    /// A [FakeReceipt], with no cryptographic integrity, used only for development.
+    Fake(FakeReceipt<Unknown>),
+}
+
+impl InnerAssumptionReceipt {
+    /// Verify the integrity of this receipt, ensuring the claim is attested to by the seal.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        tracing::debug!("InnerReceipt::verify_integrity_with_context");
+        match self {
+            InnerReceipt::Composite(inner) => inner.verify_integrity_with_context(ctx),
+            InnerReceipt::Compact(inner) => inner.verify_integrity(),
+            InnerReceipt::Succinct(inner) => inner.verify_integrity_with_context(ctx),
+            InnerReceipt::Fake(inner) => inner.verify_integrity(),
+        }
+    }
+
+    /// Returns the [InnerReceipt::Composite] arm.
+    pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
+        if let InnerReceipt::Composite(x) = self {
+            Ok(x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
+        }
+    }
+
+    /// Returns the [InnerReceipt::Compact] arm.
+    pub fn compact(&self) -> Result<&CompactReceipt<ReceiptClaim>, VerificationError> {
+        if let InnerReceipt::Compact(x) = self {
+            Ok(x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
+        }
+    }
+
+    /// Returns the [InnerReceipt::Succinct] arm.
+    pub fn succinct(&self) -> Result<&SuccinctReceipt<ReceiptClaim>, VerificationError> {
+        if let InnerReceipt::Succinct(x) = self {
+            Ok(x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
+        }
+    }
+
+    /// Extract the claim digest from this receipt.
+    pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
+        match self {
+            InnerReceipt::Composite(ref inner) => inner.claim()?.digest(),
+            InnerReceipt::Compact(ref inner) => Ok(inner.claim.digest()),
+            InnerReceipt::Succinct(ref inner) => Ok(inner.claim.digest()),
+            InnerReceipt::Fake(ref inner) => Ok(inner.claim.digest()),
+        }
+    }
+
+    /// Return the digest of the verifier parameters struct for the appropriate receipt verifier.
+    pub fn verifier_parameters(&self) -> Digest {
+        match self {
+            InnerReceipt::Composite(ref inner) => inner.verifier_parameters,
+            InnerReceipt::Compact(ref inner) => inner.verifier_parameters,
+            InnerReceipt::Succinct(ref inner) => inner.verifier_parameters,
+            InnerReceipt::Fake(_) => Digest::ZERO,
+        }
     }
 }
 

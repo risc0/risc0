@@ -24,7 +24,7 @@ use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use crate::sha;
+use crate::{receipt_claim::MaybePruned, sha};
 
 /// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -39,7 +39,7 @@ where
 
     /// [ReceiptClaim] containing information about the execution that this
     /// receipt proves.
-    pub claim: Claim,
+    pub claim: MaybePruned<Claim>,
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
     ///

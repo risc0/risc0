@@ -195,11 +195,25 @@ impl From<InvalidExitCodeError> for DecodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
 
-/// Private never type, similar to !
-/// https://doc.rust-lang.org/std/primitive.never.html
+/// A type representing an unknown claim type.
+///
+/// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
+/// only the digest of the claim is needed, and the full claim value is cannot be determined by the
+/// compiler. This allows for a collection of receipts to be created even when the underlying
+/// claims are of heterogeneous types (e.g. Vec<SuccinctReceipt<Unknown>>).
+///
+/// Note that this in an uninhabited type, simmilar to the [never type].
+///
+/// [never type]: https://doc.rust-lang.org/std/primitive.never.html
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub(crate) enum Never {}
+pub enum Unknown {}
+
+impl Digestible for Unknown {
+    fn digest<S: Sha256>(&self) -> Digest {
+        match *self { /* unreachable  */ }
+    }
+}
 
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
 /// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
@@ -210,7 +224,7 @@ pub struct Input {
     // Private field to ensure this type cannot be constructed.
     // By making this type uninhabited, it can be populated later without breaking backwards
     // compatibility.
-    pub(crate) x: Never,
+    pub(crate) x: Unknown,
 }
 
 impl Digestible for Input {
