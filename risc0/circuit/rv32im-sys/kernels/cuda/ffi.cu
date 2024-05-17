@@ -34,18 +34,6 @@ constexpr size_t kStepModeSeqReverse = 2;
 // constexpr size_t kVerifyMemBodyKind = 1;
 constexpr size_t kVerifyMemHaltKind = 2;
 
-LaunchConfig getSimpleConfig(uint32_t count) {
-  int device;
-  CUDA_OK(cudaGetDevice(&device));
-
-  int maxThreads;
-  CUDA_OK(cudaDeviceGetAttribute(&maxThreads, cudaDevAttrMaxThreadsPerBlock, device));
-
-  int block = maxThreads / 4;
-  int grid = (count + block - 1) / block;
-  return LaunchConfig{grid, block, 0};
-}
-
 struct HostContext {
   MachineContext* ctx;
 

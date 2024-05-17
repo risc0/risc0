@@ -42,17 +42,17 @@ fn build_cpu_kernels() {
 }
 
 fn build_cuda_kernels() {
-    let dir = Path::new("kernels").join("cuda");
-
     KernelBuild::new(KernelType::Cuda)
-        .file(dir.join("steps.cu"))
-        .dep(dir.join("step_compute_accum.cu"))
-        .dep(dir.join("step_verify_accum.cu"))
-        .compile("cuda_steps_fatbin");
-
-    KernelBuild::new(KernelType::Cuda)
-        .file(dir.join("eval_check.cu"))
-        .compile("cuda_eval_fatbin");
+        .files([
+            "kernels/cuda/eval_check.cu",
+            "kernels/cuda/ffi.cu",
+            "kernels/cuda/step_compute_accum.cu",
+            "kernels/cuda/step_verify_accum.cu",
+        ])
+        .deps(["kernels/cuda/kernels.h"])
+        .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
+        .include(env::var("DEP_SPPARK_ROOT").unwrap())
+        .compile("risc0_recursion_cuda");
 }
 
 fn build_metal_kernels() {
