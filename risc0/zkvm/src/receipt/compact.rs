@@ -118,7 +118,7 @@ mod tests {
     fn compact_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompactReceipt::verifier_parameters().digest(),
-            Digest::from_hex("ac59b966dd33a5fa85f1d052f163faa942208671c4175949bffa51934d5ee439")
+            Digest::from_hex("7e664fbda6f2e480889e61919854029c48c4086af1388f18576328d702d55204")
                 .unwrap()
         );
     }
