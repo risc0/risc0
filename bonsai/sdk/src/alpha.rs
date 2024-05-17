@@ -203,15 +203,17 @@ pub mod responses {
     #[derive(Deserialize, Serialize)]
     pub struct Quotas {
         /// Executor cycle limit, in millions of cycles
-        pub exec_cycle_limit: u64,
-        /// Max parallel proving units
-        pub max_parallelism: u64,
+        pub exec_cycle_limit: i64,
         /// Max concurrent proofs
-        pub concurrent_proofs: u64,
+        pub concurrent_proofs: i64,
         /// Current cycle budget remaining
-        pub cycle_budget: u64,
+        pub cycle_budget: i64,
         /// Lifetime cycles used
-        pub cycle_usage: u64,
+        pub cycle_usage: i64,
+        /// Dedicated Executor
+        pub dedicated_executor: i32,
+        /// Dedicated GPU
+        pub dedicated_gpu: i32,
     }
 }
 
@@ -1138,7 +1140,8 @@ mod tests {
             cycle_budget: 100000,
             cycle_usage: 1000000,
             exec_cycle_limit: 500,
-            max_parallelism: 2,
+            dedicated_executor: 0,
+            dedicated_gpu: 0,
         };
 
         let get_mock = server.mock(|when, then| {
@@ -1159,7 +1162,8 @@ mod tests {
         assert_eq!(quota.cycle_budget, response.cycle_budget);
         assert_eq!(quota.cycle_usage, response.cycle_usage);
         assert_eq!(quota.exec_cycle_limit, response.exec_cycle_limit);
-        assert_eq!(quota.max_parallelism, response.max_parallelism);
+        assert_eq!(quota.dedicated_executor, response.dedicated_executor);
+        assert_eq!(quota.dedicated_gpu, response.dedicated_gpu);
 
         get_mock.assert();
     }
