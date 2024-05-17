@@ -199,6 +199,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: Linux
+            feature: arm64
+            device: m6g.8xlarge
           - os: macOS
             feature: metal
             device: apple_m2_pro
@@ -258,6 +261,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: Linux
+            feature: arm64
+            device: m6g.8xlarge
           - os: macOS
             feature: metal
             device: apple_m2_pro
