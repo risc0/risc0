@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{
+    collections::BTreeMap,
     net::{SocketAddr, TcpListener},
     path::PathBuf,
     thread,
@@ -20,7 +21,7 @@ use std::{
 
 use anyhow::Result;
 use risc0_circuit_recursion::control_id::BN254_IDENTITY_CONTROL_ID;
-use risc0_zkp::core::hash::hash_suite_from_name;
+use risc0_zkp::core::hash::poseidon_254::Poseidon254HashSuite;
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     MULTI_TEST_PATH,
@@ -244,15 +245,15 @@ fn lift_join_identity() {
     let mut verifier_parameters = SuccinctReceiptVerifierParameters::default();
     verifier_parameters.control_root = MerkleGroup::new(vec![BN254_IDENTITY_CONTROL_ID])
         .unwrap()
-        .calc_root(
-            hash_suite_from_name("poseidon_254")
-                .unwrap()
-                .hashfn
-                .as_ref(),
-        );
+        .calc_root(Poseidon254HashSuite::new_suite().hashfn.as_ref());
     p254_receipt
         .verify_integrity_with_context(
-            &VerifierContext::default().with_succinct_verifier_parameters(verifier_parameters),
+            &VerifierContext::empty()
+                .with_suites(BTreeMap::from([(
+                    "poseidon_254".to_string(),
+                    Poseidon254HashSuite::new_suite(),
+                )]))
+                .with_succinct_verifier_parameters(verifier_parameters),
         )
         .unwrap();
 

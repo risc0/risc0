@@ -25,6 +25,7 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
+    receipt::VerifierContext,
     receipt_claim::{MaybePruned, Unknown},
     sha,
 };
@@ -56,21 +57,35 @@ impl<Claim> CompactReceipt<Claim>
 where
     Claim: Digestible + Debug + Clone + Serialize,
 {
-    // TODO(victor) Take in a context here.
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
-        let (a0, a1) = split_digest(ALLOWED_CONTROL_ROOT)
-            .map_err(|_| VerificationError::ReceiptFormatError)?;
+        self.verify_integrity_with_context(&VerifierContext::default())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        let params = ctx
+            .compact_verifier_parameters
+            .as_ref()
+            .ok_or(VerificationError::VerifierParametersMissing)?;
+
+        let (a0, a1) =
+            split_digest(params.control_root).map_err(|_| VerificationError::ReceiptFormatError)?;
         let (c0, c1) = split_digest(self.claim.digest::<sha::Impl>())
             .map_err(|_| VerificationError::ReceiptFormatError)?;
-        // DO NOT MERGE: Don't hex encode just to decode.
-        let id_p254_hash = fr_from_hex_string(&hex::encode(BN254_IDENTITY_CONTROL_ID))
+        let mut id_bn554: Digest = params.bn254_control_id;
+        id_bn554.as_mut_bytes().reverse();
+        let id_bn254_fr = fr_from_hex_string(&hex::encode(id_bn554))
             .map_err(|_| VerificationError::ReceiptFormatError)?;
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,
-            &[a0, a1, c0, c1, id_p254_hash],
-            &risc0_groth16::verifying_key(),
+            &[a0, a1, c0, c1, id_bn254_fr],
+            &params.verifying_key,
         )
         .map_err(|_| VerificationError::ReceiptFormatError)?
         .verify()

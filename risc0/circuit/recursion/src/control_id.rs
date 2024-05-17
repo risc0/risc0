@@ -51,7 +51,7 @@ pub const ALLOWED_CONTROL_ROOT: Digest =
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
-    digest!("10ff834dbef62ccbba201ecd26a772e3036a075aacbaf47200679a11dcdcf10d");
+    digest!("0df1dcdc119a670072f4baac5a076a03e372a726cd1e20bacb2cf6be4d83ff10");
 
 /// Control IDs for included recursion programs (ZKRs), using Poseidon2 over BabyBear.
 pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [

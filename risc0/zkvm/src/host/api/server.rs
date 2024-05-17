@@ -26,8 +26,8 @@ use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, Tcp
 use crate::{
     get_prover_server, get_version,
     host::{client::slice_io::SliceIo, server::session::NullSegmentRef},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, ReceiptClaim, Segment, SegmentReceipt,
-    SuccinctReceipt, TraceCallback, TraceEvent, VerifierContext,
+    Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, ReceiptClaim,
+    Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -618,16 +618,14 @@ fn build_env<'a>(
     for assumption in request.assumptions.iter() {
         match assumption.kind.as_ref().ok_or(malformed_err())? {
             pb::api::assumption_receipt::Kind::Proven(asset) => {
-                let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
+                let receipt: InnerAssumptionReceipt =
+                    pb::core::InnerReceipt::decode(asset.as_bytes()?)?.try_into()?;
                 env_builder.add_assumption(receipt)
             }
-            pb::api::assumption_receipt::Kind::Unresolved(_asset) => {
-                todo!()
-                /* DO NOT MERGE
-                let claim: MaybePruned<ReceiptClaim> =
-                    pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(claim)
-                */
+            pb::api::assumption_receipt::Kind::Unresolved(asset) => {
+                let assumption: Assumption =
+                    pb::core::Assumption::decode(asset.as_bytes()?)?.try_into()?;
+                env_builder.add_assumption(assumption)
             }
         };
     }

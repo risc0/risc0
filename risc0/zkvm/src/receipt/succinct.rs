@@ -107,11 +107,9 @@ where
             });
         }
 
-        // All receipts from the recursion circuit use Poseidon2 as the FRI hash
-        // function.
         let suite = ctx
             .suites
-            .get("poseidon2")
+            .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
 
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
