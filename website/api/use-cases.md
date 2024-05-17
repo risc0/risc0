@@ -50,7 +50,7 @@ Check out our [Getting Started] page.
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
-[crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
+[crate-validation]: https://reports.risczero.com/crates-validation
 [ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/main/examples/json
