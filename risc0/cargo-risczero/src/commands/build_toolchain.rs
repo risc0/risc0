@@ -31,7 +31,11 @@ const CONFIG_TOML: &'static str = include_str!("config.toml");
 
 /// `cargo risczero build-toolchain`
 #[derive(Parser)]
-pub struct BuildToolchain {}
+pub struct BuildToolchain {
+    /// Version tag of the toolchain to build.
+    #[arg(long)]
+    version: Option<String>,
+}
 
 /// Output info of a successful rust toolchain build.
 pub struct RustBuildOutput {
@@ -52,9 +56,13 @@ impl BuildToolchain {
         };
         let rust_dir = root_dir.join("rust");
 
+        let tag = match &self.version {
+            Some(tag) => tag,
+            None => RUST_BRANCH,
+        };
         let is_ci = std::env::var("CI").is_ok();
         if !is_ci {
-            self.prepare_git_repo(ToolchainRepo::Rust.url(), RUST_BRANCH, &rust_dir)?;
+            self.prepare_git_repo(ToolchainRepo::Rust.url(), tag, &rust_dir)?;
         }
 
         let out = self.build_toolchain(&rust_dir)?;
@@ -84,6 +92,12 @@ impl BuildToolchain {
             Command::new("git")
                 .args(["clone", source])
                 .arg(path)
+                .run_verbose()?;
+        } else {
+            // fetch to update tag names. Otherwise, new git tags will not appear.
+            Command::new("git")
+                .args(["fetch", "--all", "--prune"])
+                .current_dir(path)
                 .run_verbose()?;
         }
 
