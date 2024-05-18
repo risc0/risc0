@@ -1,12 +1,10 @@
 {
   "name": "web",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo build",
     "check": "cd .. && bunx @biomejs/biome check --apply-unsafe web",
+    "ci": "cd .. && bunx @biomejs/biome ci web",
     "dev": "turbo dev",
     "test": "turbo test",
     "typecheck": "turbo typecheck"
