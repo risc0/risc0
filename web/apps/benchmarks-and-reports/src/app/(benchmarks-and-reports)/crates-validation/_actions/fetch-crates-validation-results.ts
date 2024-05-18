@@ -10,7 +10,6 @@ export async function fetchCratesValidationResults({
     `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
     {
       headers: {
-        Authorization: `token ${env.GITHUB_PAT}`,
         Accept: "application/vnd.github.v3.raw",
       },
       next: { revalidate: 900 },

@@ -7,7 +7,6 @@ export async function fetchApplicationsBenchmarksCommitHash({ version }: { versi
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/COMMIT_HASH.txt`,
     {
       headers: {
-        Authorization: `token ${env.GITHUB_PAT}`,
         Accept: "application/vnd.github.v3.raw",
       },
       next: { revalidate: 900 },

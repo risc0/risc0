@@ -143,7 +143,7 @@ export function Charts() {
       <FooterAscii text="Benchmarks" />
 
       <Script
-        src="https://reports.risczero.com/benchmarks"
+        src="https://risc0.github.io/ghpages/dev/bench/data.js"
         onReady={() => {
           setReady(true);
         }}
