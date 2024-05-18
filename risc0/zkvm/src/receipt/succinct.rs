@@ -144,12 +144,11 @@ where
             .try_into()
             .map_err(|_| VerificationError::ReceiptFormatError)?;
 
-        // TODO(victor): This is not really a format error.
-        if control_root != params.control_root {
+        if control_root != params.inner_control_root.unwrap_or(params.control_root) {
             tracing::debug!(
                 "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {:?}",
                 control_root,
-                params.control_root,
+                params.inner_control_root.unwrap_or(params.control_root),
             );
             return Err(VerificationError::ControlVerificationError {
                 control_id: control_root,
@@ -201,8 +200,14 @@ where
 /// Verifier parameters used to verify a [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct SuccinctReceiptVerifierParameters {
-    /// Control root with which the receipt is expected to verify.
+    /// Control root used to verify the control ID binding the executed recursion program.
     pub control_root: Digest,
+    /// Control root used to verify the recursive control root in the output of the receipt.
+    ///
+    /// Usually, this should be set to None, which means it is equal to control_root. It may be set
+    /// to a different value than control root when switching hash functions (e.g. recursively
+    /// verifying a receipt produced with "poseidon2", producing a new receipt using "sha-256").
+    pub inner_control_root: Option<Digest>,
     /// Protocol info string distinguishing the proof system under which the receipt should verify.
     pub proof_system_info: ProtocolInfo,
     /// Protocol info string distinguishing circuit with which the receipt should verify.
@@ -216,6 +221,7 @@ impl Digestible for SuccinctReceiptVerifierParameters {
             "risc0.SuccinctReceiptVerifierParameters",
             &[
                 self.control_root,
+                self.inner_control_root.unwrap_or(self.control_root),
                 *S::hash_bytes(&self.proof_system_info.0),
                 *S::hash_bytes(&self.circuit_info.0),
             ],
@@ -229,6 +235,7 @@ impl Default for SuccinctReceiptVerifierParameters {
     fn default() -> Self {
         Self {
             control_root: ALLOWED_CONTROL_ROOT,
+            inner_control_root: None,
             proof_system_info: PROOF_SYSTEM_INFO,
             circuit_info: risc0_circuit_recursion::CircuitImpl::CIRCUIT_INFO,
         }

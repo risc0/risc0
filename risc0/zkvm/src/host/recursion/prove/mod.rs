@@ -227,6 +227,7 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     let control_root = control_inclusion_proof.root(&receipt.control_id, hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
         control_root,
+        inner_control_root: Some(a.control_root()?),
         proof_system_info: PROOF_SYSTEM_INFO,
         circuit_info: CircuitImpl::CIRCUIT_INFO,
     };
