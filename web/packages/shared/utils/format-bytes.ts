@@ -8,6 +8,10 @@ export function formatBytes(bytes: number) {
     return;
   }
 
+  if (bytes === 0) {
+    return "N/A";
+  }
+
   let unitIndex = 0;
 
   while (bytes >= 1024 && unitIndex < UNITS.length - 1) {

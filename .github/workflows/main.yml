@@ -30,6 +30,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
@@ -52,6 +53,11 @@ jobs:
               - Cargo.toml
               - rust-toolchain.toml
               - Cargo.lock
+            browser:
+              - *base
+              - examples/browser-verify/**
+              - risc0/**
+              - xtask/**
             check-external:
               - *base
               - external/**
@@ -86,16 +92,14 @@ jobs:
             test-crates:
               - *base
               - risc0/**
-            web:
-              - *base
-              - examples/browser-verify/**
-              - risc0/**
-              - xtask/**
+            test-crates:
+              - web/**
 
   # see: https://github.com/orgs/community/discussions/26822
   main-status-check:
     if: always()
     needs:
+      - browser
       - check
       - check-external
       - check-template
@@ -105,8 +109,8 @@ jobs:
       - examples
       - docker
       - test
-      # - test-crates
       - web
+      # - test-crates
     runs-on: ubuntu-latest
     steps:
       - name: Check all job status
@@ -424,8 +428,8 @@ jobs:
         working-directory: tools/crates-validator
       - run: sccache --show-stats
 
-  web:
-    if: needs.changes.outputs.web == 'true'
+  browser:
+    if: needs.changes.outputs.browser == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
     env:
@@ -470,3 +474,15 @@ jobs:
         env:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
+
+  web:
+    if: needs.changes.outputs.test == 'true'
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - run: bun run ci
+      - run: bun run typecheck
+      - run: bun run test
