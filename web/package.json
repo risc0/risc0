@@ -24,7 +24,7 @@
     "@vercel/analytics": "1.2.2",
     "@vercel/edge-config": "1.1.0",
     "@vercel/speed-insights": "1.0.10",
-    "babel-plugin-react-compiler": "^0.0.0-experimental-c23de8d-20240515",
+    "babel-plugin-react-compiler": "^0.0.0-experimental-592953e-20240517",
     "chart.js": "2.9.4",
     "deepmerge": "4.3.1",
     "lucide-react": "0.378.0",
