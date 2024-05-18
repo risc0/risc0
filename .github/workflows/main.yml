@@ -476,7 +476,7 @@ jobs:
       - run: sccache --show-stats
 
   web:
-    if: needs.changes.outputs.test == 'true'
+    if: needs.changes.outputs.web == 'true'
     needs: changes
     runs-on: ubuntu-latest
     steps:
