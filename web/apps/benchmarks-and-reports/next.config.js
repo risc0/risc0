@@ -12,6 +12,7 @@ let config = {
   experimental: {
     caseSensitiveRoutes: true,
     ppr: true,
+    reactCompiler: true,
   },
   images: {
     dangerouslyAllowSVG: false,

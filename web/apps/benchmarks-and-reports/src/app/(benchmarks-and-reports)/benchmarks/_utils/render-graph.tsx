@@ -13,7 +13,7 @@ const TOOL_COLORS = {
   julia: "#a270ba",
   jmh: "#b07219",
   benchmarkdotnet: "#178600",
-  customBiggerIsBetter: "#38ff38",
+  customBiggerIsBetter: "#020077",
   customSmallerIsBetter: "#ff3838",
   _: "#333333",
 };

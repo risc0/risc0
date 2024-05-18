@@ -12,7 +12,7 @@ export function ChartsList({ charts, selectedPlatform }) {
           // biome-ignore lint/correctness/useJsxKeyInIterable: no need for flatMap
           chart.name === selectedPlatform
             ? [
-                <CommandGroup key={chart.name} heading={chart.name}>
+                <CommandGroup key={chart.name}>
                   {[...chart.dataSet.keys()].map((benchmark) => (
                     <Link tabIndex={-1} key={`${chart.name}-${benchmark}`} scroll href={`#${chart.name}-${benchmark}`}>
                       <CommandItem className="cursor-pointer">{benchmark}</CommandItem>
