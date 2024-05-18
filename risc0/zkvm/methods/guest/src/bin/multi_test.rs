@@ -187,7 +187,8 @@ fn main() {
         }
         MultiTestSpec::SysVerifyIntegrity { claim_words } => {
             let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
-            env::verify_integrity(&claim).unwrap();
+            // NOTE: This panic string is used in a test.
+            env::verify_integrity(&claim).expect("env::verify_integrity returned error");
         }
         MultiTestSpec::Echo { bytes } => {
             env::commit_slice(&bytes);

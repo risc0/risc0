@@ -757,7 +757,8 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_receipt().claim().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
+                .unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -810,7 +811,7 @@ mod sys_verify {
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&halt_receipt.claim().unwrap()).unwrap(),
+            claim_words: to_vec(halt_receipt.claim().unwrap().as_value().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.

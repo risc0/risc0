@@ -683,8 +683,8 @@ mod sys_verify {
 
         // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
-        let pruned_claim =
-            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.claim().unwrap().digest());
+        let mut pruned_claim: ReceiptClaim = hello_commit_session.claim().unwrap();
+        pruned_claim.output = MaybePruned::Pruned(pruned_claim.output.digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&pruned_claim).unwrap(),
         };
@@ -698,10 +698,16 @@ mod sys_verify {
             .unwrap();
 
         // Result of execution should be a guest panic resulting from the pruned input.
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        let err = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
-            .is_err());
+            .map(|_| ())
+            .unwrap_err();
+
+        tracing::debug!("err: {err}");
+        assert!(err
+            .to_string()
+            .contains("env::verify_integrity returned error"));
     }
 }
 
