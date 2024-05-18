@@ -92,7 +92,7 @@ jobs:
             test-crates:
               - *base
               - risc0/**
-            test-crates:
+            web:
               - web/**
 
   # see: https://github.com/orgs/community/discussions/26822
@@ -109,8 +109,8 @@ jobs:
       - examples
       - docker
       - test
-      - web
       # - test-crates
+      - web
     runs-on: ubuntu-latest
     steps:
       - name: Check all job status
