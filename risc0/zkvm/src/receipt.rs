@@ -441,10 +441,6 @@ pub struct ReceiptMetadata {
     pub verifier_parameters: Digest,
 }
 
-// TODO(victor): AssumptionReceipt is not the best name. Also, it needs to encode the control root
-// for proven assumptions somehow.
-// TODO(victor): Top-level receipt type can only be inhabited by inner receipts with claims of type
-// ReceiptClaim. Need a way to add (inner) receipts for assumptions that are not of that type.
 /// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -456,14 +452,12 @@ pub enum AssumptionReceipt {
     /// [Receipt::verify] will return true and the verifier will accept the receipt.
     Proven(InnerAssumptionReceipt),
 
-    // TODO(victor): Adjust comment
-    /// [ReceiptClaim] digest for an assumption that is not directly proven
-    /// to be true.
+    /// An [Assumption] that is not directly proven to be true.
     ///
-    /// Proving an execution with an unresolved assumption will result in a
-    /// conditional receipt. In order for the verifier to accept a
-    /// conditional receipt, they must be given a [Receipt] proving the
-    /// assumption, or explicitly accept the assumption without proof.
+    /// Proving an execution with an unresolved assumption will result in a conditional receipt. In
+    /// order for the verifier to accept a conditional receipt, they must be given a
+    /// [AssumptionReceipt] proving the assumption, or explicitly accept the assumption without
+    /// proof.
     Unresolved(Assumption),
 }
 
