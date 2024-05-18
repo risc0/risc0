@@ -665,13 +665,6 @@ pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
     pub suites: BTreeMap<String, HashSuite<BabyBear>>,
 
-    // TODO(victor): Should I actually use verifier parameters here? The info string, for instance,
-    // is currently hard coded. Also we don't actually need folks to touch those parameters
-    // anyway. Really, the protocol info strings are stand-ins for all the code required for e.g. a
-    // procing system or a circuit's contraints. If the value is no recognized by the
-    // implementation, then there is no amount of data they could pass in here to have it be
-    // supported. In the future, when multiple versions are supported, maybe this string will be
-    // used to e.g. differentiate proof system and circuit revisions.
     /// Parameters for verification of [SegmentReceipt].
     pub segment_verifier_parameters: Option<SegmentReceiptVerifierParameters>,
 
