@@ -34,6 +34,7 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 metal = { version = "0.28", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+risc0-sys = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false, optional = true }
 
 [dev-dependencies]
@@ -44,6 +45,7 @@ cuda = [
   "dep:cust",
   "prove",
   "risc0-circuit-rv32im-sys/cuda",
+  "risc0-sys?/cuda",
   "risc0-zkp/cuda",
   "std",
 ]
@@ -52,6 +54,7 @@ metal = [
   "dep:metal",
   "prove",
   "risc0-circuit-rv32im-sys/metal",
+  "risc0-sys?/metal",
   "risc0-zkp/metal",
 ]
 prove = [
@@ -64,6 +67,7 @@ prove = [
   "dep:nvtx",
   "dep:rand",
   "dep:rayon",
+  "dep:risc0-sys",
   "dep:sha2",
   "risc0-zkp/prove",
   "risc0-circuit-rv32im-sys",

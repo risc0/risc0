@@ -16,11 +16,12 @@ use std::{collections::HashMap, ffi::c_void, rc::Rc};
 
 use anyhow::{bail, Result};
 use metal::{ComputePipelineDescriptor, MTLResourceOptions, MTLResourceUsage};
-use risc0_circuit_rv32im_sys::ffi::{Error, RawPreflightTrace};
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, RootsOfUnity,
 };
+use risc0_sys::CppError;
 use risc0_zkp::{
     core::log2_ceil,
     field::Elem as _,
@@ -91,7 +92,7 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
                 ctrl: *const BabyBearElem,
                 io: *const BabyBearElem,
                 data: *const BabyBearElem,
-            ) -> Error;
+            ) -> CppError;
         }
 
         unsafe {

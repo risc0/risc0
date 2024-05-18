@@ -37,7 +37,7 @@ fn build_cpu_kernels() {
 }
 
 fn build_cuda_kernels() {
-    KernelBuild::new(KernelType::CudaLink)
+    KernelBuild::new(KernelType::Cuda)
         .files([
             "kernels/cuda/ffi.cu",
             "kernels/cuda/step_compute_accum.cu",
@@ -54,13 +54,13 @@ fn build_cuda_kernels() {
         .deps([
             "kernels/cuda/bigint.cu",
             "kernels/cuda/context.h",
-            "kernels/cuda/cuda.h",
             "kernels/cuda/extern.h",
             "kernels/cuda/extern.cuh",
             "kernels/cuda/kernels.h",
         ])
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
+        .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_rv32im_cuda");
 }
 

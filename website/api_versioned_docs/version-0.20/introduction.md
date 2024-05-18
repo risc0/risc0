@@ -126,7 +126,7 @@ list][mailing-list] to get our latest announcements.
 [Bonsai]: ./bonsai/bonsai-overview.md
 [chess]: https://github.com/risc0/risc0/tree/release-0.20/examples/chess
 [continuations]: https://risczero.com/news/continuations
-[crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
+[crate-validation]: https://reports.risczero.com/crates-validation
 [discord]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-0.20/examples/ecdsa
 [JSON]: https://github.com/risc0/risc0/tree/release-0.20/examples/json

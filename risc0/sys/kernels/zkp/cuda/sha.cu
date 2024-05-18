@@ -14,21 +14,14 @@
 
 #include "sha256.h"
 
-extern "C" __global__
-void sha_rows(ShaDigest* out,
-              const Fp* matrix,
-              uint32_t count,
-              uint32_t colSize) {
+__global__ void sha_rows(ShaDigest* out, const Fp* matrix, uint32_t count, uint32_t colSize) {
   uint32_t idx = blockDim.x * blockIdx.x + threadIdx.x;
   if (idx < count) {
     out[idx] = shaHash(matrix + idx, colSize, count, false);
   }
 }
 
-extern "C" __global__
-void sha_fold(ShaDigest* out,
-              const ShaDigest* in,
-              uint32_t count) {
+__global__ void sha_fold(ShaDigest* out, const ShaDigest* in, uint32_t count) {
   uint32_t idx = blockDim.x * blockIdx.x + threadIdx.x;
   if (idx < count) {
     out[idx] = shaHashPair(in[2 * idx], in[2 * idx + 1]);
