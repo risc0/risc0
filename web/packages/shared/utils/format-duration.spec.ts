@@ -25,7 +25,7 @@ describe('formatDuration', () => {
   });
 
   it('should return minutes correctly', () => {
-    expect(formatDuration(1000 * 1000 * 1000 * 60)).toBe('1.00min');
+    expect(formatDuration(1000 * 1000 * 1000 * 60)).toBe('1.00m');
   });
 
   it('should return hours correctly', () => {
