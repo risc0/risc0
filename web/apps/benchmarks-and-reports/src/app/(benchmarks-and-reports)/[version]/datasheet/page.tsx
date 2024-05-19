@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { DATASHEET_DESCRIPTION } from "../_utils/constants";
 import { DatasheetContent } from "./_components/datasheet-content";
+import { DatasheetSkeleton } from "./_components/datasheet-skeleton";
 
 export const metadata: Metadata = {
   title: "Datasheet",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 export default function DatasheetPage({ params }) {
   return (
     <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-2">
-      <Suspense fallback={<SuspenseLoader />}>
+      <Suspense fallback={<DatasheetSkeleton />}>
         <DatasheetContent version={params.version} />
       </Suspense>
     </div>

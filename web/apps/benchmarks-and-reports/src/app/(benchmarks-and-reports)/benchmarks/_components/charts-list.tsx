@@ -9,6 +9,7 @@ export function ChartsList({ charts, selectedPlatform }) {
       <CommandList className="max-h-[calc(100dvh-19.5rem)] overscroll-contain">
         <CommandEmpty>No Results</CommandEmpty>
         {charts.flatMap((chart) =>
+          // biome-ignore lint/correctness/useJsxKeyInIterable: ignore jsx key
           chart.name === selectedPlatform
             ? [
                 <CommandGroup key={chart.name}>
