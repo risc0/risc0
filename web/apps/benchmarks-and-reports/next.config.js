@@ -18,6 +18,11 @@ let config = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
 
   // biome-ignore lint/suspicious/useAwait: needs to be async
   async redirects() {

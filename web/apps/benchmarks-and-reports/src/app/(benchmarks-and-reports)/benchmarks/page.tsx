@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: `https://reports-and-benchmarks-risczero.vercel.app/api/og?title=Benchmarks&description=${encodeURIComponent(
+        url: `https://benchmarks.risczero.com/api/og?title=Benchmarks&description=${encodeURIComponent(
           BENCHMARKS_DESCRIPTION,
         )}`,
       },

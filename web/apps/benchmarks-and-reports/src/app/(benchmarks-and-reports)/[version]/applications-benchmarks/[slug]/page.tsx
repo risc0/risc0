@@ -19,7 +19,7 @@ export function generateMetadata({ params }) {
     openGraph: {
       images: [
         {
-          url: `https://reports-and-benchmarks-risczero.vercel.app/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+          url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
             APPLICATIONS_BENCHMARKS_DESCRIPTION,
           )}`,
         },
