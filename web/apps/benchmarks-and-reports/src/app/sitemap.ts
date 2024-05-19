@@ -1,5 +1,6 @@
 export const baseUrl = "https://benchmarks.risczero.com";
 
+// @TODO: make this smarter
 export default async function sitemap() {
   const routes = [
     "/benchmarks",
