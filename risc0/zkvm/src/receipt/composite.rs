@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::vec::Vec;
+use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -28,7 +28,7 @@ use super::{
     CompactReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
-use crate::{sha, InnerAssumptionReceipt, MaybePruned, ReceiptClaim};
+use crate::{sha, Assumptions, InnerAssumptionReceipt, MaybePruned, Output, ReceiptClaim};
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single
 /// execution with continuations, and zero or more [Receipt](crate::Receipt) structs proving any
@@ -105,10 +105,15 @@ impl CompositeReceipt {
             }
         }
 
-        // Verify all assumption receipts attached to this composite receipt.
-        for receipt in self.assumption_receipts.iter() {
+        // Verify all assumptions on the receipt are resolved by attached receipts.
+        for (_assumption, receipt) in self
+            .assumptions()?
+            .iter()
+            .zip(self.assumption_receipts.iter())
+        {
             tracing::debug!("verifying assumption: {:?}", receipt.claim_digest()?);
             receipt.verify_integrity_with_context(ctx)?;
+            // DO NOT MERGE: Check that the receipt satisfies the assumption.
         }
 
         Ok(())
@@ -127,15 +132,46 @@ impl CompositeReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?
             .claim;
 
-        // TODO(victor): Filter out proven assumptions from the final output here.
+        // Remove the assumptions from the last receipt claim, as the verify routine requires every
+        // assumption to have an associated verifiable receipt.
+        // TODO(#982) Support unresolved assumptions here by only removing the proven assumptions.
+        let output = last_claim
+            .output
+            .as_value()
+            .map_err(|_| VerificationError::ReceiptFormatError)?
+            .as_ref()
+            .map(|output| Output {
+                journal: output.journal.clone(),
+                assumptions: vec![].into(),
+            })
+            .into();
 
         Ok(ReceiptClaim {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
             input: first_claim.input.clone(),
-            output: last_claim.output.clone(),
+            output,
         })
+    }
+
+    fn assumptions(&self) -> Result<Assumptions, VerificationError> {
+        Ok(self
+            .segments
+            .last()
+            .ok_or(VerificationError::ReceiptFormatError)?
+            .claim
+            .output
+            .as_value()
+            .map_err(|_| VerificationError::ReceiptFormatError)?
+            .as_ref()
+            .map(|output| match output.assumptions.is_empty() {
+                true => Ok(Default::default()),
+                false => output.assumptions.as_value().cloned(),
+            })
+            .transpose()
+            .map_err(|_| VerificationError::ReceiptFormatError)?
+            .unwrap_or_default())
     }
 }
 

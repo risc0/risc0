@@ -269,7 +269,7 @@ impl Digestible for Output {
 /// only a receipt proving that statement can be used to resolve and remove the assumption.
 ///
 /// [assumption]: https://dev.risczero.com/terminology#assumption
-#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Assumption {
     /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
     /// be the digest of the claim for a different circuit such as an accelerator.

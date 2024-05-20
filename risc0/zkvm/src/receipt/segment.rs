@@ -118,8 +118,10 @@ impl SegmentReceipt {
                 decoded_claim,
                 self.claim,
             );
-            return Err(VerificationError::ReceiptFormatError); // TODO(victor): This is not really
-                                                               // a format error.
+            return Err(VerificationError::ClaimDigestMismatch {
+                expected: self.claim.digest::<sha::Impl>(),
+                received: decoded_claim.digest::<sha::Impl>(),
+            });
         }
         Ok(())
     }
