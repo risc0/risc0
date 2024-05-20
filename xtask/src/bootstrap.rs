@@ -92,17 +92,6 @@ impl Bootstrap {
             control_id_blake2b[8],
             control_id_blake2b[9],
             control_id_blake2b[10],
-            control_id_poseidon2[0],
-            control_id_poseidon2[1],
-            control_id_poseidon2[2],
-            control_id_poseidon2[3],
-            control_id_poseidon2[4],
-            control_id_poseidon2[5],
-            control_id_poseidon2[6],
-            control_id_poseidon2[7],
-            control_id_poseidon2[8],
-            control_id_poseidon2[9],
-            control_id_poseidon2[10],
         );
         tracing::debug!("contents of rv32im control_id.rs:\n{contents}");
 

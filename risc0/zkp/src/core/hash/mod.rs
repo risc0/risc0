@@ -19,7 +19,6 @@ pub mod poseidon;
 pub mod poseidon2;
 #[cfg(feature = "prove")]
 pub mod poseidon_254;
-pub mod poseidon2;
 pub mod sha;
 
 use alloc::{boxed::Box, rc::Rc, string::String};
