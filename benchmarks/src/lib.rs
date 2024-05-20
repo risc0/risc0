@@ -26,20 +26,26 @@ use risc0_zkvm::{
     get_prover_server, sha::Digest, ExecutorEnv, ExecutorImpl, ProverOpts, Session, VerifierContext,
 };
 use serde::Serialize;
+use serde_with::{serde_as, DurationNanoSeconds};
 use tabled::{settings::Style, Table, Tabled};
 
+#[serde_as]
 #[derive(Serialize, Tabled)]
 pub struct Metrics {
     pub name: String,
     pub size: usize,
     #[tabled(display_with = "display_speed")]
     pub speed: f32,
+    #[serde_as(as = "DurationNanoSeconds")]
     #[tabled(display_with = "display_duration")]
     pub exec_duration: Duration,
+    #[serde_as(as = "DurationNanoSeconds")]
     #[tabled(display_with = "display_duration")]
     pub proof_duration: Duration,
+    #[serde_as(as = "DurationNanoSeconds")]
     #[tabled(display_with = "display_duration")]
     pub total_duration: Duration,
+    #[serde_as(as = "DurationNanoSeconds")]
     #[tabled(display_with = "display_duration")]
     pub verify_duration: Duration,
     #[tabled(display_with = "display_cycles")]
@@ -154,10 +160,7 @@ pub fn run_jobs(out_path: &Path, jobs: Vec<Job>) -> Vec<Metrics> {
         out_path.display()
     );
 
-    let mut out = csv::WriterBuilder::new()
-        .has_headers(false)
-        .from_path(out_path)
-        .unwrap();
+    let mut out = csv::WriterBuilder::new().from_path(out_path).unwrap();
 
     let mut all_metrics = Vec::new();
 

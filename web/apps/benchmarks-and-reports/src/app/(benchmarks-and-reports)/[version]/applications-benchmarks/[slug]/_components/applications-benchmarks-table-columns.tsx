@@ -10,36 +10,28 @@ import type { ApplicationsBenchmarksTableSchema } from "./applications-benchmark
 const columnHelper = createColumnHelper<ApplicationsBenchmarksTableSchema>();
 
 export const applicationsBenchmarksTableColumns = [
-  columnHelper.accessor("job_name", {
-    header: ({ column }) => <TableColumnHeader column={column} title="Job Name" />,
+  columnHelper.accessor("name", {
+    header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
     cell: (info) => <div className="font-mono">{info.getValue()}</div>,
   }),
-  columnHelper.accessor("job_size", {
-    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Job Size" />,
+  columnHelper.accessor("size", {
+    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Size" />,
     cell: (info) => <div className="text-right font-mono">{formatNumber(info.getValue())}</div>,
   }),
-  columnHelper.accessor("exec_duration", {
-    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Execution Duration" />,
-    cell: (info) => <div className="text-right font-mono">{formatDuration(Number(info.getValue()))}</div>,
+  columnHelper.accessor("speed", {
+    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Speed" />,
+    cell: (info) => <div className="text-right font-mono">{formatNumber(Number(info.getValue()))}</div>,
   }),
-  columnHelper.accessor("proof_duration", {
+  columnHelper.accessor("total_duration", {
     header: ({ column }) => <TableColumnHeader align="right" column={column} title="Proof Duration" />,
     cell: (info) => <div className="text-right font-mono">{formatDuration(Number(info.getValue()))}</div>,
   }),
-  columnHelper.accessor("total_duration", {
-    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Total Duration" />,
-    cell: (info) => <div className="text-right font-mono">{formatDuration(Number(info.getValue()))}</div>,
-  }),
-  columnHelper.accessor("verify_duration", {
-    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Verify Duration" />,
-    cell: (info) => <div className="text-right font-mono">{formatDuration(Number(info.getValue()))}</div>,
-  }),
-  columnHelper.accessor("insn_cycles", {
-    header: ({ column }) => <TableColumnHeader align="right" column={column} title="INSN Cycles" />,
+  columnHelper.accessor("user_cycles", {
+    header: ({ column }) => <TableColumnHeader align="right" column={column} title="User Cycles" />,
     cell: (info) => <div className="text-right font-mono">{formatNumber(info.getValue())}</div>,
   }),
-  columnHelper.accessor("prove_cycles", {
-    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Prove Cycles" />,
+  columnHelper.accessor("total_cycles", {
+    header: ({ column }) => <TableColumnHeader align="right" column={column} title="Total Cycles" />,
     cell: (info) => <div className="text-right font-mono">{formatNumber(info.getValue())}</div>,
   }),
   columnHelper.accessor("proof_bytes", {
