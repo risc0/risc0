@@ -1,11 +1,11 @@
-import { Tabs, TabsList, TabsOverflowWrapper, TabsTrigger } from "@risc0/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import pick from "lodash-es/pick";
 import Link from "next/link";
 import { Suspense } from "react";
-import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { replace } from "string-ts";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
 import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
+import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
 export function generateMetadata({ params }) {
@@ -44,7 +44,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
       </TabsList>
 
       <div className="mt-4">
-        <Suspense fallback={<SuspenseLoader />}>
+        <Suspense fallback={<ApplicationsBenchmarksSkeleton />}>
           <ApplicationsBenchmarksContent version={params.version} currentTab={params.slug} />
         </Suspense>
       </div>
