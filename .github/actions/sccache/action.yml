@@ -92,7 +92,7 @@ runs:
     - name: TEST - Check runner root objects
       run: |
         pwd
-        ls -lht /
+        ls -lht ../../../
       shell: bash
 
     - name: (External PR) Install AWS Signer (Linux)
