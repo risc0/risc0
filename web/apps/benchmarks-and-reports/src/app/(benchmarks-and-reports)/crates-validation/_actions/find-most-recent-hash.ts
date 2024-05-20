@@ -7,7 +7,6 @@ export async function findMostRecentHash() {
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
       headers: {
-        Authorization: `token ${env.GITHUB_PAT}`,
         Accept: "application/vnd.github.v3.raw",
       },
       next: { revalidate: 900 },

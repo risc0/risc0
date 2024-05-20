@@ -4,8 +4,14 @@ on:
   merge_group:
   push:
     branches: [main, "release-*"]
+    paths:
+      - .github/workflows/bench_pr.yml
+      - risc0/**
   pull_request:
     branches: [main, "release-*"]
+    paths:
+      - .github/workflows/bench_pr.yml
+      - risc0/**
   workflow_dispatch:
 
 concurrency:
