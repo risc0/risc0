@@ -158,7 +158,7 @@ mod tests {
     fn compact_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompactReceiptVerifierParameters::default().digest(),
-            digest!("ac59b966dd33a5fa85f1d052f163faa942208671c4175949bffa51934d5ee439")
+            digest!("948bbf8ddb33a80a3eea16e7d57a6e7ca72dfdfa09f5b220672f5bbb14794659")
         );
     }
 }
