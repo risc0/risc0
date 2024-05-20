@@ -17,7 +17,9 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
+use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
+    adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
     verify::VerificationError,
 };
@@ -28,7 +30,9 @@ use super::{
     CompactReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
-use crate::{sha, Assumptions, InnerAssumptionReceipt, MaybePruned, Output, ReceiptClaim};
+use crate::{
+    sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+};
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single
 /// execution with continuations, and zero or more [Receipt](crate::Receipt) structs proving any
@@ -106,14 +110,38 @@ impl CompositeReceipt {
         }
 
         // Verify all assumptions on the receipt are resolved by attached receipts.
-        for (_assumption, receipt) in self
+        for (assumption, receipt) in self
             .assumptions()?
-            .iter()
+            .into_iter()
             .zip(self.assumption_receipts.iter())
         {
-            tracing::debug!("verifying assumption: {:?}", receipt.claim_digest()?);
-            receipt.verify_integrity_with_context(ctx)?;
-            // DO NOT MERGE: Check that the receipt satisfies the assumption.
+            let assumption_ctx = match assumption.control_root {
+                // If the control root is all zeroes, we should use the same verifier paramters.
+                Digest::ZERO => None,
+                // Otherwise, we should verify the assumption receipt using the guest-provided root.
+                control_root => Some(
+                    VerifierContext::empty()
+                        .with_suites(ctx.suites.clone())
+                        .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
+                            control_root,
+                            inner_control_root: None,
+                            proof_system_info: PROOF_SYSTEM_INFO,
+                            circuit_info: CircuitImpl::CIRCUIT_INFO,
+                        }),
+                ),
+            };
+            tracing::debug!("verifying assumption: {assumption:?}");
+            receipt.verify_integrity_with_context(assumption_ctx.as_ref().unwrap_or(ctx))?;
+            if receipt.claim_digest()? != assumption.claim {
+                tracing::debug!(
+                    "verifying assumption failed due to claim mismatch: assumption: {assumption:?}, receipt claim digest: {}",
+                    receipt.claim_digest()?
+                );
+                return Err(VerificationError::ClaimDigestMismatch {
+                    expected: assumption.claim,
+                    received: receipt.claim_digest()?,
+                });
+            }
         }
 
         Ok(())
@@ -155,7 +183,9 @@ impl CompositeReceipt {
         })
     }
 
-    fn assumptions(&self) -> Result<Assumptions, VerificationError> {
+    fn assumptions(&self) -> Result<Vec<Assumption>, VerificationError> {
+        // Collect the assumptions from the output of the last segment, handling any pruned values
+        // encountered and returning and empty list if the output is None.
         Ok(self
             .segments
             .last()
@@ -167,10 +197,15 @@ impl CompositeReceipt {
             .as_ref()
             .map(|output| match output.assumptions.is_empty() {
                 true => Ok(Default::default()),
-                false => output.assumptions.as_value().cloned(),
+                false => Ok(output
+                    .assumptions
+                    .as_value()?
+                    .iter()
+                    .map(|a| a.as_value().cloned())
+                    .collect::<Result<_, _>>()?),
             })
             .transpose()
-            .map_err(|_| VerificationError::ReceiptFormatError)?
+            .map_err(|_: PrunedValueError| VerificationError::ReceiptFormatError)?
             .unwrap_or_default())
     }
 }

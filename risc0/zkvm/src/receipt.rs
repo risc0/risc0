@@ -671,6 +671,15 @@ impl VerifierContext {
         }
     }
 
+    /// Return the mapping of hash suites used in the defaul [VerifierContext].
+    pub fn default_hash_suites() -> BTreeMap<String, HashSuite<BabyBear>> {
+        BTreeMap::from([
+            ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
+            ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
+            ("sha-256".into(), Sha256HashSuite::new_suite()),
+        ])
+    }
+
     /// Return [VerifierContext] with the given map of hash suites.
     pub fn with_suites(mut self, suites: BTreeMap<String, HashSuite<BabyBear>>) -> Self {
         self.suites = suites;
@@ -720,11 +729,7 @@ impl VerifierContext {
 impl Default for VerifierContext {
     fn default() -> Self {
         Self {
-            suites: BTreeMap::from([
-                ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
-                ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
-                ("sha-256".into(), Sha256HashSuite::new_suite()),
-            ]),
+            suites: Self::default_hash_suites(),
             segment_verifier_parameters: Some(Default::default()),
             succinct_verifier_parameters: Some(Default::default()),
             compact_verifier_parameters: Some(Default::default()),
