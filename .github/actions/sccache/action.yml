@@ -93,9 +93,11 @@ runs:
       if: >
         runner.os == 'Linux' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+      env:
+        LINUX_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper
       run: |
         mkdir -p $HOME/.local/aws
-        curl https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper -o $HOME/.local/aws/aws_signing_helper
+        curl $LINUX_SIGNER_URL -o $HOME/.local/aws/aws_signing_helper
         chmod +x $HOME/.local/aws/aws_signing_helper
       shell: bash
 
@@ -103,9 +105,11 @@ runs:
       if: >
         runner.os == 'macOS' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+      env:
+        DARWIN_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Darwin/aws_signing_helper
       run: |
         mkdir -p $HOME/.local/aws
-        curl https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Darwin/aws_signing_helper -o $HOME/.local/aws/aws_signing_helper
+        curl $DARWIN_SIGNER_URL -o $HOME/.local/aws/aws_signing_helper
         chmod +x $HOME/.local/aws/aws_signing_helper
       shell: bash
 
