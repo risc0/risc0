@@ -89,6 +89,10 @@ runs:
         sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
         use-fallback: false
 
+    - name: TEST - Check runner root objects
+      run: ls -lht /
+      shell: bash
+
     - name: (External PR) Install AWS Signer (Linux)
       if: >
         runner.os == 'Linux' &&
