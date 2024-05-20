@@ -30,6 +30,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
@@ -52,6 +53,11 @@ jobs:
               - Cargo.toml
               - rust-toolchain.toml
               - Cargo.lock
+            browser:
+              - *base
+              - examples/browser-verify/**
+              - risc0/**
+              - xtask/**
             check-external:
               - *base
               - external/**
@@ -87,15 +93,13 @@ jobs:
               - *base
               - risc0/**
             web:
-              - *base
-              - examples/browser-verify/**
-              - risc0/**
-              - xtask/**
+              - web/**
 
   # see: https://github.com/orgs/community/discussions/26822
   main-status-check:
     if: always()
     needs:
+      - browser
       - check
       - check-external
       - check-template
@@ -424,8 +428,8 @@ jobs:
         working-directory: tools/crates-validator
       - run: sccache --show-stats
 
-  web:
-    if: needs.changes.outputs.web == 'true'
+  browser:
+    if: needs.changes.outputs.browser == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
     env:
@@ -470,3 +474,19 @@ jobs:
         env:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
+
+  web:
+    if: needs.changes.outputs.web == 'true'
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+        working-directory: web
+      - run: bun run ci
+        working-directory: web
+      - run: bun run typecheck
+        working-directory: web
+      - run: bun run test
+        working-directory: web

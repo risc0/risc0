@@ -8,7 +8,6 @@ export async function fetchDatasheet({ version, url }: { version: string; url: s
 
   return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`, {
     headers: {
-      Authorization: `token ${env.GITHUB_PAT}`,
       Accept: "application/vnd.github.v3.raw",
     },
   })

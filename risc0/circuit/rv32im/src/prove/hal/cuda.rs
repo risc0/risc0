@@ -20,11 +20,12 @@ use cust::{
     prelude::*,
     DeviceCopy,
 };
-use risc0_circuit_rv32im_sys::ffi::{Error, RawPreflightTrace};
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, Elem, RootsOfUnity,
 };
+use risc0_sys::CppError;
 use risc0_zkp::{
     core::log2_ceil,
     field::ExtElem as _,
@@ -33,7 +34,7 @@ use risc0_zkp::{
             prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHalPoseidon2, CudaHalSha256,
             CudaHash, CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
         },
-        Buffer, CircuitHal,
+        Buffer, CircuitHal, Hal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -73,7 +74,7 @@ extern "C" {
         ctrl: DevicePointer<u8>,
         io: DevicePointer<u8>,
         data: DevicePointer<u8>,
-    ) -> Error;
+    ) -> CppError;
 
     fn risc0_circuit_rv32im_cuda_step_compute_accum(
         ctx: DevicePointer<AccumContext>,
@@ -84,7 +85,7 @@ extern "C" {
         data: DevicePointer<u8>,
         mix: DevicePointer<u8>,
         accum: DevicePointer<u8>,
-    ) -> Error;
+    ) -> CppError;
 
     fn risc0_circuit_rv32im_cuda_step_verify_accum(
         ctx: DevicePointer<AccumContext>,
@@ -95,7 +96,7 @@ extern "C" {
         data: DevicePointer<u8>,
         mix: DevicePointer<u8>,
         accum: DevicePointer<u8>,
-    ) -> Error;
+    ) -> CppError;
 
     fn risc0_circuit_rv32im_cuda_eval_check(
         check: DevicePointer<u8>,
@@ -108,7 +109,7 @@ extern "C" {
         po2: u32,
         domain: u32,
         poly_mix_pows: *const u32,
-    ) -> Error;
+    ) -> CppError;
 }
 
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
@@ -263,20 +264,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         });
 
         tracing::info_span!("zeroize").in_scope(|| {
-            let kernel = self.hal.module.get_function("eltwise_zeroize_fp").unwrap();
-
-            let params = self.hal.compute_simple_params(accum.size());
-            unsafe {
-                let stream = &self.hal.stream;
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(accum.as_device_ptr())).unwrap();
-            }
-
-            let params = self.hal.compute_simple_params(io.size());
-            unsafe {
-                let stream = &self.hal.stream;
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(io.as_device_ptr())).unwrap();
-            }
-            self.hal.stream.synchronize().unwrap();
+            self.hal.eltwise_zeroize_elem(accum);
+            self.hal.eltwise_zeroize_elem(io);
         });
 
         nvtx::range_pop!();

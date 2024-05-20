@@ -1,11 +1,5 @@
 # Trusted Setup Security
 
-:::warning
-
-As of the writing of this note, our trusted setup ceremony has not been finalized. Without this finalization step, our ceremony is not complete and you will not be able to verify its security with the instructions below (because it is not yet secure while finalization is still pending).
-
-:::
-
 RISC Zero has run a trusted setup ceremony for our Groth16 prover/verifier. This ceremony secures our STARK Verify circuit so we can publish compact receipts for our general purpose zkVM to limited-memory environments like blockchains.
 
 You don't need to take our word for it that this is secure, though! This document will walk you through how to verify the security of our ceremony for yourself. This can also be used to aid in the detection of attacks related to our ceremony, e.g. it may help detect fraudulent actors publishing something they claim to be the RISC Zero STARK Verifier but which is actually malicious code.
@@ -27,7 +21,7 @@ To ensure that the circuit itself does not have security holes, we have used a m
 
 ## The Transcript Matches the Circuit
 
-Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. You can verify it matches the circuit using Circom and snarkjs:
+Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][zkey_mirror], and have a compressed version [here][zkey-compressed]) You can verify it matches the circuit using Circom and snarkjs:
 
 1. Install [Circom][install-circom] and [snarkjs][snarkjs].
 1. Download the [`stark_verify.circom`][stark-verify-circom] and [`risc0.circom`][risc0-circom-library] source files.
@@ -74,3 +68,5 @@ We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony
 [risc0-circom-library]: https://github.com/risc0/risc0/blob/d4e427283027c28b38b8eda1562e8e0e68d1b0e2/compact_proof/groth16/risc0.circom
 [snarkjs]: https://github.com/iden3/snarkjs
 [stark-verify-circom]: https://github.com/risc0/risc0/blob/d4e427283027c28b38b8eda1562e8e0e68d1b0e2/compact_proof/groth16/stark_verify.circom
+[zkey-mirror]: https://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify_final.zkey
+[zkey-compressed]: https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-05-17.1/stark_verify_final.zkey.gz

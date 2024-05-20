@@ -288,7 +288,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceipt::verifier_parameters().digest(),
-            Digest::from_hex("26c5446a183430b3dbd8ecf7de1b0f56727f0f6704ea5deb804a7d6ac552742b")
+            Digest::from_hex("992a4905971833331e533cb15e5466a0e609dacadec8fe2338b1d68fa0284768")
                 .unwrap()
         );
     }

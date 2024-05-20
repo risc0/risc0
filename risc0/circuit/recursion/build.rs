@@ -15,17 +15,6 @@
 use std::env;
 
 fn main() {
-    if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        println!(
-            "cargo:rustc-env=RECURSION_CUDA_EVAL_PATH={}",
-            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_EVAL_FATBIN").unwrap()
-        );
-        println!(
-            "cargo:rustc-env=RECURSION_CUDA_STEPS_PATH={}",
-            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_STEPS_FATBIN").unwrap()
-        );
-    }
-
     if env::var("CARGO_FEATURE_METAL").is_ok() {
         println!(
             "cargo:rustc-env=RECURSION_METAL_PATH={}",
