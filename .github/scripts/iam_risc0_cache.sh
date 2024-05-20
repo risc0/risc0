@@ -1,5 +1,2 @@
-#cp ../../../../_aws/certificate.pem $HOME/.local/aws/certificate.pem
-#cp ../../../../_aws/runner_key.pem $HOME/.local/aws/runner_key.pem
-
-ls -lht ../../../../_aws
-exit 1
+cp ../../../../_aws/certificate.pem $HOME/.local/aws/certificate.pem
+cp ../../../../_aws/runner_key.pem $HOME/.local/aws/runner_key.pem
