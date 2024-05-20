@@ -22,10 +22,14 @@ export function ApplicationsBenchmarksTable<TData, TValue>({
   title,
   columns,
   data,
+  version,
 }: {
-  columns: ColumnDef<TData, TValue>[];
+  columns: {
+    [version: string]: ColumnDef<TData, TValue>[];
+  };
   data: TData[];
   title: string;
+  version: string;
 }) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -35,7 +39,7 @@ export function ApplicationsBenchmarksTable<TData, TValue>({
 
   const table = useReactTable({
     data,
-    columns,
+    columns: columns[version] ?? [],
     state: {
       sorting,
       columnVisibility,
@@ -90,7 +94,7 @@ export function ApplicationsBenchmarksTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={columns[version]?.length} className="h-24 text-center text-muted-foreground">
                   No Results
                 </TableCell>
               </TableRow>

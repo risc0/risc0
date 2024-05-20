@@ -18,7 +18,8 @@ export async function ApplicationsBenchmarksContent({ version, currentTab }: { v
     <ApplicationsBenchmarksTable
       title={currentApplicationName}
       columns={applicationsBenchmarksTableColumns}
-      data={convertCsvToJson(data).filter((element) => element.name)}
+      version={version}
+      data={convertCsvToJson(data).filter((element) => element.name ?? element.job_name)}
     />
   );
 }

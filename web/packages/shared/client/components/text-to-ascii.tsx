@@ -9,7 +9,7 @@ export function TextToAscii({ text, rainbow = false }: { rainbow?: boolean; text
   return (
     <>
       <span className="sr-only">{text}</span>
-      {mounted && <ASCII rainbow={rainbow} text={text} />}
+      <div className="min-h-[72px] animate-fade-in">{mounted && <ASCII rainbow={rainbow} text={text} />}</div>
     </>
   );
 }
