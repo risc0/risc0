@@ -90,7 +90,9 @@ runs:
         use-fallback: false
 
     - name: TEST - Check runner root objects
-      run: ls -lht /
+      run: |
+        pwd
+        ls -lht /
       shell: bash
 
     - name: (External PR) Install AWS Signer (Linux)
