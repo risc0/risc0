@@ -37,7 +37,7 @@ use crate::{
         posix_io::PosixIo,
         slice_io::SliceIo,
     },
-    receipt::InnerAssumptionReceipt,
+    receipt::AssumptionReceipt,
     sha::{Digest, DIGEST_BYTES},
     Assumption,
 };
@@ -215,7 +215,7 @@ impl SysVerify {
         tracing::debug!("SYS_VERIFY_INTEGRITY: ({}, {})", claim_digest, control_root);
 
         // Iterate over the list looking for a matching assumption.
-        let mut assumption: Option<(Option<InnerAssumptionReceipt>, Assumption)> = None;
+        let mut assumption: Option<(Assumption, AssumptionReceipt)> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             let cached_claim_digest = cached_assumption
                 .claim_digest()
@@ -224,11 +224,11 @@ impl SysVerify {
             // enough to test.
             if cached_claim_digest == claim_digest {
                 assumption = Some((
-                    cached_assumption.as_receipt().ok().cloned(),
                     Assumption {
                         claim: claim_digest,
                         control_root,
                     },
+                    cached_assumption.clone(),
                 ));
                 break;
             }

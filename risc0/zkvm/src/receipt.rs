@@ -471,7 +471,7 @@ impl AssumptionReceipt {
     }
 
     #[cfg(feature = "prove")]
-    pub(crate) fn as_receipt(&self) -> Result<&InnerAssumptionReceipt> {
+    pub(crate) fn into_receipt(self) -> Result<InnerAssumptionReceipt> {
         match self {
             Self::Proven(receipt) => Ok(receipt),
             Self::Unresolved(_) => Err(anyhow::anyhow!(
@@ -479,15 +479,6 @@ impl AssumptionReceipt {
             )),
         }
     }
-
-    /*
-    pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
-        match self {
-            Self::Proven(receipt) => receipt.control_root(),
-            Self::Unresolved(assumption) => Ok(assumption.control_root),
-        }
-    }
-    */
 }
 
 impl From<Receipt> for AssumptionReceipt {
@@ -525,13 +516,10 @@ impl From<MaybePruned<ReceiptClaim>> for AssumptionReceipt {
     /// resolved with the same control root at the conditional receipt (i.e. that this assumption
     /// is for the same version of zkVM as the receipt it is attached to).
     fn from(claim: MaybePruned<ReceiptClaim>) -> Self {
-        Self::Unresolved(
-            Assumption {
-                claim: claim.digest(),
-                control_root: Digest::ZERO,
-            }
-            .into(),
-        )
+        Self::Unresolved(Assumption {
+            claim: claim.digest(),
+            control_root: Digest::ZERO,
+        })
     }
 }
 
@@ -542,13 +530,10 @@ impl From<ReceiptClaim> for AssumptionReceipt {
     /// resolved with the same control root at the conditional receipt (i.e. that this assumption
     /// is for the same version of zkVM as the receipt it is attached to).
     fn from(claim: ReceiptClaim) -> Self {
-        Self::Unresolved(
-            Assumption {
-                claim: claim.digest(),
-                control_root: Digest::ZERO,
-            }
-            .into(),
-        )
+        Self::Unresolved(Assumption {
+            claim: claim.digest(),
+            control_root: Digest::ZERO,
+        })
     }
 }
 

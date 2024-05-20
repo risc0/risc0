@@ -41,9 +41,8 @@ message InnerReceipt {
 
 message CompositeReceipt {
   repeated SegmentReceipt segments = 1;
-  repeated InnerReceipt assumptions = 2;
-  base.Digest journal_digest = 3;
-  base.Digest verifier_parameters = 4;
+  repeated InnerReceipt assumption_receipts = 2;
+  base.Digest verifier_parameters = 3;
 }
 
 message SegmentReceipt {

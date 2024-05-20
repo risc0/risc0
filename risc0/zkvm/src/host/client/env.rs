@@ -37,7 +37,6 @@ use crate::{
         posix_io::PosixIo,
         slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
     },
-    receipt::InnerAssumptionReceipt,
     serde::to_vec,
     Assumption, AssumptionReceipt, TraceCallback,
 };
@@ -55,7 +54,7 @@ pub(crate) struct AssumptionReceipts {
     // An ordered list of assumptions accessed during execution, along a receipt if available. Each
     // time an assumption is used, it is cloned and pushed to the head of the list.
     #[cfg(feature = "prove")]
-    pub(crate) accessed: Vec<(Option<InnerAssumptionReceipt>, Assumption)>,
+    pub(crate) accessed: Vec<(Assumption, AssumptionReceipt)>,
 }
 
 #[allow(dead_code)]

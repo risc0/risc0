@@ -122,7 +122,7 @@ pub trait ProverServer {
             ))?;
 
         // Compress assumptions and resolve them to get the final succinct receipt.
-        receipt.assumptions.iter().try_fold(
+        receipt.assumption_receipts.iter().try_fold(
             continuation_receipt,
             |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerAssumptionReceipt| match assumption {
                 InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),

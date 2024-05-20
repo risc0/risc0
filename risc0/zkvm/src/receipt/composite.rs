@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{vec, vec::Vec};
+use alloc::vec::Vec;
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -25,16 +25,17 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    CompactReceiptVerifierParameters, InnerAssumptionReceipt, SegmentReceipt,
-    SegmentReceiptVerifierParameters, SuccinctReceiptVerifierParameters, VerifierContext,
+    CompactReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
-use crate::{sha, Assumption, Assumptions, MaybePruned, Output, ReceiptClaim};
+use crate::{sha, InnerAssumptionReceipt, MaybePruned, ReceiptClaim};
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single
 /// execution with continuations, and zero or more [Receipt](crate::Receipt) structs proving any
 /// assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
 pub struct CompositeReceipt {
     /// Segment receipts forming the proof of an execution with continuations.
     pub segments: Vec<SegmentReceipt>,
@@ -44,7 +45,7 @@ pub struct CompositeReceipt {
     /// assumptions are unresolved, this receipt is only _conditionally_
     /// valid.
     // TODO(#982): Allow for unresolved assumptions in this list.
-    pub assumptions: Vec<InnerAssumptionReceipt>,
+    pub assumption_receipts: Vec<InnerAssumptionReceipt>,
 
     /// A digest of the verifier parameters that can be used to verify this receipt.
     ///
@@ -52,14 +53,6 @@ pub struct CompositeReceipt {
     /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
     /// be provided by a trusted source (e.g. packaged with the verifier code).
     pub verifier_parameters: Digest,
-
-    /// Digest of journal included in the final output of the continuation. Will
-    /// be `None` if the continuation has no output (e.g. it ended in `Fault`).
-    // NOTE: This field is needed in order to open the assumptions digest from
-    // the output digest.
-    // TODO: This field can potentially be removed since
-    // it can be included in the claim on the last segment receipt instead.
-    pub(crate) journal_digest: Option<Digest>,
 }
 
 impl CompositeReceipt {
@@ -113,14 +106,10 @@ impl CompositeReceipt {
         }
 
         // Verify all assumption receipts attached to this composite receipt.
-        for receipt in self.assumptions.iter() {
+        for receipt in self.assumption_receipts.iter() {
             tracing::debug!("verifying assumption: {:?}", receipt.claim_digest()?);
             receipt.verify_integrity_with_context(ctx)?;
         }
-
-        // Verify decoded output digest is consistent with the journal_digest
-        // and assumptions.
-        self.verify_output_consistency(&final_receipt.claim)?;
 
         Ok(())
     }
@@ -138,108 +127,15 @@ impl CompositeReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?
             .claim;
 
-        // After verifying the internal consistency of this receipt, we can use
-        // self.assumptions and self.journal_digest in place of
-        // last_claim.output, which is equal.
-        self.verify_output_consistency(last_claim)?;
-        let output: Option<Output> = last_claim
-            .output
-            .is_some()
-            .then(|| {
-                Ok(Output {
-                    journal: MaybePruned::Pruned(
-                        self.journal_digest
-                            .ok_or(VerificationError::ReceiptFormatError)?,
-                    ),
-                    // TODO(#982): Adjust this if unresolved assumptions are allowed on
-                    // CompositeReceipt.
-                    // NOTE: Proven assumptions are not included in the CompositeReceipt claim.
-                    assumptions: Assumptions(vec![]).into(),
-                })
-            })
-            .transpose()?;
+        // TODO(victor): Filter out proven assumptions from the final output here.
 
         Ok(ReceiptClaim {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
             input: first_claim.input.clone(),
-            output: output.into(),
+            output: last_claim.output.clone(),
         })
-    }
-
-    /// Check that the output fields in the given receipt claim are
-    /// consistent with the exit code, and with the journal_digest and
-    /// assumptions encoded on self.
-    fn verify_output_consistency(&self, claim: &ReceiptClaim) -> Result<(), VerificationError> {
-        tracing::debug!(
-            "verify_output_consistency: exit_code = {:?}",
-            claim.exit_code
-        );
-        if claim.exit_code.expects_output() && claim.output.is_some() {
-            let self_output = Output {
-                journal: MaybePruned::Pruned(
-                    self.journal_digest
-                        .ok_or(VerificationError::ReceiptFormatError)?,
-                ),
-                assumptions: self.assumptions_claim()?.into(),
-            };
-
-            // If these digests do not match, this receipt is internally inconsistent.
-            if self_output.digest::<sha::Impl>() != claim.output.digest::<sha::Impl>() {
-                let empty_output = claim.output.is_none()
-                    && self
-                        .journal_digest
-                        .ok_or(VerificationError::ReceiptFormatError)?
-                        == Vec::<u8>::new().digest::<sha::Impl>();
-                if !empty_output {
-                    tracing::debug!(
-                        "output digest does not match: expected {:?}; decoded {:?}",
-                        &self_output,
-                        &claim.output
-                    );
-                    return Err(VerificationError::ReceiptFormatError);
-                }
-            }
-        } else {
-            // Ensure all output fields are empty. If not, this receipt is internally
-            // inconsistent.
-            if claim.output.is_some() {
-                tracing::debug!("unexpected non-empty claim output: {:?}", &claim.output);
-                return Err(VerificationError::ReceiptFormatError);
-            }
-            if !self.assumptions.is_empty() {
-                tracing::debug!(
-                    "unexpected non-empty composite receipt assumptions: {:?}",
-                    &self.assumptions
-                );
-                return Err(VerificationError::ReceiptFormatError);
-            }
-            if self.journal_digest.is_some() {
-                tracing::debug!(
-                    "unexpected non-empty composite receipt journal_digest: {:?}",
-                    &self.journal_digest
-                );
-                return Err(VerificationError::ReceiptFormatError);
-            }
-        }
-        Ok(())
-    }
-
-    fn assumptions_claim(&self) -> Result<Assumptions, VerificationError> {
-        Ok(Assumptions(
-            self.assumptions
-                .iter()
-                .map(|a| {
-                    Ok(Assumption {
-                        claim: a.claim_digest()?,
-                        // TODO(victor): Revisit what the right value is here.
-                        control_root: Digest::ZERO,
-                    }
-                    .into())
-                })
-                .collect::<Result<Vec<_>, _>>()?,
-        ))
     }
 }
 

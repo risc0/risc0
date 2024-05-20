@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use risc0_circuit_rv32im::prove::SegmentProver;
 
 use super::ProverServer;
@@ -25,9 +25,9 @@ use crate::{
     receipt::{
         segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
-    receipt_claim::Unknown,
+    receipt_claim::{MaybePruned, Merge, Unknown},
     sha::Digestible,
-    CompositeReceipt, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    CompositeReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -65,22 +65,47 @@ impl ProverServer for ProverImpl {
                 hook.on_post_prove_segment(&segment);
             }
         }
-        // TODO(#982): Support unresolved assumptions here.
-        let assumptions = session
+
+        let (assumptions, session_assumption_receipts) = session
             .assumptions
             .iter()
-            .map(|x| Ok(x.as_receipt()?.clone()))
-            .collect::<Result<Vec<_>>>()?;
+            .cloned()
+            .unzip::<_, _, Vec<_>, Vec<_>>();
+
+        // Merge the output, including journal digest and assumptions, into the last segment.
+        let last_segment = segments.last_mut().ok_or(anyhow!("session is empty"))?;
+        last_segment
+            .claim
+            .output
+            .merge_with(
+                &session
+                    .journal
+                    .as_ref()
+                    .map(|journal| Output {
+                        journal: MaybePruned::Pruned(journal.digest()),
+                        assumptions: assumptions.into(),
+                    })
+                    .into(),
+            )
+            .context("failed to merge output into final segment claim")?;
+
         let verifier_parameters = ctx
             .composite_verifier_parameters()
             .ok_or(anyhow!(
                 "composite receipt verifier parameters missing from context"
             ))?
             .digest();
+
+        // Collect the proven assumption receipts from the Session.
+        // TODO(#982): Support unresolved assumptions here.
+        let assumption_receipts = session_assumption_receipts
+            .into_iter()
+            .map(|a| a.into_receipt())
+            .collect::<Result<_>>()?;
+
         let composite_receipt = CompositeReceipt {
             segments,
-            assumptions,
-            journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
+            assumption_receipts,
             verifier_parameters,
         };
 

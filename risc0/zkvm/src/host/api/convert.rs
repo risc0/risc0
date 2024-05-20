@@ -623,9 +623,12 @@ where
 impl From<CompositeReceipt> for pb::core::CompositeReceipt {
     fn from(value: CompositeReceipt) -> Self {
         Self {
-            segments: value.segments.into_iter().map(|s| s.into()).collect(),
-            assumptions: value.assumptions.into_iter().map(|a| a.into()).collect(),
-            journal_digest: value.journal_digest.map(|d| d.into()),
+            segments: value.segments.into_iter().map(Into::into).collect(),
+            assumption_receipts: value
+                .assumption_receipts
+                .into_iter()
+                .map(Into::into)
+                .collect(),
             verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
@@ -641,12 +644,11 @@ impl TryFrom<pb::core::CompositeReceipt> for CompositeReceipt {
                 .into_iter()
                 .map(|s| s.try_into())
                 .collect::<Result<Vec<_>>>()?,
-            assumptions: value
-                .assumptions
+            assumption_receipts: value
+                .assumption_receipts
                 .into_iter()
                 .map(|a| a.try_into())
                 .collect::<Result<Vec<_>>>()?,
-            journal_digest: value.journal_digest.map(|d| d.try_into()).transpose()?,
             verifier_parameters: value
                 .verifier_parameters
                 .ok_or(malformed_err())?

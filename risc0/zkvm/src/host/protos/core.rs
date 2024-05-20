@@ -35,6 +35,10 @@ pub struct ReceiptMetadata {
     #[prost(message, optional, tag = "1")]
     pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
+/// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
+/// In Rust, they are distinct types becaue Rust needs to size everything on the
+/// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
+/// have different sizes. Protobuf handles this without issue.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InnerReceipt {
@@ -62,10 +66,8 @@ pub struct CompositeReceipt {
     #[prost(message, repeated, tag = "1")]
     pub segments: ::prost::alloc::vec::Vec<SegmentReceipt>,
     #[prost(message, repeated, tag = "2")]
-    pub assumptions: ::prost::alloc::vec::Vec<InnerReceipt>,
+    pub assumption_receipts: ::prost::alloc::vec::Vec<InnerReceipt>,
     #[prost(message, optional, tag = "3")]
-    pub journal_digest: ::core::option::Option<super::base::Digest>,
-    #[prost(message, optional, tag = "4")]
     pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

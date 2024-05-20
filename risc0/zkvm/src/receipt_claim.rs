@@ -399,6 +399,24 @@ impl MaybePruned<Assumptions> {
     }
 }
 
+impl From<Vec<MaybePruned<Assumption>>> for Assumptions {
+    fn from(value: Vec<MaybePruned<Assumption>>) -> Self {
+        Self(value)
+    }
+}
+
+impl From<Vec<Assumption>> for Assumptions {
+    fn from(value: Vec<Assumption>) -> Self {
+        Self(value.into_iter().map(Into::into).collect())
+    }
+}
+
+impl From<Vec<Assumption>> for MaybePruned<Assumptions> {
+    fn from(value: Vec<Assumption>) -> Self {
+        Self::Value(value.into())
+    }
+}
+
 /// Either a source value or a hash [Digest] of the source value.
 ///
 /// This type supports creating "Merkle-ized structs". Each field of a Merkle-ized struct can have
@@ -552,6 +570,13 @@ impl std::error::Error for PrunedValueError {}
 pub(crate) trait Merge: Digestible + Sized {
     /// Merge two structs to produce an output with a union of the fields populated in the inputs.
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError>;
+
+    /// Merge two structs to assigning self as the union of the fields populated in the two inputs.
+    fn merge_with(&mut self, other: &Self) -> Result<(), MergeInequalityError> {
+        // Not an very efficient implementation.
+        *self = self.merge(other)?;
+        Ok(())
+    }
 }
 
 /// Error returned when a merge it attempted with two values with unequal digests.

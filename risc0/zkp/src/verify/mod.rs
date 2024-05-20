@@ -68,6 +68,9 @@ pub enum VerificationError {
         expected: ProtocolInfo,
         received: ProtocolInfo,
     },
+    UnresolvedAssumption {
+        digest: Digest,
+    },
 }
 
 impl fmt::Debug for VerificationError {
@@ -108,6 +111,9 @@ impl fmt::Display for VerificationError {
             }
             VerificationError::CircuitInfoMismatch { expected, received } => {
                 write!(f, "receipt was produced for a version of the verifier with circuit info {received}; expected {expected}")
+            }
+            VerificationError::UnresolvedAssumption { digest } => {
+                write!(f, "receipt contains an unresolved assumption: {digest}")
             }
         }
     }

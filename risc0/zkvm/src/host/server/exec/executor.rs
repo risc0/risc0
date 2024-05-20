@@ -28,8 +28,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::client::env::SegmentPath, AssumptionReceipt, Assumptions, ExecutorEnv, FileSegmentRef,
-    Output, Segment, SegmentRef, Session,
+    host::client::env::SegmentPath, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment,
+    SegmentRef, Session,
 };
 
 use super::{
@@ -162,7 +162,7 @@ impl<'a> ExecutorImpl<'a> {
                                         .borrow()
                                         .accessed
                                         .iter()
-                                        .map(|(_, a)| a.clone().into())
+                                        .map(|(a, _)| a.clone().into())
                                         .collect::<Vec<_>>(),
                                 )
                                 .into(),
@@ -197,15 +197,7 @@ impl<'a> ExecutorImpl<'a> {
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let accessed_assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
-        let assumptions = accessed_assumptions
-            .into_iter()
-            .map(|(receipt, assumption)| {
-                receipt
-                    .map(Into::into)
-                    .unwrap_or(AssumptionReceipt::Unresolved(assumption))
-            })
-            .collect::<Vec<_>>();
+        let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
 
         if let Some(profiler) = self.profiler.take() {
             let report = profiler.borrow_mut().finalize_to_vec();
