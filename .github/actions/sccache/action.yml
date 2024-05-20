@@ -91,21 +91,23 @@ runs:
 
     - name: (External PR) Install AWS Signer (Linux)
       if: >
-        runner.os == 'Linux'
+        runner.os == 'Linux' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
       run: |
         mkdir -p $HOME/.local/aws
         curl https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper -o $HOME/.local/aws/aws_signing_helper
         chmod +x $HOME/.local/aws/aws_signing_helper
+      shell: bash
 
     - name: (External PR) Install AWS Signer (macOS)
       if: >
-        runner.os == 'macOS'
+        runner.os == 'macOS' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
       run: |
         mkdir -p $HOME/.local/aws
         curl https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Darwin/aws_signing_helper -o $HOME/.local/aws/aws_signing_helper
         chmod +x $HOME/.local/aws/aws_signing_helper
+      shell: bash
 
     - name: (External PR) Install IAM Anywhere Resources for risc0 Public Cache
       if: github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
@@ -120,9 +122,10 @@ runs:
         ROLE_ARN: arn:aws:iam::083632199359:role/gha_instance_risc0_cache_access
       run: |
         aws configure set credential_process "./aws_signing_helper credential-process --trust-anchor-arn $TRUST_ANCHOR_ARN --profile-arn $PROFILE_ARN --role-arn $ROLE_ARN --certificate $HOME/.local/aws/certificate.pem --private-key $HOME/.local/aws/runner_key.pem" --profile default
-        echo "##vso[task.setvariable variable=AWS_SDK_LOAD_CONFIG;]1" 
+        echo "##vso[task.setvariable variable=AWS_SDK_LOAD_CONFIG;]1"
+      shell: bash
 
     - name: (External PR) TEST - View Folders in S3 Bucket Using IAM Roles Anywhere
       if: github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
       run: aws s3 ls s3://risc0-ci-cache/public/
-
+      shell: bash
