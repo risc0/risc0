@@ -24,13 +24,13 @@ const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
 
 const HOST_MAIN: &str = include_str!("../../templates/rust-starter/host/src/main.rs");
-const HOST_CARGO_TOML: &str = include_str!("../../templates/rust-starter/host/Cargo.toml");
-const PROJECT_CARGO_TOML: &str = include_str!("../../templates/rust-starter/Cargo.toml");
+const HOST_CARGO_TOML: &str = include_str!("../../templates/rust-starter/host/Cargo-toml");
+const PROJECT_CARGO_TOML: &str = include_str!("../../templates/rust-starter/Cargo-toml");
 const METHODS_BUILD_SCRIPT: &str = include_str!("../../templates/rust-starter/methods/build.rs");
-const METHODS_CARGO_TOML: &str = include_str!("../../templates/rust-starter/methods/Cargo.toml");
+const METHODS_CARGO_TOML: &str = include_str!("../../templates/rust-starter/methods/Cargo-toml");
 const METHODS_LIB: &str = include_str!("../../templates/rust-starter/methods/src/lib.rs");
 const GUEST_CARGO_TOML: &str =
-    include_str!("../../templates/rust-starter/methods/guest/Cargo.toml");
+    include_str!("../../templates/rust-starter/methods/guest/Cargo-toml");
 const GUEST_MAIN: &str = include_str!("../../templates/rust-starter/methods/guest/src/main.rs");
 static PROJECT_TEMPLATED_FILES: &'static [(&str, &str)] = &[
     ("host/src/main.rs", HOST_MAIN),
