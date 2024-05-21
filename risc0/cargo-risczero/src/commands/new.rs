@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use const_format::concatcp;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
@@ -20,7 +21,7 @@ use regex::Regex;
 use text_io::read;
 
 const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
-//const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
+const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
 
 const HOST_MAIN: &str = include_str!("../../templates/rust-starter/host/src/main.rs");
 const HOST_CARGO_TOML: &str = include_str!("../../templates/rust-starter/host/Cargo.toml");
@@ -60,6 +61,14 @@ pub struct NewCommand {
     #[arg()]
     pub name: String,
 
+    /// template git tag.
+    #[arg(long, default_value = RISC0_RELEASE_TAG)]
+    pub tag: String,
+
+    /// template git branch, overrides `tag` option
+    #[arg(long, default_value = "")]
+    pub branch: String,
+
     /// Destination directory to create project in.
     ///
     /// Example `cargo risczero new --dest /tmp/ cool-project` ->
@@ -69,12 +78,22 @@ pub struct NewCommand {
     #[arg(long)]
     pub dest: Option<PathBuf>,
 
+    /// Toggles templates to use crates from github
+    ///
+    /// Sets the value of the arg to be the cargo `branch` variable
+    #[arg(long)]
+    pub use_git_branch: Option<String>,
+
     /// Toggles `std` feature flag for guest code
     ///
     /// Toggles the `#![no_std]` in the guest main() and the `std` feature flag
     /// on the `risc0_zkvm` crate.
     #[arg(long, global = false)]
     pub no_std: bool,
+
+    /// Use a path dependency for risc0.
+    #[arg(long)]
+    pub path: Option<PathBuf>,
 
     /// Name of the guest
     ///
@@ -97,9 +116,22 @@ impl NewCommand {
 
         let mut template_variables = Vec::new();
 
-        let spec = format!("version = \"{risc0_version}\"");
-        template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, spec.as_str()));
-        template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, spec.as_str()));
+        if let Some(branch) = self.use_git_branch.as_ref() {
+            let spec =
+                format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"");
+            template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, spec.clone()));
+            template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, spec));
+        } else if let Some(path) = self.path.as_ref() {
+            let path = path.to_str().unwrap();
+            let build = format!("path = \"{path}/risc0/build\"");
+            let zkvm = format!("path = \"{path}/risc0/zkvm\"");
+            template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, build));
+            template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, zkvm));
+        } else {
+            let spec = format!("version = \"{risc0_version}\"");
+            template_variables.push((Regex::new(r"\{\{ *risc0_build *\}\}")?, spec.clone()));
+            template_variables.push((Regex::new(r"\{\{ *risc0_zkvm *\}\}")?, spec));
+        }
 
         let guest_name = match &self.guest_name {
             Some(name) => name.clone(),
@@ -127,24 +159,24 @@ impl NewCommand {
         let id = format!("{guest_name_const}_ID");
         let elf = format!("{guest_name_const}_ELF");
         let package_name = format!("\"{guest_name}\"");
-        template_variables.push((
-            Regex::new(r"\{\{ *guest_package_name *\}\}")?,
-            package_name.as_str(),
-        ));
-        template_variables.push((Regex::new(r"\{\{ *guest_id *\}\}")?, id.as_str()));
-        template_variables.push((Regex::new(r"\{\{ *guest_elf *\}\}")?, elf.as_str()));
+        template_variables.push((Regex::new(r"\{\{ *guest_package_name *\}\}")?, package_name));
+        template_variables.push((Regex::new(r"\{\{ *guest_id *\}\}")?, id));
+        template_variables.push((Regex::new(r"\{\{ *guest_elf *\}\}")?, elf));
 
         if !self.no_std {
             template_variables.push((
                 Regex::new(r"\{\{ *risc0_feature_std *\}\}")?,
-                ", features = ['std']",
+                ", features = ['std']".to_string(),
             ));
-            template_variables.push((Regex::new(r"\{\{ *no_std_preamble *\}\}")?, ""));
+            template_variables.push((Regex::new(r"\{\{ *no_std_preamble *\}\}")?, "".to_string()));
         } else {
             let no_std_preamble = "#![no_main]\n\
 #![no_std]\n\
 risc0_zkvm::guest::entry!(main);\n";
-            template_variables.push((Regex::new(r"\{\{ *no_std_preamble *\}\}")?, no_std_preamble));
+            template_variables.push((
+                Regex::new(r"\{\{ *no_std_preamble *\}\}")?,
+                no_std_preamble.to_string(),
+            ));
         }
 
         let root = dest_dir.join(self.name.clone());
@@ -158,7 +190,7 @@ risc0_zkvm::guest::entry!(main);\n";
         Ok(())
     }
 
-    fn gen_template(&self, dest: PathBuf, template_variables: Vec<(Regex, &str)>) -> Result<()> {
+    fn gen_template(&self, dest: PathBuf, template_variables: Vec<(Regex, String)>) -> Result<()> {
         let root = dest.join(self.name.clone());
 
         // generate host directories
@@ -180,7 +212,7 @@ risc0_zkvm::guest::entry!(main);\n";
         Ok(())
     }
 
-    fn gen_file(haystack: &str, patterns: Vec<(Regex, &str)>) -> String {
+    fn gen_file(haystack: &str, patterns: Vec<(Regex, String)>) -> String {
         let mut haystack: String = haystack.to_string();
         for (pattern, replace) in patterns {
             haystack = pattern.replace_all(&haystack, replace).to_string();
@@ -201,14 +233,9 @@ mod tests {
 
     use super::*;
 
-    fn make_test_env() -> (TempDir, PathBuf, &'static str) {
+    fn make_test_env() -> (TempDir, &'static str) {
         let tmpdir = tempdir().expect("Failed to create tempdir");
-        let manifest_path =
-            std::env::var("CARGO_MANIFEST_DIR").expect("Missing CARGO_MANIFEST_DIR var");
-        // NOTE: cargo run and cargo test have a slightly different idea of what the
-        // manifest_dir is. https://github.com/rust-lang/cargo/issues/3946
-        let template_path = Path::new(&manifest_path).join("../../");
-        (tmpdir, template_path, "my_project")
+        (tmpdir, "my_project")
     }
 
     fn find_in_file(needle: &str, file: &Path) -> bool {
@@ -231,7 +258,7 @@ mod tests {
 
     #[test]
     fn basic_generate() {
-        let (tmpdir, _template_path, proj_name) = make_test_env();
+        let (tmpdir, proj_name) = make_test_env();
 
         let new = NewCommand::parse_from([
             "new",
@@ -260,12 +287,14 @@ mod tests {
 
     #[test]
     fn generate_no_git_branch() {
-        let (tmpdir, _template_path, proj_name) = make_test_env();
+        let (tmpdir, proj_name) = make_test_env();
 
         let new = NewCommand::parse_from([
             "new",
             "--dest",
             &tmpdir.path().to_string_lossy(),
+            "--use-git-branch",
+            "main",
             "--guest-name",
             "method",
             proj_name,
@@ -277,15 +306,15 @@ mod tests {
 
         assert!(proj_path.exists());
         assert!(!proj_path.join(".git").exists());
-        //assert!(find_in_file(
-        //    "risc0-zkvm = { git = \"https://github.com/risc0/risc0.git\", branch = \"main\"",
-        //    &proj_path.join("host/Cargo.toml")
-        //));
+        assert!(find_in_file(
+            "risc0-zkvm = { git = \"https://github.com/risc0/risc0.git\", branch = \"main\"",
+            &proj_path.join("host/Cargo.toml")
+        ));
     }
 
     #[test]
     fn generate_no_std() {
-        let (tmpdir, _template_path, proj_name) = make_test_env();
+        let (tmpdir, proj_name) = make_test_env();
 
         let new = NewCommand::parse_from([
             "new",
