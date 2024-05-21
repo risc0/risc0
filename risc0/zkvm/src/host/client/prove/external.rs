@@ -14,13 +14,12 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{ensure, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
     compute_image_id, host::api::AssetRequest, is_dev_mode, sha::Digestible, ApiClient, Asset,
-    CompositeReceipt, ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SegmentReceipt,
-    SessionInfo, SuccinctReceipt, VerifierContext,
+    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -37,56 +36,6 @@ impl ExternalProver {
             name: name.to_string(),
             r0vm_path: r0vm_path.as_ref().to_path_buf(),
         }
-    }
-
-    /// Internal implementation of the compress function from CompositeReceipt to SuccinctReceipt.
-    fn composite_to_succinct(
-        client: &ApiClient,
-        opts: &ProverOpts,
-        receipt: &CompositeReceipt,
-    ) -> Result<SuccinctReceipt> {
-        // Compress all receipts in the top-level session into one succinct receipt for the session.
-        let continuation_receipt = receipt
-            .segments
-            .iter()
-            .try_fold(
-                None,
-                |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
-                    Ok(Some(match left {
-                        Some(left) => client.join(
-                            opts,
-                            left.try_into()?,
-                            client
-                                .lift(opts, right.clone().try_into()?, AssetRequest::Inline)?
-                                .try_into()?,
-                            AssetRequest::Inline,
-                        )?,
-                        None => {
-                            client.lift(opts, right.clone().try_into()?, AssetRequest::Inline)?
-                        }
-                    }))
-                },
-            )?
-            .ok_or(anyhow!(
-                "malformed composite receipt has no continuation segment receipts"
-            ))?;
-
-        // Compress assumptions and resolve them to get the final succinct receipt.
-        receipt.assumptions.iter().try_fold(
-            continuation_receipt,
-            |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
-                InnerReceipt::Succinct(assumption) => client.resolve(opts, conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
-                InnerReceipt::Composite(assumption) => {
-                    client.resolve(opts, conditional.try_into()?, Self::composite_to_succinct(client, opts, assumption)?.try_into()?, AssetRequest::Inline)
-                }
-                InnerReceipt::Fake { .. } => bail!(
-                    "compressing composite receipts with fake receipt assumptions is not supported"
-                ),
-                InnerReceipt::Compact(_) => bail!(
-                    "compressing composite receipts with Compact receipt assumptions is not supported"
-                ),
-            },
-        )
     }
 }
 
@@ -140,15 +89,7 @@ impl Prover for ExternalProver {
                 );
                 Ok(receipt.clone())
             }
-            (InnerReceipt::Composite(composite), ReceiptKind::Succinct) => {
-                let client = ApiClient::new_sub_process(&self.r0vm_path)?;
-                Ok(Receipt::new(
-                    InnerReceipt::Succinct(Self::composite_to_succinct(&client, opts, composite)?),
-                    receipt.journal.bytes.clone(),
-                ))
-            }
-            (_, ReceiptKind::Compact) => {
-                // TODO(#1760) Support compression to compact receipt in client/server API.
+            (_, _) => {
                 let client = ApiClient::new_sub_process(&self.r0vm_path)?;
                 client.compress(opts, receipt.clone().try_into()?, AssetRequest::Inline)
             }

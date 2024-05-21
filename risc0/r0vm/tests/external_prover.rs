@@ -17,7 +17,7 @@ use assert_cmd::cargo::cargo_bin;
 use risc0_zkvm::{ExecutorEnv, ExternalProver, Prover, ProverOpts, Receipt};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
-fn prove_nothing() -> Result<Receipt> {
+fn prove_nothing(opt: &ProverOpts) -> Result<Receipt> {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
@@ -26,12 +26,20 @@ fn prove_nothing() -> Result<Receipt> {
     let r0vm_path = cargo_bin("r0vm");
     let prover = ExternalProver::new("r0vm", r0vm_path);
     let receipt = prover.prove(env, MULTI_TEST_ELF)?.receipt;
-    prover.compress(&ProverOpts::succinct(), &receipt)
+    prover.compress(opt, &receipt)
 }
 
 #[test_log::test]
 fn basic_proof() {
-    let receipt = prove_nothing().unwrap();
+    let receipt = prove_nothing(&ProverOpts::succinct()).unwrap();
     receipt.verify(MULTI_TEST_ID).unwrap();
     receipt.inner.succinct().unwrap();
+}
+
+#[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+#[test_log::test]
+fn compressed_proof() {
+    let receipt = prove_nothing(&ProverOpts::compact()).unwrap();
+    receipt.verify(MULTI_TEST_ID).unwrap();
+    receipt.inner.compact().unwrap();
 }
