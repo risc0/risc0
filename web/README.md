@@ -1,6 +1,6 @@
 # Web Monorepo 🌳
 
-#### Before You Start2
+#### Before You Start
 
 - Install [Node](https://nodejs.org/en) (≥ v20.x.x)
 
