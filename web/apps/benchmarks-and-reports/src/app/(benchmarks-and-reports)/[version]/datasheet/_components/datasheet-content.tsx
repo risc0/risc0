@@ -11,7 +11,12 @@ const FILENAMES_TO_TITLES = {
   "Linux-cpu.json": (
     <>
       CPU only on{" "}
-      <Link target="_blank" href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge" className="link">
+      <Link
+        rel="noopener noreferrer"
+        target="_blank"
+        href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge"
+        className="link"
+      >
         c6i.8xlarge
       </Link>
     </>

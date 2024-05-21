@@ -22,7 +22,7 @@ export default function NotFoundPage() {
         </CardHeader>
 
         <CardFooter>
-          <Link href="/" className={buttonVariants({ variant: "default" })}>
+          <Link prefetch href="/" className={buttonVariants({ variant: "default" })}>
             Take Me Home
           </Link>
         </CardFooter>

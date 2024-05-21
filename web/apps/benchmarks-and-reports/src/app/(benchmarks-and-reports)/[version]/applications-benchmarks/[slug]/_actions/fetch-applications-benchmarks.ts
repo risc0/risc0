@@ -1,7 +1,5 @@
 import "server-only";
 
-import env from "~/env";
-
 export async function fetchApplicationsBenchmarks({ url, version }: { url: string; version: string }) {
   return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/${url}`, {
     headers: {

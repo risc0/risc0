@@ -36,6 +36,8 @@ export default function ApplicationsBenchmarksPage({ params }) {
           <Link
             tabIndex={-1}
             key={filename}
+            replace
+            prefetch
             href={`/${params.version}/applications-benchmarks/${replace(filename, ".csv", "")}`}
           >
             <TabsTrigger value={replace(filename, ".csv", "")}>{Object.values(FILENAMES_TO_TITLES)[index]}</TabsTrigger>
