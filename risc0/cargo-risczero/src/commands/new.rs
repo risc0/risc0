@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use const_format::concatcp;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
 use clap::Parser;
+use const_format::concatcp;
 use regex::Regex;
 use text_io::read;
 
@@ -156,12 +156,18 @@ impl NewCommand {
         })?;
 
         let guest_name_const = guest_name.replace("-", "_").to_ascii_uppercase();
-        let id = format!("{guest_name_const}_ID");
-        let elf = format!("{guest_name_const}_ELF");
-        let package_name = format!("\"{guest_name}\"");
-        template_variables.push((Regex::new(r"\{\{ *guest_package_name *\}\}")?, package_name));
-        template_variables.push((Regex::new(r"\{\{ *guest_id *\}\}")?, id));
-        template_variables.push((Regex::new(r"\{\{ *guest_elf *\}\}")?, elf));
+        template_variables.push((
+            Regex::new(r"\{\{ *guest_package_name *\}\}")?,
+            format!("\"{guest_name}\""),
+        ));
+        template_variables.push((
+            Regex::new(r"\{\{ *guest_id *\}\}")?,
+            format!("{guest_name_const}_ID"),
+        ));
+        template_variables.push((
+            Regex::new(r"\{\{ *guest_elf *\}\}")?,
+            format!("{guest_name_const}_ELF"),
+        ));
 
         if !self.no_std {
             template_variables.push((
@@ -178,13 +184,6 @@ risc0_zkvm::guest::entry!(main);\n";
                 no_std_preamble.to_string(),
             ));
         }
-
-        let root = dest_dir.join(self.name.clone());
-
-        // generate host directories
-        std::fs::create_dir_all(root.join("host/src"))?;
-
-        // TODO: generate
         self.gen_template(dest_dir, template_variables)?;
 
         Ok(())
