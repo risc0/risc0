@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::VecDeque;
+
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
-    adapter::CircuitInfo,
+    adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::digest::{Digest, DIGEST_WORDS},
     field::baby_bear::BabyBearElem,
 };
@@ -22,11 +24,13 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 use test_log::test;
 
 use super::{
-    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, Prover,
+    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, prove::zkr,
+    MerkleGroup, Prover,
 };
 use crate::{
-    default_prover, get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts,
-    Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_CONTROL_ROOT,
+    default_prover, get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl, InnerReceipt,
+    ProverOpts, Receipt, SegmentReceipt, Session, SuccinctReceipt,
+    SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -84,7 +88,7 @@ fn test_recursion_poseidon2() {
     // control tree just combines two hashes.
     let digest1 = Digest::from([0, 1, 2, 3, 4, 5, 6, 7]);
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
-    let expected = suite.hashfn.hash_pair(&digest1, &digest2);
+    let expected = *suite.hashfn.hash_pair(&digest1, &digest2);
     let mut prover =
         Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
 
@@ -102,10 +106,28 @@ fn test_recursion_poseidon2() {
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
-    let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
+    let output1_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
+    let output2_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
-    tracing::debug!("Receipt output: {:?}", output_digest);
-    assert_eq!(output_digest, *expected);
+    tracing::debug!("Receipt output: {:?}", output1_digest);
+    assert_eq!(output1_digest, digest1);
+    assert_eq!(output2_digest, expected);
+
+    // Verify the receipt. Requires us to assemble the appropriate verifier context.
+    let poseidon2_suite = Poseidon2HashSuite::new_suite();
+    let (_, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+    let _ctx = VerifierContext::empty()
+        .with_suites([("poseidon2".to_string(), poseidon2_suite.clone())].into())
+        .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
+            control_root: MerkleGroup::new(vec![control_id])
+                .unwrap()
+                .calc_root(poseidon2_suite.hashfn.as_ref()),
+            inner_control_root: Some(digest1),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: CircuitImpl::CIRCUIT_INFO,
+        });
+    // DO NOT MERGE: Finish implementing this test.
+    // receipt.verify_integrity_with_context(&ctx).unwrap();
 }
 
 #[cfg_attr(
@@ -219,6 +241,74 @@ fn test_recursion_lift_join_identity_e2e() {
         session.journal.unwrap().bytes,
     );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+fn test_recursion_identity_sha256() {
+    let default_prover = get_prover_server(&ProverOpts::succinct()).unwrap();
+
+    tracing::info!("Proving: echo 'hello'");
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Echo {
+            bytes: b"hello".to_vec(),
+        })
+        .unwrap()
+        .build()
+        .unwrap();
+    let default_receipt = default_prover
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .receipt
+        .inner
+        .succinct()
+        .unwrap()
+        .clone();
+    tracing::info!("Done proving: echo 'hello'");
+
+    let (_, control_id_sha256) = zkr::identity("sha-256").unwrap();
+
+    let opts = ProverOpts::succinct()
+        .with_hashfn("sha-256".to_string())
+        .with_control_ids(vec![control_id_sha256]);
+
+    let mut prover = Prover::new_identity(&default_receipt, opts.clone()).unwrap();
+    let sha256_recursion_receipt = prover.run().unwrap();
+    let mut out_stream = VecDeque::<u32>::new();
+    out_stream.extend(sha256_recursion_receipt.output.iter());
+
+    // Include an inclusion proof for control_id to allow verification against a root.
+    let hashfn = opts.hash_suite().unwrap().hashfn;
+    let sha256_control_tree = MerkleGroup::new(opts.control_ids.clone()).unwrap();
+    let sha256_control_inclusion_proof = sha256_control_tree
+        .get_proof(&sha256_recursion_receipt.control_id, hashfn.as_ref())
+        .unwrap();
+    let sha256_control_root = sha256_control_tree.calc_root(hashfn.as_ref());
+    let params = SuccinctReceiptVerifierParameters {
+        control_root: sha256_control_root,
+        inner_control_root: Some(ALLOWED_CONTROL_ROOT),
+        proof_system_info: PROOF_SYSTEM_INFO,
+        circuit_info: CircuitImpl::CIRCUIT_INFO,
+    };
+    let sha256_receipt = SuccinctReceipt {
+        seal: sha256_recursion_receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: control_id_sha256,
+        control_inclusion_proof: sha256_control_inclusion_proof,
+        // Use the claim from the inner receipt that verifiy will only pass if they match.
+        claim: default_receipt.claim,
+        verifier_parameters: params.digest(),
+    };
+
+    sha256_receipt
+        .verify_integrity_with_context(
+            &VerifierContext::empty()
+                .with_suites(VerifierContext::default_hash_suites())
+                .with_succinct_verifier_parameters(params),
+        )
+        .unwrap();
 }
 
 #[cfg_attr(
