@@ -149,7 +149,8 @@ impl Prover for ExternalProver {
             }
             (_, ReceiptKind::Compact) => {
                 // TODO(#1760) Support compression to compact receipt in client/server API.
-                bail!("ExternalProver does not support compression to CompactReceipt");
+                let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+                client.compress(opts, receipt.clone().try_into()?, AssetRequest::Inline)
             }
         }
     }

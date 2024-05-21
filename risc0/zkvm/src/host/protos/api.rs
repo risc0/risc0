@@ -2,7 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerRequest {
-    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7")]
+    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
 /// Nested message and enum types in `ServerRequest`.
@@ -24,6 +24,8 @@ pub mod server_request {
         IdentityP254(super::IdentityP254Request),
         #[prost(message, tag = "7")]
         Resolve(super::ResolveRequest),
+        #[prost(message, tag = "8")]
+        Compress(super::CompressRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -238,12 +240,47 @@ pub struct IdentityP254Result {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompressRequest {
+    #[prost(message, optional, tag = "1")]
+    pub opts: ::core::option::Option<ProverOpts>,
+    #[prost(message, optional, tag = "2")]
+    pub receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "3")]
+    pub receipt_out: ::core::option::Option<AssetRequest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompressReply {
+    #[prost(oneof = "compress_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<compress_reply::Kind>,
+}
+/// Nested message and enum types in `CompressReply`.
+pub mod compress_reply {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        Ok(super::CompressResult),
+        #[prost(message, tag = "2")]
+        Error(super::GenericError),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompressResult {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars:
-        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    pub env_vars: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]
