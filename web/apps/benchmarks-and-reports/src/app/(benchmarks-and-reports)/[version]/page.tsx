@@ -15,11 +15,9 @@ export default function ReportsPage({ params }) {
             </div>
 
             <div className="flex min-h-[160px] min-w-[220px] justify-center">
-              <Image
+              <img
                 width={220}
                 height={160}
-                priority
-                unoptimized
                 className="dark:filter-order-colored-svg-filter-order user-select-none pointer-events-none rounded object-contain object-right invert dark:brightness-100 dark:hue-rotate-[3deg] dark:invert-0 dark:saturate-[6] dark:sepia"
                 src={`/graph-${index}.svg`}
                 alt={description}
