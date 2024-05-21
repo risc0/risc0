@@ -2,7 +2,7 @@
   "name": "web",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo build && next build",
     "check": "cd .. && bunx @biomejs/biome check --apply-unsafe web",
     "ci": "cd .. && bunx @biomejs/biome ci web",
     "dev": "turbo dev",
