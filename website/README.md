@@ -5,7 +5,7 @@ This website is built using [Docusaurus 2](https://docusaurus.io/), a modern sta
 ### Installation
 
 ```console
-yarn 2
+yarn
 ```
 
 ### Local Development
