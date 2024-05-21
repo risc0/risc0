@@ -63,8 +63,9 @@ runs:
         echo "CXX=sccache clang++" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
-
-    - if: >
+      
+    - name: (Internal PR) Configure AWS Credentials
+      if: >
         runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
         github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       id: aws-creds
@@ -87,3 +88,50 @@ runs:
         secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
         sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
         use-fallback: false
+
+    - name: (External PR) Install AWS Signer (Linux)
+      if: >
+        runner.os == 'Linux' &&
+        github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
+        (contains(runner.name, 'puget') || contains(runner.name, 'mini-'))
+      env:
+        LINUX_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper
+      run: |
+        mkdir -p $HOME/.local/aws
+        curl $LINUX_SIGNER_URL -o $HOME/.local/aws/aws_signing_helper
+        chmod +x $HOME/.local/aws/aws_signing_helper
+      shell: bash
+
+    - name: (External PR) Install AWS Signer (macOS)
+      if: >
+        runner.os == 'macOS' &&
+        github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
+        (contains(runner.name, 'puget') || contains(runner.name, 'mini-'))
+      env:
+        DARWIN_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Darwin/aws_signing_helper
+      run: |
+        mkdir -p $HOME/.local/aws
+        curl $DARWIN_SIGNER_URL -o $HOME/.local/aws/aws_signing_helper
+        chmod +x $HOME/.local/aws/aws_signing_helper
+      shell: bash
+
+    - name: (External PR) Install IAM Anywhere Resources for risc0 Public Cache
+      if: >
+        github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
+        (contains(runner.name, 'puget') || contains(runner.name, 'mini-'))
+      run: bash ./iam_risc0_cache.sh
+      shell: bash
+      working-directory: ./.github/scripts
+
+    - name: (External PR) Configure AWS Credentials
+      if: >
+        github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
+        (contains(runner.name, 'puget') || contains(runner.name, 'mini-'))
+      env:
+        TRUST_ANCHOR_ARN: arn:aws:rolesanywhere:us-west-2:083632199359:trust-anchor/f3ef0e42-f374-43e5-8933-15b46537f855
+        PROFILE_ARN: arn:aws:rolesanywhere:us-west-2:083632199359:profile/fb3ace7d-a3c5-4786-bc26-15b74ea0d164
+        ROLE_ARN: arn:aws:iam::083632199359:role/gha_instance_risc0_cache_access
+      run: |
+        aws configure set credential_process "$HOME/.local/aws/aws_signing_helper credential-process --trust-anchor-arn $TRUST_ANCHOR_ARN --profile-arn $PROFILE_ARN --role-arn $ROLE_ARN --certificate $HOME/.local/aws/certificate.pem --private-key $HOME/.local/aws/runner_key.pem" --profile default
+        echo "##vso[task.setvariable variable=AWS_SDK_LOAD_CONFIG;]1"
+      shell: bash
