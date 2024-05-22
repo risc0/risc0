@@ -113,7 +113,7 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [
     ),
     (
         "test_recursion_circuit.zkr",
-        digest!("29188b1f420db32c5ca3882801e602515841cb608a6bd36c38c68a3ac6e9be2f"),
+        digest!("6d55102aa73086602f7039412200124bdec91f0c497c606f9aa09040403e030b"),
     ),
 ];
 
@@ -177,6 +177,6 @@ pub const SHA256_CONTROL_IDS: [(&str, Digest); 15] = [
     ),
     (
         "test_recursion_circuit.zkr",
-        digest!("917acb7730dca8de12fc5c2a68dfe82ba6ec882701a3632847bd203230afb0ed"),
+        digest!("3c7b9195e051f01d9dc21d96a1dd26c7035bc225511a715cf8c7ba83f8df7687"),
     ),
 ];
