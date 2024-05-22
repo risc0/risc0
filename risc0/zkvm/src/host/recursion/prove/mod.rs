@@ -583,21 +583,10 @@ impl Prover {
         let (program, control_id) = zkr::resolve(&opts.hashfn)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        // Determine the control root from the receipts themselves, and ensure they are equal. If
-        // the determined control root does not match what the downstream verifier expects, they
-        // will reject.
-        let merkle_root = cond.control_root()?;
-        ensure!(
-            merkle_root == assum.control_root()?,
-            "merkle roots for a and b do not match: {} != {}",
-            merkle_root,
-            assum.control_root()?
-        );
-
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        prover.add_input_digest(&cond.control_root()?, DigestKind::Poseidon2);
         prover.add_segment_receipt(cond)?;
 
         let output = cond
@@ -633,7 +622,7 @@ impl Prover {
             "assumption receipt claim does not match head of assumptions list"
         );
         let expected_root = match head.control_root == Digest::ZERO {
-            true => merkle_root,
+            true => cond.control_root()?,
             false => head.control_root,
         };
         ensure!(

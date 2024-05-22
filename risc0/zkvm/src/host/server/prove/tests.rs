@@ -866,13 +866,14 @@ mod sys_verify {
             .add_assumption(test_circuit_receipt.clone())
             .build()
             .unwrap();
-        get_prover_server(&ProverOpts::fast())
+        let receipt = get_prover_server(&ProverOpts::fast())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
-            .receipt
-            .verify(MULTI_TEST_ID)
-            .unwrap();
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a composite receipt.
+        receipt.inner.composite().unwrap();
 
         // Test that we can produce a verifying SuccinctReceipt.
         let env = ExecutorEnv::builder()
@@ -881,13 +882,14 @@ mod sys_verify {
             .add_assumption(test_circuit_receipt.clone())
             .build()
             .unwrap();
-        get_prover_server(&ProverOpts::succinct())
+        let receipt = get_prover_server(&ProverOpts::succinct())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
-            .receipt
-            .verify(MULTI_TEST_ID)
-            .unwrap();
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a succinct receipt.
+        receipt.inner.succinct().unwrap();
 
         // Test that proving without a provided assumption results in an execution
         // failure.
