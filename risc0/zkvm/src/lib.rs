@@ -144,7 +144,7 @@ pub use {
 
 pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
-    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
+    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
     SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     VerifierContext,
 };

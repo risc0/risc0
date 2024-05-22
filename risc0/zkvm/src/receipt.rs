@@ -71,7 +71,7 @@ pub use self::{
 /// # Example
 ///
 /// To create a [Receipt] attesting to the faithful execution of your code, run
-/// one of the `prove` functions from a [crate::Prover].
+/// one of the `prove` functions from a `Prover`.
 ///
 /// ```rust
 /// # #[cfg(feature = "prove")]
