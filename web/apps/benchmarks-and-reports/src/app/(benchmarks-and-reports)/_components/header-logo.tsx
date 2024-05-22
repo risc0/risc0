@@ -2,7 +2,6 @@
 
 import { useLocalStorage } from "@risc0/ui/hooks/use-local-storage";
 import { useMounted } from "@risc0/ui/hooks/use-mounted";
-import Image from "next/image";
 import Link from "next/link";
 
 export function HeaderLogo() {

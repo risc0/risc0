@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@joshdavenport/tailwindcss-filter-order": "0.2.0",
-    "@next/bundle-analyzer": "latest",
+    "@next/bundle-analyzer": "14.2.3",
     "@poppinss/intl-formatter": "3.0.2",
     "@risc0/ui": "0.0.78",
     "@t3-oss/env-nextjs": "0.10.1",
-    "@tanstack/match-sorter-utils": "9.0.0-alpha.0",
-    "@tanstack/react-table": "9.0.0-alpha.0",
+    "@tanstack/match-sorter-utils": "8.15.1",
+    "@tanstack/react-table": "8.17.3",
     "@types/chart.js": "2.9.41",
     "@types/jest": "29.5.12",
     "@types/node": "20.12.12",
@@ -38,8 +38,8 @@
     "react-rainbow-ascii": "1.0.3",
     "sharp": "0.33.4",
     "string-ts": "2.1.1",
-    "turbo": "latest",
-    "typescript": "5.5.0-dev.20240521",
+    "turbo": "1.13.3",
+    "typescript": "5.4.5",
     "zod": "3.23.8"
   }
 }

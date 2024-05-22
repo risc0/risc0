@@ -1,7 +1,6 @@
 import "server-only";
 
 import { unstable_noStore as noStore } from "next/cache";
-import env from "~/env";
 
 export async function fetchDatasheetCommitHash({ version }: { version: string }) {
   noStore();

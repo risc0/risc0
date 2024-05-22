@@ -1,5 +1,4 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
-import Image from "next/image";
 import Link from "next/link";
 import { REPORTS } from "./_utils/constants";
 
