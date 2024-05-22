@@ -19,15 +19,12 @@ pub(crate) mod local;
 
 use std::{path::PathBuf, rc::Rc};
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
 use risc0_circuit_rv32im::control_id::SHA256_CONTROL_IDS;
-use risc0_zkp::{
-    core::{digest::Digest, hash::HashSuite},
-    field::baby_bear::BabyBear,
-};
+use risc0_zkp::core::digest::Digest;
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
 use crate::{
@@ -280,9 +277,12 @@ impl ProverOpts {
         }
     }
 
-    pub(crate) fn hash_suite(&self) -> Result<HashSuite<BabyBear>> {
+    #[cfg(feature = "prove")]
+    pub(crate) fn hash_suite(
+        &self,
+    ) -> Result<risc0_zkp::core::hash::HashSuite<risc0_zkp::field::baby_bear::BabyBear>> {
         risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
-            .ok_or_else(|| anyhow!("unsupported hash suite: {}", self.hashfn))
+            .ok_or_else(|| anyhow::anyhow!("unsupported hash suite: {}", self.hashfn))
     }
 }
 

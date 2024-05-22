@@ -25,6 +25,7 @@ mod tests;
 
 // NOTE: merkle modules is next to receipts because it needs to be compiled for the zkVM, as part
 // of SuccinctReceipt, but is logically part of the recursion system.
+#[cfg(feature = "prove")]
 pub use crate::receipt::merkle::{MerkleGroup, MerkleProof};
 pub use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_ROOT;
 

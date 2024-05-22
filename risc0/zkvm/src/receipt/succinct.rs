@@ -67,7 +67,7 @@ where
     pub verifier_parameters: Digest,
 
     /// Merkle inclusion proof for control_id against the control root for this receipt.
-    pub(crate) control_inclusion_proof: MerkleProof,
+    pub control_inclusion_proof: MerkleProof,
 }
 
 impl<Claim> SuccinctReceipt<Claim>
@@ -174,7 +174,7 @@ where
         self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
     }
 
-    #[cfg(not(target_os = "zkvm"))]
+    #[cfg(feature = "prove")]
     pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
         let hash_suite = risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
             .ok_or_else(|| anyhow::anyhow!("unsupported hash function: {}", self.hashfn))?;

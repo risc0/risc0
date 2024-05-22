@@ -23,11 +23,12 @@
 // change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
 // that we are unlikely to need more.
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
+#[cfg(feature = "prove")]
 pub const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 
 use alloc::vec::Vec;
 
-use anyhow::{bail, ensure, Result};
+use anyhow::{ensure, Result};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
 use serde::{Deserialize, Serialize};
@@ -35,6 +36,7 @@ use serde::{Deserialize, Serialize};
 /// Merkle tree implementation used in the recursion system to commit to a set of recursion
 /// programs, and to verify the inclusion of a given program in the set.
 #[non_exhaustive]
+#[cfg(feature = "prove")]
 pub struct MerkleGroup {
     /// Depth of the Merkle tree.
     pub depth: u32,
@@ -56,6 +58,7 @@ pub struct MerkleProof {
     pub digests: Vec<Digest>,
 }
 
+#[cfg(feature = "prove")]
 impl MerkleGroup {
     /// Create a new [MerkleGroup] from the given leaves.
     /// Will fail is too many leaves are given for the default depth.
@@ -103,7 +106,7 @@ impl MerkleGroup {
         hashfn: &dyn HashFn<BabyBear>,
     ) -> Result<MerkleProof> {
         let Some(index) = self.leaves.iter().position(|elem| elem == control_id) else {
-            bail!("Unable to find {control_id:?} in merkle group");
+            anyhow::bail!("Unable to find {control_id:?} in merkle group");
         };
         Ok(self.get_proof_by_index(index as u32, hashfn))
     }

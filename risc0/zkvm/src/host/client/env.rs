@@ -32,13 +32,15 @@ use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
+#[cfg(feature = "prove")]
+use crate::Assumption;
 use crate::{
     host::client::{
         posix_io::PosixIo,
         slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
     },
     serde::to_vec,
-    Assumption, AssumptionReceipt, TraceCallback,
+    AssumptionReceipt, TraceCallback,
 };
 
 /// A builder pattern used to construct an [ExecutorEnv].
