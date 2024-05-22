@@ -481,7 +481,8 @@ mod docker {
     use crate::{
         get_prover_server,
         host::server::prove::{DevModeProver, ProverServer},
-        ExecutorEnv, ExecutorImpl, ExitCode, InnerReceipt, ProverOpts, Receipt, ReceiptKind,
+        ExecutorEnv, ExecutorImpl, ExitCode, FakeReceipt, InnerReceipt, ProverOpts, Receipt,
+        ReceiptKind,
     };
     use risc0_zkp::core::digest::Digest;
     use risc0_zkvm_methods::{
@@ -534,14 +535,14 @@ mod docker {
 
     fn test_fake_compress(receipt: &Receipt) {
         fn ensure_fake(receipt: Receipt) {
-            let InnerReceipt::Fake { claim: _ } = receipt.inner else {
+            let InnerReceipt::Fake(_) = receipt.inner else {
                 panic!("expected fake receipt");
             };
         }
         let fake = Receipt::new(
-            InnerReceipt::Fake {
+            InnerReceipt::Fake(FakeReceipt {
                 claim: receipt.claim().unwrap(),
-            },
+            }),
             receipt.clone().journal.bytes,
         );
 
