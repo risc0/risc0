@@ -9,7 +9,6 @@ const env = createEnv({
    * Specify server-side environment variables schema here.
    */
   server: {
-    GITHUB_PAT: z.string(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   },
 
@@ -25,7 +24,6 @@ const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-    GITHUB_PAT: process.env.GITHUB_PAT,
   },
   /**
    * Makes it so that empty strings are treated as undefined.

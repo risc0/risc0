@@ -789,7 +789,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.8.0-rc.1"
+version = "0.8.0-rc.2"
 dependencies = [
  "anyhow",
  "bincode",
@@ -947,7 +947,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "bincode",
@@ -4405,7 +4405,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "elf",
@@ -4420,7 +4420,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -4436,7 +4436,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "cc",
  "directories",
@@ -4450,7 +4450,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4463,6 +4463,7 @@ dependencies = [
  "rayon",
  "risc0-circuit-recursion-sys",
  "risc0-core",
+ "risc0-sys",
  "risc0-zkp",
  "sha2",
  "test-log",
@@ -4474,16 +4475,18 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
+ "risc0-sys",
+ "sppark",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4500,6 +4503,7 @@ dependencies = [
  "risc0-binfmt",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
+ "risc0-sys",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
@@ -4510,17 +4514,18 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
  "risc0-sys",
+ "sppark",
 ]
 
 [[package]]
 name = "risc0-core"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "bytemuck",
  "rand",
@@ -4529,7 +4534,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -4552,7 +4557,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -4569,28 +4574,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-sppark"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be1d1ff7fe501c9f420654bc1ff7461909b85e7f8fb3698a8812c0a8a787306"
-dependencies = [
- "cc",
- "which 4.4.2",
-]
-
-[[package]]
 name = "risc0-sys"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "cc",
  "cust",
  "risc0-build-kernel",
- "risc0-sppark",
+ "sppark",
 ]
 
 [[package]]
 name = "risc0-tools"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -4600,7 +4595,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "blake2",
@@ -4632,7 +4627,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -4683,7 +4678,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
@@ -4694,7 +4689,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -4703,7 +4698,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 
 [[package]]
 name = "rrs-lib"
@@ -5109,6 +5104,16 @@ name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
+
+[[package]]
+name = "sppark"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb266b15daead53670d477d7e136b8fc92d46e31bb9007ac46d304df23689a4b"
+dependencies = [
+ "cc",
+ "which 4.4.2",
+]
 
 [[package]]
 name = "stable_deref_trait"

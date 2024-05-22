@@ -16,11 +16,12 @@ use std::rc::Rc;
 
 use anyhow::{bail, Result};
 use rayon::prelude::*;
-use risc0_circuit_rv32im_sys::ffi::{Error, RawPreflightTrace};
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, Elem, ExtElem, RootsOfUnity,
 };
+use risc0_sys::CppError;
 use risc0_zkp::{
     adapter::PolyFp,
     core::{
@@ -73,7 +74,7 @@ impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
                 ctrl: *const BabyBearElem,
                 io: *const BabyBearElem,
                 data: *const BabyBearElem,
-            ) -> Error;
+            ) -> CppError;
         }
         unsafe {
             risc0_circuit_rv32im_cpu_witgen(
