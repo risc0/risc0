@@ -626,6 +626,7 @@ mod docker {
 mod sys_verify {
     use std::sync::OnceLock;
 
+    use risc0_zkp::core::{digest::digest, hash::poseidon2::Poseidon2HashSuite};
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
@@ -633,8 +634,12 @@ mod sys_verify {
 
     use super::get_prover_server;
     use crate::{
-        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
-        Receipt,
+        receipt_claim::Unknown,
+        recursion::{prove::zkr, MerkleGroup},
+        serde::to_vec,
+        sha::Digestible,
+        Assumption, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt,
+        SuccinctReceipt,
     };
 
     fn prove_hello_commit() -> Receipt {
@@ -678,14 +683,15 @@ mod sys_verify {
 
     // The test_recursion_circuit is a program for the recursion VM that does some very simple
     // operations, just to make sure the
-    // DO NOT MERGE
-    #[allow(dead_code)]
-    fn prove_test_recursion_circuit() -> Receipt {
-        get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-            .unwrap()
-            .receipt
+    fn prove_test_recursion_circuit() -> SuccinctReceipt<Unknown> {
+        // Random Poseidon2 "digest" to act as the "control root".
+        let suite = Poseidon2HashSuite::new_suite();
+        let (_, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+
+        let digest2 = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+        crate::recursion::test_recursion_circuit(&control_root, &digest2).unwrap()
     }
 
     fn hello_commit_receipt() -> &'static Receipt {
@@ -844,18 +850,35 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_assumption() {
-        /*
-        let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
-                .unwrap(),
+        let test_circuit_receipt = prove_test_recursion_circuit();
+        let test_circuit_assumption = Assumption {
+            claim: test_circuit_receipt.claim.digest(),
+            control_root: test_circuit_receipt.control_root().unwrap(),
+        };
+        let spec = &MultiTestSpec::SysVerifyAssumption {
+            assumption_words: to_vec(&test_circuit_assumption).unwrap(),
         };
 
-        // Test that providing the proven assumption results in an unconditional
-        // receipt.
+        // Test that we can produce a verifying CompositeReceipt.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_receipt().clone())
+            .add_assumption(test_circuit_receipt.clone())
+            .build()
+            .unwrap();
+        get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+
+        // Test that we can produce a verifying SuccinctReceipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(test_circuit_receipt.clone())
             .build()
             .unwrap();
         get_prover_server(&ProverOpts::fast())
@@ -877,21 +900,6 @@ mod sys_verify {
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
-
-        // Test that providing an unresolved assumption results in a conditional
-        // receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(hello_commit_receipt().claim().unwrap())
-            .build()
-            .unwrap();
-        // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&ProverOpts::fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
-        */
     }
 }
 

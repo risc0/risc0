@@ -249,6 +249,53 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     })
 }
 
+/// Prove the test_recursion_circuit. This is useful for testing purposes.
+///
+/// digest1 will be passed through to the first of the output globals, as the "inner control root".
+/// digest1 and digest2 will be used to calculate a "claim digest", placed in the second output.
+#[cfg(test)]
+pub fn test_recursion_circuit(
+    digest1: &Digest,
+    digest2: &Digest,
+) -> Result<SuccinctReceipt<crate::receipt_claim::Unknown>> {
+    let (_, control_id) = zkr::test_recursion_circuit("poseidon2")?;
+    let opts = ProverOpts::succinct().with_control_ids(vec![control_id]);
+
+    let mut prover = Prover::new_test_recursion_circuit([digest1, digest2], opts.clone())?;
+    let receipt = prover.run()?;
+
+    // Read the claim digest from the second of the global output slots.
+    const DIGEST_SHORTS: usize = crate::sha::DIGEST_WORDS * 2;
+    let claim_digest = risc0_binfmt::read_sha_halfs(&mut VecDeque::from_iter(
+        bytemuck::checked::cast_slice::<_, BabyBearElem>(
+            &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
+        )
+        .iter()
+        .copied()
+        .map(u32::from),
+    ))?;
+
+    // Include an inclusion proof for control_id to allow verification against a root.
+    let hashfn = opts.hash_suite()?.hashfn;
+    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
+        .get_proof(&receipt.control_id, hashfn.as_ref())?;
+    let control_root = control_inclusion_proof.root(&receipt.control_id, hashfn.as_ref());
+    let params = SuccinctReceiptVerifierParameters {
+        control_root,
+        inner_control_root: Some(digest1.to_owned()),
+        proof_system_info: PROOF_SYSTEM_INFO,
+        circuit_info: CircuitImpl::CIRCUIT_INFO,
+    };
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: receipt.control_id,
+        control_inclusion_proof,
+        claim: MaybePruned::Pruned(claim_digest),
+        verifier_parameters: params.digest(),
+    })
+}
+
 /// Prover for the recursion circuit.
 pub struct Prover {
     program: Program,

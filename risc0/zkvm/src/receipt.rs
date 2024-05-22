@@ -496,9 +496,19 @@ impl From<InnerReceipt> for AssumptionReceipt {
 }
 
 impl From<InnerAssumptionReceipt> for AssumptionReceipt {
-    /// Create a proven assumption from a [InnerReceipt].
+    /// Create a proven assumption from a [InnerAssumptionReceipt].
     fn from(receipt: InnerAssumptionReceipt) -> Self {
         Self::Proven(receipt)
+    }
+}
+
+impl<Claim> From<SuccinctReceipt<Claim>> for AssumptionReceipt
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
+    /// Create a proven assumption from a [InnerAssumptionReceipt].
+    fn from(receipt: SuccinctReceipt<Claim>) -> Self {
+        Self::Proven(InnerAssumptionReceipt::Succinct(receipt.into_unknown()))
     }
 }
 
