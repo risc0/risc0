@@ -97,23 +97,29 @@ To start your own project, you can use our `cargo risczero` tool to write the
 initial boilerplate and set up a standard directory structure.
 
 First, [install Rust][install-rust] if you don't already have it, then install
-the `cargo risczero` tool. We'll use `cargo binstall` to get `cargo-risczero`
-installed. See [cargo-binstall] for more details.
+the RISC Zero toolchain installer, `rzup`. We'll use `rzup` to install `cargo-risczero`.
 
-```
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-```
+To install `rzup` run the following command and follow the instructions:
 
-Next we'll need to install the `risc0` toolchain with:
-
-```
-cargo risczero install
+```bash
+curl -L https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/install | bash
 ```
 
-Then, create a new project (named `my_project` in this example):
+Next we can install the RISC Zero toolchain by running `rzup`:
 
+```bash
+rzup
 ```
+
+You can verify the installation was successful by running:
+
+```bash
+cargo risczero --version
+```
+
+After installation, you can create a new project (named `my_project` in this example):
+
+```bash
 cargo risczero new my_project
 ```
 
