@@ -30,7 +30,7 @@ use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::{Digest, Sha256},
-    ReceiptClaim,
+    Assumption, ReceiptClaim,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
@@ -187,7 +187,12 @@ fn main() {
         }
         MultiTestSpec::SysVerifyIntegrity { claim_words } => {
             let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
-            env::verify_integrity(&claim).unwrap();
+            // NOTE: This panic string is used in a test.
+            env::verify_integrity(&claim).expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::SysVerifyAssumption { assumption_words } => {
+            let assumption: Assumption = risc0_zkvm::serde::from_slice(&assumption_words).unwrap();
+            env::verify_assumption(assumption.claim, assumption.control_root).unwrap();
         }
         MultiTestSpec::Echo { bytes } => {
             env::commit_slice(&bytes);

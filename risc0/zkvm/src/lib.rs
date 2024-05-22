@@ -93,7 +93,7 @@ pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
-    Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 #[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
 pub use {
@@ -138,14 +138,15 @@ pub use {
         recursion::ALLOWED_CONTROL_ROOT,
     },
     risc0_binfmt::compute_image_id,
-    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
+    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS,
     risc0_groth16::Seal as Groth16Seal,
 };
 
 pub use receipt::{
-    Assumption, CompositeReceipt, CompositeReceiptVerifierParameters, InnerReceipt, Journal,
-    Receipt, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
-    SuccinctReceiptVerifierParameters, VerifierContext,
+    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
+    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
+    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+    VerifierContext,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
 pub use receipt::{CompactReceipt, CompactReceiptVerifierParameters};

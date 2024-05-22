@@ -297,25 +297,25 @@ pub struct ExecutorEnv {
     #[prost(string, tag = "10")]
     pub pprof_out: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "11")]
-    pub assumptions: ::prost::alloc::vec::Vec<Assumption>,
+    pub assumptions: ::prost::alloc::vec::Vec<AssumptionReceipt>,
     #[prost(string, tag = "12")]
     pub segment_path: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Assumption {
-    #[prost(oneof = "assumption::Kind", tags = "1, 2")]
-    pub kind: ::core::option::Option<assumption::Kind>,
+pub struct AssumptionReceipt {
+    #[prost(oneof = "assumption_receipt::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<assumption_receipt::Kind>,
 }
-/// Nested message and enum types in `Assumption`.
-pub mod assumption {
+/// Nested message and enum types in `AssumptionReceipt`.
+pub mod assumption_receipt {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
-        /// Receipt
+        /// InnerReceipt
         #[prost(message, tag = "1")]
         Proven(super::Asset),
-        /// MaybePruned<ReceiptClaim>
+        /// Assumption
         #[prost(message, tag = "2")]
         Unresolved(super::Asset),
     }
@@ -329,6 +329,8 @@ pub struct ProverOpts {
     pub prove_guest_errors: bool,
     #[prost(enumeration = "ReceiptKind", tag = "3")]
     pub receipt_kind: i32,
+    #[prost(message, repeated, tag = "4")]
+    pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

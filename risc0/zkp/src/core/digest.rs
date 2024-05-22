@@ -20,8 +20,11 @@ use core::fmt::{Debug, Display, Formatter};
 
 use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
-pub use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
+
+pub use crate::digest;
+pub use hex_literal::hex;
+pub use risc0_zkvm_platform::WORD_SIZE;
 
 /// The number of words in the representation of a [Digest].
 pub const DIGEST_WORDS: usize = 8;
@@ -49,6 +52,26 @@ impl Digest {
     /// Constant constructor
     pub const fn new(data: [u32; DIGEST_WORDS]) -> Self {
         Self(data)
+    }
+
+    /// Construct a digest from a array of bytes in a const context.
+    /// Outside of const context, `Digest::from` is recommended.
+    pub const fn from_bytes(bytes: [u8; DIGEST_BYTES]) -> Self {
+        let mut digest: Digest = Digest::ZERO;
+        let mut i: usize = 0;
+        while i < DIGEST_WORDS {
+            let mut j = 0;
+            let mut word = 0u32;
+            while j < WORD_SIZE {
+                word <<= 8;
+                word |= bytes[i * WORD_SIZE + j] as u32;
+                j += 1;
+            }
+            word = u32::from_be(word);
+            digest.0[i] = word;
+            i += 1;
+        }
+        digest
     }
 
     /// Returns a reference to the [Digest] as a slice of words.
@@ -227,6 +250,15 @@ impl Debug for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
         f.write_str(&format!("Digest({})", &hex::encode(self)))
     }
+}
+
+/// Macro for constructing a Digest from a hex string.
+#[macro_export]
+macro_rules! digest {
+    ($s:literal) => {{
+        const BYTES: [u8; $crate::core::digest::DIGEST_BYTES] = $crate::core::digest::hex!($s);
+        $crate::core::digest::Digest::from_bytes(BYTES)
+    }};
 }
 
 #[cfg(test)]

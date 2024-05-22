@@ -24,8 +24,7 @@ use super::get_prover_server;
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
-    VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, Session, VerifierContext,
 };
 
 fn prove_session_fast(session: &Session) -> Receipt {
@@ -42,11 +41,7 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
         .unwrap()
         .build()
         .unwrap();
-    let opts = ProverOpts {
-        hashfn: hashfn.to_string(),
-        prove_guest_errors: false,
-        receipt_kind: ReceiptKind::Composite,
-    };
+    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
 
@@ -104,10 +99,10 @@ fn check_image_id() {
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
-    assert_eq!(
+    assert!(matches!(
         receipt.verify(image_id).unwrap_err(),
-        VerificationError::ImageVerificationError
-    );
+        VerificationError::ClaimDigestMismatch { .. }
+    ));
 }
 
 #[test]
@@ -207,7 +202,7 @@ fn memory_io() {
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.claim()?.exit_code)
+        Ok(receipt.claim()?.as_value()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -486,7 +481,8 @@ mod docker {
     use crate::{
         get_prover_server,
         host::server::prove::{DevModeProver, ProverServer},
-        ExecutorEnv, ExecutorImpl, ExitCode, InnerReceipt, ProverOpts, Receipt, ReceiptKind,
+        ExecutorEnv, ExecutorImpl, ExitCode, FakeReceipt, InnerReceipt, ProverOpts, Receipt,
+        ReceiptKind,
     };
     use risc0_zkp::core::digest::Digest;
     use risc0_zkvm_methods::{
@@ -539,14 +535,14 @@ mod docker {
 
     fn test_fake_compress(receipt: &Receipt) {
         fn ensure_fake(receipt: Receipt) {
-            let InnerReceipt::Fake { claim: _ } = receipt.inner else {
+            let InnerReceipt::Fake(_) = receipt.inner else {
                 panic!("expected fake receipt");
             };
         }
         let fake = Receipt::new(
-            InnerReceipt::Fake {
+            InnerReceipt::Fake(FakeReceipt {
                 claim: receipt.claim().unwrap(),
-            },
+            }),
             receipt.clone().journal.bytes,
         );
 
@@ -631,7 +627,7 @@ mod docker {
 mod sys_verify {
     use std::sync::OnceLock;
 
-    use crate::ReceiptKind;
+    use risc0_zkp::core::{digest::digest, hash::poseidon2::Poseidon2HashSuite};
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
@@ -639,8 +635,12 @@ mod sys_verify {
 
     use super::get_prover_server;
     use crate::{
-        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
-        Receipt,
+        receipt_claim::Unknown,
+        recursion::{prove::zkr, MerkleGroup},
+        serde::to_vec,
+        sha::Digestible,
+        Assumption, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt,
+        SuccinctReceipt,
     };
 
     fn prove_hello_commit() -> Receipt {
@@ -652,11 +652,7 @@ mod sys_verify {
     }
 
     fn prove_halt(exit_code: u8) -> Receipt {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: true,
-            receipt_kind: ReceiptKind::Composite,
-        };
+        let opts = ProverOpts::fast().with_prove_guest_errors(true);
 
         let env = ExecutorEnvBuilder::default()
             .write(&MultiTestSpec::Halt(exit_code))
@@ -674,9 +670,31 @@ mod sys_verify {
             .verify_integrity_with_context(&Default::default())
             .unwrap();
         let halt_claim = halt_receipt.claim().unwrap();
-        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
+        assert_eq!(
+            halt_claim.as_value().unwrap().pre.digest(),
+            MULTI_TEST_ID.into()
+        );
+        assert_eq!(
+            halt_claim.as_value().unwrap().exit_code,
+            ExitCode::Halted(exit_code as u32)
+        );
+
         halt_receipt
+    }
+
+    // The test_recursion_circuit is a program for the recursion VM that does some very simple
+    // operations. It is used here to provide an "out-of-tree" recursion program receipt, in that
+    // this program is not in the stnadard tree of allowed recursion programs, but can should be
+    // verifiable in the guest via composition with the provided control root.
+    fn prove_test_recursion_circuit() -> SuccinctReceipt<Unknown> {
+        // Random Poseidon2 "digest" to act as the "control root".
+        let suite = Poseidon2HashSuite::new_suite();
+        let (_, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+
+        let digest2 = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+        crate::recursion::test_recursion_circuit(&control_root, &digest2).unwrap()
     }
 
     fn hello_commit_receipt() -> &'static Receipt {
@@ -760,7 +778,8 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_receipt().claim().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
+                .unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -813,7 +832,7 @@ mod sys_verify {
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&halt_receipt.claim().unwrap()).unwrap(),
+            claim_words: to_vec(halt_receipt.claim().unwrap().as_value().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.
@@ -830,6 +849,62 @@ mod sys_verify {
             .receipt
             .verify(MULTI_TEST_ID)
             .unwrap();
+    }
+
+    #[test]
+    fn sys_verify_assumption() {
+        let test_circuit_receipt = prove_test_recursion_circuit();
+        let test_circuit_assumption = Assumption {
+            claim: test_circuit_receipt.claim.digest(),
+            control_root: test_circuit_receipt.control_root().unwrap(),
+        };
+        let spec = &MultiTestSpec::SysVerifyAssumption {
+            assumption_words: to_vec(&test_circuit_assumption).unwrap(),
+        };
+
+        // Test that we can produce a verifying CompositeReceipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(test_circuit_receipt.clone())
+            .build()
+            .unwrap();
+        let receipt = get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a composite receipt.
+        receipt.inner.composite().unwrap();
+
+        // Test that we can produce a verifying SuccinctReceipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(test_circuit_receipt.clone())
+            .build()
+            .unwrap();
+        let receipt = get_prover_server(&ProverOpts::succinct())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a succinct receipt.
+        receipt.inner.succinct().unwrap();
+
+        // Test that proving without a provided assumption results in an execution
+        // failure.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .is_err());
     }
 }
 

@@ -147,7 +147,7 @@ impl Datasheet {
 
     fn composite(&mut self) {
         for hashfn in ["sha-256", "poseidon2"] {
-            let opts = ProverOpts::default().with_hashfn(hashfn.into());
+            let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
             let prover = get_prover_server(&opts).unwrap();
 
             const ITERATIONS: &[u64] = &[

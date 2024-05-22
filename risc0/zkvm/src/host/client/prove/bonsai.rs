@@ -66,8 +66,10 @@ impl Prover for BonsaiProver {
         let mut receipts_ids: Vec<String> = vec![];
         for assumption in &env.assumptions.borrow().cached {
             let serialized_receipt = match assumption {
-                crate::Assumption::Proven(receipt) => bincode::serialize(receipt)?,
-                crate::Assumption::Unresolved(_) => bail!("Only proven receipts can be uploaded."), //TODO: improve the message
+                crate::AssumptionReceipt::Proven(receipt) => bincode::serialize(receipt)?,
+                crate::AssumptionReceipt::Unresolved(_) => {
+                    bail!("only proven assumptions can be uploaded to Bonsai.")
+                }
             };
             let receipt_id = client.upload_receipt(serialized_receipt)?;
             receipts_ids.push(receipt_id);
@@ -108,12 +110,6 @@ impl Prover for BonsaiProver {
 
                 if opts.prove_guest_errors {
                     receipt.verify_integrity_with_context(ctx)?;
-                    ensure!(
-                        receipt.claim()?.pre.digest() == image_id,
-                        "received unexpected image ID: expected {}, found {}",
-                        hex::encode(image_id),
-                        hex::encode(receipt.claim()?.pre.digest())
-                    );
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;
                 }
@@ -185,6 +181,7 @@ impl Prover for BonsaiProver {
             InnerReceipt::Compact(CompactReceipt {
                 seal: snark_receipt.snark.to_vec(),
                 claim: succinct_prove_info.receipt.claim()?,
+                verifier_parameters: ctx.compact_verifier_parameters.digest(),
             }),
             succinct_prove_info.receipt.journal.bytes,
         );
