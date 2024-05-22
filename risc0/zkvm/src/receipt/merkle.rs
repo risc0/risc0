@@ -33,31 +33,35 @@ use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
 use serde::{Deserialize, Serialize};
 
-/// DO NOT MERGE add docs
+/// Merkle tree implementation used in the recursion system to commit to a set of recursion
+/// programs, and to verify the inclusion of a given program in the set.
 #[non_exhaustive]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MerkleGroup {
-    /// DO NOT MERGE add docs
+    /// Depth of the Merkle tree.
     pub depth: u32,
-    /// DO NOT MERGE add docs
+    /// Ordered list of Merkle tree leaves, as Digests. It is expected that these will be the
+    /// control IDs for the committed set of recursion programs.
     pub leaves: Vec<Digest>,
 }
 
-/// DO NOT MERGE add docs
+/// An inclusion proof for the [MerkleGroup]. Used to verify inclusion of a given recursion program
+/// in the committed set.
 #[non_exhaustive]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct MerkleProof {
-    /// DO NOT MERGE add docs
+    /// Index of the leaf for which inclusion is being proven.
     pub index: u32,
-    /// DO NOT MERGE add docs
+    /// Sibling digests on the path from the root to the leaf.
+    /// Does not include the root of the leaf.
     pub digests: Vec<Digest>,
 }
 
 // TODO(victor): Remove these allow(dead_code) annotations.
-/// DO NOT MERGE add docs
 impl MerkleGroup {
-    /// DO NOT MERGE add docs
+    /// Create a new [MerkleGroup] from the given leaves.
+    /// Will fail is too many leaves are given for the default depth.
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn new(leaves: Vec<Digest>) -> Result<Self> {
         let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
@@ -71,7 +75,7 @@ impl MerkleGroup {
         })
     }
 
-    /// DO NOT MERGE add docs
+    /// Calculate the root of the [MerkleGroup].
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn calc_root(&self, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         self.calc_range_root(0, 1 << self.depth, hashfn)
@@ -98,7 +102,8 @@ impl MerkleGroup {
         res
     }
 
-    /// DO NOT MERGE add docs
+    /// Calculate and return a [MerkleProof] for the given leaf.
+    /// Will return an error if the given leaf is not in the tree.
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn get_proof(
         &self,
@@ -111,7 +116,8 @@ impl MerkleGroup {
         Ok(self.get_proof_by_index(index as u32, hashfn))
     }
 
-    /// DO NOT MERGE add docs
+    /// Calculate and return a [MerkleProof] for the given leaf.
+    /// Will panic if the given index is out of the range of leaves.
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn get_proof_by_index(&self, index: u32, hashfn: &dyn HashFn<BabyBear>) -> MerkleProof {
         let mut digests: Vec<Digest> = Vec::with_capacity(self.depth as usize);
@@ -136,7 +142,7 @@ impl MerkleGroup {
 }
 
 impl MerkleProof {
-    /// DO NOT MERGE add docs
+    /// Verify the Merkle inclusion proof against the given leaf and root.
     #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn verify(
         &self,
