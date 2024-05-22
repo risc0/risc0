@@ -881,7 +881,7 @@ mod sys_verify {
             .add_assumption(test_circuit_receipt.clone())
             .build()
             .unwrap();
-        get_prover_server(&ProverOpts::fast())
+        get_prover_server(&ProverOpts::succinct())
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
