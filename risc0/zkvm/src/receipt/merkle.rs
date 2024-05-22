@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO(#1871): Refactor how these types are used, or the structuring of the modules, such that we don't
+// need to allow dead code here.
+#![cfg_attr(target_os = "zkvm", allow(dead_code))]
+
 //! Minimal Merkle tree implementation used in the recursion system for committing to a group of
 //! control IDs.
-
-// TODO(victor): Actually, they _do_ appear to leak to the public API when -Fprove is set. Mostly,
-// this is ok. Need to either "fix" that or improve the docs.
-// NOTE: Types in this crate are intentionally left out of the public API surface.
 
 // NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
 // change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
 // that we are unlikely to need more.
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
-#[cfg_attr(target_os = "zkvm", allow(dead_code))]
 pub const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 
 use alloc::vec::Vec;
@@ -36,7 +35,6 @@ use serde::{Deserialize, Serialize};
 /// Merkle tree implementation used in the recursion system to commit to a set of recursion
 /// programs, and to verify the inclusion of a given program in the set.
 #[non_exhaustive]
-#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MerkleGroup {
     /// Depth of the Merkle tree.
     pub depth: u32,
@@ -58,11 +56,9 @@ pub struct MerkleProof {
     pub digests: Vec<Digest>,
 }
 
-// TODO(victor): Remove these allow(dead_code) annotations.
 impl MerkleGroup {
     /// Create a new [MerkleGroup] from the given leaves.
     /// Will fail is too many leaves are given for the default depth.
-    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn new(leaves: Vec<Digest>) -> Result<Self> {
         let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
         ensure!(
@@ -76,17 +72,14 @@ impl MerkleGroup {
     }
 
     /// Calculate the root of the [MerkleGroup].
-    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn calc_root(&self, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         self.calc_range_root(0, 1 << self.depth, hashfn)
     }
 
-    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     fn leaf_or_empty(&self, index: u32) -> &Digest {
         self.leaves.get(index as usize).unwrap_or(&Digest::ZERO)
     }
 
-    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     fn calc_range_root(&self, start: u32, end: u32, hashfn: &dyn HashFn<BabyBear>) -> Digest {
         assert!(start < end);
         let res = if start + 1 == end {
@@ -104,7 +97,6 @@ impl MerkleGroup {
 
     /// Calculate and return a [MerkleProof] for the given leaf.
     /// Will return an error if the given leaf is not in the tree.
-    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn get_proof(
         &self,
         control_id: &Digest,
@@ -118,7 +110,6 @@ impl MerkleGroup {
 
     /// Calculate and return a [MerkleProof] for the given leaf.
     /// Will panic if the given index is out of the range of leaves.
-    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn get_proof_by_index(&self, index: u32, hashfn: &dyn HashFn<BabyBear>) -> MerkleProof {
         let mut digests: Vec<Digest> = Vec::with_capacity(self.depth as usize);
 
@@ -143,7 +134,6 @@ impl MerkleGroup {
 
 impl MerkleProof {
     /// Verify the Merkle inclusion proof against the given leaf and root.
-    #[cfg_attr(target_os = "zkvm", allow(dead_code))]
     pub fn verify(
         &self,
         leaf: &Digest,
