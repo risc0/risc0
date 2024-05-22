@@ -683,7 +683,9 @@ mod sys_verify {
     }
 
     // The test_recursion_circuit is a program for the recursion VM that does some very simple
-    // operations, just to make sure the
+    // operations. It is used here to provide an "out-of-tree" recursion program receipt, in that
+    // this program is not in the stnadard tree of allowed recursion programs, but can should be
+    // verifiable in the guest via composition with the provided control root.
     fn prove_test_recursion_circuit() -> SuccinctReceipt<Unknown> {
         // Random Poseidon2 "digest" to act as the "control root".
         let suite = Poseidon2HashSuite::new_suite();
