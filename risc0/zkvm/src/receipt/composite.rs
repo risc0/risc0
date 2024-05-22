@@ -220,9 +220,9 @@ impl CompositeReceipt {
 pub struct CompositeReceiptVerifierParameters {
     /// Verifier parameters related to [SegmentReceipt].
     pub segment: MaybePruned<SegmentReceiptVerifierParameters>,
-    /// Verifier parameters related to [SuccinctReceipt].
+    /// Verifier parameters related to [SuccinctReceipt][crate::SuccinctReceipt].
     pub succinct: MaybePruned<SuccinctReceiptVerifierParameters>,
-    /// Verifier parameters related to [CompactReceipt].
+    /// Verifier parameters related to [CompactReceipt][crate::CompactReceipt].
     pub compact: MaybePruned<CompactReceiptVerifierParameters>,
 }
 

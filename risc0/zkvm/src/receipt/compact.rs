@@ -41,7 +41,7 @@ where
     /// A Groth16 proof of a zkVM execution with the associated claim.
     pub seal: Vec<u8>,
 
-    /// [ReceiptClaim] containing information about the execution that this
+    /// [ReceiptClaim][crate::ReceiptClaim] containing information about the execution that this
     /// receipt proves.
     pub claim: MaybePruned<Claim>,
 

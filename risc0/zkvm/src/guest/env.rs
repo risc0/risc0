@@ -167,9 +167,9 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
 /// potentially distinct guests can be combined into one. This feature is know as [composition].
 ///
-/// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
-/// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
-/// post [crate::SystemState].
+/// In order to be valid, the [crate::Receipt] must have [ExitCode::Halted(0)][crate::ExitCode] or
+/// [ExitCode::Paused(0)][crate::ExitCode], an empty assumptions list, and an all-zeroes input
+/// hash. It may have any post [crate::SystemState].
 ///
 /// # Example
 ///
@@ -212,7 +212,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
-/// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
+/// [ExitCode::SystemSplit][crate::ExitCode]) will not have any encoded assumptions even if [verify] or
 /// [verify_integrity] is called and these receipts will be rejected by this function.
 ///
 /// [composition]: https://dev.risczero.com/terminology#composition
