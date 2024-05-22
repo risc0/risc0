@@ -220,23 +220,52 @@ impl SysVerify {
             let cached_claim_digest = cached_assumption
                 .claim_digest()
                 .context("failed to access claim digest on cached assumption")?;
-            // DO NOT MERGE: Check also that the control roots match... but this is probably good
-            // enough to test.
-            if cached_claim_digest == claim_digest {
-                assumption = Some((
-                    Assumption {
-                        claim: claim_digest,
-                        control_root,
-                    },
-                    cached_assumption.clone(),
-                ));
-                break;
+            if cached_claim_digest != claim_digest {
+                tracing::debug!(
+                    "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} does not match"
+                );
+                continue;
             }
+            // If the control root supplied by the guest is not zero, then they are requesting a
+            // specific set of recursion programs be used to resolve the assumption. Check that the
+            // given receipt can indeed resolve the assumption.
+            // NOTE: We currently only support using Succinct receipts here.
+            if control_root != Digest::ZERO {
+                let Some(cached_control_root) = (match cached_assumption {
+                    AssumptionReceipt::Proven(receipt) => receipt
+                        .succinct()
+                        .ok()
+                        .map(|r| r.control_root())
+                        .transpose()?,
+                    AssumptionReceipt::Unresolved(unresolved) => Some(unresolved.control_root),
+                }) else {
+                    // Elevate to warning because this really is likely an error.
+                    tracing::warn!(
+                        "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} is not a succinct receipt"
+                    );
+                    continue;
+                };
+                if cached_control_root != control_root {
+                    // Elevate to warning because this really is likely an error.
+                    tracing::warn!(
+                        "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} has control root {cached_control_root}; guest requested {control_root}"
+                    );
+                    continue;
+                }
+            }
+            assumption = Some((
+                Assumption {
+                    claim: claim_digest,
+                    control_root,
+                },
+                cached_assumption.clone(),
+            ));
+            break;
         }
 
         let Some(assumption) = assumption else {
             return Err(anyhow!(
-                "sys_verify_integrity: failed to resolve claim digest: {claim_digest}"
+                "sys_verify_integrity: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}"
             ));
         };
 

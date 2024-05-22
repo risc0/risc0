@@ -42,12 +42,12 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("173d6916af4a8826fb04d263bbfd75229c536b20969bc86e6e301e5de4d53313"),
     digest!("e788e63a7e9d9804f83aa34326caec3f1e871065400e9b7673479c2dd9ebed1c"),
     digest!("89270350893c3958d2463b1e5227b122a2868213d146c83fe99e9c584067fe52"),
-    digest!("ea9f2c0e3d0fd2047a6f1b2c96f1dc15c3a9b6712b253f587a804511b9430248"),
+    digest!("f0ce6e070e088e46eea00e4eb8729972c6a35417b9720f6d7c9f2620df6ce460"),
 ];
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("f20ad519aa71da4673c7392b30706a563380b81dabcb753babd679312397ac6e");
+    digest!("2c4aec26b74fdb27cd637d6106cfd64f6222aa55de73cd2b73189315b901ca09");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
@@ -109,11 +109,11 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [
     ),
     (
         "resolve.zkr",
-        digest!("ea9f2c0e3d0fd2047a6f1b2c96f1dc15c3a9b6712b253f587a804511b9430248"),
+        digest!("f0ce6e070e088e46eea00e4eb8729972c6a35417b9720f6d7c9f2620df6ce460"),
     ),
     (
         "test_recursion_circuit.zkr",
-        digest!("ca7ade1f42976e5e103ad45c97e42963515f5b4b33076418e0a9390a576edd4e"),
+        digest!("29188b1f420db32c5ca3882801e602515841cb608a6bd36c38c68a3ac6e9be2f"),
     ),
 ];
 
@@ -173,10 +173,10 @@ pub const SHA256_CONTROL_IDS: [(&str, Digest); 15] = [
     ),
     (
         "resolve.zkr",
-        digest!("21a11e006519ed31f60a8794b2c2a984cd23c403a2e474eafeaa8ff19d61f7f3"),
+        digest!("f6c0883f10b49f164a76e1b5dec3468357eec828749a1603442105d57dd62bd4"),
     ),
     (
         "test_recursion_circuit.zkr",
-        digest!("05255dcac3b74ce14ce5708edfc33634bccf12f93b7fd2ac5efe570cbc1a02bc"),
+        digest!("917acb7730dca8de12fc5c2a68dfe82ba6ec882701a3632847bd203230afb0ed"),
     ),
 ];

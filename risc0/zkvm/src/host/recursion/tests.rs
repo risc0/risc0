@@ -17,7 +17,7 @@ use std::collections::VecDeque;
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::digest::{Digest, DIGEST_WORDS},
+    core::digest::{digest, Digest, DIGEST_WORDS},
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -106,7 +106,7 @@ fn test_recursion_poseidon2() {
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
-    let output1_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
+    let output1_digest = shorts_to_digest(&output_elems[..DIGEST_SHORTS]);
     let output2_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output1_digest);
@@ -126,7 +126,7 @@ fn test_recursion_poseidon2() {
             proof_system_info: PROOF_SYSTEM_INFO,
             circuit_info: CircuitImpl::CIRCUIT_INFO,
         });
-    // DO NOT MERGE: Finish implementing this test.
+    // DO NOT MERGE: Finish implementing this test
     // receipt.verify_integrity_with_context(&ctx).unwrap();
 }
 
@@ -382,7 +382,7 @@ fn stable_root() {
     // If you have _intentionally_ changed control IDs, update this hash.
 
     assert_eq!(
-        hex::encode(ALLOWED_CONTROL_ROOT),
-        "f20ad519aa71da4673c7392b30706a563380b81dabcb753babd679312397ac6e"
+        ALLOWED_CONTROL_ROOT,
+        digest!("1a7a123fbc044710907ff72b7f6c9367d298530cac1dd7198c17ef5042c5483d")
     );
 }

@@ -31,7 +31,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
-        hash::{hash_suite_from_name, poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite},
+        hash::{hash_suite_from_name, poseidon2::Poseidon2HashSuite},
     },
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -50,7 +50,7 @@ use crate::{
         merkle::{MerkleGroup, MerkleProof},
         SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
     },
-    receipt_claim::{MaybePruned, Merge, Output},
+    receipt_claim::{Assumption, MaybePruned, Merge},
     sha::Digestible,
     HalPair, ProverOpts, ReceiptClaim,
 };
@@ -169,6 +169,9 @@ where
         .as_value()
         .context("conditional receipt claim is pruned")?
         .clone();
+    // Open the assumptions on the output of the claim and remove the first assumption.
+    // NOTE: Prover::new_resolve will check that the assumption can actually be resolved with the
+    // given receipts.
     resolved_claim
         .output
         .as_value_mut()
@@ -180,7 +183,12 @@ where
         .assumptions
         .as_value_mut()
         .context("conditional receipt assumptions are pruned")?
-        .resolve(&assumption.claim.digest())?;
+        .0
+        .drain(..1)
+        .next()
+        .ok_or(anyhow!(
+            "cannot resolve assumption from receipt with no assumptions"
+        ))?;
 
     let opts = ProverOpts::succinct();
     let mut prover = Prover::new_resolve(conditional, assumption, opts.clone())?;
@@ -253,22 +261,14 @@ pub struct Prover {
 
 #[cfg(feature = "cuda")]
 mod cuda {
-    pub use risc0_circuit_recursion::cuda::{
-        CudaCircuitHalPoseidon, CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
-    };
-    pub use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
+    pub use risc0_circuit_recursion::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+    pub use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
         let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon_hal_pair() -> HalPair<CudaHalPoseidon, CudaCircuitHalPoseidon> {
-        let hal = Rc::new(CudaHalPoseidon::new());
-        let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
@@ -283,8 +283,7 @@ mod cuda {
 mod metal {
     pub use risc0_circuit_recursion::metal::MetalCircuitHal;
     pub use risc0_zkp::hal::metal::{
-        MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon, MetalHashPoseidon2,
-        MetalHashSha256,
+        MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
     };
 
     use super::{HalPair, Rc};
@@ -292,12 +291,6 @@ mod metal {
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon_hal_pair() -> HalPair<MetalHalPoseidon, MetalCircuitHal<MetalHashPoseidon>> {
-        let hal = Rc::new(MetalHalPoseidon::new());
-        let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
@@ -312,20 +305,12 @@ mod cpu {
     use risc0_zkp::core::hash::{poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite};
 
     use super::{
-        BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Poseidon2HashSuite,
-        PoseidonHashSuite, Rc, CIRCUIT,
+        BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Poseidon2HashSuite, Rc, CIRCUIT,
     };
 
     #[allow(dead_code)]
     pub fn sha256_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
         let hal = Rc::new(CpuHal::new(Sha256HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
-        HalPair { hal, circuit_hal }
-    }
-
-    #[allow(dead_code)]
-    pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new_suite()));
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
@@ -356,12 +341,6 @@ cfg_if::cfg_if! {
 
         /// TODO
         #[allow(dead_code)]
-        pub fn poseidon_hal_pair() -> HalPair<cuda::CudaHalPoseidon, cuda::CudaCircuitHalPoseidon> {
-            cuda::poseidon_hal_pair()
-        }
-
-        /// TODO
-        #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<cuda::CudaHalPoseidon2, cuda::CudaCircuitHalPoseidon2> {
             cuda::poseidon2_hal_pair()
         }
@@ -380,12 +359,6 @@ cfg_if::cfg_if! {
 
         /// TODO
         #[allow(dead_code)]
-        pub fn poseidon_hal_pair() -> HalPair<metal::MetalHalPoseidon, metal::MetalCircuitHal<metal::MetalHashPoseidon>> {
-            metal::poseidon_hal_pair()
-        }
-
-        /// TODO
-        #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<metal::MetalHalPoseidon2, metal::MetalCircuitHal<metal::MetalHashPoseidon2>> {
             metal::poseidon2_hal_pair()
         }
@@ -400,12 +373,6 @@ cfg_if::cfg_if! {
         #[allow(dead_code)]
         pub fn sha256_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::sha256_hal_pair()
-        }
-
-        /// TODO
-        #[allow(dead_code)]
-        pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cpu::poseidon_hal_pair()
         }
 
         /// TODO
@@ -585,12 +552,8 @@ impl Prover {
         // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(cond)?;
-        prover.add_generic_receipt(assum)?;
 
-        let Output {
-            assumptions,
-            journal,
-        } = cond
+        let output = cond
             .claim
             .as_value()
             .context("cannot resolve conditional receipt with pruned claim")?
@@ -603,13 +566,40 @@ impl Prover {
 
         // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
         // removing the head and leaving the tail of the list.
-        let mut assumptions_tail = assumptions
+        let assumptions = output
+            .assumptions
             .value()
             .context("cannot resolve conditional receipt with pruned assumptions")?;
-        assumptions_tail.resolve(&assum.claim.digest())?;
+        let head: Assumption = assumptions
+            .0
+            .first()
+            .ok_or(anyhow!(
+                "cannot resolve conditional receipt with no assumptions"
+            ))?
+            .as_value()
+            .context("cannot resolve conditional receipt with pruned head assumption")?
+            .clone();
 
+        // Ensure that the assumption receipt can resolve the assumption.
+        ensure!(
+            head.claim == assum.claim.digest(),
+            "assumption receipt claim does not match head of assumptions list"
+        );
+        let expected_root = match head.control_root == Digest::ZERO {
+            true => merkle_root,
+            false => head.control_root,
+        };
+        ensure!(
+            expected_root == assum.control_root()?,
+            "assumption receipt control root does not match head of assumptions list"
+        );
+
+        let mut assumptions_tail = assumptions;
+        assumptions_tail.resolve(&head.digest())?;
+
+        prover.add_assumption_receipt(head, assum)?;
         prover.add_input_digest(&assumptions_tail.digest(), DigestKind::Sha256);
-        prover.add_input_digest(&journal.digest(), DigestKind::Sha256);
+        prover.add_input_digest(&output.journal.digest(), DigestKind::Sha256);
         Ok(prover)
     }
 
@@ -674,14 +664,24 @@ impl Prover {
         Ok(())
     }
 
-    // TODO(victor): In WIP, make sure to adjust resolve such that it doesn't expect the full
-    // ReceiptClaim info for the assumption.
     /// Add a receipt covering some generic claim. Do not include any claim information.
-    fn add_generic_receipt<Claim>(&mut self, a: &SuccinctReceipt<Claim>) -> Result<()>
+    fn add_assumption_receipt<Claim>(
+        &mut self,
+        assumption: Assumption,
+        receipt: &SuccinctReceipt<Claim>,
+    ) -> Result<()>
     where
         Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
     {
-        self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)
+        self.add_seal(
+            &receipt.seal,
+            &receipt.control_id,
+            &receipt.control_inclusion_proof,
+        )?;
+        // Resolve program expects an additional boolean to tell it when the control root is zero.
+        let zero_root = BabyBearElem::new((assumption.control_root == Digest::ZERO) as u32);
+        self.add_input(bytemuck::cast_slice(&[zero_root]));
+        Ok(())
     }
 
     /// Add a receipt covering rv32im execution, and include the first level of ReceiptClaim.

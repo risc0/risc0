@@ -676,6 +676,18 @@ mod sys_verify {
         halt_receipt
     }
 
+    // The test_recursion_circuit is a program for the recursion VM that does some very simple
+    // operations, just to make sure the
+    // DO NOT MERGE
+    #[allow(dead_code)]
+    fn prove_test_recursion_circuit() -> Receipt {
+        get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            .unwrap()
+            .receipt
+    }
+
     fn hello_commit_receipt() -> &'static Receipt {
         static ONCE: OnceLock<Receipt> = OnceLock::new();
         ONCE.get_or_init(|| prove_hello_commit())
@@ -828,6 +840,58 @@ mod sys_verify {
             .receipt
             .verify(MULTI_TEST_ID)
             .unwrap();
+    }
+
+    #[test]
+    fn sys_verify_assumption() {
+        /*
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
+                .unwrap(),
+        };
+
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_receipt().clone())
+            .build()
+            .unwrap();
+        get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+
+        // Test that proving without a provided assumption results in an execution
+        // failure.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .is_err());
+
+        // Test that providing an unresolved assumption results in a conditional
+        // receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_receipt().claim().unwrap())
+            .build()
+            .unwrap();
+        // TODO(#982) Conditional receipts currently return an error on verification.
+        assert!(get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .is_err());
+        */
     }
 }
 

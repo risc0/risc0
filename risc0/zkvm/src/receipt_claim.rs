@@ -263,7 +263,6 @@ impl Digestible for Output {
     }
 }
 
-// TODO(victor): Make this generic over the claim type?
 /// An [assumption] made in the course of proving program execution. Assumptions are generated when
 /// the guest makes a recursive verification call. Each assumption commits the statement, such that
 /// only a receipt proving that statement can be used to resolve and remove the assumption.

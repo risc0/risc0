@@ -19,10 +19,10 @@
 // this is ok. Need to either "fix" that or improve the docs.
 // NOTE: Types in this crate are intentionally left out of the public API surface.
 
-/// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 // NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
 // change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
 // that we are unlikely to need more.
+/// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 #[cfg_attr(target_os = "zkvm", allow(dead_code))]
 pub const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 
