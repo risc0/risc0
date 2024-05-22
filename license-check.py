@@ -28,7 +28,7 @@ EXTENSIONS = [
 ]
 
 SKIP_DIRS = [
-    str(Path.cwd()) + "/templates/rust-starter",
+    str(Path.cwd()) + "/risc0/cargo-risczero/templates/rust-starter",
     str(Path.cwd()) + "/risc0/sys/cxx/vendor",
     str(Path.cwd()) + "/risc0/zkvm/src/host/protos",
     str(Path.cwd()) + "/risc0/zkvm/src/host/server/exec",
