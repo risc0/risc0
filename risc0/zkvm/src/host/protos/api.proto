@@ -14,6 +14,7 @@ message ServerRequest {
     JoinRequest join = 5;
     IdentityP254Request identity_p254 = 6;
     ResolveRequest resolve = 7;
+    CompressRequest compress = 8;
   }
 }
 
@@ -123,6 +124,23 @@ message IdentityP254Reply {
 }
 
 message IdentityP254Result {
+  Asset receipt = 1;
+}
+
+message CompressRequest {
+  ProverOpts opts = 1;
+  Asset receipt = 2;
+  AssetRequest receipt_out = 3;
+}
+
+message CompressReply {
+  oneof kind {
+    CompressResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message CompressResult {
   Asset receipt = 1;
 }
 
@@ -297,6 +315,7 @@ service Server {
   rpc lift(LiftRequest) returns (LiftReply);
   rpc join(JoinRequest) returns (JoinReply);
   rpc resolve(ResolveRequest) returns (ResolveReply);
+  rpc compress(CompressRequest) returns (CompressReply);
 }
 
 service ExecuteCallback {

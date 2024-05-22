@@ -88,6 +88,14 @@ impl TryFrom<SegmentReceipt> for Asset {
     }
 }
 
+impl TryFrom<Receipt> for Asset {
+    type Error = anyhow::Error;
+
+    fn try_from(receipt: Receipt) -> Result<Self> {
+        Ok(Asset::Inline(bincode::serialize(&receipt)?.into()))
+    }
+}
+
 impl TryFrom<pb::api::Asset> for Asset {
     type Error = anyhow::Error;
 
