@@ -246,6 +246,7 @@ impl Server {
             pb::api::server_request::Kind::IdentityP254(request) => {
                 self.on_identity_p254(conn, request)
             }
+            pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
         }
     }
 
@@ -566,6 +567,46 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::IdentityP254Reply {
             kind: Some(pb::api::identity_p254_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
+                },
+            )),
+        });
+
+        tracing::debug!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_compress(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::CompressRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::CompressRequest) -> Result<pb::api::CompressReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
+            let receipt: Receipt = bincode::deserialize(&receipt_bytes)?;
+
+            let prover = get_prover_server(&opts)?;
+            let receipt = prover.compress(&opts, &receipt)?;
+
+            let receipt_pb: pb::core::Receipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::CompressReply {
+                kind: Some(pb::api::compress_reply::Kind::Ok(pb::api::CompressResult {
+                    receipt: Some(asset),
+                })),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::CompressReply {
+            kind: Some(pb::api::compress_reply::Kind::Error(
                 pb::api::GenericError {
                     reason: err.to_string(),
                 },
