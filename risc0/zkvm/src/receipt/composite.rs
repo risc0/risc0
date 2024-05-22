@@ -110,11 +110,18 @@ impl CompositeReceipt {
         }
 
         // Verify all assumptions on the receipt are resolved by attached receipts.
-        for (assumption, receipt) in self
-            .assumptions()?
-            .into_iter()
-            .zip(self.assumption_receipts.iter())
-        {
+        // Ensure that there is one receipt for every assumption. An explicity check is required
+        // because zip will terminate if either iterator terminates.
+        let assumptions = self.assumptions()?;
+        if assumptions.len() != self.assumption_receipts.len() {
+            tracing::debug!(
+                "only {} receipts provided for {} assumptions",
+                assumptions.len(),
+                self.assumption_receipts.len()
+            );
+            return Err(VerificationError::ReceiptFormatError);
+        }
+        for (assumption, receipt) in assumptions.into_iter().zip(self.assumption_receipts.iter()) {
             let assumption_ctx = match assumption.control_root {
                 // If the control root is all zeroes, we should use the same verifier paramters.
                 Digest::ZERO => None,
