@@ -14,6 +14,7 @@
 
 use std::collections::VecDeque;
 
+use risc0_binfmt::tagged_struct;
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
@@ -28,9 +29,12 @@ use super::{
     MerkleGroup, Prover,
 };
 use crate::{
-    default_prover, get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl, InnerReceipt,
-    ProverOpts, Receipt, SegmentReceipt, Session, SuccinctReceipt,
-    SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
+    default_prover, get_prover_server,
+    receipt_claim::{MaybePruned, Unknown},
+    sha,
+    sha::Digestible,
+    ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session,
+    SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -50,7 +54,8 @@ fn test_recursion_poseidon254() {
     // control tree just combines two hashes.
     let digest1 = Digest::from([0, 1, 2, 3, 4, 5, 6, 7]);
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
-    let expected = suite.hashfn.hash_pair(&digest1, &digest2);
+    let folded = *suite.hashfn.hash_pair(&digest1, &digest2);
+    let expected_claim = tagged_struct::<sha::Impl>("risc0.TestRecursionCircuit", &[folded], &[]);
     let mut prover =
         Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
     let receipt = prover
@@ -68,7 +73,7 @@ fn test_recursion_poseidon254() {
     let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output_digest);
-    assert_eq!(output_digest, *expected);
+    assert_eq!(output_digest, expected_claim);
 }
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -88,7 +93,8 @@ fn test_recursion_poseidon2() {
     // control tree just combines two hashes.
     let digest1 = Digest::from([0, 1, 2, 3, 4, 5, 6, 7]);
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
-    let expected = *suite.hashfn.hash_pair(&digest1, &digest2);
+    let folded = *suite.hashfn.hash_pair(&digest1, &digest2);
+    let expected_claim = tagged_struct::<sha::Impl>("risc0.TestRecursionCircuit", &[folded], &[]);
     let mut prover =
         Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
 
@@ -109,25 +115,38 @@ fn test_recursion_poseidon2() {
     let output1_digest = shorts_to_digest(&output_elems[..DIGEST_SHORTS]);
     let output2_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
-    tracing::debug!("Receipt output: {:?}", output1_digest);
+    tracing::debug!("Receipt output: {:?}", (output1_digest, output2_digest));
     assert_eq!(output1_digest, digest1);
-    assert_eq!(output2_digest, expected);
+    assert_eq!(output2_digest, expected_claim);
 
     // Verify the receipt. Requires us to assemble the appropriate verifier context.
-    let poseidon2_suite = Poseidon2HashSuite::new_suite();
     let (_, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
-    let _ctx = VerifierContext::empty()
-        .with_suites([("poseidon2".to_string(), poseidon2_suite.clone())].into())
+    let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+    let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+    tracing::debug!("test_recursion_circuit control_id: {control_id}");
+    tracing::debug!("test_recursion_circuit control_root: {control_root}");
+
+    let ctx = VerifierContext::empty()
+        .with_suites([("poseidon2".to_string(), suite.clone())].into())
         .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
-            control_root: MerkleGroup::new(vec![control_id])
-                .unwrap()
-                .calc_root(poseidon2_suite.hashfn.as_ref()),
+            control_root,
             inner_control_root: Some(digest1),
             proof_system_info: PROOF_SYSTEM_INFO,
             circuit_info: CircuitImpl::CIRCUIT_INFO,
         });
-    // DO NOT MERGE: Finish implementing this test
-    // receipt.verify_integrity_with_context(&ctx).unwrap();
+    let succinct_receipt = SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: "poseidon2".to_string(),
+        control_id,
+        control_inclusion_proof: control_tree
+            .get_proof(&control_id, suite.hashfn.as_ref())
+            .unwrap(),
+        claim: MaybePruned::Pruned::<Unknown>(expected_claim),
+        verifier_parameters: ctx.succinct_verifier_parameters.as_ref().unwrap().digest(),
+    };
+    succinct_receipt
+        .verify_integrity_with_context(&ctx)
+        .unwrap();
 }
 
 #[cfg_attr(

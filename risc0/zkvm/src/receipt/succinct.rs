@@ -116,8 +116,15 @@ where
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             self.control_inclusion_proof
                 .verify(control_id, &params.control_root, suite.hashfn.as_ref())
-                .map_err(|_| VerificationError::ControlVerificationError {
-                    control_id: *control_id,
+                .map_err(|_| {
+                    tracing::debug!(
+                        "failed to verify control inclusion proof for {control_id} against root {} with {}",
+                        params.control_root,
+                        suite.name,
+                    );
+                    VerificationError::ControlVerificationError {
+                        control_id: *control_id,
+                    }
                 })
         };
 
