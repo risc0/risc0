@@ -74,7 +74,7 @@ pub struct PageTableInfo {
     root_page_addr: u32,
     /// Total number of pages covered by this page table.
     pub num_pages: u32,
-    /// Number of entires in the root page. The root page may not be full, if the memory space is
+    /// Number of entries in the root page. The root page may not be full, if the memory space is
     /// smaller than what the full number of entries could cover.
     pub num_root_entries: u32,
     _layers: Vec<u32>,
