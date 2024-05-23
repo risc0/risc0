@@ -40,7 +40,6 @@ fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H
     // Do interpolate
     hal.batch_interpolate_ntt(&coeffs, count);
     // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
-    #[cfg(not(feature = "circuit_debug"))]
     hal.zk_shift(&coeffs, count);
     nvtx::range_pop!();
     coeffs
@@ -142,7 +141,6 @@ impl<'a, H: Hal> Prover<'a, H> {
             self.cycles,
         );
 
-        #[cfg(feature = "circuit_debug")]
         check_poly.view(|check_out| {
             for i in (0..domain).step_by(4) {
                 if check_out[i] != H::Elem::ZERO {
