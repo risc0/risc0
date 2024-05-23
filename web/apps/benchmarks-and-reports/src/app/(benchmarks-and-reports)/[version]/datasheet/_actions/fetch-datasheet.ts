@@ -1,14 +1,11 @@
 import "server-only";
 
-import { unstable_noStore as noStore } from "next/cache";
-
 export async function fetchDatasheet({ version, url }: { version: string; url: string }) {
-  noStore();
-
   return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`, {
     headers: {
       Accept: "application/vnd.github.v3.raw",
     },
+    cache: "no-store",
   })
     .then((response) => {
       if (!response.ok) {

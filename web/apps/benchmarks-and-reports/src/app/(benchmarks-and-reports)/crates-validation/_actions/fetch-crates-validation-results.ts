@@ -1,6 +1,5 @@
 import "server-only";
 
-import env from "~/env";
 import type { CratesIoValidationTableSchema } from "../_components/crates-io-validation-table-schema";
 
 export async function fetchCratesValidationResults({
@@ -12,6 +11,7 @@ export async function fetchCratesValidationResults({
       headers: {
         Accept: "application/vnd.github.v3.raw",
       },
+      cache: "force-cache",
       next: { revalidate: 900 },
     },
   );

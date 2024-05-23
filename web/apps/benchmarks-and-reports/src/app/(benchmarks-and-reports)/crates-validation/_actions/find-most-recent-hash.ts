@@ -1,7 +1,5 @@
 import "server-only";
 
-import env from "~/env";
-
 export async function findMostRecentHash() {
   const response = await fetch(
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
@@ -9,6 +7,7 @@ export async function findMostRecentHash() {
       headers: {
         Accept: "application/vnd.github.v3.raw",
       },
+      cache: "force-cache",
       next: { revalidate: 900 },
     },
   );

@@ -5,6 +5,7 @@ export async function fetchApplicationsBenchmarks({ url, version }: { url: strin
     headers: {
       Accept: "application/vnd.github.v3.raw",
     },
+    cache: "force-cache",
     next: { revalidate: 900 },
   })
     .then((response) => {
