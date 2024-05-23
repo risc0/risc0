@@ -49,7 +49,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
 # NOTE: cuda and metal are excluded because their build scripts require external tools.
-features = ["prove","std"]
+features = ["prove", "std"]
 
 [features]
 default = []
