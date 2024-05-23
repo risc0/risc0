@@ -353,7 +353,7 @@ jobs:
           toolchain: nightly
       - uses: ./.github/actions/sccache
         with:
-          key: macOS-docs-rs
+          key: macOS-nightly
       - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,docker,getrandom,std --no-deps
       - run: cargo +nightly doc -p risc0-zkp -Fprove,std --no-deps
       - run: cargo +nightly doc -p cargo-risczero -Fdocker,r0vm --no-deps
