@@ -4,6 +4,8 @@ import { CRATES_VALIDATION_DESCRIPTION } from "../[version]/_utils/constants";
 import { CratesIoValidationContent } from "./_components/crates-io-validation-content";
 import { CratesIoValidationSkeleton } from "./_components/crates-io-validation-skeleton";
 
+export const experimental_ppr = true;
+
 export const metadata: Metadata = {
   title: "Crates.io Validation",
   description: CRATES_VALIDATION_DESCRIPTION,

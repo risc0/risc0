@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { DATASHEET_DESCRIPTION } from "../_utils/constants";
 import { DatasheetContent } from "./_components/datasheet-content";
 import { DatasheetSkeleton } from "./_components/datasheet-skeleton";
+
+export const experimental_ppr = true;
 
 export const metadata: Metadata = {
   title: "Datasheet",

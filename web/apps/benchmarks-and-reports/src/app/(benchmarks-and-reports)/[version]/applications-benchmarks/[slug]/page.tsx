@@ -8,6 +8,8 @@ import { ApplicationsBenchmarksContent } from "./_components/applications-benchm
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
+export const experimental_ppr = true;
+
 export function generateMetadata({ params }) {
   // read route params to generate metadata
   const slug = params.slug ?? "";

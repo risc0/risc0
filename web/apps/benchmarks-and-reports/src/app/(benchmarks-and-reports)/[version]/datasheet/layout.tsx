@@ -4,6 +4,8 @@ import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { FooterAscii } from "../../_components/footer-ascii";
 import { DatasheetCommitHashButton } from "./_components/datasheet-commit-hash-button";
 
+export const experimental_ppr = true;
+
 export default function DatasheetLayout({ children, params }) {
   return (
     <div className="container max-w-screen-3xl">

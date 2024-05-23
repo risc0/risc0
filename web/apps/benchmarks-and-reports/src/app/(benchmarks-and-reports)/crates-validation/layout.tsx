@@ -5,6 +5,8 @@ import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { FooterAscii } from "../_components/footer-ascii";
 import { CratesIoValidationHashButton } from "./_components/creates-io-validation-hash-button";
 
+export const experimental_ppr = true;
+
 export default function CratesIoValidationLayout({ children }) {
   return (
     <div className="container max-w-screen-3xl">

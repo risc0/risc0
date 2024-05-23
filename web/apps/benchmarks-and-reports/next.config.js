@@ -12,6 +12,11 @@ let config = {
   experimental: {
     caseSensitiveRoutes: true,
     reactCompiler: true,
+    ppr: "incremental",
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
   },
   logging: {
     fetches: {
