@@ -10,11 +10,11 @@ hex = "0.4"
 prost-build = "0.12"
 protobuf-src = "1.1"
 regex = "1"
-risc0-circuit-recursion = { workspace = true, features = ["prove"] }
+risc0-circuit-recursion = { workspace = true, features = ["prove"], optional = true }
 risc0-core = { workspace = true }
-risc0-zkp = { workspace = true }
-risc0-zkvm = { workspace = true, features = ["prove"] }
-risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
+risc0-zkp = { workspace = true, optional = true }
+risc0-zkvm = { workspace = true, features = ["prove"], optional = true }
+risc0-zkvm-methods = { path = "../risc0/zkvm/methods", optional = true }
 tempfile = "3.3"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -23,3 +23,12 @@ xshell = "0.2"
 
 [package.metadata.release]
 release = false
+
+[features]
+default = ["zkvm"]
+zkvm = [
+  "dep:risc0-circuit-recursion",
+  "dep:risc0-zkp",
+  "dep:risc0-zkvm",
+  "dep:risc0-zkvm-methods",
+]
