@@ -18,8 +18,8 @@ use anyhow::{ensure, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    compute_image_id, host::api::AssetRequest, is_dev_mode, sha::Digestible, ApiClient, Asset,
-    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
+    compute_image_id, host::api::AssetRequest, is_dev_mode, ApiClient, Asset, ExecutorEnv,
+    InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -55,12 +55,6 @@ impl Prover for ExternalProver {
         let prove_info = client.prove(&env, opts, binary)?;
         if opts.prove_guest_errors {
             prove_info.receipt.verify_integrity_with_context(ctx)?;
-            ensure!(
-                prove_info.receipt.claim()?.pre.digest() == image_id,
-                "received unexpected image ID: expected {}, found {}",
-                hex::encode(image_id),
-                hex::encode(prove_info.receipt.claim()?.pre.digest())
-            );
         } else {
             prove_info.receipt.verify_with_context(ctx, image_id)?;
         }

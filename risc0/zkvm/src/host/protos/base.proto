@@ -16,6 +16,10 @@ message CompatVersion {
   uint32 value = 1;
 }
 
+message Digest {
+  repeated uint32 words = 1;
+}
+
 message ExitCode {
   reserved 5;
   oneof kind {

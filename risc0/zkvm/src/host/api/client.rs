@@ -25,8 +25,8 @@ use super::{
 use crate::{
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path},
-    receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt,
+    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -183,7 +183,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -225,7 +225,7 @@ impl Client {
         left_receipt: Asset,
         right_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -270,7 +270,7 @@ impl Client {
         conditional_receipt: Asset,
         assumption_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -315,7 +315,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -455,20 +455,20 @@ impl Client {
                 .iter()
                 .map(|a| {
                     Ok(match a {
-                        Assumption::Proven(receipt) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Proven(
+                        AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
-                                    pb::core::Receipt::from(receipt.clone())
+                                    pb::core::InnerReceipt::from(inner.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )
                                 .try_into()?,
                             )),
                         },
-                        Assumption::Unresolved(claim) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Unresolved(
+                        AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::MaybePruned::from(claim.clone())
+                                    pb::core::Assumption::from(assumption.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )

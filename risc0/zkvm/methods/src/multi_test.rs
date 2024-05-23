@@ -58,8 +58,12 @@ pub enum MultiTestSpec {
     },
     SysVerify(Vec<(Digest, Vec<u8>)>),
     SysVerifyIntegrity {
-        // Define this field as a serialized vector to avoid circular dependency issues.
+        // ReceiptClaim: Field is serialized to avoid circular dependency issues.
         claim_words: Vec<u32>,
+    },
+    SysVerifyAssumption {
+        // Assumption: Field is serialized to avoid circular dependency issues.
+        assumption_words: Vec<u32>,
     },
     Echo {
         bytes: Vec<u8>,

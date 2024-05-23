@@ -28,8 +28,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::client::env::SegmentPath, Assumption, Assumptions, ExecutorEnv, FileSegmentRef, Output,
-    Segment, SegmentRef, Session,
+    host::client::env::SegmentPath, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment,
+    SegmentRef, Session,
 };
 
 use super::{
@@ -162,13 +162,8 @@ impl<'a> ExecutorImpl<'a> {
                                         .borrow()
                                         .accessed
                                         .iter()
-                                        .map(|a| {
-                                            Ok(match a {
-                                                Assumption::Proven(r) => r.claim()?.into(),
-                                                Assumption::Unresolved(r) => r.clone(),
-                                            })
-                                        })
-                                        .collect::<Result<Vec<_>>>()?,
+                                        .map(|(a, _)| a.clone().into())
+                                        .collect::<Vec<_>>(),
                                 )
                                 .into(),
                             })
