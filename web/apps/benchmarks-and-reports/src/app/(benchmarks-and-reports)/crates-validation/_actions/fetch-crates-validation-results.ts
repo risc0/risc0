@@ -11,7 +11,6 @@ export async function fetchCratesValidationResults({
       headers: {
         Accept: "application/vnd.github.v3.raw",
       },
-      cache: "force-cache",
       next: { revalidate: 900 },
     },
   );

@@ -7,7 +7,6 @@ export async function findMostRecentHash() {
       headers: {
         Accept: "application/vnd.github.v3.raw",
       },
-      cache: "force-cache",
       next: { revalidate: 900 },
     },
   );
