@@ -34,7 +34,7 @@ use crate::{
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
-pub struct CompactReceipt<Claim>
+pub struct Groth16Receipt<Claim>
 where
     Claim: Digestible + Debug + Clone + Serialize,
 {
@@ -53,7 +53,7 @@ where
     pub verifier_parameters: Digest,
 }
 
-impl<Claim> CompactReceipt<Claim>
+impl<Claim> Groth16Receipt<Claim>
 where
     Claim: Digestible + Debug + Clone + Serialize,
 {
@@ -70,7 +70,7 @@ where
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
         let params = ctx
-            .compact_verifier_parameters
+            .groth16_verifier_parameters
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
 
@@ -95,10 +95,10 @@ where
         Ok(())
     }
 
-    /// Prunes the claim, retaining its digest, and converts into a [CompactReceipt] with an unknown
+    /// Prunes the claim, retaining its digest, and converts into a [Groth16Receipt] with an unknown
     /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
-    pub fn into_unknown(self) -> CompactReceipt<Unknown> {
-        CompactReceipt {
+    pub fn into_unknown(self) -> Groth16Receipt<Unknown> {
+        Groth16Receipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
             seal: self.seal,
             verifier_parameters: self.verifier_parameters,
@@ -106,9 +106,9 @@ where
     }
 }
 
-/// Verifier parameters used to verify a [CompactReceipt].
+/// Verifier parameters used to verify a [Groth16Receipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct CompactReceiptVerifierParameters {
+pub struct Groth16ReceiptVerifierParameters {
     /// Control root with which the receipt is expected to verify.
     pub control_root: Digest,
     /// Control ID, calculated with Poseidon over BN254 scalar field, with which the receipt is
@@ -118,11 +118,11 @@ pub struct CompactReceiptVerifierParameters {
     pub verifying_key: VerifyingKey,
 }
 
-impl Digestible for CompactReceiptVerifierParameters {
-    /// Hash the [CompactReceiptVerifierParameters] to get a digest of the struct.
+impl Digestible for Groth16ReceiptVerifierParameters {
+    /// Hash the [Groth16ReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
-            "risc0.CompactReceiptVerifierParameters",
+            "risc0.Groth16ReceiptVerifierParameters",
             &[
                 self.control_root,
                 self.bn254_control_id,
@@ -133,8 +133,8 @@ impl Digestible for CompactReceiptVerifierParameters {
     }
 }
 
-impl Default for CompactReceiptVerifierParameters {
-    /// Default set of parameters used to verify a [CompactReceipt].
+impl Default for Groth16ReceiptVerifierParameters {
+    /// Default set of parameters used to verify a [Groth16Receipt].
     fn default() -> Self {
         Self {
             control_root: ALLOWED_CONTROL_ROOT,
@@ -146,7 +146,7 @@ impl Default for CompactReceiptVerifierParameters {
 
 #[cfg(test)]
 mod tests {
-    use super::CompactReceiptVerifierParameters;
+    use super::Groth16ReceiptVerifierParameters;
     use crate::sha::Digestible;
     use risc0_zkp::core::digest::digest;
 
@@ -155,9 +155,9 @@ mod tests {
     // only if a change to the verifier parameters is expected. Updating the verifier parameters
     // will result in incompatibility with previous versions.
     #[test]
-    fn compact_receipt_verifier_parameters_is_stable() {
+    fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
-            CompactReceiptVerifierParameters::default().digest(),
+            Groth16ReceiptVerifierParameters::default().digest(),
             digest!("448b7f022d68f9b8a940a322201e3e07802071ad2e63cc686d3380d2897fa055")
         );
     }

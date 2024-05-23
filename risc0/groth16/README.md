@@ -27,8 +27,8 @@ It also provides a utility function to call a prover (via Docker).
 After generating a RISC Zero STARK proof, it can be transformed into a SNARK using the `stark_to_snark` function.
 This function becomes available when the `prove` feature flag is enabled.
 
-> WARNING: This feature is in an experimental stage. It requires an x86 architecture and Docker installed.
-> Additionally, specific [installation steps](https://github.com/risc0/risc0/tree/main/compact_proof) must be followed to use this functionality.
+> IMPORTANT: This feature requires an x86 architecture and Docker installed.
+> Additionally, specific [installation steps](https://github.com/risc0/risc0/tree/main/groth16_proof) must be followed to use this functionality.
 
 ### Example
 
@@ -37,7 +37,7 @@ This function becomes available when the `prove` feature flag is enabled.
 fn stark2snark() {
     use risc0_groth16::docker::stark_to_snark;
     use risc0_zkvm::{
-        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
+        get_prover_server, recursion::identity_p254, Groth16Receipt, ExecutorEnv, ExecutorImpl,
         InnerReceipt, ProverOpts, Receipt, VerifierContext,
     };
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -72,7 +72,7 @@ fn stark2snark() {
 
     tracing::info!("Receipt");
     let receipt = Receipt::new(
-        InnerReceipt::Compact(CompactReceipt { seal, claim }),
+        InnerReceipt::Groth16(Groth16Receipt { seal, claim }),
         journal,
     );
 

@@ -496,15 +496,15 @@ mod docker {
             .unwrap()
             .build()
             .unwrap();
-        let opts = ProverOpts::compact();
+        let opts = ProverOpts::groth16();
         get_prover_server(&opts)
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .receipt
             .inner
-            .compact()
-            .unwrap(); // ensure that we got a compact receipt.
+            .groth16()
+            .unwrap(); // ensure that we got a groth16 receipt.
     }
 
     fn test_compress(opts: ProverOpts, receipt: &Receipt) {
@@ -514,18 +514,18 @@ mod docker {
             ReceiptKind::Composite => match receipt.inner {
                 InnerReceipt::Composite(_)
                 | InnerReceipt::Succinct(_)
-                | InnerReceipt::Compact(_) => {}
+                | InnerReceipt::Groth16(_) => {}
                 InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
             },
             ReceiptKind::Succinct => match receipt.inner {
-                InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => {}
+                InnerReceipt::Succinct(_) | InnerReceipt::Groth16(_) => {}
                 InnerReceipt::Composite(_) => panic!("expected receipt to be succinct or smaller"),
                 InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
             },
-            ReceiptKind::Compact => match receipt.inner {
-                InnerReceipt::Compact(_) => {}
+            ReceiptKind::Groth16 => match receipt.inner {
+                InnerReceipt::Groth16(_) => {}
                 InnerReceipt::Succinct(_) | InnerReceipt::Composite(_) => {
-                    panic!("expected receipt to be compact or smaller")
+                    panic!("expected receipt to be groth16 or smaller")
                 }
                 InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
             },
@@ -551,7 +551,7 @@ mod docker {
         ensure_fake(receipt);
         let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::compact(), &fake).unwrap();
+        let receipt = prover.compress(&ProverOpts::groth16(), &fake).unwrap();
         ensure_fake(receipt);
     }
 
@@ -591,12 +591,12 @@ mod docker {
             .compress(&ProverOpts::succinct(), &composite_receipt)
             .unwrap();
         exec_verify(&succinct_receipt);
-        let compact_receipt = get_prover_server(&ProverOpts::compact())
+        let groth16_receipt = get_prover_server(&ProverOpts::groth16())
             .unwrap()
-            .compress(&ProverOpts::compact(), &succinct_receipt)
+            .compress(&ProverOpts::groth16(), &succinct_receipt)
             .unwrap();
-        exec_verify(&compact_receipt);
-        compact_receipt.inner.compact().unwrap();
+        exec_verify(&groth16_receipt);
+        groth16_receipt.inner.groth16().unwrap();
     }
 
     #[test]
@@ -605,22 +605,22 @@ mod docker {
         let composite_receipt = &generate_receipt(ProverOpts::composite());
         self::test_compress(ProverOpts::composite(), composite_receipt);
         self::test_compress(ProverOpts::succinct(), composite_receipt);
-        self::test_compress(ProverOpts::compact(), composite_receipt);
+        self::test_compress(ProverOpts::groth16(), composite_receipt);
 
         // succinct receipts
         let succinct_receipt = &generate_receipt(ProverOpts::succinct());
         self::test_compress(ProverOpts::composite(), succinct_receipt);
         self::test_compress(ProverOpts::succinct(), succinct_receipt);
-        self::test_compress(ProverOpts::compact(), succinct_receipt);
+        self::test_compress(ProverOpts::groth16(), succinct_receipt);
 
-        // compact receipts
-        let compact_receipt = &generate_receipt(ProverOpts::compact());
-        self::test_compress(ProverOpts::composite(), compact_receipt);
-        self::test_compress(ProverOpts::succinct(), compact_receipt);
-        self::test_compress(ProverOpts::compact(), compact_receipt);
+        // groth16 receipts
+        let groth16_receipt = &generate_receipt(ProverOpts::groth16());
+        self::test_compress(ProverOpts::composite(), groth16_receipt);
+        self::test_compress(ProverOpts::succinct(), groth16_receipt);
+        self::test_compress(ProverOpts::groth16(), groth16_receipt);
 
         // fake receipts
-        self::test_fake_compress(compact_receipt);
+        self::test_fake_compress(groth16_receipt);
     }
 }
 

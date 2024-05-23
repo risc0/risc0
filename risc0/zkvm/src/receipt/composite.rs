@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::{
-    CompactReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
+    Groth16ReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
     SuccinctReceiptVerifierParameters, VerifierContext,
 };
 use crate::{
@@ -229,19 +229,19 @@ pub struct CompositeReceiptVerifierParameters {
     pub segment: MaybePruned<SegmentReceiptVerifierParameters>,
     /// Verifier parameters related to [SuccinctReceipt][crate::SuccinctReceipt].
     pub succinct: MaybePruned<SuccinctReceiptVerifierParameters>,
-    /// Verifier parameters related to [CompactReceipt][crate::CompactReceipt].
-    pub compact: MaybePruned<CompactReceiptVerifierParameters>,
+    /// Verifier parameters related to [Groth16Receipt][crate::Groth16Receipt].
+    pub groth16: MaybePruned<Groth16ReceiptVerifierParameters>,
 }
 
 impl Digestible for CompositeReceiptVerifierParameters {
-    /// Hash the [CompactReceiptVerifierParameters] to get a digest of the struct.
+    /// Hash the [Groth16ReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.CompositeReceiptVerifierParameters",
             &[
                 &self.segment.digest::<S>(),
                 &self.succinct.digest::<S>(),
-                &self.compact.digest::<S>(),
+                &self.groth16.digest::<S>(),
             ],
             &[],
         )
@@ -254,7 +254,7 @@ impl Default for CompositeReceiptVerifierParameters {
         Self {
             segment: MaybePruned::Value(Default::default()),
             succinct: MaybePruned::Value(Default::default()),
-            compact: MaybePruned::Value(Default::default()),
+            groth16: MaybePruned::Value(Default::default()),
         }
     }
 }

@@ -17,7 +17,7 @@ To install the necessary dependencies, run:
 
 ## Manual installation
 
-All the following commands must be run from the `compact_proof` directory.
+All the following commands must be run from the `groth16_proof` directory.
 
 1. Run the ceremony (optional):
 
@@ -48,7 +48,7 @@ docker run --rm -v $WORK_DIR:/mnt risc0-groth16-prover
 
 The resulting `proof.json` file will be in the chosen `$WORK_DIR`.
 This file can be parsed and decoded into a `risc0_groth16::Seal`.
-Finally, this seal can be embedded within a `InnerReceipt::Compact`.
+Finally, this seal can be embedded within a `InnerReceipt::Groth16`.
 
 See [`risc0-zkvm/src/host/server/prove/tests.rs`](../risc0/zkvm/src/host/server/prove/tests.rs) for an end-to-end
 example.
