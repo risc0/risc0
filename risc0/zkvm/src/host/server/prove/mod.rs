@@ -98,7 +98,7 @@ pub trait ProverServer {
     /// [CompositeReceipt] into a single [SuccinctReceipt] that proves the same top-level claim. It
     /// accomplishes this by iterative application of the recursion programs including lift, join,
     /// and resolve.
-    fn compsite_to_succinct(
+    fn composite_to_succinct(
         &self,
         receipt: &CompositeReceipt,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
@@ -127,7 +127,7 @@ pub trait ProverServer {
             |conditional: SuccinctReceipt<ReceiptClaim>, assumption: &InnerAssumptionReceipt| match assumption {
                 InnerAssumptionReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
                 InnerAssumptionReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &self.compsite_to_succinct(assumption)?.into_unknown())
+                    self.resolve(&conditional, &self.composite_to_succinct(assumption)?.into_unknown())
                 }
                 InnerAssumptionReceipt::Fake(_) => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
@@ -165,14 +165,14 @@ pub trait ProverServer {
             InnerReceipt::Composite(inner) => match opts.receipt_kind {
                 ReceiptKind::Composite => Ok(receipt.clone()),
                 ReceiptKind::Succinct => {
-                    let succinct_receipt = self.compsite_to_succinct(inner)?;
+                    let succinct_receipt = self.composite_to_succinct(inner)?;
                     Ok(Receipt::new(
                         InnerReceipt::Succinct(succinct_receipt),
                         receipt.journal.bytes.clone(),
                     ))
                 }
                 ReceiptKind::Compact => {
-                    let succinct_receipt = self.compsite_to_succinct(inner)?;
+                    let succinct_receipt = self.composite_to_succinct(inner)?;
                     let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
                     Ok(Receipt::new(
                         InnerReceipt::Compact(compact_receipt),
