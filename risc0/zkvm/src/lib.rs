@@ -47,13 +47,14 @@
 //! The following feature flags are supported.
 //!
 //! Note that in order to use `risc0-zkvm` in the guest, you must disable the
-//! "prove" feature by setting `default-features = false`.
+//! default features by setting `default-features = false`.
 //!
 //! | Feature          | Target(s)         | Implies    | Description                                                                                                                                                  |
 //! | ---------------- | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 //! | client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
 //! | cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 //! | disable-dev-mode | all except rv32im |            | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
+//! | docker           | all except rv32im |            | Enables features that require Docker. In particular, this enables Groth16 proving.                                                                           |
 //! | metal            | macos             | prove, std | Enables Metal GPU acceleration for the prover.                                                                                                               |
 //! | prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 //! | std              | all               |            | Support for the Rust stdlib.                                                                                                                                 |
@@ -80,7 +81,6 @@ mod receipt_claim;
 pub mod serde;
 pub mod sha;
 
-/// Re-exports for recursion
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub mod recursion {
     pub use super::host::recursion::*;
