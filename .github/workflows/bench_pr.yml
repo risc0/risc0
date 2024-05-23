@@ -107,7 +107,7 @@ jobs:
 
   # see: https://github.com/orgs/community/discussions/26822
   bench-status-check:
-    #if: always()
+    if: always()
     needs:
       - bench
     runs-on: ubuntu-latest
