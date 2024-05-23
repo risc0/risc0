@@ -23,7 +23,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST},
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
     BLST_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
@@ -190,6 +190,24 @@ fn host_syscall() {
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
+}
+
+#[test]
+fn host_syscall_words() {
+    let _expected: Vec<u32> = vec![0x01020304];
+    let input = MultiTestSpec::SyscallWords;
+    let _actual: Mutex<Vec<Bytes>> = Vec::new().into();
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .io_callback(SYS_MULTI_TEST_WORDS, |buf| Ok(buf))
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 // Make sure panics in the callback get propagated correctly.
