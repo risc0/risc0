@@ -1,11 +1,4 @@
-{% unless risc0_std -%}
-#![no_main]
-#![no_std]
-{% endunless %}
-use risc0_zkvm::guest::env;
-{% unless risc0_std -%}
-risc0_zkvm::guest::entry!(main);
-{% endunless %}
+{{ no_std_preamble }}use risc0_zkvm::guest::env;
 
 fn main() {
     // TODO: Implement your guest code here

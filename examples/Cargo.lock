@@ -4032,6 +4032,7 @@ dependencies = [
  "digest",
  "ff",
  "hex",
+ "hex-literal",
  "metal",
  "ndarray",
  "nvtx",

@@ -72,15 +72,14 @@ project_name
 ├── host
 │   ├── Cargo.toml
 │   └── src
-│       └── main.rs                        <-- [Host code goes here]
+│       └── main.rs                    <-- [Host code goes here]
 └── methods
     ├── Cargo.toml
     ├── build.rs
     ├── guest
     │   ├── Cargo.toml
     │   └── src
-    │       └── bin
-    │           └── method_name.rs         <-- [Guest code goes here]
+    │       └── method_name.rs         <-- [Guest code goes here]
     └── src
         └── lib.rs
 ```

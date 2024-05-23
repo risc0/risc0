@@ -23,7 +23,7 @@ pub mod sha;
 
 use alloc::{boxed::Box, rc::Rc, string::String};
 
-use risc0_core::field::Field;
+use risc0_core::field::{baby_bear::BabyBear, Field};
 
 use super::digest::Digest;
 
@@ -84,5 +84,18 @@ impl<F: Field> Clone for HashSuite<F> {
             hashfn: self.hashfn.clone(),
             rng: self.rng.clone(),
         }
+    }
+}
+
+/// Construct a supported hash function given its name. Returns None is the name does not
+/// correspond to a supported hash function.
+pub fn hash_suite_from_name(name: impl AsRef<str>) -> Option<HashSuite<BabyBear>> {
+    match name.as_ref() {
+        "sha-256" => Some(sha::Sha256HashSuite::new_suite()),
+        "poseidon2" => Some(poseidon2::Poseidon2HashSuite::new_suite()),
+        "blake2b" => Some(blake2b::Blake2bCpuHashSuite::new_suite()),
+        #[cfg(feature = "prove")]
+        "poseidon_254" => Some(poseidon_254::Poseidon254HashSuite::new_suite()),
+        _ => None,
     }
 }
