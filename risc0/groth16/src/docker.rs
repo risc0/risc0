@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! This module contains functions for running a Groth16 prover using Docker.
+//!
+//! Docker is used here as a way to provide [rapidsnark] and the required prover key in a single
+//! package. Proving with Groth16 is currently only supported using Docker.
+//!
+//! [rapidsnark]: https://github.com/iden3/rapidsnark
+
 use std::{
     env::consts::ARCH,
     path::Path,
