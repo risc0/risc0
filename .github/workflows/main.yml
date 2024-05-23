@@ -106,6 +106,7 @@ jobs:
       - clippy
       - crates-validator
       - doc
+      - docs-rs
       - examples
       - docker
       - test
