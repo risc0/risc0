@@ -597,30 +597,6 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_verify_pause_codes() {
-        for code in [0u8, 1, 2, 255] {
-            tracing::debug!("sys_verify_halt_codes: code = {code}");
-            let pause_session = exec_pause(code);
-
-            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
-
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .add_assumption(pause_session.claim().unwrap())
-                .build()
-                .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
-
-            if code == 0 {
-                assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
-            } else {
-                assert!(session.is_err());
-            }
-        }
-    }
-
-    #[test]
     fn sys_verify_integrity() {
         let hello_commit_session = exec_hello_commit();
 
@@ -707,8 +683,8 @@ mod sys_verify {
 
         // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
-        let pruned_claim =
-            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.claim().unwrap().digest());
+        let mut pruned_claim: ReceiptClaim = hello_commit_session.claim().unwrap();
+        pruned_claim.output = MaybePruned::Pruned(pruned_claim.output.digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&pruned_claim).unwrap(),
         };
@@ -722,10 +698,16 @@ mod sys_verify {
             .unwrap();
 
         // Result of execution should be a guest panic resulting from the pruned input.
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        let err = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
-            .is_err());
+            .map(|_| ())
+            .unwrap_err();
+
+        tracing::debug!("err: {err}");
+        assert!(err
+            .to_string()
+            .contains("env::verify_integrity returned error"));
     }
 }
 

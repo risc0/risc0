@@ -134,7 +134,6 @@ pub mod nr {
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
-    declare_syscall!(pub SYS_VERIFY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
 }
@@ -725,51 +724,6 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     ptr
 }
 
-/// Send an image ID and journal hash to the host to request the post state digest and system exit
-/// code from a matching ReceiptClaim with successful exit status.
-///
-/// A cooperative prover will only return if there is a verifying proof with successful exit status
-/// associated with the given image ID and journal digest; and will always return a result code of
-/// 0 to register a0. The caller must calculate the ReceiptClaim digest, using the provided post
-/// state digest and encode the digest into a public assumptions list for inclusion in the guest
-/// output.
-///
-/// # Safety
-///
-/// `image_id`, `journal_digest`, and `from_host_buf` must be aligned and dereferenceable.
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
-pub unsafe extern "C" fn sys_verify(
-    image_id: *const [u32; DIGEST_WORDS],
-    journal_digest: *const [u32; DIGEST_WORDS],
-    from_host_buf: *mut [u32; DIGEST_WORDS + 1],
-) {
-    let mut to_host = [0u32; 2 * DIGEST_WORDS];
-    to_host[..DIGEST_WORDS].copy_from_slice(unsafe { &*image_id });
-    to_host[DIGEST_WORDS..].copy_from_slice(unsafe { &*journal_digest });
-
-    let Return(a0, _) = unsafe {
-        // Send the image_id and journal_digest to the host in a syscall.
-        // Expect in return that from_host_buf is populated with the post state
-        // digest and system exit code for from a matching ReceiptClaim.
-        syscall_2(
-            nr::SYS_VERIFY,
-            from_host_buf as *mut u32,
-            DIGEST_WORDS + 1,
-            to_host.as_ptr() as u32,
-            2 * DIGEST_BYTES as u32,
-        )
-    };
-
-    // Check to ensure the host indicated success by returning 0.
-    // This should always be the case. This check is included for
-    // forwards-compatibility.
-    if a0 != 0 {
-        const MSG: &[u8] = "sys_verify returned error result".as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
-    }
-}
-
 /// Send a ReceiptClaim digest to the host to request verification.
 ///
 /// A cooperative prover will only return if there is a verifying proof
@@ -780,17 +734,25 @@ pub unsafe extern "C" fn sys_verify(
 /// # Safety
 ///
 /// `claim_digest` must be aligned and dereferenceable.
+/// `control_root` must be aligned and dereferenceable.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_verify_integrity(claim_digest: *const [u32; DIGEST_WORDS]) {
+pub unsafe extern "C" fn sys_verify_integrity(
+    claim_digest: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
+) {
+    let mut to_host = [0u32; DIGEST_WORDS * 2];
+    to_host[..DIGEST_WORDS].copy_from_slice(claim_digest.as_ref().unwrap_unchecked());
+    to_host[DIGEST_WORDS..].copy_from_slice(control_root.as_ref().unwrap_unchecked());
+
     let Return(a0, _) = unsafe {
         // Send the claim_digest to the host via software ecall.
         syscall_2(
             nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
-            claim_digest as u32,
-            DIGEST_BYTES as u32,
+            to_host.as_ptr() as u32,
+            (DIGEST_BYTES * 2) as u32,
         )
     };
 

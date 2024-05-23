@@ -20,7 +20,7 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite,
+            blake2b::Blake2bCpuHashSuite, hash_suite_from_name, poseidon2::Poseidon2HashSuite,
             poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
         },
     },
@@ -28,7 +28,7 @@ use risc0_zkp::{
     hal::cpu::CpuHal,
 };
 use risc0_zkvm::{
-    recursion::{Program, Prover as RecursionProver},
+    recursion::{MerkleGroup, Program},
     Loader,
 };
 
@@ -107,7 +107,7 @@ impl Bootstrap {
         control_id_poseidon2
     }
 
-    fn generate_recursion_control_ids(mut allowed_control_ids: Vec<Digest>) {
+    fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<Digest>) {
         // Recursion programs (ZKRs) that are too be included in the allowed set.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
@@ -121,49 +121,51 @@ impl Bootstrap {
         tracing::info!("unzipping recursion programs (zkrs)");
         let zkrs = get_all_zkrs().unwrap();
 
-        let zkr_control_ids: Vec<(String, Digest)> = zkrs
-            .into_iter()
-            .map(|(name, encoded_program)| {
-                let program = Program::from_encoded(&encoded_program);
+        let poseidon2_control_ids =
+            Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
+        let sha256_control_ids = Self::generate_recursion_control_ids_with_hash(&zkrs, "sha-256");
 
-                tracing::info!("computing control ID for {name} with Poseidon2");
-                let control_id = program.compute_control_id(Poseidon2HashSuite::new_suite());
-
-                if allowed_zkr_names.contains(&name) {
-                    allowed_control_ids.push(control_id);
-                }
-
-                tracing::debug!("{name} control id: {control_id:?}");
-                (name, control_id)
-            })
+        let allowed_control_ids: Vec<Digest> = poseidon2_rv32im_control_ids
+            .iter()
+            .chain(
+                poseidon2_control_ids
+                    .iter()
+                    .filter(|(name, _)| allowed_zkr_names.contains(name))
+                    .map(|(_, digest)| digest),
+            )
+            .cloned()
             .collect();
-
         let mut allowed_control_ids_str = String::new();
         for digest in allowed_control_ids.iter() {
-            writeln!(&mut allowed_control_ids_str, r#""{digest}","#).unwrap();
+            writeln!(&mut allowed_control_ids_str, r#"digest!("{digest}"),"#).unwrap();
         }
 
         // Calculuate a Merkle root for the allowed control IDs and add it to the file.
-        let merkle_group = RecursionProver::bootstrap_allowed_tree(allowed_control_ids);
+        let merkle_group = MerkleGroup::new(allowed_control_ids).unwrap();
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_control_root = merkle_group.calc_root(hashfn);
         tracing::info!("Computed allowed_control_root: {allowed_control_root}");
 
-        let mut zkr_control_ids_str = String::new();
-        for (name, digest) in zkr_control_ids.iter() {
-            writeln!(&mut zkr_control_ids_str, r#"("{name}", "{digest}"),"#).unwrap();
-        }
+        let control_ids_str = |control_ids: &[(String, Digest)]| -> String {
+            let mut string = String::new();
+            for (name, digest) in control_ids.iter() {
+                writeln!(&mut string, r#"("{name}", digest!("{digest}")),"#).unwrap();
+            }
+            string
+        };
 
-        let bn254_control_id = Self::generate_identity_bn254_control_id();
-        tracing::info!("Computed bn254_control_id: {bn254_control_id}");
+        let bn254_identity_control_id = Self::generate_identity_bn254_control_id();
+        tracing::info!("Computed bn254_identity_control_id: {bn254_identity_control_id}");
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
             allowed_control_ids_str,
             allowed_control_root,
-            bn254_control_id,
-            zkr_control_ids.len(),
-            zkr_control_ids_str,
+            bn254_identity_control_id,
+            poseidon2_control_ids.len(),
+            control_ids_str(&poseidon2_control_ids),
+            sha256_control_ids.len(),
+            control_ids_str(&sha256_control_ids),
         );
 
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");
@@ -176,15 +178,28 @@ impl Bootstrap {
             .expect("failed to format {CONTROL_ID_PATH_RECURSION}");
     }
 
+    pub fn generate_recursion_control_ids_with_hash(
+        zkrs: &[(String, Vec<u32>)],
+        hashfn: &str,
+    ) -> Vec<(String, Digest)> {
+        let hash_suite = hash_suite_from_name(hashfn).unwrap();
+
+        zkrs.into_iter()
+            .map(|(name, encoded_program)| {
+                let program = Program::from_encoded(&encoded_program);
+
+                tracing::info!("computing control ID for {name} with {hashfn}");
+                let control_id = program.compute_control_id(hash_suite.clone());
+
+                tracing::debug!("{name} control id: {control_id:?}");
+                (name.clone(), control_id)
+            })
+            .collect()
+    }
+
     pub fn generate_identity_bn254_control_id() -> Digest {
         let encoded_program = get_zkr("identity.zkr").unwrap();
         let program = Program::from_encoded(&encoded_program);
-        let digest = program.compute_control_id(Poseidon254HashSuite::new_suite());
-
-        // NOTE: we need to byte-reverse the BN254_CONTROL_ID because
-        // (apparently) groth16 digests are represented as a single
-        // little-endian field element
-        let bytes: Vec<u8> = digest.as_bytes().iter().rev().cloned().collect();
-        Digest::try_from(bytes.as_slice()).unwrap()
+        program.compute_control_id(Poseidon254HashSuite::new_suite())
     }
 }
