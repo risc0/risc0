@@ -93,7 +93,7 @@ runs:
       if: >
         runner.os == 'Linux' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
-        (contains(runner.name, 'puget') || contains(runner.name, 'mini-'))
+        (runner.environment == 'self-hosted' && (contains(runner.name, 'i-') == 'false'))
       env:
         LINUX_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper
       run: |
@@ -106,7 +106,7 @@ runs:
       if: >
         runner.os == 'macOS' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
-        (contains(runner.name, 'puget') || contains(runner.name, 'mini-'))
+        runner.environment == 'self-hosted'
       env:
         DARWIN_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Darwin/aws_signing_helper
       run: |
@@ -118,7 +118,8 @@ runs:
     - name: (External PR) Configure AWS Credentials
       if: >
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
-        (contains(runner.name, 'puget') || contains(runner.name, 'mini-'))
+        runner.environment == 'self-hosted' &&
+        ((runner.os == 'Linux' && (contains(runner.name, 'i-') == 'false')  ) || (runner.os == 'macOS'))
       env:
         TRUST_ANCHOR_ARN: arn:aws:rolesanywhere:us-west-2:083632199359:trust-anchor/f3ef0e42-f374-43e5-8933-15b46537f855
         PROFILE_ARN: arn:aws:rolesanywhere:us-west-2:083632199359:profile/fb3ace7d-a3c5-4786-bc26-15b74ea0d164
@@ -128,4 +129,3 @@ runs:
         aws configure set credential_process "$HOME/.local/aws/aws_signing_helper credential-process --trust-anchor-arn $TRUST_ANCHOR_ARN --profile-arn $PROFILE_ARN --role-arn $ROLE_ARN --certificate $IAM_RA_PATH/certificate.pem --private-key $IAM_RA_PATH/runner_key.pem" --profile default
         echo "##vso[task.setvariable variable=AWS_SDK_LOAD_CONFIG;]1"
       shell: bash
-      
