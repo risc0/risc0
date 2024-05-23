@@ -66,3 +66,4 @@ prove = [
   "std",
 ]
 std = ["anyhow/std"]
+circuit_debug = []
