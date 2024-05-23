@@ -56,6 +56,11 @@ tracing-subscriber = { version = "0.3", features = [
 ], optional = true }
 zip = { version = "1.2", optional = true }
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+# NOTE: cuda and metal are excluded because their build scripts require external tools.
+features = ["docker", "r0vm"]
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = ["r0vm"]

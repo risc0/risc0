@@ -336,6 +336,29 @@ jobs:
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - run: sccache --show-stats
 
+  # Run as a separate job because we need to install a different set of tools.
+  # In particular, it uses nightly Rust and _does not_ install cargo risczero.
+  docs-rs:
+    if: needs.changes.outputs.doc == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
+    env:
+      RUSTDOCFLAGS: "--cfg docsrs -D warnings"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+        with:
+          # Building with docs.rs config requires the nightly toolchain.
+          toolchain: nightly
+      - uses: ./.github/actions/sccache
+        with:
+          key: macOS-docs-rs
+      - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,docker,getrandom,std --no-deps
+      - run: cargo +nightly doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +nightly doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +nightly doc -p risc0-binfmt -p risc0-core -p risc0-groth16 --all-features  --no-deps
+      - run: sccache --show-stats
+
   check-external:
     if: needs.changes.outputs.check-external == 'true'
     needs: changes
