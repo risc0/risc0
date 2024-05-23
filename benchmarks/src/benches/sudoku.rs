@@ -35,5 +35,6 @@ pub fn new_jobs() -> Vec<Job> {
         risc0_benchmark_methods::SUDOKU_ELF,
         risc0_benchmark_methods::SUDOKU_ID.into(),
         to_vec(&input).unwrap(),
+        1,
     )]
 }

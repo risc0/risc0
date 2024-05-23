@@ -12,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice};
-
-use bytemuck::Pod;
-use metal::{
-    Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
-    MTLSize, NSRange,
+use std::{
+    collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice, sync::OnceLock,
 };
+
+use metal::{
+    Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
+    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize, NSRange,
+};
+use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
+use rayon::prelude::*;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
 };
 
-use super::{Buffer, Hal, TRACKER};
+use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -47,6 +50,8 @@ const KERNEL_NAMES: &[&str] = &[
     "eltwise_copy_fp",
     "eltwise_mul_factor_fp",
     "eltwise_sum_fpext",
+    "eltwise_zeroize_fp",
+    "eltwise_zeroize_fpext",
     "fri_fold",
     "gather_sample",
     "mix_poly_coeffs",
@@ -54,17 +59,23 @@ const KERNEL_NAMES: &[&str] = &[
     "multi_ntt_fwd_step",
     "multi_ntt_rev_step",
     "multi_poly_eval",
-    "sha_fold",
-    "sha_rows",
     "poseidon_fold",
     "poseidon_rows",
     "poseidon2_fold",
     "poseidon2_rows",
+    "sha_fold",
+    "sha_rows",
     "zk_shift",
 ];
 
+// The GPU becomes unstable as the number of concurrent provers grow.
+fn singleton() -> &'static ReentrantMutex<()> {
+    static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
+    ONCE.get_or_init(|| ReentrantMutex::new(()))
+}
+
 pub trait MetalHash {
-    /// Create a hash implemention
+    /// Create a hash implementation
     fn new(hal: &MetalHal<Self>) -> Self;
 
     /// Run the hash_fold function
@@ -248,6 +259,7 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub cmd_queue: CommandQueue,
     kernels: HashMap<String, ComputePipelineDescriptor>,
     hash: Option<Box<Hash>>,
+    _lock: ReentrantMutexGuard<'static, ()>,
 }
 
 pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
@@ -259,14 +271,14 @@ struct TrackedBuffer(MetalBuffer);
 
 impl TrackedBuffer {
     pub fn new(buffer: MetalBuffer) -> Self {
-        TRACKER.lock().unwrap().alloc(buffer.length() as usize);
+        tracker().lock().unwrap().alloc(buffer.length() as usize);
         Self(buffer)
     }
 }
 
 impl Drop for TrackedBuffer {
     fn drop(&mut self) {
-        TRACKER.lock().unwrap().free(self.0.length() as usize);
+        tracker().lock().unwrap().free(self.0.length() as usize);
     }
 }
 
@@ -281,6 +293,7 @@ pub struct BufferImpl<T> {
 }
 
 pub enum KernelArg<'a> {
+    Null,
     Buffer {
         buffer: &'a MetalBuffer,
         offset: u64,
@@ -289,7 +302,7 @@ pub enum KernelArg<'a> {
 }
 
 impl<T> BufferImpl<T> {
-    fn new(name: &'static str, device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
+    pub fn new(name: &'static str, device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
         let bytes_len = size * mem::size_of::<T>();
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer = device.new_buffer(bytes_len as u64, options);
@@ -309,7 +322,7 @@ impl<T> BufferImpl<T> {
         cmd_queue: CommandQueue,
         slice: &[T],
     ) -> Self {
-        let bytes_len = slice.len() * mem::size_of::<T>();
+        let bytes_len = mem::size_of_val(slice);
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer =
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
@@ -347,6 +360,18 @@ impl<T> BufferImpl<T> {
         cmd_buffer.commit();
         cmd_buffer.wait_until_completed();
     }
+
+    pub fn as_device_ptr(&self) -> *mut c_void {
+        self.buffer.0.gpu_address() as *mut c_void
+    }
+
+    pub fn as_ptr(&self) -> *mut c_void {
+        self.buffer.0.contents()
+    }
+
+    pub fn as_buf(&self) -> MetalBuffer {
+        self.buffer.0.clone()
+    }
 }
 
 impl<T: Clone> Buffer<T> for BufferImpl<T> {
@@ -370,6 +395,14 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         }
     }
 
+    fn get_at(&self, idx: usize) -> T {
+        self.sync();
+        let ptr = self.buffer.0.contents() as *const T;
+        let len = self.buffer.0.length() as usize / mem::size_of::<T>();
+        let slice = unsafe { slice::from_raw_parts(ptr, len) };
+        slice[self.offset + idx].clone()
+    }
+
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         self.sync();
         let ptr = self.buffer.0.contents() as *const T;
@@ -390,6 +423,13 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
             .0
             .did_modify_range(NSRange::new(offset as u64, size as u64));
     }
+
+    fn to_vec(&self) -> Vec<T> {
+        let ptr = self.buffer.0.contents() as *const T;
+        let len = self.buffer.0.length() as usize / mem::size_of::<T>();
+        let slice = unsafe { slice::from_raw_parts(ptr, len) };
+        Vec::from(slice)
+    }
 }
 
 impl<MH: MetalHash> Default for MetalHal<MH> {
@@ -400,7 +440,12 @@ impl<MH: MetalHash> Default for MetalHal<MH> {
 
 impl<MH: MetalHash> MetalHal<MH> {
     pub fn new() -> Self {
+        let lock = singleton().lock();
         let device = Device::system_default().expect("no device found");
+        assert_eq!(
+            device.argument_buffers_support(),
+            MTLArgumentBuffersTier::Tier2
+        );
         let library = device.new_library_with_data(METAL_LIB).unwrap();
         let cmd_queue = device.new_command_queue();
         let mut kernels = HashMap::new();
@@ -415,6 +460,7 @@ impl<MH: MetalHash> MetalHal<MH> {
             cmd_queue,
             kernels,
             hash: None,
+            _lock: lock,
         };
         hal.hash = Some(Box::new(MH::new(&hal)));
         hal
@@ -432,8 +478,21 @@ impl<MH: MetalHash> MetalHal<MH> {
         count: u64,
         opts: Option<(MTLSize, MTLSize)>,
     ) {
+        self.dispatch_with_resources(kernel, args, count, opts, |_| {});
+    }
+
+    pub fn dispatch_with_resources<F: Fn(&ComputeCommandEncoderRef)>(
+        &self,
+        kernel: &ComputePipelineDescriptor,
+        args: &[KernelArg],
+        count: u64,
+        opts: Option<(MTLSize, MTLSize)>,
+        callback: F,
+    ) {
         let cmd_buffer = self.cmd_queue.new_command_buffer();
         let cmd_encoder = cmd_buffer.new_compute_command_encoder();
+
+        callback(cmd_encoder);
 
         let pipeline_state = self
             .device
@@ -452,6 +511,9 @@ impl<MH: MetalHash> MetalHal<MH> {
                         mem::size_of_val(value) as u64,
                         value.to_le_bytes().as_ptr() as *const c_void,
                     );
+                }
+                KernelArg::Null => {
+                    cmd_encoder.set_buffer(index as u64, None, 0);
                 }
             }
         }
@@ -481,7 +543,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
     type Field = BabyBear;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
@@ -787,6 +849,65 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.hash.as_ref().unwrap().get_hash_suite()
     }
+
+    #[cfg(feature = "metal_prefix_products")]
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        let block_size = 256;
+        let grain_size = 16;
+        let threadgroup_size = block_size * grain_size;
+        let io_size = io.size() as u64;
+        let threadgroups = (io_size + threadgroup_size - 1) / threadgroup_size;
+        let threadgroups_per_grid = MTLSize::new(threadgroups, 1, 1);
+        let threads_per_threadgroup = MTLSize::new(block_size, 1, 1);
+        let params = Params::ThreadGroups(threadgroups_per_grid, threads_per_threadgroup);
+
+        let partial_products = self.alloc_extelem("partial_products", block_size as usize);
+
+        let kernel = self.kernels.get("reduce").unwrap();
+        let args = &[partial_products.as_arg(), io.as_arg()];
+        self.dispatch(kernel, args, 0, Some(params.clone()));
+
+        // partial_products.view(|view| {
+        //     println!("partial_products");
+        //     let items: Vec<_> = view.iter().enumerate().collect();
+        //     for (i, x) in items {
+        //         println!("{i}: {x:?}");
+        //     }
+        // });
+
+        let kernel = self.kernels.get("prefix_products_single").unwrap();
+        let args = &[partial_products.as_arg(), partial_products.as_arg()];
+        self.dispatch(kernel, args, 0, Some(params.clone()));
+
+        // partial_products.view(|view| {
+        //     println!("partial_products");
+        //     let items: Vec<_> = view.iter().enumerate().collect();
+        //     for (i, x) in items {
+        //         println!("{i}: {x:?}");
+        //     }
+        // });
+
+        let kernel = self.kernels.get("prefix_products").unwrap();
+        let args = &[io.as_arg(), partial_products.as_arg()];
+        self.dispatch(kernel, args, 0, Some(params));
+    }
+
+    #[cfg(not(feature = "metal_prefix_products"))]
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        io.view_mut(|io| {
+            for i in 1..io.len() {
+                io[i] *= io[i - 1];
+            }
+        });
+    }
+
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        elems.view_mut(|slice| {
+            slice.par_iter_mut().for_each(|elem| {
+                *elem = elem.valid_or_zero();
+            });
+        })
+    }
 }
 
 fn simple_launch_params(count: u32, threads_per_group: u32) -> (MTLSize, MTLSize) {
@@ -924,5 +1045,33 @@ mod tests {
     #[test]
     fn gather_sample() {
         testutil::gather_sample(MetalHalSha256::new());
+    }
+
+    #[test]
+    fn prefix_products() {
+        use crate::hal::{cpu::CpuHal, dual::DualHal, Hal as _};
+        use risc0_core::field::baby_bear::BabyBearExtElem;
+        use std::rc::Rc;
+
+        fn test(size: usize) {
+            let hal_gpu = MetalHalSha256::new();
+            let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+            let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+
+            use rand::thread_rng;
+            use risc0_core::field::Elem as _;
+            let mut rng = thread_rng();
+            let io: Vec<_> = (0..size)
+                .map(|_| BabyBearExtElem::random(&mut rng))
+                .collect();
+            let io = hal.copy_from_extelem("io", io.as_slice());
+
+            hal.prefix_products(&io);
+        }
+
+        for i in 15..=20 {
+            println!("po2: {i}");
+            test(1 << i);
+        }
     }
 }

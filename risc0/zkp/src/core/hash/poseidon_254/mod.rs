@@ -14,25 +14,25 @@
 
 //! An implementation of Poseidon targeting the Snark friendly field with a
 //! security of 128 bits.
-pub(crate) mod consts;
 
-use alloc::rc::Rc;
+mod consts;
 
+use std::rc::Rc;
+
+use ff::{Field, PrimeField};
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
 };
 
-use self::consts::*;
+use self::consts::{Fr, FrRepr, CELLS, ROUNDS_HALF_FULL, ROUNDS_PARTIAL};
+
 use super::{HashFn, HashSuite, Rng, RngFactory};
-use crate::{
-    core::digest::Digest,
-    ff::{Field, PrimeField},
-};
+use crate::core::digest::Digest;
 
 fn add_round_constants(cells: &mut [Fr; CELLS], round: usize) {
-    for i in 0..CELLS {
-        cells[i] += ROUND_CONSTANTS[round * CELLS + i];
+    for (i, cell) in cells.iter_mut().enumerate() {
+        *cell += consts::round_constants()[round * CELLS + i];
     }
 }
 
@@ -54,12 +54,12 @@ fn do_partial_sboxes(cells: &mut [Fr; CELLS]) {
 
 fn multiply_by_mds(cells: &mut [Fr; CELLS]) {
     let old_cells = *cells;
-    for i in 0..CELLS {
+    for (i, cell) in cells.iter_mut().enumerate() {
         let mut tot = Fr::ZERO;
-        for j in 0..CELLS {
-            tot += MDS[i * CELLS + j] * old_cells[j];
+        for (j, old_cell) in old_cells.iter().enumerate() {
+            tot += consts::mds()[i * CELLS + j] * *old_cell;
         }
-        cells[i] = tot;
+        *cell = tot;
     }
 }
 
@@ -91,7 +91,7 @@ fn poseidon_mix(cells: &mut [Fr; CELLS]) {
     }
 }
 
-/// A hash implemention for Poseidon in a Snark friendly field
+/// A hash implementation for Poseidon in a Snark friendly field
 struct Poseidon254HashFn;
 
 /// Returns the field representation of a given digest.
@@ -157,7 +157,7 @@ impl HashFn<BabyBear> for Poseidon254HashFn {
     }
 }
 
-/// An rng implemention for Poseidon in a Snark friendly field
+/// An rng implementation for Poseidon in a Snark friendly field
 struct Poseidon254Rng {
     // The cells of the sponge
     cells: [Fr; CELLS],

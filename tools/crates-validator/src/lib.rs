@@ -260,8 +260,8 @@ impl Validator {
         cmd.env_clear();
         cmd.envs(&filtered_env);
 
-        if profile.settings.std {
-            cmd.arg("--std");
+        if !profile.settings.std {
+            cmd.arg("--no-std");
         }
 
         match self.repo() {

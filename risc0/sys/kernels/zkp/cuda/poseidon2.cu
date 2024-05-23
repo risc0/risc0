@@ -141,11 +141,11 @@ __device__ void poseidon2_mix(const Fp* ROUND_CONSTANTS, const Fp* M_INT_DIAG, F
 
 } // namespace poseidon2
 
-extern "C" __global__ void poseidon2_fold(const Fp* ROUND_CONSTANTS,
-                                          const Fp* M_INT_DIAG,
-                                          Fp* output,
-                                          const Fp* input,
-                                          uint32_t output_size) {
+__global__ void poseidon2_fold(const Fp* ROUND_CONSTANTS,
+                               const Fp* M_INT_DIAG,
+                               Fp* output,
+                               const Fp* input,
+                               uint32_t output_size) {
   uint32_t gid = blockDim.x * blockIdx.x + threadIdx.x;
   if (gid >= output_size) {
     return;
@@ -161,12 +161,12 @@ extern "C" __global__ void poseidon2_fold(const Fp* ROUND_CONSTANTS,
   }
 }
 
-extern "C" __global__ void poseidon2_rows(const Fp* ROUND_CONSTANTS,
-                                          const Fp* M_INT_DIAG,
-                                          Fp* out,
-                                          const Fp* matrix,
-                                          uint32_t count,
-                                          uint32_t col_size) {
+__global__ void poseidon2_rows(const Fp* ROUND_CONSTANTS,
+                               const Fp* M_INT_DIAG,
+                               Fp* out,
+                               const Fp* matrix,
+                               uint32_t count,
+                               uint32_t col_size) {
   uint32_t gid = blockDim.x * blockIdx.x + threadIdx.x;
   if (gid >= count) {
     return;
@@ -174,13 +174,17 @@ extern "C" __global__ void poseidon2_rows(const Fp* ROUND_CONSTANTS,
   Fp cells[CELLS];
   uint used = 0;
   for (uint i = 0; i < col_size; i++) {
-    cells[used++] += matrix[i * count + gid];
+    cells[used++] = matrix[i * count + gid];
     if (used == CELLS_RATE) {
       poseidon2::poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG, cells);
       used = 0;
     }
   }
   if (used != 0 || count == 0) {
+    // Zero pad to get a CELLS_RATE-aligned number of inputs
+    for (uint i = used; i < CELLS_RATE; i++) {
+      cells[i] = 0;
+    }
     poseidon2::poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG, cells);
   }
   for (uint i = 0; i < CELLS_OUT; i++) {

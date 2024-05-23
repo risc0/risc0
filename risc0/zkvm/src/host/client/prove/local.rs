@@ -16,8 +16,8 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, Receipt, SegmentInfo, SessionInfo,
-    VerifierContext,
+    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl, ProveInfo,
+    Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [crate::ProverServer] by calling
@@ -42,30 +42,33 @@ impl Prover for LocalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
     }
 
     fn get_name(&self) -> String {
         self.name.clone()
     }
+
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        get_prover_server(opts)?.compress(opts, receipt)
+    }
 }
 
 impl Executor for LocalProver {
     fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
-        let session = exec.run()?;
         let mut segments = Vec::new();
-        for segment in session.segments {
-            let segment = segment.resolve()?;
+        let session = exec.run_with_callback(|segment| {
             segments.push(SegmentInfo {
                 po2: segment.inner.po2 as u32,
                 cycles: segment.inner.insn_cycles as u32,
-            })
-        }
+            });
+            Ok(Box::new(NullSegmentRef))
+        })?;
         Ok(SessionInfo {
             segments,
-            journal: session.journal.unwrap_or_default().into(),
+            journal: session.journal.unwrap_or_default(),
             exit_code: session.exit_code,
         })
     }

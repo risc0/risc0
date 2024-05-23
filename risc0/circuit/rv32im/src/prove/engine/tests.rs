@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use anyhow::Result;
+use cfg_if::cfg_if;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::{
     core::{digest::Digest, hash::sha::Sha256HashSuite},
     field::baby_bear::BabyBearElem,
-    hal::{cpu::CpuHal, Hal},
+    hal::{cpu::CpuHal, Buffer as _, Hal},
     verify::VerificationError,
 };
 use risc0_zkvm_platform::PAGE_SIZE;
@@ -30,7 +33,8 @@ use crate::{
             exec::{execute, DEFAULT_SEGMENT_LIMIT_PO2},
             testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         },
-        get_segment_prover,
+        hal::StepMode,
+        segment_prover,
     },
     CIRCUIT,
 };
@@ -65,20 +69,50 @@ fn fwd_rev_ab_test(program: Program) {
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall::default(),
+        None,
     )
     .unwrap();
+
+    cfg_if! {
+        if #[cfg(feature = "cuda")] {
+            use risc0_zkp::hal::cuda::CudaHalSha256;
+            use crate::prove::hal::cuda::CudaCircuitHalSha256;
+            let hal = Rc::new(CudaHalSha256::new());
+            let circuit_hal = CudaCircuitHalSha256::new(hal.clone());
+        } else if #[cfg(feature = "metal")] {
+            use risc0_zkp::hal::metal::MetalHalSha256;
+            use crate::prove::hal::metal::MetalCircuitHal;
+            let hal = Rc::new(MetalHalSha256::new());
+            let circuit_hal = MetalCircuitHal::new(hal.clone());
+        } else {
+            use crate::prove::hal::cpu::CpuCircuitHal;
+            let suite = Sha256HashSuite::new_suite();
+            let hal = Rc::new(CpuHal::new(suite));
+            let circuit_hal = CpuCircuitHal::new();
+        }
+    }
+
     let segments = result.segments;
     for segment in segments {
         let trace = segment.preflight().unwrap();
         let io = segment.prepare_globals();
-
-        let mut fwd_witgen = WitnessGenerator::new(segment.po2, &io);
-        let fwd_data = fwd_witgen.test_step_execute(trace.clone(), true);
-
-        let mut rev_witgen = WitnessGenerator::new(segment.po2, &io);
-        let rev_data = rev_witgen.test_step_execute(trace.clone(), false);
-
-        assert!(fwd_data == rev_data);
+        let fwd_witgen = WitnessGenerator::new(
+            hal.as_ref(),
+            &circuit_hal,
+            segment.po2,
+            &io,
+            trace.clone(),
+            StepMode::SeqForward,
+        );
+        let rev_witgen = WitnessGenerator::new(
+            hal.as_ref(),
+            &circuit_hal,
+            segment.po2,
+            &io,
+            trace.clone(),
+            StepMode::SeqReverse,
+        );
+        assert!(fwd_witgen.data.to_vec() == rev_witgen.data.to_vec());
     }
 }
 
@@ -92,12 +126,13 @@ fn basic() {
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall::default(),
+        None,
     )
     .unwrap();
     let segments = result.segments;
     let segment = segments.first().unwrap();
 
-    let prover = get_segment_prover();
+    let prover = segment_prover("sha-256").unwrap();
     let seal = prover.prove_segment(&segment).unwrap();
 
     let suite = Sha256HashSuite::new_suite();
@@ -111,9 +146,16 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let result = execute(image, 14, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    let result = execute(
+        image,
+        14,
+        DEFAULT_SESSION_LIMIT,
+        &NullSyscall::default(),
+        None,
+    )
+    .unwrap();
 
-    let prover = get_segment_prover();
+    let prover = segment_prover("sha-256").unwrap();
     let suite = Sha256HashSuite::new_suite();
     let hal = CpuHal::new(suite.clone());
 
@@ -127,7 +169,7 @@ fn system_split() {
 }
 
 #[test]
-fn fwd_rev_ab() {
+fn fwd_rev_ab_basic() {
     fwd_rev_ab_test(testutil::basic());
 }
 

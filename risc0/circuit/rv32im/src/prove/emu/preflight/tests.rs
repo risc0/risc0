@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fmt, sync::atomic::Ordering};
+use std::fmt;
 
 use risc0_binfmt::MemoryImage;
 use risc0_zkvm_platform::PAGE_SIZE;
@@ -59,6 +59,7 @@ fn basic() {
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall::default(),
+        None,
     )
     .unwrap();
     let segments = result.segments;
@@ -123,7 +124,14 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let result = execute(image, 14, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    let result = execute(
+        image,
+        14,
+        DEFAULT_SESSION_LIMIT,
+        &NullSyscall::default(),
+        None,
+    )
+    .unwrap();
     let segments = result.segments;
 
     assert_eq!(segments.len(), 2);
@@ -140,7 +148,7 @@ fn system_split() {
             .cycles
             .iter()
             .filter(|x| x.mux == TopMux::Body(Major::PageFault, 0))
-            .map(|x| trace.pre.extras[x.extra_idx.load(Ordering::Relaxed) + 1])
+            .map(|x| trace.pre.extras[x.extra_idx + 1])
             .collect();
         assert_slice_eq(
             &page_reads,
@@ -154,10 +162,10 @@ fn system_split() {
             .iter()
             .filter(|x| {
                 x.mux == TopMux::Body(Major::PageFault, 0)
-                    && trace.body.extras[x.extra_idx.load(Ordering::Relaxed) + 2] == 0
+                    && trace.body.extras[x.extra_idx + 2] == 0
                 // !is_done
             })
-            .map(|x| trace.body.extras[x.extra_idx.load(Ordering::Relaxed) + 1])
+            .map(|x| trace.body.extras[x.extra_idx + 1])
             .collect();
         assert_slice_eq(&page_writes, &[0x30000, 0x35800, 0x35ac0, 0x35ad6]);
     }
@@ -174,7 +182,7 @@ fn system_split() {
             .cycles
             .iter()
             .filter(|x| x.mux == TopMux::Body(Major::PageFault, 0))
-            .map(|x| trace.pre.extras[x.extra_idx.load(Ordering::Relaxed) + 1])
+            .map(|x| trace.pre.extras[x.extra_idx + 1])
             .collect();
         assert_slice_eq(
             &page_reads,

@@ -61,7 +61,7 @@
 //! ```
 //!
 //! Notice how [env::read] is used to load the two factors, and [env::commit] is used to make their
-//! composite product publically available. All input an output of your guest is private except for
+//! composite product publicly available. All input an output of your guest is private except for
 //! what is written to the journal with [env::commit].
 //!
 //! By default, the guest only has the Rust `core` libraries and not `std`. A partial
@@ -80,7 +80,7 @@
 #![deny(missing_docs)]
 
 pub mod env;
-pub mod sha;
+pub use risc0_zkp::core::hash::sha;
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;

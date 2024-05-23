@@ -26,9 +26,7 @@ risc0-zkvm = { path = "../../risc0/zkvm", features = ["prove"] }
 rmp-serde = "1.1"
 rust_decimal = { version = "1.29", features = ["serde-str"] }
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
 sha-methods = { path = "../sha/methods" }
-sha2 = "0.10"
 smartcore = { version = "0.3", features = ['serde'] }
 smartcore-ml-methods = { path = "../smartcore-ml/methods" }
 tracing = { version = "0.1", features = ["log"] }

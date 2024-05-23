@@ -18,13 +18,10 @@ use std::{
     process::Command,
 };
 
+use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 use tempfile::tempdir_in;
-
-const CUDA_INCS: &[(&str, &str)] = &[
-    ("fp.h", include_str!("../kernels/cuda/fp.h")),
-    ("fpext.h", include_str!("../kernels/cuda/fpext.h")),
-];
+use which::which;
 
 const METAL_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/metal/fp.h")),
@@ -42,6 +39,7 @@ pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
     files: Vec<PathBuf>,
+    files_opt: Vec<(PathBuf, usize)>,
     inc_dirs: Vec<PathBuf>,
     deps: Vec<PathBuf>,
 }
@@ -52,6 +50,7 @@ impl KernelBuild {
             kernel_type,
             flags: Vec::new(),
             files: Vec::new(),
+            files_opt: Vec::new(),
             inc_dirs: Vec::new(),
             deps: Vec::new(),
         }
@@ -87,6 +86,24 @@ impl KernelBuild {
         self
     }
 
+    /// Add a file which will be compiled
+    pub fn file_opt<P: AsRef<Path>>(&mut self, p: P, opt: usize) -> &mut KernelBuild {
+        self.files_opt.push((p.as_ref().to_path_buf(), opt));
+        self
+    }
+
+    /// Add files which will be compiled
+    pub fn files_opt<P>(&mut self, p: P, opt: usize) -> &mut KernelBuild
+    where
+        P: IntoIterator,
+        P::Item: AsRef<Path>,
+    {
+        for file in p.into_iter() {
+            self.file_opt(file, opt);
+        }
+        self
+    }
+
     /// Add a dependency
     pub fn dep<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
         self.deps.push(p.as_ref().to_path_buf());
@@ -106,7 +123,14 @@ impl KernelBuild {
     }
 
     pub fn compile(&mut self, output: &str) {
+        if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+            return;
+        }
+
         for src in self.files.iter() {
+            println!("cargo:rerun-if-changed={}", src.display());
+        }
+        for (src, _) in self.files_opt.iter() {
             println!("cargo:rerun-if-changed={}", src.display());
         }
         for dep in self.deps.iter() {
@@ -126,6 +150,7 @@ impl KernelBuild {
             .cpp(true)
             .debug(false)
             .files(&self.files)
+            .includes(&self.inc_dirs)
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .flag_if_supported("-fno-var-tracking")
@@ -135,38 +160,114 @@ impl KernelBuild {
     }
 
     fn compile_cuda(&mut self, output: &str) {
-        self.cached_compile(
-            output,
-            "fatbin",
-            CUDA_INCS,
-            |_out_dir, out_path, sys_inc_dir| {
-                println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-                println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
-                println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+        fn enable_debug(output: &str) -> bool {
+            if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
+                return debug.contains(output);
+            }
+            false
+        }
 
-                let mut cmd = Command::new("nvcc");
-                cmd.arg("--fatbin");
-                cmd.arg("-o").arg(out_path);
-                cmd.args(self.files.iter());
-                cmd.arg("-I").arg(sys_inc_dir);
+        println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+        println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
 
-                // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
-                // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-                // decrease in performance but a compile time in the minutes. Use
-                // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
-                let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or_else(|_| "1".to_string());
-                cmd.arg(format!("--ptxas-options=-O{ptx_opt_level}"));
+        for inc_dir in self.inc_dirs.iter() {
+            for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
+                println!("cargo:rerun-if-changed={}", inc.unwrap().display());
+            }
+        }
+
+        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
+        let out_path = out_dir.join(format!("lib{output}.a"));
+
+        let files: Vec<_> = self
+            .files
+            .iter()
+            .map(|x| (x.as_path(), 3usize))
+            .chain(self.files_opt.iter().map(|(x, y)| (x.as_path(), *y)))
+            .collect();
+        let obj_paths: Vec<_> = files
+            .into_par_iter()
+            .map(|(src, opt_level)| {
+                let obj_path = out_dir.join(src).with_extension("").with_extension("o");
+                if let Some(parent) = obj_path.parent() {
+                    fs::create_dir_all(parent).unwrap();
+                }
+
+                let sccache = which("sccache");
+                let mut cmd = if let Ok(sccache) = sccache {
+                    let mut cmd = Command::new(sccache);
+                    cmd.arg("nvcc");
+                    cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
+                    cmd
+                } else {
+                    println!("cargo:warning=It is highly recommended to install sccache when building CUDA kernels.");
+                    Command::new("nvcc")
+                };
+
+                cmd.arg("-c");
+
+                if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
+                    cmd.arg("-arch=native");
+                }
+
+                cmd.arg("--device-c");
+
+                if enable_debug(output) {
+                    cmd.arg("-G");
+                } else {
+                    let opt_level = env::var("RISC0_CUDA_OPT").unwrap_or(opt_level.to_string());
+                    cmd.arg(format!("-O{opt_level}"));
+                    cmd.arg("-Xptxas").arg(format!("-O{opt_level}"));
+                }
+
                 for inc_dir in self.inc_dirs.iter() {
                     cmd.arg("-I").arg(inc_dir);
                 }
-                let status = cmd
-                    .status()
-                    .expect("Failed to run 'nvcc', do you have the CUDA toolkit installed?");
-                if !status.success() {
-                    panic!("Failed to build CUDA kernel: {}", output);
+
+                for flag in self.flags.iter(){
+                    cmd.arg(flag);
                 }
-            },
-        );
+
+                cmd.arg(src);
+                cmd.arg("-o").arg(&obj_path);
+                println!("Running: {:?}", cmd);
+                let status = cmd.status().unwrap();
+                if !status.success() {
+                    panic!("CUDA kernels: compilation failed");
+                }
+                obj_path
+            })
+            .collect();
+
+        let dlink = out_dir.join(format!("{output}_dlink.o"));
+        let mut cmd = Command::new("nvcc");
+        cmd.arg("--device-link");
+        cmd.arg("-o");
+        cmd.arg(&dlink);
+        cmd.args(&obj_paths);
+        println!("Running: {:?}", cmd);
+        let status = cmd.status().unwrap();
+        if !status.success() {
+            panic!("CUDA kernels: device linking failed");
+        }
+
+        let mut cmd = Command::new("ar");
+        cmd.arg("crs");
+        cmd.arg(&out_path);
+        cmd.args(&obj_paths);
+        cmd.arg(&dlink);
+        println!("Running: {:?}", cmd);
+        let status = cmd.status().unwrap();
+        if !status.success() {
+            panic!("CUDA kernels: archive creation failed");
+        }
+
+        println!("cargo:rustc-link-lib=static={output}");
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
+        println!("cargo:rustc-link-lib=cudart_static");
+        println!("cargo:{}={}", output, out_path.display());
     }
 
     fn compile_metal(&mut self, output: &str) {
@@ -174,29 +275,35 @@ impl KernelBuild {
             output,
             "metallib",
             METAL_INCS,
-            |out_dir, out_path, sys_inc_dir| {
-                let mut air_paths = vec![];
-                for src in self.files.iter() {
-                    let out_path = out_dir.join(src).with_extension("").with_extension("air");
-                    if let Some(parent) = out_path.parent() {
-                        fs::create_dir_all(parent).unwrap();
-                    }
-                    let mut cmd = Command::new("xcrun");
-                    cmd.args(["--sdk", "macosx"]);
-                    cmd.arg("metal");
-                    cmd.arg("-o").arg(&out_path);
-                    cmd.arg("-c").arg(src);
-                    cmd.arg("-I").arg(sys_inc_dir);
-                    for inc_dir in self.inc_dirs.iter() {
-                        cmd.arg("-I").arg(inc_dir);
-                    }
-                    println!("Running: {:?}", cmd);
-                    let status = cmd.status().unwrap();
-                    if !status.success() {
-                        panic!("Could not build metal kernels");
-                    }
-                    air_paths.push(out_path);
-                }
+            &[],
+            |out_dir, out_path, sys_inc_dir, _flags| {
+                let files: Vec<_> = self.files.iter().map(|x| x.as_path()).collect();
+
+                let air_paths: Vec<_> = files
+                    .into_par_iter()
+                    .map(|src| {
+                        let air_path = out_dir.join(src).with_extension("").with_extension("air");
+                        if let Some(parent) = air_path.parent() {
+                            fs::create_dir_all(parent).unwrap();
+                        }
+                        let mut cmd = Command::new("xcrun");
+                        cmd.args(["--sdk", "macosx"]);
+                        cmd.arg("metal");
+                        cmd.arg("-o").arg(&air_path);
+                        cmd.arg("-c").arg(src);
+                        cmd.arg("-I").arg(sys_inc_dir);
+                        cmd.arg("-Wno-unused-variable");
+                        for inc_dir in self.inc_dirs.iter() {
+                            cmd.arg("-I").arg(inc_dir);
+                        }
+                        println!("Running: {:?}", cmd);
+                        let status = cmd.status().unwrap();
+                        if !status.success() {
+                            panic!("Could not build metal kernels");
+                        }
+                        air_path
+                    })
+                    .collect();
 
                 let result = Command::new("xcrun")
                     .args(["--sdk", "macosx"])
@@ -213,11 +320,12 @@ impl KernelBuild {
         );
     }
 
-    fn cached_compile<F: Fn(&Path, &Path, &Path)>(
+    fn cached_compile<F: Fn(&Path, &Path, &Path, &[String])>(
         &self,
         output: &str,
         extension: &str,
         assets: &[(&str, &str)],
+        flags: &[String],
         inner: F,
     ) {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
@@ -231,6 +339,9 @@ impl KernelBuild {
 
         let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
+        for flag in flags {
+            hasher.add_flag(flag);
+        }
         for src in self.files.iter() {
             hasher.add_file(src);
         }
@@ -250,7 +361,7 @@ impl KernelBuild {
         if !cache_path.is_file() {
             let tmp_dir = temp_dir.path();
             let tmp_path = tmp_dir.join(output).with_extension(extension);
-            inner(tmp_dir, &tmp_path, &sys_inc_dir);
+            inner(tmp_dir, &tmp_path, &sys_inc_dir, flags);
             fs::rename(tmp_path, &cache_path).unwrap();
         }
         fs::copy(cache_path, &out_path).unwrap();
@@ -273,6 +384,10 @@ struct Hasher {
 impl Hasher {
     pub fn new() -> Self {
         Self { sha: Sha256::new() }
+    }
+
+    pub fn add_flag(&mut self, flag: &str) {
+        self.sha.update(flag);
     }
 
     pub fn add_file<P: AsRef<Path>>(&mut self, path: P) {

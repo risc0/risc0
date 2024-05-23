@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use clap::Parser;
+use risc0_build::BuildStatus;
 
 /// `cargo risczero build`
+///
+/// NOTE: Requires Docker to be installed and running.
 #[derive(Parser)]
 pub struct BuildGuest {
     /// Location of the Cargo.toml for the guest code.
@@ -33,7 +36,12 @@ pub struct BuildGuest {
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        let src_dir = std::env::current_dir().unwrap();
-        risc0_build::docker_build(&self.manifest_path, &src_dir, &self.features)
+        build(&self.manifest_path, &self.features)?;
+        Ok(())
     }
+}
+
+pub(crate) fn build(manifest_path: &Path, features: &[String]) -> Result<BuildStatus> {
+    let src_dir = std::env::current_dir().unwrap();
+    risc0_build::docker_build(manifest_path, &src_dir, features)
 }

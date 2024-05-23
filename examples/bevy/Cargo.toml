@@ -7,7 +7,6 @@ edition = "2021"
 bevy-core = { path = "core" }
 bevy-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
-serde = "1.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

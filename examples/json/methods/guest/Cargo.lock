@@ -220,9 +220,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck"
-version = "1.13.0"
+version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c041d3eab048880cb0b86b256447da3f18859a163c3b8d8893f4e6368abe6393"
+checksum = "5d6d68c57235a3a081186990eca2867354726650f42f7516ca50c28d6281fd15"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -347,6 +347,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
+name = "hex-literal"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
+
+[[package]]
 name = "itertools"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -399,17 +405,6 @@ dependencies = [
  "autocfg",
  "num-integer",
  "num-traits",
-]
-
-[[package]]
-name = "num-derive"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfb77679af88f8b125209d354a202862602672222e7f2313fdd6dc349bad4712"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.39",
 ]
 
 [[package]]
@@ -501,7 +496,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "elf",
@@ -513,7 +508,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -525,7 +520,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "risc0-binfmt",
@@ -538,7 +533,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -546,29 +541,33 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "ark-bn254",
+ "ark-ec",
  "ark-groth16",
  "ark-serialize",
+ "bytemuck",
  "hex",
  "num-bigint",
- "num-derive",
  "num-traits",
+ "risc0-binfmt",
  "risc0-zkp",
  "serde",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "blake2",
  "bytemuck",
+ "cfg-if",
  "digest",
  "hex",
+ "hex-literal",
  "paste",
  "rand_core",
  "risc0-core",
@@ -580,7 +579,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -603,7 +602,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.22.0-alpha.1"
+version = "1.0.0-rc.5"
 dependencies = [
  "bytemuck",
  "getrandom",

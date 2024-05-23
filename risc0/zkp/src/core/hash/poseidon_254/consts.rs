@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::sync::OnceLock;
+
 use ff::PrimeField;
-use lazy_static::lazy_static;
 
 #[derive(PrimeField)]
 #[PrimeFieldModulus = "21888242871839275222246405745257275088548364400416034343698204186575808495617"]
@@ -28,7 +29,7 @@ pub const ROUNDS_TOT: usize = 2 * ROUNDS_HALF_FULL + ROUNDS_PARTIAL;
 
 // Taken from https://extgit.iaik.tugraz.at/krypto/hadeshash
 // poseidon_params_n254_t3_alpha8_M128.txt
-pub const ROUND_CONSTANTS_STR: [&str; ROUNDS_TOT * CELLS] = [
+const ROUND_CONSTANTS_STR: [&str; ROUNDS_TOT * CELLS] = [
     "5888606379639939820599455322177884368477873312756472112671988140021184080705",
     "18489058766968673146528183220413613399079683759169985690098361647140265017944",
     "14171222512079213058951873267355514924931036792627912326743169875439702206118",
@@ -181,7 +182,7 @@ pub const ROUND_CONSTANTS_STR: [&str; ROUNDS_TOT * CELLS] = [
     "14533845515930494974466408792543952530064904726462188004585813120888450727620",
 ];
 
-pub const MDS_STR: [&str; CELLS * CELLS] = [
+const MDS_STR: [&str; CELLS * CELLS] = [
     "1017023420312749934459631888016684831103661859468634146122522913463228918266",
     "4202690840311939897388485109889706482463055357734653156799117224889688752161",
     "3652883699933663193266146845129996570393662503709132891357947639536776420532",
@@ -193,21 +194,22 @@ pub const MDS_STR: [&str; CELLS * CELLS] = [
     "3242101671879902378755777493421615650671562290095873775783342821028960288874",
 ];
 
-lazy_static! {
-    pub static ref ROUND_CONSTANTS: Vec<Fr> = {
-        let mut out = Vec::<Fr>::new();
-        for s in ROUND_CONSTANTS_STR {
-            let as_fp = Fr::from_str_vartime(s).unwrap();
-            out.push(as_fp);
-        }
-        out
-    };
-    pub static ref MDS: Vec<Fr> = {
-        let mut out = Vec::<Fr>::new();
-        for s in MDS_STR {
-            let as_fp = Fr::from_str_vartime(s).unwrap();
-            out.push(as_fp);
-        }
-        out
-    };
+pub fn round_constants() -> &'static Vec<Fr> {
+    static ONCE: OnceLock<Vec<Fr>> = OnceLock::new();
+    ONCE.get_or_init(|| {
+        ROUND_CONSTANTS_STR
+            .iter()
+            .map(|x| Fr::from_str_vartime(x).unwrap())
+            .collect()
+    })
+}
+
+pub fn mds() -> &'static Vec<Fr> {
+    static ONCE: OnceLock<Vec<Fr>> = OnceLock::new();
+    ONCE.get_or_init(|| {
+        MDS_STR
+            .iter()
+            .map(|x| Fr::from_str_vartime(x).unwrap())
+            .collect()
+    })
 }

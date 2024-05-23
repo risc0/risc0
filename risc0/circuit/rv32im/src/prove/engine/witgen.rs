@@ -12,285 +12,116 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Mutex;
-
-use anyhow::Result;
 use rand::thread_rng;
-use rayon::prelude::*;
 use risc0_zkp::{
-    adapter::{CircuitInfo as _, CircuitStep as _, CircuitStepContext, TapsProvider},
+    adapter::TapsProvider,
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem as _,
     },
-    hal::cpu::CpuBuffer,
-    prove::{
-        accum::{Accum, Handler},
-        write_iop::WriteIOP,
-    },
+    hal::Hal,
     ZK_CYCLES,
 };
 
 use super::machine::MachineContext;
 use crate::{
-    prove::{emu::preflight::PreflightTrace, engine::loader::Loader},
-    CircuitImpl, CIRCUIT,
+    prove::{
+        emu::preflight::PreflightTrace,
+        engine::loader::Loader,
+        hal::{CircuitWitnessGenerator, StepMode},
+    },
+    CIRCUIT,
 };
 
-pub struct WitnessGenerator {
-    steps: usize,
-    pub ctrl: CpuBuffer<BabyBearElem>,
-    pub data: CpuBuffer<BabyBearElem>,
-    pub io: CpuBuffer<BabyBearElem>,
+pub(crate) struct WitnessGenerator<H>
+where
+    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+{
+    pub steps: usize,
+    pub ctrl: H::Buffer<H::Elem>,
+    pub data: H::Buffer<H::Elem>,
+    pub io: H::Buffer<H::Elem>,
 }
 
-impl WitnessGenerator {
-    pub fn new(po2: usize, io: &[BabyBearElem]) -> Self {
+impl<H> WitnessGenerator<H>
+where
+    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+{
+    pub fn new<C: CircuitWitnessGenerator<H>>(
+        hal: &H,
+        circuit_hal: &C,
+        po2: usize,
+        io: &[BabyBearElem],
+        trace: PreflightTrace,
+        mode: StepMode,
+    ) -> Self {
         let steps = 1 << po2;
-        Self {
-            steps,
-            ctrl: CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
-            data: CpuBuffer::from_fn("data", steps * CIRCUIT.data_size(), |_| {
-                BabyBearElem::INVALID
-            }),
-            io: CpuBuffer::from(Vec::from(io)),
-        }
-    }
 
-    #[tracing::instrument(skip_all)]
-    pub fn execute(&mut self, trace: PreflightTrace) -> Result<()> {
-        let mut machine = MachineContext::new(self.steps, trace);
-        self.compute_execute(&mut machine)?;
-        self.compute_verify(&mut machine);
-
-        // Zero out 'invalid' entries in data and output.
-        self.data
-            .as_slice_mut()
-            .par_iter_mut()
-            .chain(self.io.as_slice_mut().par_iter_mut())
-            .for_each(|value| *value = value.valid_or_zero());
-
-        Ok(())
-    }
-
-    #[cfg(test)]
-    pub fn test_step_execute(&mut self, trace: PreflightTrace, is_fwd: bool) -> Vec<BabyBearElem> {
-        let machine = MachineContext::new(self.steps, trace);
-        let mut loader = Loader::new(self.steps, &mut self.ctrl);
+        nvtx::range_push!("load");
+        let mut loader = Loader::new(steps, CIRCUIT.ctrl_size());
         let last_cycle = loader.load();
+        nvtx::range_pop!();
+        tracing::debug!("last_cycle: {last_cycle}");
 
-        if !is_fwd {
+        nvtx::range_push!("alloc(data)");
+        let mut data = vec![BabyBearElem::INVALID; steps * CIRCUIT.data_size()];
+        nvtx::range_pop!();
+
+        let machine = MachineContext::new(trace);
+        if mode != StepMode::SeqForward {
+            nvtx::range_push!("inject_exec_backs");
             for cycle in 0..last_cycle {
-                machine.inject_exec_backs(self.steps, cycle, &self.data.as_slice_sync());
+                machine.inject_exec_backs(steps, cycle, &mut data);
             }
+            nvtx::range_pop!();
         }
 
-        {
-            let args = &[
-                self.ctrl.as_slice_sync(),
-                self.io.as_slice_sync(),
-                self.data.as_slice_sync(),
-            ];
-
-            if is_fwd {
-                for cycle in 0..last_cycle {
-                    machine.step_exec(self.steps, cycle, args).unwrap();
-                }
-            } else {
-                machine.rev_step_exec(self.steps, last_cycle, args);
-            }
-        }
-
-        self.data
-            .as_slice_mut()
-            .par_iter_mut()
-            .chain(self.io.as_slice_mut().par_iter_mut())
-            .for_each(|value| *value = value.valid_or_zero());
-
-        self.data.as_slice().to_vec()
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn compute_execute(&mut self, machine: &mut MachineContext) -> Result<()> {
-        tracing::debug!("load");
-        let mut loader = Loader::new(self.steps, &mut self.ctrl);
-        let last_cycle = loader.load();
-
-        #[cfg(not(feature = "seq"))]
-        tracing::info_span!("inject_exec_backs").in_scope(|| {
-            tracing::debug!("inject_exec_backs");
-            for cycle in 0..last_cycle {
-                machine.inject_exec_backs(self.steps, cycle, &self.data.as_slice_sync());
-            }
-        });
-
-        tracing::info_span!("step_exec").in_scope(|| {
-            tracing::debug!("step_exec");
-            let args = &[
-                self.ctrl.as_slice_sync(),
-                self.io.as_slice_sync(),
-                self.data.as_slice_sync(),
-            ];
-
-            #[cfg(not(feature = "seq"))]
-            machine.par_step_exec(self.steps, last_cycle, args);
-
-            #[cfg(feature = "seq")]
-            for cycle in 0..last_cycle {
-                machine.step_exec(self.steps, cycle, args).unwrap();
-            }
-        });
-
-        Ok(())
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn compute_verify(&mut self, machine: &mut MachineContext) {
-        tracing::debug!("compute_verify");
-        let mut rng = thread_rng();
-        {
-            let ctrl = self.ctrl.as_slice_sync();
-            let data = self.data.as_slice_sync();
-
+        if mode == StepMode::Parallel {
+            nvtx::range_push!("noise");
+            let mut rng = thread_rng();
             for i in 0..ZK_CYCLES {
-                let cycle = self.steps - ZK_CYCLES + i;
-                // Set ctrl to all zeros for the ZK_CYCLES
-                for j in 0..CIRCUIT.ctrl_size() {
-                    ctrl.set(j * self.steps + cycle, BabyBearElem::ZERO);
-                }
+                let cycle = steps - ZK_CYCLES + i;
                 // Set data to random for the ZK_CYCLES
                 for j in 0..CIRCUIT.data_size() {
-                    data.set(j * self.steps + cycle, BabyBearElem::random(&mut rng));
+                    data[j * steps + cycle] = BabyBearElem::random(&mut rng);
                 }
             }
+            nvtx::range_pop!();
         }
 
-        // Do the verify cycles
-        let last_cycle = self.steps - ZK_CYCLES;
+        nvtx::range_push!("copy(ctrl)");
+        let ctrl = hal.copy_from_elem("ctrl", &loader.ctrl);
+        nvtx::range_pop!();
 
-        machine.sort("ram");
+        nvtx::range_push!("copy(data)");
+        let data = hal.copy_from_elem("data", &data);
+        nvtx::range_pop!();
 
-        #[cfg(not(feature = "seq"))]
-        tracing::info_span!("inject_verify_mem_backs").in_scope(|| {
-            tracing::debug!("inject_verify_mem_backs");
-            for cycle in 0..last_cycle {
-                machine.inject_verify_mem_backs(self.steps, cycle, self.data.as_slice_sync());
-            }
-        });
+        nvtx::range_push!("copy(io)");
+        let io = hal.copy_from_elem("io", io);
+        nvtx::range_pop!();
 
-        tracing::info_span!("step_verify_mem").in_scope(|| {
-            tracing::debug!("step_verify_mem");
-            let args = &[
-                self.ctrl.as_slice_sync(),
-                self.io.as_slice_sync(),
-                self.data.as_slice_sync(),
-            ];
+        circuit_hal.generate_witness(
+            mode,
+            &machine.raw_trace,
+            steps,
+            last_cycle,
+            &ctrl,
+            &io,
+            &data,
+        );
 
-            #[cfg(not(feature = "seq"))]
-            machine.par_step_verify_mem(self.steps, last_cycle, args);
+        // Zero out 'invalid' entries in data and output.
+        nvtx::range_push!("zeroize");
+        hal.eltwise_zeroize_elem(&data);
+        hal.eltwise_zeroize_elem(&io);
+        nvtx::range_pop!();
 
-            #[cfg(feature = "seq")]
-            for cycle in 0..last_cycle {
-                machine.step_verify_mem(self.steps, cycle, args).unwrap();
-            }
-        });
-
-        machine.sort("bytes");
-        tracing::info_span!("step_verify_bytes").in_scope(|| {
-            tracing::debug!("step_verify_bytes");
-            let args = &[
-                self.ctrl.as_slice_sync(),
-                self.io.as_slice_sync(),
-                self.data.as_slice_sync(),
-            ];
-            for cycle in 0..last_cycle {
-                machine.step_verify_bytes(self.steps, cycle, args).unwrap();
-            }
-        });
-    }
-
-    #[tracing::instrument(skip_all)]
-    pub fn accumulate(
-        &mut self,
-        iop: &mut WriteIOP<BabyBear>,
-    ) -> (CpuBuffer<BabyBearElem>, CpuBuffer<BabyBearElem>) {
-        tracing::debug!("accumulate");
-
-        // Make the mixing values
-        let mix = CpuBuffer::from_fn("mix", CircuitImpl::MIX_SIZE, |_| iop.random_elem());
-
-        // Make and compute accum data
-        let accum_size = CIRCUIT.accum_size();
-        let accum = CpuBuffer::from_fn("accum", self.steps * accum_size, |_| BabyBearElem::INVALID);
-        self.compute_accum(&mix, &accum);
-
-        {
-            // Zero out 'invalid' entries in accum and io
-            let mut accum_slice = accum.as_slice_mut();
-            let mut io = self.io.as_slice_mut();
-            for value in accum_slice.iter_mut().chain(io.iter_mut()) {
-                *value = value.valid_or_zero();
-            }
-
-            // Add random noise to end of accum and change invalid element to zero
-            let mut rng = thread_rng();
-            for i in self.steps - ZK_CYCLES..self.steps {
-                for j in 0..accum_size {
-                    accum_slice[j * self.steps + i] = BabyBearElem::random(&mut rng);
-                }
-            }
+        Self {
+            steps,
+            ctrl,
+            data,
+            io,
         }
-
-        (mix, accum)
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn compute_accum(&mut self, mix: &CpuBuffer<BabyBearElem>, accum: &CpuBuffer<BabyBearElem>) {
-        let args = &[
-            self.ctrl.as_slice_sync(),
-            self.io.as_slice_sync(),
-            self.data.as_slice_sync(),
-            mix.as_slice_sync(),
-            accum.as_slice_sync(),
-        ];
-        let accum: Mutex<Accum<BabyBearExtElem>> = Mutex::new(Accum::new(self.steps));
-        tracing::info_span!("step_compute_accum").in_scope(|| {
-            // TODO: Add a way to be able to run this on cuda, metal, etc.
-            (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
-                || Handler::<BabyBear>::new(&accum),
-                |handler, cycle| {
-                    CIRCUIT
-                        .step_compute_accum(
-                            &CircuitStepContext {
-                                size: self.steps,
-                                cycle,
-                            },
-                            handler,
-                            args,
-                        )
-                        .unwrap();
-                },
-            );
-        });
-        tracing::info_span!("calc_prefix_products").in_scope(|| {
-            accum.lock().unwrap().calc_prefix_products();
-        });
-        tracing::info_span!("step_verify_accum").in_scope(|| {
-            (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
-                || Handler::<BabyBear>::new(&accum),
-                |handler, cycle| {
-                    CIRCUIT
-                        .step_verify_accum(
-                            &CircuitStepContext {
-                                size: self.steps,
-                                cycle,
-                            },
-                            handler,
-                            args,
-                        )
-                        .unwrap();
-                },
-            );
-        });
     }
 }

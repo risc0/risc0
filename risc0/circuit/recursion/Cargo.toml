@@ -19,16 +19,17 @@ tracing = { version = "0.1", default-features = false, features = [
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 bytemuck = "1.12"
 cust = { version = "0.3", optional = true }
-metal = { version = "0.27", optional = true }
+metal = { version = "0.28", optional = true }
+nvtx = { version = "1.3", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
-zip = { version = "0.6", default-features = false, optional = true, features = [
+risc0-sys = { workspace = true, optional = true }
+zip = { version = "1.2", default-features = false, optional = true, features = [
   "deflate",
 ] }
 
 [dev-dependencies]
-criterion = "0.5"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -46,6 +47,7 @@ cuda = [
   "dep:cust",
   "prove",
   "risc0-circuit-recursion-sys/cuda",
+  "risc0-sys?/cuda",
   "risc0-zkp/cuda",
   "std",
 ]
@@ -54,12 +56,15 @@ metal = [
   "dep:metal",
   "prove",
   "risc0-circuit-recursion-sys/metal",
+  "risc0-sys?/metal",
   "risc0-zkp/metal",
 ]
 prove = [
   "dep:downloader",
+  "dep:nvtx",
   "dep:rand",
   "dep:rayon",
+  "dep:risc0-sys",
   "dep:sha2",
   "dep:zip",
   "risc0-zkp/prove",

@@ -19,4 +19,3 @@
 #include "poseidon.cu"
 #include "poseidon2.cu"
 #include "sha.cu"
-#include "zk.cu"

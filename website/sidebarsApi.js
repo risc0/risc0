@@ -72,8 +72,18 @@ export default {
         },
         {
           type: "doc",
+          label: "Understanding I/O",
+          id: "zkvm/tutorials/io",
+        },
+        {
+          type: "doc",
           label: "Rust Resources",
           id: "zkvm/rust-resources",
+        },
+        {
+          type: "doc",
+          label: "Rust Crates that Use C++",
+          id: "zkvm/rust-crates-with-cpp",
         },
         {
           type: "link",
@@ -165,8 +175,23 @@ export default {
       items: [
         {
           type: "doc",
+          label: "Security Model",
+          id: "security-model",
+        },
+        {
+          type: "doc",
+          label: "Trusted Setup Security",
+          id: "trusted-setup-ceremony",
+        },
+        {
+          type: "doc",
           label: "zkVM technical specification",
           id: "zkvm/zkvm-specification",
+        },
+        {
+          type: "link",
+          label: "Awesome risc0",
+          href: "https://github.com/inversebrah/awesome-risc0",
         },
       ],
     },

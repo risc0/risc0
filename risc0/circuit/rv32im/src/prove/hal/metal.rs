@@ -12,43 +12,108 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
+use std::{collections::HashMap, ffi::c_void, rc::Rc};
 
-use metal::ComputePipelineDescriptor;
+use anyhow::{bail, Result};
+use metal::{ComputePipelineDescriptor, MTLResourceOptions, MTLResourceUsage};
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, RootsOfUnity,
 };
+use risc0_sys::CppError;
 use risc0_zkp::{
     core::log2_ceil,
+    field::Elem as _,
     hal::{
-        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHalSha256, MetalHash, MetalHashSha256},
-        CircuitHal,
+        metal::{
+            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
+            MetalHash,
+        },
+        Buffer as _, CircuitHal,
     },
-    INV_RATE,
+    INV_RATE, ZK_CYCLES,
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
+
+const KERNEL_NAMES: &[&str] = &["eval_check", "k_step_compute_accum", "k_step_verify_accum"];
 
 use crate::{
     prove::{engine::SegmentProverImpl, SegmentProver},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
+use super::{CircuitWitnessGenerator, StepMode};
+
 #[derive(Debug)]
 pub struct MetalCircuitHal<MH: MetalHash> {
     hal: Rc<MetalHal<MH>>,
-    kernel: ComputePipelineDescriptor,
+    kernels: HashMap<String, ComputePipelineDescriptor>,
 }
 
 impl<MH: MetalHash> MetalCircuitHal<MH> {
     pub fn new(hal: Rc<MetalHal<MH>>) -> Self {
         let library = hal.device.new_library_with_data(METAL_LIB).unwrap();
-        let function = library.get_function("eval_check", None).unwrap();
-        let kernel = ComputePipelineDescriptor::new();
-        kernel.set_compute_function(Some(&function));
-        Self { hal, kernel }
+        let mut kernels = HashMap::new();
+        for name in KERNEL_NAMES {
+            let function = library.get_function(name, None).unwrap();
+            let pipeline = ComputePipelineDescriptor::new();
+            pipeline.set_compute_function(Some(&function));
+            kernels.insert(name.to_string(), pipeline);
+        }
+        Self { hal, kernels }
     }
+}
+
+impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH> {
+    #[allow(unused)]
+    fn generate_witness(
+        &self,
+        mode: StepMode,
+        trace: &RawPreflightTrace,
+        steps: usize,
+        count: usize,
+        ctrl: &MetalBuffer<BabyBearElem>,
+        io: &MetalBuffer<BabyBearElem>,
+        data: &MetalBuffer<BabyBearElem>,
+    ) {
+        tracing::debug!("witgen: {steps}, {count}");
+
+        // TODO: call metal kernels for witgen.
+        // For now we use the CPU implementation.
+
+        extern "C" {
+            fn risc0_circuit_rv32im_cpu_witgen(
+                mode: u32,
+                trace: *const RawPreflightTrace,
+                steps: u32,
+                count: u32,
+                ctrl: *const BabyBearElem,
+                io: *const BabyBearElem,
+                data: *const BabyBearElem,
+            ) -> CppError;
+        }
+
+        unsafe {
+            risc0_circuit_rv32im_cpu_witgen(
+                mode as u32,
+                trace,
+                steps as u32,
+                count as u32,
+                ctrl.as_ptr() as *const BabyBearElem,
+                io.as_ptr() as *const BabyBearElem,
+                data.as_ptr() as *const BabyBearElem,
+            )
+            .unwrap();
+        }
+    }
+}
+
+#[repr(C)]
+struct AccumContext {
+    ram: *const c_void,
+    bytes: *const c_void,
 }
 
 impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
@@ -86,7 +151,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             self.hal.cmd_queue.clone(),
             &[domain as u32],
         );
-        let buffers = &[
+        let args = [
             check.as_arg(),
             groups[REGISTER_GROUP_CTRL].as_arg(),
             groups[REGISTER_GROUP_DATA].as_arg(),
@@ -98,15 +163,104 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             po2.as_arg(),
             size.as_arg(),
         ];
-        self.hal
-            .dispatch(&self.kernel, buffers, domain as u64, None);
+        let kernel = self.kernels.get("eval_check").unwrap();
+        self.hal.dispatch(kernel, &args, domain as u64, None);
+    }
+
+    #[tracing::instrument(skip_all)]
+    fn accumulate(
+        &self,
+        ctrl: &MetalBuffer<BabyBearElem>,
+        io: &MetalBuffer<BabyBearElem>,
+        data: &MetalBuffer<BabyBearElem>,
+        mix: &MetalBuffer<BabyBearElem>,
+        accum: &MetalBuffer<BabyBearElem>,
+        steps: usize,
+    ) {
+        let count = steps - ZK_CYCLES;
+
+        let ram = vec![BabyBearExtElem::ONE; steps];
+        let ram = MetalBuffer::copy_from("ram", &self.hal.device, self.hal.cmd_queue.clone(), &ram);
+
+        let bytes = vec![BabyBearExtElem::ONE; steps];
+        let bytes = MetalBuffer::copy_from(
+            "bytes",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &bytes,
+        );
+
+        let ctx = AccumContext {
+            ram: ram.as_device_ptr(),
+            bytes: bytes.as_device_ptr(),
+        };
+        let ctx_buffer = self.hal.device.new_buffer_with_data(
+            &ctx as *const AccumContext as *const c_void,
+            std::mem::size_of_val(&ctx) as u64,
+            MTLResourceOptions::StorageModeManaged,
+        );
+        let args = [
+            KernelArg::Buffer {
+                buffer: &ctx_buffer,
+                offset: 0,
+            },
+            KernelArg::Integer(steps as u32),
+            ctrl.as_arg(),
+            io.as_arg(),
+            data.as_arg(),
+            mix.as_arg(),
+            accum.as_arg(),
+        ];
+
+        tracing::info_span!("step_compute_accum").in_scope(|| {
+            let kernel = self.kernels.get("k_step_compute_accum").unwrap();
+
+            self.hal
+                .dispatch_with_resources(kernel, &args, count as u64, None, |cmd_encoder| {
+                    cmd_encoder.use_resource(&ram.as_buf(), MTLResourceUsage::Write);
+                    cmd_encoder.use_resource(&bytes.as_buf(), MTLResourceUsage::Write);
+                });
+        });
+
+        tracing::info_span!("prefix_products").in_scope(|| {
+            use risc0_zkp::hal::Hal as _;
+            self.hal.prefix_products(&ram);
+            self.hal.prefix_products(&bytes);
+        });
+
+        tracing::info_span!("step_verify_accum").in_scope(|| {
+            let kernel = self.kernels.get("k_step_verify_accum").unwrap();
+            self.hal
+                .dispatch_with_resources(kernel, &args, count as u64, None, |cmd_encoder| {
+                    cmd_encoder.use_resource(&ram.as_buf(), MTLResourceUsage::Read);
+                    cmd_encoder.use_resource(&bytes.as_buf(), MTLResourceUsage::Read);
+                });
+        });
+
+        tracing::info_span!("zeroize").in_scope(|| {
+            self.hal
+                .dispatch_by_name("eltwise_zeroize_fp", &[accum.as_arg()], accum.size() as u64);
+
+            self.hal
+                .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
+        });
     }
 }
 
-pub fn get_segment_prover() -> Box<dyn SegmentProver> {
-    let hal = Rc::new(MetalHalSha256::new());
-    let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
-    Box::new(SegmentProverImpl::new(hal, circuit_hal))
+pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
+    match hashfn {
+        "sha-256" => {
+            let hal = Rc::new(MetalHalSha256::new());
+            let circuit_hal = Rc::new(MetalCircuitHal::new(hal.clone()));
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+        }
+        "poseidon2" => {
+            let hal = Rc::new(MetalHalPoseidon2::new());
+            let circuit_hal = Rc::new(MetalCircuitHal::new(hal.clone()));
+            Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
+        }
+        _ => bail!("Unsupported hashfn: {hashfn}"),
+    }
 }
 
 #[cfg(test)]

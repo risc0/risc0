@@ -14,7 +14,6 @@
 
 use std::{fmt::Debug, marker::PhantomData, rc::Rc};
 
-use bytemuck::Pod;
 use risc0_core::field::Field;
 
 use super::{Buffer, CircuitHal, Hal};
@@ -57,7 +56,7 @@ where
 
 impl<T, L, R> Buffer<T> for BufferImpl<T, L, R>
 where
-    T: Clone + Debug + PartialEq + Pod,
+    T: Clone + Debug + PartialEq,
     L: Buffer<T>,
     R: Buffer<T>,
 {
@@ -78,6 +77,10 @@ where
         BufferImpl::new(lhs, rhs)
     }
 
+    fn get_at(&self, idx: usize) -> T {
+        self.lhs.get_at(idx)
+    }
+
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         self.lhs.view(f)
     }
@@ -87,6 +90,10 @@ where
         self.rhs.view_mut(|dst| {
             self.lhs.view(|src| dst.clone_from_slice(src));
         })
+    }
+
+    fn to_vec(&self) -> Vec<T> {
+        self.lhs.to_vec()
     }
 }
 
@@ -118,7 +125,7 @@ where
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
+    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.lhs.get_hash_suite()
@@ -288,6 +295,12 @@ where
         output.assert_eq();
     }
 
+    fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
+        self.lhs.eltwise_zeroize_elem(&elems.lhs);
+        self.rhs.eltwise_zeroize_elem(&elems.rhs);
+        elems.assert_eq();
+    }
+
     fn fri_fold(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -328,6 +341,21 @@ where
         self.rhs
             .gather_sample(&dst.rhs, &src.rhs, idx, size, stride);
         dst.assert_eq();
+    }
+
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        self.lhs.prefix_products(&io.lhs);
+        self.rhs.prefix_products(&io.rhs);
+        // io.assert_eq();
+
+        io.lhs.view(|lhs| {
+            io.rhs.view(|rhs| {
+                assert_eq!(lhs.len(), rhs.len());
+                for i in 0..lhs.len() {
+                    assert_eq!(lhs[i], rhs[i], "{i}");
+                }
+            });
+        })
     }
 }
 
@@ -399,5 +427,17 @@ where
             steps,
         );
         check.assert_eq();
+    }
+
+    fn accumulate(
+        &self,
+        _ctrl: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _io: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _data: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _mix: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _accum: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _steps: usize,
+    ) {
+        todo!()
     }
 }

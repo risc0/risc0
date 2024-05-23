@@ -25,7 +25,8 @@ use risc0_zkp::core::{
 
 use crate::seal_format::{IopType, K_SEAL_ELEMS, K_SEAL_TYPES, K_SEAL_WORDS};
 
-/// Convert a seal into a JSON format compatible with the `stark_verify` witness generator.
+/// Convert a recursion VM seal (i.e. succinct receipt) into a JSON format compatible with the
+/// `stark_verify` witness generator.
 pub fn to_json<R: Read, W: Write>(mut reader: R, mut writer: W) -> Result<()> {
     let mut iop = vec![0u32; K_SEAL_WORDS];
     reader.read_exact(bytemuck::cast_slice_mut(&mut iop))?;

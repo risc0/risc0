@@ -24,7 +24,7 @@ pub use paste::paste;
 
 #[macro_export]
 /// Defines a buffer in a circuit that could have layout information.  $ident
-/// should be the camelcase name of the buffer, and $elem sould be the type of
+/// should be the camelcase name of the buffer, and $elem should be the type of
 /// element in the buffer, e.g. BabyBearElem.  $elem must implement Debug, and
 /// must be comparable to $elem::ZERO.
 macro_rules! layout_buffer {

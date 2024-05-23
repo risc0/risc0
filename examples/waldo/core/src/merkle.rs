@@ -41,7 +41,7 @@ pub type Node = Digest;
 ///
 /// MerkleTree is a wrapper around the `merkle_light::merkle::MerkleTree`,
 /// created to integrate with the RISC0 SHA256 coprocessor, functionality to act
-/// as a vector oracle for the for the guest, and some convinience functions.
+/// as a vector oracle for the for the guest, and some convenient functions.
 pub struct MerkleTree<Element>
 where
     Element: Hashable<ShaHasher>,
@@ -352,7 +352,7 @@ mod test {
 
     #[test]
     fn algorithm_is_consistent_with_sha2() {
-        let test_string: &'static [u8] = "RISCO SHA hasher test string".as_bytes();
+        let test_string: &'static [u8] = "RISC0 SHA hasher test string".as_bytes();
         let mut hasher = ShaHasher::default();
         hasher.write(test_string);
         let node = hasher.hash();

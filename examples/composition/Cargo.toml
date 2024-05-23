@@ -7,7 +7,6 @@ edition = "2021"
 composition-example-methods = { path = "methods" }
 hello-world = { path = "../hello-world" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
-serde = "1.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

@@ -14,13 +14,20 @@
 
 //! Simple SHA-256 wrappers.
 
-#[cfg(not(target_os = "zkvm"))]
 pub mod cpu;
-#[cfg(not(target_os = "zkvm"))]
+pub mod guest;
 mod rng;
 pub mod rust_crypto;
 
-#[cfg(not(target_os = "zkvm"))]
+// Pick the appropriate implementation of SHA-256 depending on whether we are
+// in the zkVM guest.
+cfg_if::cfg_if! {
+    if #[cfg(target_os = "zkvm")] {
+        pub use crate::core::hash::sha::guest::Impl;
+    } else {
+        pub use crate::core::hash::sha::cpu::Impl;
+    }
+}
 use alloc::boxed::Box;
 use alloc::{format, vec::Vec};
 use core::{
@@ -85,7 +92,7 @@ pub trait Sha256 {
 
     /// Generate a hash from a pair of [Digest] using the SHA-256 compression
     /// function. Note that the result is not a standard-compliant hash of any
-    /// kwown preimage.
+    /// known preimage.
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
         Self::compress(&SHA256_INIT, a, b)
     }
@@ -111,10 +118,10 @@ pub trait Sha256 {
     fn compress_slice(state: &Digest, blocks: &[Block]) -> Self::DigestPtr;
 
     /// Generate a hash from a slice of anything that can be represented as
-    /// plain old data. Pads up to the SHA-256 block boundary, but does not
+    /// a slice of bytes. Pads up to the SHA-256 block boundary, but does not
     /// add the standard SHA-256 trailer and so is not a standards compliant
     /// hash.
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
+    fn hash_raw_data_slice<T: bytemuck::NoUninit>(data: &[T]) -> Self::DigestPtr;
 }
 
 /// Input block to the SHA-256 hashing algorithm. SHA-256 consumes blocks in
@@ -302,28 +309,24 @@ impl Debug for Block {
 }
 
 /// Wrap a Sha256 trait as a HashFn trait
-#[cfg(not(target_os = "zkvm"))]
 struct Sha256HashFn;
 
-#[cfg(not(target_os = "zkvm"))]
 impl<F: Field> super::HashFn<F> for Sha256HashFn {
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest> {
-        cpu::Impl::hash_pair(a, b)
+        (*Impl::hash_pair(a, b)).into()
     }
 
     fn hash_elem_slice(&self, slice: &[F::Elem]) -> Box<Digest> {
-        cpu::Impl::hash_raw_pod_slice(slice)
+        (*Impl::hash_raw_data_slice(slice)).into()
     }
 
     fn hash_ext_elem_slice(&self, slice: &[F::ExtElem]) -> Box<Digest> {
-        cpu::Impl::hash_raw_pod_slice(slice)
+        (*Impl::hash_raw_data_slice(slice)).into()
     }
 }
 
-#[cfg(not(target_os = "zkvm"))]
 struct Sha256RngFactory;
 
-#[cfg(not(target_os = "zkvm"))]
 impl<F: Field> super::RngFactory<F> for Sha256RngFactory {
     fn new_rng(&self) -> Box<dyn super::Rng<F>> {
         Box::new(rng::ShaRng::new())
@@ -335,7 +338,6 @@ pub struct Sha256HashSuite<F: Field> {
     phantom: PhantomData<F>,
 }
 
-#[cfg(not(target_os = "zkvm"))]
 impl<F: Field> Sha256HashSuite<F> {
     /// Construct a Sha256HashSuite
     pub fn new_suite() -> super::HashSuite<F> {
@@ -367,7 +369,7 @@ pub mod testutil {
     pub fn test_sha_impl<S: Sha256>() {
         test_hash_pair::<S>();
         test_rust_crypto_wrapper::<S>();
-        test_hash_raw_pod_slice::<S>();
+        test_hash_raw_data_slice::<S>();
         test_sha_basics::<S>();
         test_elems::<S>();
         test_extelems::<S>();
@@ -436,7 +438,7 @@ pub mod testutil {
 
     fn hash_elems<S: Sha256>(len: usize) -> Digest {
         let items: Vec<BabyBearElem> = (0..len as u32).map(BabyBearElem::new).collect();
-        *S::hash_raw_pod_slice(items.as_slice())
+        *S::hash_raw_data_slice(items.as_slice())
     }
 
     fn hash_extelems<S: Sha256>(len: usize) -> Digest {
@@ -450,7 +452,7 @@ pub mod testutil {
                 )
             })
             .collect();
-        *S::hash_raw_pod_slice(items.as_slice())
+        *S::hash_raw_data_slice(items.as_slice())
     }
 
     fn test_elems<S: Sha256>() {
@@ -491,11 +493,11 @@ pub mod testutil {
         assert_eq!(expected, actual);
     }
 
-    fn test_hash_raw_pod_slice<S: Sha256>() {
+    fn test_hash_raw_data_slice<S: Sha256>() {
         {
             let items: &[u32] = &[1];
             assert_eq!(
-                *S::hash_raw_pod_slice(items),
+                *S::hash_raw_data_slice(items),
                 Digest::from_hex(
                     "e3050856aac389661ae490656ad0ea57df6aff0ff6eef306f8cc2eed4f240249"
                 )
@@ -505,7 +507,7 @@ pub mod testutil {
         {
             let items: &[u32] = &[1, 2];
             assert_eq!(
-                *S::hash_raw_pod_slice(items),
+                *S::hash_raw_data_slice(items),
                 Digest::from_hex(
                     "4138ebae12299733cc677d1150c2a0139454662fc76ec95da75d2bf9efddc57a"
                 )
@@ -515,7 +517,7 @@ pub mod testutil {
         {
             let items: &[u32] = &[0xffffffff];
             assert_eq!(
-                *S::hash_raw_pod_slice(items),
+                *S::hash_raw_data_slice(items),
                 Digest::from_hex(
                     "a3dba037d56175209dfd4191f727e91c5feb67e65a6ab5ed4daf0893c89598c8"
                 )

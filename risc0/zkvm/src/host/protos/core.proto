@@ -2,31 +2,34 @@ syntax = "proto3";
 
 import "base.proto";
 
-package protos.core;
+package core;
 
-message MemoryImage {
-  protos.base.CompatVersion version = 1;
-  PageTableInfo info = 2;
-  uint32 pc = 3;
-  repeated PageEntry pages = 4;
+message ProveInfo {
+  Receipt receipt = 1;
+  SessionStats stats = 2;
 }
 
-message PageEntry {
-  uint32 addr = 1;
-  bytes data = 2;
-}
-
-message PageTableInfo {
-  uint32 page_size = 1;
-  uint32 page_table_addr = 2;
+message SessionStats {
+  uint64 segments = 1;
+  uint64 total_cycles = 2;
+  uint64 user_cycles = 3;
 }
 
 message Receipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   InnerReceipt inner = 2;
   bytes journal = 3;
+  ReceiptMetadata metadata = 4;
 }
 
+message ReceiptMetadata {
+  base.Digest verifier_parameters = 1;
+}
+
+// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
+// In Rust, they are distinct types becaue Rust needs to size everything on the
+// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
+// have different sizes. Protobuf handles this without issue.
 message InnerReceipt {
   oneof kind {
     CompositeReceipt composite = 1;
@@ -38,36 +41,46 @@ message InnerReceipt {
 
 message CompositeReceipt {
   repeated SegmentReceipt segments = 1;
-  repeated InnerReceipt assumptions = 2;
-  Digest journal_digest = 3;
+  repeated InnerReceipt assumption_receipts = 2;
+  base.Digest verifier_parameters = 3;
 }
 
 message SegmentReceipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   bytes seal = 2;
   uint32 index = 3;
   string hashfn = 4;
   ReceiptClaim claim = 5;
+  base.Digest verifier_parameters = 6;
 }
 
 message SuccinctReceipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   bytes seal = 2;
-  Digest control_id = 3;
-  ReceiptClaim claim = 4;
+  base.Digest control_id = 3;
+  MaybePruned claim = 4; // MaybePruned<ReceiptClaim>
+  MerkleProof control_inclusion_proof = 5;
+  string hashfn = 6;
+  base.Digest verifier_parameters = 7;
+}
+
+message MerkleProof {
+  uint32 index = 1;
+  repeated base.Digest digests = 2;
 }
 
 message Groth16Receipt {
-  protos.base.CompatVersion version = 1;
+  base.CompatVersion version = 1;
   bytes seal = 2;
-  ReceiptClaim claim = 3;
+  MaybePruned claim = 3; // MaybePruned<ReceiptClaim>
+  base.Digest verifier_parameters = 4;
 }
 
 message ReceiptClaim {
   MaybePruned pre = 1;  // MaybePruned<SystemState>
   MaybePruned post = 2; // MaybePruned<SystemState>
-  protos.base.ExitCode exit_code = 3;
-  Digest input = 4;
+  base.ExitCode exit_code = 3;
+  MaybePruned input = 4;  // Option<MaybePruned<Input>>
   MaybePruned output = 5; // Option<MaybePruned<Output>>
 }
 
@@ -75,28 +88,31 @@ message MaybePruned {
   oneof kind {
     // Protobuf encoded bytes of the inner value.
     bytes value = 1;
-    Digest pruned = 2;
+    base.Digest pruned = 2;
   }
 }
 
 message SystemState {
   uint32 pc = 1;
-  Digest merkle_root = 2;
+  base.Digest merkle_root = 2;
 }
+
+message Input {}
 
 message Output {
   MaybePruned journal = 1;     // MaybePruned<bytes>
   MaybePruned assumptions = 2; // MaybePruned<Assumptions>
 }
 
+message Assumption {
+  base.Digest claim = 1;
+  base.Digest control_root = 2;
+}
+
 message Assumptions {
-  repeated MaybePruned inner = 1; // MaybePruned<ReceiptClaim>
+  repeated MaybePruned inner = 1; // MaybePruned<Assumption>
 }
 
 message FakeReceipt {
-  ReceiptClaim claim = 1;
-}
-
-message Digest {
-  repeated uint32 words = 1;
+  MaybePruned claim = 1; // MaybePruned<ReceiptClaim>
 }

@@ -1,0 +1,126 @@
+name: Benchmark Reports
+
+on:
+  schedule:
+    - cron: '0 7 * * *' # Nightly (ish) Pacific
+
+  workflow_dispatch:
+
+  # uncomment for only for testing changes to this workflow while in a PR
+  # pull_request:
+  #   branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  RISC0_BUILD_LOCKED: 1
+  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+
+jobs:
+  bench:
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [prove]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_3090_ti
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+
+    env:
+      FEATURE: ${{ matrix.feature }}
+      EXTRA: ""
+
+    steps:
+      - uses: actions/checkout@v4
+      - if: matrix.feature == 'cuda'
+        uses: ./.github/actions/cuda
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+
+      - name: Save commit hash to a file
+        run: |
+          echo "${{ github.sha }}" > benchmarks/COMMIT_HASH.txt
+          echo "${{ github.sha }}" > risc0/zkvm/COMMIT_HASH.txt
+
+      - run: cargo run --release -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.csv
+        working-directory: benchmarks
+
+      - name: Upload benchmarks
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-result-${{ matrix.os }}-${{ matrix.device }}
+          path: |
+            benchmarks/COMMIT_HASH.txt
+            benchmarks/${{ matrix.os }}-${{ matrix.device }}.csv
+
+      - if: matrix.feature == 'cuda'
+        run: echo "EXTRA=-F docker" >> $GITHUB_ENV
+
+      - name: Generate datasheet
+        run: cargo run --release -F $FEATURE $EXTRA --example datasheet -- --json risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
+
+      - name: Upload datasheet
+        uses: actions/upload-artifact@v4
+        with:
+          name: datasheet-result-${{ matrix.os }}-${{ matrix.device }}
+          path: |
+            risc0/zkvm/COMMIT_HASH.txt
+            risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
+
+  publish:
+    needs: bench
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages repository branch ${{ github.base_ref || github.ref_name }}
+        uses: actions/checkout@v4
+        with:
+          repository: risc0/ghpages
+          token: ${{ secrets.BENCHMARK_TOKEN }}
+          ref: ${{ github.base_ref || github.ref_name }}
+
+      - name: Download benchmarks
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-result-*
+          path: dev/benchmarks
+          merge-multiple: true
+
+      - name: Download datasheet
+        uses: actions/download-artifact@v4
+        with:
+          pattern: datasheet-result-*
+          path: dev/datasheet
+          merge-multiple: true
+
+      - name: Push results
+        run: |
+          git config user.name "r0-ghbot"
+          git config user.email "r0-ghbot@users.noreply.github.com"
+          git add --all
+          if git diff --cached --exit-code; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add build artifacts"
+            git push
+          fi

@@ -19,7 +19,10 @@
 
 extern crate alloc;
 
-use alloc::{format, vec};
+use alloc::{
+    alloc::{alloc_zeroed, Layout},
+    format, vec,
+};
 use core::arch::asm;
 
 use getrandom::getrandom;
@@ -27,9 +30,9 @@ use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::{Digest, Sha256},
-    ReceiptClaim,
+    Assumption, ReceiptClaim,
 };
-use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
+use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
 use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
@@ -104,7 +107,7 @@ fn main() {
         MultiTestSpec::Halt(exit_code) => {
             env::exit(exit_code);
         }
-        MultiTestSpec::PauseContinue(exit_code) => {
+        MultiTestSpec::PauseResume(exit_code) => {
             env::log("before");
             env::pause(exit_code);
             env::log("after");
@@ -143,6 +146,12 @@ fn main() {
                 input_len = input.len();
             }
         }
+        MultiTestSpec::SyscallWords => {
+            let input: &[u64] = &[0x0102030405060708];
+
+            let host_data = env::send_recv_slice::<u64, u32>(SYS_MULTI_TEST_WORDS, &input);
+            assert_eq!(host_data, &[0x05060708, 0x01020304]);
+        }
         MultiTestSpec::DoRandom => {
             // Test random number generation in the zkvm
             // Test for a combination of lengths and data alignments to make sure all cases
@@ -161,17 +170,21 @@ fn main() {
                 }
             }
         }
+        MultiTestSpec::SysInput(digest) => {
+            assert_eq!(env::input_digest(), digest);
+        }
         MultiTestSpec::SysRead {
             mut buf,
             fd,
             pos_and_len,
         } => {
+            let mut num_read = alloc::vec::Vec::with_capacity(pos_and_len.len());
             for (pos, len) in pos_and_len {
-                let num_read =
-                    unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
-                assert_eq!(num_read, len as usize);
+                let n = unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
+                num_read.push(n);
+                assert!(n <= len as usize);
             }
-            env::commit(&buf);
+            env::commit(&(buf, num_read));
         }
         MultiTestSpec::SysVerify(pairs) => {
             for (image_id, journal) in pairs.into_iter() {
@@ -180,7 +193,12 @@ fn main() {
         }
         MultiTestSpec::SysVerifyIntegrity { claim_words } => {
             let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
-            env::verify_integrity(&claim).unwrap();
+            // NOTE: This panic string is used in a test.
+            env::verify_integrity(&claim).expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::SysVerifyAssumption { assumption_words } => {
+            let assumption: Assumption = risc0_zkvm::serde::from_slice(&assumption_words).unwrap();
+            env::verify_assumption(assumption.claim, assumption.control_root).unwrap();
         }
         MultiTestSpec::Echo { bytes } => {
             env::commit_slice(&bytes);
@@ -209,7 +227,7 @@ fn main() {
             env::log("Busy loop starting!");
             let mut tot_cycles = last_cycles;
 
-            while tot_cycles < cycles as usize {
+            while tot_cycles < cycles {
                 let now_cycles = env::cycle_count();
                 if now_cycles <= last_cycles {
                     // Cycle count may have reset or wrapped around.
@@ -310,6 +328,20 @@ fn main() {
             let a = &AlignTest1::new(54) as *const _;
             let b = &AlignTest1::new(60) as *const _;
             assert_eq!(PAGE_SIZE, b as usize - a as usize);
+        }
+        MultiTestSpec::AllocZeroed => {
+            // Bump allocator was modified to not manually zero memory in the zkVM. Simple test to
+            // ensure that zkVM memory is zeroed in initialization.
+            let array: &[u32; 512] = unsafe {
+                // Allocate some arbitrary amount of bytes
+                let layout = Layout::new::<[u32; 512]>();
+                let ptr = alloc_zeroed(layout);
+
+                &*(ptr as *const [u32; 512])
+            };
+            for value in array {
+                assert_eq!(*value, 0);
+            }
         }
     }
 }

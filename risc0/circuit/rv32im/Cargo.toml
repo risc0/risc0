@@ -7,10 +7,6 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[[bench]]
-name = "eval_check"
-harness = false
-
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 risc0-binfmt = { workspace = true }
@@ -33,14 +29,15 @@ crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
 derive-debug = { version = "0.1", optional = true }
 lazy-regex = { version = "3.1", optional = true }
+nvtx = { version = "1.3", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-metal = { version = "0.27", optional = true }
+metal = { version = "0.28", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+risc0-sys = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false, optional = true }
 
 [dev-dependencies]
-criterion = "0.5"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
@@ -48,6 +45,7 @@ cuda = [
   "dep:cust",
   "prove",
   "risc0-circuit-rv32im-sys/cuda",
+  "risc0-sys?/cuda",
   "risc0-zkp/cuda",
   "std",
 ]
@@ -56,6 +54,7 @@ metal = [
   "dep:metal",
   "prove",
   "risc0-circuit-rv32im-sys/metal",
+  "risc0-sys?/metal",
   "risc0-zkp/metal",
 ]
 prove = [
@@ -65,8 +64,10 @@ prove = [
   "dep:crypto-bigint",
   "dep:derive-debug",
   "dep:lazy-regex",
+  "dep:nvtx",
   "dep:rand",
   "dep:rayon",
+  "dep:risc0-sys",
   "dep:sha2",
   "risc0-zkp/prove",
   "risc0-circuit-rv32im-sys",

@@ -24,12 +24,9 @@ use super::{
 };
 use crate::{
     get_version,
-    host::{
-        api::SegmentInfo,
-        client::prove::get_r0vm_path,
-        receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
-    },
-    ExecutorEnv, Journal, ProverOpts, Receipt,
+    host::{api::SegmentInfo, client::prove::get_r0vm_path},
+    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -68,14 +65,19 @@ impl Client {
     }
 
     /// Prove the specified ELF binary.
-    pub fn prove(&self, env: &ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Result<Receipt> {
+    pub fn prove(
+        &self,
+        env: &ExecutorEnv<'_>,
+        opts: &ProverOpts,
+        binary: Asset,
+    ) -> Result<ProveInfo> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Prove(
                 pb::api::ProveRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     receipt_out: Some(pb::api::AssetRequest {
                         kind: Some(pb::api::asset_request::Kind::Inline(())),
                     }),
@@ -91,9 +93,9 @@ impl Client {
             bail!("Child finished with: {code}");
         }
 
-        let receipt_bytes = asset.as_bytes()?;
-        let receipt_pb = pb::core::Receipt::decode(receipt_bytes)?;
-        receipt_pb.try_into()
+        let prove_info_bytes = asset.as_bytes()?;
+        let prove_info_pb = pb::core::ProveInfo::decode(prove_info_bytes)?;
+        prove_info_pb.try_into()
     }
 
     /// Execute the specified ELF binary.
@@ -133,7 +135,7 @@ impl Client {
     /// Prove the specified segment.
     pub fn prove_segment(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         segment: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SegmentReceipt> {
@@ -142,7 +144,7 @@ impl Client {
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::ProveSegment(
                 pb::api::ProveSegmentRequest {
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     segment: Some(segment.try_into()?),
                     receipt_out: Some(receipt_out.try_into()?),
                 },
@@ -178,15 +180,15 @@ impl Client {
     /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
     pub fn lift(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Lift(pb::api::LiftRequest {
-                opts: Some(opts.into()),
+                opts: Some(opts.clone().into()),
                 receipt: Some(receipt.try_into()?),
                 receipt_out: Some(receipt_out.try_into()?),
             })),
@@ -219,16 +221,16 @@ impl Client {
     /// the same session can be compressed into a single receipt for the entire session.
     pub fn join(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         left_receipt: Asset,
         right_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Join(pb::api::JoinRequest {
-                opts: Some(opts.into()),
+                opts: Some(opts.clone().into()),
                 left_receipt: Some(left_receipt.try_into()?),
                 right_receipt: Some(right_receipt.try_into()?),
                 receipt_out: Some(receipt_out.try_into()?),
@@ -264,17 +266,17 @@ impl Client {
     /// unconditional receipt.
     pub fn resolve(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         conditional_receipt: Asset,
         assumption_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Resolve(
                 pb::api::ResolveRequest {
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     conditional_receipt: Some(conditional_receipt.try_into()?),
                     assumption_receipt: Some(assumption_receipt.try_into()?),
                     receipt_out: Some(receipt_out.try_into()?),
@@ -307,19 +309,19 @@ impl Client {
     ///
     /// The identity_p254 program is used as the last step in the prover pipeline before running the
     /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
-    /// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
+    /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
     pub fn identity_p254(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
-            kind: Some(pb::api::server_request::Kind::IdentiyP254(
+            kind: Some(pb::api::server_request::Kind::IdentityP254(
                 pb::api::IdentityP254Request {
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     receipt: Some(receipt.try_into()?),
                     receipt_out: Some(receipt_out.try_into()?),
                 },
@@ -337,6 +339,50 @@ impl Client {
                 receipt_pb.try_into()
             }
             pb::api::identity_p254_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
+    ///
+    /// The identity_p254 program is used as the last step in the prover pipeline before running the
+    /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
+    /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
+    pub fn compress(
+        &self,
+        opts: &ProverOpts,
+        receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<Receipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Compress(
+                pb::api::CompressRequest {
+                    opts: Some(opts.clone().into()),
+                    receipt: Some(receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::CompressReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::compress_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::Receipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::compress_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -409,20 +455,20 @@ impl Client {
                 .iter()
                 .map(|a| {
                     Ok(match a {
-                        Assumption::Proven(receipt) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Proven(
+                        AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
-                                    pb::core::Receipt::from(receipt.clone())
+                                    pb::core::InnerReceipt::from(inner.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )
                                 .try_into()?,
                             )),
                         },
-                        Assumption::Unresolved(claim) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Unresolved(
+                        AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::MaybePruned::from(claim.clone())
+                                    pb::core::Assumption::from(assumption.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )
@@ -432,6 +478,11 @@ impl Client {
                     })
                 })
                 .collect::<Result<_>>()?,
+            segment_path: env
+                .segment_path
+                .as_ref()
+                .map(|x| x.path().to_string_lossy().into())
+                .unwrap_or_default(),
         })
     }
 
@@ -525,7 +576,7 @@ impl Client {
                             return Err(anyhow!("Illegal client callback"))
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
-                            return done.receipt.ok_or(malformed_err())
+                            return done.prove_info.ok_or(malformed_err())
                         }
                     }
                 }

@@ -33,7 +33,7 @@ pub struct MerkleTreeProver<H: Hal> {
     // A heap style array where node N has children 2*N and 2*N+1.  The size of
     // this buffer is (1 << (layers + 1)) and begins at offset 1 (zero is unused
     // to make indexing nicer).
-    nodes: Vec<Digest>,
+    nodes: H::Buffer<Digest>,
 
     // The root value
     root: Digest,
@@ -64,33 +64,34 @@ impl<H: Hal> MerkleTreeProver<H> {
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
         let nodes = hal.alloc_digest("nodes", rows * 2);
-        // SHA-256 hash each column
+        // hash each column
         hal.hash_rows(&nodes.slice(rows, rows), matrix);
-        // For each layer, sha up the layer below
+        // For each layer, hash up the layer below
         tracing::info_span!("hash_fold").in_scope(|| {
             for i in (0..params.layers).rev() {
                 let layer_size = 1 << i;
                 hal.hash_fold(&nodes, layer_size * 2, layer_size);
             }
         });
-        let mut nodes_host = Vec::with_capacity(nodes.size());
-        nodes.view(|view| {
-            nodes_host.extend_from_slice(view);
-        });
-        let root = nodes_host[1];
+        let root = nodes.get_at(1);
         MerkleTreeProver {
             params,
             matrix: matrix.clone(),
-            nodes: nodes_host,
+            nodes,
             root,
         }
     }
 
     /// Write the 'top' of the merkle tree and commit to the root.
     pub fn commit(&self, iop: &mut WriteIOP<H::Field>) {
+        nvtx::range_push!("commit");
         let top_size = self.params.top_size;
-        iop.write_pod_slice(&self.nodes[top_size..top_size * 2]);
+        let slice = self.nodes.slice(top_size, top_size);
+        slice.view(|view| {
+            iop.write_pod_slice(view);
+        });
         iop.commit(self.root());
+        nvtx::range_pop!();
     }
 
     /// Get the root digest of the tree.
@@ -135,7 +136,8 @@ impl<H: Hal> MerkleTreeProver<H> {
             let low_bit = idx % 2;
             idx /= 2;
             let other_idx = 2 * idx + (1 - low_bit);
-            iop.write_pod_slice(&[self.nodes[other_idx]]);
+            let other = self.nodes.get_at(other_idx);
+            iop.write_pod_slice(&[other]);
         }
         out
     }

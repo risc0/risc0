@@ -12,58 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, path::Path};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    println!(
+        "cargo:cxx_root={}",
+        manifest_dir.join("cxx").to_string_lossy()
+    );
+
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
+        println!(
+            "cargo:cuda_root={}",
+            manifest_dir.join("kernels/zkp/cuda").to_string_lossy()
+        );
         build_cuda_kernels();
     }
 
     if env::var("CARGO_FEATURE_METAL").is_ok() {
+        println!(
+            "cargo:metal_root={}",
+            manifest_dir.join("kernels/zkp/metal").to_string_lossy()
+        );
         build_metal_kernels();
     }
 }
 
 fn build_cuda_kernels() {
-    const CUDA_KERNELS: &[(&str, &str, &[&str])] = &[(
-        "zkp",
-        "all.cu",
-        &[
-            "eltwise.cu",
-            "fri.cu",
-            "mix.cu",
-            "ntt.cu",
-            "poseidon.cu",
-            "poseidon2.cu",
-            "sha.cu",
-            "zk.cu",
-            "sha256.h",
-        ],
-    )];
-
-    let inc_path = Path::new("kernels/zkp/cuda");
-    for (name, src, deps) in CUDA_KERNELS {
-        let dir = Path::new("kernels").join(name).join("cuda");
-        let dep_paths = deps.iter().map(|x| dir.join(x));
-        let out = format!("cuda_kernels_{name}");
-        KernelBuild::new(KernelType::Cuda)
-            .file(dir.join(src))
-            .include(inc_path)
-            .deps(dep_paths)
-            .compile(&out);
-    }
-
-    // This is a workaround for compilation errors when compiling with clang++.
-    std::env::set_var("CXX", "g++");
-
-    cc::Build::new()
-        .cuda(true)
-        .define("FEATURE_BABY_BEAR", None)
-        .file("kernels/zkp/cuda/supra_ntt_api.cu")
+    KernelBuild::new(KernelType::Cuda)
+        .files([
+            "kernels/zkp/cuda/all.cu",
+            "kernels/zkp/cuda/ffi.cu",
+            "kernels/zkp/cuda/supra_ntt_api.cu",
+        ])
+        .deps([
+            "kernels/zkp/cuda/cuda.h",
+            "kernels/zkp/cuda/eltwise.cu",
+            "kernels/zkp/cuda/fp.h",
+            "kernels/zkp/cuda/fpext.h",
+            "kernels/zkp/cuda/fri.cu",
+            "kernels/zkp/cuda/kernels.h",
+            "kernels/zkp/cuda/mix.cu",
+            "kernels/zkp/cuda/ntt.cu",
+            "kernels/zkp/cuda/poseidon.cu",
+            "kernels/zkp/cuda/poseidon2.cu",
+            "kernels/zkp/cuda/sha.cu",
+            "kernels/zkp/cuda/sha256.h",
+        ])
+        .flag("-DFEATURE_BABY_BEAR")
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
-        .compile("supra_ntt");
+        .compile("risc0_zkp_cuda");
 }
 
 fn build_metal_kernels() {

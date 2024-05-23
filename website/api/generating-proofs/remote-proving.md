@@ -10,12 +10,12 @@ If you already have an API key, you can request proofs from Bonsai in any of the
 
 - via **[cargo risczero][external-cargo-risczero]** (great for experimenting or for non-blockchain applications)
   - Enable Bonsai by setting the environment variables `BONSAI_API_KEY=<YOUR_API_KEY>` and `BONSAI_API_URL=<BONSAI_URL>` when running your program
-- via the **[Bonsai Foundry Template][external-foundry-template]** (for accessing Bonsai via Ethereum)
+- via the **[RISC Zero Foundry Template][external-foundry-template]** (for integrating with Ethereum)
 - via the **[Bonsai SDK][external-bonsai-sdk]** (for accessing Bonsai from Rust)
 - via the **[Bonsai REST API][external-bonsai-rest-api]** (for building your own client or accessing Bonsai directly)
 
 If you don't have an API key, you can [request access][external-bonsai-apply].
-While you wait, you can make use of the local proving option on the [Bonsai Foundry Template][external-foundry-template], or you can focus on developing for the [zkVM][docs-zkvm].
+While you wait, you can make use of the local proving option on the [RISC Zero Foundry Template][external-foundry-template], or you can focus on developing for the [zkVM][docs-zkvm].
 
 ## API Limits
 
@@ -46,8 +46,8 @@ You can log the cycle count and other performance info for your zkVM Guest progr
 [external-bonsai-rest-api]: https://api.bonsai.xyz/swagger-ui/
 [external-bonsai-sdk]: https://crates.io/crates/bonsai-sdk
 [external-cargo-risczero]: https://crates.io/crates/cargo-risczero
-[external-foundry-template]: https://github.com/risc0/bonsai-foundry-template/blob/main/README.md
-[external-governance-showcase]: https://github.com/risc0/risc0/tree/main/bonsai/examples/governance#readme
+[external-foundry-template]: https://github.com/risc0/risc0-foundry-template/blob/main/README.md
+[external-governance-showcase]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance#readme
 [external-zeth]: https://www.risczero.com/news/zeth-release
 [external-zkcoprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
 [term-cycles]: /terminology#clock-cycles

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# Adapted from https://github.com/foundry-rs/foundry/blob/master/foundryup/install
+
+set -eo pipefail
+
+clear
+
+echo "💾 Installing rzup"
+
+BASE_DIR=${XDG_CONFIG_HOME:-$HOME}
+RISC0_DIR=${RISC0_DIR-"$BASE_DIR/.risc0"}
+RISC0_BIN_DIR="$RISC0_DIR/bin"
+
+# TODO: Replace this friendly redirect URL once set up
+BIN_URL="https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/rzup"
+BIN_PATH="$RISC0_BIN_DIR/rzup"
+
+command -v curl >/dev/null 2>&1 || { echo >&2 "curl is required but it's not installed. Aborting."; exit 1; }
+
+# Create the .rzup bin directory and rzup binary if it doesn't exist.
+mkdir -p $RISC0_BIN_DIR
+curl -# -L $BIN_URL -o $BIN_PATH
+chmod +x $BIN_PATH
+
+detect_shell() {
+    case $SHELL in
+    */zsh) PROFILE="${ZDOTDIR:-"$HOME"}/.zshenv"; PREF_SHELL='zsh' ;;
+    */bash) PROFILE="$HOME/.bashrc"; PREF_SHELL='bash' ;;
+    */fish) PROFILE="$HOME/.config/fish/config.fish"; PREF_SHELL='fish' ;;
+    */ash) PROFILE="$HOME/.profile"; PREF_SHELL='ash' ;;
+    *) echo "Could not detect shell, manually add ${RISC0_BIN_DIR} to your PATH." && exit 1 ;;
+    esac
+}
+
+detect_shell
+echo "✅ Detected your preferred shell as ${PREF_SHELL}"
+
+# add rzup to PATH if it isn't already present
+if [[ ":$PATH:" != *":${RISC0_BIN_DIR}:"* ]]; then
+    echo "➕Adding rzup to PATH in ${PROFILE}"
+    {
+        echo
+        echo "export PATH=\"\$PATH:$RISC0_BIN_DIR\""
+    } >> "$PROFILE"
+else
+    echo "✅ rzup found in PATH"
+fi
+
+echo "🎉 rzup installed!"
+echo
+echo "▶️ Run the following commands to install the zkVM:"
+echo
+echo "source ${PROFILE}"
+echo "rzup"
+echo

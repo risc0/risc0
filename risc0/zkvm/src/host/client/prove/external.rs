@@ -18,8 +18,8 @@ use anyhow::{ensure, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    compute_image_id, host::api::AssetRequest, sha::Digestible, ApiClient, Asset, ExecutorEnv,
-    Receipt, SessionInfo, VerifierContext,
+    compute_image_id, host::api::AssetRequest, is_dev_mode, ApiClient, Asset, ExecutorEnv,
+    InnerReceipt, ProveInfo, Receipt, ReceiptKind, SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -46,30 +46,48 @@ impl Prover for ExternalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
         let image_id = compute_image_id(elf)?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
-        let receipt = client.prove(&env, opts.clone(), binary)?;
+        let prove_info = client.prove(&env, opts, binary)?;
         if opts.prove_guest_errors {
-            receipt.verify_integrity_with_context(ctx)?;
-            ensure!(
-                receipt.get_claim()?.pre.digest() == image_id,
-                "received unexpected image ID: expected {}, found {}",
-                hex::encode(image_id),
-                hex::encode(receipt.get_claim()?.pre.digest())
-            );
+            prove_info.receipt.verify_integrity_with_context(ctx)?;
         } else {
-            receipt.verify_with_context(ctx, image_id)?;
+            prove_info.receipt.verify_with_context(ctx, image_id)?;
         }
 
-        Ok(receipt)
+        Ok(prove_info)
     }
 
     fn get_name(&self) -> String {
         self.name.clone()
+    }
+
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match (&receipt.inner, opts.receipt_kind) {
+            // Compression is a no-op when the requested kind is at least as large as the current.
+            (InnerReceipt::Composite(_), ReceiptKind::Composite)
+            | (InnerReceipt::Succinct(_), ReceiptKind::Composite | ReceiptKind::Succinct)
+            | (
+                InnerReceipt::Compact(_),
+                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Compact,
+            ) => Ok(receipt.clone()),
+            // Compression is always a no-op in dev mode
+            (InnerReceipt::Fake { .. }, _) => {
+                ensure!(
+                    is_dev_mode(),
+                    "dev mode must be enabled to compress fake receipts"
+                );
+                Ok(receipt.clone())
+            }
+            (_, _) => {
+                let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+                client.compress(opts, receipt.clone().try_into()?, AssetRequest::Inline)
+            }
+        }
     }
 }
 

@@ -19,7 +19,7 @@ ecosystem, the zkVM has made it possible for developers to quickly build
 meaningful ZK applications, with no background in advanced mathematics or
 cryptography.
 
-We've built a number of applications and primitives showcasing these capabilies, including:
+We've built a number of applications and primitives showcasing these capabilities, including:
 
 - **[Zeth]**: prove the correct construction of an entire Ethereum block or an entire Optimism block
 - **[Bonsai Pay]**: send Ethereum to someone's gmail address
@@ -50,7 +50,7 @@ Check out our [Getting Started] page.
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
-[crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
+[crate-validation]: https://reports.risczero.com/crates-validation
 [ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/main/examples/json

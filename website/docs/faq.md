@@ -110,7 +110,7 @@ fn compute_image_id(used_elf_pages, page_size, page_table_addr, pc) -> ImageID
 
 Note: Only the loaded parts of the application binary, `used_elf_pages,` are utilized to calculate the ImageID. Consequently, the hashing does not include elements of a compiled binary that do not affect program meaning, e.g., debug information and timestamps.
 
-As a consequence, _functionally equivilant_ binaries, from the zkVM perspective, will result in identical ImageIDs. However, the compiled binaries (ELFs) may be bitwise different if hashed directly from disk. _This does not affect the zkVM security model._
+As a consequence, _functionally equivalent_ binaries, from the zkVM perspective, will result in identical ImageIDs. However, the compiled binaries (ELFs) may be bitwise different if hashed directly from disk. _This does not affect the zkVM security model._
 
 </details>
 <br/>
@@ -123,7 +123,7 @@ As a consequence, _functionally equivilant_ binaries, from the zkVM perspective,
 <summary>
 Q: Are performance benchmarks available?
 </summary>
-A: Yes. We have a <a href="https://dev.risczero.com/datasheet.pdf">datasheet</a> with performance benchmarks, and you can also generate your own benchmarks. More details are available on the <a href="https://dev.risczero.com/zkvm/benchmarks">benchmarks page</a>.
+A: Yes. We have a <a href="https://benchmarks.risczero.com/">benchmarks website</a>, and you can also generate your own benchmarks. More details are available on the <a href="https://dev.risczero.com/zkvm/benchmarks">benchmarks page</a>.
 </details>
 
 <a class="anchor" id="language-support"></a>
@@ -155,7 +155,7 @@ So far, we've made proofs for executions that exceed 4 billion cycles, and there
 Q: I have a specific Rust crate I'd like to use. Will it work inside the zkVM?
 </summary>
 A: Each night, we check the top 1000 Rust crates for zkVM compatibility.
-You can see the results <a href="https://risc0.github.io/ghpages/dev/crate-validation/index.html"> here</a>.
+You can see the results <a href="https://reports.risczero.com/crates-validation"> here</a>.
 As of this writing, 71% of the top 1000 Rust crates work inside the zkVM. <br/>
 <br/>
 If the crate you'd like to use isn't working, there may be a workaround <a href="https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22">here</a>.

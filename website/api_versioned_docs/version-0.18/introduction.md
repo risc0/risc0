@@ -85,7 +85,7 @@ The zkVM has GPU acceleration for CUDA and Metal, and with [continuations] we've
 
 Given the ease of development and the performance, the zkVM is the clear choice for your ZK needs.
 
-[top 1000 Rust crates]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
+[top 1000 Rust crates]: https://reports.risczero.com/crates-validation
 [performance]: https://dev.risczero.com/zkvm/benchmarks
 [continuations]: https://risczero.com/news/continuations
 

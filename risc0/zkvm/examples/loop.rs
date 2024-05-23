@@ -16,6 +16,7 @@ use std::{process::Command, rc::Rc, time::Instant};
 
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
+use risc0_zkp::hal::tracker;
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Session,
     VerifierContext,
@@ -28,11 +29,12 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(serde::Serialize, Debug)]
 struct PerformanceData {
-    cycles: u64,
+    user_cycles: u64,
+    total_cycles: u64,
     duration: u128,
     ram: usize,
     seal: usize,
-    speed: f64,
+    throughput: f64,
 }
 
 #[derive(Parser)]
@@ -93,17 +95,18 @@ fn main() {
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
 
-        let usage = prover.get_peak_memory_usage();
+        let ram = tracker().lock().unwrap().peak;
         let throughput = (session.total_cycles as f64) / duration.as_secs_f64();
 
         if !args.quiet {
             if args.json {
                 let entry = PerformanceData {
-                    cycles: session.user_cycles,
+                    user_cycles: session.user_cycles,
+                    total_cycles: session.total_cycles,
                     duration: duration.as_nanos(),
-                    ram: usage,
+                    ram,
                     seal,
-                    speed: throughput,
+                    throughput,
                 };
                 match serde_json::to_string_pretty(&entry) {
                     Ok(json_str) => print!("{json_str}"),
@@ -115,7 +118,7 @@ fn main() {
                     session.user_cycles / 1024,
                     session.total_cycles / 1024,
                     duration.human_duration().to_string(),
-                    usage.human_count_bytes().to_string(),
+                    ram.human_count_bytes().to_string(),
                     seal.human_count_bytes().to_string(),
                     throughput.human_count_bare().to_string()
                 );
@@ -132,16 +135,12 @@ fn main() {
         }
 
         let input = [
-            0usize,     // warm-up
-            1,          // 16, 64K
-            4 * 1024,   // 17, 128K
-            16 * 1024,  // 18, 256K
-            32 * 1024,  // 19, 512K
-            64 * 1024,  // 20, 1M
-            200 * 1024, // 21, 2M
-            400 * 1024, // 22, 4M
-                        // 900 * 1024,  // 23, 8M
-                        // 1400 * 1024, // 24, 16M
+            0usize,    // warm-up
+            1,         // 16, 64K
+            4 * 1024,  // 17, 128K
+            16 * 1024, // 18, 256K
+            32 * 1024, // 19, 512K
+            64 * 1024, // 20, 1M
         ];
         let len = input.len();
 
@@ -192,6 +191,6 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Rec
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
     (session, receipt)
 }

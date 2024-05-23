@@ -15,11 +15,7 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{
-    collections::BTreeSet,
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use anyhow::{ensure, Result};
 use risc0_binfmt::{MemoryImage, SystemState};
@@ -27,8 +23,10 @@ use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::client::env::SegmentPath, sha::Digest, Assumption, Assumptions, ExitCode, Journal,
-    Output, ReceiptClaim,
+    host::{client::env::SegmentPath, prove_info::SessionStats},
+    sha::Digest,
+    Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
+    ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -43,12 +41,16 @@ pub struct PageFaults {
 /// initial memory image (which includes the starting PC) and proceeds until
 /// either a sys_halt or a sys_pause syscall is encountered. This record is
 /// stored as a vector of [Segment]s.
+#[non_exhaustive]
 pub struct Session {
     /// The constituent [Segment]s of the Session. The final [Segment] will have
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
     /// or [SessionLimit](ExitCode::SessionLimit), and all other [Segment]s (if
     /// any) will have [ExitCode::SystemSplit].
     pub segments: Vec<Box<dyn SegmentRef>>,
+
+    /// The input digest.
+    pub input: Digest,
 
     /// The data publicly committed by the guest program.
     pub journal: Option<Journal>,
@@ -60,7 +62,7 @@ pub struct Session {
     pub post_image: MemoryImage,
 
     /// The list of assumptions made by the guest and resolved by the host.
-    pub assumptions: Vec<Assumption>,
+    pub assumptions: Vec<(Assumption, AssumptionReceipt)>,
 
     /// The hooks to be called during the proving phase.
     pub hooks: Vec<Box<dyn SessionEvents>>,
@@ -97,11 +99,20 @@ pub struct Segment {
     pub(crate) output: Option<Output>,
 }
 
+impl Segment {
+    /// Give the power of two length of this [Segment]
+    ///
+    /// If the [Segment]'s execution trace had 2^20 rows, this would return 20.
+    pub fn po2(&self) -> usize {
+        self.inner.po2
+    }
+}
+
 /// A reference to a [Segment].
 ///
 /// This allows implementors to determine the best way to represent this in an
 /// pluggable manner. See the [SimpleSegmentRef] for a very basic
-/// implmentation.
+/// implementation.
 pub trait SegmentRef: Send {
     /// Resolve this reference into an actual [Segment].
     fn resolve(&self) -> Result<Segment>;
@@ -120,12 +131,14 @@ pub trait SessionEvents {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         segments: Vec<Box<dyn SegmentRef>>,
+        input: Digest,
         journal: Option<Vec<u8>>,
         exit_code: ExitCode,
         post_image: MemoryImage,
-        assumptions: Vec<Assumption>,
+        assumptions: Vec<(Assumption, AssumptionReceipt)>,
         user_cycles: u64,
         total_cycles: u64,
         pre_state: SystemState,
@@ -133,7 +146,8 @@ impl Session {
     ) -> Self {
         Self {
             segments,
-            journal: journal.map(|x| Journal::new(x)),
+            input,
+            journal: journal.map(Journal::new),
             exit_code,
             post_image,
             assumptions,
@@ -153,7 +167,7 @@ impl Session {
     /// Calculate for the [ReceiptClaim] associated with this [Session]. The
     /// [ReceiptClaim] is the claim that will be proven if this [Session]
     /// is passed to the [crate::Prover].
-    pub fn get_claim(&self) -> Result<ReceiptClaim> {
+    pub fn claim(&self) -> Result<ReceiptClaim> {
         // Construct the Output struct for the session, checking internal consistency.
         // NOTE: The Session output is distinct from the final Segment output because in the
         // Session output any proven assumptions are not included.
@@ -166,9 +180,9 @@ impl Session {
                         assumptions: Assumptions(
                             self.assumptions
                                 .iter()
-                                .filter_map(|a| match a {
-                                    Assumption::Proven(_) => None,
-                                    Assumption::Unresolved(r) => Some(r.clone()),
+                                .filter_map(|(_, ar)| match ar {
+                                    AssumptionReceipt::Proven(_) => None,
+                                    AssumptionReceipt::Unresolved(a) => Some(a.clone().into()),
                                 })
                                 .collect::<Vec<_>>(),
                         )
@@ -194,7 +208,7 @@ impl Session {
             pre: self.pre_state.clone().into(),
             post: self.post_state.clone().into(),
             exit_code: self.exit_code,
-            input: Digest::ZERO,
+            input: MaybePruned::Pruned(self.input),
             output: output.into(),
         })
     }
@@ -208,17 +222,26 @@ impl Session {
         tracing::info!("number of segments: {}", self.segments.len());
         tracing::info!("total cycles: {}", self.total_cycles);
         tracing::info!("user cycles: {}", self.user_cycles);
-        tracing::info!("cycle efficiency: {}%", cycle_efficiency as u32);
+        tracing::debug!("cycle efficiency: {}%", cycle_efficiency as u32);
+    }
+
+    /// Returns stats for the session
+    ///
+    /// This contains cycle and segment information about the session useful for debugging and measuring performance.
+    pub fn stats(&self) -> SessionStats {
+        SessionStats {
+            segments: self.segments.len(),
+            total_cycles: self.total_cycles,
+            user_cycles: self.user_cycles,
+        }
     }
 }
-
-const NULL_SEGMENT_REF: NullSegmentRef = NullSegmentRef {};
 
 /// Implementation of a [SegmentRef] that does not save the segment.
 ///
 /// This is useful for DevMode where the segments aren't needed.
 #[derive(Serialize, Deserialize)]
-pub struct NullSegmentRef {}
+pub struct NullSegmentRef;
 
 impl SegmentRef for NullSegmentRef {
     fn resolve(&self) -> anyhow::Result<Segment> {
@@ -226,8 +249,8 @@ impl SegmentRef for NullSegmentRef {
     }
 }
 
-pub fn null_callback() -> Result<Box<dyn SegmentRef>> {
-    Ok(Box::new(NULL_SEGMENT_REF))
+pub fn null_callback(_: Segment) -> Result<Box<dyn SegmentRef>> {
+    Ok(Box::new(NullSegmentRef))
 }
 
 /// A very basic implementation of a [SegmentRef].
@@ -269,15 +292,6 @@ impl SegmentRef for FileSegmentRef {
         let contents = fs::read(&self.path)?;
         let segment = bincode::deserialize(&contents)?;
         Ok(segment)
-    }
-}
-
-impl SegmentPath {
-    pub(crate) fn path(&self) -> &Path {
-        match self {
-            Self::TempDir(dir) => dir.path(),
-            Self::Path(path) => path.as_path(),
-        }
     }
 }
 

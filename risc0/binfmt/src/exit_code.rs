@@ -74,7 +74,6 @@ impl ExitCode {
         }
     }
 
-    #[cfg(not(target_os = "zkvm"))]
     pub fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,
@@ -82,10 +81,9 @@ impl ExitCode {
         }
     }
 
-    /// True if the exit code is Halted(0) or Paused(0), indicating the program guest exited with
-    /// an ok status.
+    /// True if the exit code is Halted(0), indicating the program guest exited with an ok status.
     pub fn is_ok(&self) -> bool {
-        matches!(self, ExitCode::Halted(0) | ExitCode::Paused(0))
+        matches!(self, ExitCode::Halted(0))
     }
 }
 

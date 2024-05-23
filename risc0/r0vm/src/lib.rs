@@ -35,7 +35,7 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Poseidon2)]
     hashfn: HashFn,
 
-    /// Whether to prove exections ending in error status.
+    /// Whether to prove executions ending in error status.
     //
     // When false, only prove execution sessions that end in a successful
     // [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
@@ -63,6 +63,10 @@ struct Cli {
     /// to read it.
     #[arg(long, env = "RISC0_PPROF_OUT")]
     pprof_out: Option<PathBuf>,
+
+    /// The receipt kind produced by the r0vm prover
+    #[arg(long, value_enum, default_value_t = ReceiptKind::Composite)]
+    receipt_kind: ReceiptKind,
 }
 
 #[derive(Args)]
@@ -86,6 +90,16 @@ enum HashFn {
     Sha256,
     #[value(name = "poseidon2")]
     Poseidon2,
+}
+
+#[derive(Clone, PartialEq, ValueEnum)]
+enum ReceiptKind {
+    #[value(name = "composite")]
+    Composite,
+    #[value(name = "succinct")]
+    Succinct,
+    #[value(name = "compact")]
+    Compact,
 }
 
 pub fn main() {
@@ -138,7 +152,7 @@ pub fn main() {
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
 
     let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);
@@ -160,11 +174,14 @@ impl Cli {
             HashFn::Sha256 => "sha-256",
             HashFn::Poseidon2 => "poseidon2",
         };
-        let opts = ProverOpts {
-            hashfn: hashfn.to_string(),
-            prove_guest_errors: self.prove_guest_errors,
-        };
-
+        let opts = ProverOpts::default()
+            .with_hashfn(hashfn.to_string())
+            .with_prove_guest_errors(self.prove_guest_errors)
+            .with_receipt_kind(match self.receipt_kind {
+                ReceiptKind::Composite => risc0_zkvm::ReceiptKind::Composite,
+                ReceiptKind::Succinct => risc0_zkvm::ReceiptKind::Succinct,
+                ReceiptKind::Compact => risc0_zkvm::ReceiptKind::Compact,
+            });
         get_prover_server(&opts).unwrap()
     }
 }

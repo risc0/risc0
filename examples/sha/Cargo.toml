@@ -6,12 +6,10 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 risc0-zkvm = { path = "../../risc0/zkvm" }
-serde = "1.0"
 sha-methods = { path = "methods" }
 
 [dev-dependencies]
 hex = "0.4"
-serial_test = "2.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

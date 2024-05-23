@@ -13,12 +13,15 @@
 // limitations under the License.
 
 use std::{
+    collections::BTreeMap,
     net::{SocketAddr, TcpListener},
     path::PathBuf,
     thread,
 };
 
 use anyhow::Result;
+use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
+use risc0_zkp::core::hash::poseidon_254::Poseidon254HashSuite;
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     MULTI_TEST_PATH,
@@ -28,8 +31,9 @@ use test_log::test;
 
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    recursion::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts,
-    Receipt, SegmentReceipt, SessionInfo, VerifierContext,
+    receipt::SuccinctReceipt, recursion::MerkleGroup, ApiClient, ApiServer, ExecutorEnv,
+    InnerReceipt, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt, SessionInfo,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -86,25 +90,30 @@ impl TestClient {
         })
     }
 
-    fn prove(&self, env: ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Receipt {
-        with_server(self.addr, || self.client.prove(&env, opts, binary))
+    fn prove(&self, env: &ExecutorEnv<'_>, opts: &ProverOpts, binary: Asset) -> Receipt {
+        with_server(self.addr, || self.client.prove(&env, opts, binary)).receipt
     }
 
-    fn prove_segment(&self, opts: ProverOpts, segment: Asset) -> SegmentReceipt {
+    fn prove_segment(&self, opts: &ProverOpts, segment: Asset) -> SegmentReceipt {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.prove_segment(opts, segment, receipt_out)
         })
     }
 
-    fn lift(&self, opts: ProverOpts, receipt: Asset) -> SuccinctReceipt {
+    fn lift(&self, opts: &ProverOpts, receipt: Asset) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.lift(opts, receipt, receipt_out)
         })
     }
 
-    fn join(&self, opts: ProverOpts, left_receipt: Asset, right_receipt: Asset) -> SuccinctReceipt {
+    fn join(
+        &self,
+        opts: &ProverOpts,
+        left_receipt: Asset,
+        right_receipt: Asset,
+    ) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client
@@ -114,10 +123,10 @@ impl TestClient {
 
     fn resolve(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         conditional_receipt: Asset,
         assumption_receipt: Asset,
-    ) -> SuccinctReceipt {
+    ) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client
@@ -125,7 +134,7 @@ impl TestClient {
         })
     }
 
-    fn identity_p254(&self, opts: ProverOpts, receipt: Asset) -> SuccinctReceipt {
+    fn identity_p254(&self, opts: &ProverOpts, receipt: Asset) -> SuccinctReceipt<ReceiptClaim> {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.identity_p254(opts, receipt, receipt_out)
@@ -168,7 +177,7 @@ fn prove() {
         .unwrap();
     let binary = Asset::Path(MULTI_TEST_PATH.into());
     let opts = ProverOpts::default();
-    let receipt = TestClient::new().prove(env, opts, binary);
+    let receipt = TestClient::new().prove(&env, &opts, binary);
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
@@ -189,7 +198,7 @@ fn prove_segment_elf() {
     let ctx = VerifierContext::default();
     for segment in client.segments.iter() {
         let opts = ProverOpts::default();
-        let receipt = client.prove_segment(opts, segment.clone());
+        let receipt = client.prove_segment(&opts, segment.clone());
         receipt.verify_integrity_with_context(&ctx).unwrap();
     }
 }
@@ -211,17 +220,17 @@ fn lift_join_identity() {
     let session = client.execute(env, binary);
     assert_eq!(session.segments.len(), client.segments.len());
 
-    let opts = ProverOpts::default();
+    let opts = &ProverOpts::default();
 
-    let receipt = client.prove_segment(opts.clone(), client.segments[0].clone());
-    let mut rollup = client.lift(opts.clone(), receipt.try_into().unwrap());
+    let receipt = client.prove_segment(opts, client.segments[0].clone());
+    let mut rollup = client.lift(opts, receipt.try_into().unwrap());
 
     for segment in &client.segments[1..] {
-        let receipt = client.prove_segment(opts.clone(), segment.clone());
-        let rec_receipt = client.lift(opts.clone(), receipt.try_into().unwrap());
+        let receipt = client.prove_segment(opts, segment.clone());
+        let rec_receipt = client.lift(opts, receipt.try_into().unwrap());
 
         rollup = client.join(
-            opts.clone(),
+            opts,
             rollup.try_into().unwrap(),
             rec_receipt.try_into().unwrap(),
         );
@@ -229,7 +238,25 @@ fn lift_join_identity() {
             .verify_integrity_with_context(&VerifierContext::default())
             .unwrap();
     }
-    client.identity_p254(opts, rollup.clone().try_into().unwrap());
+    let p254_receipt = client.identity_p254(opts, rollup.clone().try_into().unwrap());
+
+    // Verify the identity_p254 succinct receipt. This is pretty ugly, but its not expected to be a
+    // common operation.
+    let mut verifier_parameters = SuccinctReceiptVerifierParameters::default();
+    verifier_parameters.control_root = MerkleGroup::new(vec![BN254_IDENTITY_CONTROL_ID])
+        .unwrap()
+        .calc_root(Poseidon254HashSuite::new_suite().hashfn.as_ref());
+    verifier_parameters.inner_control_root = Some(ALLOWED_CONTROL_ROOT);
+    p254_receipt
+        .verify_integrity_with_context(
+            &VerifierContext::empty()
+                .with_suites(BTreeMap::from([(
+                    "poseidon_254".to_string(),
+                    Poseidon254HashSuite::new_suite(),
+                )]))
+                .with_succinct_verifier_parameters(verifier_parameters),
+        )
+        .unwrap();
 
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
@@ -245,15 +272,15 @@ fn lift_resolve() {
     assert_eq!(assumption_session.segments.len(), 1);
     assert_eq!(client.segments.len(), 1);
 
-    let opts = ProverOpts::default();
+    let opts = &ProverOpts::default();
 
     // Prove and lift the assumption.
-    let assumption_segment_receipt = client.prove_segment(opts.clone(), client.segments[0].clone());
+    let assumption_segment_receipt = client.prove_segment(opts, client.segments[0].clone());
     assumption_segment_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
     let assumption_succinct_receipt =
-        client.lift(opts.clone(), assumption_segment_receipt.try_into().unwrap());
+        client.lift(opts, assumption_segment_receipt.try_into().unwrap());
     assumption_succinct_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
@@ -277,29 +304,26 @@ fn lift_resolve() {
     assert_eq!(client.segments.len(), 1);
 
     // Prove and lift the composition
-    let composition_segment_receipt =
-        client.prove_segment(opts.clone(), client.segments[0].clone());
+    let composition_segment_receipt = client.prove_segment(opts, client.segments[0].clone());
     composition_segment_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
-    let composition_succinct_receipt = client.lift(
-        opts.clone(),
-        composition_segment_receipt.try_into().unwrap(),
-    );
+    let composition_succinct_receipt =
+        client.lift(opts, composition_segment_receipt.try_into().unwrap());
     composition_succinct_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
 
     // Use resolve to create an unconditional succinct receipt
-    let succint_receipt = client.resolve(
-        opts.clone(),
+    let succinct_receipt = client.resolve(
+        opts,
         composition_succinct_receipt.try_into().unwrap(),
         assumption_succinct_receipt.try_into().unwrap(),
     );
 
     // Wrap into a Receipt and verify
     let receipt = Receipt::new(
-        InnerReceipt::Succinct(succint_receipt),
+        InnerReceipt::Succinct(succinct_receipt),
         composition_session.journal.bytes,
     );
     receipt.verify(MULTI_TEST_ID).unwrap();
