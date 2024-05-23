@@ -1,3 +1,5 @@
+<!-- cargo-rdme start -->
+
 # Groth16
 
 This library implements a verifier for the Groth16 protocol over the BN_254 elliptic curve.
@@ -23,6 +25,7 @@ use risc0_groth16::{ProofJson, PublicInputsJson, Verifier, VerifyingKeyJson};
 ```
 
 ## STARK to SNARK
+
 It also provides a utility function to call a prover (via Docker).
 After generating a RISC Zero STARK proof, it can be transformed into a SNARK using the `stark_to_snark` function.
 This function becomes available when the `prove` feature flag is enabled.
@@ -79,3 +82,6 @@ fn stark2snark() {
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 ```
+
+<!-- cargo-rdme end -->
+

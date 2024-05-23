@@ -153,6 +153,8 @@ jobs:
         working-directory: bonsai/sdk
       - run: cargo rdme -c
         working-directory: risc0/zkvm
+      - run: cargo rdme -c
+        working-directory: risc0/groth16
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
