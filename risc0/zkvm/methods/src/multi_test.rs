@@ -47,6 +47,7 @@ pub enum MultiTestSpec {
     Syscall {
         count: u32,
     },
+    SyscallWords,
     DoRandom,
     SysInput(Digest),
     SysRead {
@@ -97,3 +98,4 @@ pub enum MultiTestSpec {
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
+declare_syscall!(pub SYS_MULTI_TEST_WORDS);
