@@ -7,7 +7,6 @@ To harness the power of ZK, you'll need to:
 3. [Integrate your proofs into on-chain applications][bonsai-on-eth].
 
 ```mermaid
-
 flowchart TD
     %% Level 0
     getting_started["Getting Started
@@ -46,10 +45,6 @@ flowchart TD
     getting_started --> chain_integration
         chain_integration --> getting_proofs_on_chain
         chain_integration --> onchain_verifier
-
-
-
-
 ```
 
 [zkvm-quickstart]: ./zkvm/quickstart.md
