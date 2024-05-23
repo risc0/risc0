@@ -4,8 +4,6 @@ import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { BENCHMARKS_DESCRIPTION } from "../[version]/_utils/constants";
 import { Charts } from "./_components/charts";
 
-export const experimental_ppr = true;
-
 export const metadata: Metadata = {
   title: "Benchmarks",
   description: BENCHMARKS_DESCRIPTION,

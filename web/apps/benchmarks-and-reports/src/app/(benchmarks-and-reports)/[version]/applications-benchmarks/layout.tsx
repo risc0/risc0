@@ -4,8 +4,6 @@ import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { FooterAscii } from "../../_components/footer-ascii";
 import { ApplicationsBenchmarksCommitHashButton } from "./_components/applications-benchmarks-commit-hash-button";
 
-export const experimental_ppr = true;
-
 export default function ApplicationsBenchmarksLayout({ params, children }) {
   return (
     <div className="container max-w-screen-3xl">
