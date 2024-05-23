@@ -1,8 +1,5 @@
 # Groth16
 
-> WARNING: This software is still experimental, we do not recommend it for
-> production use (see Security section).
-
 This library implements a verifier for the Groth16 protocol over the BN_254 elliptic curve.
 
 ## Example
