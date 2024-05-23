@@ -32,7 +32,7 @@ use risc0_zkvm::{
     sha::{Digest, Sha256},
     Assumption, ReceiptClaim,
 };
-use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
+use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
 use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
@@ -145,6 +145,12 @@ fn main() {
                 input = bytemuck::cast_slice(host_data);
                 input_len = input.len();
             }
+        }
+        MultiTestSpec::SyscallWords => {
+            let input: &[u64] = &[0x0102030405060708];
+
+            let host_data = env::send_recv_slice::<u64, u32>(SYS_MULTI_TEST_WORDS, &input);
+            assert_eq!(host_data, &[0x05060708, 0x01020304]);
         }
         MultiTestSpec::DoRandom => {
             // Test random number generation in the zkvm
