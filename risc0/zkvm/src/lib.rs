@@ -81,9 +81,7 @@ pub mod serde;
 pub mod sha;
 
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
-pub mod recursion {
-    pub use super::host::recursion::*;
-}
+pub use host::recursion;
 
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
