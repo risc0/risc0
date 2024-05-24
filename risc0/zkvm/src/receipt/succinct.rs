@@ -30,13 +30,14 @@ use crate::{
     receipt_claim::{MaybePruned, Unknown},
     sha,
 };
+use borsh::{BorshDeserialize, BorshSerialize};
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM with a STARK.
 ///
 /// Using recursion, a [crate::CompositeReceipt] can be compressed to form a [SuccinctReceipt]. In this
 /// way, a constant sized proof can be generated for arbitrarily long computations, and with an
 /// arbitrary number of segments linked via composition.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct SuccinctReceipt<Claim>

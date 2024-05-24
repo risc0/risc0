@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::{vec, vec::Vec};
+use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -37,7 +38,7 @@ use crate::{
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single
 /// execution with continuations, and zero or more [Receipt](crate::Receipt) structs proving any
 /// assumptions.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct CompositeReceipt {

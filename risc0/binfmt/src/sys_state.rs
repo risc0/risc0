@@ -21,10 +21,10 @@ use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
 use crate::{tagged_struct, Digestible};
-
+use borsh::{BorshDeserialize, BorshSerialize};
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
-#[derive(Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize)]
 pub struct SystemState {
     /// The program counter.
     pub pc: u32,

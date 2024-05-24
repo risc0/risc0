@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
+use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -31,7 +32,7 @@ use crate::{
 };
 
 /// A receipt composed of a Groth16 over the BN_254 curve
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct Groth16Receipt<Claim>
