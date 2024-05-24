@@ -1,6 +1,6 @@
 import { Tabs, TabsList, TabsTrigger } from "@risc0/ui/tabs";
-import pick from "lodash-es/pick";
 import Link from "next/link";
+import { pick } from "radash";
 import { Suspense } from "react";
 import { replace } from "string-ts";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
@@ -11,7 +11,9 @@ import { FILENAMES_TO_TITLES } from "./_utils/constants";
 export function generateMetadata({ params }) {
   // read route params to generate metadata
   const slug = params.slug ?? "";
-  const slugLabel = Object.values(pick(FILENAMES_TO_TITLES, `${slug}.csv`))[0];
+  const slugLabel = Object.values(
+    pick(FILENAMES_TO_TITLES, [`${slug}.csv`] as (keyof typeof FILENAMES_TO_TITLES)[]),
+  )[0];
 
   return {
     title: `${slugLabel ? `${slugLabel} | ` : ""}Applications Benchmark`,

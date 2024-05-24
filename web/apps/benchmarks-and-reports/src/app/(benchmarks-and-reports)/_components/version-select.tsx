@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@risc0/ui/select";
-import compact from "lodash-es/compact";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { VERSIONS } from "~/versions";
@@ -21,7 +20,7 @@ export function VersionSelect() {
   const router = useRouter();
   const pathname = usePathname();
   const mounted = useMounted();
-  const pathnameParts = compact(pathname.split("/"));
+  const pathnameParts = pathname.split("/").filter(Boolean);
   const [_versionLocalStorage, setVersionLocalStorage] = useLocalStorage<string | undefined>("version", undefined);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
