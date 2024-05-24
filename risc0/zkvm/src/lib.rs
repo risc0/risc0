@@ -54,7 +54,6 @@
 //! | client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
 //! | cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 //! | disable-dev-mode | all except rv32im |            | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
-//! | docker           | all except rv32im |            | Enables features that require Docker. In particular, this enables Groth16 proving.                                                                           |
 //! | metal            | macos             | prove, std | Enables Metal GPU acceleration for the prover.                                                                                                               |
 //! | prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 //! | std              | all               |            | Support for the Rust stdlib.                                                                                                                                 |
