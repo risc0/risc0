@@ -257,7 +257,11 @@ impl Receipt {
     }
 }
 
-/// A journal is a record of all public commitments for a given proof session.
+/// A record of the public commitments for a proven zkVM execution.
+///
+/// Public outputs, including commitments to important inputs, are written to the journal during
+/// zkVM execution. Along with an image ID, it constitutes the statement proven by a given
+/// [Receipt]
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Journal {
     /// The raw bytes of the journal.
@@ -425,10 +429,12 @@ where
     }
 }
 
-/// Metadata providing context on the receipt, about the proving system, SDK versions, and other
-/// information to help with interoperability. It is not cryptographically bound to the receipt,
-/// and should not be used for security-relevant decisions, such as choosing whether or not to
-/// accept a receipt based on it's stated version.
+/// Metadata providing context on the receipt.
+///
+/// It contains information about the proving system, SDK versions, and other information to help
+/// with interoperability. It is not cryptographically bound to the receipt, and should not be used
+/// for security-relevant decisions, such as choosing whether or not to accept a receipt based on
+/// it's stated version.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct ReceiptMetadata {

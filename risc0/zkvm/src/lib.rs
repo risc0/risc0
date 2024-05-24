@@ -133,7 +133,7 @@ pub use {
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        recursion::ALLOWED_CONTROL_ROOT,
+        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
     },
     risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS,
