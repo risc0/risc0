@@ -43,7 +43,7 @@ jobs:
     runs-on:
       labels: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
     if: needs.changes.outputs.trigger-bench == 'true'
-
+    needs: changes
     strategy:
       fail-fast: false
       matrix:
@@ -109,6 +109,7 @@ jobs:
   bench-status-check:
     if: always()
     needs:
+      - changes
       - bench
     runs-on: ubuntu-latest
     steps:
