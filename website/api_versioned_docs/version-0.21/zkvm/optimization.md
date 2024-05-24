@@ -168,7 +168,7 @@ it can acted on (e.g. used as input to an `add`). It must also be written back
 to memory to store the result. Memory loads and stores (i.e. reads and writes)
 usually take one cycle.
 
-Memory access, both load and store takes exactly one cycle, expect in the case
+Memory access, both load and store takes exactly one cycle, except in the case
 of page-in and page-out operations ([discussed below](#paging)).
 
 Note that relative to a physical CPU, this is extremely fast (in terms of

@@ -72,8 +72,8 @@ impl Prover for ExternalProver {
             (InnerReceipt::Composite(_), ReceiptKind::Composite)
             | (InnerReceipt::Succinct(_), ReceiptKind::Composite | ReceiptKind::Succinct)
             | (
-                InnerReceipt::Compact(_),
-                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Compact,
+                InnerReceipt::Groth16(_),
+                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Groth16,
             ) => Ok(receipt.clone()),
             // Compression is always a no-op in dev mode
             (InnerReceipt::Fake { .. }, _) => {

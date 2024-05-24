@@ -18,8 +18,8 @@ use clap::Parser;
 use regex::Regex;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, CompactReceiptVerifierParameters, ExecutorEnv,
-    ExecutorImpl, ProverOpts, Receipt, VerifierContext,
+    get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl,
+    Groth16ReceiptVerifierParameters, ProverOpts, Receipt, VerifierContext,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
@@ -55,7 +55,7 @@ const SOL_HEADER: &str = r#"// Copyright 2024 RISC Zero, Inc.
 
 "#;
 
-const SOLIDITY_VERIFIER_SOURCE: &str = "compact_proof/groth16/verifier.sol";
+const SOLIDITY_VERIFIER_SOURCE: &str = "groth16_proof/groth16/verifier.sol";
 const SOLIDITY_VERIFIER_TARGET: &str = "contracts/src/groth16/Groth16Verifier.sol";
 const SOLIDITY_CONTROL_ID_PATH: &str = "contracts/src/groth16/ControlID.sol";
 const SOLIDITY_TEST_RECEIPT_PATH: &str = "contracts/test/TestReceipt.sol";
@@ -157,9 +157,9 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
 "#;
     let receipt = generate_receipt();
     let image_id = receipt.claim().unwrap().as_value().unwrap().pre.digest();
-    let verifier_parameters_digest = CompactReceiptVerifierParameters::default().digest();
+    let verifier_parameters_digest = Groth16ReceiptVerifierParameters::default().digest();
     let selector = hex::encode(&verifier_parameters_digest.as_bytes()[..4]);
-    let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
+    let seal = hex::encode(receipt.inner.groth16().unwrap().seal.clone());
     let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
 
@@ -183,7 +183,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
         .unwrap();
 }
 
-// Return a Compact `Receipt` and the imageID used to generate the proof.
+// Return a Groth16 `Receipt` and the imageID used to generate the proof.
 // Requires running Docker on an x86 architecture.
 fn generate_receipt() -> Receipt {
     let env = ExecutorEnv::builder()
@@ -200,7 +200,7 @@ fn generate_receipt() -> Receipt {
     let session = exec.run().unwrap();
 
     tracing::info!("prove");
-    let prover = get_prover_server(&ProverOpts::compact()).unwrap();
+    let prover = get_prover_server(&ProverOpts::groth16()).unwrap();
 
     prover
         .prove_session(&VerifierContext::default(), &session)
