@@ -356,7 +356,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-nightly
-      - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,docker,getrandom,std --no-deps
+      - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
       - run: cargo +nightly doc -p risc0-zkp -Fprove,std --no-deps
       - run: cargo +nightly doc -p cargo-risczero -Fdocker,r0vm --no-deps
       - run: cargo +nightly doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
