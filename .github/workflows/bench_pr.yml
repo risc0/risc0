@@ -1,4 +1,4 @@
-name: Benchmark Check 
+name: Benchmark Check
 
 on:
   merge_group:
