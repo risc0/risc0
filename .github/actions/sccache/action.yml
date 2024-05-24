@@ -94,7 +94,7 @@ runs:
         runner.os == 'Linux' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
         runner.environment == 'self-hosted' &&
-        contains(runner.name, 'i-') != 'true'
+        (contains(runner.name, 'i-')) == 'false'
       env:
         LINUX_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper
       run: |
@@ -120,7 +120,7 @@ runs:
       if: >
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
         runner.environment == 'self-hosted' &&
-        ((runner.os == 'Linux' && contains(runner.name, 'i-') != 'true') || (runner.os == 'macOS'))
+        ((runner.os == 'Linux' && (contains(runner.name, 'i-')) == 'false') || (runner.os == 'macOS'))
       env:
         TRUST_ANCHOR_ARN: arn:aws:rolesanywhere:us-west-2:083632199359:trust-anchor/f3ef0e42-f374-43e5-8933-15b46537f855
         PROFILE_ARN: arn:aws:rolesanywhere:us-west-2:083632199359:profile/fb3ace7d-a3c5-4786-bc26-15b74ea0d164
