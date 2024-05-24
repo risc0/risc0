@@ -23,7 +23,7 @@ use tempfile::tempdir;
 
 use crate::{to_json, ProofJson, Seal};
 
-/// Compact a given seal of an `identity_p254` receipt into a Groth16 `Seal`.
+/// Groth16 a given seal of an `identity_p254` receipt into a Groth16 `Seal`.
 /// Requires running Docker on an x86 architecture.
 pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     if !is_x86_architecture() {

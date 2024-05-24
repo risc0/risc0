@@ -98,8 +98,8 @@ enum ReceiptKind {
     Composite,
     #[value(name = "succinct")]
     Succinct,
-    #[value(name = "compact")]
-    Compact,
+    #[value(name = "groth16")]
+    Groth16,
 }
 
 pub fn main() {
@@ -180,7 +180,7 @@ impl Cli {
             .with_receipt_kind(match self.receipt_kind {
                 ReceiptKind::Composite => risc0_zkvm::ReceiptKind::Composite,
                 ReceiptKind::Succinct => risc0_zkvm::ReceiptKind::Succinct,
-                ReceiptKind::Compact => risc0_zkvm::ReceiptKind::Compact,
+                ReceiptKind::Groth16 => risc0_zkvm::ReceiptKind::Groth16,
             });
         get_prover_server(&opts).unwrap()
     }

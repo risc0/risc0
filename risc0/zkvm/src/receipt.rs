@@ -14,8 +14,8 @@
 
 //! Manages the output and cryptographic data for a proven computation.
 
-pub(crate) mod compact;
 pub(crate) mod composite;
+pub(crate) mod groth16;
 pub(crate) mod merkle;
 pub(crate) mod segment;
 pub(crate) mod succinct;
@@ -45,7 +45,7 @@ use crate::{
     Assumption, Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
-pub use self::compact::{CompactReceipt, CompactReceiptVerifierParameters};
+pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 pub use self::{
     composite::{CompositeReceipt, CompositeReceiptVerifierParameters},
@@ -301,8 +301,8 @@ pub enum InnerReceipt {
     /// A [SuccinctReceipt], proving arbitrarily long zkVM computions with a single STARK.
     Succinct(SuccinctReceipt<ReceiptClaim>),
 
-    /// A [CompactReceipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK.
-    Compact(CompactReceipt<ReceiptClaim>),
+    /// A [Groth16Receipt], proving arbitrarily long zkVM computions with a single Groth16 SNARK.
+    Groth16(Groth16Receipt<ReceiptClaim>),
 
     /// A [FakeReceipt], with no cryptographic integrity, used only for development.
     Fake(FakeReceipt<ReceiptClaim>),
@@ -317,7 +317,7 @@ impl InnerReceipt {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Compact(inner) => inner.verify_integrity(),
+            Self::Groth16(inner) => inner.verify_integrity(),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity(),
         }
@@ -332,9 +332,9 @@ impl InnerReceipt {
         }
     }
 
-    /// Returns the [InnerReceipt::Compact] arm.
-    pub fn compact(&self) -> Result<&CompactReceipt<ReceiptClaim>, VerificationError> {
-        if let Self::Compact(x) = self {
+    /// Returns the [InnerReceipt::Groth16] arm.
+    pub fn groth16(&self) -> Result<&Groth16Receipt<ReceiptClaim>, VerificationError> {
+        if let Self::Groth16(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -354,7 +354,7 @@ impl InnerReceipt {
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
             Self::Composite(ref inner) => Ok(inner.claim()?.into()),
-            Self::Compact(ref inner) => Ok(inner.claim.clone()),
+            Self::Groth16(ref inner) => Ok(inner.claim.clone()),
             Self::Succinct(ref inner) => Ok(inner.claim.clone()),
             Self::Fake(ref inner) => Ok(inner.claim.clone()),
         }
@@ -364,7 +364,7 @@ impl InnerReceipt {
     pub fn verifier_parameters(&self) -> Digest {
         match self {
             Self::Composite(ref inner) => inner.verifier_parameters,
-            Self::Compact(ref inner) => inner.verifier_parameters,
+            Self::Groth16(ref inner) => inner.verifier_parameters,
             Self::Succinct(ref inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
@@ -560,8 +560,8 @@ pub enum InnerAssumptionReceipt {
     /// A [SuccinctReceipt], proving arbitrarily the claim with a single STARK.
     Succinct(SuccinctReceipt<Unknown>),
 
-    /// A [CompactReceipt], proving arbitrarily the claim with a single Groth16 SNARK.
-    Compact(CompactReceipt<Unknown>),
+    /// A [Groth16Receipt], proving arbitrarily the claim with a single Groth16 SNARK.
+    Groth16(Groth16Receipt<Unknown>),
 
     /// A [FakeReceipt], with no cryptographic integrity, used only for development.
     Fake(FakeReceipt<Unknown>),
@@ -576,7 +576,7 @@ impl InnerAssumptionReceipt {
         tracing::debug!("InnerAssumptionReceipt::verify_integrity_with_context");
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Compact(inner) => inner.verify_integrity(),
+            Self::Groth16(inner) => inner.verify_integrity(),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity(),
         }
@@ -591,9 +591,9 @@ impl InnerAssumptionReceipt {
         }
     }
 
-    /// Returns the [InnerAssumptionReceipt::Compact] arm.
-    pub fn compact(&self) -> Result<&CompactReceipt<Unknown>, VerificationError> {
-        if let Self::Compact(x) = self {
+    /// Returns the [InnerAssumptionReceipt::Groth16] arm.
+    pub fn groth16(&self) -> Result<&Groth16Receipt<Unknown>, VerificationError> {
+        if let Self::Groth16(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -615,7 +615,7 @@ impl InnerAssumptionReceipt {
     pub fn claim_digest(&self) -> Result<Digest, VerificationError> {
         match self {
             Self::Composite(ref inner) => Ok(inner.claim()?.digest()),
-            Self::Compact(ref inner) => Ok(inner.claim.digest()),
+            Self::Groth16(ref inner) => Ok(inner.claim.digest()),
             Self::Succinct(ref inner) => Ok(inner.claim.digest()),
             Self::Fake(ref inner) => Ok(inner.claim.digest()),
         }
@@ -625,22 +625,11 @@ impl InnerAssumptionReceipt {
     pub fn verifier_parameters(&self) -> Digest {
         match self {
             Self::Composite(ref inner) => inner.verifier_parameters,
-            Self::Compact(ref inner) => inner.verifier_parameters,
+            Self::Groth16(ref inner) => inner.verifier_parameters,
             Self::Succinct(ref inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
         }
     }
-
-    /*
-    pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
-        match self {
-            Self::Composite(_) => Ok(Digest::ZERO),
-            Self::Succinct(_) => todo!(),
-            Self::Compact(_) => todo!(),
-            Self::Fake(_) => todo!(),
-        }
-    }
-    */
 }
 
 impl From<InnerReceipt> for InnerAssumptionReceipt {
@@ -648,7 +637,7 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
         match value {
             InnerReceipt::Composite(x) => InnerAssumptionReceipt::Composite(x),
             InnerReceipt::Succinct(x) => InnerAssumptionReceipt::Succinct(x.into_unknown()),
-            InnerReceipt::Compact(x) => InnerAssumptionReceipt::Compact(x.into_unknown()),
+            InnerReceipt::Groth16(x) => InnerAssumptionReceipt::Groth16(x.into_unknown()),
             InnerReceipt::Fake(x) => InnerAssumptionReceipt::Fake(x.into_unknown()),
         }
     }
@@ -666,8 +655,8 @@ pub struct VerifierContext {
     /// Parameters for verification of [SuccinctReceipt].
     pub succinct_verifier_parameters: Option<SuccinctReceiptVerifierParameters>,
 
-    /// Parameters for verification of [CompactReceipt].
-    pub compact_verifier_parameters: Option<CompactReceiptVerifierParameters>,
+    /// Parameters for verification of [Groth16Receipt].
+    pub groth16_verifier_parameters: Option<Groth16ReceiptVerifierParameters>,
 }
 
 impl VerifierContext {
@@ -677,7 +666,7 @@ impl VerifierContext {
             suites: BTreeMap::default(),
             segment_verifier_parameters: None,
             succinct_verifier_parameters: None,
-            compact_verifier_parameters: None,
+            groth16_verifier_parameters: None,
         }
     }
 
@@ -714,12 +703,12 @@ impl VerifierContext {
         self
     }
 
-    /// Return [VerifierContext] with the given [CompactReceiptVerifierParameters] set.
-    pub fn with_compact_verifier_parameters(
+    /// Return [VerifierContext] with the given [Groth16ReceiptVerifierParameters] set.
+    pub fn with_groth16_verifier_parameters(
         mut self,
-        params: CompactReceiptVerifierParameters,
+        params: Groth16ReceiptVerifierParameters,
     ) -> Self {
-        self.compact_verifier_parameters = Some(params);
+        self.groth16_verifier_parameters = Some(params);
         self
     }
 
@@ -731,7 +720,7 @@ impl VerifierContext {
         Some(CompositeReceiptVerifierParameters {
             segment: self.segment_verifier_parameters.as_ref()?.clone().into(),
             succinct: self.succinct_verifier_parameters.as_ref()?.clone().into(),
-            compact: self.compact_verifier_parameters.as_ref()?.clone().into(),
+            groth16: self.groth16_verifier_parameters.as_ref()?.clone().into(),
         })
     }
 }
@@ -742,7 +731,7 @@ impl Default for VerifierContext {
             suites: Self::default_hash_suites(),
             segment_verifier_parameters: Some(Default::default()),
             succinct_verifier_parameters: Some(Default::default()),
-            compact_verifier_parameters: Some(Default::default()),
+            groth16_verifier_parameters: Some(Default::default()),
         }
     }
 }
