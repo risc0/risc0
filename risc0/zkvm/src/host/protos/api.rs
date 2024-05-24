@@ -594,7 +594,7 @@ pub struct GenericError {
 pub enum ReceiptKind {
     Composite = 0,
     Succinct = 1,
-    Compact = 2,
+    Groth16 = 2,
 }
 impl ReceiptKind {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -605,7 +605,7 @@ impl ReceiptKind {
         match self {
             ReceiptKind::Composite => "COMPOSITE",
             ReceiptKind::Succinct => "SUCCINCT",
-            ReceiptKind::Compact => "COMPACT",
+            ReceiptKind::Groth16 => "GROTH16",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -613,7 +613,7 @@ impl ReceiptKind {
         match value {
             "COMPOSITE" => Some(Self::Composite),
             "SUCCINCT" => Some(Self::Succinct),
-            "COMPACT" => Some(Self::Compact),
+            "GROTH16" => Some(Self::Groth16),
             _ => None,
         }
     }

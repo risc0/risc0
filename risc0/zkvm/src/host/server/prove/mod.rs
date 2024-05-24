@@ -31,7 +31,7 @@ use crate::{
     host::prove_info::ProveInfo,
     is_dev_mode,
     receipt::{
-        CompactReceipt, CompactReceiptVerifierParameters, CompositeReceipt, InnerAssumptionReceipt,
+        CompositeReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
         InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::Unknown,
@@ -132,26 +132,26 @@ pub trait ProverServer {
                 InnerAssumptionReceipt::Fake(_) => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
                 ),
-                InnerAssumptionReceipt::Compact(_) => bail!(
-                    "compressing composite receipts with Compact receipt assumptions is not supported"
+                InnerAssumptionReceipt::Groth16(_) => bail!(
+                    "compressing composite receipts with Groth16 receipt assumptions is not supported"
                 )
             },
         )
     }
 
-    /// Compress a [SuccinctReceipt] into a [CompactReceipt].
-    fn succinct_to_compact(
+    /// Compress a [SuccinctReceipt] into a [Groth16Receipt].
+    fn succinct_to_groth16(
         &self,
         receipt: &SuccinctReceipt<ReceiptClaim>,
-    ) -> Result<CompactReceipt<ReceiptClaim>> {
+    ) -> Result<Groth16Receipt<ReceiptClaim>> {
         let ident_receipt = self.identity_p254(receipt).unwrap();
         let seal_bytes = ident_receipt.get_seal_bytes();
 
         let seal = stark_to_snark(&seal_bytes)?.to_vec();
-        Ok(CompactReceipt {
+        Ok(Groth16Receipt {
             seal,
             claim: receipt.claim.clone(),
-            verifier_parameters: CompactReceiptVerifierParameters::default().digest(),
+            verifier_parameters: Groth16ReceiptVerifierParameters::default().digest(),
         })
     }
 
@@ -171,27 +171,27 @@ pub trait ProverServer {
                         receipt.journal.bytes.clone(),
                     ))
                 }
-                ReceiptKind::Compact => {
+                ReceiptKind::Groth16 => {
                     let succinct_receipt = self.composite_to_succinct(inner)?;
-                    let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+                    let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
                     Ok(Receipt::new(
-                        InnerReceipt::Compact(compact_receipt),
+                        InnerReceipt::Groth16(groth16_receipt),
                         receipt.journal.bytes.clone(),
                     ))
                 }
             },
             InnerReceipt::Succinct(inner) => match opts.receipt_kind {
                 ReceiptKind::Composite | ReceiptKind::Succinct => Ok(receipt.clone()),
-                ReceiptKind::Compact => {
-                    let compact_receipt = self.succinct_to_compact(inner)?;
+                ReceiptKind::Groth16 => {
+                    let groth16_receipt = self.succinct_to_groth16(inner)?;
                     Ok(Receipt::new(
-                        InnerReceipt::Compact(compact_receipt),
+                        InnerReceipt::Groth16(groth16_receipt),
                         receipt.journal.bytes.clone(),
                     ))
                 }
             },
-            InnerReceipt::Compact(_) => match opts.receipt_kind {
-                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Compact => {
+            InnerReceipt::Groth16(_) => match opts.receipt_kind {
+                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Groth16 => {
                     Ok(receipt.clone())
                 }
             },

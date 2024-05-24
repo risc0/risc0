@@ -150,7 +150,7 @@ pub use receipt::{
     VerifierContext,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::{CompactReceipt, CompactReceiptVerifierParameters};
+pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 use semver::Version;
 
