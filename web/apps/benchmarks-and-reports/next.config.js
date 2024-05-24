@@ -11,7 +11,7 @@ let config = {
   transpilePackages: ["@risc0/ui"],
   experimental: {
     caseSensitiveRoutes: true,
-    reactCompiler: true,
+    reactCompiler: false,
     staleTimes: {
       dynamic: 30,
       static: 180,
