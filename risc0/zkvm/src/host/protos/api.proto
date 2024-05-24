@@ -177,7 +177,7 @@ message ProverOpts {
 enum ReceiptKind {
   COMPOSITE = 0;
   SUCCINCT = 1;
-  COMPACT = 2;
+  GROTH16 = 2;
 }
 
 message SessionInfo {
