@@ -1,8 +1,9 @@
 import { truncate } from "@risc0/ui/utils/truncate";
 import { CopyButton } from "shared/client/components/copy-button";
+import type { Version } from "~/types/version";
 import { fetchDatasheetCommitHash } from "../_actions/fetch-datasheet-commit-hash";
 
-export async function DatasheetCommitHashButton({ version }: { version: string }) {
+export async function DatasheetCommitHashButton({ version }: { version: Version }) {
   const commitHash = await fetchDatasheetCommitHash({ version });
 
   if (!commitHash) {

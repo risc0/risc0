@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
+import type { Version } from "~/types/version";
 
 export function ApplicationsBenchmarksTable<TData, TValue>({
   title,
@@ -25,11 +26,11 @@ export function ApplicationsBenchmarksTable<TData, TValue>({
   version,
 }: {
   columns: {
-    [version: string]: ColumnDef<TData, TValue>[];
+    [key in Version]: ColumnDef<TData, TValue>[];
   };
   data: TData[];
   title: string;
-  version: string;
+  version: Version;
 }) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

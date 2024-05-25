@@ -1,6 +1,8 @@
 import "server-only";
 
-export async function fetchApplicationsBenchmarks({ url, version }: { url: string; version: string }) {
+import type { Version } from "~/types/version";
+
+export async function fetchApplicationsBenchmarks({ url, version }: { url: string; version: Version }) {
   return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/${url}`, {
     next: { revalidate: 180 }, // 3 minutes cache
   })

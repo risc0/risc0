@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { all } from "radash";
+import type { Version } from "~/types/version";
 import { fetchDatasheet } from "../_actions/fetch-datasheet";
 import { DatasheetTable } from "./datasheet-table";
 import { datasheetTableColumns } from "./datasheet-table-columns";
@@ -24,7 +25,7 @@ const FILENAMES_TO_TITLES = {
   ),
 } as const;
 
-export async function DatasheetContent({ version }: { version: string }) {
+export async function DatasheetContent({ version }: { version: Version }) {
   const urls = Object.keys(FILENAMES_TO_TITLES);
   const dataPromises = urls.map((url) => fetchDatasheet({ version, url }));
   const data: DatasheetTableSchema[][] = await all(dataPromises);
