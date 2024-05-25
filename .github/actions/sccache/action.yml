@@ -94,7 +94,7 @@ runs:
         runner.os == 'Linux' &&
         github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
         runner.environment == 'self-hosted' &&
-        (contains(runner.name, 'i-')) ! 'true'
+        contains(runner.name, 'i-')) ! 'true'
       env:
         LINUX_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper
       run: |
