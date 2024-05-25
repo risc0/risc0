@@ -5,7 +5,7 @@ export async function fetchDatasheet({ version, url }: { version: string; url: s
     headers: {
       Accept: "application/vnd.github.v3.raw",
     },
-    cache: "no-store",
+    next: { revalidate: 120 },
   })
     .then((response) => {
       if (!response.ok) {

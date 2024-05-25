@@ -3,10 +3,20 @@ import Link from "next/link";
 import { pick } from "radash";
 import { Suspense } from "react";
 import { replace } from "string-ts";
+import { VERSIONS } from "~/versions";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
 import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { FILENAMES_TO_TITLES } from "./_utils/constants";
+
+export function generateStaticParams() {
+  return VERSIONS.flatMap(({ value }) => {
+    return Object.keys(FILENAMES_TO_TITLES).map((filename) => ({
+      slug: replace(filename, ".csv", ""),
+      version: value,
+    }));
+  });
+}
 
 export function generateMetadata({ params }) {
   // read route params to generate metadata

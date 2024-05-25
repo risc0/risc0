@@ -1,7 +1,14 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+import { VERSIONS } from "~/versions";
 import { REPORTS } from "./_utils/constants";
+
+export function generateStaticParams() {
+  return VERSIONS.map(({ value }) => ({
+    version: value,
+  }));
+}
 
 export default function ReportsPage({ params }) {
   return (
