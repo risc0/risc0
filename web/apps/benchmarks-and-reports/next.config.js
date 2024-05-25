@@ -7,7 +7,6 @@ let config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  reactStrictMode: true,
   transpilePackages: ["@risc0/ui"],
   experimental: {
     caseSensitiveRoutes: true,
