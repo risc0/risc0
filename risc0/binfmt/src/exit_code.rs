@@ -96,7 +96,7 @@ impl ExitCode {
 
 impl Eq for ExitCode {}
 
-/// Error returned when a (system, user) exit code pair is an invalid
+/// Error returned when a `(system, user)` exit code pair is an invalid
 /// representation.
 #[derive(Debug, Copy, Clone)]
 pub struct InvalidExitCodeError(pub u32, pub u32);

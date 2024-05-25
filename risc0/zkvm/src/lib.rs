@@ -47,7 +47,7 @@
 //! The following feature flags are supported.
 //!
 //! Note that in order to use `risc0-zkvm` in the guest, you must disable the
-//! "prove" feature by setting `default-features = false`.
+//! default features by setting `default-features = false`.
 //!
 //! | Feature          | Target(s)         | Implies    | Description                                                                                                                                                  |
 //! | ---------------- | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -80,11 +80,8 @@ mod receipt_claim;
 pub mod serde;
 pub mod sha;
 
-/// Re-exports for recursion
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
-pub mod recursion {
-    pub use super::host::recursion::*;
-}
+pub use host::recursion;
 
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
@@ -136,7 +133,7 @@ pub use {
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        recursion::ALLOWED_CONTROL_ROOT,
+        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
     },
     risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS,
