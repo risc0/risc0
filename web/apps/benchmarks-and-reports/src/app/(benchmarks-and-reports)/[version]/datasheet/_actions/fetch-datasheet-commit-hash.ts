@@ -4,10 +4,7 @@ export async function fetchDatasheetCommitHash({ version }: { version: string })
   const response = await fetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/COMMIT_HASH.txt`,
     {
-      headers: {
-        Accept: "application/vnd.github.v3.raw",
-      },
-      cache: "no-store",
+      next: { revalidate: 180 }, // 3 minutes cache
     },
   );
   const responseText = await response.text();
