@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
 import { DATASHEET_DESCRIPTION } from "../_utils/constants";
 import { DatasheetContent } from "./_components/datasheet-content";
@@ -25,7 +26,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DatasheetPage({ params }) {
+export default function DatasheetPage({
+  params,
+}: {
+  params: {
+    version: Version;
+  };
+}) {
   return (
     <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-2">
       <Suspense fallback={<DatasheetSkeleton />}>

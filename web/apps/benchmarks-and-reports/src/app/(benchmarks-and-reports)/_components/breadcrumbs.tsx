@@ -15,13 +15,14 @@ import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { Fragment } from "react";
+import type { Version } from "~/types/version";
 
 // Routes you don't want to show up in the breadcrumb
 const HIDDEN_BREADCRUMB_ROUTES = ["applications-benchmarks"];
 
 export function Breadcrumbs() {
   const pathname = usePathname();
-  const { version } = useParams();
+  const { version } = useParams<{ version: Version }>();
   const paths = pathname.split("/").filter(Boolean);
   const mounted = useMounted();
   const [versionLocalStorage] = useLocalStorage<string | undefined>("version", undefined);

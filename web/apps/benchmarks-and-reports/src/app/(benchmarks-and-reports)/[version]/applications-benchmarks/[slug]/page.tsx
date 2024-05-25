@@ -3,26 +3,33 @@ import Link from "next/link";
 import { pick } from "radash";
 import { Suspense } from "react";
 import { replace } from "string-ts";
+import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
 import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
-import { FILENAMES_TO_TITLES } from "./_utils/constants";
+import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./_utils/constants";
 
 export function generateStaticParams() {
   return VERSIONS.flatMap(({ value }) => {
-    return Object.keys(FILENAMES_TO_TITLES).map((filename) => ({
+    return Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[value]).map((filename) => ({
       slug: replace(filename, ".csv", ""),
       version: value,
     }));
   });
 }
 
-export function generateMetadata({ params }) {
-  // read route params to generate metadata
-  const slug = params.slug ?? "";
+export function generateMetadata({
+  params,
+}: {
+  params: {
+    slug: string;
+    version: Version;
+  };
+}) {
+  const applicationsBenchmarks = APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version];
   const slugLabel = Object.values(
-    pick(FILENAMES_TO_TITLES, [`${slug}.csv`] as (keyof typeof FILENAMES_TO_TITLES)[]),
+    pick(applicationsBenchmarks, [`${params.slug}.csv` as keyof typeof applicationsBenchmarks]),
   )[0];
 
   return {
@@ -40,11 +47,18 @@ export function generateMetadata({ params }) {
   };
 }
 
-export default function ApplicationsBenchmarksPage({ params }) {
+export default function ApplicationsBenchmarksPage({
+  params,
+}: {
+  params: {
+    slug: string;
+    version: Version;
+  };
+}) {
   return (
     <Tabs className="mt-6" defaultValue={params.slug}>
       <TabsList>
-        {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
+        {Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version]).map((filename, index) => (
           <Link
             tabIndex={-1}
             key={filename}
@@ -52,7 +66,9 @@ export default function ApplicationsBenchmarksPage({ params }) {
             prefetch
             href={`/${params.version}/applications-benchmarks/${replace(filename, ".csv", "")}`}
           >
-            <TabsTrigger value={replace(filename, ".csv", "")}>{Object.values(FILENAMES_TO_TITLES)[index]}</TabsTrigger>
+            <TabsTrigger value={replace(filename, ".csv", "")}>
+              {Object.values(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version])[index]}
+            </TabsTrigger>
           </Link>
         ))}
       </TabsList>

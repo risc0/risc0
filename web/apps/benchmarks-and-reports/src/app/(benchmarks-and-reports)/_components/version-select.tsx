@@ -13,10 +13,11 @@ import {
 } from "@risc0/ui/select";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
 
 export function VersionSelect() {
-  const { version } = useParams();
+  const { version } = useParams<{ version: Version }>();
   const router = useRouter();
   const pathname = usePathname();
   const mounted = useMounted();
@@ -26,7 +27,7 @@ export function VersionSelect() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (version) {
-      setVersionLocalStorage(String(version));
+      setVersionLocalStorage(version);
     }
   }, []);
 
@@ -39,7 +40,7 @@ export function VersionSelect() {
   }
 
   return mounted && version ? (
-    <Select onValueChange={onValueChange} value={String(version)}>
+    <Select onValueChange={onValueChange} value={version}>
       <SelectTrigger size="sm">
         <SelectValue />
       </SelectTrigger>
