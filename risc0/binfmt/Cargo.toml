@@ -21,6 +21,7 @@ serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
 ] }
+borsh = { version = "1.5.0", default-features=false, features = ["derive"]}
 tracing = { version = "0.1", default-features = false }
 
 [features]

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::{collections::BTreeSet, string::String, vec::Vec};
+use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -37,7 +38,7 @@ use crate::{sha, MaybePruned, ReceiptClaim};
 ///
 /// A SegmentReceipt attests that a Segment was executed in a manner
 /// consistent with the [ReceiptClaim] included in the receipt.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct SegmentReceipt {

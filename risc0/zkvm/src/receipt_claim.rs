@@ -20,6 +20,7 @@
 //! memory).
 
 use alloc::{collections::VecDeque, vec::Vec};
+use borsh::{BorshDeserialize, BorshSerialize};
 use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, ensure};
@@ -45,7 +46,7 @@ use crate::{
 /// state (i.e. the state of memory). [ReceiptClaim] is a "Merkle-ized struct" supporting
 /// partial openings of the underlying fields from a hash commitment to the full structure. Also
 /// see [MaybePruned].
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReceiptClaim {
     /// The [SystemState] just before execution has begun.
@@ -211,14 +212,25 @@ pub enum Unknown {}
 
 impl Digestible for Unknown {
     fn digest<S: Sha256>(&self) -> Digest {
-        match *self { /* unreachable  */ }
+        unreachable!("unreachable")
+    }
+}
+
+impl BorshSerialize for Unknown {
+    fn serialize<W>(&self, _: &mut W) -> core::result::Result<(), borsh::io::Error> {
+        unreachable!("unreachable")
+    }
+}
+impl BorshDeserialize for Unknown {
+    fn deserialize_reader<R>(_: &mut R) -> core::result::Result<Self, borsh::io::Error> {
+        unreachable!("unreachable")
     }
 }
 
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
 /// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
 /// is accessible. It may become inhabited in a future release.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Input {
     // Private field to ensure this type cannot be constructed.
@@ -235,7 +247,7 @@ impl Digestible for Input {
 }
 
 /// Output field in the [ReceiptClaim], committing to a claimed journal and assumptions list.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Output {
     /// The journal committed to by the guest execution.
@@ -268,7 +280,7 @@ impl Digestible for Output {
 /// only a receipt proving that statement can be used to resolve and remove the assumption.
 ///
 /// [assumption]: https://dev.risczero.com/terminology#assumption
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize)]
 pub struct Assumption {
     /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
     /// be the digest of the claim for a different circuit such as an accelerator.
@@ -296,7 +308,7 @@ impl Digestible for Assumption {
 }
 
 /// A list of assumptions, each a [Digest] or populated value of an [Assumption].
-#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Assumptions(pub Vec<MaybePruned<Assumption>>);
 
@@ -424,7 +436,7 @@ impl From<Vec<Assumption>> for MaybePruned<Assumptions> {
 /// is a child node. Any field/node in the tree can be opened by providing the Merkle inclusion
 /// proof. When a subtree is pruned, the digest commits to the value of all contained fields.
 /// [ReceiptClaim] is the motivating example of this type of Merkle-ized struct.
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 pub enum MaybePruned<T>
 where
     T: Clone + Serialize,

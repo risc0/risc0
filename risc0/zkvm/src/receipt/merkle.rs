@@ -29,10 +29,10 @@ pub const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 use alloc::vec::Vec;
 
 use anyhow::{ensure, Result};
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
 use serde::{Deserialize, Serialize};
-
 /// Merkle tree implementation used in the recursion system to commit to a set of recursion
 /// programs, and to verify the inclusion of a given program in the set.
 #[non_exhaustive]
@@ -48,7 +48,7 @@ pub struct MerkleGroup {
 /// An inclusion proof for the [MerkleGroup]. Used to verify inclusion of a given recursion program
 /// in the committed set.
 #[non_exhaustive]
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct MerkleProof {
     /// Index of the leaf for which inclusion is being proven.
