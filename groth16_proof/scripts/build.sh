@@ -10,7 +10,7 @@ set -eoux
 # nlohmann/json
 #
 # This script is meant to be run via
-# scripts/build.sh from the `compact_proof` folder
+# scripts/build.sh from the `groth16_proof` folder
 
 # Run circom
 (cd groth16; circom --c --r1cs stark_verify.circom)

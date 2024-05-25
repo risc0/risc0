@@ -80,7 +80,7 @@ pub trait Prover {
 
     /// Prove zkVM execution of the specified ELF binary and using the specified [ProverOpts].
     ///
-    /// Use this method when you want to specify the receipt type you would like (e.g. compact or
+    /// Use this method when you want to specify the receipt type you would like (e.g. groth16 or
     /// succinct), or if you need to tweak other parameter in [ProverOpts].
     ///
     /// Default [VerifierContext] will be used.
@@ -114,22 +114,22 @@ pub trait Prover {
     /// Together, these receipts collectively prove a top-level
     /// [ReceiptClaim](crate::ReceiptClaim). This function can be used to compress all of the constituent
     /// receipts of a [CompositeReceipt](crate::CompositeReceipt) into a single
-    /// [SuccinctReceipt](crate::SuccinctReceipt) or [CompactReceipt](crate::CompactReceipt) that proves the same top-level claim.
+    /// [SuccinctReceipt](crate::SuccinctReceipt) or [Groth16Receipt](crate::Groth16Receipt) that proves the same top-level claim.
     ///
-    /// Compression from [CompactReceipt](crate::CompositeReceipt) to
+    /// Compression from [Groth16Receipt](crate::CompositeReceipt) to
     /// [SuccinctReceipt](crate::SuccinctReceipt) is accomplished by iterative application of the
     /// recursion programs including lift, join, and resolve.
     ///
     /// Compression from [SuccinctReceipt](crate::SuccinctReceipt) to
-    /// [CompactReceipt](crate::CompactReceipt) is accomplished by running a Groth16 recursive
+    /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
     /// verifier, refered to as the "STARK-to-SNARK" operation.
     ///
-    /// NOTE: Compression to [CompactReceipt](crate::CompactReceipt) is currently only supported on
+    /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
     /// x86 hosts, and requires Docker to be installed. See issue
     /// [#1749](https://github.com/risc0/risc0/issues/1749) for more information.
     ///
     /// If the receipt is already at least as compressed as the requested compression level (e.g.
-    /// it is already succinct or compact and a succinct receipt is required) this function is a
+    /// it is already succinct or groth16 and a succinct receipt is required) this function is a
     /// no-op. As a result, it is idempotent.
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt>;
 }
@@ -176,11 +176,11 @@ pub enum ReceiptKind {
     ///
     /// Succinct receipts are constant in size, with respect to the execution length.
     Succinct,
-    /// Request that a [CompactReceipt][crate::CompactReceipt] be generated.
+    /// Request that a [Groth16Receipt][crate::Groth16Receipt] be generated.
     ///
-    /// Compact receipts are proven using Groth16, are constant in size, and are the smallest
-    /// available receipt format. A compact receipt can be serialized to a few hundred bytes.
-    Compact,
+    /// Groth16 receipts are proven using Groth16, are constant in size, and are the smallest
+    /// available receipt format. A groth16 receipt can be serialized to a few hundred bytes.
+    Groth16,
 }
 
 impl Default for ProverOpts {
@@ -232,15 +232,15 @@ impl ProverOpts {
         }
     }
 
-    /// Choose the prover that generates compact, Groth16 receipts, which are constant size in the
-    /// length of the execution and small enough to verify in smart contract systems.
+    /// Choose the prover that generates Groth16 receipts which are constant size in the length of
+    /// the execution and small enough to verify on blockchains, like Ethereum.
     ///
     /// Only supported for x86_64 Linux
-    pub fn compact() -> Self {
+    pub fn groth16() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
-            receipt_kind: ReceiptKind::Compact,
+            receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
         }
     }

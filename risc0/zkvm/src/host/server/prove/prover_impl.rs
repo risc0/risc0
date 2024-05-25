@@ -129,17 +129,17 @@ impl ProverServer for ProverImpl {
                 session.journal.clone().unwrap_or_default().bytes,
             ),
             ReceiptKind::Succinct => {
-                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
+                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
                 Receipt::new(
                     InnerReceipt::Succinct(succinct_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
                 )
             }
-            ReceiptKind::Compact => {
-                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
-                let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+            ReceiptKind::Groth16 => {
+                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
+                let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
                 Receipt::new(
-                    InnerReceipt::Compact(compact_receipt),
+                    InnerReceipt::Groth16(groth16_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
                 )
             }
