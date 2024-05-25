@@ -2,10 +2,7 @@ import "server-only";
 
 export async function fetchDatasheet({ version, url }: { version: string; url: string }) {
   return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`, {
-    headers: {
-      Accept: "application/vnd.github.v3.raw",
-    },
-    next: { revalidate: 120 },
+    next: { revalidate: 180 }, // 3 minutes cache
   })
     .then((response) => {
       if (!response.ok) {

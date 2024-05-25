@@ -4,10 +4,7 @@ export async function fetchApplicationsBenchmarksCommitHash({ version }: { versi
   const response = await fetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/COMMIT_HASH.txt`,
     {
-      headers: {
-        Accept: "application/vnd.github.v3.raw",
-      },
-      next: { revalidate: 900 },
+      next: { revalidate: 180 }, // 3 minutes cache
     },
   );
   const responseText = await response.text();

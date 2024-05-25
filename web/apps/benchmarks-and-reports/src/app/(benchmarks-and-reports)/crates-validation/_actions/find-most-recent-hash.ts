@@ -4,10 +4,7 @@ export async function findMostRecentHash() {
   const response = await fetch(
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
-      headers: {
-        Accept: "application/vnd.github.v3.raw",
-      },
-      next: { revalidate: 900 },
+      next: { revalidate: 180 }, // 3 minutes cache
     },
   );
   const responseText = await response.text();

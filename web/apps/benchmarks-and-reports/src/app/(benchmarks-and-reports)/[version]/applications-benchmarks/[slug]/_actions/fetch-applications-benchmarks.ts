@@ -2,10 +2,7 @@ import "server-only";
 
 export async function fetchApplicationsBenchmarks({ url, version }: { url: string; version: string }) {
   return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/${url}`, {
-    headers: {
-      Accept: "application/vnd.github.v3.raw",
-    },
-    next: { revalidate: 900 },
+    next: { revalidate: 180 }, // 3 minutes cache
   })
     .then((response) => {
       if (!response.ok) {

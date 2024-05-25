@@ -1,16 +1,13 @@
+import { VERSIONS } from "~/versions";
+
 export const baseUrl = "https://benchmarks.risczero.com";
 
-// @TODO: make this smarter
+// @TODO: add individual tabs for app benchmarks?
 export default async function sitemap() {
   const routes = [
     "/benchmarks",
     "/crates-validation",
-    "/main",
-    "/main/applications-benchmarks",
-    "/main/datasheet",
-    "/release-0.21",
-    "/release-0.21/applications-benchmarks",
-    "/release-0.21/datasheet",
+    ...VERSIONS.flatMap(({ value }) => [`/${value}`, `/${value}/applications-benchmarks`, `/${value}/datasheet`]),
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString().split("T")[0],
