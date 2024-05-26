@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     template: "%s | RISC Zero Benchmarks & Reports",
     default: "RISC Zero Benchmarks & Reports",
   },
+  keywords: ["risczero", "zero knowledge proofs", "zkvm", "benchmarks", "zk", "reports", "risc0", "risc0.com"],
   metadataBase: new URL("https://benchmarks.risczero.com"),
   description: "Get to market fast with dramatically lower development costs on the first general purpose zkVM",
   openGraph: {
