@@ -1,12 +1,19 @@
+import { tryit } from "radash";
 import "server-only";
 
 export async function findMostRecentHash() {
-  const response = await fetch(
+  const [error, response] = await tryit(fetch)(
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
       next: { revalidate: 180 }, // 3 minutes cache
     },
   );
+
+  // error handling
+  if (error || !response.ok) {
+    throw error || new Error("Failed to fetch");
+  }
+
   const responseText = await response.text();
 
   // Find the most recent timestamp
@@ -14,6 +21,5 @@ export async function findMostRecentHash() {
     prev.timestamp > current.timestamp ? prev : current,
   );
 
-  // Retrieve the hash related to the most recent timestamp
   return mostRecent.hash;
 }

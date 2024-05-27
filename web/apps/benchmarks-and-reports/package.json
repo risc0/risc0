@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "NODE_NO_WARNINGS=1 next build",
     "build:analyze": "ANALYZE=true next build",
     "dev": "NODE_NO_WARNINGS=1 next dev --turbo",
     "start": "next start",

@@ -10,10 +10,6 @@ export async function ApplicationsBenchmarksCommitHashButton({
 }) {
   const commitHash = await fetchApplicationsBenchmarksCommitHash({ version });
 
-  if (!commitHash) {
-    return null;
-  }
-
   return (
     <CopyButton size="sm" variant="ghost" value={commitHash}>
       Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>

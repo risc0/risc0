@@ -6,10 +6,6 @@ import { fetchDatasheetCommitHash } from "../_actions/fetch-datasheet-commit-has
 export async function DatasheetCommitHashButton({ version }: { version: Version }) {
   const commitHash = await fetchDatasheetCommitHash({ version });
 
-  if (!commitHash) {
-    return null;
-  }
-
   return (
     <CopyButton size="sm" variant="ghost" value={commitHash}>
       Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
