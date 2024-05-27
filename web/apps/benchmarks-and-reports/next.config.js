@@ -1,30 +1,14 @@
 await import("./src/env.js");
+
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { nextConfigBase } from "@risc0/ui/config/next.config.base.js";
+import deepmerge from "deepmerge";
 import { latestVersion } from "./src/versions.js";
 
 /** @type {import("next").NextConfig} */
-let config = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  transpilePackages: ["@risc0/ui"],
+let config = deepmerge(nextConfigBase, {
   experimental: {
-    caseSensitiveRoutes: true,
-    reactCompiler: false,
-    staleTimes: {
-      dynamic: 30,
-      static: 180,
-    },
-  },
-  images: {
-    dangerouslyAllowSVG: true,
-    contentDispositionType: "attachment",
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-  },
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
+    reactCompiler: false, // turn on when supported in react-table
   },
 
   // biome-ignore lint/suspicious/useAwait: needs to be async
@@ -42,7 +26,7 @@ let config = {
       },
     ];
   },
-};
+});
 
 if (process.env.ANALYZE === "true") {
   config = withBundleAnalyzer({

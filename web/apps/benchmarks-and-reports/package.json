@@ -6,7 +6,7 @@
   "scripts": {
     "build": "next build",
     "build:analyze": "ANALYZE=true next build",
-    "dev": "next dev --turbo",
+    "dev": "NODE_NO_WARNINGS=1 next dev --turbo",
     "start": "next start",
     "test": "bun test spec",
     "typecheck": "tsc"

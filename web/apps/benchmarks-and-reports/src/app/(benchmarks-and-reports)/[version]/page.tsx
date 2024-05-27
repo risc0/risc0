@@ -1,6 +1,7 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+import { useRedirectIfWrongVersion } from "~/hooks/use-redirect-if-wrong-version";
 import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
 import { REPORTS } from "./_utils/constants";
@@ -18,6 +19,8 @@ export default function ReportsPage({
     version: Version;
   };
 }) {
+  useRedirectIfWrongVersion(params.version);
+
   return (
     <div className="container grid max-w-screen-3xl grid-cols-1 gap-10 pt-4 lg:grid-cols-2">
       {REPORTS.map(({ label, href, description, showVersionSelect }, index) => (
