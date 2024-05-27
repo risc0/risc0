@@ -1,8 +1,15 @@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@risc0/ui/command";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import Link from "next/link";
+import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 
-export function ChartsList({ charts, selectedPlatform }) {
+export function BenchmarksList({
+  charts,
+  selectedPlatform,
+}: {
+  charts: { name: string; dataSet: Map<string, FormattedDataSetEntry[]> }[];
+  selectedPlatform: string;
+}) {
   return (
     <Command className="border">
       <CommandInput className="capitalize" placeholder={`${joinWords(selectedPlatform)} Benchmarks`} />

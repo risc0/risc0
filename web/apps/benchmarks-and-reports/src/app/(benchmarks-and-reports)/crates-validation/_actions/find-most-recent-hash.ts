@@ -1,7 +1,8 @@
-import { tryit } from "radash";
 import "server-only";
 
-export async function findMostRecentHash() {
+import { tryit } from "radash";
+
+export async function findMostRecentHash(): Promise<string> {
   const [error, response] = await tryit(fetch)(
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
