@@ -194,7 +194,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
 
             let result;
             if u32arg[2] != 0 {
-                // AND and combine [a, b, 0, 0] & [c, d, 0, 0] -> [(a&c) + ((b&d) << 16), 0, 0,
+                // AND combine [a, b, 0, 0] & [c, d, 0, 0] -> [(a&c) + ((b&d) << 16), 0, 0,
                 // 0]
                 result = FpExt::new(
                     Fp::from(
