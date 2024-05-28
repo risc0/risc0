@@ -45,8 +45,8 @@ guest: gcc platform
 
 .PHONY: execute
 execute: guest
-	RISC0_DEV_MODE=true cargo run
+	RISC0_DEV_MODE=true cargo run -p c-guest-host
 
 .PHONY: prove
 prove: guest
-	cargo run
+	cargo run -p c-guest-host
