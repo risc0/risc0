@@ -63,7 +63,6 @@ export default function ApplicationsBenchmarksPage({
             tabIndex={-1}
             key={filename}
             replace
-            prefetch
             href={`/${params.version}/applications-benchmarks/${replace(filename, ".csv", "")}`}
           >
             <TabsTrigger value={replace(filename, ".csv", "")}>
