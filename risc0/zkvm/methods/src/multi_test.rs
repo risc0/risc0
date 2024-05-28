@@ -47,6 +47,7 @@ pub enum MultiTestSpec {
     Syscall {
         count: u32,
     },
+    SyscallWords,
     DoRandom,
     SysInput(Digest),
     SysRead {
@@ -58,8 +59,12 @@ pub enum MultiTestSpec {
     },
     SysVerify(Vec<(Digest, Vec<u8>)>),
     SysVerifyIntegrity {
-        // Define this field as a serialized vector to avoid circular dependency issues.
+        // ReceiptClaim: Field is serialized to avoid circular dependency issues.
         claim_words: Vec<u32>,
+    },
+    SysVerifyAssumption {
+        // Assumption: Field is serialized to avoid circular dependency issues.
+        assumption_words: Vec<u32>,
     },
     Echo {
         bytes: Vec<u8>,
@@ -93,3 +98,4 @@ pub enum MultiTestSpec {
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
+declare_syscall!(pub SYS_MULTI_TEST_WORDS);
