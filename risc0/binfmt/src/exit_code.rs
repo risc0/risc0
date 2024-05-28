@@ -56,6 +56,8 @@ pub enum ExitCode {
 }
 
 impl ExitCode {
+    /// Convert this [ExitCode] into a pair representation, where the first number is the "system"
+    /// part, and the second is the "user" part. E.g. Halted(255) -> (0, 255)
     pub fn into_pair(self) -> (u32, u32) {
         match self {
             ExitCode::Halted(user_exit) => (0, user_exit),
@@ -65,6 +67,8 @@ impl ExitCode {
         }
     }
 
+    /// Convert this [ExitCode] from its pair representation, where the first number is the "system"
+    /// part, and the second is the "user" part. E.g. (0, 255) -> Halted(255)
     pub fn from_pair(sys_exit: u32, user_exit: u32) -> Result<ExitCode, InvalidExitCodeError> {
         match sys_exit {
             0 => Ok(ExitCode::Halted(user_exit)),
@@ -74,6 +78,9 @@ impl ExitCode {
         }
     }
 
+    /// Whether the verifier should expect a non-empty output field. Exit codes Halted and Paused
+    /// produce can produce a non-empty outputs, whereas system initiated exits like SystemSplit do
+    /// not.
     pub fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,
@@ -89,7 +96,7 @@ impl ExitCode {
 
 impl Eq for ExitCode {}
 
-/// Error returned when a (system, user) exit code pair is an invalid
+/// Error returned when a `(system, user)` exit code pair is an invalid
 /// representation.
 #[derive(Debug, Copy, Clone)]
 pub struct InvalidExitCodeError(pub u32, pub u32);
