@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use risc0_circuit_rv32im::prove::SegmentProver;
 
 use super::ProverServer;
@@ -25,8 +25,9 @@ use crate::{
     receipt::{
         segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
+    receipt_claim::{MaybePruned, Merge, Unknown},
     sha::Digestible,
-    CompositeReceipt, ProverOpts, Receipt, Segment, Session, VerifierContext,
+    CompositeReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -64,16 +65,48 @@ impl ProverServer for ProverImpl {
                 hook.on_post_prove_segment(&segment);
             }
         }
-        // TODO(#982): Support unresolved assumptions here.
-        let assumptions = session
+
+        let (assumptions, session_assumption_receipts) = session
             .assumptions
             .iter()
-            .map(|x| Ok(x.as_receipt()?.inner.clone()))
-            .collect::<Result<Vec<_>>>()?;
+            .cloned()
+            .unzip::<_, _, Vec<_>, Vec<_>>();
+
+        // Merge the output, including journal digest and assumptions, into the last segment.
+        let last_segment = segments.last_mut().ok_or(anyhow!("session is empty"))?;
+        last_segment
+            .claim
+            .output
+            .merge_with(
+                &session
+                    .journal
+                    .as_ref()
+                    .map(|journal| Output {
+                        journal: MaybePruned::Pruned(journal.digest()),
+                        assumptions: assumptions.into(),
+                    })
+                    .into(),
+            )
+            .context("failed to merge output into final segment claim")?;
+
+        let verifier_parameters = ctx
+            .composite_verifier_parameters()
+            .ok_or(anyhow!(
+                "composite receipt verifier parameters missing from context"
+            ))?
+            .digest();
+
+        // Collect the proven assumption receipts from the Session.
+        // TODO(#982): Support unresolved assumptions here.
+        let assumption_receipts = session_assumption_receipts
+            .into_iter()
+            .map(|a| a.into_receipt())
+            .collect::<Result<_>>()?;
+
         let composite_receipt = CompositeReceipt {
             segments,
-            assumptions,
-            journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
+            assumption_receipts,
+            verifier_parameters,
         };
 
         // Verify the receipt to catch if something is broken in the proving process.
@@ -96,17 +129,17 @@ impl ProverServer for ProverImpl {
                 session.journal.clone().unwrap_or_default().bytes,
             ),
             ReceiptKind::Succinct => {
-                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
+                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
                 Receipt::new(
                     InnerReceipt::Succinct(succinct_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
                 )
             }
-            ReceiptKind::Compact => {
-                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
-                let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+            ReceiptKind::Groth16 => {
+                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
+                let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
                 Receipt::new(
-                    InnerReceipt::Compact(compact_receipt),
+                    InnerReceipt::Groth16(groth16_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
                 )
             }
@@ -137,34 +170,49 @@ impl ProverServer for ProverImpl {
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();
 
+        let verifier_parameters = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or(anyhow!(
+                "segment receipt verifier parameters missing from context"
+            ))?
+            .digest();
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
             hashfn: self.opts.hashfn.clone(),
             claim,
+            verifier_parameters,
         };
         receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
     }
 
-    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
         lift(receipt)
     }
 
-    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+        b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         join(a, b)
     }
 
     fn resolve(
         &self,
-        conditional: &SuccinctReceipt,
-        assumption: &SuccinctReceipt,
-    ) -> Result<SuccinctReceipt> {
+        conditional: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         resolve(conditional, assumption)
     }
 
-    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn identity_p254(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         identity_p254(a)
     }
 }

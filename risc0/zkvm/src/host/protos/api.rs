@@ -2,7 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerRequest {
-    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7")]
+    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
 /// Nested message and enum types in `ServerRequest`.
@@ -24,6 +24,8 @@ pub mod server_request {
         IdentityP254(super::IdentityP254Request),
         #[prost(message, tag = "7")]
         Resolve(super::ResolveRequest),
+        #[prost(message, tag = "8")]
+        Compress(super::CompressRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -238,6 +240,39 @@ pub struct IdentityP254Result {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompressRequest {
+    #[prost(message, optional, tag = "1")]
+    pub opts: ::core::option::Option<ProverOpts>,
+    #[prost(message, optional, tag = "2")]
+    pub receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "3")]
+    pub receipt_out: ::core::option::Option<AssetRequest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompressReply {
+    #[prost(oneof = "compress_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<compress_reply::Kind>,
+}
+/// Nested message and enum types in `CompressReply`.
+pub mod compress_reply {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        Ok(super::CompressResult),
+        #[prost(message, tag = "2")]
+        Error(super::GenericError),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CompressResult {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
@@ -262,25 +297,25 @@ pub struct ExecutorEnv {
     #[prost(string, tag = "10")]
     pub pprof_out: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "11")]
-    pub assumptions: ::prost::alloc::vec::Vec<Assumption>,
+    pub assumptions: ::prost::alloc::vec::Vec<AssumptionReceipt>,
     #[prost(string, tag = "12")]
     pub segment_path: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Assumption {
-    #[prost(oneof = "assumption::Kind", tags = "1, 2")]
-    pub kind: ::core::option::Option<assumption::Kind>,
+pub struct AssumptionReceipt {
+    #[prost(oneof = "assumption_receipt::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<assumption_receipt::Kind>,
 }
-/// Nested message and enum types in `Assumption`.
-pub mod assumption {
+/// Nested message and enum types in `AssumptionReceipt`.
+pub mod assumption_receipt {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
-        /// Receipt
+        /// InnerReceipt
         #[prost(message, tag = "1")]
         Proven(super::Asset),
-        /// MaybePruned<ReceiptClaim>
+        /// Assumption
         #[prost(message, tag = "2")]
         Unresolved(super::Asset),
     }
@@ -294,6 +329,8 @@ pub struct ProverOpts {
     pub prove_guest_errors: bool,
     #[prost(enumeration = "ReceiptKind", tag = "3")]
     pub receipt_kind: i32,
+    #[prost(message, repeated, tag = "4")]
+    pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -557,7 +594,7 @@ pub struct GenericError {
 pub enum ReceiptKind {
     Composite = 0,
     Succinct = 1,
-    Compact = 2,
+    Groth16 = 2,
 }
 impl ReceiptKind {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -568,7 +605,7 @@ impl ReceiptKind {
         match self {
             ReceiptKind::Composite => "COMPOSITE",
             ReceiptKind::Succinct => "SUCCINCT",
-            ReceiptKind::Compact => "COMPACT",
+            ReceiptKind::Groth16 => "GROTH16",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -576,7 +613,7 @@ impl ReceiptKind {
         match value {
             "COMPOSITE" => Some(Self::Composite),
             "SUCCINCT" => Some(Self::Succinct),
-            "COMPACT" => Some(Self::Compact),
+            "GROTH16" => Some(Self::Groth16),
             _ => None,
         }
     }
