@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { BENCHMARKS_DESCRIPTION } from "../[version]/_utils/constants";
 import { Benchmarks } from "./_components/benchmarks";
 
+export const experimental_ppr = true;
+
 export const metadata: Metadata = {
   title: "Benchmarks",
   description: BENCHMARKS_DESCRIPTION,
