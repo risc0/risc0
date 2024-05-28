@@ -496,7 +496,7 @@ jobs:
           key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-build -F docker
-      - run: cargo test -p risc0-groth16 -F docker --release
+      - run: cargo test -p risc0-groth16 -F prove --release
       - run: cargo test -p risc0-zkvm -F docker -F prove -- docker
         env:
           RISC0_USE_DOCKER: "1"
