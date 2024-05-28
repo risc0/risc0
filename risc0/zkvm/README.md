@@ -30,7 +30,7 @@ find helpful, especially if you're new to the RISC Zero zkVM. These include:
 The following feature flags are supported.
 
 Note that in order to use `risc0-zkvm` in the guest, you must disable the
-"prove" feature by setting `default-features = false`.
+default features by setting `default-features = false`.
 
 | Feature          | Target(s)         | Implies    | Description                                                                                                                                                  |
 | ---------------- | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |

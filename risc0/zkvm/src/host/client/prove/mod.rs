@@ -129,7 +129,7 @@ pub trait Prover {
     /// [#1749](https://github.com/risc0/risc0/issues/1749) for more information.
     ///
     /// If the receipt is already at least as compressed as the requested compression level (e.g.
-    /// it is already succinct or groth16 and a succinct receipt is required) this function is a
+    /// it is already succinct or Groth16 and a succinct receipt is required) this function is a
     /// no-op. As a result, it is idempotent.
     fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt>;
 }
@@ -179,7 +179,7 @@ pub enum ReceiptKind {
     /// Request that a [Groth16Receipt][crate::Groth16Receipt] be generated.
     ///
     /// Groth16 receipts are proven using Groth16, are constant in size, and are the smallest
-    /// available receipt format. A groth16 receipt can be serialized to a few hundred bytes.
+    /// available receipt format. A Groth16 receipt can be serialized to a few hundred bytes.
     Groth16,
 }
 
@@ -235,7 +235,7 @@ impl ProverOpts {
     /// Choose the prover that generates Groth16 receipts which are constant size in the length of
     /// the execution and small enough to verify on blockchains, like Ethereum.
     ///
-    /// Only supported for x86_64 Linux
+    /// Only supported for x86_64 Linux with Docker installed.
     pub fn groth16() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
