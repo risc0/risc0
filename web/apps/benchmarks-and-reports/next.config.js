@@ -9,7 +9,7 @@ import { latestVersion } from "./src/versions.js";
 let config = deepmerge(nextConfigBase, {
   experimental: {
     reactCompiler: false, // turn on when supported in react-table
-    ppr: "incremental",
+    ppr: true,
   },
 
   // biome-ignore lint/suspicious/useAwait: needs to be async

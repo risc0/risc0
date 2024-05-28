@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 
-export const experimental_ppr = true;
-
 export const metadata: Metadata = {
   title: "App is in Maintenance",
 };
