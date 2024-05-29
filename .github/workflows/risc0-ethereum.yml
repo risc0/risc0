@@ -99,7 +99,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'bonsai-foundry-template'
-          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
+          # DO NOT MERGE: Change this ref to 'dev'
+          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || '63039263ab40ec45b021741c620945fb45c36ccb' }}
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
         with:
