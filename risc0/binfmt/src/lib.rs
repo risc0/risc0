@@ -15,6 +15,9 @@
 //! Manages formatted binaries used by the RISC Zero zkVM
 
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
+#![deny(missing_docs)]
+#![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 mod elf;
 mod exit_code;

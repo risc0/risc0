@@ -216,6 +216,7 @@ impl Digestible for Unknown {
 }
 
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
+///
 /// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
 /// is accessible. It may become inhabited in a future release.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -263,9 +264,11 @@ impl Digestible for Output {
     }
 }
 
-/// An [assumption] made in the course of proving program execution. Assumptions are generated when
-/// the guest makes a recursive verification call. Each assumption commits the statement, such that
-/// only a receipt proving that statement can be used to resolve and remove the assumption.
+/// An [assumption] made in the course of proving program execution.
+///
+/// Assumptions are generated when the guest makes a recursive verification call. Each assumption
+/// commits the statement, such that only a receipt proving that statement can be used to resolve
+/// and remove the assumption.
 ///
 /// [assumption]: https://dev.risczero.com/terminology#assumption
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -277,9 +280,10 @@ pub struct Assumption {
     /// Commitment to the set of [recursion programs] that can be used to resolve this assumption.
     ///
     /// Binding the set of recursion programs also binds the circuits, and creates an assumption
-    /// resolved by independent set of circuits (e.g. keccak or Groth16). Proofs of these external
-    /// claims are verified by a "lift" program implemented for the recursion VM which brings the
-    /// claim into the recursion system. This lift program is committed to in the control root.
+    /// resolved by independent set of circuits (e.g. keccak or Groth16 verify). Proofs of these
+    /// external claims are verified by a "lift" program implemented for the recursion VM which
+    /// brings the claim into the recursion system. This lift program is committed to in the
+    /// control root.
     ///
     /// A special value of all zeroes indicates "self-composition", where the control root used to
     /// verify this claim is also used to verify the assumption.
