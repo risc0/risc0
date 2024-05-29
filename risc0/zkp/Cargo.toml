@@ -46,6 +46,11 @@ rand = { version = "0.8", features = ["small_rng"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+# NOTE: cuda and metal are excluded because their build scripts require external tools.
+features = ["prove", "std"]
+
 [features]
 default = []
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
@@ -61,3 +66,4 @@ prove = [
   "std",
 ]
 std = ["anyhow/std"]
+circuit_debug = []
