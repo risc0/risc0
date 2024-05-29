@@ -8,7 +8,7 @@ This example is a template of a basic program written in C.
 
 First, make sure [rustup] is installed.
 
-Then, install the [Risc Zero toolchain](https://dev.risczero.com/api/zkvm/install#install).
+Then, install the [Risc Zero toolchain](https://dev.risczero.com/api/zkvm/install).
 
 To build all methods and execute the method within the zkVM, run the following
 command:
