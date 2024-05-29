@@ -167,6 +167,7 @@ impl MerkleProof {
 }
 
 #[cfg(test)]
+#[cfg(feature = "prove")]
 mod tests {
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
