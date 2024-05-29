@@ -1,8 +1,8 @@
 <p align="center">
-  <a href="https://risczero.com"><img src="website/static/img/logo.png" height="100"></a>
+  <a href="https://www.risczero.com/"><img src="website/static/img/logo.png" height="100"></a>
 </p>
 
-<h1 align="center"><a href="https://risczero.com">RISC Zero</a></h1>
+<h1 align="center"><a href="https://www.risczero.com/">RISC Zero</a></h1>
 
 [![Crates.io][crates-badge]][crates-url]
 [![MIT licensed][licence-badge]][licence-url]
