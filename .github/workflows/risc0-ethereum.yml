@@ -46,6 +46,7 @@ jobs:
           filters: |
             base: &base
               - .github/actions/**
+              - .github/cargo_local_patch.py
               - .github/workflows/risc0-ethereum.yml
               - Cargo.toml
               - rust-toolchain.toml
