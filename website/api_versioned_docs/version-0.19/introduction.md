@@ -37,7 +37,7 @@ Key among these use cases are:
 
 To enable ZK builders to thrive, we're working on two core products: the [zkVM] and [Bonsai].
 
-[startup]: https://risczero.com/news/series-a
+[startup]: https://www.risczero.com/news/series-a
 [zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
 [our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
 [RISC Zero]: https://risczero.com
@@ -72,9 +72,9 @@ These applications include:
 
 [April 2022]: https://www.risczero.com/news/announce
 [JSON]: https://github.com/risc0/risc0/tree/release-0.19/examples/json
-[Where's Waldo]: https://risczero.com/news/waldo
+[Where's Waldo]: https://www.risczero.com/news/waldo
 [ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess
-[ZK Proof of Exploit]: https://risczero.com/news/zkpoex
+[ZK Proof of Exploit]: https://www.risczero.com/news/zkpoex
 [ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.19/examples/ecdsa
 
 These examples are all made possible by **leveraging a mature software ecosystem**: over 70% of the [top 1000 Rust crates] work out-of-the-box in the zkVM.
@@ -87,7 +87,7 @@ Given the ease of development and the performance, the zkVM is the clear choice 
 
 [top 1000 Rust crates]: https://reports.risczero.com/crates-validation
 [performance]: https://dev.risczero.com/zkvm/benchmarks
-[continuations]: https://risczero.com/news/continuations
+[continuations]: https://www.risczero.com/news/continuations
 
 ## Connect with us
 

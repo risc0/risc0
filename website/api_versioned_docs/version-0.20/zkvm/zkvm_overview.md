@@ -126,5 +126,5 @@ Read the [article][zeth].
 [session]: /terminology#session
 [verify]: /terminology#verify
 [waldo]: https://www.risczero.com/news/waldo
-[zeth]: https://risczero.com/news/zeth-release
+[zeth]: https://www.risczero.com/news/zeth-release
 [zkVM]: /terminology#zero-knowledge-virtual-machine-zkvm

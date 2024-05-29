@@ -47,17 +47,17 @@ In addition to being far easier to build on, we're also delivering on
 **Ready to start building?** <br/>
 Check out our [Getting Started] page.
 
-[Bonsai Pay]: https://risczero.com/news/bonsai-pay
+[Bonsai Pay]: https://www.risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/release-0.21/examples/chess
-[continuations]: https://risczero.com/news/continuations
+[continuations]: https://www.risczero.com/news/continuations
 [crate-validation]: https://reports.risczero.com/crates-validation
 [ecdsa]: https://github.com/risc0/risc0/tree/release-0.21/examples/ecdsa
 [Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/release-0.21/examples/json
 [optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
 [performance]: ./zkvm/benchmarks.md
-[waldo]: https://risczero.com/news/waldo
-[Zeth]: https://risczero.com/news/zeth-release
+[waldo]: https://www.risczero.com/news/waldo
+[Zeth]: https://www.risczero.com/news/zeth-release
 [zk-coprocessors-tweet]: https://twitter.com/RiscZero/status/1677316664772132864
-[zkpoex]: https://risczero.com/news/zkpoex
+[zkpoex]: https://www.risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm_overview.md

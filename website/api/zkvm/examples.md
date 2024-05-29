@@ -58,5 +58,5 @@ cargo run --release
 [example-zkevm]: https://github.com/risc0/risc0/tree/main/examples/zkevm-demo
 [examples-dir]: https://github.com/risc0/risc0/tree/main/examples
 [install]: ./install.md
-[waldo-blog]: https://risczero.com/news/waldo
-[zkpoex]: https://risczero.com/news/zkpoex
+[waldo-blog]: https://www.risczero.com/news/waldo
+[zkpoex]: https://www.risczero.com/news/zkpoex

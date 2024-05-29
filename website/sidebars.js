@@ -11,7 +11,7 @@ export default {
     {
       type: "link",
       label: "Articles",
-      href: "https://risczero.com/blog",
+      href: "https://www.risczero.com/blog",
     },
     "studyclub",
     {

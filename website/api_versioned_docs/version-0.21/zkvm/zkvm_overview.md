@@ -97,5 +97,5 @@ Check out our [Bonsai on Eth] page.
 [use cases]: ../use-cases
 [verify]: /terminology#verify
 [waldo]: https://www.risczero.com/news/waldo
-[zeth]: https://risczero.com/news/zeth-release
+[zeth]: https://www.risczero.com/news/zeth-release
 [zkVM]: /terminology#zero-knowledge-virtual-machine-zkvm

@@ -124,7 +124,7 @@ export default async function createConfigAsync() {
           logo: {
             alt: "RISC Zero Logo",
             src: "img/logo.png",
-            href: "https://risczero.com/",
+            href: "https://www.risczero.com/",
           },
           items: [
             {

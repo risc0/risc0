@@ -125,7 +125,7 @@ list][mailing-list] to get our latest announcements.
 
 [Bonsai]: ./bonsai/bonsai-overview.md
 [chess]: https://github.com/risc0/risc0/tree/release-0.20/examples/chess
-[continuations]: https://risczero.com/news/continuations
+[continuations]: https://www.risczero.com/news/continuations
 [crate-validation]: https://reports.risczero.com/crates-validation
 [discord]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-0.20/examples/ecdsa
@@ -138,10 +138,10 @@ list][mailing-list] to get our latest announcements.
 [risc0-repo]: https://github.com/risc0/risc0
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [rust-libraries]: https://github.com/risc0/risc0#rust-libraries
-[startup]: https://risczero.com/news/series-a
+[startup]: https://www.risczero.com/news/series-a
 [twitter]: https://twitter.com/risczero
-[waldo]: https://risczero.com/news/waldo
+[waldo]: https://www.risczero.com/news/waldo
 [YouTube]: https://www.youtube.com/@risczero
 [zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
-[zkpoex]: https://risczero.com/news/zkpoex
+[zkpoex]: https://www.risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm_overview.md

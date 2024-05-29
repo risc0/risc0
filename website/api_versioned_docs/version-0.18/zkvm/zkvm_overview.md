@@ -24,7 +24,7 @@ Our demos show how to:
 [prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess#zk-checkmate
 [proofs about private data]: https://github.com/risc0/risc0/tree/release-0.18/examples/json#json-example
 [prove you can find Waldo]: https://www.risczero.com/news/waldo
-[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
+[prove correct construction of Ethereum blocks]: https://www.risczero.com/news/zeth-release
 
 On any other proving platform, building any of these projects requires starting from the ground up.
 By letting developers use the primitives they need, the RISC Zero zkVM makes verifiable software development a practical reality for projects of all scales.
@@ -80,7 +80,7 @@ _Looking for information about blockchain integration?_ <br/>
 Check out [Bonsai].
 
 _Curious about Zeth?_<br/>
-Read the [article](https://risczero.com/news/zeth-release).
+Read the [article](https://www.risczero.com/news/zeth-release).
 
 [cargo]: https://doc.rust-lang.org/cargo/index.html
 [imageID]: /terminology#image-id

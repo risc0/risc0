@@ -305,7 +305,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [recursion program]: #recursion-program
 [RISC-V]: #risc-v
 [RISC-V Circuit]: #risc-v-circuit
-[RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
+[RISC Zero's ZKP Whitepaper]: https://www.risczero.com/proof-system-in-detail.pdf
 [Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [seal]: #seal
 [Segment]: #segment

@@ -22,7 +22,7 @@ Or find us on [Discord] and ask us there!
 _Looking for documentation?_<br/>
 Check out the [dev docs].
 
-[blog]: https://risczero.com/blog
+[blog]: https://www.risczero.com/blog
 [conference talks and podcast appearances]: https://www.youtube.com/playlist?list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1
 [Dev Docs]: ./zkvm
 [Discord]: https://discord.gg/risczero

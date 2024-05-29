@@ -76,8 +76,8 @@ In addition to the links in the sidebar, we recommend the following resources:
 [guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [ImageID]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
-[news]: https://risczero.com/news
-[open-source]: https://risczero.com/news/open-source
+[news]: https://www.risczero.com/news
+[open-source]: https://www.risczero.com/news/open-source
 [proof composition]: ../terminology#composition
 [quickstart]: /api/zkvm/quickstart
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

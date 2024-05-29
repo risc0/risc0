@@ -11,8 +11,8 @@
 [Hello World]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world
 [JSON]: https://github.com/risc0/risc0/tree/release-0.19/examples/json
 [Where's Waldo]: https://github.com/risc0/risc0/tree/release-0.19/examples/waldo
-[Where's Waldo blog]: https://risczero.com/news/waldo
+[Where's Waldo blog]: https://www.risczero.com/news/waldo
 [ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess
-[ZK Proof of Exploit]: https://risczero.com/news/zkpoex
+[ZK Proof of Exploit]: https://www.risczero.com/news/zkpoex
 [ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.19/examples/ecdsa
 [zkEVM]: https://github.com/risc0/risc0/tree/release-0.19/examples/zkevm-demo
