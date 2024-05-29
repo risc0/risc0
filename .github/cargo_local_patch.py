@@ -102,8 +102,6 @@ if __name__ == "__main__":
         "risc0-ethereum-contracts": "risc0-ethereum/contracts",
         "risc0-build-ethereum": "risc0-ethereum/build",
         "risc0-forge-ffi": "risc0-ethereum/ffi",
-        "risc0-ethereum-relay": "risc0-ethereum/relay",
-        "risc0-ethereum-relay-test-methods": "risc0-ethereum/relay/tests/methods",
         "risc0-steel": "risc0-ethereum/steel",
     }
 
