@@ -61,7 +61,7 @@ pub struct MerkleProof {
 #[cfg(feature = "prove")]
 impl MerkleGroup {
     /// Create a new [MerkleGroup] from the given leaves.
-    /// Will fail is too many leaves are given for the default depth.
+    /// Will fail if too many leaves are given for the default depth.
     pub fn new(leaves: Vec<Digest>) -> Result<Self> {
         let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
         ensure!(

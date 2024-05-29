@@ -247,7 +247,7 @@ impl Default for SuccinctReceiptVerifierParameters {
             control_root: ALLOWED_CONTROL_ROOT,
             inner_control_root: None,
             proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_recursion::CircuitImpl::CIRCUIT_INFO,
+            circuit_info: CircuitImpl::CIRCUIT_INFO,
         }
     }
 }
