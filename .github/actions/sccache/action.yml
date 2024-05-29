@@ -130,3 +130,14 @@ runs:
         aws configure set credential_process "$HOME/.local/aws/aws_signing_helper credential-process --trust-anchor-arn $TRUST_ANCHOR_ARN --profile-arn $PROFILE_ARN --role-arn $ROLE_ARN --certificate $IAM_RA_PATH/certificate.pem --private-key $IAM_RA_PATH/runner_key.pem" --profile default
         echo "##vso[task.setvariable variable=AWS_SDK_LOAD_CONFIG;]1"
       shell: bash
+
+    - name: DevOps Test
+      if: >
+        runner.os == 'Linux' &&
+        github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
+        runner.environment == 'self-hosted' &&
+        startsWith(runner.name, 'i-') != true
+      run: |
+        cd $HOME/.local/aws/
+        aws s3 ls s3://risc0-ci-cache/public/ --recursive --human-readable --summarize
+      shell: bash
