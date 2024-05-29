@@ -107,9 +107,12 @@ export const cratesIoValidationTableColumns = [
             </Badge>
           </DialogTrigger>
 
-          <DialogContent className="max-h-full max-w-screen-3xl">
+          <DialogContent className="dark max-h-full max-w-screen-3xl text-white">
             <DialogTitle>Build Errors for {info.row.original.name}</DialogTitle>
-            <div className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit">
+            <div
+              style={{ colorScheme: "dark" }}
+              className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit"
+            >
               <Highlight code={info.row.original.build_errors} language="rust">
                 {({ className, tokens, getLineProps, getTokenProps }) => (
                   <pre className={cn(className, "text-xs")}>
