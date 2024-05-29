@@ -13,7 +13,7 @@ export default async function createConfigAsync() {
   return {
     title: "RISC Zero Developer Docs",
     tagline: "Hyper-Efficient General Purpose Zero-Knowledge Computing.",
-    favicon: "img/logo.svg",
+    favicon: "img/favicon.png",
 
     url: "https://dev.risczero.com",
     baseUrl: baseUrl,
