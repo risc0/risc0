@@ -138,6 +138,6 @@ runs:
         runner.environment == 'self-hosted' &&
         startsWith(runner.name, 'i-') != true
       run: |
-        cd $HOME/.local/aws/
+        #cd $HOME/.local/aws/
         aws s3 ls s3://risc0-ci-cache/public/ --recursive --human-readable --summarize
       shell: bash
