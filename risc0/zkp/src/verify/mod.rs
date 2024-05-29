@@ -459,7 +459,7 @@ where
     /// Read the globals (i.e. outputs) from the IOP, and mix them into the Fiat-Shamir state.
     ///
     /// NOTE: The globals are the only values known to the verifier, and constitute the public
-    /// statement of of the prover. In many scenarios, they are the first values sent to the
+    /// statement of the prover. In many scenarios, they are the first values sent to the
     /// verifier by the prover, and therefore should be committed at the start of verification.
     fn execute(&mut self, iop: &mut ReadIOP<'a, F>) {
         let slice = iop.read_field_elem_slice(C::OUTPUT_SIZE + 1);
