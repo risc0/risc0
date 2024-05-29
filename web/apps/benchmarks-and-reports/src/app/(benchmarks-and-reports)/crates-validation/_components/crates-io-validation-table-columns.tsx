@@ -21,7 +21,7 @@ export const cratesIoValidationTableColumns = [
     cell: (info) => (
       <div className="font-mono text-xs">
         <Link
-          className="link"
+          className="link text-primary"
           href={`https://crates.io/crates/${info.row.original.name}${
             info.row.original.version ? `/${info.row.original.version}` : ""
           }`}
