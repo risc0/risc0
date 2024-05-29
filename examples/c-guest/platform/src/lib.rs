@@ -17,6 +17,7 @@ use risc0_zkvm_platform::syscall::{sys_halt, sys_panic, sys_read, sys_write};
 //
 // Note: this is slightly different than the rust program because it uses a linker script symbol to
 // set the stack pointer and calls main instead of __start.
+#[cfg(target_os = "zkvm")]
 core::arch::global_asm!(
     r#"
 .section .text._start
