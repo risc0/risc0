@@ -7,10 +7,10 @@ union u32_cast {
 };
 
 int main() {
-  // TODO introduce entropy into memory image (for zk)
+// TODO introduce entropy into memory image (for zk)
   sha256_state* hasher = init_sha256();
 
-  // Use buffer to read two u32 of bytes.
+  // Read two u32 values from the host, assuming LE byte order.
   union u32_cast a;
   union u32_cast b;
   env_read(a.buffer, 4);
