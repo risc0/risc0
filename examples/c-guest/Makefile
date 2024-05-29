@@ -29,6 +29,7 @@ platform:
 # Regenerate the header file. Assumes cbindgen installed locally.
 .PHONY: headers
 headers:
+    # Note: this is currently broken on main, as there is a FFI incompatible type
 	cbindgen --crate zkvm-platform -c ./platform/cbindgen.toml -o ./guest/platform.h
 
 .PHONY: gcc

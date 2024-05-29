@@ -287,6 +287,14 @@ void env_exit(struct sha256_state *hasher, uint8_t exit_code);
  */
 void env_commit(struct sha256_state *hasher, const uint8_t *bytes_ptr, uint32_t len);
 
+/**
+ * Reads `len` bytes into buffer from the host.
+ *
+ * # Safety
+ * Assumes that the buffer has at least `len` bytes allocated.
+ */
+void env_read(uint8_t *bytes_ptr, uint32_t len);
+
 #if defined(DEFINE_SYSCALLS)
 /**
  * # Safety

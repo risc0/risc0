@@ -4,7 +4,7 @@ use risc0_zkp::core::digest::Digest;
 use risc0_zkp::core::hash::sha::guest::Impl;
 use risc0_zkp::core::hash::sha::rust_crypto::{Digest as _, Sha256};
 use risc0_zkvm_platform::fileno;
-use risc0_zkvm_platform::syscall::{sys_halt, sys_panic, sys_write};
+use risc0_zkvm_platform::syscall::{sys_halt, sys_panic, sys_read, sys_write};
 
 // Load the globals pointer. The program will load pointers relative to this
 // register, so it must be set to the right value on startup.
@@ -128,4 +128,13 @@ pub unsafe extern "C" fn env_exit(hasher: *mut sha256_state, exit_code: u8) -> !
 pub unsafe extern "C" fn env_commit(hasher: *mut sha256_state, bytes_ptr: *const u8, len: u32) {
     sha256_update(hasher, bytes_ptr, len);
     sys_write(fileno::JOURNAL, bytes_ptr, len as usize);
+}
+
+/// Reads `len` bytes into buffer from the host.
+///
+/// # Safety
+/// Assumes that the buffer has at least `len` bytes allocated.
+#[no_mangle]
+pub unsafe extern "C" fn env_read(bytes_ptr: *mut u8, len: u32) {
+    sys_read(fileno::STDIN, bytes_ptr, len as usize);
 }
