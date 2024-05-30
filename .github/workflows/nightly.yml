@@ -39,6 +39,9 @@ jobs:
       - run: cargo build --release
         working-directory: tools/crates-validator/
 
+      - run: ls -lht
+        working-directory: tools/crates-validator/
+
       - name: Create working directory
         run: mkdir -p ${{ runner.temp }}/crate-validation/
 
@@ -52,6 +55,7 @@ jobs:
 
       - name: Validate profiles
         run: |
+          ls -lht
           target/release/main \
           -p ${{ github.workspace }} \
           -P ${{ runner.temp }}/crate-validation/profiles.yaml \
