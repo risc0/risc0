@@ -57,6 +57,15 @@ impl<Claim> Groth16Receipt<Claim>
 where
     Claim: Digestible + Debug + Clone + Serialize,
 {
+    /// Create a [Groth16Receipt] from the given seal, claim, and verifier parameters digest.
+    pub fn new(seal: Vec<u8>, claim: MaybePruned<Claim>, verifier_parameters: Digest) -> Self {
+        Self {
+            seal,
+            claim,
+            verifier_parameters,
+        }
+    }
+
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
