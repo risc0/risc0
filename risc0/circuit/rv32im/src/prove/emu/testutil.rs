@@ -57,7 +57,7 @@ pub fn simple_loop() -> Program {
     //
     // _boot:
     //     li      a4,0
-    //     li      a5,1000
+    //     li      a5,100
     // loop:
     //     addi    a4,a4,1
     //     blt     a4,a5,loop
