@@ -63,27 +63,27 @@ jobs:
 
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
 
-      - name: Upload artifact results
-        uses: actions/upload-artifact@v4
-        if: always() # upload all artifacts even on failures
-        with:
-          name: crates-test-results
-          path: ${{ runner.temp }}/crate-validation/
-          retention-days: 2
+      # - name: Upload artifact results
+      #   uses: actions/upload-artifact@v4
+      #   if: always() # upload all artifacts even on failures
+      #   with:
+      #     name: crates-test-results
+      #     path: ${{ runner.temp }}/crate-validation/
+      #     retention-days: 2
 
-      - name: Clone ghpages repo
-        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
+      # - name: Clone ghpages repo
+      #   run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
 
-      - name: Export environment variable
-        run: |
-          echo "TEMP_DIR=${{ runner.temp }}" >> $GITHUB_ENV
-          echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
+      # - name: Export environment variable
+      #   run: |
+      #     echo "TEMP_DIR=${{ runner.temp }}" >> $GITHUB_ENV
+      #     echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
 
-      - name: Commit results to risc0/ghpages
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-        run: bash ./parse_profile_compilation_results.sh
-        working-directory: ./.github/scripts
+      # - name: Commit results to risc0/ghpages
+      #   env:
+      #     GITHUB_SHA: ${{ github.sha }}
+      #   run: bash ./parse_profile_compilation_results.sh
+      #   working-directory: ./.github/scripts
 
 #  alert_devops_if_failed:
 #    runs-on: ubuntu-latest
