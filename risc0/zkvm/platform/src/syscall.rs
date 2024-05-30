@@ -115,7 +115,7 @@ macro_rules! declare_syscall {
     ($(#[$meta:meta])*
      $vis:vis $name:ident) => {
         $(#[$meta])*
-        $vis const $name: $crate::syscall::SyscallName = {
+        $vis const $name: $crate::syscall::SyscallName = unsafe {
             $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
                 module_path!(),
                 "::",
@@ -140,15 +140,20 @@ pub mod nr {
 }
 
 impl SyscallName {
-    pub const fn from_bytes_with_nul(ptr: *const u8) -> Self {
+    /// Converts a raw UTF-8 C string pointer to a system call name.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must reference a static null-terminated UTF-8 string.
+    pub const unsafe fn from_bytes_with_nul(ptr: *const u8) -> Self {
         Self(ptr)
     }
 
-    pub fn as_ptr(&self) -> *const u8 {
+    pub fn as_ptr(self) -> *const u8 {
         self.0
     }
 
-    pub fn as_str(&self) -> &str {
+    pub fn as_str(self) -> &'static str {
         core::str::from_utf8(unsafe { core::ffi::CStr::from_ptr(self.as_ptr().cast()).to_bytes() })
             .unwrap()
     }
