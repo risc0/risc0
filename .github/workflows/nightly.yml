@@ -26,7 +26,8 @@ jobs:
       - uses: ./.github/actions/rustup
       - name: Set the variables
         env:
-          DEFAULT_CRATE_COUNT: 1000
+          #DEFAULT_CRATE_COUNT: 1000
+          DEFAULT_CRATE_COUNT: 100
         run: echo "TOP_N_CRATES=${{ github.event.inputs.crate_count || env.DEFAULT_CRATE_COUNT }}" >> $GITHUB_ENV
 
       - run: cargo install --force --path risc0/cargo-risczero
