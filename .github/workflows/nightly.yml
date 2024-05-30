@@ -57,6 +57,7 @@ jobs:
         run: |
           ls -lht target/release
           ls -lht target/release/main
+          cat target/release/main
           target/release/main \
           -p ${{ github.workspace }} \
           -P ${{ runner.temp }}/crate-validation/profiles.yaml \
