@@ -46,10 +46,6 @@ fn download_zkr() {
         hex::encode(Sha256::digest(data)) == SHA256_HASH
     }
 
-    if env::var("DOCS_RS").is_ok() {
-        return;
-    }
-
     println!("cargo:rerun-if-env-changed=RECURSION_SRC_PATH");
 
     let src_path = env::var("RECURSION_SRC_PATH").unwrap_or(SRC_PATH.to_string());
@@ -57,6 +53,11 @@ fn download_zkr() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
     let out_path = out_dir.join(FILENAME);
+
+    if env::var("DOCS_RS").is_ok() && !out_path.exists() {
+        fs::write(&out_path, b"").unwrap();
+        return;
+    }
 
     if out_path.exists() {
         if check_sha2(&out_path) {
