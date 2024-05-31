@@ -247,7 +247,7 @@ impl Default for SuccinctReceiptVerifierParameters {
             control_root: ALLOWED_CONTROL_ROOT,
             inner_control_root: None,
             proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_recursion::CircuitImpl::CIRCUIT_INFO,
+            circuit_info: CircuitImpl::CIRCUIT_INFO,
         }
     }
 }
@@ -266,7 +266,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("2b77ca0b15690e4ccf3264268ade0daece7eb811ce5259cbb8b52a9c2bba12e5")
+            digest!("8c4998a7f381242553bc1c7bce8f056ea30d6a653ade2666c2b28b76d11d4749")
         );
     }
 }

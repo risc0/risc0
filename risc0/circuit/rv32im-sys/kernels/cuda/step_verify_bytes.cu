@@ -22,15 +22,15 @@ __device__ void step_verify_bytes(
   Fp extern_args[96];
   Fp extern_outs[32];
   // loc(unknown)
-  Fp x0(255);
+  Fp x0(0);
   // loc(unknown)
-  Fp x1(2);
+  Fp x1(1);
   // loc(unknown)
   Fp x2(254);
   // loc(unknown)
-  Fp x3(0);
+  Fp x3(255);
   // loc(unknown)
-  Fp x4(1);
+  Fp x4(2);
   // loc("Top/Code/OneHot/hot[1](Reg)"("./zirgen/components/mux.h":49:0))
   auto x5 = arg0[2 * steps + ((cycle - 0) & mask)];
   assert(x5 != Fp::invalid());
@@ -59,14 +59,14 @@ __device__ void step_verify_bytes(
     // loc("zirgen/components/bytes.cpp":21:0)
     {
       auto& reg = arg2[0 * steps + cycle];
-      assert(reg == Fp::invalid() || reg == x3);
-      reg = x3;
+      assert(reg == Fp::invalid() || reg == x0);
+      reg = x0;
     }
     // loc("zirgen/components/bytes.cpp":22:0)
     {
       auto& reg = arg2[1 * steps + cycle];
-      assert(reg == Fp::invalid() || reg == x3);
-      reg = x3;
+      assert(reg == Fp::invalid() || reg == x0);
+      reg = x0;
     }
   }
   if (x5 != 0) {
@@ -387,51 +387,51 @@ __device__ void step_verify_bytes(
         reg = x54;
       }
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
-    auto x55 = arg2[0 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x55 = arg2[45 * steps + ((cycle - 0) & mask)];
     assert(x55 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
-    auto x56 = arg2[1 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x56 = arg2[46 * steps + ((cycle - 0) & mask)];
     assert(x56 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x57 = arg2[45 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
+    auto x57 = arg2[0 * steps + ((cycle - 1) & mask)];
     assert(x57 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x58 = arg2[46 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
+    auto x58 = arg2[1 * steps + ((cycle - 1) & mask)];
     assert(x58 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x59 = x57 - x55;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x60 = x58 - x56;
+    auto x59 = x56 - x58;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x60 = x55 - x57;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x61 = x59 - x4;
+    auto x61 = x60 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x62 = x59 * x61;
+    auto x62 = x60 * x61;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x62 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x59 != 0) {
+    if (x60 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
-      assert(x58 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
+      assert(x56 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x63 = x56 - x2;
+      auto x63 = x58 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x64 = x56 - x0;
+      auto x64 = x58 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x65 = x64 * x63;
+      auto x65 = x63 * x64;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x65 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x66 = x4 - x59;
+    auto x66 = x1 - x60;
     if (x66 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x67 = x60 - x1;
+      auto x67 = x59 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x68 = x60 - x4;
+      auto x68 = x59 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x69 = x60 * x68;
+      auto x69 = x59 * x67;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x70 = x69 * x67;
+      auto x70 = x69 * x68;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x70 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -441,39 +441,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x72 = arg2[48 * steps + ((cycle - 0) & mask)];
     assert(x72 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x73 = x71 - x57;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x74 = x72 - x58;
+    auto x73 = x72 - x56;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x74 = x71 - x55;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x75 = x73 - x4;
+    auto x75 = x74 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x76 = x73 * x75;
+    auto x76 = x74 * x75;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x76 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x73 != 0) {
+    if (x74 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x72 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x77 = x58 - x2;
+      auto x77 = x56 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x78 = x58 - x0;
+      auto x78 = x56 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x79 = x78 * x77;
+      auto x79 = x77 * x78;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x79 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x80 = x4 - x73;
+    auto x80 = x1 - x74;
     if (x80 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x81 = x74 - x1;
+      auto x81 = x73 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x82 = x74 - x4;
+      auto x82 = x73 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x83 = x74 * x82;
+      auto x83 = x73 * x81;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x84 = x83 * x81;
+      auto x84 = x83 * x82;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x84 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -483,39 +483,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x86 = arg2[50 * steps + ((cycle - 0) & mask)];
     assert(x86 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x87 = x85 - x71;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x88 = x86 - x72;
+    auto x87 = x86 - x72;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x88 = x85 - x71;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x89 = x87 - x4;
+    auto x89 = x88 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x90 = x87 * x89;
+    auto x90 = x88 * x89;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x90 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x87 != 0) {
+    if (x88 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x86 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x91 = x72 - x2;
+      auto x91 = x72 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x92 = x72 - x0;
+      auto x92 = x72 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x93 = x92 * x91;
+      auto x93 = x91 * x92;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x93 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x94 = x4 - x87;
+    auto x94 = x1 - x88;
     if (x94 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x95 = x88 - x1;
+      auto x95 = x87 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x96 = x88 - x4;
+      auto x96 = x87 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x97 = x88 * x96;
+      auto x97 = x87 * x95;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x98 = x97 * x95;
+      auto x98 = x97 * x96;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x98 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -525,39 +525,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x100 = arg2[52 * steps + ((cycle - 0) & mask)];
     assert(x100 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x101 = x99 - x85;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x102 = x100 - x86;
+    auto x101 = x100 - x86;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x102 = x99 - x85;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x103 = x101 - x4;
+    auto x103 = x102 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x104 = x101 * x103;
+    auto x104 = x102 * x103;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x104 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x101 != 0) {
+    if (x102 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x100 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x105 = x86 - x2;
+      auto x105 = x86 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x106 = x86 - x0;
+      auto x106 = x86 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x107 = x106 * x105;
+      auto x107 = x105 * x106;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x107 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x108 = x4 - x101;
+    auto x108 = x1 - x102;
     if (x108 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x109 = x102 - x1;
+      auto x109 = x101 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x110 = x102 - x4;
+      auto x110 = x101 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x111 = x102 * x110;
+      auto x111 = x101 * x109;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x112 = x111 * x109;
+      auto x112 = x111 * x110;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x112 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -567,39 +567,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x114 = arg2[54 * steps + ((cycle - 0) & mask)];
     assert(x114 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x115 = x113 - x99;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x116 = x114 - x100;
+    auto x115 = x114 - x100;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x116 = x113 - x99;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x117 = x115 - x4;
+    auto x117 = x116 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x118 = x115 * x117;
+    auto x118 = x116 * x117;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x118 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x115 != 0) {
+    if (x116 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x114 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x119 = x100 - x2;
+      auto x119 = x100 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x120 = x100 - x0;
+      auto x120 = x100 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x121 = x120 * x119;
+      auto x121 = x119 * x120;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x121 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x122 = x4 - x115;
+    auto x122 = x1 - x116;
     if (x122 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x123 = x116 - x1;
+      auto x123 = x115 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x124 = x116 - x4;
+      auto x124 = x115 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x125 = x116 * x124;
+      auto x125 = x115 * x123;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x126 = x125 * x123;
+      auto x126 = x125 * x124;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x126 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -609,39 +609,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x128 = arg2[56 * steps + ((cycle - 0) & mask)];
     assert(x128 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x129 = x127 - x113;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x130 = x128 - x114;
+    auto x129 = x128 - x114;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x130 = x127 - x113;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x131 = x129 - x4;
+    auto x131 = x130 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x132 = x129 * x131;
+    auto x132 = x130 * x131;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x132 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x129 != 0) {
+    if (x130 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x128 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x133 = x114 - x2;
+      auto x133 = x114 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x134 = x114 - x0;
+      auto x134 = x114 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x135 = x134 * x133;
+      auto x135 = x133 * x134;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x135 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x136 = x4 - x129;
+    auto x136 = x1 - x130;
     if (x136 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x137 = x130 - x1;
+      auto x137 = x129 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x138 = x130 - x4;
+      auto x138 = x129 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x139 = x130 * x138;
+      auto x139 = x129 * x137;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x140 = x139 * x137;
+      auto x140 = x139 * x138;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x140 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -651,39 +651,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x142 = arg2[58 * steps + ((cycle - 0) & mask)];
     assert(x142 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x143 = x141 - x127;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x144 = x142 - x128;
+    auto x143 = x142 - x128;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x144 = x141 - x127;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x145 = x143 - x4;
+    auto x145 = x144 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x146 = x143 * x145;
+    auto x146 = x144 * x145;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x146 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x143 != 0) {
+    if (x144 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x142 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x147 = x128 - x2;
+      auto x147 = x128 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x148 = x128 - x0;
+      auto x148 = x128 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x149 = x148 * x147;
+      auto x149 = x147 * x148;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x149 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x150 = x4 - x143;
+    auto x150 = x1 - x144;
     if (x150 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x151 = x144 - x1;
+      auto x151 = x143 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x152 = x144 - x4;
+      auto x152 = x143 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x153 = x144 * x152;
+      auto x153 = x143 * x151;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x154 = x153 * x151;
+      auto x154 = x153 * x152;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x154 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -693,39 +693,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x156 = arg2[60 * steps + ((cycle - 0) & mask)];
     assert(x156 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x157 = x155 - x141;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x158 = x156 - x142;
+    auto x157 = x156 - x142;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x158 = x155 - x141;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x159 = x157 - x4;
+    auto x159 = x158 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x160 = x157 * x159;
+    auto x160 = x158 * x159;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x160 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x157 != 0) {
+    if (x158 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x156 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x161 = x142 - x2;
+      auto x161 = x142 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x162 = x142 - x0;
+      auto x162 = x142 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x163 = x162 * x161;
+      auto x163 = x161 * x162;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x163 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x164 = x4 - x157;
+    auto x164 = x1 - x158;
     if (x164 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x165 = x158 - x1;
+      auto x165 = x157 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x166 = x158 - x4;
+      auto x166 = x157 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x167 = x158 * x166;
+      auto x167 = x157 * x165;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x168 = x167 * x165;
+      auto x168 = x167 * x166;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x168 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -735,39 +735,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x170 = arg2[62 * steps + ((cycle - 0) & mask)];
     assert(x170 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x171 = x169 - x155;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x172 = x170 - x156;
+    auto x171 = x170 - x156;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x172 = x169 - x155;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x173 = x171 - x4;
+    auto x173 = x172 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x174 = x171 * x173;
+    auto x174 = x172 * x173;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x174 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x171 != 0) {
+    if (x172 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x170 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x175 = x156 - x2;
+      auto x175 = x156 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x176 = x156 - x0;
+      auto x176 = x156 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x177 = x176 * x175;
+      auto x177 = x175 * x176;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x177 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x178 = x4 - x171;
+    auto x178 = x1 - x172;
     if (x178 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x179 = x172 - x1;
+      auto x179 = x171 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x180 = x172 - x4;
+      auto x180 = x171 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x181 = x172 * x180;
+      auto x181 = x171 * x179;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x182 = x181 * x179;
+      auto x182 = x181 * x180;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x182 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -777,39 +777,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x184 = arg2[64 * steps + ((cycle - 0) & mask)];
     assert(x184 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x185 = x183 - x169;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x186 = x184 - x170;
+    auto x185 = x184 - x170;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x186 = x183 - x169;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x187 = x185 - x4;
+    auto x187 = x186 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x188 = x185 * x187;
+    auto x188 = x186 * x187;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x188 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x185 != 0) {
+    if (x186 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x184 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x189 = x170 - x2;
+      auto x189 = x170 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x190 = x170 - x0;
+      auto x190 = x170 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x191 = x190 * x189;
+      auto x191 = x189 * x190;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x191 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x192 = x4 - x185;
+    auto x192 = x1 - x186;
     if (x192 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x193 = x186 - x1;
+      auto x193 = x185 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x194 = x186 - x4;
+      auto x194 = x185 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x195 = x186 * x194;
+      auto x195 = x185 * x193;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x196 = x195 * x193;
+      auto x196 = x195 * x194;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x196 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -819,39 +819,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x198 = arg2[66 * steps + ((cycle - 0) & mask)];
     assert(x198 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x199 = x197 - x183;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x200 = x198 - x184;
+    auto x199 = x198 - x184;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x200 = x197 - x183;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x201 = x199 - x4;
+    auto x201 = x200 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x202 = x199 * x201;
+    auto x202 = x200 * x201;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x202 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x199 != 0) {
+    if (x200 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x198 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x203 = x184 - x2;
+      auto x203 = x184 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x204 = x184 - x0;
+      auto x204 = x184 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x205 = x204 * x203;
+      auto x205 = x203 * x204;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x205 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x206 = x4 - x199;
+    auto x206 = x1 - x200;
     if (x206 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x207 = x200 - x1;
+      auto x207 = x199 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x208 = x200 - x4;
+      auto x208 = x199 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x209 = x200 * x208;
+      auto x209 = x199 * x207;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x210 = x209 * x207;
+      auto x210 = x209 * x208;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x210 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -861,39 +861,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x212 = arg2[68 * steps + ((cycle - 0) & mask)];
     assert(x212 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x213 = x211 - x197;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x214 = x212 - x198;
+    auto x213 = x212 - x198;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x214 = x211 - x197;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x215 = x213 - x4;
+    auto x215 = x214 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x216 = x213 * x215;
+    auto x216 = x214 * x215;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x216 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x213 != 0) {
+    if (x214 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x212 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x217 = x198 - x2;
+      auto x217 = x198 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x218 = x198 - x0;
+      auto x218 = x198 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x219 = x218 * x217;
+      auto x219 = x217 * x218;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x219 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x220 = x4 - x213;
+    auto x220 = x1 - x214;
     if (x220 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x221 = x214 - x1;
+      auto x221 = x213 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x222 = x214 - x4;
+      auto x222 = x213 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x223 = x214 * x222;
+      auto x223 = x213 * x221;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x224 = x223 * x221;
+      auto x224 = x223 * x222;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x224 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -903,39 +903,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x226 = arg2[70 * steps + ((cycle - 0) & mask)];
     assert(x226 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x227 = x225 - x211;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x228 = x226 - x212;
+    auto x227 = x226 - x212;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x228 = x225 - x211;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x229 = x227 - x4;
+    auto x229 = x228 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x230 = x227 * x229;
+    auto x230 = x228 * x229;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x230 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x227 != 0) {
+    if (x228 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x226 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x231 = x212 - x2;
+      auto x231 = x212 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x232 = x212 - x0;
+      auto x232 = x212 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x233 = x232 * x231;
+      auto x233 = x231 * x232;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x233 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x234 = x4 - x227;
+    auto x234 = x1 - x228;
     if (x234 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x235 = x228 - x1;
+      auto x235 = x227 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x236 = x228 - x4;
+      auto x236 = x227 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x237 = x228 * x236;
+      auto x237 = x227 * x235;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x238 = x237 * x235;
+      auto x238 = x237 * x236;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x238 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -945,39 +945,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x240 = arg2[72 * steps + ((cycle - 0) & mask)];
     assert(x240 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x241 = x239 - x225;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x242 = x240 - x226;
+    auto x241 = x240 - x226;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x242 = x239 - x225;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x243 = x241 - x4;
+    auto x243 = x242 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x244 = x241 * x243;
+    auto x244 = x242 * x243;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x244 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x241 != 0) {
+    if (x242 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x240 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x245 = x226 - x2;
+      auto x245 = x226 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x246 = x226 - x0;
+      auto x246 = x226 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x247 = x246 * x245;
+      auto x247 = x245 * x246;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x247 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x248 = x4 - x241;
+    auto x248 = x1 - x242;
     if (x248 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x249 = x242 - x1;
+      auto x249 = x241 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x250 = x242 - x4;
+      auto x250 = x241 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x251 = x242 * x250;
+      auto x251 = x241 * x249;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x252 = x251 * x249;
+      auto x252 = x251 * x250;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x252 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -987,39 +987,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x254 = arg2[74 * steps + ((cycle - 0) & mask)];
     assert(x254 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x255 = x253 - x239;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x256 = x254 - x240;
+    auto x255 = x254 - x240;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x256 = x253 - x239;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x257 = x255 - x4;
+    auto x257 = x256 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x258 = x255 * x257;
+    auto x258 = x256 * x257;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x258 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x255 != 0) {
+    if (x256 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x254 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x259 = x240 - x2;
+      auto x259 = x240 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x260 = x240 - x0;
+      auto x260 = x240 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x261 = x260 * x259;
+      auto x261 = x259 * x260;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x261 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x262 = x4 - x255;
+    auto x262 = x1 - x256;
     if (x262 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x263 = x256 - x1;
+      auto x263 = x255 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x264 = x256 - x4;
+      auto x264 = x255 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x265 = x256 * x264;
+      auto x265 = x255 * x263;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x266 = x265 * x263;
+      auto x266 = x265 * x264;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x266 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1029,39 +1029,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x268 = arg2[76 * steps + ((cycle - 0) & mask)];
     assert(x268 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x269 = x267 - x253;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x270 = x268 - x254;
+    auto x269 = x268 - x254;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x270 = x267 - x253;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x271 = x269 - x4;
+    auto x271 = x270 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x272 = x269 * x271;
+    auto x272 = x270 * x271;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x272 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x269 != 0) {
+    if (x270 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x268 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x273 = x254 - x2;
+      auto x273 = x254 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x274 = x254 - x0;
+      auto x274 = x254 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x275 = x274 * x273;
+      auto x275 = x273 * x274;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x275 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x276 = x4 - x269;
+    auto x276 = x1 - x270;
     if (x276 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x277 = x270 - x1;
+      auto x277 = x269 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x278 = x270 - x4;
+      auto x278 = x269 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x279 = x270 * x278;
+      auto x279 = x269 * x277;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x280 = x279 * x277;
+      auto x280 = x279 * x278;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x280 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1071,39 +1071,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x282 = arg2[78 * steps + ((cycle - 0) & mask)];
     assert(x282 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x283 = x281 - x267;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x284 = x282 - x268;
+    auto x283 = x282 - x268;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x284 = x281 - x267;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x285 = x283 - x4;
+    auto x285 = x284 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x286 = x283 * x285;
+    auto x286 = x284 * x285;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x286 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x283 != 0) {
+    if (x284 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x282 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x287 = x268 - x2;
+      auto x287 = x268 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x288 = x268 - x0;
+      auto x288 = x268 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x289 = x288 * x287;
+      auto x289 = x287 * x288;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x289 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x290 = x4 - x283;
+    auto x290 = x1 - x284;
     if (x290 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x291 = x284 - x1;
+      auto x291 = x283 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x292 = x284 - x4;
+      auto x292 = x283 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x293 = x284 * x292;
+      auto x293 = x283 * x291;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x294 = x293 * x291;
+      auto x294 = x293 * x292;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x294 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1113,39 +1113,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x296 = arg2[80 * steps + ((cycle - 0) & mask)];
     assert(x296 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x297 = x295 - x281;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x298 = x296 - x282;
+    auto x297 = x296 - x282;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x298 = x295 - x281;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x299 = x297 - x4;
+    auto x299 = x298 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x300 = x297 * x299;
+    auto x300 = x298 * x299;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x300 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x297 != 0) {
+    if (x298 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x296 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x301 = x282 - x2;
+      auto x301 = x282 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x302 = x282 - x0;
+      auto x302 = x282 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x303 = x302 * x301;
+      auto x303 = x301 * x302;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x303 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x304 = x4 - x297;
+    auto x304 = x1 - x298;
     if (x304 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x305 = x298 - x1;
+      auto x305 = x297 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x306 = x298 - x4;
+      auto x306 = x297 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x307 = x298 * x306;
+      auto x307 = x297 * x305;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x308 = x307 * x305;
+      auto x308 = x307 * x306;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x308 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1155,39 +1155,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x310 = arg2[82 * steps + ((cycle - 0) & mask)];
     assert(x310 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x311 = x309 - x295;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x312 = x310 - x296;
+    auto x311 = x310 - x296;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x312 = x309 - x295;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x313 = x311 - x4;
+    auto x313 = x312 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x314 = x311 * x313;
+    auto x314 = x312 * x313;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x314 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x311 != 0) {
+    if (x312 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x310 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x315 = x296 - x2;
+      auto x315 = x296 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x316 = x296 - x0;
+      auto x316 = x296 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x317 = x316 * x315;
+      auto x317 = x315 * x316;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x317 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x318 = x4 - x311;
+    auto x318 = x1 - x312;
     if (x318 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x319 = x312 - x1;
+      auto x319 = x311 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x320 = x312 - x4;
+      auto x320 = x311 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x321 = x312 * x320;
+      auto x321 = x311 * x319;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x322 = x321 * x319;
+      auto x322 = x321 * x320;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x322 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1197,39 +1197,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x324 = arg2[84 * steps + ((cycle - 0) & mask)];
     assert(x324 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x325 = x323 - x309;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x326 = x324 - x310;
+    auto x325 = x324 - x310;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x326 = x323 - x309;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x327 = x325 - x4;
+    auto x327 = x326 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x328 = x325 * x327;
+    auto x328 = x326 * x327;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x328 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x325 != 0) {
+    if (x326 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x324 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x329 = x310 - x2;
+      auto x329 = x310 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x330 = x310 - x0;
+      auto x330 = x310 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x331 = x330 * x329;
+      auto x331 = x329 * x330;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x331 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x332 = x4 - x325;
+    auto x332 = x1 - x326;
     if (x332 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x333 = x326 - x1;
+      auto x333 = x325 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x334 = x326 - x4;
+      auto x334 = x325 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x335 = x326 * x334;
+      auto x335 = x325 * x333;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x336 = x335 * x333;
+      auto x336 = x335 * x334;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x336 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1239,39 +1239,39 @@ __device__ void step_verify_bytes(
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x338 = arg2[1 * steps + ((cycle - 0) & mask)];
     assert(x338 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x339 = x337 - x323;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x340 = x338 - x324;
+    auto x339 = x338 - x324;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x340 = x337 - x323;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x341 = x339 - x4;
+    auto x341 = x340 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x342 = x339 * x341;
+    auto x342 = x340 * x341;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x342 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x339 != 0) {
+    if (x340 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x338 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x343 = x324 - x2;
+      auto x343 = x324 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x344 = x324 - x0;
+      auto x344 = x324 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x345 = x344 * x343;
+      auto x345 = x343 * x344;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x345 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x346 = x4 - x339;
+    auto x346 = x1 - x340;
     if (x346 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x347 = x340 - x1;
+      auto x347 = x339 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x348 = x340 - x4;
+      auto x348 = x339 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x349 = x340 * x348;
+      auto x349 = x339 * x347;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x350 = x349 * x347;
+      auto x350 = x349 * x348;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x350 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1534,51 +1534,51 @@ __device__ void step_verify_bytes(
         reg = x384;
       }
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
-    auto x385 = arg2[0 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x385 = arg2[37 * steps + ((cycle - 0) & mask)];
     assert(x385 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
-    auto x386 = arg2[1 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x386 = arg2[38 * steps + ((cycle - 0) & mask)];
     assert(x386 != Fp::invalid());
-    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x387 = arg2[37 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
+    auto x387 = arg2[0 * steps + ((cycle - 1) & mask)];
     assert(x387 != Fp::invalid());
-    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x388 = arg2[38 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
+    auto x388 = arg2[1 * steps + ((cycle - 1) & mask)];
     assert(x388 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x389 = x387 - x385;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x390 = x388 - x386;
+    auto x389 = x386 - x388;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x390 = x385 - x387;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x391 = x389 - x4;
+    auto x391 = x390 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x392 = x389 * x391;
+    auto x392 = x390 * x391;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x392 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x389 != 0) {
+    if (x390 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
-      assert(x388 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
+      assert(x386 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x393 = x386 - x2;
+      auto x393 = x388 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x394 = x386 - x0;
+      auto x394 = x388 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x395 = x394 * x393;
+      auto x395 = x393 * x394;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x395 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x396 = x4 - x389;
+    auto x396 = x1 - x390;
     if (x396 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x397 = x390 - x1;
+      auto x397 = x389 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x398 = x390 - x4;
+      auto x398 = x389 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x399 = x390 * x398;
+      auto x399 = x389 * x397;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x400 = x399 * x397;
+      auto x400 = x399 * x398;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x400 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1588,39 +1588,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x402 = arg2[40 * steps + ((cycle - 0) & mask)];
     assert(x402 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x403 = x401 - x387;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x404 = x402 - x388;
+    auto x403 = x402 - x386;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x404 = x401 - x385;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x405 = x403 - x4;
+    auto x405 = x404 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x406 = x403 * x405;
+    auto x406 = x404 * x405;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x406 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x403 != 0) {
+    if (x404 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x402 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x407 = x388 - x2;
+      auto x407 = x386 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x408 = x388 - x0;
+      auto x408 = x386 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x409 = x408 * x407;
+      auto x409 = x407 * x408;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x409 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x410 = x4 - x403;
+    auto x410 = x1 - x404;
     if (x410 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x411 = x404 - x1;
+      auto x411 = x403 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x412 = x404 - x4;
+      auto x412 = x403 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x413 = x404 * x412;
+      auto x413 = x403 * x411;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x414 = x413 * x411;
+      auto x414 = x413 * x412;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x414 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1630,39 +1630,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x416 = arg2[42 * steps + ((cycle - 0) & mask)];
     assert(x416 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x417 = x415 - x401;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x418 = x416 - x402;
+    auto x417 = x416 - x402;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x418 = x415 - x401;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x419 = x417 - x4;
+    auto x419 = x418 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x420 = x417 * x419;
+    auto x420 = x418 * x419;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x420 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x417 != 0) {
+    if (x418 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x416 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x421 = x402 - x2;
+      auto x421 = x402 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x422 = x402 - x0;
+      auto x422 = x402 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x423 = x422 * x421;
+      auto x423 = x421 * x422;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x423 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x424 = x4 - x417;
+    auto x424 = x1 - x418;
     if (x424 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x425 = x418 - x1;
+      auto x425 = x417 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x426 = x418 - x4;
+      auto x426 = x417 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x427 = x418 * x426;
+      auto x427 = x417 * x425;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x428 = x427 * x425;
+      auto x428 = x427 * x426;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x428 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1672,39 +1672,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x430 = arg2[44 * steps + ((cycle - 0) & mask)];
     assert(x430 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x431 = x429 - x415;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x432 = x430 - x416;
+    auto x431 = x430 - x416;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x432 = x429 - x415;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x433 = x431 - x4;
+    auto x433 = x432 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x434 = x431 * x433;
+    auto x434 = x432 * x433;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x434 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x431 != 0) {
+    if (x432 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x430 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x435 = x416 - x2;
+      auto x435 = x416 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x436 = x416 - x0;
+      auto x436 = x416 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x437 = x436 * x435;
+      auto x437 = x435 * x436;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x437 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x438 = x4 - x431;
+    auto x438 = x1 - x432;
     if (x438 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x439 = x432 - x1;
+      auto x439 = x431 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x440 = x432 - x4;
+      auto x440 = x431 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x441 = x432 * x440;
+      auto x441 = x431 * x439;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x442 = x441 * x439;
+      auto x442 = x441 * x440;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x442 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1714,39 +1714,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x444 = arg2[46 * steps + ((cycle - 0) & mask)];
     assert(x444 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x445 = x443 - x429;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x446 = x444 - x430;
+    auto x445 = x444 - x430;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x446 = x443 - x429;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x447 = x445 - x4;
+    auto x447 = x446 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x448 = x445 * x447;
+    auto x448 = x446 * x447;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x448 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x445 != 0) {
+    if (x446 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x444 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x449 = x430 - x2;
+      auto x449 = x430 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x450 = x430 - x0;
+      auto x450 = x430 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x451 = x450 * x449;
+      auto x451 = x449 * x450;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x451 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x452 = x4 - x445;
+    auto x452 = x1 - x446;
     if (x452 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x453 = x446 - x1;
+      auto x453 = x445 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x454 = x446 - x4;
+      auto x454 = x445 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x455 = x446 * x454;
+      auto x455 = x445 * x453;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x456 = x455 * x453;
+      auto x456 = x455 * x454;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x456 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1756,39 +1756,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x458 = arg2[48 * steps + ((cycle - 0) & mask)];
     assert(x458 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x459 = x457 - x443;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x460 = x458 - x444;
+    auto x459 = x458 - x444;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x460 = x457 - x443;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x461 = x459 - x4;
+    auto x461 = x460 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x462 = x459 * x461;
+    auto x462 = x460 * x461;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x462 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x459 != 0) {
+    if (x460 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x458 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x463 = x444 - x2;
+      auto x463 = x444 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x464 = x444 - x0;
+      auto x464 = x444 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x465 = x464 * x463;
+      auto x465 = x463 * x464;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x465 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x466 = x4 - x459;
+    auto x466 = x1 - x460;
     if (x466 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x467 = x460 - x1;
+      auto x467 = x459 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x468 = x460 - x4;
+      auto x468 = x459 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x469 = x460 * x468;
+      auto x469 = x459 * x467;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x470 = x469 * x467;
+      auto x470 = x469 * x468;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x470 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1798,39 +1798,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x472 = arg2[50 * steps + ((cycle - 0) & mask)];
     assert(x472 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x473 = x471 - x457;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x474 = x472 - x458;
+    auto x473 = x472 - x458;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x474 = x471 - x457;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x475 = x473 - x4;
+    auto x475 = x474 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x476 = x473 * x475;
+    auto x476 = x474 * x475;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x476 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x473 != 0) {
+    if (x474 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x472 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x477 = x458 - x2;
+      auto x477 = x458 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x478 = x458 - x0;
+      auto x478 = x458 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x479 = x478 * x477;
+      auto x479 = x477 * x478;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x479 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x480 = x4 - x473;
+    auto x480 = x1 - x474;
     if (x480 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x481 = x474 - x1;
+      auto x481 = x473 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x482 = x474 - x4;
+      auto x482 = x473 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x483 = x474 * x482;
+      auto x483 = x473 * x481;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x484 = x483 * x481;
+      auto x484 = x483 * x482;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x484 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1840,39 +1840,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x486 = arg2[52 * steps + ((cycle - 0) & mask)];
     assert(x486 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x487 = x485 - x471;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x488 = x486 - x472;
+    auto x487 = x486 - x472;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x488 = x485 - x471;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x489 = x487 - x4;
+    auto x489 = x488 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x490 = x487 * x489;
+    auto x490 = x488 * x489;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x490 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x487 != 0) {
+    if (x488 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x486 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x491 = x472 - x2;
+      auto x491 = x472 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x492 = x472 - x0;
+      auto x492 = x472 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x493 = x492 * x491;
+      auto x493 = x491 * x492;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x493 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x494 = x4 - x487;
+    auto x494 = x1 - x488;
     if (x494 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x495 = x488 - x1;
+      auto x495 = x487 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x496 = x488 - x4;
+      auto x496 = x487 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x497 = x488 * x496;
+      auto x497 = x487 * x495;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x498 = x497 * x495;
+      auto x498 = x497 * x496;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x498 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1882,39 +1882,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x500 = arg2[54 * steps + ((cycle - 0) & mask)];
     assert(x500 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x501 = x499 - x485;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x502 = x500 - x486;
+    auto x501 = x500 - x486;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x502 = x499 - x485;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x503 = x501 - x4;
+    auto x503 = x502 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x504 = x501 * x503;
+    auto x504 = x502 * x503;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x504 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x501 != 0) {
+    if (x502 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x500 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x505 = x486 - x2;
+      auto x505 = x486 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x506 = x486 - x0;
+      auto x506 = x486 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x507 = x506 * x505;
+      auto x507 = x505 * x506;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x507 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x508 = x4 - x501;
+    auto x508 = x1 - x502;
     if (x508 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x509 = x502 - x1;
+      auto x509 = x501 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x510 = x502 - x4;
+      auto x510 = x501 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x511 = x502 * x510;
+      auto x511 = x501 * x509;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x512 = x511 * x509;
+      auto x512 = x511 * x510;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x512 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1924,39 +1924,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x514 = arg2[56 * steps + ((cycle - 0) & mask)];
     assert(x514 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x515 = x513 - x499;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x516 = x514 - x500;
+    auto x515 = x514 - x500;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x516 = x513 - x499;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x517 = x515 - x4;
+    auto x517 = x516 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x518 = x515 * x517;
+    auto x518 = x516 * x517;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x518 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x515 != 0) {
+    if (x516 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x514 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x519 = x500 - x2;
+      auto x519 = x500 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x520 = x500 - x0;
+      auto x520 = x500 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x521 = x520 * x519;
+      auto x521 = x519 * x520;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x521 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x522 = x4 - x515;
+    auto x522 = x1 - x516;
     if (x522 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x523 = x516 - x1;
+      auto x523 = x515 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x524 = x516 - x4;
+      auto x524 = x515 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x525 = x516 * x524;
+      auto x525 = x515 * x523;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x526 = x525 * x523;
+      auto x526 = x525 * x524;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x526 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -1966,39 +1966,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x528 = arg2[58 * steps + ((cycle - 0) & mask)];
     assert(x528 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x529 = x527 - x513;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x530 = x528 - x514;
+    auto x529 = x528 - x514;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x530 = x527 - x513;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x531 = x529 - x4;
+    auto x531 = x530 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x532 = x529 * x531;
+    auto x532 = x530 * x531;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x532 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x529 != 0) {
+    if (x530 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x528 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x533 = x514 - x2;
+      auto x533 = x514 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x534 = x514 - x0;
+      auto x534 = x514 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x535 = x534 * x533;
+      auto x535 = x533 * x534;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x535 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x536 = x4 - x529;
+    auto x536 = x1 - x530;
     if (x536 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x537 = x530 - x1;
+      auto x537 = x529 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x538 = x530 - x4;
+      auto x538 = x529 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x539 = x530 * x538;
+      auto x539 = x529 * x537;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x540 = x539 * x537;
+      auto x540 = x539 * x538;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x540 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2008,39 +2008,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x542 = arg2[60 * steps + ((cycle - 0) & mask)];
     assert(x542 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x543 = x541 - x527;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x544 = x542 - x528;
+    auto x543 = x542 - x528;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x544 = x541 - x527;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x545 = x543 - x4;
+    auto x545 = x544 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x546 = x543 * x545;
+    auto x546 = x544 * x545;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x546 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x543 != 0) {
+    if (x544 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x542 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x547 = x528 - x2;
+      auto x547 = x528 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x548 = x528 - x0;
+      auto x548 = x528 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x549 = x548 * x547;
+      auto x549 = x547 * x548;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x549 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x550 = x4 - x543;
+    auto x550 = x1 - x544;
     if (x550 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x551 = x544 - x1;
+      auto x551 = x543 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x552 = x544 - x4;
+      auto x552 = x543 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x553 = x544 * x552;
+      auto x553 = x543 * x551;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x554 = x553 * x551;
+      auto x554 = x553 * x552;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x554 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2050,39 +2050,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x556 = arg2[62 * steps + ((cycle - 0) & mask)];
     assert(x556 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x557 = x555 - x541;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x558 = x556 - x542;
+    auto x557 = x556 - x542;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x558 = x555 - x541;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x559 = x557 - x4;
+    auto x559 = x558 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x560 = x557 * x559;
+    auto x560 = x558 * x559;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x560 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x557 != 0) {
+    if (x558 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x556 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x561 = x542 - x2;
+      auto x561 = x542 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x562 = x542 - x0;
+      auto x562 = x542 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x563 = x562 * x561;
+      auto x563 = x561 * x562;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x563 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x564 = x4 - x557;
+    auto x564 = x1 - x558;
     if (x564 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x565 = x558 - x1;
+      auto x565 = x557 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x566 = x558 - x4;
+      auto x566 = x557 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x567 = x558 * x566;
+      auto x567 = x557 * x565;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x568 = x567 * x565;
+      auto x568 = x567 * x566;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x568 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2092,39 +2092,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x570 = arg2[64 * steps + ((cycle - 0) & mask)];
     assert(x570 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x571 = x569 - x555;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x572 = x570 - x556;
+    auto x571 = x570 - x556;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x572 = x569 - x555;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x573 = x571 - x4;
+    auto x573 = x572 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x574 = x571 * x573;
+    auto x574 = x572 * x573;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x574 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x571 != 0) {
+    if (x572 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x570 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x575 = x556 - x2;
+      auto x575 = x556 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x576 = x556 - x0;
+      auto x576 = x556 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x577 = x576 * x575;
+      auto x577 = x575 * x576;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x577 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x578 = x4 - x571;
+    auto x578 = x1 - x572;
     if (x578 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x579 = x572 - x1;
+      auto x579 = x571 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x580 = x572 - x4;
+      auto x580 = x571 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x581 = x572 * x580;
+      auto x581 = x571 * x579;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x582 = x581 * x579;
+      auto x582 = x581 * x580;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x582 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2134,39 +2134,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x584 = arg2[66 * steps + ((cycle - 0) & mask)];
     assert(x584 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x585 = x583 - x569;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x586 = x584 - x570;
+    auto x585 = x584 - x570;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x586 = x583 - x569;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x587 = x585 - x4;
+    auto x587 = x586 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x588 = x585 * x587;
+    auto x588 = x586 * x587;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x588 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x585 != 0) {
+    if (x586 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x584 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x589 = x570 - x2;
+      auto x589 = x570 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x590 = x570 - x0;
+      auto x590 = x570 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x591 = x590 * x589;
+      auto x591 = x589 * x590;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x591 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x592 = x4 - x585;
+    auto x592 = x1 - x586;
     if (x592 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x593 = x586 - x1;
+      auto x593 = x585 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x594 = x586 - x4;
+      auto x594 = x585 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x595 = x586 * x594;
+      auto x595 = x585 * x593;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x596 = x595 * x593;
+      auto x596 = x595 * x594;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x596 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2176,39 +2176,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x598 = arg2[68 * steps + ((cycle - 0) & mask)];
     assert(x598 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x599 = x597 - x583;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x600 = x598 - x584;
+    auto x599 = x598 - x584;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x600 = x597 - x583;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x601 = x599 - x4;
+    auto x601 = x600 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x602 = x599 * x601;
+    auto x602 = x600 * x601;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x602 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x599 != 0) {
+    if (x600 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x598 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x603 = x584 - x2;
+      auto x603 = x584 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x604 = x584 - x0;
+      auto x604 = x584 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x605 = x604 * x603;
+      auto x605 = x603 * x604;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x605 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x606 = x4 - x599;
+    auto x606 = x1 - x600;
     if (x606 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x607 = x600 - x1;
+      auto x607 = x599 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x608 = x600 - x4;
+      auto x608 = x599 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x609 = x600 * x608;
+      auto x609 = x599 * x607;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x610 = x609 * x607;
+      auto x610 = x609 * x608;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x610 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2218,39 +2218,39 @@ __device__ void step_verify_bytes(
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x612 = arg2[1 * steps + ((cycle - 0) & mask)];
     assert(x612 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x613 = x611 - x597;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x614 = x612 - x598;
+    auto x613 = x612 - x598;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x614 = x611 - x597;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x615 = x613 - x4;
+    auto x615 = x614 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x616 = x613 * x615;
+    auto x616 = x614 * x615;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x616 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x613 != 0) {
+    if (x614 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x612 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x617 = x598 - x2;
+      auto x617 = x598 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x618 = x598 - x0;
+      auto x618 = x598 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x619 = x618 * x617;
+      auto x619 = x617 * x618;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x619 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x620 = x4 - x613;
+    auto x620 = x1 - x614;
     if (x620 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x621 = x614 - x1;
+      auto x621 = x613 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x622 = x614 - x4;
+      auto x622 = x613 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x623 = x614 * x622;
+      auto x623 = x613 * x621;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x624 = x623 * x621;
+      auto x624 = x623 * x622;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x624 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2513,51 +2513,51 @@ __device__ void step_verify_bytes(
         reg = x658;
       }
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
-    auto x659 = arg2[0 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x659 = arg2[37 * steps + ((cycle - 0) & mask)];
     assert(x659 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
-    auto x660 = arg2[1 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x660 = arg2[38 * steps + ((cycle - 0) & mask)];
     assert(x660 != Fp::invalid());
-    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x661 = arg2[37 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
+    auto x661 = arg2[0 * steps + ((cycle - 1) & mask)];
     assert(x661 != Fp::invalid());
-    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x662 = arg2[38 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
+    auto x662 = arg2[1 * steps + ((cycle - 1) & mask)];
     assert(x662 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x663 = x661 - x659;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x664 = x662 - x660;
+    auto x663 = x660 - x662;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x664 = x659 - x661;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x665 = x663 - x4;
+    auto x665 = x664 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x666 = x663 * x665;
+    auto x666 = x664 * x665;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x666 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x663 != 0) {
+    if (x664 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
-      assert(x662 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
+      assert(x660 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x667 = x660 - x2;
+      auto x667 = x662 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x668 = x660 - x0;
+      auto x668 = x662 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x669 = x668 * x667;
+      auto x669 = x667 * x668;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x669 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x670 = x4 - x663;
+    auto x670 = x1 - x664;
     if (x670 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x671 = x664 - x1;
+      auto x671 = x663 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x672 = x664 - x4;
+      auto x672 = x663 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x673 = x664 * x672;
+      auto x673 = x663 * x671;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x674 = x673 * x671;
+      auto x674 = x673 * x672;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x674 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2567,39 +2567,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x676 = arg2[40 * steps + ((cycle - 0) & mask)];
     assert(x676 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x677 = x675 - x661;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x678 = x676 - x662;
+    auto x677 = x676 - x660;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x678 = x675 - x659;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x679 = x677 - x4;
+    auto x679 = x678 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x680 = x677 * x679;
+    auto x680 = x678 * x679;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x680 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x677 != 0) {
+    if (x678 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x676 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x681 = x662 - x2;
+      auto x681 = x660 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x682 = x662 - x0;
+      auto x682 = x660 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x683 = x682 * x681;
+      auto x683 = x681 * x682;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x683 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x684 = x4 - x677;
+    auto x684 = x1 - x678;
     if (x684 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x685 = x678 - x1;
+      auto x685 = x677 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x686 = x678 - x4;
+      auto x686 = x677 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x687 = x678 * x686;
+      auto x687 = x677 * x685;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x688 = x687 * x685;
+      auto x688 = x687 * x686;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x688 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2609,39 +2609,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x690 = arg2[42 * steps + ((cycle - 0) & mask)];
     assert(x690 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x691 = x689 - x675;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x692 = x690 - x676;
+    auto x691 = x690 - x676;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x692 = x689 - x675;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x693 = x691 - x4;
+    auto x693 = x692 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x694 = x691 * x693;
+    auto x694 = x692 * x693;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x694 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x691 != 0) {
+    if (x692 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x690 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x695 = x676 - x2;
+      auto x695 = x676 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x696 = x676 - x0;
+      auto x696 = x676 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x697 = x696 * x695;
+      auto x697 = x695 * x696;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x697 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x698 = x4 - x691;
+    auto x698 = x1 - x692;
     if (x698 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x699 = x692 - x1;
+      auto x699 = x691 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x700 = x692 - x4;
+      auto x700 = x691 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x701 = x692 * x700;
+      auto x701 = x691 * x699;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x702 = x701 * x699;
+      auto x702 = x701 * x700;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x702 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2651,39 +2651,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x704 = arg2[44 * steps + ((cycle - 0) & mask)];
     assert(x704 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x705 = x703 - x689;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x706 = x704 - x690;
+    auto x705 = x704 - x690;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x706 = x703 - x689;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x707 = x705 - x4;
+    auto x707 = x706 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x708 = x705 * x707;
+    auto x708 = x706 * x707;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x708 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x705 != 0) {
+    if (x706 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x704 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x709 = x690 - x2;
+      auto x709 = x690 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x710 = x690 - x0;
+      auto x710 = x690 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x711 = x710 * x709;
+      auto x711 = x709 * x710;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x711 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x712 = x4 - x705;
+    auto x712 = x1 - x706;
     if (x712 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x713 = x706 - x1;
+      auto x713 = x705 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x714 = x706 - x4;
+      auto x714 = x705 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x715 = x706 * x714;
+      auto x715 = x705 * x713;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x716 = x715 * x713;
+      auto x716 = x715 * x714;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x716 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2693,39 +2693,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x718 = arg2[46 * steps + ((cycle - 0) & mask)];
     assert(x718 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x719 = x717 - x703;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x720 = x718 - x704;
+    auto x719 = x718 - x704;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x720 = x717 - x703;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x721 = x719 - x4;
+    auto x721 = x720 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x722 = x719 * x721;
+    auto x722 = x720 * x721;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x722 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x719 != 0) {
+    if (x720 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x718 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x723 = x704 - x2;
+      auto x723 = x704 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x724 = x704 - x0;
+      auto x724 = x704 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x725 = x724 * x723;
+      auto x725 = x723 * x724;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x725 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x726 = x4 - x719;
+    auto x726 = x1 - x720;
     if (x726 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x727 = x720 - x1;
+      auto x727 = x719 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x728 = x720 - x4;
+      auto x728 = x719 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x729 = x720 * x728;
+      auto x729 = x719 * x727;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x730 = x729 * x727;
+      auto x730 = x729 * x728;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x730 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2735,39 +2735,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x732 = arg2[48 * steps + ((cycle - 0) & mask)];
     assert(x732 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x733 = x731 - x717;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x734 = x732 - x718;
+    auto x733 = x732 - x718;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x734 = x731 - x717;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x735 = x733 - x4;
+    auto x735 = x734 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x736 = x733 * x735;
+    auto x736 = x734 * x735;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x736 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x733 != 0) {
+    if (x734 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x732 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x737 = x718 - x2;
+      auto x737 = x718 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x738 = x718 - x0;
+      auto x738 = x718 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x739 = x738 * x737;
+      auto x739 = x737 * x738;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x739 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x740 = x4 - x733;
+    auto x740 = x1 - x734;
     if (x740 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x741 = x734 - x1;
+      auto x741 = x733 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x742 = x734 - x4;
+      auto x742 = x733 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x743 = x734 * x742;
+      auto x743 = x733 * x741;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x744 = x743 * x741;
+      auto x744 = x743 * x742;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x744 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2777,39 +2777,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x746 = arg2[50 * steps + ((cycle - 0) & mask)];
     assert(x746 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x747 = x745 - x731;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x748 = x746 - x732;
+    auto x747 = x746 - x732;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x748 = x745 - x731;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x749 = x747 - x4;
+    auto x749 = x748 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x750 = x747 * x749;
+    auto x750 = x748 * x749;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x750 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x747 != 0) {
+    if (x748 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x746 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x751 = x732 - x2;
+      auto x751 = x732 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x752 = x732 - x0;
+      auto x752 = x732 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x753 = x752 * x751;
+      auto x753 = x751 * x752;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x753 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x754 = x4 - x747;
+    auto x754 = x1 - x748;
     if (x754 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x755 = x748 - x1;
+      auto x755 = x747 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x756 = x748 - x4;
+      auto x756 = x747 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x757 = x748 * x756;
+      auto x757 = x747 * x755;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x758 = x757 * x755;
+      auto x758 = x757 * x756;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x758 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2819,39 +2819,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x760 = arg2[52 * steps + ((cycle - 0) & mask)];
     assert(x760 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x761 = x759 - x745;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x762 = x760 - x746;
+    auto x761 = x760 - x746;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x762 = x759 - x745;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x763 = x761 - x4;
+    auto x763 = x762 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x764 = x761 * x763;
+    auto x764 = x762 * x763;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x764 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x761 != 0) {
+    if (x762 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x760 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x765 = x746 - x2;
+      auto x765 = x746 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x766 = x746 - x0;
+      auto x766 = x746 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x767 = x766 * x765;
+      auto x767 = x765 * x766;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x767 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x768 = x4 - x761;
+    auto x768 = x1 - x762;
     if (x768 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x769 = x762 - x1;
+      auto x769 = x761 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x770 = x762 - x4;
+      auto x770 = x761 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x771 = x762 * x770;
+      auto x771 = x761 * x769;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x772 = x771 * x769;
+      auto x772 = x771 * x770;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x772 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2861,39 +2861,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x774 = arg2[54 * steps + ((cycle - 0) & mask)];
     assert(x774 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x775 = x773 - x759;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x776 = x774 - x760;
+    auto x775 = x774 - x760;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x776 = x773 - x759;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x777 = x775 - x4;
+    auto x777 = x776 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x778 = x775 * x777;
+    auto x778 = x776 * x777;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x778 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x775 != 0) {
+    if (x776 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x774 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x779 = x760 - x2;
+      auto x779 = x760 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x780 = x760 - x0;
+      auto x780 = x760 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x781 = x780 * x779;
+      auto x781 = x779 * x780;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x781 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x782 = x4 - x775;
+    auto x782 = x1 - x776;
     if (x782 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x783 = x776 - x1;
+      auto x783 = x775 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x784 = x776 - x4;
+      auto x784 = x775 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x785 = x776 * x784;
+      auto x785 = x775 * x783;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x786 = x785 * x783;
+      auto x786 = x785 * x784;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x786 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2903,39 +2903,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x788 = arg2[56 * steps + ((cycle - 0) & mask)];
     assert(x788 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x789 = x787 - x773;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x790 = x788 - x774;
+    auto x789 = x788 - x774;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x790 = x787 - x773;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x791 = x789 - x4;
+    auto x791 = x790 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x792 = x789 * x791;
+    auto x792 = x790 * x791;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x792 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x789 != 0) {
+    if (x790 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x788 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x793 = x774 - x2;
+      auto x793 = x774 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x794 = x774 - x0;
+      auto x794 = x774 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x795 = x794 * x793;
+      auto x795 = x793 * x794;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x795 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x796 = x4 - x789;
+    auto x796 = x1 - x790;
     if (x796 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x797 = x790 - x1;
+      auto x797 = x789 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x798 = x790 - x4;
+      auto x798 = x789 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x799 = x790 * x798;
+      auto x799 = x789 * x797;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x800 = x799 * x797;
+      auto x800 = x799 * x798;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x800 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2945,39 +2945,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x802 = arg2[58 * steps + ((cycle - 0) & mask)];
     assert(x802 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x803 = x801 - x787;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x804 = x802 - x788;
+    auto x803 = x802 - x788;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x804 = x801 - x787;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x805 = x803 - x4;
+    auto x805 = x804 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x806 = x803 * x805;
+    auto x806 = x804 * x805;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x806 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x803 != 0) {
+    if (x804 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x802 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x807 = x788 - x2;
+      auto x807 = x788 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x808 = x788 - x0;
+      auto x808 = x788 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x809 = x808 * x807;
+      auto x809 = x807 * x808;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x809 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x810 = x4 - x803;
+    auto x810 = x1 - x804;
     if (x810 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x811 = x804 - x1;
+      auto x811 = x803 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x812 = x804 - x4;
+      auto x812 = x803 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x813 = x804 * x812;
+      auto x813 = x803 * x811;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x814 = x813 * x811;
+      auto x814 = x813 * x812;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x814 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -2987,39 +2987,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x816 = arg2[60 * steps + ((cycle - 0) & mask)];
     assert(x816 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x817 = x815 - x801;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x818 = x816 - x802;
+    auto x817 = x816 - x802;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x818 = x815 - x801;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x819 = x817 - x4;
+    auto x819 = x818 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x820 = x817 * x819;
+    auto x820 = x818 * x819;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x820 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x817 != 0) {
+    if (x818 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x816 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x821 = x802 - x2;
+      auto x821 = x802 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x822 = x802 - x0;
+      auto x822 = x802 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x823 = x822 * x821;
+      auto x823 = x821 * x822;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x823 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x824 = x4 - x817;
+    auto x824 = x1 - x818;
     if (x824 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x825 = x818 - x1;
+      auto x825 = x817 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x826 = x818 - x4;
+      auto x826 = x817 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x827 = x818 * x826;
+      auto x827 = x817 * x825;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x828 = x827 * x825;
+      auto x828 = x827 * x826;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x828 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3029,39 +3029,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x830 = arg2[62 * steps + ((cycle - 0) & mask)];
     assert(x830 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x831 = x829 - x815;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x832 = x830 - x816;
+    auto x831 = x830 - x816;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x832 = x829 - x815;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x833 = x831 - x4;
+    auto x833 = x832 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x834 = x831 * x833;
+    auto x834 = x832 * x833;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x834 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x831 != 0) {
+    if (x832 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x830 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x835 = x816 - x2;
+      auto x835 = x816 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x836 = x816 - x0;
+      auto x836 = x816 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x837 = x836 * x835;
+      auto x837 = x835 * x836;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x837 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x838 = x4 - x831;
+    auto x838 = x1 - x832;
     if (x838 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x839 = x832 - x1;
+      auto x839 = x831 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x840 = x832 - x4;
+      auto x840 = x831 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x841 = x832 * x840;
+      auto x841 = x831 * x839;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x842 = x841 * x839;
+      auto x842 = x841 * x840;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x842 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3071,39 +3071,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x844 = arg2[64 * steps + ((cycle - 0) & mask)];
     assert(x844 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x845 = x843 - x829;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x846 = x844 - x830;
+    auto x845 = x844 - x830;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x846 = x843 - x829;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x847 = x845 - x4;
+    auto x847 = x846 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x848 = x845 * x847;
+    auto x848 = x846 * x847;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x848 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x845 != 0) {
+    if (x846 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x844 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x849 = x830 - x2;
+      auto x849 = x830 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x850 = x830 - x0;
+      auto x850 = x830 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x851 = x850 * x849;
+      auto x851 = x849 * x850;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x851 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x852 = x4 - x845;
+    auto x852 = x1 - x846;
     if (x852 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x853 = x846 - x1;
+      auto x853 = x845 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x854 = x846 - x4;
+      auto x854 = x845 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x855 = x846 * x854;
+      auto x855 = x845 * x853;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x856 = x855 * x853;
+      auto x856 = x855 * x854;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x856 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3113,39 +3113,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x858 = arg2[66 * steps + ((cycle - 0) & mask)];
     assert(x858 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x859 = x857 - x843;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x860 = x858 - x844;
+    auto x859 = x858 - x844;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x860 = x857 - x843;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x861 = x859 - x4;
+    auto x861 = x860 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x862 = x859 * x861;
+    auto x862 = x860 * x861;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x862 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x859 != 0) {
+    if (x860 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x858 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x863 = x844 - x2;
+      auto x863 = x844 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x864 = x844 - x0;
+      auto x864 = x844 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x865 = x864 * x863;
+      auto x865 = x863 * x864;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x865 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x866 = x4 - x859;
+    auto x866 = x1 - x860;
     if (x866 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x867 = x860 - x1;
+      auto x867 = x859 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x868 = x860 - x4;
+      auto x868 = x859 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x869 = x860 * x868;
+      auto x869 = x859 * x867;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x870 = x869 * x867;
+      auto x870 = x869 * x868;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x870 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3155,39 +3155,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x872 = arg2[68 * steps + ((cycle - 0) & mask)];
     assert(x872 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x873 = x871 - x857;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x874 = x872 - x858;
+    auto x873 = x872 - x858;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x874 = x871 - x857;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x875 = x873 - x4;
+    auto x875 = x874 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x876 = x873 * x875;
+    auto x876 = x874 * x875;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x876 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x873 != 0) {
+    if (x874 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x872 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x877 = x858 - x2;
+      auto x877 = x858 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x878 = x858 - x0;
+      auto x878 = x858 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x879 = x878 * x877;
+      auto x879 = x877 * x878;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x879 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x880 = x4 - x873;
+    auto x880 = x1 - x874;
     if (x880 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x881 = x874 - x1;
+      auto x881 = x873 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x882 = x874 - x4;
+      auto x882 = x873 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x883 = x874 * x882;
+      auto x883 = x873 * x881;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x884 = x883 * x881;
+      auto x884 = x883 * x882;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x884 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3197,39 +3197,39 @@ __device__ void step_verify_bytes(
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x886 = arg2[1 * steps + ((cycle - 0) & mask)];
     assert(x886 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x887 = x885 - x871;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x888 = x886 - x872;
+    auto x887 = x886 - x872;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x888 = x885 - x871;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x889 = x887 - x4;
+    auto x889 = x888 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x890 = x887 * x889;
+    auto x890 = x888 * x889;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x890 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x887 != 0) {
+    if (x888 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x886 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x891 = x872 - x2;
+      auto x891 = x872 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x892 = x872 - x0;
+      auto x892 = x872 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x893 = x892 * x891;
+      auto x893 = x891 * x892;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x893 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x894 = x4 - x887;
+    auto x894 = x1 - x888;
     if (x894 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x895 = x888 - x1;
+      auto x895 = x887 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x896 = x888 - x4;
+      auto x896 = x887 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x897 = x888 * x896;
+      auto x897 = x887 * x895;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x898 = x897 * x895;
+      auto x898 = x897 * x896;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x898 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3492,51 +3492,51 @@ __device__ void step_verify_bytes(
         reg = x932;
       }
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
-    auto x933 = arg2[0 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x933 = arg2[37 * steps + ((cycle - 0) & mask)];
     assert(x933 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
-    auto x934 = arg2[1 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x934 = arg2[38 * steps + ((cycle - 0) & mask)];
     assert(x934 != Fp::invalid());
-    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x935 = arg2[37 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
+    auto x935 = arg2[0 * steps + ((cycle - 1) & mask)];
     assert(x935 != Fp::invalid());
-    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x936 = arg2[38 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
+    auto x936 = arg2[1 * steps + ((cycle - 1) & mask)];
     assert(x936 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x937 = x935 - x933;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x938 = x936 - x934;
+    auto x937 = x934 - x936;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x938 = x933 - x935;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x939 = x937 - x4;
+    auto x939 = x938 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x940 = x937 * x939;
+    auto x940 = x938 * x939;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x940 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x937 != 0) {
+    if (x938 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
-      assert(x936 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
+      assert(x934 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x941 = x934 - x2;
+      auto x941 = x936 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x942 = x934 - x0;
+      auto x942 = x936 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x943 = x942 * x941;
+      auto x943 = x941 * x942;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x943 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x944 = x4 - x937;
+    auto x944 = x1 - x938;
     if (x944 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x945 = x938 - x1;
+      auto x945 = x937 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x946 = x938 - x4;
+      auto x946 = x937 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x947 = x938 * x946;
+      auto x947 = x937 * x945;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x948 = x947 * x945;
+      auto x948 = x947 * x946;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x948 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3546,39 +3546,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x950 = arg2[40 * steps + ((cycle - 0) & mask)];
     assert(x950 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x951 = x949 - x935;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x952 = x950 - x936;
+    auto x951 = x950 - x934;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x952 = x949 - x933;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x953 = x951 - x4;
+    auto x953 = x952 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x954 = x951 * x953;
+    auto x954 = x952 * x953;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x954 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x951 != 0) {
+    if (x952 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x950 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x955 = x936 - x2;
+      auto x955 = x934 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x956 = x936 - x0;
+      auto x956 = x934 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x957 = x956 * x955;
+      auto x957 = x955 * x956;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x957 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x958 = x4 - x951;
+    auto x958 = x1 - x952;
     if (x958 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x959 = x952 - x1;
+      auto x959 = x951 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x960 = x952 - x4;
+      auto x960 = x951 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x961 = x952 * x960;
+      auto x961 = x951 * x959;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x962 = x961 * x959;
+      auto x962 = x961 * x960;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x962 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3588,39 +3588,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x964 = arg2[42 * steps + ((cycle - 0) & mask)];
     assert(x964 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x965 = x963 - x949;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x966 = x964 - x950;
+    auto x965 = x964 - x950;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x966 = x963 - x949;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x967 = x965 - x4;
+    auto x967 = x966 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x968 = x965 * x967;
+    auto x968 = x966 * x967;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x968 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x965 != 0) {
+    if (x966 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x964 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x969 = x950 - x2;
+      auto x969 = x950 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x970 = x950 - x0;
+      auto x970 = x950 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x971 = x970 * x969;
+      auto x971 = x969 * x970;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x971 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x972 = x4 - x965;
+    auto x972 = x1 - x966;
     if (x972 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x973 = x966 - x1;
+      auto x973 = x965 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x974 = x966 - x4;
+      auto x974 = x965 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x975 = x966 * x974;
+      auto x975 = x965 * x973;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x976 = x975 * x973;
+      auto x976 = x975 * x974;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x976 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3630,39 +3630,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x978 = arg2[44 * steps + ((cycle - 0) & mask)];
     assert(x978 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x979 = x977 - x963;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x980 = x978 - x964;
+    auto x979 = x978 - x964;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x980 = x977 - x963;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x981 = x979 - x4;
+    auto x981 = x980 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x982 = x979 * x981;
+    auto x982 = x980 * x981;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x982 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x979 != 0) {
+    if (x980 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x978 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x983 = x964 - x2;
+      auto x983 = x964 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x984 = x964 - x0;
+      auto x984 = x964 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x985 = x984 * x983;
+      auto x985 = x983 * x984;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x985 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x986 = x4 - x979;
+    auto x986 = x1 - x980;
     if (x986 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x987 = x980 - x1;
+      auto x987 = x979 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x988 = x980 - x4;
+      auto x988 = x979 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x989 = x980 * x988;
+      auto x989 = x979 * x987;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x990 = x989 * x987;
+      auto x990 = x989 * x988;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x990 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3672,39 +3672,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x992 = arg2[46 * steps + ((cycle - 0) & mask)];
     assert(x992 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x993 = x991 - x977;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x994 = x992 - x978;
+    auto x993 = x992 - x978;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x994 = x991 - x977;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x995 = x993 - x4;
+    auto x995 = x994 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x996 = x993 * x995;
+    auto x996 = x994 * x995;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x996 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x993 != 0) {
+    if (x994 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x992 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x997 = x978 - x2;
+      auto x997 = x978 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x998 = x978 - x0;
+      auto x998 = x978 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x999 = x998 * x997;
+      auto x999 = x997 * x998;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x999 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1000 = x4 - x993;
+    auto x1000 = x1 - x994;
     if (x1000 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1001 = x994 - x1;
+      auto x1001 = x993 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1002 = x994 - x4;
+      auto x1002 = x993 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1003 = x994 * x1002;
+      auto x1003 = x993 * x1001;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1004 = x1003 * x1001;
+      auto x1004 = x1003 * x1002;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1004 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3714,39 +3714,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1006 = arg2[48 * steps + ((cycle - 0) & mask)];
     assert(x1006 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1007 = x1005 - x991;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1008 = x1006 - x992;
+    auto x1007 = x1006 - x992;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1008 = x1005 - x991;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1009 = x1007 - x4;
+    auto x1009 = x1008 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1010 = x1007 * x1009;
+    auto x1010 = x1008 * x1009;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1010 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1007 != 0) {
+    if (x1008 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1006 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1011 = x992 - x2;
+      auto x1011 = x992 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1012 = x992 - x0;
+      auto x1012 = x992 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1013 = x1012 * x1011;
+      auto x1013 = x1011 * x1012;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1013 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1014 = x4 - x1007;
+    auto x1014 = x1 - x1008;
     if (x1014 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1015 = x1008 - x1;
+      auto x1015 = x1007 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1016 = x1008 - x4;
+      auto x1016 = x1007 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1017 = x1008 * x1016;
+      auto x1017 = x1007 * x1015;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1018 = x1017 * x1015;
+      auto x1018 = x1017 * x1016;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1018 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3756,39 +3756,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1020 = arg2[50 * steps + ((cycle - 0) & mask)];
     assert(x1020 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1021 = x1019 - x1005;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1022 = x1020 - x1006;
+    auto x1021 = x1020 - x1006;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1022 = x1019 - x1005;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1023 = x1021 - x4;
+    auto x1023 = x1022 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1024 = x1021 * x1023;
+    auto x1024 = x1022 * x1023;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1024 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1021 != 0) {
+    if (x1022 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1020 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1025 = x1006 - x2;
+      auto x1025 = x1006 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1026 = x1006 - x0;
+      auto x1026 = x1006 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1027 = x1026 * x1025;
+      auto x1027 = x1025 * x1026;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1027 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1028 = x4 - x1021;
+    auto x1028 = x1 - x1022;
     if (x1028 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1029 = x1022 - x1;
+      auto x1029 = x1021 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1030 = x1022 - x4;
+      auto x1030 = x1021 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1031 = x1022 * x1030;
+      auto x1031 = x1021 * x1029;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1032 = x1031 * x1029;
+      auto x1032 = x1031 * x1030;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1032 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3798,39 +3798,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1034 = arg2[52 * steps + ((cycle - 0) & mask)];
     assert(x1034 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1035 = x1033 - x1019;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1036 = x1034 - x1020;
+    auto x1035 = x1034 - x1020;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1036 = x1033 - x1019;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1037 = x1035 - x4;
+    auto x1037 = x1036 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1038 = x1035 * x1037;
+    auto x1038 = x1036 * x1037;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1038 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1035 != 0) {
+    if (x1036 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1034 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1039 = x1020 - x2;
+      auto x1039 = x1020 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1040 = x1020 - x0;
+      auto x1040 = x1020 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1041 = x1040 * x1039;
+      auto x1041 = x1039 * x1040;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1041 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1042 = x4 - x1035;
+    auto x1042 = x1 - x1036;
     if (x1042 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1043 = x1036 - x1;
+      auto x1043 = x1035 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1044 = x1036 - x4;
+      auto x1044 = x1035 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1045 = x1036 * x1044;
+      auto x1045 = x1035 * x1043;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1046 = x1045 * x1043;
+      auto x1046 = x1045 * x1044;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1046 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3840,39 +3840,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1048 = arg2[54 * steps + ((cycle - 0) & mask)];
     assert(x1048 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1049 = x1047 - x1033;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1050 = x1048 - x1034;
+    auto x1049 = x1048 - x1034;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1050 = x1047 - x1033;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1051 = x1049 - x4;
+    auto x1051 = x1050 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1052 = x1049 * x1051;
+    auto x1052 = x1050 * x1051;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1052 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1049 != 0) {
+    if (x1050 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1048 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1053 = x1034 - x2;
+      auto x1053 = x1034 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1054 = x1034 - x0;
+      auto x1054 = x1034 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1055 = x1054 * x1053;
+      auto x1055 = x1053 * x1054;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1055 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1056 = x4 - x1049;
+    auto x1056 = x1 - x1050;
     if (x1056 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1057 = x1050 - x1;
+      auto x1057 = x1049 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1058 = x1050 - x4;
+      auto x1058 = x1049 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1059 = x1050 * x1058;
+      auto x1059 = x1049 * x1057;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1060 = x1059 * x1057;
+      auto x1060 = x1059 * x1058;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1060 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3882,39 +3882,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1062 = arg2[56 * steps + ((cycle - 0) & mask)];
     assert(x1062 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1063 = x1061 - x1047;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1064 = x1062 - x1048;
+    auto x1063 = x1062 - x1048;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1064 = x1061 - x1047;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1065 = x1063 - x4;
+    auto x1065 = x1064 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1066 = x1063 * x1065;
+    auto x1066 = x1064 * x1065;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1066 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1063 != 0) {
+    if (x1064 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1062 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1067 = x1048 - x2;
+      auto x1067 = x1048 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1068 = x1048 - x0;
+      auto x1068 = x1048 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1069 = x1068 * x1067;
+      auto x1069 = x1067 * x1068;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1069 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1070 = x4 - x1063;
+    auto x1070 = x1 - x1064;
     if (x1070 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1071 = x1064 - x1;
+      auto x1071 = x1063 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1072 = x1064 - x4;
+      auto x1072 = x1063 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1073 = x1064 * x1072;
+      auto x1073 = x1063 * x1071;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1074 = x1073 * x1071;
+      auto x1074 = x1073 * x1072;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1074 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3924,39 +3924,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1076 = arg2[58 * steps + ((cycle - 0) & mask)];
     assert(x1076 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1077 = x1075 - x1061;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1078 = x1076 - x1062;
+    auto x1077 = x1076 - x1062;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1078 = x1075 - x1061;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1079 = x1077 - x4;
+    auto x1079 = x1078 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1080 = x1077 * x1079;
+    auto x1080 = x1078 * x1079;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1080 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1077 != 0) {
+    if (x1078 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1076 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1081 = x1062 - x2;
+      auto x1081 = x1062 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1082 = x1062 - x0;
+      auto x1082 = x1062 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1083 = x1082 * x1081;
+      auto x1083 = x1081 * x1082;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1083 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1084 = x4 - x1077;
+    auto x1084 = x1 - x1078;
     if (x1084 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1085 = x1078 - x1;
+      auto x1085 = x1077 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1086 = x1078 - x4;
+      auto x1086 = x1077 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1087 = x1078 * x1086;
+      auto x1087 = x1077 * x1085;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1088 = x1087 * x1085;
+      auto x1088 = x1087 * x1086;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1088 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -3966,39 +3966,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1090 = arg2[60 * steps + ((cycle - 0) & mask)];
     assert(x1090 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1091 = x1089 - x1075;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1092 = x1090 - x1076;
+    auto x1091 = x1090 - x1076;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1092 = x1089 - x1075;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1093 = x1091 - x4;
+    auto x1093 = x1092 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1094 = x1091 * x1093;
+    auto x1094 = x1092 * x1093;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1094 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1091 != 0) {
+    if (x1092 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1090 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1095 = x1076 - x2;
+      auto x1095 = x1076 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1096 = x1076 - x0;
+      auto x1096 = x1076 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1097 = x1096 * x1095;
+      auto x1097 = x1095 * x1096;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1097 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1098 = x4 - x1091;
+    auto x1098 = x1 - x1092;
     if (x1098 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1099 = x1092 - x1;
+      auto x1099 = x1091 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1100 = x1092 - x4;
+      auto x1100 = x1091 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1101 = x1092 * x1100;
+      auto x1101 = x1091 * x1099;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1102 = x1101 * x1099;
+      auto x1102 = x1101 * x1100;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1102 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4008,39 +4008,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1104 = arg2[62 * steps + ((cycle - 0) & mask)];
     assert(x1104 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1105 = x1103 - x1089;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1106 = x1104 - x1090;
+    auto x1105 = x1104 - x1090;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1106 = x1103 - x1089;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1107 = x1105 - x4;
+    auto x1107 = x1106 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1108 = x1105 * x1107;
+    auto x1108 = x1106 * x1107;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1108 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1105 != 0) {
+    if (x1106 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1104 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1109 = x1090 - x2;
+      auto x1109 = x1090 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1110 = x1090 - x0;
+      auto x1110 = x1090 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1111 = x1110 * x1109;
+      auto x1111 = x1109 * x1110;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1111 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1112 = x4 - x1105;
+    auto x1112 = x1 - x1106;
     if (x1112 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1113 = x1106 - x1;
+      auto x1113 = x1105 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1114 = x1106 - x4;
+      auto x1114 = x1105 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1115 = x1106 * x1114;
+      auto x1115 = x1105 * x1113;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1116 = x1115 * x1113;
+      auto x1116 = x1115 * x1114;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1116 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4050,39 +4050,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1118 = arg2[64 * steps + ((cycle - 0) & mask)];
     assert(x1118 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1119 = x1117 - x1103;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1120 = x1118 - x1104;
+    auto x1119 = x1118 - x1104;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1120 = x1117 - x1103;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1121 = x1119 - x4;
+    auto x1121 = x1120 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1122 = x1119 * x1121;
+    auto x1122 = x1120 * x1121;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1122 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1119 != 0) {
+    if (x1120 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1118 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1123 = x1104 - x2;
+      auto x1123 = x1104 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1124 = x1104 - x0;
+      auto x1124 = x1104 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1125 = x1124 * x1123;
+      auto x1125 = x1123 * x1124;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1125 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1126 = x4 - x1119;
+    auto x1126 = x1 - x1120;
     if (x1126 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1127 = x1120 - x1;
+      auto x1127 = x1119 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1128 = x1120 - x4;
+      auto x1128 = x1119 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1129 = x1120 * x1128;
+      auto x1129 = x1119 * x1127;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1130 = x1129 * x1127;
+      auto x1130 = x1129 * x1128;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1130 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4092,39 +4092,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1132 = arg2[66 * steps + ((cycle - 0) & mask)];
     assert(x1132 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1133 = x1131 - x1117;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1134 = x1132 - x1118;
+    auto x1133 = x1132 - x1118;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1134 = x1131 - x1117;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1135 = x1133 - x4;
+    auto x1135 = x1134 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1136 = x1133 * x1135;
+    auto x1136 = x1134 * x1135;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1136 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1133 != 0) {
+    if (x1134 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1132 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1137 = x1118 - x2;
+      auto x1137 = x1118 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1138 = x1118 - x0;
+      auto x1138 = x1118 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1139 = x1138 * x1137;
+      auto x1139 = x1137 * x1138;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1139 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1140 = x4 - x1133;
+    auto x1140 = x1 - x1134;
     if (x1140 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1141 = x1134 - x1;
+      auto x1141 = x1133 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1142 = x1134 - x4;
+      auto x1142 = x1133 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1143 = x1134 * x1142;
+      auto x1143 = x1133 * x1141;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1144 = x1143 * x1141;
+      auto x1144 = x1143 * x1142;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1144 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4134,39 +4134,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1146 = arg2[68 * steps + ((cycle - 0) & mask)];
     assert(x1146 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1147 = x1145 - x1131;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1148 = x1146 - x1132;
+    auto x1147 = x1146 - x1132;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1148 = x1145 - x1131;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1149 = x1147 - x4;
+    auto x1149 = x1148 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1150 = x1147 * x1149;
+    auto x1150 = x1148 * x1149;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1150 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1147 != 0) {
+    if (x1148 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1146 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1151 = x1132 - x2;
+      auto x1151 = x1132 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1152 = x1132 - x0;
+      auto x1152 = x1132 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1153 = x1152 * x1151;
+      auto x1153 = x1151 * x1152;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1153 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1154 = x4 - x1147;
+    auto x1154 = x1 - x1148;
     if (x1154 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1155 = x1148 - x1;
+      auto x1155 = x1147 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1156 = x1148 - x4;
+      auto x1156 = x1147 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1157 = x1148 * x1156;
+      auto x1157 = x1147 * x1155;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1158 = x1157 * x1155;
+      auto x1158 = x1157 * x1156;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1158 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4176,39 +4176,39 @@ __device__ void step_verify_bytes(
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1160 = arg2[1 * steps + ((cycle - 0) & mask)];
     assert(x1160 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1161 = x1159 - x1145;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1162 = x1160 - x1146;
+    auto x1161 = x1160 - x1146;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1162 = x1159 - x1145;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1163 = x1161 - x4;
+    auto x1163 = x1162 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1164 = x1161 * x1163;
+    auto x1164 = x1162 * x1163;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1164 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1161 != 0) {
+    if (x1162 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1160 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1165 = x1146 - x2;
+      auto x1165 = x1146 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1166 = x1146 - x0;
+      auto x1166 = x1146 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1167 = x1166 * x1165;
+      auto x1167 = x1165 * x1166;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1167 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1168 = x4 - x1161;
+    auto x1168 = x1 - x1162;
     if (x1168 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1169 = x1162 - x1;
+      auto x1169 = x1161 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1170 = x1162 - x4;
+      auto x1170 = x1161 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1171 = x1162 * x1170;
+      auto x1171 = x1161 * x1169;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1172 = x1171 * x1169;
+      auto x1172 = x1171 * x1170;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1172 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4471,51 +4471,51 @@ __device__ void step_verify_bytes(
         reg = x1206;
       }
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
-    auto x1207 = arg2[0 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x1207 = arg2[37 * steps + ((cycle - 0) & mask)];
     assert(x1207 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
-    auto x1208 = arg2[1 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x1208 = arg2[38 * steps + ((cycle - 0) & mask)];
     assert(x1208 != Fp::invalid());
-    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x1209 = arg2[37 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
+    auto x1209 = arg2[0 * steps + ((cycle - 1) & mask)];
     assert(x1209 != Fp::invalid());
-    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x1210 = arg2[38 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
+    auto x1210 = arg2[1 * steps + ((cycle - 1) & mask)];
     assert(x1210 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1211 = x1209 - x1207;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1212 = x1210 - x1208;
+    auto x1211 = x1208 - x1210;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1212 = x1207 - x1209;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1213 = x1211 - x4;
+    auto x1213 = x1212 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1214 = x1211 * x1213;
+    auto x1214 = x1212 * x1213;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1214 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1211 != 0) {
+    if (x1212 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
-      assert(x1210 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
+      assert(x1208 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1215 = x1208 - x2;
+      auto x1215 = x1210 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1216 = x1208 - x0;
+      auto x1216 = x1210 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1217 = x1216 * x1215;
+      auto x1217 = x1215 * x1216;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1217 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1218 = x4 - x1211;
+    auto x1218 = x1 - x1212;
     if (x1218 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1219 = x1212 - x1;
+      auto x1219 = x1211 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1220 = x1212 - x4;
+      auto x1220 = x1211 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1221 = x1212 * x1220;
+      auto x1221 = x1211 * x1219;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1222 = x1221 * x1219;
+      auto x1222 = x1221 * x1220;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1222 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4525,39 +4525,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1224 = arg2[40 * steps + ((cycle - 0) & mask)];
     assert(x1224 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1225 = x1223 - x1209;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1226 = x1224 - x1210;
+    auto x1225 = x1224 - x1208;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1226 = x1223 - x1207;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1227 = x1225 - x4;
+    auto x1227 = x1226 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1228 = x1225 * x1227;
+    auto x1228 = x1226 * x1227;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1228 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1225 != 0) {
+    if (x1226 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1224 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1229 = x1210 - x2;
+      auto x1229 = x1208 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1230 = x1210 - x0;
+      auto x1230 = x1208 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1231 = x1230 * x1229;
+      auto x1231 = x1229 * x1230;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1231 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1232 = x4 - x1225;
+    auto x1232 = x1 - x1226;
     if (x1232 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1233 = x1226 - x1;
+      auto x1233 = x1225 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1234 = x1226 - x4;
+      auto x1234 = x1225 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1235 = x1226 * x1234;
+      auto x1235 = x1225 * x1233;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1236 = x1235 * x1233;
+      auto x1236 = x1235 * x1234;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1236 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4567,39 +4567,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1238 = arg2[42 * steps + ((cycle - 0) & mask)];
     assert(x1238 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1239 = x1237 - x1223;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1240 = x1238 - x1224;
+    auto x1239 = x1238 - x1224;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1240 = x1237 - x1223;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1241 = x1239 - x4;
+    auto x1241 = x1240 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1242 = x1239 * x1241;
+    auto x1242 = x1240 * x1241;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1242 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1239 != 0) {
+    if (x1240 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1238 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1243 = x1224 - x2;
+      auto x1243 = x1224 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1244 = x1224 - x0;
+      auto x1244 = x1224 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1245 = x1244 * x1243;
+      auto x1245 = x1243 * x1244;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1245 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1246 = x4 - x1239;
+    auto x1246 = x1 - x1240;
     if (x1246 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1247 = x1240 - x1;
+      auto x1247 = x1239 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1248 = x1240 - x4;
+      auto x1248 = x1239 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1249 = x1240 * x1248;
+      auto x1249 = x1239 * x1247;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1250 = x1249 * x1247;
+      auto x1250 = x1249 * x1248;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1250 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4609,39 +4609,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1252 = arg2[44 * steps + ((cycle - 0) & mask)];
     assert(x1252 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1253 = x1251 - x1237;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1254 = x1252 - x1238;
+    auto x1253 = x1252 - x1238;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1254 = x1251 - x1237;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1255 = x1253 - x4;
+    auto x1255 = x1254 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1256 = x1253 * x1255;
+    auto x1256 = x1254 * x1255;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1256 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1253 != 0) {
+    if (x1254 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1252 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1257 = x1238 - x2;
+      auto x1257 = x1238 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1258 = x1238 - x0;
+      auto x1258 = x1238 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1259 = x1258 * x1257;
+      auto x1259 = x1257 * x1258;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1259 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1260 = x4 - x1253;
+    auto x1260 = x1 - x1254;
     if (x1260 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1261 = x1254 - x1;
+      auto x1261 = x1253 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1262 = x1254 - x4;
+      auto x1262 = x1253 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1263 = x1254 * x1262;
+      auto x1263 = x1253 * x1261;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1264 = x1263 * x1261;
+      auto x1264 = x1263 * x1262;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1264 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4651,39 +4651,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1266 = arg2[46 * steps + ((cycle - 0) & mask)];
     assert(x1266 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1267 = x1265 - x1251;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1268 = x1266 - x1252;
+    auto x1267 = x1266 - x1252;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1268 = x1265 - x1251;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1269 = x1267 - x4;
+    auto x1269 = x1268 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1270 = x1267 * x1269;
+    auto x1270 = x1268 * x1269;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1270 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1267 != 0) {
+    if (x1268 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1266 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1271 = x1252 - x2;
+      auto x1271 = x1252 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1272 = x1252 - x0;
+      auto x1272 = x1252 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1273 = x1272 * x1271;
+      auto x1273 = x1271 * x1272;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1273 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1274 = x4 - x1267;
+    auto x1274 = x1 - x1268;
     if (x1274 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1275 = x1268 - x1;
+      auto x1275 = x1267 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1276 = x1268 - x4;
+      auto x1276 = x1267 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1277 = x1268 * x1276;
+      auto x1277 = x1267 * x1275;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1278 = x1277 * x1275;
+      auto x1278 = x1277 * x1276;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1278 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4693,39 +4693,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1280 = arg2[48 * steps + ((cycle - 0) & mask)];
     assert(x1280 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1281 = x1279 - x1265;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1282 = x1280 - x1266;
+    auto x1281 = x1280 - x1266;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1282 = x1279 - x1265;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1283 = x1281 - x4;
+    auto x1283 = x1282 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1284 = x1281 * x1283;
+    auto x1284 = x1282 * x1283;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1284 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1281 != 0) {
+    if (x1282 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1280 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1285 = x1266 - x2;
+      auto x1285 = x1266 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1286 = x1266 - x0;
+      auto x1286 = x1266 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1287 = x1286 * x1285;
+      auto x1287 = x1285 * x1286;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1287 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1288 = x4 - x1281;
+    auto x1288 = x1 - x1282;
     if (x1288 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1289 = x1282 - x1;
+      auto x1289 = x1281 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1290 = x1282 - x4;
+      auto x1290 = x1281 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1291 = x1282 * x1290;
+      auto x1291 = x1281 * x1289;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1292 = x1291 * x1289;
+      auto x1292 = x1291 * x1290;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1292 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4735,39 +4735,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1294 = arg2[50 * steps + ((cycle - 0) & mask)];
     assert(x1294 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1295 = x1293 - x1279;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1296 = x1294 - x1280;
+    auto x1295 = x1294 - x1280;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1296 = x1293 - x1279;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1297 = x1295 - x4;
+    auto x1297 = x1296 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1298 = x1295 * x1297;
+    auto x1298 = x1296 * x1297;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1298 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1295 != 0) {
+    if (x1296 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1294 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1299 = x1280 - x2;
+      auto x1299 = x1280 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1300 = x1280 - x0;
+      auto x1300 = x1280 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1301 = x1300 * x1299;
+      auto x1301 = x1299 * x1300;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1301 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1302 = x4 - x1295;
+    auto x1302 = x1 - x1296;
     if (x1302 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1303 = x1296 - x1;
+      auto x1303 = x1295 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1304 = x1296 - x4;
+      auto x1304 = x1295 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1305 = x1296 * x1304;
+      auto x1305 = x1295 * x1303;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1306 = x1305 * x1303;
+      auto x1306 = x1305 * x1304;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1306 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4777,39 +4777,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1308 = arg2[52 * steps + ((cycle - 0) & mask)];
     assert(x1308 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1309 = x1307 - x1293;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1310 = x1308 - x1294;
+    auto x1309 = x1308 - x1294;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1310 = x1307 - x1293;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1311 = x1309 - x4;
+    auto x1311 = x1310 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1312 = x1309 * x1311;
+    auto x1312 = x1310 * x1311;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1312 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1309 != 0) {
+    if (x1310 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1308 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1313 = x1294 - x2;
+      auto x1313 = x1294 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1314 = x1294 - x0;
+      auto x1314 = x1294 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1315 = x1314 * x1313;
+      auto x1315 = x1313 * x1314;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1315 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1316 = x4 - x1309;
+    auto x1316 = x1 - x1310;
     if (x1316 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1317 = x1310 - x1;
+      auto x1317 = x1309 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1318 = x1310 - x4;
+      auto x1318 = x1309 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1319 = x1310 * x1318;
+      auto x1319 = x1309 * x1317;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1320 = x1319 * x1317;
+      auto x1320 = x1319 * x1318;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1320 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4819,39 +4819,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1322 = arg2[54 * steps + ((cycle - 0) & mask)];
     assert(x1322 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1323 = x1321 - x1307;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1324 = x1322 - x1308;
+    auto x1323 = x1322 - x1308;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1324 = x1321 - x1307;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1325 = x1323 - x4;
+    auto x1325 = x1324 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1326 = x1323 * x1325;
+    auto x1326 = x1324 * x1325;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1326 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1323 != 0) {
+    if (x1324 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1322 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1327 = x1308 - x2;
+      auto x1327 = x1308 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1328 = x1308 - x0;
+      auto x1328 = x1308 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1329 = x1328 * x1327;
+      auto x1329 = x1327 * x1328;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1329 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1330 = x4 - x1323;
+    auto x1330 = x1 - x1324;
     if (x1330 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1331 = x1324 - x1;
+      auto x1331 = x1323 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1332 = x1324 - x4;
+      auto x1332 = x1323 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1333 = x1324 * x1332;
+      auto x1333 = x1323 * x1331;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1334 = x1333 * x1331;
+      auto x1334 = x1333 * x1332;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1334 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4861,39 +4861,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1336 = arg2[56 * steps + ((cycle - 0) & mask)];
     assert(x1336 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1337 = x1335 - x1321;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1338 = x1336 - x1322;
+    auto x1337 = x1336 - x1322;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1338 = x1335 - x1321;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1339 = x1337 - x4;
+    auto x1339 = x1338 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1340 = x1337 * x1339;
+    auto x1340 = x1338 * x1339;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1340 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1337 != 0) {
+    if (x1338 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1336 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1341 = x1322 - x2;
+      auto x1341 = x1322 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1342 = x1322 - x0;
+      auto x1342 = x1322 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1343 = x1342 * x1341;
+      auto x1343 = x1341 * x1342;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1343 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1344 = x4 - x1337;
+    auto x1344 = x1 - x1338;
     if (x1344 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1345 = x1338 - x1;
+      auto x1345 = x1337 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1346 = x1338 - x4;
+      auto x1346 = x1337 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1347 = x1338 * x1346;
+      auto x1347 = x1337 * x1345;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1348 = x1347 * x1345;
+      auto x1348 = x1347 * x1346;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1348 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4903,39 +4903,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1350 = arg2[58 * steps + ((cycle - 0) & mask)];
     assert(x1350 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1351 = x1349 - x1335;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1352 = x1350 - x1336;
+    auto x1351 = x1350 - x1336;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1352 = x1349 - x1335;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1353 = x1351 - x4;
+    auto x1353 = x1352 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1354 = x1351 * x1353;
+    auto x1354 = x1352 * x1353;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1354 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1351 != 0) {
+    if (x1352 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1350 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1355 = x1336 - x2;
+      auto x1355 = x1336 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1356 = x1336 - x0;
+      auto x1356 = x1336 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1357 = x1356 * x1355;
+      auto x1357 = x1355 * x1356;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1357 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1358 = x4 - x1351;
+    auto x1358 = x1 - x1352;
     if (x1358 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1359 = x1352 - x1;
+      auto x1359 = x1351 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1360 = x1352 - x4;
+      auto x1360 = x1351 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1361 = x1352 * x1360;
+      auto x1361 = x1351 * x1359;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1362 = x1361 * x1359;
+      auto x1362 = x1361 * x1360;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1362 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4945,39 +4945,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1364 = arg2[60 * steps + ((cycle - 0) & mask)];
     assert(x1364 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1365 = x1363 - x1349;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1366 = x1364 - x1350;
+    auto x1365 = x1364 - x1350;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1366 = x1363 - x1349;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1367 = x1365 - x4;
+    auto x1367 = x1366 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1368 = x1365 * x1367;
+    auto x1368 = x1366 * x1367;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1368 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1365 != 0) {
+    if (x1366 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1364 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1369 = x1350 - x2;
+      auto x1369 = x1350 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1370 = x1350 - x0;
+      auto x1370 = x1350 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1371 = x1370 * x1369;
+      auto x1371 = x1369 * x1370;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1371 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1372 = x4 - x1365;
+    auto x1372 = x1 - x1366;
     if (x1372 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1373 = x1366 - x1;
+      auto x1373 = x1365 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1374 = x1366 - x4;
+      auto x1374 = x1365 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1375 = x1366 * x1374;
+      auto x1375 = x1365 * x1373;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1376 = x1375 * x1373;
+      auto x1376 = x1375 * x1374;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1376 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -4987,39 +4987,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1378 = arg2[62 * steps + ((cycle - 0) & mask)];
     assert(x1378 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1379 = x1377 - x1363;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1380 = x1378 - x1364;
+    auto x1379 = x1378 - x1364;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1380 = x1377 - x1363;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1381 = x1379 - x4;
+    auto x1381 = x1380 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1382 = x1379 * x1381;
+    auto x1382 = x1380 * x1381;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1382 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1379 != 0) {
+    if (x1380 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1378 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1383 = x1364 - x2;
+      auto x1383 = x1364 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1384 = x1364 - x0;
+      auto x1384 = x1364 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1385 = x1384 * x1383;
+      auto x1385 = x1383 * x1384;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1385 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1386 = x4 - x1379;
+    auto x1386 = x1 - x1380;
     if (x1386 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1387 = x1380 - x1;
+      auto x1387 = x1379 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1388 = x1380 - x4;
+      auto x1388 = x1379 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1389 = x1380 * x1388;
+      auto x1389 = x1379 * x1387;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1390 = x1389 * x1387;
+      auto x1390 = x1389 * x1388;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1390 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5029,39 +5029,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1392 = arg2[64 * steps + ((cycle - 0) & mask)];
     assert(x1392 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1393 = x1391 - x1377;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1394 = x1392 - x1378;
+    auto x1393 = x1392 - x1378;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1394 = x1391 - x1377;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1395 = x1393 - x4;
+    auto x1395 = x1394 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1396 = x1393 * x1395;
+    auto x1396 = x1394 * x1395;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1396 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1393 != 0) {
+    if (x1394 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1392 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1397 = x1378 - x2;
+      auto x1397 = x1378 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1398 = x1378 - x0;
+      auto x1398 = x1378 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1399 = x1398 * x1397;
+      auto x1399 = x1397 * x1398;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1399 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1400 = x4 - x1393;
+    auto x1400 = x1 - x1394;
     if (x1400 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1401 = x1394 - x1;
+      auto x1401 = x1393 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1402 = x1394 - x4;
+      auto x1402 = x1393 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1403 = x1394 * x1402;
+      auto x1403 = x1393 * x1401;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1404 = x1403 * x1401;
+      auto x1404 = x1403 * x1402;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1404 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5071,39 +5071,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1406 = arg2[66 * steps + ((cycle - 0) & mask)];
     assert(x1406 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1407 = x1405 - x1391;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1408 = x1406 - x1392;
+    auto x1407 = x1406 - x1392;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1408 = x1405 - x1391;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1409 = x1407 - x4;
+    auto x1409 = x1408 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1410 = x1407 * x1409;
+    auto x1410 = x1408 * x1409;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1410 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1407 != 0) {
+    if (x1408 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1406 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1411 = x1392 - x2;
+      auto x1411 = x1392 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1412 = x1392 - x0;
+      auto x1412 = x1392 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1413 = x1412 * x1411;
+      auto x1413 = x1411 * x1412;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1413 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1414 = x4 - x1407;
+    auto x1414 = x1 - x1408;
     if (x1414 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1415 = x1408 - x1;
+      auto x1415 = x1407 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1416 = x1408 - x4;
+      auto x1416 = x1407 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1417 = x1408 * x1416;
+      auto x1417 = x1407 * x1415;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1418 = x1417 * x1415;
+      auto x1418 = x1417 * x1416;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1418 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5113,39 +5113,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1420 = arg2[68 * steps + ((cycle - 0) & mask)];
     assert(x1420 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1421 = x1419 - x1405;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1422 = x1420 - x1406;
+    auto x1421 = x1420 - x1406;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1422 = x1419 - x1405;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1423 = x1421 - x4;
+    auto x1423 = x1422 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1424 = x1421 * x1423;
+    auto x1424 = x1422 * x1423;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1424 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1421 != 0) {
+    if (x1422 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1420 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1425 = x1406 - x2;
+      auto x1425 = x1406 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1426 = x1406 - x0;
+      auto x1426 = x1406 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1427 = x1426 * x1425;
+      auto x1427 = x1425 * x1426;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1427 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1428 = x4 - x1421;
+    auto x1428 = x1 - x1422;
     if (x1428 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1429 = x1422 - x1;
+      auto x1429 = x1421 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1430 = x1422 - x4;
+      auto x1430 = x1421 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1431 = x1422 * x1430;
+      auto x1431 = x1421 * x1429;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1432 = x1431 * x1429;
+      auto x1432 = x1431 * x1430;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1432 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5155,39 +5155,39 @@ __device__ void step_verify_bytes(
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1434 = arg2[1 * steps + ((cycle - 0) & mask)];
     assert(x1434 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1435 = x1433 - x1419;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1436 = x1434 - x1420;
+    auto x1435 = x1434 - x1420;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1436 = x1433 - x1419;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1437 = x1435 - x4;
+    auto x1437 = x1436 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1438 = x1435 * x1437;
+    auto x1438 = x1436 * x1437;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1438 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1435 != 0) {
+    if (x1436 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1434 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1439 = x1420 - x2;
+      auto x1439 = x1420 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1440 = x1420 - x0;
+      auto x1440 = x1420 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1441 = x1440 * x1439;
+      auto x1441 = x1439 * x1440;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1441 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1442 = x4 - x1435;
+    auto x1442 = x1 - x1436;
     if (x1442 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1443 = x1436 - x1;
+      auto x1443 = x1435 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1444 = x1436 - x4;
+      auto x1444 = x1435 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1445 = x1436 * x1444;
+      auto x1445 = x1435 * x1443;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1446 = x1445 * x1443;
+      auto x1446 = x1445 * x1444;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1446 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5450,51 +5450,51 @@ __device__ void step_verify_bytes(
         reg = x1480;
       }
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
-    auto x1481 = arg2[0 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x1481 = arg2[37 * steps + ((cycle - 0) & mask)];
     assert(x1481 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
-    auto x1482 = arg2[1 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x1482 = arg2[38 * steps + ((cycle - 0) & mask)];
     assert(x1482 != Fp::invalid());
-    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x1483 = arg2[37 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
+    auto x1483 = arg2[0 * steps + ((cycle - 1) & mask)];
     assert(x1483 != Fp::invalid());
-    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x1484 = arg2[38 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
+    auto x1484 = arg2[1 * steps + ((cycle - 1) & mask)];
     assert(x1484 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1485 = x1483 - x1481;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1486 = x1484 - x1482;
+    auto x1485 = x1482 - x1484;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1486 = x1481 - x1483;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1487 = x1485 - x4;
+    auto x1487 = x1486 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1488 = x1485 * x1487;
+    auto x1488 = x1486 * x1487;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1488 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1485 != 0) {
+    if (x1486 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
-      assert(x1484 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
+      assert(x1482 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1489 = x1482 - x2;
+      auto x1489 = x1484 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1490 = x1482 - x0;
+      auto x1490 = x1484 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1491 = x1490 * x1489;
+      auto x1491 = x1489 * x1490;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1491 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1492 = x4 - x1485;
+    auto x1492 = x1 - x1486;
     if (x1492 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1493 = x1486 - x1;
+      auto x1493 = x1485 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1494 = x1486 - x4;
+      auto x1494 = x1485 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1495 = x1486 * x1494;
+      auto x1495 = x1485 * x1493;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1496 = x1495 * x1493;
+      auto x1496 = x1495 * x1494;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1496 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5504,39 +5504,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1498 = arg2[40 * steps + ((cycle - 0) & mask)];
     assert(x1498 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1499 = x1497 - x1483;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1500 = x1498 - x1484;
+    auto x1499 = x1498 - x1482;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1500 = x1497 - x1481;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1501 = x1499 - x4;
+    auto x1501 = x1500 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1502 = x1499 * x1501;
+    auto x1502 = x1500 * x1501;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1502 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1499 != 0) {
+    if (x1500 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1498 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1503 = x1484 - x2;
+      auto x1503 = x1482 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1504 = x1484 - x0;
+      auto x1504 = x1482 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1505 = x1504 * x1503;
+      auto x1505 = x1503 * x1504;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1505 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1506 = x4 - x1499;
+    auto x1506 = x1 - x1500;
     if (x1506 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1507 = x1500 - x1;
+      auto x1507 = x1499 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1508 = x1500 - x4;
+      auto x1508 = x1499 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1509 = x1500 * x1508;
+      auto x1509 = x1499 * x1507;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1510 = x1509 * x1507;
+      auto x1510 = x1509 * x1508;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1510 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5546,39 +5546,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1512 = arg2[42 * steps + ((cycle - 0) & mask)];
     assert(x1512 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1513 = x1511 - x1497;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1514 = x1512 - x1498;
+    auto x1513 = x1512 - x1498;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1514 = x1511 - x1497;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1515 = x1513 - x4;
+    auto x1515 = x1514 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1516 = x1513 * x1515;
+    auto x1516 = x1514 * x1515;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1516 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1513 != 0) {
+    if (x1514 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1512 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1517 = x1498 - x2;
+      auto x1517 = x1498 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1518 = x1498 - x0;
+      auto x1518 = x1498 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1519 = x1518 * x1517;
+      auto x1519 = x1517 * x1518;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1519 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1520 = x4 - x1513;
+    auto x1520 = x1 - x1514;
     if (x1520 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1521 = x1514 - x1;
+      auto x1521 = x1513 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1522 = x1514 - x4;
+      auto x1522 = x1513 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1523 = x1514 * x1522;
+      auto x1523 = x1513 * x1521;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1524 = x1523 * x1521;
+      auto x1524 = x1523 * x1522;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1524 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5588,39 +5588,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1526 = arg2[44 * steps + ((cycle - 0) & mask)];
     assert(x1526 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1527 = x1525 - x1511;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1528 = x1526 - x1512;
+    auto x1527 = x1526 - x1512;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1528 = x1525 - x1511;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1529 = x1527 - x4;
+    auto x1529 = x1528 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1530 = x1527 * x1529;
+    auto x1530 = x1528 * x1529;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1530 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1527 != 0) {
+    if (x1528 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1526 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1531 = x1512 - x2;
+      auto x1531 = x1512 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1532 = x1512 - x0;
+      auto x1532 = x1512 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1533 = x1532 * x1531;
+      auto x1533 = x1531 * x1532;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1533 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1534 = x4 - x1527;
+    auto x1534 = x1 - x1528;
     if (x1534 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1535 = x1528 - x1;
+      auto x1535 = x1527 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1536 = x1528 - x4;
+      auto x1536 = x1527 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1537 = x1528 * x1536;
+      auto x1537 = x1527 * x1535;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1538 = x1537 * x1535;
+      auto x1538 = x1537 * x1536;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1538 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5630,39 +5630,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1540 = arg2[46 * steps + ((cycle - 0) & mask)];
     assert(x1540 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1541 = x1539 - x1525;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1542 = x1540 - x1526;
+    auto x1541 = x1540 - x1526;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1542 = x1539 - x1525;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1543 = x1541 - x4;
+    auto x1543 = x1542 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1544 = x1541 * x1543;
+    auto x1544 = x1542 * x1543;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1544 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1541 != 0) {
+    if (x1542 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1540 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1545 = x1526 - x2;
+      auto x1545 = x1526 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1546 = x1526 - x0;
+      auto x1546 = x1526 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1547 = x1546 * x1545;
+      auto x1547 = x1545 * x1546;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1547 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1548 = x4 - x1541;
+    auto x1548 = x1 - x1542;
     if (x1548 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1549 = x1542 - x1;
+      auto x1549 = x1541 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1550 = x1542 - x4;
+      auto x1550 = x1541 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1551 = x1542 * x1550;
+      auto x1551 = x1541 * x1549;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1552 = x1551 * x1549;
+      auto x1552 = x1551 * x1550;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1552 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5672,39 +5672,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1554 = arg2[48 * steps + ((cycle - 0) & mask)];
     assert(x1554 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1555 = x1553 - x1539;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1556 = x1554 - x1540;
+    auto x1555 = x1554 - x1540;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1556 = x1553 - x1539;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1557 = x1555 - x4;
+    auto x1557 = x1556 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1558 = x1555 * x1557;
+    auto x1558 = x1556 * x1557;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1558 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1555 != 0) {
+    if (x1556 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1554 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1559 = x1540 - x2;
+      auto x1559 = x1540 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1560 = x1540 - x0;
+      auto x1560 = x1540 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1561 = x1560 * x1559;
+      auto x1561 = x1559 * x1560;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1561 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1562 = x4 - x1555;
+    auto x1562 = x1 - x1556;
     if (x1562 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1563 = x1556 - x1;
+      auto x1563 = x1555 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1564 = x1556 - x4;
+      auto x1564 = x1555 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1565 = x1556 * x1564;
+      auto x1565 = x1555 * x1563;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1566 = x1565 * x1563;
+      auto x1566 = x1565 * x1564;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1566 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5714,39 +5714,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1568 = arg2[50 * steps + ((cycle - 0) & mask)];
     assert(x1568 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1569 = x1567 - x1553;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1570 = x1568 - x1554;
+    auto x1569 = x1568 - x1554;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1570 = x1567 - x1553;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1571 = x1569 - x4;
+    auto x1571 = x1570 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1572 = x1569 * x1571;
+    auto x1572 = x1570 * x1571;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1572 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1569 != 0) {
+    if (x1570 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1568 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1573 = x1554 - x2;
+      auto x1573 = x1554 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1574 = x1554 - x0;
+      auto x1574 = x1554 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1575 = x1574 * x1573;
+      auto x1575 = x1573 * x1574;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1575 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1576 = x4 - x1569;
+    auto x1576 = x1 - x1570;
     if (x1576 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1577 = x1570 - x1;
+      auto x1577 = x1569 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1578 = x1570 - x4;
+      auto x1578 = x1569 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1579 = x1570 * x1578;
+      auto x1579 = x1569 * x1577;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1580 = x1579 * x1577;
+      auto x1580 = x1579 * x1578;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1580 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5756,39 +5756,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1582 = arg2[52 * steps + ((cycle - 0) & mask)];
     assert(x1582 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1583 = x1581 - x1567;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1584 = x1582 - x1568;
+    auto x1583 = x1582 - x1568;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1584 = x1581 - x1567;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1585 = x1583 - x4;
+    auto x1585 = x1584 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1586 = x1583 * x1585;
+    auto x1586 = x1584 * x1585;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1586 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1583 != 0) {
+    if (x1584 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1582 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1587 = x1568 - x2;
+      auto x1587 = x1568 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1588 = x1568 - x0;
+      auto x1588 = x1568 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1589 = x1588 * x1587;
+      auto x1589 = x1587 * x1588;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1589 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1590 = x4 - x1583;
+    auto x1590 = x1 - x1584;
     if (x1590 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1591 = x1584 - x1;
+      auto x1591 = x1583 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1592 = x1584 - x4;
+      auto x1592 = x1583 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1593 = x1584 * x1592;
+      auto x1593 = x1583 * x1591;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1594 = x1593 * x1591;
+      auto x1594 = x1593 * x1592;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1594 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5798,39 +5798,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1596 = arg2[54 * steps + ((cycle - 0) & mask)];
     assert(x1596 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1597 = x1595 - x1581;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1598 = x1596 - x1582;
+    auto x1597 = x1596 - x1582;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1598 = x1595 - x1581;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1599 = x1597 - x4;
+    auto x1599 = x1598 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1600 = x1597 * x1599;
+    auto x1600 = x1598 * x1599;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1600 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1597 != 0) {
+    if (x1598 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1596 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1601 = x1582 - x2;
+      auto x1601 = x1582 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1602 = x1582 - x0;
+      auto x1602 = x1582 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1603 = x1602 * x1601;
+      auto x1603 = x1601 * x1602;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1603 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1604 = x4 - x1597;
+    auto x1604 = x1 - x1598;
     if (x1604 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1605 = x1598 - x1;
+      auto x1605 = x1597 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1606 = x1598 - x4;
+      auto x1606 = x1597 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1607 = x1598 * x1606;
+      auto x1607 = x1597 * x1605;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1608 = x1607 * x1605;
+      auto x1608 = x1607 * x1606;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1608 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5840,39 +5840,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1610 = arg2[56 * steps + ((cycle - 0) & mask)];
     assert(x1610 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1611 = x1609 - x1595;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1612 = x1610 - x1596;
+    auto x1611 = x1610 - x1596;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1612 = x1609 - x1595;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1613 = x1611 - x4;
+    auto x1613 = x1612 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1614 = x1611 * x1613;
+    auto x1614 = x1612 * x1613;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1614 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1611 != 0) {
+    if (x1612 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1610 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1615 = x1596 - x2;
+      auto x1615 = x1596 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1616 = x1596 - x0;
+      auto x1616 = x1596 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1617 = x1616 * x1615;
+      auto x1617 = x1615 * x1616;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1617 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1618 = x4 - x1611;
+    auto x1618 = x1 - x1612;
     if (x1618 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1619 = x1612 - x1;
+      auto x1619 = x1611 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1620 = x1612 - x4;
+      auto x1620 = x1611 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1621 = x1612 * x1620;
+      auto x1621 = x1611 * x1619;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1622 = x1621 * x1619;
+      auto x1622 = x1621 * x1620;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1622 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5882,39 +5882,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1624 = arg2[58 * steps + ((cycle - 0) & mask)];
     assert(x1624 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1625 = x1623 - x1609;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1626 = x1624 - x1610;
+    auto x1625 = x1624 - x1610;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1626 = x1623 - x1609;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1627 = x1625 - x4;
+    auto x1627 = x1626 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1628 = x1625 * x1627;
+    auto x1628 = x1626 * x1627;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1628 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1625 != 0) {
+    if (x1626 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1624 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1629 = x1610 - x2;
+      auto x1629 = x1610 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1630 = x1610 - x0;
+      auto x1630 = x1610 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1631 = x1630 * x1629;
+      auto x1631 = x1629 * x1630;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1631 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1632 = x4 - x1625;
+    auto x1632 = x1 - x1626;
     if (x1632 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1633 = x1626 - x1;
+      auto x1633 = x1625 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1634 = x1626 - x4;
+      auto x1634 = x1625 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1635 = x1626 * x1634;
+      auto x1635 = x1625 * x1633;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1636 = x1635 * x1633;
+      auto x1636 = x1635 * x1634;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1636 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5924,39 +5924,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1638 = arg2[60 * steps + ((cycle - 0) & mask)];
     assert(x1638 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1639 = x1637 - x1623;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1640 = x1638 - x1624;
+    auto x1639 = x1638 - x1624;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1640 = x1637 - x1623;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1641 = x1639 - x4;
+    auto x1641 = x1640 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1642 = x1639 * x1641;
+    auto x1642 = x1640 * x1641;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1642 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1639 != 0) {
+    if (x1640 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1638 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1643 = x1624 - x2;
+      auto x1643 = x1624 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1644 = x1624 - x0;
+      auto x1644 = x1624 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1645 = x1644 * x1643;
+      auto x1645 = x1643 * x1644;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1645 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1646 = x4 - x1639;
+    auto x1646 = x1 - x1640;
     if (x1646 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1647 = x1640 - x1;
+      auto x1647 = x1639 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1648 = x1640 - x4;
+      auto x1648 = x1639 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1649 = x1640 * x1648;
+      auto x1649 = x1639 * x1647;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1650 = x1649 * x1647;
+      auto x1650 = x1649 * x1648;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1650 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -5966,39 +5966,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1652 = arg2[62 * steps + ((cycle - 0) & mask)];
     assert(x1652 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1653 = x1651 - x1637;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1654 = x1652 - x1638;
+    auto x1653 = x1652 - x1638;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1654 = x1651 - x1637;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1655 = x1653 - x4;
+    auto x1655 = x1654 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1656 = x1653 * x1655;
+    auto x1656 = x1654 * x1655;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1656 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1653 != 0) {
+    if (x1654 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1652 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1657 = x1638 - x2;
+      auto x1657 = x1638 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1658 = x1638 - x0;
+      auto x1658 = x1638 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1659 = x1658 * x1657;
+      auto x1659 = x1657 * x1658;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1659 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1660 = x4 - x1653;
+    auto x1660 = x1 - x1654;
     if (x1660 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1661 = x1654 - x1;
+      auto x1661 = x1653 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1662 = x1654 - x4;
+      auto x1662 = x1653 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1663 = x1654 * x1662;
+      auto x1663 = x1653 * x1661;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1664 = x1663 * x1661;
+      auto x1664 = x1663 * x1662;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1664 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -6008,39 +6008,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1666 = arg2[64 * steps + ((cycle - 0) & mask)];
     assert(x1666 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1667 = x1665 - x1651;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1668 = x1666 - x1652;
+    auto x1667 = x1666 - x1652;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1668 = x1665 - x1651;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1669 = x1667 - x4;
+    auto x1669 = x1668 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1670 = x1667 * x1669;
+    auto x1670 = x1668 * x1669;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1670 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1667 != 0) {
+    if (x1668 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1666 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1671 = x1652 - x2;
+      auto x1671 = x1652 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1672 = x1652 - x0;
+      auto x1672 = x1652 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1673 = x1672 * x1671;
+      auto x1673 = x1671 * x1672;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1673 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1674 = x4 - x1667;
+    auto x1674 = x1 - x1668;
     if (x1674 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1675 = x1668 - x1;
+      auto x1675 = x1667 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1676 = x1668 - x4;
+      auto x1676 = x1667 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1677 = x1668 * x1676;
+      auto x1677 = x1667 * x1675;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1678 = x1677 * x1675;
+      auto x1678 = x1677 * x1676;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1678 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -6050,39 +6050,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1680 = arg2[66 * steps + ((cycle - 0) & mask)];
     assert(x1680 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1681 = x1679 - x1665;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1682 = x1680 - x1666;
+    auto x1681 = x1680 - x1666;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1682 = x1679 - x1665;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1683 = x1681 - x4;
+    auto x1683 = x1682 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1684 = x1681 * x1683;
+    auto x1684 = x1682 * x1683;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1684 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1681 != 0) {
+    if (x1682 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1680 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1685 = x1666 - x2;
+      auto x1685 = x1666 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1686 = x1666 - x0;
+      auto x1686 = x1666 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1687 = x1686 * x1685;
+      auto x1687 = x1685 * x1686;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1687 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1688 = x4 - x1681;
+    auto x1688 = x1 - x1682;
     if (x1688 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1689 = x1682 - x1;
+      auto x1689 = x1681 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1690 = x1682 - x4;
+      auto x1690 = x1681 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1691 = x1682 * x1690;
+      auto x1691 = x1681 * x1689;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1692 = x1691 * x1689;
+      auto x1692 = x1691 * x1690;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1692 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -6092,39 +6092,39 @@ __device__ void step_verify_bytes(
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1694 = arg2[68 * steps + ((cycle - 0) & mask)];
     assert(x1694 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1695 = x1693 - x1679;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1696 = x1694 - x1680;
+    auto x1695 = x1694 - x1680;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1696 = x1693 - x1679;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1697 = x1695 - x4;
+    auto x1697 = x1696 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1698 = x1695 * x1697;
+    auto x1698 = x1696 * x1697;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1698 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1695 != 0) {
+    if (x1696 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1694 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1699 = x1680 - x2;
+      auto x1699 = x1680 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1700 = x1680 - x0;
+      auto x1700 = x1680 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1701 = x1700 * x1699;
+      auto x1701 = x1699 * x1700;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1701 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1702 = x4 - x1695;
+    auto x1702 = x1 - x1696;
     if (x1702 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1703 = x1696 - x1;
+      auto x1703 = x1695 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1704 = x1696 - x4;
+      auto x1704 = x1695 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1705 = x1696 * x1704;
+      auto x1705 = x1695 * x1703;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1706 = x1705 * x1703;
+      auto x1706 = x1705 * x1704;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1706 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -6134,39 +6134,39 @@ __device__ void step_verify_bytes(
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
     auto x1708 = arg2[1 * steps + ((cycle - 0) & mask)];
     assert(x1708 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1709 = x1707 - x1693;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1710 = x1708 - x1694;
+    auto x1709 = x1708 - x1694;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1710 = x1707 - x1693;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1711 = x1709 - x4;
+    auto x1711 = x1710 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1712 = x1709 * x1711;
+    auto x1712 = x1710 * x1711;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1712 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1709 != 0) {
+    if (x1710 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
       assert(x1708 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1713 = x1694 - x2;
+      auto x1713 = x1694 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1714 = x1694 - x0;
+      auto x1714 = x1694 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1715 = x1714 * x1713;
+      auto x1715 = x1713 * x1714;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1715 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1716 = x4 - x1709;
+    auto x1716 = x1 - x1710;
     if (x1716 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1717 = x1710 - x1;
+      auto x1717 = x1709 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1718 = x1710 - x4;
+      auto x1718 = x1709 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1719 = x1710 * x1718;
+      auto x1719 = x1709 * x1717;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1720 = x1719 * x1717;
+      auto x1720 = x1719 * x1718;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1720 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
@@ -6175,60 +6175,60 @@ __device__ void step_verify_bytes(
     // loc("zirgen/components/bytes.cpp":26:0)
     {
       auto& reg = arg2[3 * steps + cycle];
-      assert(reg == Fp::invalid() || reg == x0);
-      reg = x0;
+      assert(reg == Fp::invalid() || reg == x3);
+      reg = x3;
     }
     // loc("zirgen/components/bytes.cpp":27:0)
     {
       auto& reg = arg2[4 * steps + cycle];
-      assert(reg == Fp::invalid() || reg == x0);
-      reg = x0;
+      assert(reg == Fp::invalid() || reg == x3);
+      reg = x3;
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
-    auto x1721 = arg2[0 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/bytes_fini(BytesFiniStep)/PlonkFini/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x1721 = arg2[3 * steps + ((cycle - 0) & mask)];
     assert(x1721 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
-    auto x1722 = arg2[1 * steps + ((cycle - 1) & mask)];
+    // loc("Top/mux(Mux)/bytes_fini(BytesFiniStep)/PlonkFini/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
+    auto x1722 = arg2[4 * steps + ((cycle - 0) & mask)];
     assert(x1722 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_fini(BytesFiniStep)/PlonkFini/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x1723 = arg2[3 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:0))
+    auto x1723 = arg2[0 * steps + ((cycle - 1) & mask)];
     assert(x1723 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_fini(BytesFiniStep)/PlonkFini/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x1724 = arg2[4 * steps + ((cycle - 0) & mask)];
+    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:0))
+    auto x1724 = arg2[1 * steps + ((cycle - 1) & mask)];
     assert(x1724 != Fp::invalid());
-    // loc("zirgen/components/bytes.cpp":66:0)
-    auto x1725 = x1723 - x1721;
     // loc("zirgen/components/bytes.cpp":67:0)
-    auto x1726 = x1724 - x1722;
+    auto x1725 = x1722 - x1724;
+    // loc("zirgen/components/bytes.cpp":66:0)
+    auto x1726 = x1721 - x1723;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1727 = x1725 - x4;
+    auto x1727 = x1726 - x1;
     // loc("zirgen/components/bytes.cpp":69:0)
-    auto x1728 = x1725 * x1727;
+    auto x1728 = x1726 * x1727;
     // loc("zirgen/components/bytes.cpp":69:0)
     assert(x1728 == 0 && "eqz failed at: zirgen/components/bytes.cpp:69");
-    if (x1725 != 0) {
+    if (x1726 != 0) {
       // loc("zirgen/components/bytes.cpp":73:0)
-      assert(x1724 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
+      assert(x1722 == 0 && "eqz failed at: zirgen/components/bytes.cpp:73");
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1729 = x1722 - x2;
+      auto x1729 = x1724 - x3;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1730 = x1722 - x0;
+      auto x1730 = x1724 - x2;
       // loc("zirgen/components/bytes.cpp":75:0)
-      auto x1731 = x1730 * x1729;
+      auto x1731 = x1729 * x1730;
       // loc("zirgen/components/bytes.cpp":75:0)
       assert(x1731 == 0 && "eqz failed at: zirgen/components/bytes.cpp:75");
     }
     // loc("zirgen/components/bytes.cpp":77:0)
-    auto x1732 = x4 - x1725;
+    auto x1732 = x1 - x1726;
     if (x1732 != 0) {
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1733 = x1726 - x1;
+      auto x1733 = x1725 - x1;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1734 = x1726 - x4;
+      auto x1734 = x1725 - x4;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1735 = x1726 * x1734;
+      auto x1735 = x1725 * x1733;
       // loc("zirgen/components/bytes.cpp":79:0)
-      auto x1736 = x1735 * x1733;
+      auto x1736 = x1735 * x1734;
       // loc("zirgen/components/bytes.cpp":79:0)
       assert(x1736 == 0 && "eqz failed at: zirgen/components/bytes.cpp:79");
     }
