@@ -402,6 +402,6 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("4346c564a1c66d4f6aafac2dd2efea6310dc516db5053002b2d8765636e5ca4c")
+        digest!("a516a057c9fbf5629106300934d48e0e775d4230e41e503347cad96fcbde7e2e")
     );
 }
