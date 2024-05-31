@@ -18,17 +18,17 @@ use risc0_zkp::digest;
 /// Control IDs allowed in the default set of recursion programs. Includes control IDs for the base
 /// set of recursion programs, and each power-of-two of the rv32im circuit, using Poseidon2.
 pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
-    digest!("bebb4c5f19d4973b590313766e476d3d7cce5c18b2d600188d7476767a4a8614"),
-    digest!("0296f8241298c95f780501761519030966b9902bc508b539881b0c49bf326b6e"),
-    digest!("b3b5d8727f259c31dfa971583c8db640a4a78b5b791fd76c15e90d2c5a85e45b"),
-    digest!("3376da16801abe4c46bf9c508d67c559a6ba4a46e0f8c602bfd9a337c9b0f40b"),
-    digest!("61c4fc0b6df2a935904374720c967b081deb844653f81956b71c4e1e863e6e3e"),
-    digest!("1f2a072b0e7ae7113aa1193120e2543daf39ad727c2128539c84072ae150c960"),
-    digest!("0c31d02a1900786d81bdae23ce96ce474c8b0b7182a91457aeac5a25b79f5c65"),
-    digest!("1ef23b55919a8313dfb56057c4174431839660377a3e22738e279c02901ad345"),
-    digest!("d695e66e4db81a4b6e8d535a5ba1370757291d1ef7fe1973db9cb83716565637"),
-    digest!("9ef20b736835d16fb922710871488552582aee312f0925599d3fee12934b3465"),
-    digest!("da824e2ecc179c2c1359bb75b154f8490086cd0f85e3391cc96ffc3b8e3afa11"),
+    digest!("55ba2d763ec3c016c0f97c298507115c77e0a25215e5771ba501d016edca522c"),
+    digest!("c265954c4dcb2155e041286a246bfe400ba9d042d919aa3cb1a299651f84c13e"),
+    digest!("467cd61da86f37347b45e64b5d4665308871bc301c67ba6c6d13c9470c3e4840"),
+    digest!("57b2031d3881e92b85d73d2d0800a223fdaccd5e7bdd0a569c10556ec138f551"),
+    digest!("c1f19103f8376c00fe20f62aa4370f628efe3a4a5eb1a5739466c944cf7dfe31"),
+    digest!("548ec1774c6c833b18db2e2a1464cb1923c6c721df87b437509ba87292d20529"),
+    digest!("ce535b3b10e4cc212842b90a918553633c4f5375dee51d4788798765df5a8750"),
+    digest!("7dea3854a91c906f92f23a291340066ecbd5375669fe752a5047c926e4d56747"),
+    digest!("dca31f53c5bf4c67ecdc9f1035cf5934072afc29573a1845100d6140befab657"),
+    digest!("12da4520930b1740810a69428c02fb2fcb586763a0e3794c45196608b594dd69"),
+    digest!("5c2dce7226ff9073b8e38919583c01375f11395111e9ae3bfd519b57f84a5e00"),
     digest!("4882cd253cc9c775ca50d63162756140aa910608886b9c3f97d0d55653a86671"),
     digest!("bea76f74072983519b9ca337aae9e653b5468d721b1f9664c7bc2c50fa1fc236"),
     digest!("54f2492833c36345869f4b0c877c20283bb49e23d91f2221fc18483e1c3d8f62"),
@@ -47,7 +47,7 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("2c4aec26b74fdb27cd637d6106cfd64f6222aa55de73cd2b73189315b901ca09");
+    digest!("97daec1ebae0011ad383fe5bb1247e4bbbe6d150ee1403115c296d4993384a53");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
