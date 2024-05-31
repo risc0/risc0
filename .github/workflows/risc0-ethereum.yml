@@ -99,8 +99,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'risc0-foundry-template'
-          # DO NOT MERGE: Change this ref to 'dev'
-          ref: ${{ github.event.inputs.risc0-foundry-template-branch || 'capossele/refactor-prover-api' }}
+          ref: ${{ github.event.inputs.risc0-foundry-template-branch || 'dev' }}
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
         with:
