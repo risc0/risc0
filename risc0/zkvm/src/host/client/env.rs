@@ -75,7 +75,7 @@ impl SegmentPath {
     }
 }
 
-/// The [crate::Executor] is configured from this object.
+/// The [Executor][crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
 /// guest environment is set up prior to guest program execution.

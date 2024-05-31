@@ -40,8 +40,8 @@ use crate::{
     Segment, Session, VerifierContext,
 };
 
-/// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
-/// that can be used to verify correct computation.
+/// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
+/// [Receipt][crate::Receipt] that can be used to verify correct computation.
 pub trait ProverServer {
     /// Prove the specified ELF binary.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {

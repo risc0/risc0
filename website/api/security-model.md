@@ -19,10 +19,11 @@ RISC Zero offers the following components, each of which is ready for use on tes
    Each recursion program is identified by a [control ID], and the full list of allowed programs is identified by the [control root].
 
 4. The **STARK-to-SNARK Prover**, which verifies proofs from the RISC Zero Recursion Prover, compressing the STARK into a Groth16 SNARK.
-   The [control root] is passed to as an input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.
+   The [control root] is passed to as a public input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.
 
 5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
-   Version information for the on-chain verifier is available in our [verifier contract] documentation.
+   The control root is hard-coded into the on-chain verifier contract.
+   Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc.
 
 Together, these components allow developers to integrate proofs of arbitrary Rust code into their on-chain applications.
 In order to use these components, developers provide:
@@ -119,3 +120,4 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [Verifier Contract]: ../blockchain-integration/contracts/verifier
+[VersionManagement@main]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md

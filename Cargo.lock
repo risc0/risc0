@@ -752,7 +752,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.8.0-rc.2"
+version = "0.8.0-rc.3"
 dependencies = [
  "anyhow",
  "bincode",
@@ -869,7 +869,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "bincode",
@@ -2961,9 +2961,9 @@ dependencies = [
 
 [[package]]
 name = "parking_lot"
-version = "0.12.2"
+version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e4af0ca4f6caed20e900d564c242b8e5d4903fdacf31d3daf527b66fe6f42fb"
+checksum = "f1bf18183cf54e8d6059647fc3063646a1801cf30896933ec2311622cc4b9a27"
 dependencies = [
  "lock_api",
  "parking_lot_core 0.9.10",
@@ -3604,7 +3604,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "elf",
@@ -3619,7 +3619,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3635,7 +3635,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "cc",
  "directories",
@@ -3649,7 +3649,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3674,7 +3674,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3685,7 +3685,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3713,7 +3713,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3724,7 +3724,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "bytemuck",
  "rand",
@@ -3733,7 +3733,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -3756,7 +3756,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -3774,7 +3774,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "cc",
  "cust",
@@ -3784,7 +3784,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-tools"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -3794,7 +3794,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3809,7 +3809,7 @@ dependencies = [
  "metal",
  "ndarray",
  "nvtx",
- "parking_lot 0.12.2",
+ "parking_lot 0.12.3",
  "paste",
  "rand",
  "rand_core",
@@ -3826,7 +3826,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -3877,7 +3877,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
@@ -3888,7 +3888,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -3897,7 +3897,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 
 [[package]]
 name = "rrs-lib"
@@ -4082,18 +4082,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.202"
+version = "1.0.203"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "226b61a0d411b2ba5ff6d7f73a476ac4f8bb900373459cd00fab8512828ba395"
+checksum = "7253ab4de971e72fb7be983802300c30b5a7f0c2e56fab8abfc6a214307c0094"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.202"
+version = "1.0.203"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6048858004bcff69094cd972ed40a32500f153bd3be9f716b2eed2e8217c4838"
+checksum = "500cbc0ebeb6f46627f50f3f5811ccf6bf00643be300b4c3eabc0ef55dc5b5ba"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4292,7 +4292,7 @@ checksum = "f91138e76242f575eb1d3b38b4f1362f10d3a43f47d182a5b359af488a02293b"
 dependencies = [
  "new_debug_unreachable",
  "once_cell",
- "parking_lot 0.12.2",
+ "parking_lot 0.12.3",
  "phf_shared",
  "precomputed-hash",
 ]
@@ -4420,7 +4420,7 @@ version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96374855068f47402c3121c6eed88d29cb1de8f3ab27090e273e420bdabcf050"
 dependencies = [
- "parking_lot 0.12.2",
+ "parking_lot 0.12.3",
 ]
 
 [[package]]
@@ -4585,7 +4585,7 @@ dependencies = [
  "libc",
  "mio",
  "num_cpus",
- "parking_lot 0.12.2",
+ "parking_lot 0.12.3",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2 0.5.7",

@@ -52,17 +52,30 @@ struct PersistentPageTableInfo {
     page_table_addr: u32,
 }
 
+/// Structure representing the page table for zkVM memory.
+///
+/// The notion of pages is borrowed from common operating system memory management, and the zkVM
+/// organizes memory into a series of memory pages similarly. In the zkVM, the "page table" is
+/// backed by a Merkle tree that verifies memory that is loaded into memory, or stored between
+/// segments.
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(try_from = "PersistentPageTableInfo", into = "PersistentPageTableInfo")]
 pub struct PageTableInfo {
+    /// Size of each page, in bytes.
     pub page_size: u32,
     page_size_po2: u32,
+    /// Starting address for the page table in the memory space.
     pub page_table_addr: u32,
     _page_table_size: u32,
+    /// Address of the root page, which is the top layer of the Merkle tree.
     pub root_addr: u32,
+    /// Page index of the root page.
     pub root_idx: u32,
     root_page_addr: u32,
+    /// Total number of pages covered by this page table.
     pub num_pages: u32,
+    /// Number of entries in the root page. The root page may not be full, if the memory space is
+    /// smaller than what the full number of entries could cover.
     pub num_root_entries: u32,
     _layers: Vec<u32>,
     /// Hash of an uninitialized page containing all zeros.
@@ -106,6 +119,7 @@ const fn round_up(a: u32, b: u32) -> u32 {
 }
 
 impl PageTableInfo {
+    /// Crate a new page table info struct with the given address and page size.
     pub fn new(page_table_addr: u32, page_size: u32) -> Result<Self> {
         let max_mem = page_table_addr;
         ensure!(max_mem >= page_size, "Max memory must be at least one page");
@@ -150,14 +164,17 @@ impl PageTableInfo {
         })
     }
 
+    /// Calculate the page address given its index.
     pub fn get_page_addr(&self, page_idx: u32) -> u32 {
         page_idx * self.page_size
     }
 
+    /// Calculate the index given its address.
     pub fn get_page_index(&self, addr: u32) -> u32 {
         addr >> self.page_size_po2
     }
 
+    /// Calculate the index of the page that contains the hash of this page.
     pub fn get_page_entry_addr(&self, page_idx: u32) -> u32 {
         self.page_table_addr + page_idx * DIGEST_BYTES as u32
     }
