@@ -31,11 +31,13 @@ use crate::{
     sha,
 };
 
-/// A succinct receipt, produced via recursion, proving the execution of the zkVM with a STARK.
+/// A succinct receipt, produced via recursion, proving the execution of the zkVM with a [STARK].
 ///
-/// Using recursion, a [crate::CompositeReceipt] can be compressed to form a [SuccinctReceipt]. In this
-/// way, a constant sized proof can be generated for arbitrarily long computations, and with an
-/// arbitrary number of segments linked via composition.
+/// Using recursion, a [CompositeReceipt][crate::CompositeReceipt] can be compressed to form a
+/// [SuccinctReceipt]. In this way, a constant sized proof can be generated for arbitrarily long
+/// computations, and with an arbitrary number of segments linked via composition.
+///
+/// [STARK]: https://dev.risczero.com/terminology#stark
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]

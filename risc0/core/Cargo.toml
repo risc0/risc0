@@ -14,5 +14,9 @@ rand_core = "0.6"
 [dev-dependencies]
 rand = { version = "0.8", features = ["small_rng"] }
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true
+
 [features]
 std = []

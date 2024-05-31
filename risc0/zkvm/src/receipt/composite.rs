@@ -34,9 +34,9 @@ use crate::{
     sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 
-/// A receipt composed of one or more [SegmentReceipt] structs proving a single
-/// execution with continuations, and zero or more [Receipt](crate::Receipt) structs proving any
-/// assumptions.
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
+/// continuations, and zero or more [InnerAssumptionReceipt](crate::InnerAssumptionReceipt) structs
+/// proving any assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
