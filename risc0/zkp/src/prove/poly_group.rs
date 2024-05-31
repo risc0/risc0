@@ -47,8 +47,8 @@ use crate::{
 /// (possibly with randomized data), which is presumed to be done by the caller.
 /// The constructor additionally 'shifts' the polynomial so that f(x) -> f(3*x),
 /// which means that the normal NTT evaluation domain does not reveal anything
-/// about the original datapoints (i.e. is zero knowledge) so long as the number
-/// of queries is less than the randomized padding.
+/// about the original datapoints (i.e. is zero knowledge) so long as there is
+/// sufficient randomized padding.
 pub struct PolyGroup<H: Hal> {
     pub coeffs: H::Buffer<H::Elem>,
     pub count: usize,
