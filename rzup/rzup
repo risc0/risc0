@@ -67,7 +67,7 @@ check_rust_installed() {
 }
 
 install_cargo_binstall() {
-  execute_with_feedback "cargo install cargo-binstall --quiet" "Installing cargo-binstall"
+  execute_with_feedback "cargo install --locked cargo-binstall --quiet" "Installing cargo-binstall"
 }
 
 binstall_cargo_risczero() {
