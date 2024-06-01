@@ -9,5 +9,4 @@ risc0-build = "1.0.0-rc.7"
 # risc0-build = { path = "../../../risc0/build" }
 
 [package.metadata.risc0]
-1.0.0-rc.7
 methods = ["guest"]
