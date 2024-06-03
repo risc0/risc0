@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+VERSION=0.1.0
+
 VERBOSE_MODE=1
 
 print_banner() {
+  echo "rzup v$VERSION"
   cat <<"EOF"
 
     ██████  █▀▀▀██
