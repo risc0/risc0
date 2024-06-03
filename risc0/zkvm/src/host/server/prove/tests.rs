@@ -477,6 +477,7 @@ fn sys_input() {
 }
 
 #[cfg(feature = "docker")]
+#[cfg(target_arch = "x86_64")]
 mod docker {
     use crate::{
         get_prover_server,
