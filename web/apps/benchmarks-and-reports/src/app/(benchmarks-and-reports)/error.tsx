@@ -5,14 +5,14 @@ import { Button } from "@risc0/ui/button";
 import { AlertTriangleIcon } from "lucide-react";
 import { useEffect } from "react";
 
-export default function RootError({ error, reset }: { error: Error; reset: () => void }) {
+export default function BenchmarksAndReportsError({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
     // Log the error to an error reporting service
     console.error(error);
   }, [error]);
 
   return (
-    <div className="grid min-h-screen items-center justify-center">
+    <div className="container max-w-screen-3xl">
       <Alert variant="destructive" className="min-w-96 max-w-screen-md">
         <AlertTriangleIcon className="size-4" />
         <AlertTitle>Something Went Wrong 😔</AlertTitle>
