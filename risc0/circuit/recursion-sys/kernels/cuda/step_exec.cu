@@ -12,17 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Core RISC Zero functionality shared across multiple crates
-//!
-//! This crate contains fundamental code that multiple RISC Zero crates rely on,
-//! most notably representing finite field elements and enabling finite field
-//! arithmetic.
+// This code is automatically generated
 
-#![cfg_attr(not(feature = "std"), no_std)]
-#![deny(missing_docs)]
-#![deny(rustdoc::broken_intra_doc_links)]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
-
-extern crate alloc;
-
-pub mod field;
+// This is intentionally blank

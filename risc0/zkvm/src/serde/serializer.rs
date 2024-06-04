@@ -25,7 +25,7 @@ pub trait WordWrite {
 
     /// Write the given bytes to the stream, padding up to the next word
     /// boundary.
-    // TODO: Do we still want to to pad the bytes now that we have
+    // TODO: Do we still want to pad the bytes now that we have
     // posix-style I/O that can read things into buffers right where
     // we want them to be?  If we don't, we could change the
     // serialization buffers to use Vec<u8> instead of Vec<u32>,

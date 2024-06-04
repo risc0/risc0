@@ -14,7 +14,7 @@
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
-use core::{cmp::min, ptr::null_mut};
+use core::{cmp::min, ffi::CStr, ptr::null_mut, str::Utf8Error};
 
 use crate::WORD_SIZE;
 
@@ -94,11 +94,7 @@ pub mod bigint {
     pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
 }
 
-// TODO: We can probably use ffi::CStr::from_bytes_with_nul once it's
-// const-stablized instead of rolling our own structure:
-// https://github.com/rust-lang/rust/issues/101719
-
-/// A NUL-terminated name of a syscall with static lifetime.
+/// A UTF-8 NUL-terminated name of a syscall with static lifetime.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct SyscallName(*const u8);
@@ -112,15 +108,20 @@ pub struct SyscallName(*const u8);
 /// ```
 #[macro_export]
 macro_rules! declare_syscall {
-    ($(#[$meta:meta])*
-     $vis:vis $name:ident) => {
+    (
+        $(#[$meta:meta])*
+        $vis:vis $name:ident
+    ) => {
+        // Go through `CStr` to avoid `unsafe` in the caller.
         $(#[$meta])*
-        $vis const $name: $crate::syscall::SyscallName = {
-            $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
-                module_path!(),
-                "::",
-                stringify!($name),
-                "\0").as_ptr())
+        $vis const $name: $crate::syscall::SyscallName = match ::core::ffi::CStr::from_bytes_until_nul(
+            concat!(module_path!(), "::", stringify!($name), "\0").as_bytes(),
+        ) {
+            Ok(c_str) => match $crate::syscall::SyscallName::from_c_str(c_str) {
+                Ok(name) => name,
+                Err(_) => unreachable!(),
+            },
+            Err(_) => unreachable!(),
         };
     };
 }
@@ -139,7 +140,21 @@ pub mod nr {
 }
 
 impl SyscallName {
-    pub const fn from_bytes_with_nul(ptr: *const u8) -> Self {
+    /// Converts a static C string to a system call name, if it is UTF-8.
+    #[inline]
+    pub const fn from_c_str(c_str: &'static CStr) -> Result<Self, Utf8Error> {
+        match c_str.to_str() {
+            Ok(_) => Ok(unsafe { Self::from_bytes_with_nul(c_str.as_ptr().cast()) }),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Converts a raw UTF-8 C string pointer to a system call name.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must reference a static null-terminated UTF-8 string.
+    pub const unsafe fn from_bytes_with_nul(ptr: *const u8) -> Self {
         Self(ptr)
     }
 
