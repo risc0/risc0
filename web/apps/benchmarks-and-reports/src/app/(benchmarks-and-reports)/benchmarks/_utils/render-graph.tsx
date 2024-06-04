@@ -3,19 +3,7 @@ import Chart from "react-chartjs-2";
 import type { FormattedDataSetEntry } from "./collect-benches-per-test-case";
 
 const TOOL_COLORS = {
-  cargo: "#020077",
-  go: "#00add8",
-  benchmarkjs: "#f1e05a",
-  benchmarkluau: "#000080",
-  pytest: "#3572a5",
-  googlecpp: "#f34b7d",
-  catch2: "#f34b7d",
-  julia: "#a270ba",
-  jmh: "#b07219",
-  benchmarkdotnet: "#178600",
-  customBiggerIsBetter: "#38ff38",
-  customSmallerIsBetter: "#ff3838",
-  _: "#333333",
+  customBiggerIsBetter: "#020077",
 };
 
 export function renderGraph({
