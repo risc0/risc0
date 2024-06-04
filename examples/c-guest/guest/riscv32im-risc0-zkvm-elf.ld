@@ -20,13 +20,14 @@ ENTRY(_start)
 
 /* Must match risc0/zkvm/platform/src/memory.rs */
 MEMORY {
-  ram          : ORIGIN = 0x00000400, LENGTH =  0x06FFC000
+  stack        : ORIGIN = 0x00000400, LENGTH = 0x001FFC00
+  ram          : ORIGIN = 0x00200800, LENGTH =  0x06FF8000
   system  (X)  : ORIGIN = 0x07000000, LENGTH =  80M
 }
 
 SECTIONS {
-  . = 0x00000400;
-	.text 0x00000400 : ALIGN(4) {
+  . = 0x00200800;
+	.text 0x00200800 : ALIGN(4) {
     KEEP (*(.init))
     . = ALIGN(4);
     *(.text*)
@@ -38,7 +39,7 @@ SECTIONS {
 
   . = ALIGN(4);
 
-  .data 0x00200800 : ALIGN(4) {
+  .data : ALIGN(4) {
     *(.data .data.*)
     *(.gnu.linkonce.d.*)
     __global_pointer$ = . + 0x800;
