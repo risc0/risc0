@@ -290,10 +290,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x109 = arg2[3 * steps + ((cycle - 0) & mask)];
       assert(x109 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x110 = arg2[4 * steps + ((cycle - 0) & mask)];
       assert(x110 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -365,10 +365,10 @@ __device__ void step_exec(
         }
       }
     }
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x126 = arg2[5 * steps + ((cycle - 0) & mask)];
     assert(x126 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x127 = arg2[6 * steps + ((cycle - 0) & mask)];
     assert(x127 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":44:18)
@@ -433,10 +433,10 @@ __device__ void step_exec(
         }
       }
     }
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x141 = arg2[7 * steps + ((cycle - 0) & mask)];
     assert(x141 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x142 = arg2[8 * steps + ((cycle - 0) & mask)];
     assert(x142 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":44:18)
@@ -501,10 +501,10 @@ __device__ void step_exec(
         }
       }
     }
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x156 = arg2[10 * steps + ((cycle - 0) & mask)];
     assert(x156 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x157 = arg2[9 * steps + ((cycle - 0) & mask)];
     assert(x157 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":45:17)
@@ -569,10 +569,10 @@ __device__ void step_exec(
         }
       }
     }
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x171 = arg2[11 * steps + ((cycle - 0) & mask)];
     assert(x171 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x172 = arg2[12 * steps + ((cycle - 0) & mask)];
     assert(x172 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":44:18)
@@ -637,10 +637,10 @@ __device__ void step_exec(
         }
       }
     }
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x186 = arg2[13 * steps + ((cycle - 0) & mask)];
     assert(x186 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x187 = arg2[14 * steps + ((cycle - 0) & mask)];
     assert(x187 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":44:18)
@@ -705,10 +705,10 @@ __device__ void step_exec(
         }
       }
     }
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x201 = arg2[15 * steps + ((cycle - 0) & mask)];
     assert(x201 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x202 = arg2[16 * steps + ((cycle - 0) & mask)];
     assert(x202 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":44:18)
@@ -773,10 +773,10 @@ __device__ void step_exec(
         }
       }
     }
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x216 = arg2[17 * steps + ((cycle - 0) & mask)];
     assert(x216 != Fp::invalid());
-    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x217 = arg2[18 * steps + ((cycle - 0) & mask)];
     assert(x217 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":44:18)
@@ -1002,10 +1002,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x232 = arg2[19 * steps + ((cycle - 0) & mask)];
       assert(x232 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x233 = arg2[20 * steps + ((cycle - 0) & mask)];
       assert(x233 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1070,10 +1070,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x247 = arg2[21 * steps + ((cycle - 0) & mask)];
       assert(x247 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x248 = arg2[22 * steps + ((cycle - 0) & mask)];
       assert(x248 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1138,10 +1138,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x262 = arg2[23 * steps + ((cycle - 0) & mask)];
       assert(x262 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x263 = arg2[24 * steps + ((cycle - 0) & mask)];
       assert(x263 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1206,10 +1206,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x277 = arg2[25 * steps + ((cycle - 0) & mask)];
       assert(x277 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x278 = arg2[26 * steps + ((cycle - 0) & mask)];
       assert(x278 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1274,10 +1274,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x292 = arg2[27 * steps + ((cycle - 0) & mask)];
       assert(x292 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x293 = arg2[28 * steps + ((cycle - 0) & mask)];
       assert(x293 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1342,10 +1342,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x307 = arg2[29 * steps + ((cycle - 0) & mask)];
       assert(x307 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x308 = arg2[30 * steps + ((cycle - 0) & mask)];
       assert(x308 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1410,10 +1410,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x322 = arg2[31 * steps + ((cycle - 0) & mask)];
       assert(x322 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x323 = arg2[32 * steps + ((cycle - 0) & mask)];
       assert(x323 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1478,10 +1478,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x337 = arg2[33 * steps + ((cycle - 0) & mask)];
       assert(x337 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x338 = arg2[34 * steps + ((cycle - 0) & mask)];
       assert(x338 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1546,10 +1546,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x352 = arg2[35 * steps + ((cycle - 0) & mask)];
       assert(x352 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x353 = arg2[36 * steps + ((cycle - 0) & mask)];
       assert(x353 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1614,10 +1614,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x367 = arg2[37 * steps + ((cycle - 0) & mask)];
       assert(x367 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x368 = arg2[38 * steps + ((cycle - 0) & mask)];
       assert(x368 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1682,10 +1682,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x382 = arg2[39 * steps + ((cycle - 0) & mask)];
       assert(x382 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x383 = arg2[40 * steps + ((cycle - 0) & mask)];
       assert(x383 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1750,10 +1750,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x397 = arg2[41 * steps + ((cycle - 0) & mask)];
       assert(x397 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x398 = arg2[42 * steps + ((cycle - 0) & mask)];
       assert(x398 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1818,10 +1818,10 @@ __device__ void step_exec(
           }
         }
       }
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x412 = arg2[43 * steps + ((cycle - 0) & mask)];
       assert(x412 != Fp::invalid());
-      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x413 = arg2[44 * steps + ((cycle - 0) & mask)];
       assert(x413 != Fp::invalid());
       // loc("zirgen/components/bytes.cpp":44:18)
@@ -1907,7 +1907,7 @@ __device__ void step_exec(
     // loc("Top/Code/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x433 = arg0[0 * steps + ((cycle - 0) & mask)];
     assert(x433 != Fp::invalid());
-    // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x434 = arg0[9 * steps + ((cycle - 0) & mask)];
     assert(x434 != Fp::invalid());
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
@@ -2338,10 +2338,10 @@ __device__ void step_exec(
           reg = x95;
         }
       }
-      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x481 = arg2[173 * steps + ((cycle - 0) & mask)];
       assert(x481 != Fp::invalid());
-      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x482 = arg2[174 * steps + ((cycle - 0) & mask)];
       assert(x482 != Fp::invalid());
       // loc("./zirgen/components/onehot.h":46:19)
@@ -3233,7 +3233,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x580 = x93 - x577;
-      // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x581 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x581 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -3262,10 +3262,10 @@ __device__ void step_exec(
           reg = x95;
         }
       }
-      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x583 = arg2[173 * steps + ((cycle - 0) & mask)];
       assert(x583 != Fp::invalid());
-      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x584 = arg2[174 * steps + ((cycle - 0) & mask)];
       assert(x584 != Fp::invalid());
       // loc("./zirgen/components/onehot.h":46:19)
@@ -3398,7 +3398,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x621 = x93 - x618;
-      // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x622 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x622 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -3406,49 +3406,49 @@ __device__ void step_exec(
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
       assert(x623 == 0 && "eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:23");
       if (x479 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x624 = arg2[101 * steps + ((cycle - 1) & mask)];
         assert(x624 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x625 = arg2[102 * steps + ((cycle - 1) & mask)];
         assert(x625 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x626 = arg2[103 * steps + ((cycle - 1) & mask)];
         assert(x626 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x627 = arg2[104 * steps + ((cycle - 1) & mask)];
         assert(x627 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x628 = arg2[105 * steps + ((cycle - 1) & mask)];
         assert(x628 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x629 = arg2[106 * steps + ((cycle - 1) & mask)];
         assert(x629 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x630 = arg2[107 * steps + ((cycle - 1) & mask)];
         assert(x630 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x631 = arg2[108 * steps + ((cycle - 1) & mask)];
         assert(x631 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x632 = arg2[109 * steps + ((cycle - 1) & mask)];
         assert(x632 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x633 = arg2[110 * steps + ((cycle - 1) & mask)];
         assert(x633 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x634 = arg2[111 * steps + ((cycle - 1) & mask)];
         assert(x634 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x635 = arg2[112 * steps + ((cycle - 1) & mask)];
         assert(x635 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x636 = arg2[113 * steps + ((cycle - 1) & mask)];
         assert(x636 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x637 = arg2[114 * steps + ((cycle - 1) & mask)];
         assert(x637 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x638 = arg2[115 * steps + ((cycle - 1) & mask)];
         assert(x638 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -4358,10 +4358,10 @@ __device__ void step_exec(
           reg = x750;
         }
       }
-      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x751 = arg2[173 * steps + ((cycle - 0) & mask)];
       assert(x751 != Fp::invalid());
-      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x752 = arg2[174 * steps + ((cycle - 0) & mask)];
       assert(x752 != Fp::invalid());
       // loc("./zirgen/components/onehot.h":46:19)
@@ -4500,7 +4500,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x791 = x93 - x788;
-        // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x792 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x792 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -5067,7 +5067,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x883 = x93 - x880;
-        // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x884 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x884 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -5749,49 +5749,49 @@ __device__ void step_exec(
             reg = x998;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x999 = arg2[101 * steps + ((cycle - 0) & mask)];
         assert(x999 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1000 = arg2[102 * steps + ((cycle - 0) & mask)];
         assert(x1000 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1001 = arg2[103 * steps + ((cycle - 0) & mask)];
         assert(x1001 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1002 = arg2[104 * steps + ((cycle - 0) & mask)];
         assert(x1002 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1003 = arg2[105 * steps + ((cycle - 0) & mask)];
         assert(x1003 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1004 = arg2[106 * steps + ((cycle - 0) & mask)];
         assert(x1004 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1005 = arg2[107 * steps + ((cycle - 0) & mask)];
         assert(x1005 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1006 = arg2[108 * steps + ((cycle - 0) & mask)];
         assert(x1006 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1007 = arg2[109 * steps + ((cycle - 0) & mask)];
         assert(x1007 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1008 = arg2[110 * steps + ((cycle - 0) & mask)];
         assert(x1008 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1009 = arg2[111 * steps + ((cycle - 0) & mask)];
         assert(x1009 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1010 = arg2[112 * steps + ((cycle - 0) & mask)];
         assert(x1010 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1011 = arg2[113 * steps + ((cycle - 0) & mask)];
         assert(x1011 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1012 = arg2[114 * steps + ((cycle - 0) & mask)];
         assert(x1012 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1013 = arg2[115 * steps + ((cycle - 0) & mask)];
         assert(x1013 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -6026,49 +6026,49 @@ __device__ void step_exec(
             reg = x1045;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1076 = arg2[101 * steps + ((cycle - 0) & mask)];
         assert(x1076 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1077 = arg2[102 * steps + ((cycle - 0) & mask)];
         assert(x1077 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1078 = arg2[103 * steps + ((cycle - 0) & mask)];
         assert(x1078 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1079 = arg2[104 * steps + ((cycle - 0) & mask)];
         assert(x1079 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1080 = arg2[105 * steps + ((cycle - 0) & mask)];
         assert(x1080 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1081 = arg2[106 * steps + ((cycle - 0) & mask)];
         assert(x1081 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1082 = arg2[107 * steps + ((cycle - 0) & mask)];
         assert(x1082 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1083 = arg2[108 * steps + ((cycle - 0) & mask)];
         assert(x1083 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1084 = arg2[109 * steps + ((cycle - 0) & mask)];
         assert(x1084 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1085 = arg2[110 * steps + ((cycle - 0) & mask)];
         assert(x1085 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1086 = arg2[111 * steps + ((cycle - 0) & mask)];
         assert(x1086 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1087 = arg2[112 * steps + ((cycle - 0) & mask)];
         assert(x1087 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1088 = arg2[113 * steps + ((cycle - 0) & mask)];
         assert(x1088 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1089 = arg2[114 * steps + ((cycle - 0) & mask)];
         assert(x1089 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1090 = arg2[115 * steps + ((cycle - 0) & mask)];
         assert(x1090 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -6515,7 +6515,7 @@ __device__ void step_exec(
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x1207 = arg2[179 * steps + ((cycle - 0) & mask)];
       assert(x1207 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x1208 = arg2[180 * steps + ((cycle - 0) & mask)];
       assert(x1208 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:21)
@@ -6613,25 +6613,25 @@ __device__ void step_exec(
             reg = x1227;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1228 = arg2[182 * steps + ((cycle - 0) & mask)];
         assert(x1228 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1229 = arg2[183 * steps + ((cycle - 0) & mask)];
         assert(x1229 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1230 = arg2[184 * steps + ((cycle - 0) & mask)];
         assert(x1230 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1231 = arg2[185 * steps + ((cycle - 0) & mask)];
         assert(x1231 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1232 = arg2[186 * steps + ((cycle - 0) & mask)];
         assert(x1232 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1233 = arg2[187 * steps + ((cycle - 0) & mask)];
         assert(x1233 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1234 = arg2[188 * steps + ((cycle - 0) & mask)];
         assert(x1234 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -7829,7 +7829,7 @@ __device__ void step_exec(
         assert(reg == Fp::invalid() || reg == x1420);
         reg = x1420;
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x1421 = arg2[210 * steps + ((cycle - 0) & mask)];
       assert(x1421 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":71:27)
@@ -7878,7 +7878,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x1431 = x96 - x1430;
       if (x1431 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1432 = arg2[213 * steps + ((cycle - 0) & mask)];
         assert(x1432 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -7924,7 +7924,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x1442 = x96 - x1441;
       if (x1442 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1443 = arg2[215 * steps + ((cycle - 0) & mask)];
         assert(x1443 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -8008,7 +8008,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x1456 = x96 - x1455;
       if (x1456 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1457 = arg2[217 * steps + ((cycle - 0) & mask)];
         assert(x1457 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -8183,7 +8183,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1483 = x93 - x1480;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1484 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1484 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -8506,7 +8506,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1515 = x93 - x1512;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1516 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1516 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -8829,7 +8829,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1547 = x93 - x1544;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1548 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1548 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -9152,7 +9152,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1579 = x93 - x1576;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1580 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1580 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -9475,7 +9475,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1611 = x93 - x1608;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1612 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1612 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -9798,7 +9798,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1643 = x93 - x1640;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1644 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1644 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -10121,7 +10121,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1675 = x93 - x1672;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1676 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1676 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -10458,7 +10458,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x1715 = x93 - x1712;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1716 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x1716 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -10999,7 +10999,7 @@ __device__ void step_exec(
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x1811 = arg2[179 * steps + ((cycle - 0) & mask)];
       assert(x1811 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x1812 = arg2[180 * steps + ((cycle - 0) & mask)];
       assert(x1812 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:21)
@@ -11097,25 +11097,25 @@ __device__ void step_exec(
             reg = x1831;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1832 = arg2[182 * steps + ((cycle - 0) & mask)];
         assert(x1832 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1833 = arg2[183 * steps + ((cycle - 0) & mask)];
         assert(x1833 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1834 = arg2[184 * steps + ((cycle - 0) & mask)];
         assert(x1834 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1835 = arg2[185 * steps + ((cycle - 0) & mask)];
         assert(x1835 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1836 = arg2[186 * steps + ((cycle - 0) & mask)];
         assert(x1836 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1837 = arg2[187 * steps + ((cycle - 0) & mask)];
         assert(x1837 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1838 = arg2[188 * steps + ((cycle - 0) & mask)];
         assert(x1838 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -12485,7 +12485,7 @@ __device__ void step_exec(
         assert(reg == Fp::invalid() || reg == x2110);
         reg = x2110;
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x2111 = arg2[210 * steps + ((cycle - 0) & mask)];
       assert(x2111 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":71:27)
@@ -12534,7 +12534,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x2121 = x96 - x2120;
       if (x2121 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2122 = arg2[213 * steps + ((cycle - 0) & mask)];
         assert(x2122 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -12580,7 +12580,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x2132 = x96 - x2131;
       if (x2132 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2133 = arg2[215 * steps + ((cycle - 0) & mask)];
         assert(x2133 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -12664,7 +12664,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x2146 = x96 - x2145;
       if (x2146 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/1(ComputeWrap)/ComputeCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2147 = arg2[217 * steps + ((cycle - 0) & mask)];
         assert(x2147 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -12893,7 +12893,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2201 = x93 - x2198;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2202 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2202 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -13232,7 +13232,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2242 = x93 - x2239;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2243 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2243 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -13571,7 +13571,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2283 = x93 - x2280;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2284 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2284 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -13910,7 +13910,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2324 = x93 - x2321;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2325 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2325 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -14249,7 +14249,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2365 = x93 - x2362;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2366 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2366 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -14592,7 +14592,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2408 = x93 - x2405;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2409 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2409 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -14939,7 +14939,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2453 = x93 - x2450;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2454 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2454 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -15286,7 +15286,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2498 = x93 - x2495;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2499 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2499 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -15829,7 +15829,7 @@ __device__ void step_exec(
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x2595 = arg2[179 * steps + ((cycle - 0) & mask)];
       assert(x2595 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x2596 = arg2[180 * steps + ((cycle - 0) & mask)];
       assert(x2596 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:21)
@@ -15927,25 +15927,25 @@ __device__ void step_exec(
             reg = x2615;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2616 = arg2[182 * steps + ((cycle - 0) & mask)];
         assert(x2616 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2617 = arg2[183 * steps + ((cycle - 0) & mask)];
         assert(x2617 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2618 = arg2[184 * steps + ((cycle - 0) & mask)];
         assert(x2618 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2619 = arg2[185 * steps + ((cycle - 0) & mask)];
         assert(x2619 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2620 = arg2[186 * steps + ((cycle - 0) & mask)];
         assert(x2620 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2621 = arg2[187 * steps + ((cycle - 0) & mask)];
         assert(x2621 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2622 = arg2[188 * steps + ((cycle - 0) & mask)];
         assert(x2622 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -17194,7 +17194,7 @@ __device__ void step_exec(
         assert(reg == Fp::invalid() || reg == x2865);
         reg = x2865;
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/ALU/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x2866 = arg2[210 * steps + ((cycle - 0) & mask)];
       assert(x2866 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":71:27)
@@ -17243,7 +17243,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x2876 = x96 - x2875;
       if (x2876 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2877 = arg2[213 * steps + ((cycle - 0) & mask)];
         assert(x2877 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -17289,7 +17289,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x2887 = x96 - x2886;
       if (x2887 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2888 = arg2[215 * steps + ((cycle - 0) & mask)];
         assert(x2888 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -17373,7 +17373,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x2901 = x96 - x2900;
       if (x2901 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/2(ComputeWrap)/ComputeCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2902 = arg2[217 * steps + ((cycle - 0) & mask)];
         assert(x2902 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -17618,7 +17618,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x2964 = x93 - x2961;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2965 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x2965 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -17965,7 +17965,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x3009 = x93 - x3006;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3010 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x3010 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -18312,7 +18312,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x3054 = x93 - x3051;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3055 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x3055 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -18659,7 +18659,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x3100 = x93 - x3097;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3101 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x3101 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -18996,7 +18996,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x3140 = x93 - x3137;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3141 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x3141 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -19313,7 +19313,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x3171 = x93 - x3168;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3172 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x3172 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -19630,7 +19630,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x3202 = x93 - x3199;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3203 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x3203 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -20171,7 +20171,7 @@ __device__ void step_exec(
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/Decoder/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x3298 = arg2[195 * steps + ((cycle - 0) & mask)];
       assert(x3298 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x3299 = arg2[196 * steps + ((cycle - 0) & mask)];
       assert(x3299 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:21)
@@ -20269,25 +20269,25 @@ __device__ void step_exec(
             reg = x3318;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3319 = arg2[202 * steps + ((cycle - 0) & mask)];
         assert(x3319 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3320 = arg2[203 * steps + ((cycle - 0) & mask)];
         assert(x3320 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3321 = arg2[204 * steps + ((cycle - 0) & mask)];
         assert(x3321 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3322 = arg2[205 * steps + ((cycle - 0) & mask)];
         assert(x3322 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3323 = arg2[206 * steps + ((cycle - 0) & mask)];
         assert(x3323 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3324 = arg2[207 * steps + ((cycle - 0) & mask)];
         assert(x3324 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3325 = arg2[208 * steps + ((cycle - 0) & mask)];
         assert(x3325 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -20979,7 +20979,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x3476 = x96 - x3475;
       if (x3476 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3477 = arg2[210 * steps + ((cycle - 0) & mask)];
         assert(x3477 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -21034,13 +21034,13 @@ __device__ void step_exec(
             reg = x3488;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3489 = arg2[212 * steps + ((cycle - 0) & mask)];
         assert(x3489 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3490 = arg2[213 * steps + ((cycle - 0) & mask)];
         assert(x3490 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3491 = arg2[214 * steps + ((cycle - 0) & mask)];
         assert(x3491 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -21196,13 +21196,13 @@ __device__ void step_exec(
       // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
       auto x3530 = arg2[21 * steps + ((cycle - 0) & mask)];
       assert(x3530 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x3531 = arg2[212 * steps + ((cycle - 0) & mask)];
       assert(x3531 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x3532 = arg2[213 * steps + ((cycle - 0) & mask)];
       assert(x3532 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x3533 = arg2[214 * steps + ((cycle - 0) & mask)];
       assert(x3533 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":67:35)
@@ -21511,7 +21511,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x3607 = x93 - x3604;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x3608 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x3608 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -24298,7 +24298,7 @@ __device__ void step_exec(
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/Decoder/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4054 = arg2[179 * steps + ((cycle - 0) & mask)];
       assert(x4054 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4055 = arg2[180 * steps + ((cycle - 0) & mask)];
       assert(x4055 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:21)
@@ -24396,25 +24396,25 @@ __device__ void step_exec(
             reg = x4074;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4075 = arg2[182 * steps + ((cycle - 0) & mask)];
         assert(x4075 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4076 = arg2[183 * steps + ((cycle - 0) & mask)];
         assert(x4076 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4077 = arg2[184 * steps + ((cycle - 0) & mask)];
         assert(x4077 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4078 = arg2[185 * steps + ((cycle - 0) & mask)];
         assert(x4078 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4079 = arg2[186 * steps + ((cycle - 0) & mask)];
         assert(x4079 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4080 = arg2[187 * steps + ((cycle - 0) & mask)];
         assert(x4080 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4081 = arg2[188 * steps + ((cycle - 0) & mask)];
         assert(x4081 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -25238,10 +25238,10 @@ __device__ void step_exec(
       auto x4302 = x4221 + x4297;
       // loc("zirgen/components/u32.cpp":240:38)
       auto x4303 = x4112 + x4299;
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/U32Mul/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/U32Mul/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4304 = arg2[201 * steps + ((cycle - 0) & mask)];
       assert(x4304 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/U32Mul/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/U32Mul/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4305 = arg2[202 * steps + ((cycle - 0) & mask)];
       assert(x4305 != Fp::invalid());
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/U32Mul/Twit/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
@@ -25435,7 +25435,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x4361 = x96 - x4360;
       if (x4361 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/4(MultiplyCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4362 = arg2[204 * steps + ((cycle - 0) & mask)];
         assert(x4362 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -25538,7 +25538,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x4386 = x93 - x4383;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4387 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x4387 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -26247,7 +26247,7 @@ __device__ void step_exec(
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Decoder/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4505 = arg2[179 * steps + ((cycle - 0) & mask)];
       assert(x4505 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Decoder/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4506 = arg2[180 * steps + ((cycle - 0) & mask)];
       assert(x4506 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/decode.cpp":33:21)
@@ -26345,25 +26345,25 @@ __device__ void step_exec(
             reg = x4525;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4526 = arg2[182 * steps + ((cycle - 0) & mask)];
         assert(x4526 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4527 = arg2[183 * steps + ((cycle - 0) & mask)];
         assert(x4527 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4528 = arg2[184 * steps + ((cycle - 0) & mask)];
         assert(x4528 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4529 = arg2[185 * steps + ((cycle - 0) & mask)];
         assert(x4529 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4530 = arg2[186 * steps + ((cycle - 0) & mask)];
         assert(x4530 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4531 = arg2[187 * steps + ((cycle - 0) & mask)];
         assert(x4531 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4532 = arg2[188 * steps + ((cycle - 0) & mask)];
         assert(x4532 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -27145,7 +27145,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x4718 = x96 - x4717;
       if (x4718 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x4719 = arg2[202 * steps + ((cycle - 0) & mask)];
         assert(x4719 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -27480,7 +27480,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x4756 = x93 - x4753;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4757 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x4757 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -29029,7 +29029,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x5211 = x93 - x5208;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5212 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x5212 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -29515,7 +29515,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x5346 = x96 - x5345;
       if (x5346 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/7(VerifyDivideCycle)/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/7(VerifyDivideCycle)/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5347 = arg2[122 * steps + ((cycle - 0) & mask)];
         assert(x5347 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -29561,7 +29561,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x5357 = x96 - x5356;
       if (x5357 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/7(VerifyDivideCycle)/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/7(VerifyDivideCycle)/IsZeroU32/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5358 = arg2[124 * steps + ((cycle - 0) & mask)];
         assert(x5358 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -30299,7 +30299,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x5564 = x93 - x5561;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5565 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x5565 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -30553,16 +30553,16 @@ __device__ void step_exec(
           reg = x5594;
         }
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5595 = arg2[188 * steps + ((cycle - 0) & mask)];
       assert(x5595 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5596 = arg2[189 * steps + ((cycle - 0) & mask)];
       assert(x5596 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5597 = arg2[190 * steps + ((cycle - 0) & mask)];
       assert(x5597 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5598 = arg2[191 * steps + ((cycle - 0) & mask)];
       assert(x5598 != Fp::invalid());
       // loc("./zirgen/components/onehot.h":46:19)
@@ -30894,7 +30894,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x5653 = x93 - x5650;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5654 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x5654 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -31076,25 +31076,25 @@ __device__ void step_exec(
             reg = x5678;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5679 = arg2[193 * steps + ((cycle - 0) & mask)];
         assert(x5679 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5680 = arg2[194 * steps + ((cycle - 0) & mask)];
         assert(x5680 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5681 = arg2[195 * steps + ((cycle - 0) & mask)];
         assert(x5681 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5682 = arg2[196 * steps + ((cycle - 0) & mask)];
         assert(x5682 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[5](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5683 = arg2[197 * steps + ((cycle - 0) & mask)];
         assert(x5683 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[6](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5684 = arg2[198 * steps + ((cycle - 0) & mask)];
         assert(x5684 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/1(ECallInput)/OneHot/hot[7](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5685 = arg2[199 * steps + ((cycle - 0) & mask)];
         assert(x5685 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -31736,7 +31736,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x5793 = x93 - x5790;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5794 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x5794 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -32150,7 +32150,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x5867 = x93 - x5864;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5868 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x5868 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -32520,7 +32520,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x5915 = x93 - x5912;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5916 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x5916 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -32713,7 +32713,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x5946 = x93 - x5943;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5947 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x5947 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -32811,7 +32811,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x5962 = x96 - x5961;
       if (x5962 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5963 = arg2[145 * steps + ((cycle - 0) & mask)];
         assert(x5963 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -32830,22 +32830,22 @@ __device__ void step_exec(
         }
       }
       if (x5962 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5966 = arg2[110 * steps + ((cycle - 0) & mask)];
         assert(x5966 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5967 = arg2[111 * steps + ((cycle - 0) & mask)];
         assert(x5967 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5968 = arg2[112 * steps + ((cycle - 0) & mask)];
         assert(x5968 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5969 = arg2[113 * steps + ((cycle - 0) & mask)];
         assert(x5969 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5970 = arg2[114 * steps + ((cycle - 0) & mask)];
         assert(x5970 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5971 = arg2[115 * steps + ((cycle - 0) & mask)];
         assert(x5971 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -33002,7 +33002,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x6020 = x93 - x6017;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x6021 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x6021 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -33337,16 +33337,16 @@ __device__ void step_exec(
           assert(reg == Fp::invalid() || reg == x96);
           reg = x96;
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6086 = arg2[139 * steps + ((cycle - 0) & mask)];
         assert(x6086 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6087 = arg2[140 * steps + ((cycle - 0) & mask)];
         assert(x6087 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6088 = arg2[141 * steps + ((cycle - 0) & mask)];
         assert(x6088 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6089 = arg2[142 * steps + ((cycle - 0) & mask)];
         assert(x6089 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/component.h":154:27))
@@ -33515,16 +33515,16 @@ __device__ void step_exec(
           assert(reg == Fp::invalid() || reg == x95);
           reg = x95;
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6103 = arg2[139 * steps + ((cycle - 0) & mask)];
         assert(x6103 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6104 = arg2[140 * steps + ((cycle - 0) & mask)];
         assert(x6104 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6105 = arg2[141 * steps + ((cycle - 0) & mask)];
         assert(x6105 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6106 = arg2[142 * steps + ((cycle - 0) & mask)];
         assert(x6106 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/component.h":154:27))
@@ -33609,7 +33609,7 @@ __device__ void step_exec(
           assert(reg == Fp::invalid() || reg == x6118);
           reg = x6118;
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6119 = arg2[140 * steps + ((cycle - 0) & mask)];
         assert(x6119 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":239:24)
@@ -33828,7 +33828,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x6142 = x96 - x6141;
       if (x6142 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6143 = arg2[148 * steps + ((cycle - 0) & mask)];
         assert(x6143 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -35664,7 +35664,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x6647 = x96 - x6646;
       if (x6647 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6648 = arg2[145 * steps + ((cycle - 0) & mask)];
         assert(x6648 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -35698,19 +35698,19 @@ __device__ void step_exec(
         }
       }
       if (x6647 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6653 = arg2[111 * steps + ((cycle - 0) & mask)];
         assert(x6653 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6654 = arg2[112 * steps + ((cycle - 0) & mask)];
         assert(x6654 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6655 = arg2[113 * steps + ((cycle - 0) & mask)];
         assert(x6655 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6656 = arg2[114 * steps + ((cycle - 0) & mask)];
         assert(x6656 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6657 = arg2[115 * steps + ((cycle - 0) & mask)];
         assert(x6657 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -35867,7 +35867,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x6706 = x93 - x6703;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x6707 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x6707 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -35968,7 +35968,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x6720 = x96 - x6719;
       if (x6720 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6721 = arg2[148 * steps + ((cycle - 0) & mask)];
         assert(x6721 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -35984,13 +35984,13 @@ __device__ void step_exec(
         assert(reg == Fp::invalid() || reg == x95);
         reg = x95;
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x6724 = arg2[139 * steps + ((cycle - 0) & mask)];
       assert(x6724 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x6725 = arg2[141 * steps + ((cycle - 0) & mask)];
       assert(x6725 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x6726 = arg2[142 * steps + ((cycle - 0) & mask)];
       assert(x6726 != Fp::invalid());
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
@@ -41830,7 +41830,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x8932 = x96 - x8931;
       if (x8932 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x8933 = arg2[145 * steps + ((cycle - 0) & mask)];
         assert(x8933 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -41938,7 +41938,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x8946 = x96 - x8945;
       if (x8946 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x8947 = arg2[148 * steps + ((cycle - 0) & mask)];
         assert(x8947 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -42039,7 +42039,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x8970 = x93 - x8967;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x8971 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x8971 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -46981,7 +46981,7 @@ __device__ void step_exec(
       auto x10770 = x96 - x10769;
       if (x8945 != 0) {
         if (x10769 != 0) {
-          // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+          // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
           auto x10771 = arg2[139 * steps + ((cycle - 0) & mask)];
           assert(x10771 != Fp::invalid());
           // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":406:26)
@@ -47668,7 +47668,7 @@ __device__ void step_exec(
           assert(x10996 == 0 && "eqz failed at: zirgen/circuit/rv32im/v1/edsl/sha.cpp:411");
         }
         if (x10770 != 0) {
-          // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+          // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
           auto x10997 = arg2[139 * steps + ((cycle - 0) & mask)];
           assert(x10997 != Fp::invalid());
           // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
@@ -53500,7 +53500,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x13284 = x93 - x13281;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x13285 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x13285 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -53534,7 +53534,7 @@ __device__ void step_exec(
           reg = x13289;
         }
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x13290 = arg2[120 * steps + ((cycle - 0) & mask)];
       assert(x13290 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/page_fault.cpp":49:20)
@@ -53567,7 +53567,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x13295 = x96 - x13294;
       if (x13295 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13296 = arg2[124 * steps + ((cycle - 0) & mask)];
         assert(x13296 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -53605,7 +53605,7 @@ __device__ void step_exec(
           reg = x95;
         }
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x13299 = arg2[122 * steps + ((cycle - 0) & mask)];
       assert(x13299 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/page_fault.cpp":59:24)
@@ -53924,7 +53924,7 @@ __device__ void step_exec(
       // loc("zirgen/components/iszero.cpp":18:19)
       auto x13364 = x96 - x13363;
       if (x13364 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/IsZero/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13365 = arg2[179 * steps + ((cycle - 0) & mask)];
         assert(x13365 != Fp::invalid());
         // loc("zirgen/components/iszero.cpp":18:26)
@@ -53992,16 +53992,16 @@ __device__ void step_exec(
             reg = x13379;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13380 = arg2[174 * steps + ((cycle - 0) & mask)];
         assert(x13380 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13381 = arg2[175 * steps + ((cycle - 0) & mask)];
         assert(x13381 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13382 = arg2[176 * steps + ((cycle - 0) & mask)];
         assert(x13382 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13383 = arg2[177 * steps + ((cycle - 0) & mask)];
         assert(x13383 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -54020,7 +54020,7 @@ __device__ void step_exec(
         auto x13390 = x13389 - x13370;
         // loc("./zirgen/components/onehot.h":40:8)
         assert(x13390 == 0 && "eqz failed at: ./zirgen/components/onehot.h:40");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13391 = arg2[172 * steps + ((cycle - 0) & mask)];
         assert(x13391 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":194:10)
@@ -54083,16 +54083,16 @@ __device__ void step_exec(
             reg = x13402;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13403 = arg2[174 * steps + ((cycle - 0) & mask)];
         assert(x13403 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13404 = arg2[175 * steps + ((cycle - 0) & mask)];
         assert(x13404 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13405 = arg2[176 * steps + ((cycle - 0) & mask)];
         assert(x13405 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13406 = arg2[177 * steps + ((cycle - 0) & mask)];
         assert(x13406 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -54539,7 +54539,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x13468 = x93 - x13465;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13469 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x13469 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -54647,7 +54647,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x13492 = x93 - x13489;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13493 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x13493 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -54678,7 +54678,7 @@ __device__ void step_exec(
       // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":236:22)
       auto x13500 = x13499 + x13498;
       if (x13496 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13501 = arg2[172 * steps + ((cycle - 0) & mask)];
         assert(x13501 != Fp::invalid());
         {
@@ -54845,7 +54845,7 @@ __device__ void step_exec(
       // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":234:22)
       auto x13515 = x13498 + x13496;
       if (x13515 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13516 = arg2[172 * steps + ((cycle - 0) & mask)];
         assert(x13516 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":241:23)
@@ -55016,7 +55016,7 @@ __device__ void step_exec(
       // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":234:22)
       auto x13532 = x13531 + x13496;
       if (x13532 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13533 = arg2[172 * steps + ((cycle - 0) & mask)];
         assert(x13533 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":241:23)
@@ -55185,7 +55185,7 @@ __device__ void step_exec(
       // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":234:22)
       auto x13548 = x13500 + x13496;
       if (x13548 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/13(ECallCopyInCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13549 = arg2[172 * steps + ((cycle - 0) & mask)];
         assert(x13549 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":241:23)
@@ -55398,16 +55398,16 @@ __device__ void step_exec(
             reg = x95;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13566 = arg2[173 * steps + ((cycle - 0) & mask)];
         assert(x13566 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13567 = arg2[174 * steps + ((cycle - 0) & mask)];
         assert(x13567 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13568 = arg2[175 * steps + ((cycle - 0) & mask)];
         assert(x13568 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13569 = arg2[176 * steps + ((cycle - 0) & mask)];
         assert(x13569 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -55473,16 +55473,16 @@ __device__ void step_exec(
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x13591 = arg2[177 * steps + ((cycle - 0) & mask)];
         assert(x13591 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13592 = arg2[173 * steps + ((cycle - 1) & mask)];
         assert(x13592 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13593 = arg2[174 * steps + ((cycle - 1) & mask)];
         assert(x13593 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13594 = arg2[175 * steps + ((cycle - 1) & mask)];
         assert(x13594 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13595 = arg2[176 * steps + ((cycle - 1) & mask)];
         assert(x13595 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -55551,16 +55551,16 @@ __device__ void step_exec(
             reg = x13612;
           }
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13613 = arg2[173 * steps + ((cycle - 0) & mask)];
         assert(x13613 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[2](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13614 = arg2[174 * steps + ((cycle - 0) & mask)];
         assert(x13614 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13615 = arg2[175 * steps + ((cycle - 0) & mask)];
         assert(x13615 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[4](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13616 = arg2[176 * steps + ((cycle - 0) & mask)];
         assert(x13616 != Fp::invalid());
         // loc("./zirgen/components/onehot.h":46:19)
@@ -55607,10 +55607,10 @@ __device__ void step_exec(
         assert(reg == Fp::invalid() || reg == x13629);
         reg = x13629;
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x13630 = arg2[173 * steps + ((cycle - 0) & mask)];
       assert(x13630 != Fp::invalid());
-      // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/OneHot/hot[3](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x13631 = arg2[175 * steps + ((cycle - 0) & mask)];
       assert(x13631 != Fp::invalid());
       // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
@@ -56145,7 +56145,7 @@ __device__ void step_exec(
       // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":246:48)
       auto x13720 = x13719 + x13631;
       if (x13720 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13721 = arg2[171 * steps + ((cycle - 0) & mask)];
         assert(x13721 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":248:40)
@@ -71979,7 +71979,7 @@ __device__ void step_exec(
         assert(x19592 == 0 && "eqz failed at: zirgen/circuit/rv32im/v1/edsl/bigint.cpp:428");
       }
       if (x13625 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x19593 = arg2[171 * steps + ((cycle - 0) & mask)];
         assert(x19593 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
@@ -72539,7 +72539,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x19677 = x93 - x19674;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x19678 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x19678 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -72647,7 +72647,7 @@ __device__ void step_exec(
         }
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
         auto x19701 = x93 - x19698;
-        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+        // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x19702 = arg2[98 * steps + ((cycle - 0) & mask)];
         assert(x19702 != Fp::invalid());
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -72873,7 +72873,7 @@ __device__ void step_exec(
       }
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:17)
       auto x19736 = x93 - x19733;
-      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("Top/mux(Mux)/body(BodyStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x19737 = arg2[98 * steps + ((cycle - 0) & mask)];
       assert(x19737 != Fp::invalid());
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":23:7)
@@ -72949,7 +72949,7 @@ __device__ void step_exec(
       reg = x95;
     }
   }
-  // loc("Top/halted(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("Top/halted(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x19754 = arg2[2 * steps + ((cycle - 0) & mask)];
   assert(x19754 != Fp::invalid());
   // loc("zirgen/circuit/rv32im/v1/edsl/top.cpp":96:10)

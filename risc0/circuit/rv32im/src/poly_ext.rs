@@ -105,7 +105,7 @@ PolyExtStep::Const(56361032), // loc(unknown)
 PolyExtStep::Const(67108863), // loc(unknown)
 PolyExtStep::Const(33554431), // loc(unknown)
 PolyExtStep::Const(2013265910), // loc(unknown)
-PolyExtStep::True, // zirgen/circuit/rv32im/v1/edsl/rv32im.cpp:21
+PolyExtStep::True, // zirgen/circuit/rv32im/v1/edsl/rv32im.cpp:26
 PolyExtStep::Get(46), // Top/Code/OneHot/hot[1](Reg)(components/mux.h:49)
 PolyExtStep::Get(54), // Top/Code/Mux/1(SetupInfo)/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(47), // Top/Code/OneHot/hot[1](Reg)(zirgen/circuit/rv32im/v1/edsl/top.cpp:17)
@@ -130,8 +130,8 @@ PolyExtStep::Sub(91, 3), // zirgen/components/bytes.cpp:54
 PolyExtStep::Mul(92, 96), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndEqz(5, 97), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndCond(3, 87, 6), // zirgen/components/bytes.cpp:117
-PolyExtStep::Get(68), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(69), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(68), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(69), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Sub(98, 85), // zirgen/components/bytes.cpp:44
 PolyExtStep::Sub(99, 86), // zirgen/components/bytes.cpp:45
 PolyExtStep::Sub(100, 0), // zirgen/components/bytes.cpp:48
@@ -143,8 +143,8 @@ PolyExtStep::AndEqz(8, 105), // zirgen/components/bytes.cpp:51
 PolyExtStep::Sub(101, 3), // zirgen/components/bytes.cpp:54
 PolyExtStep::Mul(102, 106), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndEqz(9, 107), // zirgen/components/bytes.cpp:54
-PolyExtStep::Get(71), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(73), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(71), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(73), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Sub(108, 98), // zirgen/components/bytes.cpp:44
 PolyExtStep::Sub(109, 99), // zirgen/components/bytes.cpp:45
 PolyExtStep::Sub(110, 0), // zirgen/components/bytes.cpp:48
@@ -156,8 +156,8 @@ PolyExtStep::AndEqz(11, 115), // zirgen/components/bytes.cpp:51
 PolyExtStep::Sub(111, 3), // zirgen/components/bytes.cpp:54
 PolyExtStep::Mul(112, 116), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndEqz(12, 117), // zirgen/components/bytes.cpp:54
-PolyExtStep::Get(76), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(75), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(76), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(75), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Sub(118, 109), // zirgen/components/bytes.cpp:45
 PolyExtStep::Sub(119, 108), // zirgen/components/bytes.cpp:44
 PolyExtStep::Sub(121, 0), // zirgen/components/bytes.cpp:48
@@ -169,8 +169,8 @@ PolyExtStep::AndEqz(14, 125), // zirgen/components/bytes.cpp:51
 PolyExtStep::Sub(120, 3), // zirgen/components/bytes.cpp:54
 PolyExtStep::Mul(122, 126), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndEqz(15, 127), // zirgen/components/bytes.cpp:54
-PolyExtStep::Get(77), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(78), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(77), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(78), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Sub(128, 119), // zirgen/components/bytes.cpp:44
 PolyExtStep::Sub(129, 118), // zirgen/components/bytes.cpp:45
 PolyExtStep::Sub(130, 0), // zirgen/components/bytes.cpp:48
@@ -182,8 +182,8 @@ PolyExtStep::AndEqz(17, 135), // zirgen/components/bytes.cpp:51
 PolyExtStep::Sub(131, 3), // zirgen/components/bytes.cpp:54
 PolyExtStep::Mul(132, 136), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndEqz(18, 137), // zirgen/components/bytes.cpp:54
-PolyExtStep::Get(83), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(88), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(83), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(88), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Sub(138, 128), // zirgen/components/bytes.cpp:44
 PolyExtStep::Sub(139, 129), // zirgen/components/bytes.cpp:45
 PolyExtStep::Sub(140, 0), // zirgen/components/bytes.cpp:48
@@ -195,8 +195,8 @@ PolyExtStep::AndEqz(20, 145), // zirgen/components/bytes.cpp:51
 PolyExtStep::Sub(141, 3), // zirgen/components/bytes.cpp:54
 PolyExtStep::Mul(142, 146), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndEqz(21, 147), // zirgen/components/bytes.cpp:54
-PolyExtStep::Get(93), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(98), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(93), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(98), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Sub(148, 138), // zirgen/components/bytes.cpp:44
 PolyExtStep::Sub(149, 139), // zirgen/components/bytes.cpp:45
 PolyExtStep::Sub(150, 0), // zirgen/components/bytes.cpp:48
@@ -208,8 +208,8 @@ PolyExtStep::AndEqz(23, 155), // zirgen/components/bytes.cpp:51
 PolyExtStep::Sub(151, 3), // zirgen/components/bytes.cpp:54
 PolyExtStep::Mul(152, 156), // zirgen/components/bytes.cpp:54
 PolyExtStep::AndEqz(24, 157), // zirgen/components/bytes.cpp:54
-PolyExtStep::Get(103), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(108), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(103), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(108), // Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Sub(158, 148), // zirgen/components/bytes.cpp:44
 PolyExtStep::Sub(159, 149), // zirgen/components/bytes.cpp:45
 PolyExtStep::Sub(160, 0), // zirgen/components/bytes.cpp:48
@@ -540,8 +540,8 @@ PolyExtStep::Sub(367, 367), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(134, 377), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(96, 299, 135), // components/mux.h:49
 PolyExtStep::Get(50), // Top/Code/OneHot/hot[4](Reg)(components/mux.h:49)
-PolyExtStep::Get(586), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(592), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(586), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[1](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(592), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(380, 3), // components/onehot.h:46
 PolyExtStep::Add(379, 381), // components/onehot.h:46
 PolyExtStep::AndEqz(0, 382), // components/onehot.h:40
@@ -791,21 +791,21 @@ PolyExtStep::Sub(499, 529), // components/bits.h:68
 PolyExtStep::AndEqz(137, 530), // components/bits.h:68
 PolyExtStep::AndEqz(233, 504), // zirgen/circuit/rv32im/v1/edsl/body.cpp:22
 PolyExtStep::AndEqz(234, 506), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::Get(375), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(377), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(379), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(381), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(383), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(385), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(387), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(389), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(391), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(393), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(395), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(397), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(399), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(401), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(403), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(375), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(377), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(379), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(381), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(383), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(385), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(387), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(389), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(391), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(393), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(395), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(397), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(399), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(401), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(403), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(532, 3), // components/onehot.h:46
 PolyExtStep::Mul(533, 20), // components/onehot.h:46
 PolyExtStep::Mul(534, 18), // components/onehot.h:46
@@ -1283,7 +1283,7 @@ PolyExtStep::Add(811, 804), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
 PolyExtStep::Sub(315, 812), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
 PolyExtStep::AndEqz(442, 813), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
 PolyExtStep::Get(622), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(628), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(628), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(814, 35), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:33
 PolyExtStep::Add(816, 815), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:33
 PolyExtStep::Sub(313, 817), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:33
@@ -1453,7 +1453,7 @@ PolyExtStep::Get(852), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/Compute
 PolyExtStep::AndEqz(0, 954), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(469, 955, 470), // zirgen/components/iszero.cpp:16
 PolyExtStep::Sub(0, 955), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(859), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(859), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(954, 957), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(958, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 959), // zirgen/components/iszero.cpp:18
@@ -1466,7 +1466,7 @@ PolyExtStep::Get(866), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/Compute
 PolyExtStep::AndEqz(0, 963), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(473, 964, 474), // zirgen/components/iszero.cpp:16
 PolyExtStep::Sub(0, 964), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(873), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(873), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(963, 966), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(967, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 968), // zirgen/components/iszero.cpp:18
@@ -1480,7 +1480,7 @@ PolyExtStep::Get(880), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/Compute
 PolyExtStep::AndEqz(0, 973), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(477, 974, 478), // zirgen/components/iszero.cpp:16
 PolyExtStep::Sub(0, 974), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(887), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Reg(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(887), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(973, 976), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(977, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 978), // zirgen/components/iszero.cpp:18
@@ -3734,10 +3734,10 @@ PolyExtStep::AndCond(1498, 2203, 1499), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(766, 23), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:187
 PolyExtStep::AndEqz(0, 2206), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:187
 PolyExtStep::AndCond(1500, 1307, 1501), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:187
-PolyExtStep::Get(392), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(394), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(396), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)(compiler/edsl/edsl.h:117)
-PolyExtStep::Get(398), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(392), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(394), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(396), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(398), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(1100, 3), // components/onehot.h:46
 PolyExtStep::Mul(1188, 20), // components/onehot.h:46
 PolyExtStep::Mul(1384, 18), // components/onehot.h:46
