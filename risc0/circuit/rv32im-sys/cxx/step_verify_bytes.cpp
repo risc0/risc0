@@ -63,10 +63,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
   // loc("Top/Code/OneHot/hot[7](Reg)"("./zirgen/components/mux.h":49:25))
   auto x10 = args[0][8 * steps + ((cycle - 0) & mask)];
   assert(x10 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":78:27))
+  // loc("Top/Code/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":84:27))
   auto x11 = args[0][1 * steps + ((cycle - 0) & mask)];
   assert(x11 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":78:27))
+  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":84:27))
   auto x12 = args[0][3 * steps + ((cycle - 0) & mask)];
   assert(x12 != Fp::invalid());
   if (x11 != 0) {
@@ -365,10 +365,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x56 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x56 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:42))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":62:42))
     auto x57 = args[2][0 * steps + ((cycle - 1) & mask)];
     assert(x57 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:40))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":63:40))
     auto x58 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x58 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -1205,10 +1205,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":79:9)
       if (x336 != 0) throw std::runtime_error("eqz failed at: zirgen/components/bytes.cpp:79");
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x337 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x337 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x338 = args[2][1 * steps + ((cycle - 0) & mask)];
     assert(x338 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -1478,10 +1478,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x386 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x386 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:42))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":62:42))
     auto x387 = args[2][0 * steps + ((cycle - 1) & mask)];
     assert(x387 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:40))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":63:40))
     auto x388 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x388 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -2150,10 +2150,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":79:9)
       if (x610 != 0) throw std::runtime_error("eqz failed at: zirgen/components/bytes.cpp:79");
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x611 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x611 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x612 = args[2][1 * steps + ((cycle - 0) & mask)];
     assert(x612 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -2423,10 +2423,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x660 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x660 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:42))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":62:42))
     auto x661 = args[2][0 * steps + ((cycle - 1) & mask)];
     assert(x661 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:40))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":63:40))
     auto x662 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x662 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -3095,10 +3095,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":79:9)
       if (x884 != 0) throw std::runtime_error("eqz failed at: zirgen/components/bytes.cpp:79");
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x885 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x885 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x886 = args[2][1 * steps + ((cycle - 0) & mask)];
     assert(x886 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -3368,10 +3368,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x934 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x934 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:42))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":62:42))
     auto x935 = args[2][0 * steps + ((cycle - 1) & mask)];
     assert(x935 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:40))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":63:40))
     auto x936 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x936 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -4040,10 +4040,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":79:9)
       if (x1158 != 0) throw std::runtime_error("eqz failed at: zirgen/components/bytes.cpp:79");
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1159 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x1159 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1160 = args[2][1 * steps + ((cycle - 0) & mask)];
     assert(x1160 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -4313,10 +4313,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1208 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x1208 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:42))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":62:42))
     auto x1209 = args[2][0 * steps + ((cycle - 1) & mask)];
     assert(x1209 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:40))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":63:40))
     auto x1210 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x1210 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -4985,10 +4985,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":79:9)
       if (x1432 != 0) throw std::runtime_error("eqz failed at: zirgen/components/bytes.cpp:79");
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1433 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x1433 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1434 = args[2][1 * steps + ((cycle - 0) & mask)];
     assert(x1434 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -5258,10 +5258,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1482 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x1482 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:42))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":62:42))
     auto x1483 = args[2][0 * steps + ((cycle - 1) & mask)];
     assert(x1483 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:40))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":63:40))
     auto x1484 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x1484 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -5930,10 +5930,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":79:9)
       if (x1706 != 0) throw std::runtime_error("eqz failed at: zirgen/components/bytes.cpp:79");
     }
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1707 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x1707 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1708 = args[2][1 * steps + ((cycle - 0) & mask)];
     assert(x1708 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
@@ -5992,10 +5992,10 @@ Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/bytes_fini(BytesFiniStep)/PlonkFini/BytesPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1722 = args[2][4 * steps + ((cycle - 0) & mask)];
     assert(x1722 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":62:42))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":62:42))
     auto x1723 = args[2][0 * steps + ((cycle - 1) & mask)];
     assert(x1723 != Fp::invalid());
-    // loc("Top/BytesHeader/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":63:40))
+    // loc("Top/BytesHeader/element(BytesPlonkElement)/Reg"("zirgen/components/bytes.cpp":63:40))
     auto x1724 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x1724 != Fp::invalid());
     // loc("zirgen/components/bytes.cpp":67:17)
