@@ -7,11 +7,6 @@ import { latestVersion } from "./src/versions.js";
 
 /** @type {import("next").NextConfig} */
 let config = deepmerge(nextConfigBase, {
-  experimental: {
-    reactCompiler: false, // turn on when supported in react-table
-    ppr: true,
-  },
-
   // biome-ignore lint/suspicious/useAwait: needs to be async
   async redirects() {
     return [
