@@ -19,16 +19,14 @@ OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
 /* Must match risc0/zkvm/platform/src/memory.rs */
-/* TODO double check these memory sections, probably not ideal */
 MEMORY {
-  stack        : ORIGIN = 0x00000400, LENGTH =  8M - 1K
-  data    (RW) : ORIGIN = 0x00080000, LENGTH =  24M
-  heap         : ORIGIN = 0x02000000, LENGTH =  80M
-  prog    (X)  : ORIGIN = 0x07000000, LENGTH =  80M
+  ram          : ORIGIN = 0x00000400, LENGTH =  0x06FFC000
+  system  (X)  : ORIGIN = 0x07000000, LENGTH =  80M
 }
 
 SECTIONS {
-  .text : {
+  . = 0x00000400;
+	.text 0x00000400 : ALIGN(4) {
     KEEP (*(.init))
     . = ALIGN(4);
     *(.text*)
@@ -36,21 +34,21 @@ SECTIONS {
     *(.rodata*)
     . = ALIGN(4);
     *(.srodata*)
-  } >prog
+  } >ram
 
   . = ALIGN(4);
 
-  .data : {
+  .data 0x00200800 : ALIGN(4) {
     *(.data .data.*)
     *(.gnu.linkonce.d.*)
     __global_pointer$ = . + 0x800;
     *(.sdata .sdata.* .sdata2.*)
     *(.gnu.linkonce.s.*)
-  } >data
+  } >ram
 
   . = ALIGN(4);
 
-  .bss (NOLOAD) : {
+  .bss (NOLOAD) : ALIGN(4) {
     __bss_start = .;
     *(.sbss*)
     *(.gnu.linkonce.sb.*)
@@ -59,12 +57,13 @@ SECTIONS {
     *(COMMON)
     . = ALIGN(4);
     __bss_end = .;
-  } >data
+  } >ram
 
   /* _end marker for zkvm allocator */
-  _end = ORIGIN(heap);
+  _end = .;
 
-  __stack_init$ = ORIGIN(stack) + LENGTH(stack) - 4;
+  /* Stack top marker, used to initialize the stack pointer */
+  __stack_init$ = 0x00200400;
   _stack_top = __stack_init$;
 
 
