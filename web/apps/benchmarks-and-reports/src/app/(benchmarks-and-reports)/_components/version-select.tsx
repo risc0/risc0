@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@risc0/ui/select";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { startTransition, useEffect } from "react";
+import { useProgressBar } from "shared/client/providers/progress-bar-provider";
 import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
 
@@ -21,6 +22,7 @@ export function VersionSelect() {
   const router = useRouter();
   const pathname = usePathname();
   const mounted = useMounted();
+  const progress = useProgressBar();
   const pathnameParts = pathname.split("/").filter(Boolean);
   const [_versionLocalStorage, setVersionLocalStorage] = useLocalStorage<string | undefined>("version", undefined);
 
@@ -36,7 +38,12 @@ export function VersionSelect() {
 
     setVersionLocalStorage(value);
 
-    router.push(`/${value}/${pathnameWithoutVersion.join("/")}`);
+    progress.start();
+
+    startTransition(() => {
+      router.push(`/${value}/${pathnameWithoutVersion.join("/")}`);
+      progress.done();
+    });
   }
 
   return mounted && version ? (
