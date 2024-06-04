@@ -57,7 +57,7 @@ pub fn simple_loop() -> Program {
     //
     // _boot:
     //     li      a4,0
-    //     li      a5,1000
+    //     li      a5,100
     // loop:
     //     addi    a4,a4,1
     //     blt     a4,a5,loop
@@ -69,7 +69,7 @@ pub fn simple_loop() -> Program {
         entry: 0x4000,
         image: BTreeMap::from([
             (0x4000, 0x00000713), // li      a4,0
-            (0x4004, 0x3e800793), // li      a5,1000
+            (0x4004, 0x06400793), // li      a5,100
             (0x4008, 0x00170713), // add     a4,a4,1
             (0x400c, 0xfef74ee3), // blt     a4,a5,8 <loop>
             (0x4010, 0x010005b7), // lui     a1,0x1000
