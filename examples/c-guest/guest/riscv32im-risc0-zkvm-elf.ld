@@ -27,7 +27,7 @@ MEMORY {
 
 SECTIONS {
   . = 0x00200800;
-	.text 0x00200800 : ALIGN(4) {
+  .text 0x00200800 : ALIGN(4) {
     KEEP (*(.init))
     . = ALIGN(4);
     *(.text*)
