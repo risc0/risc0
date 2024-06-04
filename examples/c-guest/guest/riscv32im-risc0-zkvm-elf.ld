@@ -20,7 +20,7 @@ ENTRY(_start)
 
 /* Must match risc0/zkvm/platform/src/memory.rs */
 MEMORY {
-  stack        : ORIGIN = 0x00000400, LENGTH = 0x001FFC00
+  stack        : ORIGIN = 0x00000400, LENGTH =  0x001FFC00
   ram          : ORIGIN = 0x00200800, LENGTH =  0x06FF8000
   system  (X)  : ORIGIN = 0x07000000, LENGTH =  80M
 }
