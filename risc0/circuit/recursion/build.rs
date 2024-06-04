@@ -39,15 +39,11 @@ fn download_zkr() {
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "7199d49a31879d3cafcc95ee188a73e41754fbad458c4c2d6219d93c323f11e4";
+    const SHA256_HASH: &str = "4e8496469e1efa00efb3630d261abf345e6b2905fb64b4f3a297be88ebdf83d2";
 
     fn check_sha2(path: &Path) -> bool {
         let data = fs::read(path).unwrap();
         hex::encode(Sha256::digest(data)) == SHA256_HASH
-    }
-
-    if env::var("DOCS_RS").is_ok() {
-        return;
     }
 
     println!("cargo:rerun-if-env-changed=RECURSION_SRC_PATH");
@@ -57,6 +53,11 @@ fn download_zkr() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
     let out_path = out_dir.join(FILENAME);
+
+    if env::var("DOCS_RS").is_ok() && !out_path.exists() {
+        fs::write(&out_path, b"").unwrap();
+        return;
+    }
 
     if out_path.exists() {
         if check_sha2(&out_path) {
