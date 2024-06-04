@@ -104,7 +104,7 @@ function useProgress() {
   return { state, value, start, done, reset };
 }
 
-function useProgressBar() {
+export function useProgressBar() {
   const progress = useContext(ProgressBarContext);
 
   if (progress === null) {

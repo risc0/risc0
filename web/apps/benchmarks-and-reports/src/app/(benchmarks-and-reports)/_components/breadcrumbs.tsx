@@ -12,9 +12,9 @@ import { useLocalStorage } from "@risc0/ui/hooks/use-local-storage";
 import { useMounted } from "@risc0/ui/hooks/use-mounted";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { ChevronRightIcon } from "lucide-react";
+import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { Fragment } from "react";
-import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
 import type { Version } from "~/types/version";
 
 // Routes you don't want to show up in the breadcrumb
@@ -45,7 +45,7 @@ export function Breadcrumbs() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <ProgressBarLink href={mounted ? `/${version ?? versionLocalStorage ?? ""}` : "/"}>Home</ProgressBarLink>
+              <Link href={mounted ? `/${version ?? versionLocalStorage ?? ""}` : "/"}>Home</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator>
@@ -64,9 +64,9 @@ export function Breadcrumbs() {
                   ) : (
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <ProgressBarLink className="capitalize" href={`/${version}/${path}`}>
+                        <Link className="capitalize" href={`/${version}/${path}`}>
                           {sanitizedChunk}
-                        </ProgressBarLink>
+                        </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                   )}
