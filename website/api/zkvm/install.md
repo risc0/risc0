@@ -13,7 +13,7 @@ The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] 
 1. Install `rzup` by running the following command:
 
     ```sh
-    curl -L https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/install | bash
+    curl -L https://risczero.com/install | bash
     ```
 
 2. Run `rzup` to install RISC Zero:

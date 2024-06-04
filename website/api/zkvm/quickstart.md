@@ -21,7 +21,7 @@ zkVM. A proof of execution is a **[receipt]**; it contains a public part - a
 Install `rzup` by running the following command:
 
 ```bash
-curl -L https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/install | bash
+curl -L https://risczero.com/install | bash
 ```
 
 Run `rzup` to install the RISC Zero toolchain and `cargo-risczero`.

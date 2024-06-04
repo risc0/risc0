@@ -102,7 +102,7 @@ the RISC Zero toolchain installer, `rzup`. We'll use `rzup` to install `cargo-ri
 To install `rzup` run the following command and follow the instructions:
 
 ```bash
-curl -L https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/install | bash
+curl -L https://risczero.com/install | bash
 ```
 
 Next we can install the RISC Zero toolchain by running `rzup`:
