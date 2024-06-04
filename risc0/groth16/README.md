@@ -1,7 +1,6 @@
-# Groth16
+<!-- cargo-rdme start -->
 
-> WARNING: This software is still experimental, we do not recommend it for
-> production use (see Security section).
+# Groth16
 
 This library implements a verifier for the Groth16 protocol over the BN_254 elliptic curve.
 
@@ -10,75 +9,35 @@ This library implements a verifier for the Groth16 protocol over the BN_254 elli
 ```rust
 use risc0_groth16::{ProofJson, PublicInputsJson, Verifier, VerifyingKeyJson};
 
-    const TEST_VERIFICATION_KEY: &str = include_str!("data/verification_key.json");
-    const TEST_PROOF: &str = include_str!("data/proof.json");
-    const TEST_PUBLIC_INPUTS: &str = include_str!("data/public.json");
+const TEST_VERIFICATION_KEY: &str = test_data!("verification_key.json");
+const TEST_PROOF: &str = test_data!("proof.json");
+const TEST_PUBLIC_INPUTS: &str = test_data!("public.json");
 
-    fn verify() {
-        let verifying_key: VerifyingKeyJson = serde_json::from_str(TEST_VERIFICATION_KEY).unwrap();
-        let proof: ProofJson = serde_json::from_str(TEST_PROOF).unwrap();
-        let public_inputs = PublicInputsJson {
-            values: serde_json::from_str(TEST_PUBLIC_INPUTS).unwrap(),
-        };
-        let verifier = Verifier::from_json(proof, public_inputs, verifying_key).unwrap();
-        verifier.verify().unwrap();
-    }
+fn verify() {
+    let verifying_key: VerifyingKeyJson = serde_json::from_str(TEST_VERIFICATION_KEY).unwrap();
+    let proof: ProofJson = serde_json::from_str(TEST_PROOF).unwrap();
+    let public_inputs = PublicInputsJson {
+        values: serde_json::from_str(TEST_PUBLIC_INPUTS).unwrap(),
+    };
+    let verifier = Verifier::from_json(proof, public_inputs, verifying_key).unwrap();
+    verifier.verify().unwrap();
+}
 ```
 
 ## STARK to SNARK
-It also provides a utility function to call a prover (via Docker).
-After generating a RISC Zero STARK proof, it can be transformed into a SNARK using the `stark_to_snark` function.
-This function becomes available when the `prove` feature flag is enabled.
 
-> WARNING: This feature is in an experimental stage. It requires an x86 architecture and Docker installed.
-> Additionally, specific [installation steps](https://github.com/risc0/risc0/tree/main/compact_proof) must be followed to use this functionality.
+It also provides the [stark_to_snark][docker::stark_to_snark] function to run a prover Groth16
+recursion prover via Docker. After generating a RISC Zero STARK proof, this function can be
+used to transform it into a Groth16 proof. This function becomes available when the `prove`
+feature flag is enabled.
 
-### Example
+> IMPORTANT: This feature requires an x86 architecture and Docker installed.
+> Additionally, specific [installation steps](https://github.com/risc0/risc0/tree/main/groth16_proof) must be followed to use this functionality.
 
-```rust
-#[cfg(feature = "prove")]
-fn stark2snark() {
-    use risc0_groth16::docker::stark_to_snark;
-    use risc0_zkvm::{
-        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
-        InnerReceipt, ProverOpts, Receipt, VerifierContext,
-    };
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+The recommended way to get a Groth16 proof is to use the `Prover` trait in the [risc0-zkvm]
+crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
 
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::BusyLoop { cycles: 0 })
-        .unwrap()
-        .build()
-        .unwrap();
+[risc0-zkvm]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/
 
-    tracing::info!("execute");
+<!-- cargo-rdme end -->
 
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-
-    tracing::info!("prove");
-    let opts = ProverOpts::default();
-    let ctx = VerifierContext::default();
-    let prover = get_prover_server(&opts).unwrap();
-    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
-    let claim = receipt.claim().unwrap();
-    let composite_receipt = receipt.inner.composite().unwrap();
-    let succinct_receipt = prover.compress(composite_receipt).unwrap();
-    let journal = session.journal.unwrap().bytes;
-
-    tracing::info!("identity_p254");
-    let ident_receipt = identity_p254(&succinct_receipt).unwrap();
-    let seal_bytes = ident_receipt.get_seal_bytes();
-
-    tracing::info!("stark-to-snark");
-    let seal = stark_to_snark(&seal_bytes).unwrap().to_vec();
-
-    tracing::info!("Receipt");
-    let receipt = Receipt::new(
-        InnerReceipt::Compact(CompactReceipt { seal, claim }),
-        journal,
-    );
-
-    receipt.verify(MULTI_TEST_ID).unwrap();
-}
-```

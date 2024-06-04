@@ -1,13 +1,14 @@
 # Groth16 Prover
 
-> WARNING: This software is still experimental, we do not recommend it for
-> production use (see Security section).
->
-> Currently, due to the Circom native C++ witness generator that depends on x86 assembly for field operations, only x86 architecture is supported.
+> Currently, due to the Circom native C++ witness generator that depends on x86
+> assembly for field operations, only x86 architecture is supported.
 
 This directory contains utilities for performing a "stark2snark" workflow. This
 is useful for transforming a RISC Zero STARK proof into a Groth16 SNARK proof
 which is suitable for publishing on-chain.
+
+> Recommended way to produce Groth16 receipts is to use the `Prover` trait in the `risc0-zkvm` crate.
+> See the crate documentation for more information.
 
 ## Quickstart
 
@@ -19,7 +20,7 @@ To install the necessary dependencies, run:
 
 ## Manual installation
 
-All the following commands must be run from the `compact_proof` directory.
+All the following commands must be run from the `groth16_proof` directory.
 
 1. Run the ceremony (optional):
 
@@ -50,7 +51,7 @@ docker run --rm -v $WORK_DIR:/mnt risc0-groth16-prover
 
 The resulting `proof.json` file will be in the chosen `$WORK_DIR`.
 This file can be parsed and decoded into a `risc0_groth16::Seal`.
-Finally, this seal can be embedded within a `InnerReceipt::Compact`.
+Finally, this seal can be embedded within a `InnerReceipt::Groth16`.
 
 See [`risc0-zkvm/src/host/server/prove/tests.rs`](../risc0/zkvm/src/host/server/prove/tests.rs) for an end-to-end
 example.

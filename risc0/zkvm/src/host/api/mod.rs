@@ -82,6 +82,8 @@ impl RootMessage for pb::api::ResolveRequest {}
 impl RootMessage for pb::api::ResolveReply {}
 impl RootMessage for pb::api::IdentityP254Request {}
 impl RootMessage for pb::api::IdentityP254Reply {}
+impl RootMessage for pb::api::CompressRequest {}
+impl RootMessage for pb::api::CompressReply {}
 
 impl ConnectionWrapper {
     fn new(inner: Box<dyn Connection>) -> Self {

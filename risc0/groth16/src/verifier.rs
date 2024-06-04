@@ -124,6 +124,8 @@ impl Verifier {
         })
     }
 
+    /// Create a Verifier given the JSON representation of the proof, public inputs and verifier
+    /// key.
     pub fn from_json(
         proof: ProofJson,
         public_inputs: PublicInputsJson,

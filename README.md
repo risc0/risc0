@@ -1,8 +1,6 @@
 <p align="center">
-  <a href="https://risczero.com"><img src="website/static/img/logo.png" height="100"></a>
+  <a href="https://risczero.com" target="_blank"><img src="website/static/img/logo.svg" height="100"></a>
 </p>
-
-<h1 align="center"><a href="https://risczero.com">RISC Zero</a></h1>
 
 [![Crates.io][crates-badge]][crates-url]
 [![MIT licensed][licence-badge]][licence-url]
@@ -32,9 +30,6 @@
 [security-model]: https://dev.risczero.com/api/security-model
 [proof-system-in-detail]: https://dev.risczero.com/proof-system-in-detail.pdf
 [soundness.rs]: risc0/zkp/src/prove/soundness.rs
-
-> WARNING: This software is still experimental, we do not recommend it for
-> production use (see Security section).
 
 RISC Zero is a zero-knowledge verifiable general computing platform based on
 [zk-STARKs][zk-proof] and the [RISC-V] microarchitecture.
@@ -85,11 +80,16 @@ execution of the code).
 
 ## Security
 
-This code implements a [three-layer recursive proof system][zksummit10-talk], based on the well-studied
-zk-STARK protocol and Groth16 protocol. An overview of the underlying cryptographic assumptions can be found on our
-[Security Model][security-model] page. With default parameters, this system achieves perfect zero-knowledgeness and 98 bits of conjectured security. Our STARK protocol is described in [Scalable, Transparent Arguments of RISC-V Integrity][proof-system-in-detail], and a soundness/security calculator is included in the [soundness.rs][soundness.rs] file.
+This code implements a [three-layer recursive proof system][zksummit10-talk],
+based on the well-studied zk-STARK protocol and Groth16 protocol. An overview of
+the underlying cryptographic assumptions can be found on our [Security
+Model][security-model] page. With default parameters, this system achieves
+perfect zero-knowledgeness and 98 bits of conjectured security. Our STARK
+protocol is described in [Scalable, Transparent Arguments of RISC-V
+Integrity][proof-system-in-detail], and a soundness/security calculator is
+included in the [soundness.rs][soundness.rs] file.
 
-To run the calculator, use `RUST_LOG=risc0_zkp=info cargo run --release`.
+To run the calculator, use `RUST_LOG=risc0_zkp=debug` when running a proof.
 
 ## Getting Started
 

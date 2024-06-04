@@ -30,9 +30,9 @@ use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::{Digest, Sha256},
-    ReceiptClaim,
+    Assumption, ReceiptClaim,
 };
-use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
+use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
 use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
@@ -146,6 +146,12 @@ fn main() {
                 input_len = input.len();
             }
         }
+        MultiTestSpec::SyscallWords => {
+            let input: &[u64] = &[0x0102030405060708];
+
+            let host_data = env::send_recv_slice::<u64, u32>(SYS_MULTI_TEST_WORDS, &input);
+            assert_eq!(host_data, &[0x05060708, 0x01020304]);
+        }
         MultiTestSpec::DoRandom => {
             // Test random number generation in the zkvm
             // Test for a combination of lengths and data alignments to make sure all cases
@@ -187,7 +193,12 @@ fn main() {
         }
         MultiTestSpec::SysVerifyIntegrity { claim_words } => {
             let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
-            env::verify_integrity(&claim).unwrap();
+            // NOTE: This panic string is used in a test.
+            env::verify_integrity(&claim).expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::SysVerifyAssumption { assumption_words } => {
+            let assumption: Assumption = risc0_zkvm::serde::from_slice(&assumption_words).unwrap();
+            env::verify_assumption(assumption.claim, assumption.control_root).unwrap();
         }
         MultiTestSpec::Echo { bytes } => {
             env::commit_slice(&bytes);

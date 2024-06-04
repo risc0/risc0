@@ -65,6 +65,50 @@ pub struct ReceiptClaim {
 }
 
 impl ReceiptClaim {
+    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded normally (i.e.
+    /// Halted(0)) with the given image ID and journal.
+    pub fn ok(
+        image_id: impl Into<Digest>,
+        journal: impl Into<MaybePruned<Vec<u8>>>,
+    ) -> ReceiptClaim {
+        Self {
+            pre: MaybePruned::Pruned(image_id.into()),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: journal.into(),
+                assumptions: MaybePruned::Pruned(Digest::ZERO),
+            })
+            .into(),
+        }
+    }
+
+    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded in a normal paused
+    /// state (i.e. Paused(0)) with the given image ID and journal.
+    pub fn paused(
+        image_id: impl Into<Digest>,
+        journal: impl Into<MaybePruned<Vec<u8>>>,
+    ) -> ReceiptClaim {
+        Self {
+            pre: MaybePruned::Pruned(image_id.into()),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::Paused(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: journal.into(),
+                assumptions: MaybePruned::Pruned(Digest::ZERO),
+            })
+            .into(),
+        }
+    }
+
     /// Decode a [ReceiptClaim] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
         let input = read_sha_halfs(flat)?;
@@ -151,13 +195,28 @@ impl From<InvalidExitCodeError> for DecodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
 
-/// Private never type, similar to !
-/// https://doc.rust-lang.org/std/primitive.never.html
+/// A type representing an unknown claim type.
+///
+/// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
+/// only the digest of the claim is needed, and the full claim value is cannot be determined by the
+/// compiler. This allows for a collection of receipts to be created even when the underlying
+/// claims are of heterogeneous types (e.g. Vec<SuccinctReceipt<Unknown>>).
+///
+/// Note that this in an uninhabited type, simmilar to the [never type].
+///
+/// [never type]: https://doc.rust-lang.org/std/primitive.never.html
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub(crate) enum Never {}
+pub enum Unknown {}
+
+impl Digestible for Unknown {
+    fn digest<S: Sha256>(&self) -> Digest {
+        match *self { /* unreachable  */ }
+    }
+}
 
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
+///
 /// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
 /// is accessible. It may become inhabited in a future release.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -166,11 +225,11 @@ pub struct Input {
     // Private field to ensure this type cannot be constructed.
     // By making this type uninhabited, it can be populated later without breaking backwards
     // compatibility.
-    pub(crate) x: Never,
+    pub(crate) x: Unknown,
 }
 
 impl Digestible for Input {
-    /// Hash the [Output] to get a digest of the struct.
+    /// Hash the [Input] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         match self.x { /* unreachable  */ }
     }
@@ -205,14 +264,49 @@ impl Digestible for Output {
     }
 }
 
-/// A list of assumptions, each a [Digest] of a [ReceiptClaim].
+/// An [assumption] made in the course of proving program execution.
+///
+/// Assumptions are generated when the guest makes a recursive verification call. Each assumption
+/// commits the statement, such that only a receipt proving that statement can be used to resolve
+/// and remove the assumption.
+///
+/// [assumption]: https://dev.risczero.com/terminology#assumption
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Assumption {
+    /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
+    /// be the digest of the claim for a different circuit such as an accelerator.
+    pub claim: Digest,
+
+    /// Commitment to the set of [recursion programs] that can be used to resolve this assumption.
+    ///
+    /// Binding the set of recursion programs also binds the circuits, and creates an assumption
+    /// resolved by independent set of circuits (e.g. keccak or Groth16 verify). Proofs of these
+    /// external claims are verified by a "lift" program implemented for the recursion VM which
+    /// brings the claim into the recursion system. This lift program is committed to in the
+    /// control root.
+    ///
+    /// A special value of all zeroes indicates "self-composition", where the control root used to
+    /// verify this claim is also used to verify the assumption.
+    ///
+    /// [recursion programs]: https://dev.risczero.com/terminology#recursion-program
+    pub control_root: Digest,
+}
+
+impl Digestible for Assumption {
+    /// Hash the [Assumption] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>("risc0.Assumption", &[self.claim, self.control_root], &[])
+    }
+}
+
+/// A list of assumptions, each a [Digest] or populated value of an [Assumption].
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Assumptions(pub Vec<MaybePruned<ReceiptClaim>>);
+pub struct Assumptions(pub Vec<MaybePruned<Assumption>>);
 
 impl Assumptions {
     /// Add an assumption to the head of the assumptions list.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
+    pub fn add(&mut self, assumption: MaybePruned<Assumption>) {
         self.0.insert(0, assumption);
     }
 
@@ -239,7 +333,7 @@ impl Assumptions {
 }
 
 impl Deref for Assumptions {
-    type Target = [MaybePruned<ReceiptClaim>];
+    type Target = [MaybePruned<Assumption>];
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -268,7 +362,7 @@ impl MaybePruned<Assumptions> {
     /// Add an assumption to the head of the assumptions list.
     ///
     /// If this value is pruned, then the result will also be a pruned value.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
+    pub fn add(&mut self, assumption: MaybePruned<Assumption>) {
         match self {
             MaybePruned::Value(list) => list.add(assumption),
             MaybePruned::Pruned(list_digest) => {
@@ -305,6 +399,24 @@ impl MaybePruned<Assumptions> {
                 Ok(())
             }
         }
+    }
+}
+
+impl From<Vec<MaybePruned<Assumption>>> for Assumptions {
+    fn from(value: Vec<MaybePruned<Assumption>>) -> Self {
+        Self(value)
+    }
+}
+
+impl From<Vec<Assumption>> for Assumptions {
+    fn from(value: Vec<Assumption>) -> Self {
+        Self(value.into_iter().map(Into::into).collect())
+    }
+}
+
+impl From<Vec<Assumption>> for MaybePruned<Assumptions> {
+    fn from(value: Vec<Assumption>) -> Self {
+        Self::Value(value.into())
     }
 }
 
@@ -461,6 +573,13 @@ impl std::error::Error for PrunedValueError {}
 pub(crate) trait Merge: Digestible + Sized {
     /// Merge two structs to produce an output with a union of the fields populated in the inputs.
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError>;
+
+    /// Merge two structs to assigning self as the union of the fields populated in the two inputs.
+    fn merge_with(&mut self, other: &Self) -> Result<(), MergeInequalityError> {
+        // Not an very efficient implementation.
+        *self = self.merge(other)?;
+        Ok(())
+    }
 }
 
 /// Error returned when a merge it attempted with two values with unequal digests.
@@ -485,6 +604,7 @@ impl std::error::Error for MergeInequalityError {}
 trait MergeLeaf: Digestible + PartialEq + Clone + Sized {}
 
 impl MergeLeaf for SystemState {}
+impl MergeLeaf for Assumption {}
 impl MergeLeaf for Vec<u8> {}
 
 impl<T: MergeLeaf> Merge for T {

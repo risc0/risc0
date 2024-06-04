@@ -25,8 +25,8 @@ use super::{
 use crate::{
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path},
-    receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts,
+    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -183,7 +183,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -225,7 +225,7 @@ impl Client {
         left_receipt: Asset,
         right_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -270,7 +270,7 @@ impl Client {
         conditional_receipt: Asset,
         assumption_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -315,7 +315,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -339,6 +339,50 @@ impl Client {
                 receipt_pb.try_into()
             }
             pb::api::identity_p254_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
+    ///
+    /// The identity_p254 program is used as the last step in the prover pipeline before running the
+    /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
+    /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
+    pub fn compress(
+        &self,
+        opts: &ProverOpts,
+        receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<Receipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Compress(
+                pb::api::CompressRequest {
+                    opts: Some(opts.clone().into()),
+                    receipt: Some(receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::CompressReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::compress_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::Receipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::compress_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -411,20 +455,20 @@ impl Client {
                 .iter()
                 .map(|a| {
                     Ok(match a {
-                        Assumption::Proven(receipt) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Proven(
+                        AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
-                                    pb::core::Receipt::from(receipt.clone())
+                                    pb::core::InnerReceipt::from(inner.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )
                                 .try_into()?,
                             )),
                         },
-                        Assumption::Unresolved(claim) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Unresolved(
+                        AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::MaybePruned::from(claim.clone())
+                                    pb::core::Assumption::from(assumption.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )

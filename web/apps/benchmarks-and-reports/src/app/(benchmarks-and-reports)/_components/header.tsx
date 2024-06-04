@@ -19,7 +19,7 @@ export function Header() {
 
           <ThemeToggle />
 
-          <Link tabIndex={-1} target="_blank" href="https://github.com/risc0/risc0/">
+          <Link rel="noopener noreferrer" tabIndex={-1} target="_blank" href="https://github.com/risc0/risc0/">
             <Button variant="outline" size="sm" className="hidden sm:flex" startIcon={<GithubIcon />}>
               GitHub
             </Button>
