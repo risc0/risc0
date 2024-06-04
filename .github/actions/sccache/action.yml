@@ -89,20 +89,6 @@ runs:
         sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
         use-fallback: false
 
-    - name: (External PR) Install AWS Signer (Linux)
-      if: >
-        runner.os == 'Linux' &&
-        github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name &&
-        runner.environment == 'self-hosted' &&
-        startsWith(runner.name, 'i-') != true
-      env:
-        LINUX_SIGNER_URL: https://rolesanywhere.amazonaws.com/releases/1.1.1/X86_64/Linux/aws_signing_helper
-      run: |
-        mkdir -p $HOME/.local/aws
-        curl $LINUX_SIGNER_URL -o $HOME/.local/aws/aws_signing_helper
-        chmod +x $HOME/.local/aws/aws_signing_helper
-      shell: bash
-
     - name: (External PR) Install AWS Signer (macOS)
       if: >
         runner.os == 'macOS' &&
@@ -127,6 +113,6 @@ runs:
         ROLE_ARN: arn:aws:iam::083632199359:role/gha_instance_risc0_cache_access
         IAM_RA_PATH: ../../_aws
       run: |
-        aws configure set credential_process "$HOME/.local/aws/aws_signing_helper credential-process --trust-anchor-arn $TRUST_ANCHOR_ARN --profile-arn $PROFILE_ARN --role-arn $ROLE_ARN --certificate $IAM_RA_PATH/certificate.pem --private-key $IAM_RA_PATH/runner_key.pem" --profile default
+        aws configure set credential_process "$IAM_RA_PATH/aws_signing_helper credential-process --trust-anchor-arn $TRUST_ANCHOR_ARN --profile-arn $PROFILE_ARN --role-arn $ROLE_ARN --certificate $IAM_RA_PATH/certificate.pem --private-key $IAM_RA_PATH/runner_key.pem" --profile default
         echo "##vso[task.setvariable variable=AWS_SDK_LOAD_CONFIG;]1"
       shell: bash
