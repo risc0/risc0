@@ -113,8 +113,8 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [ethSTARK documentation]: https://eprint.iacr.org/2021/582
 [deterministically]: /terminology#deterministic-builds
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
-[receipt claim]: /terminology#receipt-claim
 [proof-system]: pathname:///proof-system-in-detail.pdf
+[receipt claim]: /terminology#receipt-claim
 [RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
