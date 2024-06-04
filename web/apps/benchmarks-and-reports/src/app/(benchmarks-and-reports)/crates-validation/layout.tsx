@@ -13,7 +13,12 @@ export default function CratesIoValidationLayout({ children }) {
           <h1 className="title-sm">Crates.io Validation</h1>
           <p className="text-muted-foreground text-sm">
             Each night, we test compatibility between each of the{" "}
-            <Link href="https://crates.io/crates?sort=downloads" target="_blank" className="link">
+            <Link
+              rel="noopener noreferrer"
+              href="https://crates.io/crates?sort=downloads"
+              target="_blank"
+              className="link"
+            >
               top 1000 Rust crates
             </Link>{" "}
             and the RISC Zero zkVM

@@ -1,26 +1,20 @@
 import "server-only";
 
-import { unstable_noStore as noStore } from "next/cache";
-import env from "~/env";
+import { tryFetch } from "shared/utils/try-fetch";
+import type { Version } from "~/types/version";
 
-export async function fetchDatasheet({ version, url }: { version: string; url: string }) {
-  noStore();
-
-  return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`, {
-    headers: {
-      Accept: "application/vnd.github.v3.raw",
+export async function fetchDatasheet({ version, url }: { version: Version; url: string }) {
+  const [error, response] = await tryFetch(
+    `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`,
+    {
+      next: { revalidate: 180 }, // 3 minutes cache
     },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Error fetching ${url}: ${response.statusText}`);
-      }
+  );
 
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(`Failed fetching ${url}:`, error.message);
+  // error handling
+  if (error || !response.ok) {
+    throw error || new Error("Failed to fetch");
+  }
 
-      return null; // Handle individual failures gracefully
-    });
+  return await response.json();
 }

@@ -5,10 +5,6 @@ import { findMostRecentHash } from "../_actions/find-most-recent-hash";
 export async function CratesIoValidationHashButton() {
   const hash = await findMostRecentHash();
 
-  if (!hash) {
-    return null;
-  }
-
   return (
     <CopyButton size="sm" variant="ghost" value={hash}>
       Commit Hash<span className="hidden sm:inline">: {truncate(hash, 15)}</span>

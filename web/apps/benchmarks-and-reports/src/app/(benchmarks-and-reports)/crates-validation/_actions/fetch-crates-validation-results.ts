@@ -1,21 +1,22 @@
 import "server-only";
 
-import env from "~/env";
+import { tryFetch } from "shared/utils/try-fetch";
 import type { CratesIoValidationTableSchema } from "../_components/crates-io-validation-table-schema";
 
 export async function fetchCratesValidationResults({
   hash,
 }: { hash: string }): Promise<CratesIoValidationTableSchema[]> {
-  const response = await fetch(
+  const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
     {
-      headers: {
-        Accept: "application/vnd.github.v3.raw",
-      },
-      next: { revalidate: 900 },
+      next: { revalidate: 180 }, // 3 minutes cache
     },
   );
-  const responseJson = await response.json();
 
-  return responseJson;
+  // error handling
+  if (error || !response.ok) {
+    throw error || new Error("Failed to fetch");
+  }
+
+  return await response.json();
 }
