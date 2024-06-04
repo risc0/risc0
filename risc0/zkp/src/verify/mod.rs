@@ -395,7 +395,7 @@ where
             return Err(VerificationError::InvalidProof);
         }
 
-        // Set the mix mix value, pseudorandom value used for FRI batching
+        // Set the mix value, pseudorandom value used for FRI batching
         let mix = iop.random_ext_elem();
         // tracing::debug!("mix = {mix:?}");
 
