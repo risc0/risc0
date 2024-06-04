@@ -31,6 +31,7 @@ def modify_dependency(details, new_path, start_directory):
         details.pop('version', None)
         details.pop('git', None)
         details.pop('rev', None)
+        details.pop('tag', None)
         details.pop('branch', None)
     return details
 
