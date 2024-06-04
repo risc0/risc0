@@ -120,8 +120,8 @@ export default async function createConfigAsync() {
       ({
         image: "img/logo.png",
         navbar: {
+          title: "RISC Zero",
           logo: {
-            title: "RISC Zero",
             alt: "RISC Zero Logo",
             src: "img/logo.png",
             href: "https://risczero.com/",
