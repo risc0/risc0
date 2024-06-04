@@ -147,9 +147,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.83"
+version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25bdb32cbbdce2b519a9cd7df3a678443100e265d5e25ca763b7572a5104f5f3"
+checksum = "b3d1d046238990b9cf5bcde22a3fb3584ee5cf65fb2765f454ed428c7a0063da"
 dependencies = [
  "backtrace",
 ]
@@ -885,8 +885,8 @@ dependencies = [
  "hex",
  "regex",
  "reqwest 0.11.27",
- "reqwest-middleware",
- "reqwest-retry",
+ "reqwest-middleware 0.2.5",
+ "reqwest-retry 0.4.0",
  "risc0-binfmt",
  "risc0-build",
  "risc0-r0vm",
@@ -3554,6 +3554,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "reqwest-middleware"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a45d100244a467870f6cb763c4484d010a6bed6bd610b3676e3825d93fb4cfbd"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "http 1.1.0",
+ "reqwest 0.12.4",
+ "serde",
+ "thiserror",
+ "tower-service",
+]
+
+[[package]]
 name = "reqwest-retry"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3568,9 +3583,31 @@ dependencies = [
  "hyper 0.14.28",
  "parking_lot 0.11.2",
  "reqwest 0.11.27",
- "reqwest-middleware",
+ "reqwest-middleware 0.2.5",
  "retry-policies",
  "task-local-extensions",
+ "tokio",
+ "tracing",
+ "wasm-timer",
+]
+
+[[package]]
+name = "reqwest-retry"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "40f342894422862af74c50e1e9601cf0931accc9c6981e5eb413c46603b616b5"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "futures",
+ "getrandom",
+ "http 1.1.0",
+ "hyper 1.3.1",
+ "parking_lot 0.11.2",
+ "reqwest 0.12.4",
+ "reqwest-middleware 0.3.1",
+ "retry-policies",
  "tokio",
  "tracing",
  "wasm-timer",
@@ -4045,6 +4082,26 @@ name = "ryu"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
+
+[[package]]
+name = "rzup"
+version = "1.0.0-rc.5"
+dependencies = [
+ "anyhow",
+ "clap",
+ "dirs",
+ "downloader",
+ "flate2",
+ "reqwest 0.11.27",
+ "reqwest-middleware 0.3.1",
+ "reqwest-retry 0.5.0",
+ "serde",
+ "serde_json",
+ "tar",
+ "tempfile",
+ "tokio",
+ "xz",
+]
 
 [[package]]
 name = "same-file"
