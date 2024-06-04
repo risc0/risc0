@@ -17,3 +17,4 @@ tmp/
 *.pb
 tools/smoke-test/Cargo.lock
 compile_commands.json
+.vercel

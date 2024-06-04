@@ -7,11 +7,12 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dia
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Highlight, themes } from "prism-react-renderer";
 import { TableColumnHeader } from "shared/client/table/table-column-header";
 import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
+const Highlight = dynamic(() => import("prism-react-renderer").then((mod) => mod.Highlight), { ssr: false });
 const columnHelper = createColumnHelper<CratesIoValidationTableSchema>();
 
 export const cratesIoValidationTableColumns = [
@@ -20,7 +21,7 @@ export const cratesIoValidationTableColumns = [
     cell: (info) => (
       <div className="font-mono text-xs">
         <Link
-          className="link"
+          className="link text-primary"
           href={`https://crates.io/crates/${info.row.original.name}${
             info.row.original.version ? `/${info.row.original.version}` : ""
           }`}
@@ -106,10 +107,13 @@ export const cratesIoValidationTableColumns = [
             </Badge>
           </DialogTrigger>
 
-          <DialogContent className="max-h-full max-w-screen-3xl">
+          <DialogContent className="dark max-h-full max-w-screen-3xl text-white">
             <DialogTitle>Build Errors for {info.row.original.name}</DialogTitle>
-            <div className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit">
-              <Highlight theme={themes.shadesOfPurple} code={info.row.original.build_errors} language="rust">
+            <div
+              style={{ colorScheme: "dark" }}
+              className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit"
+            >
+              <Highlight code={info.row.original.build_errors} language="rust">
                 {({ className, tokens, getLineProps, getTokenProps }) => (
                   <pre className={cn(className, "text-xs")}>
                     {tokens.map((line, index) => (
