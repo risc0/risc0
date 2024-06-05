@@ -141,16 +141,41 @@ mod cli {
     }
 
     mod utils {
-        // pub struct ExitCode(pub i32);
+        use anyhow::{bail, Result};
+        use std::path::PathBuf;
+
+        pub fn risc0_data() -> Result<PathBuf> {
+            let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+                dir.into()
+            } else if let Some(home) = dirs::home_dir() {
+                home.join(".rzup")
+            } else {
+                bail!("Could not determine rzup directory. Set RISC0_DATA_DIR env var.");
+            };
+
+            Ok(dir)
+        }
     }
 
+    #[allow(dead_code)]
     mod dist {
 
-        use anyhow::Result;
-        use downloader::Downloader;
+        use anyhow::{bail, Context, Result};
+        use clap::Parser;
+        use downloader::{Download, Downloader};
+        use flate2::bufread::GzDecoder;
+        use fs_extra::dir::CopyOptions;
         use reqwest::{header::HeaderMap, Client};
+        use serde::Deserialize;
+        use std::fs::File;
+        use std::io::BufReader;
         use std::path::{Path, PathBuf};
+        use std::process::Command;
+        use tar::Archive;
         use tempfile::tempdir;
+        use xz::read::XzDecoder;
+
+        use crate::cli::utils::risc0_data;
 
         enum ToolchainRepo {
             Rust,
@@ -164,117 +189,296 @@ mod cli {
                     Self::Cpp => "https://github.com/risc0/toolchain.git",
                 }
             }
+
+            pub fn asset_name(&self, target: &str) -> String {
+                match self {
+                    Self::Rust => format!("rust-toolchain-{target}.tar.gz"),
+                    Self::Cpp => match target {
+                        "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.xz".to_string(),
+                        "x86_64-unknown-linux-gnu" => "riscv32im-linux-x86_64.tar.xz".to_string(),
+                        _ => panic!("binaries for {target} are not available"),
+                    },
+                }
+            }
+
+            pub const fn language(&self) -> &str {
+                match self {
+                    Self::Rust => "rust",
+                    Self::Cpp => "cpp",
+                }
+            }
         }
 
-        async fn _download_toolchain(
-            _target: &str,
-            _toolchains_root_dir: &Path,
-            _repo: &ToolchainRepo,
-        ) -> Result<PathBuf> {
-            let headers = HeaderMap::new();
-            let client = Client::builder()
-                .default_headers(headers)
-                .user_agent("rzup")
-                .build()?;
-
-            let temp_dir = tempdir()?;
-
-            let mut _dl = Downloader::builder()
-                .download_folder(temp_dir.path())
-                .build_with_client(client.clone())?;
-
-            todo!()
+        #[derive(Clone, Debug)]
+        pub struct CppToolchain {
+            pub path: PathBuf,
         }
 
-        async fn get_download_url(
-            _client: &Client,
-            _target: &str,
-            version: &str,
-            repo: &ToolchainRepo,
-        ) -> Result<(String, String)> {
-            let tag = match repo {
-                ToolchainRepo::Rust => format!("tags/{}", version),
-                ToolchainRepo::Cpp => "tags/2024.01.05".to_string(),
-            };
+        impl CppToolchain {
+            fn get_subdir(path: &Path) -> Result<PathBuf> {
+                let sub_dir: Vec<std::result::Result<std::fs::DirEntry, std::io::Error>> =
+                    std::fs::read_dir(path)?.into_iter().collect();
+                if sub_dir.len() != 1 {
+                    bail!(
+                        "Expected {} to only have 1 subdirectory, found {}",
+                        path.display(),
+                        sub_dir.len()
+                    );
+                }
+                let entry = sub_dir[0].as_ref().unwrap();
+                Ok(entry.path())
+            }
 
-            let repo_name = repo
-                .url()
-                .trim_start_matches("https://github.com/")
-                .trim_end_matches(".git");
+            pub fn link(path: &Path) -> Result<Self> {
+                let cpp_download_dir = Self::get_subdir(path)?;
+                let r0_data = risc0_data()?;
+                fs_extra::dir::copy(
+                    cpp_download_dir.clone(),
+                    &r0_data,
+                    &CopyOptions::new().overwrite(true).copy_inside(true),
+                )?;
 
-            let release_url = format!("https://api.github.com/repos/{repo_name}/releases/{tag}");
+                let cpp_install_dir = &r0_data.join("cpp");
+                if cpp_install_dir.exists() {
+                    std::fs::remove_dir_all(cpp_install_dir)?;
+                }
+                std::fs::rename(
+                    r0_data.join(cpp_download_dir.file_name().unwrap()),
+                    cpp_install_dir,
+                )?;
 
-            eprintln!("Getting release info: {release_url}...");
-            todo!()
+                Ok(Self {
+                    path: cpp_install_dir.into(),
+                })
+            }
         }
 
-        // use crate::cli::utils;
-        // use anyhow::Result;
-        // use downloader::{Download, Downloader};
-        // use flate2::read::GzDecoder;
-        // use std::fs;
-        // use std::fs::File;
-        // use tar::Archive;
-        // use tempfile::tempdir;
-        //
-        // pub async fn _install(opts: &crate::cli::rzup_mode::UpdateOpts) -> Result<utils::ExitCode> {
-        //     if opts.install_cargo_risczero {
-        //         let cargo_risczero_url = format!(
-        //             "https://github.com/risc0/risc0/releases/download/{}/cargo-risczero-{}.tgz",
-        //             opts.toolchain[0], opts.toolchain[0]
-        //         );
-        //
-        //         _download_and_extract(&cargo_risczero_url).await?;
-        //     }
-        //
-        //     for toolchain in &opts.toolchain {
-        //         let url = format!(
-        //             "https://github.com/risc0/risc0/releases/download/{}/{}.tgz",
-        //             toolchain, toolchain
-        //         );
-        //
-        //         _download_and_extract(&url).await?;
-        //     }
-        //
-        //     Ok(utils::ExitCode(0))
-        // }
-        //
-        // async fn _download_and_extract(url: &str) -> Result<utils::ExitCode> {
-        //     let tmp_dir = tempdir()?;
-        //
-        //     let file_path = tmp_dir.path().join("r0_downloaded.tgz");
-        //
-        //     let mut downloader = Downloader::builder()
-        //         .download_folder(tmp_dir.path())
-        //         .build()?;
-        //
-        //     let _ = downloader
-        //         .download(&[Download::new(url)])
-        //         .map_err(|_| utils::ExitCode(1));
-        //
-        //     let tar_gz = File::open(&file_path)?;
-        //     let tar = GzDecoder::new(tar_gz);
-        //     let mut archive = Archive::new(tar);
-        //
-        //     let home_dir =
-        //         dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Could not find home dir"))?;
-        //     let cargo_bin_dir = home_dir.join(".cargo/bin");
-        //
-        //     fs::create_dir_all(&cargo_bin_dir)?;
-        //
-        //     for entry in archive.entries()? {
-        //         let mut entry = entry?;
-        //         let path = entry.path()?;
-        //         let dest_path = cargo_bin_dir.join(
-        //             path.file_name()
-        //                 .ok_or_else(|| anyhow::anyhow!("Invalid file name"))?,
-        //         );
-        //         entry.unpack(dest_path)?;
-        //     }
-        //
-        //     println!("Installed to {}", cargo_bin_dir.display());
-        //
-        //     Ok(utils::ExitCode(0))
-        // }
+        #[derive(Clone, Debug)]
+        pub struct RustupToolchain {
+            pub path: PathBuf,
+            pub name: String,
+        }
+
+        impl RustupToolchain {
+            fn find_by_name(name: &str) -> Result<Option<Self>, anyhow::Error> {
+                let out = Command::new("rustup")
+                    .args(["toolchain", "list", "--verbose"])
+                    .output()
+                    .expect("failed to run rustup");
+                let path_raw = out
+                    .stdout
+                    .lines()
+                    .find(|line| line.trim().starts_with(name))
+                    .and_then(|line| line.strip_prefix(name))
+                    .map(|line| line.trim());
+            }
+        }
+
+        /// Release returned by Github API.
+        #[derive(Deserialize)]
+        struct GithubReleaseData {
+            assets: Vec<GithubAsset>,
+            tag_name: String,
+        }
+
+        /// Release asset returned by Github API.
+        #[derive(Deserialize)]
+        struct GithubAsset {
+            browser_download_url: String,
+            name: String,
+        }
+
+        #[derive(Parser)]
+        struct InstallToolchain {
+            #[arg(long)]
+            version: Option<String>,
+        }
+
+        impl InstallToolchain {
+            async fn get_download_url(
+                &self,
+                client: &Client,
+                target: &str,
+                repo: &ToolchainRepo,
+            ) -> Result<(String, String)> {
+                let tag = match repo {
+                    ToolchainRepo::Rust => self
+                        .version
+                        .clone()
+                        .map_or("latest".to_string(), |tag| format!("tags/{tag}")),
+                    ToolchainRepo::Cpp => "tags/2024.01.05".to_string(),
+                };
+
+                let repo_name = repo
+                    .url()
+                    .trim_start_matches("https://github.com/")
+                    .trim_end_matches(".git");
+
+                let release_url =
+                    format!("https://api.github.com/repos/{repo_name}/releases/{tag}");
+
+                eprintln!("Getting release info: {release_url}...");
+
+                let release: GithubReleaseData = client
+                    .get(&release_url)
+                    .send()
+                    .await?
+                    .error_for_status()
+                    .context(format!("Could not download release info"))?
+                    .json()
+                    .await
+                    .context("could not deserialize release info")?;
+
+                let asset_name = repo.asset_name(target);
+
+                let asset = release
+                    .assets
+                    .iter()
+                    .find(|asset| asset.name == asset_name)
+                    .with_context(|| {
+                        format!(
+                            "Release {} does not have a prebuilt toolchain for host {}",
+                            release.tag_name, target
+                        )
+                    })?;
+
+                Ok((release.tag_name, asset.browser_download_url.clone()))
+            }
+
+            fn download_toolchain(
+                &self,
+                target: &str,
+                toolchain_root_dir: &Path,
+                repo: &ToolchainRepo,
+            ) -> Result<PathBuf> {
+                // TODO: Add github access token to avoid rate limiting
+                let headers = HeaderMap::new();
+
+                let client = Client::builder()
+                    .default_headers(headers)
+                    .user_agent("rzup")
+                    .build()?;
+
+                let temp_dir = tempdir()?;
+
+                let mut downloader = Downloader::builder()
+                    .download_folder(temp_dir.path())
+                    .build_with_client(client.clone())?;
+
+                let rt = tokio::runtime::Runtime::new()?;
+
+                let (tag_name, download_url) =
+                    rt.block_on(self.get_download_url(&client, target, repo))?;
+
+                let toolchain_dir =
+                    toolchain_root_dir.join(format!("{}_{target}_{}", repo.language(), tag_name));
+
+                // TODO: Check about deleting toolchains
+                if toolchain_dir.is_dir() {
+                    eprintln!(
+                        "Toolchain path {} already exists - deleting existing files!",
+                        toolchain_dir.display()
+                    );
+                    std::fs::remove_dir_all(&toolchain_dir)?;
+                }
+
+                // Download the toolchain
+                eprintln!(
+                    "Downloading {} toolchain from '{}'...",
+                    repo.language(),
+                    &download_url
+                );
+
+                let dl = Download::new(&download_url);
+                let download_res = downloader.download(&[dl])?;
+
+                for res in download_res {
+                    let summary = res.context(format!("Download failed."))?;
+                    let tarball = File::open(summary.file_name)?;
+
+                    eprintln!("Extracting toolchain...");
+
+                    match repo {
+                        ToolchainRepo::Rust => {
+                            let decoder = GzDecoder::new(BufReader::new(tarball));
+                            let mut archive = Archive::new(decoder);
+                            archive.unpack(toolchain_dir.clone())?;
+                        }
+                        ToolchainRepo::Cpp => {
+                            let decoder = XzDecoder::new(BufReader::new(tarball));
+                            let mut archive = Archive::new(decoder);
+                            archive.unpack(toolchain_dir.clone())?;
+                        }
+                    }
+                }
+
+                Ok(toolchain_dir)
+            }
+
+            fn download_toolchains(
+                &self,
+                target: &str,
+                toolchains_root_dir: &Path,
+            ) -> Result<(PathBuf, PathBuf)> {
+                let cpp_toolchain_dir =
+                    self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::Cpp)?;
+                eprintln!(
+                    "Downloaded C++ toolchain to {}",
+                    cpp_toolchain_dir.display()
+                );
+
+                let rust_toolchain_dir =
+                    self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::Rust)?;
+
+                let rust_dir = rust_toolchain_dir.clone();
+
+                #[cfg(target_family = "unix")]
+                {
+                    use std::os::unix::fs::PermissionsExt;
+
+                    let iter1 = std::fs::read_dir(rust_dir.join("bin"))?;
+                    let iter2 =
+                        std::fs::read_dir(rust_dir.join(format!("lib/rustlib/{target}/bin")))?;
+
+                    // make executable
+                    for res in iter1.chain(iter2) {
+                        let entry = res?;
+                        if entry.file_type()?.is_file() {
+                            let mut perms = entry.metadata()?.permissions();
+                            perms.set_mode(0o755);
+                            std::fs::set_permissions(entry.path(), perms)?;
+                        }
+                    }
+                }
+
+                eprintln!(
+                    "Downloaded Rust toolchain to {}",
+                    rust_toolchain_dir.display()
+                );
+
+                Ok((rust_toolchain_dir, cpp_toolchain_dir))
+            }
+
+            fn install_prebuilt_toolchains(
+                &self,
+                toolchain_dir: &Path,
+            ) -> Result<(RustupToolchain, CppToolchain)> {
+                if let Some(target) = guess_host_target() {
+                    match self.download_toolchains(target, toolchain_dir) {
+                        Ok((rust_path, cpp_path)) => {
+                            let rust = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
+                            let cpp = CppToolchain::link(&cpp_path)?;
+                            Ok((rust, cpp))
+                        }
+                        Err(err) => {
+                            eprintln!("Could not download pre-built toolchains: {err:?}");
+                            Err(err.context("Download of pre-built toolchain failed"))
+                        }
+                    }
+                } else {
+                    bail!("The risc0 toolchain is not available for download on this platform. Build it yourself with: 'cargo risczero build-toolchain'")
+                }
+            }
+        }
     }
 }
