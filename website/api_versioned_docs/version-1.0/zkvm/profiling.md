@@ -101,7 +101,7 @@ web interface.
 <!-- prettier-ignore-end -->
 
 [cycle count]: /terminology#clock-cycles
-[example-profiling]: https://github.com/risc0/risc0/tree/main/examples/profiling
+[example-profiling]: https://github.com/risc0/risc0/tree/release-1.0/examples/profiling
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [install]: ./install.md

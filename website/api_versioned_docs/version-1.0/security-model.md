@@ -104,9 +104,9 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
 [examples]: https://www.pcmag.com/news/zuckerbergs-meta-is-spending-billions-to-buy-350000-nvidia-h100-gpus
-[lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
-[join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
-[resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
+[lift]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.lift
+[join]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.join
+[resolve]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.resolve
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [execution trace]: /terminology#execution-trace
@@ -116,7 +116,7 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [proof-system]: pathname:///proof-system-in-detail.pdf
 [receipt claim]: /terminology#receipt-claim
 [RISC Zero zkVM]: ./zkvm
-[security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
+[security calculator]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkp/src/prove/soundness.rs
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [Verifier Contract]: ./blockchain-integration/contracts/verifier
