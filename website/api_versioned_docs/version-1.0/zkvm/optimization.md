@@ -508,12 +508,12 @@ below.
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [`counts`]: https://github.com/nnethercote/counts/
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
-[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.cycle_count.html
-[`env::read`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read_slice.html
-[example-ecdsa]: https://github.com/risc0/risc0/tree/release-0.21/examples/ecdsa
-[example-waldo]: https://github.com/risc0/risc0/tree/release-0.21/examples/waldo
-[Executor]: https://github.com/risc0/risc0/blob/release-0.21/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
+[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest/env/fn.cycle_count.html
+[`env::read`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest/env/fn.read.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest/env/fn.read_slice.html
+[example-ecdsa]: https://github.com/risc0/risc0/tree/release-1.0/examples/ecdsa
+[example-waldo]: https://github.com/risc0/risc0/tree/release-1.0/examples/waldo
+[Executor]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [hibernates]: https://en.wikipedia.org/wiki/Hibernation_(computing)
@@ -534,9 +534,9 @@ below.
 [RISC-V architecture]: /reference-docs/about-risc-v
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.21/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
-[snippet-password-checker]: https://github.com/risc0/risc0/blob/release-0.21/examples/password-checker/methods/guest/src/main.rs#L24
+[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
+[snippet-password-checker]: https://github.com/risc0/risc0/blob/release-1.0/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
-[waldo-merkle]: https://github.com/risc0/risc0/blob/release-0.21/examples/waldo/core/src/merkle.rs
+[waldo-merkle]: https://github.com/risc0/risc0/blob/release-1.0/examples/waldo/core/src/merkle.rs
 [x86]: https://en.wikipedia.org/wiki/X86
 [zkVM guest programs]: ./guest-code-101.md

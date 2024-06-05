@@ -99,9 +99,9 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-[lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
-[join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
-[resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
+[lift]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.ApiClient.html#method.lift
+[join]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.ApiClient.html#method.join
+[resolve]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.ApiClient.html#method.resolve
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [execution trace]: /terminology#execution-trace
