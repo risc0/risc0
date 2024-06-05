@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://risczero.com" target="_blank"><img src="website/static/img/logo.svg" height="100"></a>
+  <a href="https://risczero.com" target="_blank"><img src="website/static/img/logo.png" height="100"></a>
 </p>
 
 [![Crates.io][crates-badge]][crates-url]
