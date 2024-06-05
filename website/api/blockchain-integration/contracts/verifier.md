@@ -43,18 +43,19 @@ You can choose to use this contract or deploy your own.
 | ---------------------------------------------------------------- | -------------------------- | --------- | ---------------------------------------------------------------------- |
 | [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol@v0.9]  | [v0.9.0][release-v0.9.0]   | [Sepolia] | [0xe57255C10291771A2E14f7eb257555AE82D78302][sepolia-verifier-v0.9.0]  |
 | [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol@v0.10] | [v0.10.0][release-v0.10.0] | [Sepolia] | [0x4e9559f1fdf82dd1babdd42b4550ffdb1a1c59de][sepolia-verifier-v0.10.0] |
+| [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol@v1.0]  | [v1.0.0][release-v1.0.0]   | [Sepolia] | [0x36be51af39a2d430368ffee8c664c46d2298083d][sepolia-verifier-v1.0.0] |
 
 [EvenNumber.sol@v0.10]: https://github.com/risc0/bonsai-foundry-template/blob/release-0.10/contracts/EvenNumber.sol
 [RiscZeroVerifierRouter@v0.10]: https://github.com/risc0/risc0-ethereum/blob/release-0.10/contracts/src/RiscZeroVerifierRouter.sol
-[IRiscZeroVerifier.sol@v0.10]: https://github.com/risc0/risc0-ethereum/blob/release-0.10/contracts/src/IRiscZeroVerifier.sol
+[RiscZeroGroth16Verifier.sol@v1.0]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [RiscZeroGroth16Verifier.sol@v0.10]: https://github.com/risc0/risc0-ethereum/blob/release-0.10/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [RiscZeroGroth16Verifier.sol@v0.9]: https://github.com/risc0/risc0-ethereum/blob/release-0.9/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
-[article-groth16]: https://www.risczero.com/news/on-chain-verification
-[article-proof-composition]: https://www.risczero.com/news/proof-composition
+[release-v1.0.0]: https://github.com/risc0/risc0-ethereum/releases/tag/v1.0.0
 [release-v0.10.0]: https://github.com/risc0/risc0-ethereum/releases/tag/v0.10.0
 [release-v0.9.0]: https://github.com/risc0/risc0-ethereum/releases/tag/v0.9.0
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[sepolia-verifier-v1.0.0]: https://sepolia.etherscan.io/address/0x36be51af39a2d430368ffee8c664c46d2298083d#code
 [sepolia-verifier-v0.10.0]: https://sepolia.etherscan.io/address/0x4e9559f1fdf82dd1babdd42b4550ffdb1a1c59de#code
 [sepolia-verifier-v0.9.0]: https://sepolia.etherscan.io/address/0xe57255C10291771A2E14f7eb257555AE82D78302#code
 [crate-CompactReceipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.CompactReceipt.html
