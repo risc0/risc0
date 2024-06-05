@@ -57,6 +57,7 @@ fn build_cuda_kernels() {
             "kernels/cuda/extern.h",
             "kernels/cuda/extern.cuh",
             "kernels/cuda/kernels.h",
+            "kernels/cuda/layout.cu.inc",
         ])
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())

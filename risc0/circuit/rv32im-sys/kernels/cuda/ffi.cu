@@ -39,7 +39,7 @@ using DataReg = size_t;
 using MixReg = size_t;
 using AccumReg = size_t;
 
-#include "../../../rv32im/src/layout.cu.inc"
+#include "layout.cu.inc"
 
 } // namespace
 
