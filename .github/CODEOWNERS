@@ -1,0 +1,16 @@
+# CODEOWNERS
+
+# Note: # Order is important; the last matching pattern takes the most
+# precedence.
+
+*                                      @flaub
+
+/bonsai/                               @risc0/bonsai
+/rzup/                                 @hmrtn
+/web/                                  @nahoc
+/website/                              @pdg744
+
+/groth16_proof/groth16/                @flaub @nategraf @tzerrell
+/SECURITY.md                           @kevinnassery
+control_id.rs                          @flaub @nategraf @tzerrell
+recursion_zkr.zip                      @flaub @nategraf @tzerrell
