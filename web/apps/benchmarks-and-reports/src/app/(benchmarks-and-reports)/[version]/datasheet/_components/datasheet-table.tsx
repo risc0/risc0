@@ -60,7 +60,7 @@ export function DatasheetTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="subtitle truncate">{title}</h2>
+        <h2 className="truncate text-xl">{title}</h2>
         <TableToolbar table={table} />
       </div>
 

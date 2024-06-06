@@ -194,10 +194,11 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             ram: ram.as_device_ptr(),
             bytes: bytes.as_device_ptr(),
         };
+        // TODO: detect if device supports shared mode
         let ctx_buffer = self.hal.device.new_buffer_with_data(
             &ctx as *const AccumContext as *const c_void,
             std::mem::size_of_val(&ctx) as u64,
-            MTLResourceOptions::StorageModeManaged,
+            MTLResourceOptions::StorageModeShared,
         );
         let args = [
             KernelArg::Buffer {
