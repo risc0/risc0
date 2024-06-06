@@ -46,6 +46,7 @@ risc0-circuit-rv32im-sys = { version = "1.1.0-alpha.1", default-features = false
 risc0-core = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/core" }
 risc0-groth16 = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/groth16" }
 risc0-r0vm = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/r0vm" }
+risc0-recursion = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/recursion" }
 risc0-sys = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/sys" }
 risc0-zkp = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/zkvm" }

@@ -31,10 +31,10 @@ use test_log::test;
 
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    receipt::SuccinctReceipt, recursion::MerkleGroup, ApiClient, ApiServer, ExecutorEnv,
-    InnerReceipt, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt, SessionInfo,
-    SuccinctReceiptVerifierParameters, VerifierContext,
+    receipt::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts, Receipt,
+    ReceiptClaim, SegmentReceipt, SessionInfo, SuccinctReceiptVerifierParameters, VerifierContext,
 };
+use risc0_recursion::merkle::MerkleGroup;
 
 struct TestClientConnector {
     listener: TcpListener,

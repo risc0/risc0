@@ -24,10 +24,7 @@ use risc0_zkp::{
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use test_log::test;
 
-use super::{
-    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, prove::zkr,
-    MerkleGroup, Prover,
-};
+use super::{identity_p254, join, lift, prove::zkr, Prover};
 use crate::{
     default_prover, get_prover_server,
     receipt_claim::{MaybePruned, Unknown},
@@ -35,6 +32,10 @@ use crate::{
     sha::Digestible,
     ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session,
     SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
+};
+use risc0_recursion::{
+    merkle::MerkleGroup,
+    prove::{poseidon254_hal_pair, poseidon2_hal_pair},
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -302,7 +303,7 @@ fn test_recursion_identity_sha256() {
     let hashfn = opts.hash_suite().unwrap().hashfn;
     let sha256_control_tree = MerkleGroup::new(opts.control_ids.clone()).unwrap();
     let sha256_control_inclusion_proof = sha256_control_tree
-        .get_proof(&sha256_recursion_receipt.control_id, hashfn.as_ref())
+        .get_proof(&prover.control_id(), hashfn.as_ref())
         .unwrap();
     let sha256_control_root = sha256_control_tree.calc_root(hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {

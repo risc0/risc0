@@ -636,13 +636,10 @@ mod sys_verify {
 
     use super::get_prover_server;
     use crate::{
-        receipt_claim::Unknown,
-        recursion::{prove::zkr, MerkleGroup},
-        serde::to_vec,
-        sha::Digestible,
-        Assumption, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt,
-        SuccinctReceipt,
+        receipt_claim::Unknown, recursion::prove::zkr, serde::to_vec, sha::Digestible, Assumption,
+        ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt, SuccinctReceipt,
     };
+    use risc0_recursion::merkle::MerkleGroup;
 
     fn prove_hello_commit() -> Receipt {
         get_prover_server(&ProverOpts::fast())

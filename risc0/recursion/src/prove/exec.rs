@@ -29,7 +29,7 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 
-use super::{plonk, Program, CIRCUIT, RECURSION_PO2};
+use super::{plonk, Program, CIRCUIT};
 
 pub struct MachineContext {
     // Contents of the write-only memory
@@ -273,8 +273,7 @@ impl<'a> RecursionExecutor<'a> {
         split_points: Vec<usize>,
     ) -> Self {
         let io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
-        let po2 = RECURSION_PO2;
-        let executor = Executor::new(circuit, machine, po2, &io);
+        let executor = Executor::new(circuit, machine, zkr.po2, &io);
         Self {
             zkr,
             executor,
@@ -384,12 +383,10 @@ impl<'a> ParallelHandler<'a> {
 
         // Run the step
         let args = self.args;
+        let size = 1 << self.program.po2;
         for row in begin..end {
             self.cur_iop_body = None;
-            let ctx = CircuitStepContext {
-                size: 1 << RECURSION_PO2,
-                cycle: row,
-            };
+            let ctx = CircuitStepContext { size, cycle: row };
             CIRCUIT.step_exec(&ctx, &mut self, args).unwrap();
         }
         self

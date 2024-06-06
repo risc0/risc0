@@ -48,8 +48,7 @@ pub struct MerkleGroup {
 /// An inclusion proof for the [MerkleGroup]. Used to verify inclusion of a given recursion program
 /// in the committed set.
 #[non_exhaustive]
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(test, derive(PartialEq))]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MerkleProof {
     /// Index of the leaf for which inclusion is being proven.
     pub index: u32,
@@ -136,6 +135,14 @@ impl MerkleGroup {
 }
 
 impl MerkleProof {
+    /// Create a new MerkleProof referencing the given index using the
+    /// given chain of digests.  Callers should prefer to use a method
+    /// on MerkleGroup to generate a new MerkleProof.
+    #[doc(hidden)]
+    pub fn from_raw_proof(index: u32, digests: Vec<Digest>) -> Self {
+        Self { index, digests }
+    }
+
     /// Verify the Merkle inclusion proof against the given leaf and root.
     pub fn verify(
         &self,

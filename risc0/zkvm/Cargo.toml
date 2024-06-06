@@ -43,6 +43,7 @@ risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-groth16 = { workspace = true }
+risc0-recursion = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true, features = [
   "rust-runtime",
@@ -154,6 +155,7 @@ prove = [
   "risc0-circuit-recursion/prove",
   "risc0-circuit-rv32im/prove",
   "risc0-groth16/prove",
+  "risc0-recursion/prove",
   "risc0-zkp/prove",
   "std",
 ]

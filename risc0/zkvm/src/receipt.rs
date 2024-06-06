@@ -16,7 +16,6 @@
 
 pub(crate) mod composite;
 pub(crate) mod groth16;
-pub(crate) mod merkle;
 pub(crate) mod segment;
 pub(crate) mod succinct;
 
@@ -46,6 +45,7 @@ use crate::{
 };
 
 pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
+pub use risc0_recursion::merkle::MerkleProof;
 
 pub use self::{
     composite::{CompositeReceipt, CompositeReceiptVerifierParameters},
