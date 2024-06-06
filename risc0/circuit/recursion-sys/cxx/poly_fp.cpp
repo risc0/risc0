@@ -18930,7 +18930,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x9450 = x9449 + x7910 * x284 * poly_mix[140];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x9451 = x9450 + x8071 * x284 * poly_mix[140];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
   auto x9452 = args[2][0 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x9453 = x1159 - x9452;
@@ -18940,25 +18940,25 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x9455 = x9453 * x9454;
   // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   FpExt x9456 = x284 + x9455 * poly_mix[0];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x9457 = args[2][1 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9458 = x9457 - x1160;
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   FpExt x9459 = x284 + x9458 * poly_mix[0];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x9460 = args[2][2 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9461 = x9460 - x1168;
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   FpExt x9462 = x9459 + x9461 * poly_mix[1];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x9463 = args[2][3 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9464 = x9463 - x1169;
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   FpExt x9465 = x9462 + x9464 * poly_mix[2];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x9466 = args[2][4 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9467 = x9466 - x1177;
@@ -19148,7 +19148,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x9559 = x9557 + x9558 * poly_mix[3];
   // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   FpExt x9560 = x9551 + x9549 * x9559 * poly_mix[36];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
   auto x9561 = args[2][0 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x9562 = x9561 - x1313;
@@ -19158,25 +19158,25 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x9564 = x9562 * x9563;
   // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   FpExt x9565 = x9560 + x9564 * poly_mix[40];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x9566 = args[2][1 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9567 = x1321 - x9566;
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   FpExt x9568 = x284 + x9567 * poly_mix[0];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x9569 = args[2][2 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9570 = x1322 - x9569;
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   FpExt x9571 = x9568 + x9570 * poly_mix[1];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x9572 = args[2][3 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9573 = x1330 - x9572;
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   FpExt x9574 = x9571 + x9573 * poly_mix[2];
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x9575 = args[2][4 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x9576 = x1331 - x9575;
@@ -19562,2573 +19562,2573 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x9766 = x9765 + x7910 * x284 * poly_mix[147];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x9767 = x9766 + x8071 * x284 * poly_mix[147];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[0](FpExtReg)/elem[0](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9768 = args[3][0];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[0](FpExtReg)/elem[1](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9769 = args[3][1];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[2](FpExtReg)/elem[2](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9770 = args[3][10];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[2](FpExtReg)/elem[3](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9771 = args[3][11];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[3](FpExtReg)/elem[0](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9772 = args[3][12];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[3](FpExtReg)/elem[1](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9773 = args[3][13];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[3](FpExtReg)/elem[2](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9774 = args[3][14];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[3](FpExtReg)/elem[3](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9775 = args[3][15];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[4](FpExtReg)/elem[0](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9776 = args[3][16];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[4](FpExtReg)/elem[1](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9777 = args[3][17];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[4](FpExtReg)/elem[2](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9778 = args[3][18];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[4](FpExtReg)/elem[3](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9779 = args[3][19];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[0](FpExtReg)/elem[2](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9780 = args[3][2];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[0](FpExtReg)/elem[3](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9781 = args[3][3];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[1](FpExtReg)/elem[0](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9782 = args[3][4];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[1](FpExtReg)/elem[1](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9783 = args[3][5];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[1](FpExtReg)/elem[2](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9784 = args[3][6];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[1](FpExtReg)/elem[3](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9785 = args[3][7];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[2](FpExtReg)/elem[0](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9786 = args[3][8];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":218:23))
+  // loc("top(recursion::Top)/recursion::WomHeader/mix[2](FpExtReg)/elem[1](Reg)"("./zirgen/components/plonk.h":220:23))
   auto x9787 = args[3][9];
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9788 = x9768 * x9561;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9789 = x9768 * x332;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9790 = x9768 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9791 = x9768 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9792 = x9768 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9793 = x9768 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9794 = x9768 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9795 = x9768 * x876;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9796 = x9768 * x886;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9797 = x9768 * x322;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9798 = x9768 * x1159;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9799 = x9768 * x1178;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9800 = x9768 * x1204;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9801 = x9768 * x1223;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9802 = x9768 * x1249;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9803 = x9768 * x1268;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9804 = x9768 * x1294;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9805 = x9768 * x1313;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9806 = x9769 * x9561;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9807 = x9769 * x332;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9808 = x9769 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9809 = x9769 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9810 = x9769 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9811 = x9769 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9812 = x9769 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9813 = x9769 * x876;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9814 = x9769 * x886;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9815 = x9769 * x322;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9816 = x9769 * x1159;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9817 = x9769 * x1178;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9818 = x9769 * x1204;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9819 = x9769 * x1223;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9820 = x9769 * x1249;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9821 = x9769 * x1268;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9822 = x9769 * x1294;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9823 = x9769 * x1313;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9824 = x9770 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9825 = x9770 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9826 = x9770 * x9569;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9827 = x9770 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9828 = x9770 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9829 = x9770 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9830 = x9770 * x870;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9831 = x9770 * x880;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9832 = x9770 * x892;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9833 = x9770 * x1168;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9834 = x9770 * x1187;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9835 = x9770 * x1213;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9836 = x9770 * x1232;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9837 = x9770 * x326;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9838 = x9770 * x1258;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9839 = x9770 * x1277;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9840 = x9770 * x1303;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9841 = x9770 * x1322;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9842 = x9771 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9843 = x9771 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9844 = x9771 * x9569;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9845 = x9771 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9846 = x9771 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9847 = x9771 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9848 = x9771 * x870;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9849 = x9771 * x880;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9850 = x9771 * x892;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9851 = x9771 * x1168;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9852 = x9771 * x1187;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9853 = x9771 * x1213;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9854 = x9771 * x1232;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9855 = x9771 * x326;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9856 = x9771 * x1258;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9857 = x9771 * x1277;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9858 = x9771 * x1303;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9859 = x9771 * x1322;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9860 = x9773 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9861 = x9773 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9862 = x9773 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9863 = x9773 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9864 = x9773 * x9572;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9865 = x9773 * x623;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9866 = x9773 * x872;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9867 = x9773 * x882;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9868 = x9773 * x895;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9869 = x9773 * x1169;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9870 = x9773 * x1195;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9871 = x9773 * x1214;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9872 = x9773 * x1240;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9873 = x9773 * x1259;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9874 = x9773 * x1285;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9875 = x9773 * x328;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9876 = x9773 * x1304;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9877 = x9773 * x1330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9878 = x9774 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9879 = x9774 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9880 = x9774 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9881 = x9774 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9882 = x9774 * x9572;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9883 = x9774 * x623;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9884 = x9774 * x872;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9885 = x9774 * x882;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9886 = x9774 * x895;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9887 = x9774 * x1169;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9888 = x9774 * x1195;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9889 = x9774 * x1214;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9890 = x9774 * x1240;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9891 = x9774 * x1259;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9892 = x9774 * x1285;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9893 = x9774 * x328;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9894 = x9774 * x1304;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9895 = x9774 * x1330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9896 = x9775 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9897 = x9775 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9898 = x9775 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9899 = x9775 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9900 = x9775 * x9572;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9901 = x9775 * x623;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9902 = x9775 * x872;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9903 = x9775 * x882;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9904 = x9775 * x895;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9905 = x9775 * x1169;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9906 = x9775 * x1195;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9907 = x9775 * x1214;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9908 = x9775 * x1240;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9909 = x9775 * x1259;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9910 = x9775 * x1285;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9911 = x9775 * x328;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9912 = x9775 * x1304;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9913 = x9775 * x1330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9914 = x9777 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9915 = x9777 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9916 = x9777 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9917 = x9777 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9918 = x9777 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9919 = x9777 * x874;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9920 = x9777 * x9575;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9921 = x9777 * x884;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9922 = x9777 * x898;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9923 = x9777 * x1177;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9924 = x9777 * x1196;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9925 = x9777 * x1222;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9926 = x9777 * x1241;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9927 = x9777 * x1267;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9928 = x9777 * x1286;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9929 = x9777 * x1312;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9930 = x9777 * x1331;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9931 = x9777 * x330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9932 = x9778 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9933 = x9778 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9934 = x9778 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9935 = x9778 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9936 = x9778 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9937 = x9778 * x874;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9938 = x9778 * x9575;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9939 = x9778 * x884;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9940 = x9778 * x898;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9941 = x9778 * x1177;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9942 = x9778 * x1196;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9943 = x9778 * x1222;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9944 = x9778 * x1241;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9945 = x9778 * x1267;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9946 = x9778 * x1286;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9947 = x9778 * x1312;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9948 = x9778 * x1331;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9949 = x9778 * x330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9950 = x9779 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9951 = x9779 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9952 = x9779 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9953 = x9779 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9954 = x9779 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9955 = x9779 * x874;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9956 = x9779 * x9575;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9957 = x9779 * x884;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9958 = x9779 * x898;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9959 = x9779 * x1177;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9960 = x9779 * x1196;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9961 = x9779 * x1222;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9962 = x9779 * x1241;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9963 = x9779 * x1267;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9964 = x9779 * x1286;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9965 = x9779 * x1312;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9966 = x9779 * x1331;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9967 = x9779 * x330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9968 = x9780 * x9561;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9969 = x9780 * x332;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9970 = x9780 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9971 = x9780 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9972 = x9780 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9973 = x9780 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9974 = x9780 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9975 = x9780 * x876;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9976 = x9780 * x886;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9977 = x9780 * x322;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9978 = x9780 * x1159;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9979 = x9780 * x1178;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9980 = x9780 * x1204;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9981 = x9780 * x1223;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9982 = x9780 * x1249;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9983 = x9780 * x1268;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9984 = x9780 * x1294;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9985 = x9780 * x1313;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9986 = x9781 * x9561;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9987 = x9781 * x332;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9988 = x9781 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9989 = x9781 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9990 = x9781 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9991 = x9781 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9992 = x9781 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9993 = x9781 * x876;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9994 = x9781 * x886;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9995 = x9781 * x322;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9996 = x9781 * x1159;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9997 = x9781 * x1178;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9998 = x9781 * x1204;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x9999 = x9781 * x1223;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10000 = x9781 * x1249;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10001 = x9781 * x1268;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10002 = x9781 * x1294;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10003 = x9781 * x1313;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10004 = x9783 * x9566;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10005 = x9783 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10006 = x9783 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10007 = x9783 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10008 = x9783 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10009 = x9783 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10010 = x9783 * x868;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10011 = x9783 * x878;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10012 = x9783 * x889;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10013 = x9783 * x1160;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10014 = x9783 * x1186;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10015 = x9783 * x324;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10016 = x9783 * x1205;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10017 = x9783 * x1231;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10018 = x9783 * x1250;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10019 = x9783 * x1276;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10020 = x9783 * x1295;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10021 = x9783 * x1321;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10022 = x9784 * x9566;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10023 = x9784 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10024 = x9784 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10025 = x9784 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10026 = x9784 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10027 = x9784 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10028 = x9784 * x868;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10029 = x9784 * x878;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10030 = x9784 * x889;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10031 = x9784 * x1160;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10032 = x9784 * x1186;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10033 = x9784 * x324;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10034 = x9784 * x1205;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10035 = x9784 * x1231;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10036 = x9784 * x1250;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10037 = x9784 * x1276;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10038 = x9784 * x1295;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10039 = x9784 * x1321;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10040 = x9785 * x9566;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10041 = x9785 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10042 = x9785 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10043 = x9785 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10044 = x9785 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10045 = x9785 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10046 = x9785 * x868;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10047 = x9785 * x878;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10048 = x9785 * x889;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10049 = x9785 * x1160;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10050 = x9785 * x1186;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10051 = x9785 * x324;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10052 = x9785 * x1205;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10053 = x9785 * x1231;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10054 = x9785 * x1250;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10055 = x9785 * x1276;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10056 = x9785 * x1295;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10057 = x9785 * x1321;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10058 = x9787 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10059 = x9787 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10060 = x9787 * x9569;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10061 = x9787 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10062 = x9787 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10063 = x9787 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10064 = x9787 * x870;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10065 = x9787 * x880;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10066 = x9787 * x892;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10067 = x9787 * x1168;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10068 = x9787 * x1187;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10069 = x9787 * x1213;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10070 = x9787 * x1232;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10071 = x9787 * x326;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10072 = x9787 * x1258;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10073 = x9787 * x1277;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10074 = x9787 * x1303;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10075 = x9787 * x1322;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10076 = x9772 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10077 = x9772 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10078 = x9772 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10079 = x9772 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10080 = x9772 * x9572;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10081 = x9772 * x623;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10082 = x9772 * x872;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10083 = x9772 * x882;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10084 = x9772 * x895;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10085 = x9772 * x1169;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10086 = x9772 * x1195;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10087 = x9772 * x1214;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10088 = x9772 * x1240;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10089 = x9772 * x1259;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10090 = x9772 * x1285;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10091 = x9772 * x328;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10092 = x9772 * x1304;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10093 = x9772 * x1330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10094 = x9776 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10095 = x9776 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10096 = x9776 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10097 = x9776 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10098 = x9776 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10099 = x9776 * x874;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10100 = x9776 * x9575;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10101 = x9776 * x884;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10102 = x9776 * x898;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10103 = x9776 * x1177;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10104 = x9776 * x1196;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10105 = x9776 * x1222;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10106 = x9776 * x1241;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10107 = x9776 * x1267;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10108 = x9776 * x1286;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10109 = x9776 * x1312;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10110 = x9776 * x1331;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10111 = x9776 * x330;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10112 = x9782 * x9566;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10113 = x9782 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10114 = x9782 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10115 = x9782 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10116 = x9782 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10117 = x9782 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10118 = x9782 * x868;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10119 = x9782 * x878;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10120 = x9782 * x889;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10121 = x9782 * x1160;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10122 = x9782 * x1186;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10123 = x9782 * x324;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10124 = x9782 * x1205;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10125 = x9782 * x1231;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10126 = x9782 * x1250;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10127 = x9782 * x1276;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10128 = x9782 * x1295;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10129 = x9782 * x1321;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10130 = x9786 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10131 = x9786 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10132 = x9786 * x9569;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10133 = x9786 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10134 = x9786 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10135 = x9786 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10136 = x9786 * x870;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10137 = x9786 * x880;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10138 = x9786 * x892;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10139 = x9786 * x1168;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10140 = x9786 * x1187;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10141 = x9786 * x1213;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10142 = x9786 * x1232;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10143 = x9786 * x326;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10144 = x9786 * x1258;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10145 = x9786 * x1277;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10146 = x9786 * x1303;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x10147 = x9786 * x1322;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10148 = x9788 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10149 = x9789 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10150 = x9790 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10151 = x9791 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10152 = x9792 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10153 = x9793 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10154 = x9794 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10155 = x9795 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10156 = x9796 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10157 = x9797 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10158 = x9798 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10159 = x9799 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10160 = x9800 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10161 = x9801 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10162 = x9802 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10163 = x9803 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10164 = x9804 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10165 = x9805 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10166 = x10148 + x10112;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10167 = x10149 + x10113;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10168 = x10150 + x10114;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10169 = x10151 + x10115;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10170 = x10152 + x10116;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10171 = x10153 + x10117;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10172 = x10154 + x10118;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10173 = x10155 + x10119;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10174 = x10156 + x10120;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10175 = x10157 + x10123;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10176 = x10158 + x10121;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10177 = x10159 + x10122;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10178 = x10160 + x10124;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10179 = x10161 + x10125;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10180 = x10162 + x10126;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10181 = x10163 + x10127;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10182 = x10164 + x10128;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10183 = x10165 + x10129;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10184 = x10166 + x10132;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10185 = x10167 + x10130;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10186 = x10168 + x10131;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10187 = x10169 + x10133;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10188 = x10170 + x10134;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10189 = x10171 + x10135;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10190 = x10172 + x10136;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10191 = x10173 + x10137;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10192 = x10174 + x10138;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10193 = x10175 + x10143;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10194 = x10176 + x10139;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10195 = x10177 + x10140;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10196 = x10178 + x10141;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10197 = x10179 + x10142;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10198 = x10180 + x10144;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10199 = x10181 + x10145;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10200 = x10182 + x10146;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10201 = x10183 + x10147;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10202 = x9806 + x10004;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10203 = x9807 + x10005;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10204 = x9808 + x10006;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10205 = x9809 + x10007;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10206 = x9810 + x10008;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10207 = x9811 + x10009;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10208 = x9812 + x10010;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10209 = x9813 + x10011;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10210 = x9814 + x10012;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10211 = x9815 + x10015;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10212 = x9816 + x10013;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10213 = x9817 + x10014;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10214 = x9818 + x10016;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10215 = x9819 + x10017;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10216 = x9820 + x10018;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10217 = x9821 + x10019;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10218 = x9822 + x10020;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10219 = x9823 + x10021;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10220 = x9968 + x10022;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10221 = x9969 + x10023;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10222 = x9970 + x10024;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10223 = x9971 + x10025;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10224 = x9972 + x10026;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10225 = x9973 + x10027;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10226 = x9974 + x10028;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10227 = x9975 + x10029;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10228 = x9976 + x10030;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10229 = x9977 + x10033;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10230 = x9978 + x10031;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10231 = x9979 + x10032;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10232 = x9980 + x10034;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10233 = x9981 + x10035;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10234 = x9982 + x10036;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10235 = x9983 + x10037;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10236 = x9984 + x10038;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10237 = x9985 + x10039;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10238 = x9986 + x10040;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10239 = x9987 + x10041;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10240 = x9988 + x10042;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10241 = x9989 + x10043;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10242 = x9990 + x10044;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10243 = x9991 + x10045;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10244 = x9992 + x10046;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10245 = x9993 + x10047;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10246 = x9994 + x10048;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10247 = x9995 + x10051;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10248 = x9996 + x10049;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10249 = x9997 + x10050;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10250 = x9998 + x10052;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10251 = x9999 + x10053;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10252 = x10000 + x10054;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10253 = x10001 + x10055;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10254 = x10002 + x10056;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10255 = x10003 + x10057;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10256 = x10184 + x10080;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10257 = x10185 + x10076;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10258 = x10186 + x10077;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10259 = x10187 + x10078;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10260 = x10188 + x10079;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10261 = x10189 + x10081;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10262 = x10190 + x10082;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10263 = x10191 + x10083;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10264 = x10192 + x10084;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10265 = x10193 + x10091;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10266 = x10194 + x10085;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10267 = x10195 + x10086;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10268 = x10196 + x10087;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10269 = x10197 + x10088;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10270 = x10198 + x10089;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10271 = x10199 + x10090;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10272 = x10200 + x10092;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10273 = x10201 + x10093;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10274 = x10202 + x10060;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10275 = x10203 + x10058;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10276 = x10204 + x10059;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10277 = x10205 + x10061;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10278 = x10206 + x10062;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10279 = x10207 + x10063;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10280 = x10208 + x10064;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10281 = x10209 + x10065;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10282 = x10210 + x10066;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10283 = x10211 + x10071;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10284 = x10212 + x10067;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10285 = x10213 + x10068;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10286 = x10214 + x10069;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10287 = x10215 + x10070;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10288 = x10216 + x10072;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10289 = x10217 + x10073;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10290 = x10218 + x10074;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10291 = x10219 + x10075;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10292 = x10220 + x9826;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10293 = x10221 + x9824;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10294 = x10222 + x9825;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10295 = x10223 + x9827;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10296 = x10224 + x9828;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10297 = x10225 + x9829;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10298 = x10226 + x9830;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10299 = x10227 + x9831;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10300 = x10228 + x9832;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10301 = x10229 + x9837;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10302 = x10230 + x9833;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10303 = x10231 + x9834;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10304 = x10232 + x9835;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10305 = x10233 + x9836;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10306 = x10234 + x9838;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10307 = x10235 + x9839;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10308 = x10236 + x9840;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10309 = x10237 + x9841;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10310 = x10238 + x9844;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10311 = x10239 + x9842;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10312 = x10240 + x9843;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10313 = x10241 + x9845;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10314 = x10242 + x9846;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10315 = x10243 + x9847;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10316 = x10244 + x9848;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10317 = x10245 + x9849;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10318 = x10246 + x9850;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10319 = x10247 + x9855;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10320 = x10248 + x9851;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10321 = x10249 + x9852;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10322 = x10250 + x9853;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10323 = x10251 + x9854;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10324 = x10252 + x9856;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10325 = x10253 + x9857;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10326 = x10254 + x9858;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10327 = x10255 + x9859;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10328 = x10256 + x10100;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10329 = x10257 + x10094;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10330 = x10258 + x10095;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10331 = x10260 + x10097;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10332 = x10261 + x10098;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10333 = x10263 + x10101;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10334 = x10264 + x10102;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10335 = x10267 + x10104;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10336 = x10268 + x10105;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10337 = x10270 + x10107;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10338 = x10271 + x10108;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10339 = x10273 + x10110;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10340 = x10259 + x10096;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10341 = x10262 + x10099;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10342 = x10265 + x10111;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10343 = x10266 + x10103;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10344 = x10269 + x10106;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10345 = x10272 + x10109;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10346 = x10274 + x9864;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10347 = x10275 + x9860;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10348 = x10276 + x9861;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10349 = x10277 + x9862;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10350 = x10278 + x9863;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10351 = x10279 + x9865;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10352 = x10280 + x9866;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10353 = x10281 + x9867;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10354 = x10282 + x9868;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10355 = x10283 + x9875;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10356 = x10284 + x9869;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10357 = x10285 + x9870;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10358 = x10286 + x9871;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10359 = x10287 + x9872;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10360 = x10288 + x9873;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10361 = x10289 + x9874;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10362 = x10290 + x9876;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10363 = x10291 + x9877;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10364 = x10292 + x9882;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10365 = x10293 + x9878;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10366 = x10294 + x9879;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10367 = x10295 + x9880;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10368 = x10296 + x9881;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10369 = x10297 + x9883;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10370 = x10298 + x9884;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10371 = x10299 + x9885;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10372 = x10300 + x9886;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10373 = x10301 + x9893;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10374 = x10302 + x9887;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10375 = x10303 + x9888;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10376 = x10304 + x9889;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10377 = x10305 + x9890;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10378 = x10306 + x9891;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10379 = x10307 + x9892;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10380 = x10308 + x9894;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10381 = x10309 + x9895;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10382 = x10310 + x9900;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10383 = x10311 + x9896;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10384 = x10312 + x9897;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10385 = x10313 + x9898;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10386 = x10314 + x9899;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10387 = x10315 + x9901;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10388 = x10316 + x9902;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10389 = x10317 + x9903;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10390 = x10318 + x9904;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10391 = x10319 + x9911;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10392 = x10320 + x9905;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10393 = x10321 + x9906;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10394 = x10322 + x9907;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10395 = x10323 + x9908;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10396 = x10324 + x9909;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10397 = x10325 + x9910;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10398 = x10326 + x9912;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10399 = x10327 + x9913;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10400 = x10346 + x9920;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10401 = x10347 + x9914;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10402 = x10348 + x9915;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10403 = x10350 + x9917;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10404 = x10351 + x9918;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10405 = x10353 + x9921;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10406 = x10354 + x9922;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10407 = x10357 + x9924;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10408 = x10358 + x9925;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10409 = x10360 + x9927;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10410 = x10361 + x9928;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10411 = x10363 + x9930;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10412 = x10364 + x9938;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10413 = x10365 + x9932;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10414 = x10366 + x9933;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10415 = x10368 + x9935;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10416 = x10369 + x9936;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10417 = x10371 + x9939;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10418 = x10372 + x9940;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10419 = x10375 + x9942;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10420 = x10376 + x9943;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10421 = x10378 + x9945;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10422 = x10379 + x9946;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10423 = x10381 + x9948;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10424 = x10382 + x9956;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10425 = x10383 + x9950;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10426 = x10384 + x9951;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10427 = x10386 + x9953;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10428 = x10387 + x9954;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10429 = x10389 + x9957;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10430 = x10390 + x9958;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10431 = x10393 + x9960;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10432 = x10394 + x9961;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10433 = x10396 + x9963;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10434 = x10397 + x9964;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10435 = x10399 + x9966;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10436 = x10349 + x9916;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10437 = x10352 + x9919;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10438 = x10355 + x9931;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10439 = x10356 + x9923;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10440 = x10359 + x9926;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10441 = x10362 + x9929;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10442 = x10367 + x9934;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10443 = x10370 + x9937;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10444 = x10373 + x9949;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10445 = x10374 + x9941;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10446 = x10377 + x9944;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10447 = x10380 + x9947;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10448 = x10385 + x9952;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10449 = x10388 + x9955;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10450 = x10391 + x9967;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10451 = x10392 + x9959;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10452 = x10395 + x9962;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x10453 = x10398 + x9965;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10454 = x10436 * x10427;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10455 = x10437 * x10429;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10456 = x10438 * x10425;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10457 = x10439 * x10431;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10458 = x10440 * x10433;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10459 = x10441 * x10435;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10460 = x10436 * x10403;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10461 = x10436 * x10415;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10462 = x10436 * x10331;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10463 = x10437 * x10405;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10464 = x10437 * x10417;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10465 = x10437 * x10333;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10466 = x10438 * x10401;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10467 = x10438 * x10413;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10468 = x10438 * x10329;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10469 = x10439 * x10407;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10470 = x10439 * x10419;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10471 = x10439 * x10335;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10472 = x10440 * x10409;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10473 = x10440 * x10421;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10474 = x10440 * x10337;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10475 = x10441 * x10411;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10476 = x10441 * x10423;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10477 = x10441 * x10339;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10478 = x10442 * x10427;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10479 = x10443 * x10429;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10480 = x10444 * x10425;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10481 = x10445 * x10431;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10482 = x10446 * x10433;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10483 = x10447 * x10435;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10484 = x10448 * x10427;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10485 = x10449 * x10429;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10486 = x10450 * x10425;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10487 = x10451 * x10431;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10488 = x10452 * x10433;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10489 = x10453 * x10435;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10490 = x10340 * x10403;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10491 = x10340 * x10415;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10492 = x10340 * x10427;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10493 = x10340 * x10331;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10494 = x10341 * x10405;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10495 = x10341 * x10417;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10496 = x10341 * x10429;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10497 = x10341 * x10333;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10498 = x10342 * x10401;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10499 = x10342 * x10413;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10500 = x10342 * x10425;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10501 = x10342 * x10329;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10502 = x10343 * x10407;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10503 = x10343 * x10419;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10504 = x10343 * x10431;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10505 = x10343 * x10335;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10506 = x10344 * x10409;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10507 = x10344 * x10421;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10508 = x10344 * x10433;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10509 = x10344 * x10337;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10510 = x10345 * x10411;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10511 = x10345 * x10423;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10512 = x10345 * x10435;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10513 = x10345 * x10339;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10514 = x10442 * x10403;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10515 = x10442 * x10415;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10516 = x10442 * x10331;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10517 = x10443 * x10405;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10518 = x10443 * x10417;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10519 = x10443 * x10333;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10520 = x10444 * x10401;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10521 = x10444 * x10413;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10522 = x10444 * x10329;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10523 = x10445 * x10407;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10524 = x10445 * x10419;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10525 = x10445 * x10335;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10526 = x10446 * x10409;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10527 = x10446 * x10421;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10528 = x10446 * x10337;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10529 = x10447 * x10411;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10530 = x10447 * x10423;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10531 = x10447 * x10339;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10532 = x10448 * x10403;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10533 = x10448 * x10415;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10534 = x10448 * x10331;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10535 = x10449 * x10405;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10536 = x10449 * x10417;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10537 = x10449 * x10333;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10538 = x10450 * x10401;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10539 = x10450 * x10413;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10540 = x10450 * x10329;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10541 = x10451 * x10407;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10542 = x10451 * x10419;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10543 = x10451 * x10335;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10544 = x10452 * x10409;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10545 = x10452 * x10421;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10546 = x10452 * x10337;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10547 = x10453 * x10411;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10548 = x10453 * x10423;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10549 = x10453 * x10339;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10550 = x10484 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10551 = x10485 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10552 = x10486 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10553 = x10487 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10554 = x10488 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10555 = x10489 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10556 = x10478 + x10533;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10557 = x10479 + x10536;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10558 = x10480 + x10539;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10559 = x10481 + x10542;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10560 = x10482 + x10545;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10561 = x10483 + x10548;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10562 = x10454 + x10515;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10563 = x10455 + x10518;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10564 = x10456 + x10521;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10565 = x10457 + x10524;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10566 = x10458 + x10527;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10567 = x10459 + x10530;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10568 = x10490 + x10462;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10569 = x10491 + x10460;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10570 = x10492 + x10461;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10571 = x10494 + x10465;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10572 = x10495 + x10463;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10573 = x10496 + x10464;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10574 = x10498 + x10468;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10575 = x10499 + x10466;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10576 = x10500 + x10467;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10577 = x10502 + x10471;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10578 = x10503 + x10469;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10579 = x10504 + x10470;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10580 = x10506 + x10474;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10581 = x10507 + x10472;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10582 = x10508 + x10473;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10583 = x10510 + x10477;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10584 = x10511 + x10475;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10585 = x10512 + x10476;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10586 = x10556 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10587 = x10557 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10588 = x10558 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10589 = x10559 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10590 = x10560 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10591 = x10561 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10592 = x10562 + x10532;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10593 = x10563 + x10535;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10594 = x10564 + x10538;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10595 = x10565 + x10541;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10596 = x10566 + x10544;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10597 = x10567 + x10547;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10598 = x10568 + x10586;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10599 = x10569 + x10516;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10600 = x10570 + x10514;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10601 = x10571 + x10587;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10602 = x10572 + x10519;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10603 = x10573 + x10517;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10604 = x10574 + x10588;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10605 = x10575 + x10522;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10606 = x10576 + x10520;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10607 = x10577 + x10589;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10608 = x10578 + x10525;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10609 = x10579 + x10523;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10610 = x10580 + x10590;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10611 = x10581 + x10528;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10612 = x10582 + x10526;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10613 = x10583 + x10591;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10614 = x10584 + x10531;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10615 = x10585 + x10529;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10616 = x10598 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10617 = x10601 * x10430;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10618 = x10604 * x10426;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10619 = x10607 * x10432;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10620 = x10610 * x10434;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10621 = x10613 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10622 = x10592 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10623 = x10593 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10624 = x10594 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10625 = x10595 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10626 = x10596 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10627 = x10597 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10628 = x10598 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10629 = x10598 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10630 = x10598 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10631 = x10601 * x10406;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10632 = x10601 * x10418;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10633 = x10601 * x10334;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10634 = x10604 * x10402;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10635 = x10604 * x10414;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10636 = x10604 * x10330;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10637 = x10607 * x10408;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10638 = x10607 * x10420;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10639 = x10607 * x10336;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10640 = x10610 * x10410;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10641 = x10610 * x10422;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10642 = x10610 * x10338;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10643 = x10613 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10644 = x10613 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10645 = x10613 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10646 = x10599 + x10550;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10647 = x10600 + x10534;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10648 = x10602 + x10551;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10649 = x10603 + x10537;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10650 = x10605 + x10552;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10651 = x10606 + x10540;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10652 = x10608 + x10553;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10653 = x10609 + x10543;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10654 = x10611 + x10554;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10655 = x10612 + x10546;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10656 = x10614 + x10555;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10657 = x10615 + x10549;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10658 = x10493 + x10622;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10659 = x10497 + x10623;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10660 = x10501 + x10624;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10661 = x10505 + x10625;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10662 = x10509 + x10626;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10663 = x10513 + x10627;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10664 = x10646 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10665 = x10647 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10666 = x10648 * x10430;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10667 = x10649 * x10430;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10668 = x10650 * x10426;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10669 = x10651 * x10426;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10670 = x10652 * x10432;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10671 = x10653 * x10432;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10672 = x10654 * x10434;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10673 = x10655 * x10434;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10674 = x10656 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10675 = x10657 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10676 = x10658 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10677 = x10658 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10678 = x10658 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10679 = x10658 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10680 = x10659 * x10406;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10681 = x10659 * x10418;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10682 = x10659 * x10430;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10683 = x10659 * x10334;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10684 = x10660 * x10402;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10685 = x10660 * x10414;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10686 = x10660 * x10426;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10687 = x10660 * x10330;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10688 = x10661 * x10408;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10689 = x10661 * x10420;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10690 = x10661 * x10432;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10691 = x10661 * x10336;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10692 = x10662 * x10410;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10693 = x10662 * x10422;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10694 = x10662 * x10434;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10695 = x10662 * x10338;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10696 = x10663 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10697 = x10663 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10698 = x10663 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10699 = x10663 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10700 = x10646 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10701 = x10646 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10702 = x10646 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10703 = x10647 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10704 = x10647 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10705 = x10647 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10706 = x10648 * x10406;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10707 = x10648 * x10418;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10708 = x10648 * x10334;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10709 = x10649 * x10406;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10710 = x10649 * x10418;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10711 = x10649 * x10334;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10712 = x10650 * x10402;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10713 = x10650 * x10414;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10714 = x10650 * x10330;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10715 = x10651 * x10402;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10716 = x10651 * x10414;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10717 = x10651 * x10330;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10718 = x10652 * x10408;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10719 = x10652 * x10420;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10720 = x10652 * x10336;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10721 = x10653 * x10408;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10722 = x10653 * x10420;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10723 = x10653 * x10336;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10724 = x10654 * x10410;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10725 = x10654 * x10422;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10726 = x10654 * x10338;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10727 = x10655 * x10410;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10728 = x10655 * x10422;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10729 = x10655 * x10338;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10730 = x10656 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10731 = x10656 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10732 = x10656 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10733 = x10657 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10734 = x10657 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10735 = x10657 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10736 = x10665 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10737 = x10667 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10738 = x10669 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10739 = x10671 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10740 = x10673 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10741 = x10675 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10742 = x10664 + x10704;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10743 = x10666 + x10710;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10744 = x10668 + x10716;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10745 = x10670 + x10722;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10746 = x10672 + x10728;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10747 = x10674 + x10734;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10748 = x10616 + x10701;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10749 = x10617 + x10707;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10750 = x10618 + x10713;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10751 = x10619 + x10719;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10752 = x10620 + x10725;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10753 = x10621 + x10731;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10754 = x10676 + x10630;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10755 = x10677 + x10628;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10756 = x10678 + x10629;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10757 = x10680 + x10633;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10758 = x10681 + x10631;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10759 = x10682 + x10632;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10760 = x10684 + x10636;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10761 = x10685 + x10634;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10762 = x10686 + x10635;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10763 = x10688 + x10639;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10764 = x10689 + x10637;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10765 = x10690 + x10638;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10766 = x10692 + x10642;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10767 = x10693 + x10640;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10768 = x10694 + x10641;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10769 = x10696 + x10645;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10770 = x10697 + x10643;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10771 = x10698 + x10644;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10772 = x10742 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10773 = x10743 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10774 = x10744 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10775 = x10745 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10776 = x10746 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10777 = x10747 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10778 = x10748 + x10703;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10779 = x10749 + x10709;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10780 = x10750 + x10715;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10781 = x10751 + x10721;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10782 = x10752 + x10727;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10783 = x10753 + x10733;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10784 = x10755 + x10702;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10785 = x10756 + x10700;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10786 = x10758 + x10708;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10787 = x10759 + x10706;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10788 = x10761 + x10714;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10789 = x10762 + x10712;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10790 = x10764 + x10720;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10791 = x10765 + x10718;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10792 = x10767 + x10726;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10793 = x10768 + x10724;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10794 = x10770 + x10732;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10795 = x10771 + x10730;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10796 = x10754 + x10772;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10797 = x10757 + x10773;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10798 = x10760 + x10774;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10799 = x10784 + x10736;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10800 = x10785 + x10705;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10801 = x10786 + x10737;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10802 = x10787 + x10711;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10803 = x10788 + x10738;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10804 = x10789 + x10717;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10805 = x10790 + x10739;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10806 = x10791 + x10723;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10807 = x10792 + x10740;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10808 = x10793 + x10729;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10809 = x10794 + x10741;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10810 = x10795 + x10735;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10811 = x10763 + x10775;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10812 = x10766 + x10776;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10813 = x10769 + x10777;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10814 = x10778 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10815 = x10779 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10816 = x10780 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10817 = x10781 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10818 = x10782 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10819 = x10783 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10820 = x10679 + x10814;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10821 = x10683 + x10815;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10822 = x10687 + x10816;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10823 = x10691 + x10817;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10824 = x10695 + x10818;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x10825 = x10699 + x10819;
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10826 = args[4][4 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10827 = args[4][5 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10828 = args[4][6 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10829 = args[4][7 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":284:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[0](Reg)"("./zirgen/components/plonk.h":286:45))
   auto x10830 = args[4][0 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":284:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[1](Reg)"("./zirgen/components/plonk.h":286:45))
   auto x10831 = args[4][1 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":284:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[2](Reg)"("./zirgen/components/plonk.h":286:45))
   auto x10832 = args[4][2 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":284:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[3](Reg)"("./zirgen/components/plonk.h":286:45))
   auto x10833 = args[4][3 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10834 = x10826 * x10805;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10835 = x10826 * x10806;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10836 = x10826 * x10811;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10837 = x10826 * x10823;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10838 = x10827 * x10806;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10839 = x10828 * x10806;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10840 = x10829 * x10806;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10841 = x10830 * x10798;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10842 = x10830 * x10822;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10843 = x10830 * x10803;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10844 = x10830 * x10804;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10845 = x10831 * x10804;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10846 = x10832 * x10804;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10847 = x10833 * x10804;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10848 = x10827 * x10805;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10849 = x10827 * x10811;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10850 = x10827 * x10823;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10851 = x10828 * x10805;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10852 = x10828 * x10811;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10853 = x10828 * x10823;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10854 = x10829 * x10805;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10855 = x10829 * x10811;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10856 = x10829 * x10823;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10857 = x10831 * x10798;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10858 = x10831 * x10822;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10859 = x10831 * x10803;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10860 = x10832 * x10798;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10861 = x10832 * x10822;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10862 = x10832 * x10803;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10863 = x10833 * x10798;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10864 = x10833 * x10822;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10865 = x10833 * x10803;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10866 = x10840 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10867 = x10847 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10868 = x10834 + x10849;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10869 = x10835 + x10848;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10870 = x10836 + x10850;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10871 = x10838 + x10851;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10872 = x10839 + x10854;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10873 = x10841 + x10858;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10874 = x10843 + x10857;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10875 = x10844 + x10859;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10876 = x10845 + x10862;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10877 = x10846 + x10865;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10878 = x10872 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10879 = x10877 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10880 = x10868 + x10853;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10881 = x10869 + x10852;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10882 = x10871 + x10855;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10883 = x10873 + x10879;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10884 = x10874 + x10861;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10885 = x10875 + x10860;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10886 = x10876 + x10863;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10887 = x10880 + x10866;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10888 = x10881 + x10856;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10889 = x10870 + x10878;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10890 = x10882 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10891 = x10886 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10892 = x10884 + x10867;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10893 = x10885 + x10864;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10894 = x10842 + x10891;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10895 = x10837 + x10890;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10896 = x10894 - x10895;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10897 = x284 + x10896 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10898 = x10883 - x10889;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10899 = x10897 + x10898 * poly_mix[1];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10900 = x10892 - x10887;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10901 = x10899 + x10900 * poly_mix[2];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10902 = x10893 - x10888;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10903 = x10901 + x10902 * poly_mix[3];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10904 = x10826 * x10796;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10905 = x10826 * x10820;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10906 = x10826 * x10799;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10907 = x10826 * x10800;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10908 = x10827 * x10800;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10909 = x10828 * x10800;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10910 = x10829 * x10800;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10911 = x10827 * x10796;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10912 = x10827 * x10820;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10913 = x10827 * x10799;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10914 = x10828 * x10796;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10915 = x10828 * x10820;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10916 = x10828 * x10799;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10917 = x10829 * x10796;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10918 = x10829 * x10820;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10919 = x10829 * x10799;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10920 = x10910 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10921 = x10904 + x10912;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10922 = x10906 + x10911;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10923 = x10907 + x10913;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10924 = x10908 + x10916;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10925 = x10909 + x10919;
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10926 = args[4][10 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10927 = args[4][11 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10928 = args[4][8 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x10929 = args[4][9 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10930 = x10926 * x10808;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10931 = x10927 * x10808;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10932 = x10928 * x10807;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10933 = x10928 * x10808;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10934 = x10928 * x10812;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10935 = x10928 * x10824;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10936 = x10929 * x10808;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10937 = x10925 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10938 = x10926 * x10807;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10939 = x10926 * x10812;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10940 = x10926 * x10824;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10941 = x10927 * x10807;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10942 = x10927 * x10812;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10943 = x10927 * x10824;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10944 = x10929 * x10807;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10945 = x10929 * x10812;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10946 = x10929 * x10824;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10947 = x10931 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10948 = x10921 + x10937;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10949 = x10922 + x10915;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10950 = x10923 + x10914;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10951 = x10924 + x10917;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10952 = x10930 + x10941;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10953 = x10932 + x10945;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10954 = x10933 + x10944;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10955 = x10934 + x10946;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10956 = x10936 + x10938;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10957 = x10951 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10958 = x10952 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10959 = x10949 + x10920;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10960 = x10950 + x10918;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10961 = x10953 + x10940;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10962 = x10954 + x10939;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10963 = x10956 + x10942;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10964 = x10905 + x10957;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10965 = x10961 + x10947;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10966 = x10962 + x10943;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10967 = x10955 + x10958;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10968 = x10963 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x10969 = x10935 + x10968;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10970 = x10964 - x10969;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10971 = x10903 + x10970 * poly_mix[4];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10972 = x10948 - x10967;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10973 = x10971 + x10972 * poly_mix[5];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10974 = x10959 - x10965;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10975 = x10973 + x10974 * poly_mix[6];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10976 = x10960 - x10966;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x10977 = x10975 + x10976 * poly_mix[7];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10978 = x10926 * x10802;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10979 = x10927 * x10802;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10980 = x10928 * x10797;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10981 = x10928 * x10821;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10982 = x10928 * x10801;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10983 = x10928 * x10802;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10984 = x10929 * x10802;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10985 = x10926 * x10797;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10986 = x10926 * x10821;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10987 = x10926 * x10801;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10988 = x10927 * x10797;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10989 = x10927 * x10821;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10990 = x10927 * x10801;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10991 = x10929 * x10797;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10992 = x10929 * x10821;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10993 = x10929 * x10801;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10994 = x10979 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10995 = x10978 + x10990;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10996 = x10980 + x10992;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10997 = x10982 + x10991;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10998 = x10983 + x10993;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x10999 = x10984 + x10987;
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[0](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x11000 = args[4][0 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[1](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x11001 = args[4][1 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[2](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x11002 = args[4][2 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":286:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/accum(FpExtReg)/elem[3](Reg)"("./zirgen/components/plonk.h":288:20))
   auto x11003 = args[4][3 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11004 = x11000 * x10809;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11005 = x11000 * x10810;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11006 = x11000 * x10813;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11007 = x11000 * x10825;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11008 = x11001 * x10810;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11009 = x11002 * x10810;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11010 = x11003 * x10810;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11011 = x10995 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11012 = x11001 * x10809;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11013 = x11001 * x10813;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11014 = x11001 * x10825;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11015 = x11002 * x10809;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11016 = x11002 * x10813;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11017 = x11002 * x10825;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11018 = x11003 * x10809;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11019 = x11003 * x10813;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11020 = x11003 * x10825;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11021 = x11010 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11022 = x10996 + x11011;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11023 = x10997 + x10986;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11024 = x10998 + x10985;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11025 = x10999 + x10988;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11026 = x11004 + x11013;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11027 = x11005 + x11012;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11028 = x11006 + x11014;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11029 = x11008 + x11015;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11030 = x11009 + x11018;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11031 = x11025 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11032 = x11030 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11033 = x11023 + x10994;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11034 = x11024 + x10989;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11035 = x11026 + x11017;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11036 = x11027 + x11016;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11037 = x11029 + x11019;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11038 = x10981 + x11031;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11039 = x11035 + x11021;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11040 = x11036 + x11020;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11041 = x11028 + x11032;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11042 = x11037 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11043 = x11007 + x11042;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11044 = x11038 - x11043;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11045 = x10977 + x11044 * poly_mix[8];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11046 = x11022 - x11041;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11047 = x11045 + x11046 * poly_mix[9];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11048 = x11033 - x11039;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11049 = x11047 + x11048 * poly_mix[10];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11050 = x11034 - x11040;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11051 = x11049 + x11050 * poly_mix[11];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11052 = x9767 + x285 * x11051 * poly_mix[147];
@@ -22144,935 +22144,935 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x11057 = x11056 + x11003 * poly_mix[3];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11058 = x284 + x319 * x11057 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":122:57)
+  // loc("./zirgen/components/plonk.h":124:57)
   auto x11059 = x10830 - x1;
-  // loc("./zirgen/components/plonk.h":122:57)
+  // loc("./zirgen/components/plonk.h":124:57)
   FpExt x11060 = x284 + x11059 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":122:57)
+  // loc("./zirgen/components/plonk.h":124:57)
   FpExt x11061 = x11060 + x10831 * poly_mix[1];
-  // loc("./zirgen/components/plonk.h":122:57)
+  // loc("./zirgen/components/plonk.h":124:57)
   FpExt x11062 = x11061 + x10832 * poly_mix[2];
-  // loc("./zirgen/components/plonk.h":122:57)
+  // loc("./zirgen/components/plonk.h":124:57)
   FpExt x11063 = x11062 + x10833 * poly_mix[3];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11064 = x11058 + x321 * x11063 * poly_mix[4];
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11065 = x9768 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11066 = x9768 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11067 = x9768 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11068 = x9768 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11069 = x9768 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11070 = x9769 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11071 = x9769 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11072 = x9769 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11073 = x9769 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11074 = x9769 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11075 = x9770 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11076 = x9770 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11077 = x9770 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11078 = x9770 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11079 = x9770 * x623;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11080 = x9771 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11081 = x9771 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11082 = x9771 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11083 = x9771 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11084 = x9771 * x623;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11085 = x9773 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11086 = x9773 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11087 = x9773 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11088 = x9773 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11089 = x9773 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11090 = x9774 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11091 = x9774 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11092 = x9774 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11093 = x9774 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11094 = x9774 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11095 = x9775 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11096 = x9775 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11097 = x9775 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11098 = x9775 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11099 = x9775 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11100 = x9777 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11101 = x9777 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11102 = x9777 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11103 = x9777 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11104 = x9777 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11105 = x9778 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11106 = x9778 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11107 = x9778 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11108 = x9778 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11109 = x9778 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11110 = x9779 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11111 = x9779 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11112 = x9779 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11113 = x9779 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11114 = x9779 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11115 = x9780 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11116 = x9780 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11117 = x9780 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11118 = x9780 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11119 = x9780 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11120 = x9781 * x334;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11121 = x9781 * x345;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11122 = x9781 * x596;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11123 = x9781 * x606;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11124 = x9781 * x617;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11125 = x9783 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11126 = x9783 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11127 = x9783 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11128 = x9783 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11129 = x9783 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11130 = x9784 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11131 = x9784 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11132 = x9784 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11133 = x9784 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11134 = x9784 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11135 = x9785 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11136 = x9785 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11137 = x9785 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11138 = x9785 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11139 = x9785 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11140 = x9787 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11141 = x9787 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11142 = x9787 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11143 = x9787 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11144 = x9787 * x623;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11145 = x9772 * x340;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11146 = x9772 * x354;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11147 = x9772 * x602;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11148 = x9772 * x612;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11149 = x9772 * x626;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11150 = x9776 * x342;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11151 = x9776 * x594;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11152 = x9776 * x604;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11153 = x9776 * x614;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11154 = x9776 * x866;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11155 = x9782 * x336;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11156 = x9782 * x348;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11157 = x9782 * x598;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11158 = x9782 * x608;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11159 = x9782 * x620;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11160 = x9786 * x338;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11161 = x9786 * x351;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11162 = x9786 * x600;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11163 = x9786 * x610;
-  // loc("./zirgen/components/plonk.h":218:23)
+  // loc("./zirgen/components/plonk.h":220:23)
   auto x11164 = x9786 * x623;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11165 = x11065 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11166 = x11066 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11167 = x11067 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11168 = x11068 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11169 = x11069 + x1;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11170 = x11165 + x11155;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11171 = x11166 + x11156;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11172 = x11167 + x11157;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11173 = x11168 + x11158;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11174 = x11169 + x11159;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11175 = x11170 + x11160;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11176 = x11171 + x11161;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11177 = x11172 + x11162;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11178 = x11173 + x11163;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11179 = x11174 + x11164;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11180 = x11070 + x11125;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11181 = x11071 + x11126;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11182 = x11072 + x11127;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11183 = x11073 + x11128;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11184 = x11074 + x11129;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11185 = x11115 + x11130;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11186 = x11116 + x11131;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11187 = x11117 + x11132;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11188 = x11118 + x11133;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11189 = x11119 + x11134;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11190 = x11120 + x11135;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11191 = x11121 + x11136;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11192 = x11122 + x11137;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11193 = x11123 + x11138;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11194 = x11124 + x11139;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11195 = x11175 + x11145;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11196 = x11176 + x11146;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11197 = x11177 + x11147;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11198 = x11178 + x11148;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11199 = x11179 + x11149;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11200 = x11180 + x11140;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11201 = x11181 + x11141;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11202 = x11182 + x11142;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11203 = x11183 + x11143;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11204 = x11184 + x11144;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11205 = x11185 + x11075;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11206 = x11186 + x11076;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11207 = x11187 + x11077;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11208 = x11188 + x11078;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11209 = x11189 + x11079;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11210 = x11190 + x11080;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11211 = x11191 + x11081;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11212 = x11192 + x11082;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11213 = x11193 + x11083;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11214 = x11194 + x11084;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11215 = x11196 + x11151;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11216 = x11199 + x11154;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11217 = x11195 + x11150;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11218 = x11197 + x11152;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11219 = x11198 + x11153;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11220 = x11200 + x11085;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11221 = x11201 + x11086;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11222 = x11202 + x11087;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11223 = x11203 + x11088;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11224 = x11204 + x11089;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11225 = x11205 + x11090;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11226 = x11206 + x11091;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11227 = x11207 + x11092;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11228 = x11208 + x11093;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11229 = x11209 + x11094;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11230 = x11210 + x11095;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11231 = x11211 + x11096;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11232 = x11212 + x11097;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11233 = x11213 + x11098;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11234 = x11214 + x11099;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11235 = x11221 + x11101;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11236 = x11224 + x11104;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11237 = x11226 + x11106;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11238 = x11229 + x11109;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11239 = x11231 + x11111;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11240 = x11234 + x11114;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11241 = x11220 + x11100;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11242 = x11222 + x11102;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11243 = x11223 + x11103;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11244 = x11225 + x11105;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11245 = x11227 + x11107;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11246 = x11228 + x11108;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11247 = x11230 + x11110;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11248 = x11232 + x11112;
-  // loc("./zirgen/components/plonk.h":218:17)
+  // loc("./zirgen/components/plonk.h":220:17)
   auto x11249 = x11233 + x11113;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11250 = x11241 * x11239;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11251 = x11243 * x11240;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11252 = x11241 * x11235;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11253 = x11241 * x11237;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11254 = x11241 * x11215;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11255 = x11243 * x11236;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11256 = x11243 * x11238;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11257 = x11243 * x11216;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11258 = x11244 * x11239;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11259 = x11246 * x11240;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11260 = x11247 * x11239;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11261 = x11249 * x11240;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11262 = x11217 * x11235;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11263 = x11217 * x11237;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11264 = x11217 * x11239;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11265 = x11217 * x11215;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11266 = x11219 * x11236;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11267 = x11219 * x11238;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11268 = x11219 * x11240;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11269 = x11219 * x11216;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11270 = x11244 * x11235;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11271 = x11244 * x11237;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11272 = x11244 * x11215;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11273 = x11246 * x11236;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11274 = x11246 * x11238;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11275 = x11246 * x11216;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11276 = x11247 * x11235;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11277 = x11247 * x11237;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11278 = x11247 * x11215;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11279 = x11249 * x11236;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11280 = x11249 * x11238;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11281 = x11249 * x11216;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11282 = x11260 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11283 = x11261 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11284 = x11258 + x11277;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11285 = x11259 + x11280;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11286 = x11250 + x11271;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11287 = x11251 + x11274;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11288 = x11262 + x11254;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11289 = x11263 + x11252;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11290 = x11264 + x11253;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11291 = x11266 + x11257;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11292 = x11267 + x11255;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11293 = x11268 + x11256;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11294 = x11284 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11295 = x11285 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11296 = x11286 + x11276;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11297 = x11287 + x11279;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11298 = x11289 + x11272;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11299 = x11290 + x11270;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11300 = x11292 + x11275;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11301 = x11293 + x11273;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11302 = x11288 + x11294;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11303 = x11298 + x11282;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11304 = x11299 + x11278;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11305 = x11300 + x11283;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11306 = x11301 + x11281;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11307 = x11291 + x11295;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11308 = x11296 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11309 = x11297 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11310 = x11265 + x11308;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11311 = x11269 + x11309;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11312 = x10826 * x11305;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11313 = x10826 * x11306;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11314 = x10826 * x11307;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11315 = x10826 * x11311;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11316 = x10827 * x11306;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11317 = x10828 * x11306;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11318 = x10829 * x11306;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11319 = x10830 * x11302;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11320 = x10830 * x11310;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11321 = x10830 * x11303;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11322 = x10830 * x11304;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11323 = x10831 * x11304;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11324 = x10832 * x11304;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11325 = x10833 * x11304;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11326 = x10827 * x11305;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11327 = x10827 * x11307;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11328 = x10827 * x11311;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11329 = x10828 * x11305;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11330 = x10828 * x11307;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11331 = x10828 * x11311;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11332 = x10829 * x11305;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11333 = x10829 * x11307;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11334 = x10829 * x11311;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11335 = x10831 * x11302;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11336 = x10831 * x11310;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11337 = x10831 * x11303;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11338 = x10832 * x11302;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11339 = x10832 * x11310;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11340 = x10832 * x11303;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11341 = x10833 * x11302;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11342 = x10833 * x11310;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11343 = x10833 * x11303;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11344 = x11318 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11345 = x11325 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11346 = x11312 + x11327;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11347 = x11313 + x11326;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11348 = x11314 + x11328;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11349 = x11316 + x11329;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11350 = x11317 + x11332;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11351 = x11319 + x11336;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11352 = x11321 + x11335;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11353 = x11322 + x11337;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11354 = x11323 + x11340;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11355 = x11324 + x11343;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11356 = x11350 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11357 = x11355 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11358 = x11346 + x11331;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11359 = x11347 + x11330;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11360 = x11349 + x11333;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11361 = x11351 + x11357;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11362 = x11352 + x11339;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11363 = x11353 + x11338;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11364 = x11354 + x11341;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11365 = x11358 + x11344;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11366 = x11359 + x11334;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11367 = x11348 + x11356;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11368 = x11360 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11369 = x11364 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11370 = x11362 + x11345;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11371 = x11363 + x11342;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11372 = x11320 + x11369;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11373 = x11315 + x11368;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11374 = x11372 - x11373;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11375 = x284 + x11374 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11376 = x11361 - x11367;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11377 = x11375 + x11376 * poly_mix[1];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11378 = x11370 - x11365;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11379 = x11377 + x11378 * poly_mix[2];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11380 = x11371 - x11366;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11381 = x11379 + x11380 * poly_mix[3];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11382 = x10826 * x11242;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11383 = x10826 * x11218;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11384 = x10826 * x11245;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11385 = x10826 * x11248;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11386 = x10827 * x11248;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11387 = x10828 * x11248;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11388 = x10829 * x11248;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11389 = x10827 * x11242;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11390 = x10827 * x11218;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11391 = x10827 * x11245;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11392 = x10828 * x11242;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11393 = x10828 * x11218;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11394 = x10828 * x11245;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11395 = x10829 * x11242;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11396 = x10829 * x11218;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11397 = x10829 * x11245;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11398 = x11388 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11399 = x11382 + x11390;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11400 = x11384 + x11389;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11401 = x11385 + x11391;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11402 = x11386 + x11394;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11403 = x11387 + x11397;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11404 = x11000 * x10412;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11405 = x11000 * x10424;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11406 = x11000 * x10400;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11407 = x11000 * x10328;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11408 = x11001 * x10424;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11409 = x11002 * x10424;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11410 = x11003 * x10424;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11411 = x11403 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11412 = x11001 * x10412;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11413 = x11001 * x10400;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11414 = x11001 * x10328;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11415 = x11002 * x10412;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11416 = x11002 * x10400;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11417 = x11002 * x10328;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11418 = x11003 * x10412;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11419 = x11003 * x10400;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11420 = x11003 * x10328;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11421 = x11410 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11422 = x11399 + x11411;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11423 = x11400 + x11393;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11424 = x11401 + x11392;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11425 = x11402 + x11395;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11426 = x11404 + x11413;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11427 = x11405 + x11412;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11428 = x11406 + x11414;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11429 = x11408 + x11415;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11430 = x11409 + x11418;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11431 = x11425 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11432 = x11430 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11433 = x11423 + x11398;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11434 = x11424 + x11396;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11435 = x11426 + x11417;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11436 = x11427 + x11416;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11437 = x11429 + x11419;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11438 = x11383 + x11431;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11439 = x11435 + x11421;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11440 = x11436 + x11420;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11441 = x11428 + x11432;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11442 = x11437 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11443 = x11407 + x11442;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11444 = x11438 - x11443;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11445 = x11381 + x11444 * poly_mix[4];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11446 = x11422 - x11441;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11447 = x11445 + x11446 * poly_mix[5];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11448 = x11433 - x11439;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11449 = x11447 + x11448 * poly_mix[6];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11450 = x11434 - x11440;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11451 = x11449 + x11450 * poly_mix[7];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11452 = x11064 + x320 * x11451 * poly_mix[8];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11453 = x11452 + x559 * x11451 * poly_mix[16];
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11454 = x11242 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11455 = x11242 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11456 = x11242 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11457 = x11242 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11458 = x11245 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11459 = x11248 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11460 = x11218 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11461 = x11218 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11462 = x11218 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11463 = x11218 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11464 = x11245 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11465 = x11245 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11466 = x11245 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11467 = x11248 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11468 = x11248 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11469 = x11248 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11470 = x11459 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11471 = x11458 + x11468;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11472 = x11454 + x11465;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11473 = x11460 + x11457;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11474 = x11461 + x11455;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11475 = x11462 + x11456;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11476 = x11471 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11477 = x11472 + x11467;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11478 = x11474 + x11466;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11479 = x11475 + x11464;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11480 = x11478 + x11470;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11481 = x11479 + x11469;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11482 = x11473 + x11476;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11483 = x11477 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11484 = x11463 + x11483;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11485 = x11000 * x11480;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11486 = x11000 * x11481;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11487 = x11000 * x11482;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11488 = x11000 * x11484;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11489 = x11001 * x11481;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11490 = x11002 * x11481;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11491 = x11003 * x11481;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11492 = x11001 * x11480;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11493 = x11001 * x11482;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11494 = x11001 * x11484;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11495 = x11002 * x11480;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11496 = x11002 * x11482;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11497 = x11002 * x11484;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11498 = x11003 * x11480;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11499 = x11003 * x11482;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11500 = x11003 * x11484;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11501 = x11491 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11502 = x11485 + x11493;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11503 = x11486 + x11492;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11504 = x11487 + x11494;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11505 = x11489 + x11495;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11506 = x11490 + x11498;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11507 = x11506 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11508 = x11502 + x11497;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11509 = x11503 + x11496;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11510 = x11505 + x11499;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11511 = x11508 + x11501;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11512 = x11509 + x11500;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11513 = x11504 + x11507;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11514 = x11510 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11515 = x11488 + x11514;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11516 = x11372 - x11515;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11517 = x284 + x11516 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11518 = x11361 - x11513;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11519 = x11517 + x11518 * poly_mix[1];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11520 = x11370 - x11511;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11521 = x11519 + x11520 * poly_mix[2];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11522 = x11371 - x11512;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11523 = x11521 + x11522 * poly_mix[3];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11524 = x11453 + x591 * x11523 * poly_mix[24];
@@ -23082,471 +23082,471 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x11526 = x11525 + x592 * x11523 * poly_mix[32];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11527 = x11526 + x831 * x11523 * poly_mix[36];
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11528 = x10402 * x10448;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11529 = x10403 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11530 = x10406 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11531 = x10402 * x10436;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11532 = x10402 * x10442;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11533 = x10402 * x10340;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11534 = x10403 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11535 = x10403 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11536 = x10403 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11537 = x10406 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11538 = x10406 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11539 = x10406 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11540 = x10414 * x10448;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11541 = x10415 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11542 = x10418 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11543 = x10426 * x10448;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11544 = x10427 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11545 = x10430 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11546 = x10330 * x10436;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11547 = x10330 * x10442;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11548 = x10330 * x10448;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11549 = x10330 * x10340;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11550 = x10331 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11551 = x10331 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11552 = x10331 * x10428;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11553 = x10331 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11554 = x10334 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11555 = x10334 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11556 = x10334 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11557 = x10334 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11558 = x10414 * x10436;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11559 = x10414 * x10442;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11560 = x10414 * x10340;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11561 = x10415 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11562 = x10415 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11563 = x10415 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11564 = x10418 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11565 = x10418 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11566 = x10418 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11567 = x10426 * x10436;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11568 = x10426 * x10442;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11569 = x10426 * x10340;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11570 = x10427 * x10404;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11571 = x10427 * x10416;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11572 = x10427 * x10332;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11573 = x10430 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11574 = x10430 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11575 = x10430 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11576 = x11543 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11577 = x11544 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11578 = x11545 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11579 = x11540 + x11568;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11580 = x11541 + x11571;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11581 = x11542 + x11574;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11582 = x11528 + x11559;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11583 = x11529 + x11562;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11584 = x11530 + x11565;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11585 = x11546 + x11533;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11586 = x11547 + x11531;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11587 = x11548 + x11532;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11588 = x11550 + x11536;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11589 = x11551 + x11534;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11590 = x11552 + x11535;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11591 = x11554 + x11539;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11592 = x11555 + x11537;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11593 = x11556 + x11538;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11594 = x11579 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11595 = x11580 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11596 = x11581 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11597 = x11582 + x11567;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11598 = x11583 + x11570;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11599 = x11584 + x11573;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11600 = x11586 + x11560;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11601 = x11587 + x11558;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11602 = x11589 + x11563;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11603 = x11590 + x11561;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11604 = x11592 + x11566;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11605 = x11593 + x11564;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11606 = x11585 + x11594;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11607 = x11588 + x11595;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11608 = x11600 + x11576;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11609 = x11601 + x11569;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11610 = x11602 + x11577;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11611 = x11603 + x11572;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11612 = x11604 + x11578;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11613 = x11605 + x11575;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11614 = x11591 + x11596;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11615 = x11597 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11616 = x11598 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11617 = x11599 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11618 = x11549 + x11615;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11619 = x11553 + x11616;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11620 = x11557 + x11617;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11621 = x10826 * x10648;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11622 = x10826 * x10649;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11623 = x10826 * x10601;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11624 = x10826 * x10659;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11625 = x10827 * x10649;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11626 = x10828 * x10649;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11627 = x10829 * x10649;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11628 = x10830 * x11606;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11629 = x10830 * x11618;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11630 = x10830 * x11608;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11631 = x10830 * x11609;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11632 = x10831 * x11609;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11633 = x10832 * x11609;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11634 = x10833 * x11609;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11635 = x10827 * x10648;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11636 = x10827 * x10601;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11637 = x10827 * x10659;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11638 = x10828 * x10648;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11639 = x10828 * x10601;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11640 = x10828 * x10659;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11641 = x10829 * x10648;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11642 = x10829 * x10601;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11643 = x10829 * x10659;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11644 = x10831 * x11606;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11645 = x10831 * x11618;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11646 = x10831 * x11608;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11647 = x10832 * x11606;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11648 = x10832 * x11618;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11649 = x10832 * x11608;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11650 = x10833 * x11606;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11651 = x10833 * x11618;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11652 = x10833 * x11608;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11653 = x11627 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11654 = x11634 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11655 = x11621 + x11636;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11656 = x11622 + x11635;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11657 = x11623 + x11637;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11658 = x11625 + x11638;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11659 = x11626 + x11641;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11660 = x11628 + x11645;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11661 = x11630 + x11644;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11662 = x11631 + x11646;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11663 = x11632 + x11649;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11664 = x11633 + x11652;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11665 = x11659 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11666 = x11664 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11667 = x11655 + x11640;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11668 = x11656 + x11639;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11669 = x11658 + x11642;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11670 = x11660 + x11666;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11671 = x11661 + x11648;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11672 = x11662 + x11647;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11673 = x11663 + x11650;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11674 = x11667 + x11653;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11675 = x11668 + x11643;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11676 = x11657 + x11665;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11677 = x11669 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11678 = x11673 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11679 = x11671 + x11654;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11680 = x11672 + x11651;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11681 = x11629 + x11678;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11682 = x11624 + x11677;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11683 = x11681 - x11682;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11684 = x284 + x11683 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11685 = x11670 - x11676;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11686 = x11684 + x11685 * poly_mix[1];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11687 = x11679 - x11674;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11688 = x11686 + x11687 * poly_mix[2];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11689 = x11680 - x11675;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11690 = x11688 + x11689 * poly_mix[3];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11691 = x10826 * x11607;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11692 = x10826 * x11619;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11693 = x10826 * x11610;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11694 = x10826 * x11611;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11695 = x10827 * x11611;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11696 = x10828 * x11611;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11697 = x10829 * x11611;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11698 = x10827 * x11607;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11699 = x10827 * x11619;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11700 = x10827 * x11610;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11701 = x10828 * x11607;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11702 = x10828 * x11619;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11703 = x10828 * x11610;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11704 = x10829 * x11607;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11705 = x10829 * x11619;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11706 = x10829 * x11610;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11707 = x11697 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11708 = x11691 + x11699;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11709 = x11693 + x11698;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11710 = x11694 + x11700;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11711 = x11695 + x11703;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11712 = x11696 + x11706;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11713 = x11000 * x11612;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11714 = x11000 * x11613;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11715 = x11000 * x11614;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11716 = x11000 * x11620;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11717 = x11001 * x11613;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11718 = x11002 * x11613;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11719 = x11003 * x11613;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11720 = x11712 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11721 = x11001 * x11612;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11722 = x11001 * x11614;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11723 = x11001 * x11620;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11724 = x11002 * x11612;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11725 = x11002 * x11614;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11726 = x11002 * x11620;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11727 = x11003 * x11612;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11728 = x11003 * x11614;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11729 = x11003 * x11620;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11730 = x11719 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11731 = x11708 + x11720;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11732 = x11709 + x11702;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11733 = x11710 + x11701;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11734 = x11711 + x11704;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11735 = x11713 + x11722;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11736 = x11714 + x11721;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11737 = x11715 + x11723;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11738 = x11717 + x11724;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11739 = x11718 + x11727;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11740 = x11734 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11741 = x11739 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11742 = x11732 + x11707;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11743 = x11733 + x11705;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11744 = x11735 + x11726;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11745 = x11736 + x11725;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11746 = x11738 + x11728;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11747 = x11692 + x11740;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11748 = x11744 + x11730;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11749 = x11745 + x11729;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11750 = x11737 + x11741;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11751 = x11746 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11752 = x11716 + x11751;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11753 = x11747 - x11752;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11754 = x11690 + x11753 * poly_mix[4];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11755 = x11731 - x11750;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11756 = x11754 + x11755 * poly_mix[5];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11757 = x11742 - x11748;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11758 = x11756 + x11757 * poly_mix[6];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11759 = x11743 - x11749;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11760 = x11758 + x11759 * poly_mix[7];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11761 = x11527 + x863 * x11760 * poly_mix[40];
@@ -23554,21 +23554,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x11762 = x11052 + x1103 * x11761 * poly_mix[148];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11763 = x11762 + x4812 * x11051 * poly_mix[149];
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   auto x11764 = x11000 - x10830;
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   FpExt x11765 = x284 + x11764 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   auto x11766 = x11001 - x10831;
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   FpExt x11767 = x11765 + x11766 * poly_mix[1];
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   auto x11768 = x11002 - x10832;
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   FpExt x11769 = x11767 + x11768 * poly_mix[2];
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   auto x11770 = x11003 - x10833;
-  // loc("./zirgen/components/plonk.h":101:8)
+  // loc("./zirgen/components/plonk.h":103:8)
   FpExt x11771 = x11769 + x11770 * poly_mix[3];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11772 = x11763 + x5226 * x11771 * poly_mix[150];
@@ -23576,207 +23576,207 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x11773 = x11772 + x6154 * x11771 * poly_mix[151];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11774 = x11773 + x7910 * x11051 * poly_mix[152];
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11775 = x10402 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11776 = x10402 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11777 = x10402 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11778 = x10402 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11779 = x10414 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11780 = x10426 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11781 = x10330 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11782 = x10330 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11783 = x10330 * x10424;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11784 = x10330 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11785 = x10414 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11786 = x10414 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11787 = x10414 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11788 = x10426 * x10400;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11789 = x10426 * x10412;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11790 = x10426 * x10328;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11791 = x11780 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11792 = x11779 + x11789;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11793 = x11775 + x11786;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11794 = x11781 + x11778;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11795 = x11782 + x11776;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11796 = x11783 + x11777;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11797 = x11792 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11798 = x11793 + x11788;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11799 = x11795 + x11787;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11800 = x11796 + x11785;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11801 = x11799 + x11791;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11802 = x11800 + x11790;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11803 = x11794 + x11797;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11804 = x11798 * x11;
-  // loc("./zirgen/components/plonk.h":220:16)
+  // loc("./zirgen/components/plonk.h":222:16)
   auto x11805 = x11784 + x11804;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11806 = x11000 * x11801;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11807 = x11000 * x11802;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11808 = x11000 * x11803;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11809 = x11000 * x11805;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11810 = x11001 * x11802;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11811 = x11002 * x11802;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11812 = x11003 * x11802;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11813 = x10830 * x10604;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11814 = x10830 * x10660;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11815 = x10830 * x10650;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11816 = x10830 * x10651;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11817 = x10831 * x10651;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11818 = x10832 * x10651;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11819 = x10833 * x10651;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11820 = x11001 * x11801;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11821 = x11001 * x11803;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11822 = x11001 * x11805;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11823 = x11002 * x11801;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11824 = x11002 * x11803;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11825 = x11002 * x11805;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11826 = x11003 * x11801;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11827 = x11003 * x11803;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11828 = x11003 * x11805;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11829 = x10831 * x10604;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11830 = x10831 * x10660;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11831 = x10831 * x10650;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11832 = x10832 * x10604;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11833 = x10832 * x10660;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11834 = x10832 * x10650;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11835 = x10833 * x10604;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11836 = x10833 * x10660;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11837 = x10833 * x10650;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11838 = x11812 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11839 = x11819 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11840 = x11806 + x11821;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11841 = x11807 + x11820;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11842 = x11808 + x11822;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11843 = x11810 + x11823;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11844 = x11811 + x11826;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11845 = x11813 + x11830;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11846 = x11815 + x11829;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11847 = x11816 + x11831;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11848 = x11817 + x11834;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11849 = x11818 + x11837;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11850 = x11844 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11851 = x11849 * x11;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11852 = x11840 + x11825;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11853 = x11841 + x11824;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11854 = x11843 + x11827;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11855 = x11845 + x11851;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11856 = x11846 + x11833;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11857 = x11847 + x11832;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11858 = x11848 + x11835;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11859 = x11852 + x11838;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11860 = x11853 + x11828;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11861 = x11842 + x11850;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11862 = x11854 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11863 = x11858 * x11;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11864 = x11856 + x11839;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11865 = x11857 + x11836;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11866 = x11814 + x11863;
-  // loc("./zirgen/components/plonk.h":287:30)
+  // loc("./zirgen/components/plonk.h":289:30)
   auto x11867 = x11809 + x11862;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11868 = x11866 - x11867;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11869 = x284 + x11868 * poly_mix[0];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11870 = x11855 - x11861;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11871 = x11869 + x11870 * poly_mix[1];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11872 = x11864 - x11859;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11873 = x11871 + x11872 * poly_mix[2];
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   auto x11874 = x11865 - x11860;
-  // loc("./zirgen/components/plonk.h":287:10)
+  // loc("./zirgen/components/plonk.h":289:10)
   FpExt x11875 = x11873 + x11874 * poly_mix[3];
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   FpExt x11876 = x11774 + x8071 * x11875 * poly_mix[153];
