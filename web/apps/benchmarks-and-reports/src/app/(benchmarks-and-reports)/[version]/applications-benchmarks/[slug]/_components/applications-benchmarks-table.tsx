@@ -17,15 +17,20 @@ import {
 import { useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
+import type { Version } from "~/types/version";
 
 export function ApplicationsBenchmarksTable<TData, TValue>({
   title,
   columns,
   data,
+  version,
 }: {
-  columns: ColumnDef<TData, TValue>[];
+  columns: {
+    [key in Version]: ColumnDef<TData, TValue>[];
+  };
   data: TData[];
   title: string;
+  version: Version;
 }) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -35,7 +40,7 @@ export function ApplicationsBenchmarksTable<TData, TValue>({
 
   const table = useReactTable({
     data,
-    columns,
+    columns: columns[version] ?? [],
     state: {
       sorting,
       columnVisibility,
@@ -90,7 +95,7 @@ export function ApplicationsBenchmarksTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={columns[version]?.length} className="h-24 text-center text-muted-foreground">
                   No Results
                 </TableCell>
               </TableRow>

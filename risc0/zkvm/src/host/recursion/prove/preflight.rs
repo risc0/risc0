@@ -309,7 +309,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                 ctx,
                 code,
                 write_addr + Fp::new(i as u32),
-                LAYOUT.code.inst.micro_ops.inst[i],
+                LAYOUT.code.inst.micro_ops[i],
             )?;
         }
         Ok(())
