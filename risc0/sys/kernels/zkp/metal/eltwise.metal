@@ -40,8 +40,8 @@ kernel void eltwise_copy_fp(device Fp* out,
 
 kernel void eltwise_sum_fpext(device Fp* out,
                               const device FpExt* in,
-                              device uint32_t& count,
-                              device uint32_t& to_add,
+                              const device uint32_t& count,
+                              const device uint32_t& to_add,
                               uint gid [[thread_position_in_grid]]) {
   FpExt tot;
   for (size_t i = 0; i < to_add; i++) {
