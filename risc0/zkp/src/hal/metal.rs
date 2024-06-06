@@ -354,14 +354,14 @@ impl<T> BufferImpl<T> {
         }
     }
 
-    fn sync(&self) {
-        let cmd_buffer = self.cmd_queue.new_command_buffer();
-        let blit_encoder = cmd_buffer.new_blit_command_encoder();
-        blit_encoder.synchronize_resource(&self.buffer.0);
-        blit_encoder.end_encoding();
-        cmd_buffer.commit();
-        cmd_buffer.wait_until_completed();
-    }
+    // fn sync(&self) {
+    //     let cmd_buffer = self.cmd_queue.new_command_buffer();
+    //     let blit_encoder = cmd_buffer.new_blit_command_encoder();
+    //     blit_encoder.synchronize_resource(&self.buffer.0);
+    //     blit_encoder.end_encoding();
+    //     cmd_buffer.commit();
+    //     cmd_buffer.wait_until_completed();
+    // }
 
     pub fn as_device_ptr(&self) -> *mut c_void {
         self.buffer.0.gpu_address() as *mut c_void
@@ -398,7 +398,8 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn get_at(&self, idx: usize) -> T {
-        self.sync();
+        // TODO: detect if device supports synchronize_resource
+        // self.sync();
         let ptr = self.buffer.0.contents() as *const T;
         let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts(ptr, len) };
@@ -406,7 +407,8 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
-        self.sync();
+        // TODO: detect if device supports synchronize_resource
+        // self.sync();
         let ptr = self.buffer.0.contents() as *const T;
         let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts(ptr, len) };
@@ -414,12 +416,13 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
-        self.sync();
+        // TODO: detect if device supports synchronize_resource
+        // self.sync();
         let ptr = self.buffer.0.contents() as *mut T;
         let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts_mut(ptr, len) };
         f(&mut slice[self.offset..self.offset + self.size]);
-        // TODO: detect if device can handle did_modify_range
+        // TODO: detect if device supports did_modify_range
         // let offset = self.offset * mem::size_of::<T>();
         // let size = self.size * mem::size_of::<T>();
         // self.buffer
