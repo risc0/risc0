@@ -50,7 +50,7 @@ export async function GET(request: Request) {
           />
         </svg>
 
-        <div tw="text-[92px] tracking-wide mb-6 mt-24 -black max-w-[65%]" style={{ fontFamily: "EuropaBold" }}>
+        <div tw="text-[92px] tracking-wide mb-6 mt-24 text-black max-w-[65%]" style={{ fontFamily: "EuropaBold" }}>
           {title}
         </div>
         <div tw="text-[32px] tracking-wider text-neutral-700 max-w-[65%]" style={{ fontFamily: "EuropaNormal" }}>
