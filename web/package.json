@@ -40,8 +40,9 @@
     "react-rainbow-ascii": "1.0.3",
     "sharp": "0.33.4",
     "string-ts": "2.1.1",
-    "turbo": "1.13.3",
+    "turbo": "^2.0.2",
     "typescript": "5.4.5",
     "zod": "3.23.8"
-  }
+  },
+  "packageManager": "bun@1.1.12"
 }
