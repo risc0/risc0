@@ -25,9 +25,9 @@ export default function ReportsPage({
     <div className="container grid max-w-screen-3xl grid-cols-1 gap-10 pt-4 lg:grid-cols-2">
       {REPORTS.map(({ label, href, description, showVersionSelect }, index) => (
         <ProgressBarLink key={href} href={`${showVersionSelect ? `/${params.version}` : ""}${href}`} className="group">
-          <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 border-2 border-border px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12 hover:border-primary dark:bg-neutral-900">
-            <div>
-              <CardTitle className="text-xl">{label}</CardTitle>
+          <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 border-2 border-border px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12 hover:border-primary">
+            <div className="space-y-1">
+              <CardTitle className="font-normal text-3xl">{label}</CardTitle>
               <CardDescription className="text-sm">{description}</CardDescription>
             </div>
 

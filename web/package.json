@@ -3,13 +3,14 @@
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo build",
-    "check": "cd .. && bunx @biomejs/biome check --apply-unsafe web",
+    "check": "cd .. && bunx @biomejs/biome check --write --unsafe web",
     "ci": "cd .. && bunx @biomejs/biome ci web",
     "dev": "turbo dev",
     "test": "turbo test",
     "typecheck": "turbo typecheck"
   },
   "dependencies": {
+    "@biomejs/biome": "1.8.0",
     "@joshdavenport/tailwindcss-filter-order": "0.2.0",
     "@next/bundle-analyzer": "14.2.3",
     "@poppinss/intl-formatter": "3.0.2",
