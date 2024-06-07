@@ -1,6 +1,5 @@
 import { Separator } from "@risc0/ui/separator";
 import { type PropsWithChildren, Suspense } from "react";
-import { RenderedTimeAgo } from "shared/client/components/rendered-time-ago";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { useRedirectIfWrongVersion } from "~/hooks/use-redirect-if-wrong-version";
 import type { Version } from "~/types/version";
