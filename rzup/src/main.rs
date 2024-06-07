@@ -4,6 +4,7 @@ use cli::dist::ToolchainRepo;
 use cli::rzup_mode::InstallSubcmd;
 use cli::rzup_mode::RzupSubcmd;
 use cli::rzup_mode::ShowSubcmd;
+use cli::rzup_mode::ToolchainSubcmd;
 use cli::utils::risc0_data;
 use std::fs;
 use std::io::Write;
@@ -52,6 +53,59 @@ fn main() {
                 }
             }
         }
+        Some(RzupSubcmd::Toolchain { subcmd }) => {
+            match subcmd {
+                ToolchainSubcmd::List { verbose } => {
+                    if let Err(e) = show_installed_toolchains(verbose) {
+                        eprintln!("Error showing toolchains: {}", e);
+                        std::process::exit(1);
+                    }
+                }
+                ToolchainSubcmd::Install { subcmd } => {
+                    match subcmd {
+                        InstallSubcmd::Rust { toolchain } => {
+                            // Install Rust toolchain
+                            InstallToolchain {
+                                toolchain: Some(toolchain),
+                                repo: ToolchainRepo::Rust,
+                            }
+                            .run()
+                            .expect("Error during Rust toolchain installation");
+                        }
+                        InstallSubcmd::Cpp { toolchain } => {
+                            // Install C++ toolchain
+                            InstallToolchain {
+                                toolchain: Some(toolchain),
+                                repo: ToolchainRepo::Cpp,
+                            }
+                            .run()
+                            .expect("Error during C++ toolchain installation");
+                        }
+                        InstallSubcmd::All => {
+                            // Install all toolchains
+                            InstallToolchain {
+                                toolchain: None,
+                                repo: ToolchainRepo::Rust,
+                            }
+                            .run()
+                            .expect("Error during Rust toolchain installation");
+                            InstallToolchain {
+                                toolchain: None,
+                                repo: ToolchainRepo::Cpp,
+                            }
+                            .run()
+                            .expect("Error during C++ toolchain installation");
+                        }
+                    }
+                }
+                ToolchainSubcmd::Build(cmd) => {
+                    if let Err(e) = cmd.run() {
+                        eprintln!("Error building toolchain: {}", e);
+                        std::process::exit(1);
+                    }
+                }
+            }
+        }
         Some(RzupSubcmd::Show { verbose, subcmd }) => {
             match subcmd {
                 Some(ShowSubcmd::ActiveToolchain { .. }) => {
@@ -73,8 +127,8 @@ fn main() {
         }
         Some(RzupSubcmd::Check { .. }) => todo!(),
         Some(RzupSubcmd::Update { .. }) => todo!(),
-        Some(RzupSubcmd::Toolchain { .. }) => todo!(),
         Some(RzupSubcmd::Default { .. }) => todo!(),
+        Some(RzupSubcmd::Uninstall { .. }) => todo!(),
         None => todo!(),
     }
 }
@@ -116,7 +170,7 @@ fn show_installed_toolchains(verbose: bool) -> anyhow::Result<()> {
 mod cli {
 
     pub mod rzup_mode {
-        use crate::cli::{common, help};
+        use crate::cli::{build_toolchain, common, help};
         use clap::{Parser, Subcommand};
 
         #[derive(Debug, Parser)]
@@ -142,10 +196,14 @@ mod cli {
             /// Update RISC Zero toolchains
             #[command(after_help = help::INSTALL_HELP)]
             Install {
-                // #[command(flatten)]
-                // opts: dist::InstallToolchain,
                 #[command(subcommand)]
                 subcmd: InstallSubcmd,
+            },
+
+            /// Manage toolchains
+            Toolchain {
+                #[command(subcommand)]
+                subcmd: ToolchainSubcmd,
             },
 
             /// Show the active and installed toolchains
@@ -177,8 +235,26 @@ mod cli {
             /// Set the default RISC Zero toolchain
             Default,
 
-            /// Modify or query the installed toolchains
-            Toolchain,
+            /// Uninstall RISC Zero toolchains
+            Uninstall,
+        }
+
+        #[derive(Debug, Subcommand)]
+        pub enum ToolchainSubcmd {
+            /// List installed toolchains
+            List {
+                #[arg(short, long)]
+                verbose: bool,
+            },
+
+            /// Install or update a given toolchain
+            Install {
+                #[command(subcommand)]
+                subcmd: InstallSubcmd,
+            },
+
+            /// Build the toolchain
+            Build(build_toolchain::BuildToolchain),
         }
 
         #[derive(Debug, Subcommand)]
@@ -241,6 +317,7 @@ mod cli {
         ";
     }
 
+    #[allow(dead_code)]
     pub mod utils {
         use anyhow::{anyhow, Context};
         use anyhow::{bail, Result};
@@ -260,6 +337,17 @@ mod cli {
             };
 
             Ok(dir)
+        }
+
+        /// Make sure a binary exists and runs with the given arguments.
+        pub fn ensure_binary(command: &str, args: &[&str]) -> Result<()> {
+            Command::new(command)
+                .args(args)
+                .stdout(std::process::Stdio::piped())
+                .run_verbose()
+                .with_context(|| format!("Could not find or execute binary: {command}"))?;
+
+            Ok(())
         }
 
         pub trait CommandExt {
@@ -407,7 +495,7 @@ mod cli {
 
         use crate::cli::utils::risc0_data;
 
-        const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
+        pub const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
         #[derive(Default, Debug, Clone, Parser, ValueEnum)]
         pub enum ToolchainRepo {
@@ -785,6 +873,159 @@ mod cli {
             return Some("x86_64-pc-windows-msvc");
 
             None
+        }
+    }
+
+    pub mod build_toolchain {
+        use std::{
+            path::{Path, PathBuf},
+            process::Command,
+        };
+
+        use anyhow::{bail, Context, Result};
+        use clap::Parser;
+
+        use crate::{
+            cli::dist::{RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME},
+            cli::utils::{ensure_binary, CommandExt},
+        };
+
+        const CONFIG_TOML: &'static str = include_str!("config.toml");
+
+        /// `cargo risczero build-toolchain`
+        #[derive(Debug, Parser)]
+        pub struct BuildToolchain {
+            /// Version tag of the toolchain to build.
+            #[arg(long)]
+            version: Option<String>,
+        }
+
+        /// Output info of a successful rust toolchain build.
+        pub struct RustBuildOutput {
+            pub target: String,
+            pub toolchain_dir: PathBuf,
+        }
+
+        impl BuildToolchain {
+            pub fn run(&self) -> Result<()> {
+                eprintln!("Building the riscv32im-risc0-zkvm-elf toolchain...");
+
+                let root_dir = if let Ok(dir) = std::env::var("RISC0_BUILD_DIR") {
+                    PathBuf::from(dir)
+                } else {
+                    dirs::home_dir()
+                        .context("Could not determine home dir. Set RISC0_BUILD_DIR env var!")?
+                        .join(".rzup")
+                };
+                let rust_dir = root_dir.join("rust");
+
+                let tag = match &self.version {
+                    Some(tag) => tag,
+                    None => "risc0",
+                };
+                let is_ci = std::env::var("CI").is_ok();
+                if !is_ci {
+                    self.prepare_git_repo(ToolchainRepo::Rust.url(), tag, &rust_dir)?;
+                }
+
+                let out = self.build_toolchain(&rust_dir)?;
+                let tools_bin_dir = out.toolchain_dir.parent().unwrap().join("stage2-tools-bin");
+                let target_bin_dir = out.toolchain_dir.join("bin");
+
+                for tool in tools_bin_dir.read_dir()? {
+                    let tool = tool?;
+                    let tool_name = tool.file_name();
+                    eprintln!("copy tool: {tool_name:?}");
+                    std::fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+                }
+
+                RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &out.toolchain_dir)?;
+
+                Ok(())
+            }
+
+            /// Initialize a Git repo.
+            ///
+            /// Clone if it doesn't exist yet, otherwise update the branch/tag.
+            fn prepare_git_repo(&self, source: &str, tag: &str, path: &Path) -> Result<()> {
+                eprintln!("Preparing git repo {source} with tag/branch {tag}");
+                ensure_binary("git", &["--version"])?;
+
+                if !path.join(".git").is_dir() {
+                    Command::new("git")
+                        .args(["clone", source])
+                        .arg(path)
+                        .run_verbose()?;
+                } else {
+                    // fetch to update tag names. Otherwise, new git tags will not appear.
+                    Command::new("git")
+                        .args(["fetch", "--all", "--prune"])
+                        .current_dir(path)
+                        .run_verbose()?;
+                }
+
+                Command::new("git")
+                    .args(["checkout", tag])
+                    .current_dir(path)
+                    .run_verbose()?;
+
+                Command::new("git")
+                    .args(["reset", "--hard"])
+                    .current_dir(path)
+                    .run_verbose()?;
+
+                Command::new("git")
+                    .args(["submodule", "update", "--init", "--recursive", "--progress"])
+                    .current_dir(path)
+                    .run_verbose()?;
+
+                eprintln!("Git repo ready at {}", path.display());
+
+                Ok(())
+            }
+
+            fn build_toolchain(&self, rust_dir: &Path) -> Result<RustBuildOutput> {
+                std::fs::write(rust_dir.join("config.toml"), CONFIG_TOML)?;
+
+                let has_python3 = Command::new("python3").arg("--version").run().is_ok();
+                let python_cmd = if has_python3 { "python3" } else { "python" };
+
+                // Stage 1.
+                Command::new(python_cmd)
+                    .env(
+                        "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
+                        "-Cpasses=loweratomic",
+                    )
+                    .current_dir(&rust_dir)
+                    .args(["x.py", "build"])
+                    .run_verbose()?;
+
+                // Stage 2.
+                Command::new(python_cmd)
+                    .env(
+                        "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
+                        "-Cpasses=loweratomic",
+                    )
+                    .args(["x.py", "build", "--stage", "2"])
+                    .current_dir(&rust_dir)
+                    .run_verbose()?;
+
+                eprintln!("Rust build complete!");
+
+                for result in std::fs::read_dir(rust_dir.join("build"))? {
+                    let entry = result?;
+                    let toolchain_dir = entry.path().join("stage2");
+                    if toolchain_dir.is_dir() {
+                        let target = entry.file_name().to_string_lossy().to_string();
+                        return Ok(RustBuildOutput {
+                            target,
+                            toolchain_dir,
+                        });
+                    }
+                }
+
+                bail!("Could not find build directory")
+            }
         }
     }
 }

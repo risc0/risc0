@@ -1,0 +1,14 @@
+changelog-seen = 2
+
+[build]
+target = ["riscv32im-risc0-zkvm-elf"]
+extended = true
+tools = ["cargo", "cargo-clippy", "clippy", "rustfmt"]
+configure-args = []
+
+[rust]
+lld = true
+llvm-tools = true
+
+[llvm]
+download-ci-llvm = false
