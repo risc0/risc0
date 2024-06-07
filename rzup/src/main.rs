@@ -1,21 +1,83 @@
 use clap::Parser;
+use cli::dist::InstallToolchain;
 use cli::rzup_mode::RzupSubcmd;
+use cli::rzup_mode::ShowSubcmd;
+use cli::utils::risc0_data;
+use std::fs;
+use std::io::Write;
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let matches = cli::rzup_mode::Rzup::parse();
 
     let subcmd = matches.subcmd;
 
     match subcmd {
-        Some(RzupSubcmd::Install { .. }) => todo!(),
-        Some(RzupSubcmd::Show { .. }) => todo!(),
+        Some(RzupSubcmd::Install { .. }) => {
+            if let Err(e) = (InstallToolchain { version: None }).run() {
+                eprintln!("Error during installation: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some(RzupSubcmd::Show { verbose, subcmd }) => {
+            match subcmd {
+                Some(ShowSubcmd::ActiveToolchain { .. }) => {
+                    // Placeholder for active toolchain logic
+                    println!("Active toolchain logic not implemented yet.");
+                }
+                Some(ShowSubcmd::Home) => {
+                    // Placeholder for RZUP_HOME logic
+                    println!("RZUP_HOME logic not implemented yet.");
+                }
+                None => {
+                    // Call the function to list all installed toolchains
+                    if let Err(e) = show_installed_toolchains(verbose) {
+                        eprintln!("Error showing toolchains: {}", e);
+                        std::process::exit(1);
+                    }
+                }
+            }
+        }
         Some(RzupSubcmd::Check { .. }) => todo!(),
         Some(RzupSubcmd::Update { .. }) => todo!(),
         Some(RzupSubcmd::Toolchain { .. }) => todo!(),
         Some(RzupSubcmd::Default { .. }) => todo!(),
         None => todo!(),
     }
+}
+
+fn show_installed_toolchains(verbose: bool) -> anyhow::Result<()> {
+    let toolchains_dir = risc0_data()?.join("toolchains");
+
+    if !toolchains_dir.exists() {
+        eprintln!("No toolchains directory found.");
+        return Ok(());
+    }
+
+    let entries = fs::read_dir(&toolchains_dir)?
+        .filter_map(|res| res.ok())
+        .filter(|entry| entry.path().is_dir())
+        .collect::<Vec<_>>();
+
+    if entries.is_empty() {
+        println!("No installed toolchains found.");
+        return Ok(());
+    }
+
+    for entry in entries {
+        let toolchain_name = entry.file_name().to_string_lossy().to_string();
+        if verbose {
+            println!("Toolchain: {}", toolchain_name);
+            // Optionally add more detailed information about the toolchain here
+        } else {
+            // println!("{}", toolchain_name);
+            let mut stdout = StandardStream::stdout(ColorChoice::Always);
+            stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
+            writeln!(&mut stdout, "{}", toolchain_name)?;
+        }
+    }
+
+    Ok(())
 }
 
 mod cli {
@@ -101,7 +163,7 @@ mod cli {
         #[derive(Debug, Default, Args)]
         pub struct UpdateOpts {
             #[arg(
-                required = true,
+                required = false,
                 help = help::TOOLCHAIN_ARG_HELP,
                 num_args = 1..,
             )]
@@ -140,9 +202,14 @@ mod cli {
         ";
     }
 
-    mod utils {
+    pub mod utils {
+        use anyhow::{anyhow, Context};
         use anyhow::{bail, Result};
-        use std::path::PathBuf;
+        use fs2::FileExt;
+        use std::fmt;
+        use std::fs::{File, OpenOptions};
+        use std::path::{Path, PathBuf};
+        use std::process::{Command, ExitStatus, Output, Stdio};
 
         pub fn risc0_data() -> Result<PathBuf> {
             let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
@@ -155,11 +222,132 @@ mod cli {
 
             Ok(dir)
         }
+
+        pub trait CommandExt {
+            fn as_command_mut(&mut self) -> &mut Command;
+
+            fn capture_stdout(&mut self) -> Result<String> {
+                let cmd = self.as_command_mut();
+                let output = cmd.stderr(Stdio::inherit()).output_if_success()?;
+                let str = String::from_utf8(output.stdout)
+                    .map_err(|_| anyhow!("process output was not utf-8"))
+                    .with_context(|| format!("failed to execute {:?}", cmd))?;
+                Ok(str)
+            }
+
+            fn run_verbose(&mut self) -> Result<()> {
+                let cmd = self.as_command_mut();
+                eprintln!(
+                    "Running {} {}:",
+                    cmd.get_program().to_string_lossy(),
+                    cmd.get_args()
+                        .map(|x| x.to_string_lossy())
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                );
+                self.run()
+            }
+
+            fn run(&mut self) -> Result<()> {
+                let cmd = self.as_command_mut();
+                cmd.stderr(Stdio::inherit())
+                    .stdout(Stdio::inherit())
+                    .stdin(Stdio::inherit())
+                    .output_if_success()?;
+                Ok(())
+            }
+
+            fn output_if_success(&mut self) -> Result<Output> {
+                let cmd = self.as_command_mut();
+                let output = cmd
+                    .output()
+                    .with_context(|| format!("failed to create process {:?}", cmd))?;
+                check_success(cmd, &output.status, &output.stdout, &output.stderr)?;
+                Ok(output)
+            }
+        }
+
+        impl CommandExt for Command {
+            fn as_command_mut(&mut self) -> &mut Command {
+                self
+            }
+        }
+
+        pub fn check_success(
+            cmd: &Command,
+            status: &ExitStatus,
+            stdout: &[u8],
+            stderr: &[u8],
+        ) -> Result<()> {
+            if status.success() {
+                return Ok(());
+            }
+            Err(ProcessError {
+                cmd_desc: format!("{:?}", cmd),
+                status: *status,
+                stdout: stdout.to_vec(),
+                stderr: stderr.to_vec(),
+                hidden: false,
+            }
+            .into())
+        }
+
+        #[derive(Debug)]
+        struct ProcessError {
+            status: ExitStatus,
+            #[allow(dead_code)]
+            hidden: bool,
+            stdout: Vec<u8>,
+            stderr: Vec<u8>,
+            cmd_desc: String,
+        }
+
+        impl fmt::Display for ProcessError {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "failed to execute {}", self.cmd_desc)?;
+                write!(f, "\n    status: {}", self.status)?;
+                if !self.stdout.is_empty() {
+                    let stdout = String::from_utf8_lossy(&self.stdout);
+                    let stdout = stdout.replace('\n', "\n        ");
+                    write!(f, "\n    stdout:\n        {}", stdout)?;
+                }
+                if !self.stderr.is_empty() {
+                    let stderr = String::from_utf8_lossy(&self.stderr);
+                    let stderr = stderr.replace('\n', "\n        ");
+                    write!(f, "\n    stderr:\n        {}", stderr)?;
+                }
+                Ok(())
+            }
+        }
+
+        impl std::error::Error for ProcessError {}
+
+        pub struct FileLock(File);
+
+        impl Drop for FileLock {
+            fn drop(&mut self) {
+                drop(self.0.unlock());
+            }
+        }
+
+        pub fn flock(path: &Path) -> Result<FileLock> {
+            let parent = path.parent().unwrap();
+            std::fs::create_dir_all(parent)
+                .context(format!("failed to create directory `{}`", parent.display()))?;
+            let file = OpenOptions::new()
+                .create(true)
+                .read(true)
+                .write(true)
+                .open(path)?;
+            file.lock_exclusive()?;
+            return Ok(FileLock(file));
+        }
     }
 
     #[allow(dead_code)]
-    mod dist {
+    pub mod dist {
 
+        use crate::cli::utils::{flock, CommandExt};
         use anyhow::{bail, Context, Result};
         use clap::Parser;
         use downloader::{Download, Downloader};
@@ -176,6 +364,8 @@ mod cli {
         use xz::read::XzDecoder;
 
         use crate::cli::utils::risc0_data;
+
+        const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
         enum ToolchainRepo {
             Rust,
@@ -263,14 +453,60 @@ mod cli {
             fn find_by_name(name: &str) -> Result<Option<Self>, anyhow::Error> {
                 let out = Command::new("rustup")
                     .args(["toolchain", "list", "--verbose"])
-                    .output()
-                    .expect("failed to run rustup");
+                    .capture_stdout()?;
+
                 let path_raw = out
-                    .stdout
                     .lines()
                     .find(|line| line.trim().starts_with(name))
                     .and_then(|line| line.strip_prefix(name))
                     .map(|line| line.trim());
+
+                if let Some(path) = path_raw {
+                    Ok(Some(Self {
+                        name: name.to_string(),
+                        path: path.into(),
+                    }))
+                } else {
+                    Ok(None)
+                }
+            }
+
+            pub fn link(name: &str, dir: &Path) -> Result<Self> {
+                eprintln!("Activating rustup toolchain {} at {}", name, dir.display());
+
+                #[cfg(not(target_os = "windows"))]
+                let rustc_exe = "rustc";
+
+                #[cfg(target_os = "windows")]
+                let rustc_exe = "rustc.exe";
+
+                let rustc_path = dir.join("bin").join(rustc_exe);
+                if !rustc_path.is_file() {
+                    bail!(
+                        "Invalid toolchain directory: rustc executable not found at {}",
+                        rustc_path.display()
+                    );
+                }
+
+                if Self::find_by_name(name)?.is_some() {
+                    Command::new("rustup")
+                        .args(["toolchain", "remove", name])
+                        .run()
+                        .context("Could not remove existing toolchain")?;
+                }
+
+                Command::new("rustup")
+                    .args(["toolchain", "link", name])
+                    .arg(dir)
+                    .run_verbose()
+                    .context("Could not link toolchain: rustup not installed?")?;
+
+                eprintln!("rusutp toolcahin {name} was linked sucessfully");
+
+                Ok(Self {
+                    name: name.to_string(),
+                    path: dir.into(),
+                })
             }
         }
 
@@ -289,9 +525,9 @@ mod cli {
         }
 
         #[derive(Parser)]
-        struct InstallToolchain {
+        pub struct InstallToolchain {
             #[arg(long)]
-            version: Option<String>,
+            pub version: Option<String>,
         }
 
         impl InstallToolchain {
@@ -479,6 +715,48 @@ mod cli {
                     bail!("The risc0 toolchain is not available for download on this platform. Build it yourself with: 'cargo risczero build-toolchain'")
                 }
             }
+
+            pub fn run(&self) -> Result<()> {
+                let root_dir = risc0_data()?;
+                let lockfile_path = root_dir.join("rustup-lock");
+                let _lock = flock(&lockfile_path);
+
+                let toolchain_dir = root_dir.join("toolchains");
+                let (rust_chain, cpp_chain) = self.install_prebuilt_toolchains(&toolchain_dir)?;
+
+                eprintln!(
+                    "Rust Toolchain {} downloaded and installed to path {}.",
+                    rust_chain.name,
+                    rust_chain.path.display()
+                );
+                eprintln!(
+                    "C++ Toolchain downloaded and installed to path {}.",
+                    cpp_chain.path.display()
+                );
+                eprintln!("The risc0 toolchain is now ready to use.");
+
+                Ok(())
+            }
+        }
+
+        /// Try to get the host target triple.
+        ///
+        /// Only checks for targets that have pre-built toolchains.
+        #[allow(unreachable_code)]
+        fn guess_host_target() -> Option<&'static str> {
+            #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+            return Some("x86_64-unknown-linux-gnu");
+
+            #[cfg(all(target_arch = "x86_64", target_os = "macos"))]
+            return Some("x86_64-apple-darwin");
+
+            #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+            return Some("aarch64-apple-darwin");
+
+            #[cfg(all(target_arch = "x86_64", target_os = "windows"))]
+            return Some("x86_64-pc-windows-msvc");
+
+            None
         }
     }
 }

@@ -4092,6 +4092,7 @@ dependencies = [
  "dirs",
  "downloader",
  "flate2",
+ "fs2",
  "fs_extra",
  "reqwest 0.11.27",
  "reqwest-middleware 0.3.1",
@@ -4100,6 +4101,7 @@ dependencies = [
  "serde_json",
  "tar",
  "tempfile",
+ "termcolor",
  "tokio",
  "xz",
 ]
@@ -4502,6 +4504,15 @@ dependencies = [
  "dirs-next",
  "rustversion",
  "winapi",
+]
+
+[[package]]
+name = "termcolor"
+version = "1.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755"
+dependencies = [
+ "winapi-util",
 ]
 
 [[package]]
