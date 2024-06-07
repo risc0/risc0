@@ -6,6 +6,8 @@ import { DATASHEET_DESCRIPTION } from "../_utils/constants";
 import { DatasheetContent } from "./_components/datasheet-content";
 import { DatasheetSkeleton } from "./_components/datasheet-skeleton";
 
+export const dynamic = 'force-dynamic';
+
 export function generateStaticParams() {
   return VERSIONS.map(({ value }) => ({
     version: value,
