@@ -14,6 +14,17 @@ let config = deepmerge(nextConfigBase, {
       static: 30,
     },
   },
+
+  // biome-ignore lint/suspicious/useAwait: needs to be async
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: latestVersion ? `/${latestVersion}` : "/",
+        permanent: true,
+      },
+    ];
+  },
 });
 
 if (process.env.ANALYZE === "true") {
