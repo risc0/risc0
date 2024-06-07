@@ -6158,6 +6158,7 @@ dependencies = [
  "primitive-types",
  "revm",
  "serde",
+ "serde_json",
  "tokio",
 ]
 
