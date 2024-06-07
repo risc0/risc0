@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { all } from "radash";
-import { RenderedTimeAgo } from "shared/client/components/rendered-time-ago";
 import type { Version } from "~/types/version";
 import { fetchDatasheet } from "../_actions/fetch-datasheet";
 import { DatasheetTable } from "./datasheet-table";
@@ -32,14 +31,11 @@ export async function DatasheetContent({ version }: { version: Version }) {
   const data: DatasheetTableSchema[][] = await all(dataPromises);
 
   return data.map((dataArray, index) => (
-    <>
-      <RenderedTimeAgo timestamp={Date.now()} />
-      <DatasheetTable
-        key={Object.keys(FILENAMES_TO_TITLES)[index]}
-        data={dataArray}
-        title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
-        columns={datasheetTableColumns}
-      />
-    </>
+    <DatasheetTable
+      key={Object.keys(FILENAMES_TO_TITLES)[index]}
+      data={dataArray}
+      title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
+      columns={datasheetTableColumns}
+    />
   ));
 }
