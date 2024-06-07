@@ -7,12 +7,6 @@ import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
 import { REPORTS } from "./_utils/constants";
 
-export function generateStaticParams() {
-  return VERSIONS.map(({ value }) => ({
-    version: value,
-  }));
-}
-
 export default function ReportsPage({
   params,
 }: {
