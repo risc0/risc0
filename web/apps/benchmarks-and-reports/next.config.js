@@ -8,18 +8,10 @@ import { latestVersion } from "./src/versions.js";
 /** @type {import("next").NextConfig} */
 let config = deepmerge(nextConfigBase, {
   experimental: {
-    ppr: true,
-  },
-
-  // biome-ignore lint/suspicious/useAwait: needs to be async
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: latestVersion ? `/${latestVersion}` : "/",
-        permanent: true,
-      },
-    ];
+    staleTimes: {
+      dynamic: 0,
+      static: 0,
+    },
   },
 });
 
