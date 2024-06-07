@@ -11,7 +11,7 @@ let config = deepmerge(nextConfigBase, {
     ppr: false,
     staleTimes: {
       dynamic: 30,
-      static: 30,
+      static: 180,
     },
   },
 
