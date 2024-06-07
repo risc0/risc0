@@ -9,7 +9,7 @@ import { ApplicationsBenchmarksContent } from "./_components/applications-benchm
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./_utils/constants";
 
-export const dynamic = "force-static";
+export const dynamic = "error";
 
 export function generateMetadata({
   params,

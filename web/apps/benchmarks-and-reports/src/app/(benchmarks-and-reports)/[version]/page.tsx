@@ -5,7 +5,7 @@ import { useRedirectIfWrongVersion } from "~/hooks/use-redirect-if-wrong-version
 import type { Version } from "~/types/version";
 import { REPORTS } from "./_utils/constants";
 
-export const dynamic = "force-static";
+export const dynamic = "error";
 
 export default function ReportsPage({
   params,

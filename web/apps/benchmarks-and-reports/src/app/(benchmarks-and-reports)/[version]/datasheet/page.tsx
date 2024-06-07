@@ -5,7 +5,7 @@ import { DATASHEET_DESCRIPTION } from "../_utils/constants";
 import { DatasheetContent } from "./_components/datasheet-content";
 import { DatasheetSkeleton } from "./_components/datasheet-skeleton";
 
-export const dynamic = "force-static";
+export const dynamic = "error";
 
 export const metadata: Metadata = {
   title: "Datasheet",
