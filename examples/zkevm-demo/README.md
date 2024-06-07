@@ -37,8 +37,14 @@ RUST_LOG=info cargo run --release -F cuda -- -t 0x671a3b40ecb7d51b209e68392df2d3
 
 ## Testing
 
-The RPC URL used by tests is: https://rpc.flashbots.net/.
+To prepare the test, download a test transaction:
 
 ```bash
-cargo test
+cargo run -p zkevm-core
+```
+
+Then run the test with:
+
+```bash
+cargo test -p zkevm-core
 ```
