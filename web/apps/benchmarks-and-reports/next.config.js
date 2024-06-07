@@ -8,7 +8,7 @@ import { latestVersion } from "./src/versions.js";
 /** @type {import("next").NextConfig} */
 let config = deepmerge(nextConfigBase, {
   experimental: {
-    ppr: true,
+    ppr: false,
     staleTimes: {
       dynamic: 30,
       static: 30,
