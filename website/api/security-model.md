@@ -33,7 +33,7 @@ In order to use these components, developers provide:
 
 **RISC Zero technology cannot prevent many types of security issues in user guest programs (e.g. applications) or contracts. It is necessary for zkVM adopters to validate the security of guest programs and contracts. This includes secure development life-cycles and external security auditing by qualified providers.**
 
-![Security Model Diagram](../static/diagrams/security-model-diagram.svg)
+![Security Model Diagram](/diagrams/security-model-diagram.svg)
 
 ## Zero-Knowledge Proving
 
@@ -89,7 +89,7 @@ At $2^{98}$ [bits] of security required to force a collision, we can estimate th
 `2^98 / (25,000,000,000 Hashes/s * 1,000,000 GPUs) / 60seconds / 60 minutes / 24 hours / 365 days = 401969 years`
 
 The analysis for bits of security for the RISC-V and Recursion Prover can be found in the [security calculator].
-For a detailed cryptographic description of our STARK system, we refer readers to [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity].
+For a detailed cryptographic description of our STARK system, we refer readers to [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity][proof-system].
 
 ## The STARK to SNARK Translator
 
@@ -114,10 +114,10 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [deterministically]: /terminology#deterministic-builds
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
 [receipt claim]: /terminology#receipt-claim
-[RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: pathname:///proof-system-in-detail.pdf
-[RISC Zero zkVM]: ../zkvm
+[proof-system]: pathname:///proof-system-in-detail.pdf
+[RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
-[Verifier Contract]: ../blockchain-integration/contracts/verifier
+[Verifier Contract]: ./blockchain-integration/contracts/verifier
 [VersionManagement@main]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md

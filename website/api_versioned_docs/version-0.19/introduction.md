@@ -15,7 +15,7 @@ Welcome to the [RISC Zero] documentation! This site contains documentation for:
 - **[The RISC Zero Proof System]**:
   The cryptographic techniques underlying the zkVM.
 
-We also have reference documentation for our Rust code, which can be found at [https://docs.rs/risc0-zkvm/](https://docs.rs/risc0-zkvm) for the `risc0-zkvm` crate. For our other Rust crates, links to their reference docs can be found in [this list](https://github.com/risc0/risc0#rust-libraries).
+We also have reference documentation for our Rust code, which can be found at [https://docs.rs/risc0-zkvm/][docs.rs] for the `risc0-zkvm` crate. For our other Rust crates, links to their reference docs can be found in [this list](https://github.com/risc0/risc0#rust-libraries).
 
 ---
 
@@ -101,3 +101,4 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 [Bonsai]: bonsai/bonsai-overview.md
 [The RISC Zero Proof System]: /proof-system
 [computational receipt]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/struct.Receipt.html
+[docs.rs]: https://docs.rs/risc0-zkvm/0.19/

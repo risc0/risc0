@@ -71,7 +71,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [Discord]: https://discord.gg/risczero
 [examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [execute]: /terminology#execute
-[execution environment]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnv.html
+[execution environment]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/struct.ExecutorEnv.html
 [executor]: /terminology#executor
 [guest]: /terminology#guest
 [`guest` module]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest
