@@ -10,8 +10,6 @@ import { ApplicationsBenchmarksContent } from "./_components/applications-benchm
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./_utils/constants";
 
-export const dynamic = 'force-dynamic';
-
 export function generateStaticParams() {
   return VERSIONS.flatMap(({ value }) => {
     return Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[value]).map((filename) => ({
