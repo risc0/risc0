@@ -7,7 +7,7 @@ export async function fetchDatasheetCommitHash({ version }: { version: Version }
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/COMMIT_HASH.txt`,
     {
-      next: { revalidate: 60, tags: ["fetch-datasheet-commit-hash"] }, // 1 minute cache
+      next: { revalidate: 10, tags: ["fetch-datasheet-commit-hash"] }, // 1 minute cache
     },
   );
 
