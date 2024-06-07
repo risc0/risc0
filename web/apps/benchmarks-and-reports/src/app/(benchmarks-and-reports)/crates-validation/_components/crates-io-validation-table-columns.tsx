@@ -92,14 +92,14 @@ export const cratesIoValidationTableColumns = [
             <Badge
               title={info.getValue()}
               variant="secondary"
-              className="relative line-clamp-5 max-w-lg cursor-pointer font-mono text-[10px] md:max-w-max"
+              className="relative line-clamp-5 max-w-lg cursor-pointer font-mono border-none text-[10px] md:max-w-max"
             >
               <pre>{resultString}</pre>
 
               <Button
                 size="sm"
                 variant="outline"
-                className="absolute bottom-1 left-1 text-destructive"
+                className="absolute bottom-1 left-1 text-[10px] text-destructive"
                 startIcon={<EyeIcon />}
               >
                 View Build Errors

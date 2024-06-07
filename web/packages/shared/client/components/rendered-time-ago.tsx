@@ -1,11 +1,12 @@
 "use client";
 
+import { noop } from "@tanstack/react-table";
 import ms from "ms";
 import { useEffect, useRef, useState } from "react";
 
 // https://github.com/streamich/react-use/blob/master/src/useInterval.ts
-const useInterval = (callback: Function, delay?: number | null) => {
-  const savedCallback = useRef<Function>(() => {});
+const useInterval = (callback, delay?: number | null) => {
+  const savedCallback = useRef(noop);
 
   useEffect(() => {
     savedCallback.current = callback;
@@ -41,18 +42,12 @@ export function RenderedTimeAgo({ timestamp }: { timestamp: number }) {
     >
       {msAgo ? (
         <>
-          <span
-            // https://react.dev/reference/react-dom/hydrate#suppressing-unavoidable-hydration-mismatch-errors
-            suppressHydrationWarning={true}
-            className="font-semibold tabular-nums text-gray-900"
-          >
+          <span suppressHydrationWarning={true} className="font-semibold tabular-nums text-gray-900">
             {msAgo >= 1000 ? ms(msAgo) : "0s"}
           </span>{" "}
           <span className="text-gray-600">ago</span>
         </>
       ) : null}
-
-      <span>timestamp: {timestamp}</span>
     </div>
   );
 }
