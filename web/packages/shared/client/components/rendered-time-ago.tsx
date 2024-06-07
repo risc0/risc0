@@ -51,6 +51,8 @@ export function RenderedTimeAgo({ timestamp }: { timestamp: number }) {
           <span className="text-gray-600">ago</span>
         </>
       ) : null}
+
+      <span>timestamp: {timestamp}</span>
     </div>
   );
 }
