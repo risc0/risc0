@@ -1,6 +1,6 @@
 > [!IMPORTANT]
 > `main` is the development branch.
-> When building applications or running examples, use the [latest release](https://github.com/risc0/risc0-ethereum/releases) instead.
+> When building applications or running examples, use the [latest release](https://github.com/risc0/risc0/releases) instead.
 
 <p align="center">
   <a href="https://risczero.com" target="_blank"><img src="website/static/img/logo.png" height="100"></a>
