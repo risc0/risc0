@@ -10,8 +10,8 @@ let config = deepmerge(nextConfigBase, {
   experimental: {
     ppr: true,
     staleTimes: {
-      dynamic: 0,
-      static: 0,
+      dynamic: 30,
+      static: 30,
     },
   },
 });
