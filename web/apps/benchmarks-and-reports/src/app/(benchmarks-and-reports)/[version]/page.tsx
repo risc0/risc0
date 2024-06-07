@@ -7,6 +7,8 @@ import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
 import { REPORTS } from "./_utils/constants";
 
+export const dynamic = "force-static";
+
 export default function ReportsPage({
   params,
 }: {
