@@ -16,5 +16,8 @@ export async function fetchApplicationsBenchmarksCommitHash({ version }: { versi
     throw error || new Error("Failed to fetch");
   }
 
-  return await response.text();
+  return {
+    data: await response.text(),
+    fetchedAt: Date.now(),
+  };
 }

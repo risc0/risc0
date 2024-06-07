@@ -2,7 +2,10 @@ import "server-only";
 
 import { tryFetch } from "shared/utils/try-fetch";
 
-export async function findMostRecentHash(): Promise<string> {
+export async function findMostRecentHash(): Promise<{
+  data: string;
+  fetchedAt: number;
+}> {
   const [error, response] = await tryFetch(
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
@@ -22,5 +25,8 @@ export async function findMostRecentHash(): Promise<string> {
     prev.timestamp > current.timestamp ? prev : current,
   );
 
-  return mostRecent.hash;
+  return {
+    data: mostRecent.hash,
+    fetchedAt: Date.now(),
+  };
 }

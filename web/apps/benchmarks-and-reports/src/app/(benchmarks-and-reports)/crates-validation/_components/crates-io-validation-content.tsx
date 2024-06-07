@@ -6,7 +6,7 @@ import { CratesIoValidationTable } from "./crates-io-validation-table";
 import { cratesIoValidationTableColumns } from "./crates-io-validation-table-columns";
 
 export async function CratesIoValidationContent() {
-  const hash = await findMostRecentHash();
+  const { data: hash } = await findMostRecentHash();
   const cratesValidationResults = await fetchCratesValidationResults({
     hash,
   });
