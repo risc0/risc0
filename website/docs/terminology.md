@@ -143,10 +143,28 @@ The host program loads the [guest program] and provides inputs to the guest prog
 A small cryptographic identifier that indicates the [method] or boot image for zkVM [execution]. <br/>
 See also: [ImageID documentation], [ImageID excerpt from Study Club], [segment]
 
+### Join
+
+Run the join program to compress two [SuccinctReceipt]s in the same [Session] into one.
+
+By repeated application of the join program, any number of receipts for execution spans within the same session can be compressed into a single receipt for the entire session.
+
+See also: [join() documentation]
+
+
+https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
+
 ### Journal
 
 The portion of the [receipt] that contains the public outputs of a [zkVM] application. <br/>
 See also: [commit]
+
+### Lift
+
+Run the lift program to transform [SegmentReceipt] into a [SuccinctReceipt].
+
+The lift program verifies the rv32im circuit STARK proof inside the recursion circuit, resulting in a recursion circuit STARK proof. This recursion proof has a single constant-time verification procedure, with respect to the original segment length, and is then used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).<br/>
+See also: [lift() documentation]
 
 ### Method
 
@@ -290,7 +308,9 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [imageID]: #image-id
 [ImageID documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
 [ImageID excerpt from Study Club]: https://www.youtube.com/watch?v=QwzrBHHkzFE&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=4
+[join() documentation]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
 [journal]: #journal
+[lift() documentation]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
 [method]: #method
 [prove]: #prove
 [proves]: #prove
