@@ -1,4 +1,5 @@
 import { pick } from "radash";
+import { RenderedTimeAgo } from "shared/client/components/rendered-time-ago";
 import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
 import type { Version } from "~/types/version";
 import { fetchApplicationsBenchmarks } from "../_actions/fetch-applications-benchmarks";
@@ -17,11 +18,14 @@ export async function ApplicationsBenchmarksContent({ version, currentTab }: { v
   }
 
   return (
-    <ApplicationsBenchmarksTable
-      title={currentApplicationName}
-      columns={applicationsBenchmarksTableColumns}
-      version={version}
-      data={convertCsvToJson(data).filter((element) => element.name ?? element.job_name)}
-    />
+    <>
+      <RenderedTimeAgo timestamp={Date.now()} />
+      <ApplicationsBenchmarksTable
+        title={currentApplicationName}
+        columns={applicationsBenchmarksTableColumns}
+        version={version}
+        data={convertCsvToJson(data).filter((element) => element.name ?? element.job_name)}
+      />
+    </>
   );
 }

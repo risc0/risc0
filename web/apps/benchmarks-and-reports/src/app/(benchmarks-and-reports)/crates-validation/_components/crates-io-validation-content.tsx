@@ -1,3 +1,4 @@
+import { RenderedTimeAgo } from "shared/client/components/rendered-time-ago";
 import { fetchCratesValidationResults } from "../_actions/fetch-crates-validation-results";
 import { findMostRecentHash } from "../_actions/find-most-recent-hash";
 import { CratesIoValidationSummary } from "./crates-io-validation-summary";
@@ -13,6 +14,7 @@ export async function CratesIoValidationContent() {
 
   return (
     <>
+      <RenderedTimeAgo timestamp={Date.now()} />
       <CratesIoValidationSummaryHeader data={cratesValidationResults} />
       <CratesIoValidationSummary data={cratesValidationResults} />
       <CratesIoValidationTable data={cratesValidationResults} columns={cratesIoValidationTableColumns} />

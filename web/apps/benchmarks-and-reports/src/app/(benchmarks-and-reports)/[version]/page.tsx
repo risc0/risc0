@@ -1,5 +1,6 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
 import Image from "next/image";
+import { RenderedTimeAgo } from "shared/client/components/rendered-time-ago";
 import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
 import { useRedirectIfWrongVersion } from "~/hooks/use-redirect-if-wrong-version";
 import type { Version } from "~/types/version";
@@ -23,6 +24,7 @@ export default function ReportsPage({
 
   return (
     <div className="container grid max-w-screen-3xl grid-cols-1 gap-10 pt-4 lg:grid-cols-2">
+      <RenderedTimeAgo timestamp={Date.now()} />
       {REPORTS.map(({ label, href, description, showVersionSelect }, index) => (
         <ProgressBarLink key={href} href={`${showVersionSelect ? `/${params.version}` : ""}${href}`} className="group">
           <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 border-2 border-border px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12 hover:border-primary">
