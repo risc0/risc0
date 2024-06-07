@@ -42,7 +42,7 @@ export function RenderedTimeAgo({ timestamp }: { timestamp: number }) {
     >
       {msAgo ? (
         <>
-          <span suppressHydrationWarning={true} className="font-semibold tabular-nums text-gray-900">
+          <span suppressHydrationWarning={true} className="font-semibold text-gray-900 tabular-nums">
             {msAgo >= 1000 ? ms(msAgo) : "0s"}
           </span>{" "}
           <span className="text-gray-600">ago</span>
