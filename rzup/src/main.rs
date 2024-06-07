@@ -1,5 +1,7 @@
 use clap::Parser;
 use cli::dist::InstallToolchain;
+use cli::dist::ToolchainRepo;
+use cli::rzup_mode::InstallSubcmd;
 use cli::rzup_mode::RzupSubcmd;
 use cli::rzup_mode::ShowSubcmd;
 use cli::utils::risc0_data;
@@ -13,10 +15,41 @@ fn main() {
     let subcmd = matches.subcmd;
 
     match subcmd {
-        Some(RzupSubcmd::Install { .. }) => {
-            if let Err(e) = (InstallToolchain { version: None }).run() {
-                eprintln!("Error during installation: {}", e);
-                std::process::exit(1);
+        Some(RzupSubcmd::Install { subcmd }) => {
+            match subcmd {
+                InstallSubcmd::Rust { toolchain } => {
+                    // Install Rust toolchain
+                    InstallToolchain {
+                        toolchain: Some(toolchain),
+                        repo: ToolchainRepo::Rust,
+                    }
+                    .run()
+                    .expect("Error during Rust toolchain installation");
+                }
+                InstallSubcmd::Cpp { toolchain } => {
+                    // Install C++ toolchain
+                    InstallToolchain {
+                        toolchain: Some(toolchain),
+                        repo: ToolchainRepo::Cpp,
+                    }
+                    .run()
+                    .expect("Error during C++ toolchain installation");
+                }
+                InstallSubcmd::All => {
+                    // Install all toolchains
+                    InstallToolchain {
+                        toolchain: None,
+                        repo: ToolchainRepo::Rust,
+                    }
+                    .run()
+                    .expect("Error during Rust toolchain installation");
+                    InstallToolchain {
+                        toolchain: None,
+                        repo: ToolchainRepo::Cpp,
+                    }
+                    .run()
+                    .expect("Error during C++ toolchain installation");
+                }
             }
         }
         Some(RzupSubcmd::Show { verbose, subcmd }) => {
@@ -84,7 +117,7 @@ mod cli {
 
     pub mod rzup_mode {
         use crate::cli::{common, help};
-        use clap::{Args, Parser, Subcommand};
+        use clap::{Parser, Subcommand};
 
         #[derive(Debug, Parser)]
         #[command(
@@ -109,8 +142,10 @@ mod cli {
             /// Update RISC Zero toolchains
             #[command(after_help = help::INSTALL_HELP)]
             Install {
-                #[command(flatten)]
-                opts: UpdateOpts,
+                // #[command(flatten)]
+                // opts: dist::InstallToolchain,
+                #[command(subcommand)]
+                subcmd: InstallSubcmd,
             },
 
             /// Show the active and installed toolchains
@@ -160,24 +195,28 @@ mod cli {
             Home,
         }
 
-        #[derive(Debug, Default, Args)]
-        pub struct UpdateOpts {
-            #[arg(
-                required = false,
-                help = help::TOOLCHAIN_ARG_HELP,
-                num_args = 1..,
-            )]
-            pub toolchain: Vec<String>,
-
-            /// Install cargo-risczero
-            #[arg(long)]
-            pub install_cargo_risczero: bool,
+        #[derive(Debug, Subcommand)]
+        pub enum InstallSubcmd {
+            /// Install Rust toolchain
+            Rust {
+                /// Toolchain version (i.e. stable)
+                #[arg(required = false)]
+                toolchain: String,
+            },
+            /// Install C++ toolchain
+            Cpp {
+                /// Toolchain version
+                #[arg(required = false)]
+                toolchain: String,
+            },
+            /// Install all avaliable toolchains
+            All,
         }
     }
 
     mod common {
         pub fn version() -> &'static str {
-            "0.0.0"
+            "0.2.0"
         }
     }
 
@@ -347,9 +386,12 @@ mod cli {
     #[allow(dead_code)]
     pub mod dist {
 
+        use crate::cli::help;
         use crate::cli::utils::{flock, CommandExt};
-        use anyhow::{bail, Context, Result};
+        use anyhow::{anyhow, bail, Context, Result};
+        use clap::Args;
         use clap::Parser;
+        use clap::ValueEnum;
         use downloader::{Download, Downloader};
         use flate2::bufread::GzDecoder;
         use fs_extra::dir::CopyOptions;
@@ -367,9 +409,12 @@ mod cli {
 
         const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
-        enum ToolchainRepo {
+        #[derive(Default, Debug, Clone, Parser, ValueEnum)]
+        pub enum ToolchainRepo {
+            #[default]
             Rust,
             Cpp,
+            All,
         }
 
         impl ToolchainRepo {
@@ -377,6 +422,7 @@ mod cli {
                 match self {
                     Self::Rust => "https://github.com/risc0/rust.git",
                     Self::Cpp => "https://github.com/risc0/toolchain.git",
+                    Self::All => todo!(),
                 }
             }
 
@@ -388,6 +434,7 @@ mod cli {
                         "x86_64-unknown-linux-gnu" => "riscv32im-linux-x86_64.tar.xz".to_string(),
                         _ => panic!("binaries for {target} are not available"),
                     },
+                    Self::All => todo!(),
                 }
             }
 
@@ -395,6 +442,7 @@ mod cli {
                 match self {
                     Self::Rust => "rust",
                     Self::Cpp => "cpp",
+                    Self::All => todo!(),
                 }
             }
         }
@@ -524,10 +572,15 @@ mod cli {
             name: String,
         }
 
-        #[derive(Parser)]
+        #[derive(Debug, Default, Args)]
         pub struct InstallToolchain {
-            #[arg(long)]
-            pub version: Option<String>,
+            #[arg(
+                required = false,
+                help = help::TOOLCHAIN_ARG_HELP,
+                num_args = 1..,
+            )]
+            pub toolchain: Option<String>,
+            pub repo: ToolchainRepo,
         }
 
         impl InstallToolchain {
@@ -539,10 +592,11 @@ mod cli {
             ) -> Result<(String, String)> {
                 let tag = match repo {
                     ToolchainRepo::Rust => self
-                        .version
+                        .toolchain
                         .clone()
                         .map_or("latest".to_string(), |tag| format!("tags/{tag}")),
                     ToolchainRepo::Cpp => "tags/2024.01.05".to_string(),
+                    ToolchainRepo::All => todo!(),
                 };
 
                 let repo_name = repo
@@ -587,7 +641,6 @@ mod cli {
                 toolchain_root_dir: &Path,
                 repo: &ToolchainRepo,
             ) -> Result<PathBuf> {
-                // TODO: Add github access token to avoid rate limiting
                 let headers = HeaderMap::new();
 
                 let client = Client::builder()
@@ -607,9 +660,8 @@ mod cli {
                     rt.block_on(self.get_download_url(&client, target, repo))?;
 
                 let toolchain_dir =
-                    toolchain_root_dir.join(format!("{}_{target}_{}", repo.language(), tag_name));
+                    toolchain_root_dir.join(format!("{}-{}-{target}", tag_name, repo.language()));
 
-                // TODO: Check about deleting toolchains
                 if toolchain_dir.is_dir() {
                     eprintln!(
                         "Toolchain path {} already exists - deleting existing files!",
@@ -618,7 +670,6 @@ mod cli {
                     std::fs::remove_dir_all(&toolchain_dir)?;
                 }
 
-                // Download the toolchain
                 eprintln!(
                     "Downloading {} toolchain from '{}'...",
                     repo.language(),
@@ -645,96 +696,73 @@ mod cli {
                             let mut archive = Archive::new(decoder);
                             archive.unpack(toolchain_dir.clone())?;
                         }
+                        ToolchainRepo::All => todo!(),
                     }
                 }
 
                 Ok(toolchain_dir)
             }
 
-            fn download_toolchains(
-                &self,
-                target: &str,
-                toolchains_root_dir: &Path,
-            ) -> Result<(PathBuf, PathBuf)> {
-                let cpp_toolchain_dir =
-                    self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::Cpp)?;
-                eprintln!(
-                    "Downloaded C++ toolchain to {}",
-                    cpp_toolchain_dir.display()
-                );
-
-                let rust_toolchain_dir =
-                    self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::Rust)?;
-
-                let rust_dir = rust_toolchain_dir.clone();
-
-                #[cfg(target_family = "unix")]
-                {
-                    use std::os::unix::fs::PermissionsExt;
-
-                    let iter1 = std::fs::read_dir(rust_dir.join("bin"))?;
-                    let iter2 =
-                        std::fs::read_dir(rust_dir.join(format!("lib/rustlib/{target}/bin")))?;
-
-                    // make executable
-                    for res in iter1.chain(iter2) {
-                        let entry = res?;
-                        if entry.file_type()?.is_file() {
-                            let mut perms = entry.metadata()?.permissions();
-                            perms.set_mode(0o755);
-                            std::fs::set_permissions(entry.path(), perms)?;
-                        }
-                    }
-                }
-
-                eprintln!(
-                    "Downloaded Rust toolchain to {}",
-                    rust_toolchain_dir.display()
-                );
-
-                Ok((rust_toolchain_dir, cpp_toolchain_dir))
-            }
-
-            fn install_prebuilt_toolchains(
-                &self,
-                toolchain_dir: &Path,
-            ) -> Result<(RustupToolchain, CppToolchain)> {
-                if let Some(target) = guess_host_target() {
-                    match self.download_toolchains(target, toolchain_dir) {
-                        Ok((rust_path, cpp_path)) => {
-                            let rust = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
-                            let cpp = CppToolchain::link(&cpp_path)?;
-                            Ok((rust, cpp))
-                        }
-                        Err(err) => {
-                            eprintln!("Could not download pre-built toolchains: {err:?}");
-                            Err(err.context("Download of pre-built toolchain failed"))
-                        }
-                    }
-                } else {
-                    bail!("The risc0 toolchain is not available for download on this platform. Build it yourself with: 'cargo risczero build-toolchain'")
-                }
-            }
-
             pub fn run(&self) -> Result<()> {
                 let root_dir = risc0_data()?;
-                let lockfile_path = root_dir.join("rustup-lock");
+                let lockfile_path = root_dir.join("lock");
                 let _lock = flock(&lockfile_path);
 
                 let toolchain_dir = root_dir.join("toolchains");
-                let (rust_chain, cpp_chain) = self.install_prebuilt_toolchains(&toolchain_dir)?;
 
-                eprintln!(
-                    "Rust Toolchain {} downloaded and installed to path {}.",
-                    rust_chain.name,
-                    rust_chain.path.display()
-                );
-                eprintln!(
-                    "C++ Toolchain downloaded and installed to path {}.",
-                    cpp_chain.path.display()
-                );
+                match self.repo {
+                    ToolchainRepo::Rust => {
+                        let rust_path = self.download_toolchain(
+                            guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                            &toolchain_dir,
+                            &ToolchainRepo::Rust,
+                        )?;
+                        let rust_chain = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
+                        eprintln!(
+                            "Rust Toolchain {} downloaded and installed to path {}.",
+                            rust_chain.name,
+                            rust_chain.path.display()
+                        );
+                    }
+                    ToolchainRepo::Cpp => {
+                        let cpp_path = self.download_toolchain(
+                            guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                            &toolchain_dir,
+                            &ToolchainRepo::Cpp,
+                        )?;
+                        let cpp_chain = CppToolchain::link(&cpp_path)?;
+                        eprintln!(
+                            "C++ Toolchain downloaded and installed to path {}.",
+                            cpp_chain.path.display()
+                        );
+                    }
+                    ToolchainRepo::All => {
+                        let rust_path = self.download_toolchain(
+                            guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                            &toolchain_dir,
+                            &ToolchainRepo::Rust,
+                        )?;
+                        let rust_chain = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
+                        eprintln!(
+                            "Rust Toolchain {} downloaded and installed to path {}.",
+                            rust_chain.name,
+                            rust_chain.path.display()
+                        );
+
+                        let cpp_path = self.download_toolchain(
+                            guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                            &toolchain_dir,
+                            &ToolchainRepo::Cpp,
+                        )?;
+                        let cpp_chain = CppToolchain::link(&cpp_path)?;
+                        eprintln!(
+                            "C++ Toolchain downloaded and installed to path {}.",
+                            cpp_chain.path.display()
+                        );
+                    }
+                }
+
                 eprintln!("The risc0 toolchain is now ready to use.");
-
                 Ok(())
             }
         }
