@@ -9,7 +9,7 @@ import { latestVersion } from "./src/versions.js";
 let config = deepmerge(nextConfigBase, {
   experimental: {
     reactCompiler: false, // turn on when supported in react-table
-    ppr: false,
+    ppr: false, // keep disabled for now, breaks ISR
   },
 
   // biome-ignore lint/suspicious/useAwait: needs to be async
@@ -18,11 +18,6 @@ let config = deepmerge(nextConfigBase, {
       {
         source: "/",
         destination: latestVersion ? `/${latestVersion}` : "/",
-        permanent: true,
-      },
-      {
-        source: "/:version/applications-benchmarks",
-        destination: "/:version/applications-benchmarks/macOS-apple_m2_pro", // TODO: make sure this is the right default
         permanent: true,
       },
     ];

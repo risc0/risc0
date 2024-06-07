@@ -47,7 +47,7 @@ export function generateMetadata({
   };
 }
 
-export default function ApplicationsBenchmarksPage({
+export default function ApplicationsBenchmarksSlugPage({
   params,
 }: {
   params: {
