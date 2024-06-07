@@ -3,6 +3,8 @@ import { replace } from "string-ts";
 import type { Version } from "~/types/version";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./[slug]/_utils/constants";
 
+export const dynamic = "force-static";
+
 export default function ApplicationsBenchmarksPage({
   params,
 }: {

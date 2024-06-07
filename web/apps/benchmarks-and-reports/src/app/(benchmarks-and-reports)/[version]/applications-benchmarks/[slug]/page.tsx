@@ -4,20 +4,12 @@ import { pick } from "radash";
 import { Suspense } from "react";
 import { replace } from "string-ts";
 import type { Version } from "~/types/version";
-import { VERSIONS } from "~/versions";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
 import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./_utils/constants";
 
-export function generateStaticParams() {
-  return VERSIONS.flatMap(({ value }) => {
-    return Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[value]).map((filename) => ({
-      slug: replace(filename, ".csv", ""),
-      version: value,
-    }));
-  });
-}
+export const dynamic = "force-static";
 
 export function generateMetadata({
   params,

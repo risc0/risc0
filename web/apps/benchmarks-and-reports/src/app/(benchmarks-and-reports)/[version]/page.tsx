@@ -3,14 +3,9 @@ import Image from "next/image";
 import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
 import { useRedirectIfWrongVersion } from "~/hooks/use-redirect-if-wrong-version";
 import type { Version } from "~/types/version";
-import { VERSIONS } from "~/versions";
 import { REPORTS } from "./_utils/constants";
 
-export function generateStaticParams() {
-  return VERSIONS.map(({ value }) => ({
-    version: value,
-  }));
-}
+export const dynamic = "force-static";
 
 export default function ReportsPage({
   params,
