@@ -1,9 +1,10 @@
 import "server-only";
 
-import { tryFetch } from "shared/utils/try-fetch";
+import { tryit } from "radash";
 import type { Version } from "~/types/version";
 
 export async function fetchDatasheetCommitHash({ version }: { version: Version }) {
+  const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/COMMIT_HASH.txt`,
     {
