@@ -6,7 +6,7 @@ export async function findMostRecentHash(): Promise<string> {
   const [error, response] = await tryFetch(
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
-      next: { revalidate: 180 }, // 3 minutes cache
+      cache: "no-store",
     },
   );
 

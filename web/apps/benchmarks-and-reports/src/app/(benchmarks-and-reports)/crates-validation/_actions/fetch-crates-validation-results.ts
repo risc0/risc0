@@ -9,7 +9,7 @@ export async function fetchCratesValidationResults({
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
     {
-      next: { revalidate: 180 }, // 3 minutes cache
+      cache: "no-store",
     },
   );
 
