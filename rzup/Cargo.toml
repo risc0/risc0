@@ -31,3 +31,7 @@ tempfile = "3.10.1"
 termcolor = "1.4.1"
 tokio = { version = "1.37.0", features = ["full", "rt"] }
 xz = "0.1.0"
+
+[[bin]]
+name = "rzup"
+path = "src/bin/rzup.rs"
