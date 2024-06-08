@@ -11,19 +11,19 @@ To use proof composition in your program, you'll need to call [`add_assumption()
 ## How it works
 Under the hood, proof composition works by *adding assumptions* to the [ReceiptClaim] struct, and then *resolving* those assumptions.
 
-![ReceiptClaim with no assumptions](composition-no-assumptions.png)
+![ReceiptClaim with no assumptions][composition-no-assumptions]
 
 ### Adding assumptions
 When [`env::verify()`] is called inside the guest program, an [assumption] is added to the [ReceiptClaim].
 This results in a "conditional receipt."
 
-![Adding an assumption](composition-add-assumption.png)
+![Adding an assumption][composition-add-assumption]
 
 ### Resolve an assumption
 In order to finish the process of proof composition, assumptions must be resolved.
 This is accomplished via [`resolve()`], which is called automatically when users [`verify()`][TODO - is this right?] a conditional receipt.
 
-![Resolving an assumption](composition-resolve.png)
+![Resolving an assumption][composition-resolve]
 
 For a more detailed dive into proof composition and RISC Zero's approach to recursive proving, check out the [Study Club recording].
 
@@ -35,3 +35,6 @@ For a more detailed dive into proof composition and RISC Zero's approach to recu
 [`resolve()`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
 [ReceiptClaim]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ReceiptClaim.html
 [Study Club recording]: https://www.youtube.com/watch?v=x0-7Y46bQO0&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1
+[composition-no-assumptions]: /diagrams/composition-no-assumptions.png
+[composition-add-assumption]: /diagrams/composition-add-assumption.png
+[composition-resolve]: /diagrams/composition-resolve.png
