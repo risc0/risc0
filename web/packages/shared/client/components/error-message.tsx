@@ -17,7 +17,7 @@ export function ErrorMessage({ error, reset }: ErrorMessageProps) {
   }, [error]);
 
   return (
-    <div className="grid min-h-screen items-center justify-center">
+    <div className="grid items-center justify-center">
       <Alert variant="destructive" className="min-w-96 max-w-screen-md">
         <AlertTriangleIcon className="size-4" />
         <AlertTitle>Something Went Wrong 😔</AlertTitle>

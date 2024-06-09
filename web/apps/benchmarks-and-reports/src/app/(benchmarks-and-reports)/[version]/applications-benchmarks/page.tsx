@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
-import { replace } from "string-ts";
 import type { Version } from "~/types/version";
-import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./[slug]/_utils/constants";
+import { getFirstApplicationBenchmark } from "./_utils/get-first-application-benchmark";
 
 export default function ApplicationsBenchmarksPage({
   params,
@@ -11,10 +10,8 @@ export default function ApplicationsBenchmarksPage({
     slug: string;
   };
 }) {
-  const firstElement = Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version])[0];
-
-  if (!params.slug && firstElement) {
-    redirect(`/${params.version}/applications-benchmarks/${replace(firstElement, ".csv", "")}`);
+  if (!params.slug) {
+    redirect(`/${params.version}/applications-benchmarks/${getFirstApplicationBenchmark(params.version)}`);
   }
 
   return null;
