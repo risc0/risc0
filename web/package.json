@@ -32,7 +32,6 @@
     "react-dom": "19.0.0-rc-827cbea417-20240606",
     "react-rainbow-ascii": "1.0.3",
     "sharp": "0.33.4",
-    "string-ts": "2.1.1",
     "zod": "3.23.8"
   },
   "devDependencies": {
