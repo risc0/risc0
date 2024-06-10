@@ -541,7 +541,6 @@ dependencies = [
  "hex",
  "risc0-core",
  "risc0-zkp",
- "serde",
  "tracing",
 ]
 
