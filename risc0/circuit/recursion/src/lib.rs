@@ -47,8 +47,6 @@ mod taps;
 #[cfg(feature = "prove")]
 pub mod zkr;
 
-pub mod merkle;
-
 use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::{CircuitCoreDef, TapsProvider},

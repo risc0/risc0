@@ -26,7 +26,7 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    receipt::{MerkleProof, VerifierContext},
+    receipt::{merkle::MerkleProof, VerifierContext},
     receipt_claim::{MaybePruned, Unknown},
     sha,
 };

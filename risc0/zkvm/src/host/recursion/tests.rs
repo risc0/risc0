@@ -24,7 +24,7 @@ use risc0_zkp::{
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use test_log::test;
 
-use super::{identity_p254, join, lift, prove::zkr, Prover};
+use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
     default_prover, get_prover_server,
     receipt_claim::{MaybePruned, Unknown},
@@ -33,10 +33,7 @@ use crate::{
     ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session,
     SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
-use risc0_circuit_recursion::{
-    merkle::MerkleGroup,
-    prove::{poseidon254_hal_pair, poseidon2_hal_pair},
-};
+use risc0_circuit_recursion::prove::{poseidon254_hal_pair, poseidon2_hal_pair};
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
 // (signal: 11, SIGSEGV: invalid memory reference)

@@ -23,8 +23,8 @@ use serde::Serialize;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     receipt::{
-        segment::decode_receipt_claim_from_seal, CompositeReceipt, FakeReceipt,
-        InnerAssumptionReceipt, InnerReceipt, MerkleProof, ReceiptMetadata, SegmentReceipt,
+        merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
+        FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt,
         SuccinctReceipt,
     },
     receipt_claim::Unknown,
@@ -476,14 +476,14 @@ impl TryFrom<pb::core::MerkleProof> for MerkleProof {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::MerkleProof) -> Result<Self> {
-        Ok(Self::from_raw_proof(
-            value.index,
-            value
+        Ok(Self {
+            index: value.index,
+            digests: value
                 .digests
                 .into_iter()
                 .map(TryInto::try_into)
                 .collect::<Result<_>>()?,
-        ))
+        })
     }
 }
 

@@ -20,11 +20,7 @@ use std::{
 };
 
 use anyhow::Result;
-use risc0_circuit_recursion::{
-    control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID},
-    merkle::MerkleGroup,
-};
-
+use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkp::core::hash::poseidon_254::Poseidon254HashSuite;
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
@@ -35,8 +31,9 @@ use test_log::test;
 
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    receipt::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts, Receipt,
-    ReceiptClaim, SegmentReceipt, SessionInfo, SuccinctReceiptVerifierParameters, VerifierContext,
+    receipt::SuccinctReceipt, recursion::MerkleGroup, ApiClient, ApiServer, ExecutorEnv,
+    InnerReceipt, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt, SessionInfo,
+    SuccinctReceiptVerifierParameters, VerifierContext,
 };
 
 struct TestClientConnector {

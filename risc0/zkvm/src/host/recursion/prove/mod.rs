@@ -34,19 +34,16 @@ use risc0_zkp::{
 use serde::Serialize;
 
 use crate::{
-    receipt::{SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters},
+    receipt::{
+        merkle::{MerkleGroup, MerkleProof},
+        SegmentReceipt, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+    },
     receipt_claim::{Assumption, MaybePruned, Merge},
     sha::Digestible,
     ProverOpts, ReceiptClaim,
 };
 
-// Re-export risc0_circuit_recursion items that were previously here
-// as to not break dependencies.
-#[allow(unused_imports)]
-use risc0_circuit_recursion::{
-    merkle::{MerkleGroup, MerkleProof},
-    prove::Program,
-};
+use risc0_circuit_recursion::prove::Program;
 
 /// Number of rows to use for the recursion circuit witness as a power of 2.
 pub const RECURSION_PO2: usize = 18;

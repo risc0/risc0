@@ -25,6 +25,10 @@ pub(crate) mod prove;
 #[cfg(feature = "prove")]
 mod tests;
 
+// NOTE: merkle modules is next to receipts because it needs to be compiled for the zkVM, as part
+// of SuccinctReceipt, but is logically part of the recursion system.
+#[cfg(feature = "prove")]
+pub use crate::receipt::merkle::{MerkleGroup, MerkleProof};
 pub use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT};
 
 #[cfg(test)]
@@ -33,7 +37,6 @@ pub use self::prove::test_recursion_circuit;
 #[cfg(feature = "prove")]
 pub use self::prove::{identity_p254, join, lift, resolve, Prover, RECURSION_PO2};
 #[cfg(feature = "prove")]
-pub use risc0_circuit_recursion::{
-    merkle::{MerkleGroup, MerkleProof},
-    prove::{poseidon254_hal_pair, poseidon2_hal_pair, sha256_hal_pair, Program},
+pub use risc0_circuit_recursion::prove::{
+    poseidon254_hal_pair, poseidon2_hal_pair, sha256_hal_pair, Program,
 };

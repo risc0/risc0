@@ -3666,7 +3666,6 @@ dependencies = [
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
- "serde",
  "sha2",
  "test-log",
  "tracing",
