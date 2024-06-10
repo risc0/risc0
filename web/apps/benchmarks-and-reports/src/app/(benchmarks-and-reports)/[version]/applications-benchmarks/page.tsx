@@ -7,12 +7,8 @@ export default function ApplicationsBenchmarksPage({
 }: {
   params: {
     version: Version;
-    slug: string;
   };
 }) {
-  if (!params.slug) {
-    redirect(`/${params.version}/applications-benchmarks/${getFirstApplicationBenchmark(params.version)}`);
-  }
-
-  return null;
+  // redirect to the first application benchmark
+  redirect(`/${params.version}/applications-benchmarks/${getFirstApplicationBenchmark(params.version)}`);
 }
