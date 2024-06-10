@@ -54,7 +54,7 @@ pub fn handle_install(subcmd: InstallSubcmd) {
         }
         InstallSubcmd::Cpp { toolchain } => {
             InstallToolchain {
-                toolchain: toolchain.or(Some("latest".to_string())),
+                toolchain: toolchain.or(None),
                 repo: ToolchainRepo::Cpp,
             }
             .run()
