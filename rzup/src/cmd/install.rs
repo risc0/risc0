@@ -28,24 +28,25 @@ use crate::{
 pub enum InstallSubcmd {
     /// Install Rust toolchain
     Rust {
-        /// Toolchain version (i.e. stable)
+        /// Toolchain version (i.e. stable or a specific version)
         #[arg(required = false)]
-        toolchain: String,
+        toolchain: Option<String>,
     },
     /// Install C++ toolchain
     Cpp {
         /// Toolchain version
         #[arg(required = false)]
-        toolchain: String,
+        toolchain: Option<String>,
     },
-    /// Install all avaliable toolchains
+    /// Install all available toolchains
     All,
 }
+
 pub fn handle_install(subcmd: InstallSubcmd) {
     match subcmd {
         InstallSubcmd::Rust { toolchain } => {
             InstallToolchain {
-                toolchain: Some(toolchain),
+                toolchain: toolchain.or(None),
                 repo: ToolchainRepo::Rust,
             }
             .run()
@@ -53,7 +54,7 @@ pub fn handle_install(subcmd: InstallSubcmd) {
         }
         InstallSubcmd::Cpp { toolchain } => {
             InstallToolchain {
-                toolchain: Some(toolchain),
+                toolchain: toolchain.or(Some("latest".to_string())),
                 repo: ToolchainRepo::Cpp,
             }
             .run()
@@ -61,13 +62,13 @@ pub fn handle_install(subcmd: InstallSubcmd) {
         }
         InstallSubcmd::All => {
             InstallToolchain {
-                toolchain: None,
+                toolchain: Some("latest".to_string()),
                 repo: ToolchainRepo::Rust,
             }
             .run()
             .expect("Error during Rust toolchain installation");
             InstallToolchain {
-                toolchain: None,
+                toolchain: Some("latest".to_string()),
                 repo: ToolchainRepo::Cpp,
             }
             .run()
@@ -75,6 +76,7 @@ pub fn handle_install(subcmd: InstallSubcmd) {
         }
     }
 }
+
 /// Release returned by Github API.
 #[derive(Deserialize)]
 struct GithubReleaseData {
@@ -92,10 +94,10 @@ struct GithubAsset {
 #[derive(Debug, Default, Args)]
 pub struct InstallToolchain {
     #[arg(
-          required = false,
-          help = help::TOOLCHAIN_ARG_HELP,
-          num_args = 1..,
-      )]
+        required = false,
+        help = help::TOOLCHAIN_ARG_HELP,
+        num_args = 1..,
+    )]
     pub toolchain: Option<String>,
     pub repo: ToolchainRepo,
 }
@@ -108,11 +110,28 @@ impl InstallToolchain {
         repo: &ToolchainRepo,
     ) -> Result<(String, String)> {
         let tag = match repo {
-            ToolchainRepo::Rust => self
-                .toolchain
-                .clone()
-                .map_or("latest".to_string(), |tag| format!("tags/{tag}")),
-            ToolchainRepo::Cpp => "tags/2024.01.05".to_string(),
+            ToolchainRepo::Rust => {
+                let version = self
+                    .toolchain
+                    .clone()
+                    .unwrap_or_else(|| "latest".to_string());
+                if version == "latest" {
+                    version
+                } else {
+                    format!("tags/{}", version)
+                }
+            }
+            ToolchainRepo::Cpp => {
+                let version = self
+                    .toolchain
+                    .clone()
+                    .unwrap_or_else(|| "tags/2024.01.05".to_string());
+                if version.starts_with("tags/") {
+                    version
+                } else {
+                    format!("tags/{}", version)
+                }
+            }
             ToolchainRepo::All => todo!(),
         };
 
