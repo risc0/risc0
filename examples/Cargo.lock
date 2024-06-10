@@ -734,6 +734,7 @@ name = "c-guest-host"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "risc0-build",
  "risc0-zkvm",
  "serde",
  "tracing-subscriber 0.3.18",
