@@ -24,12 +24,12 @@ pub mod zkr;
 
 use std::{collections::VecDeque, fmt::Debug, mem::take, rc::Rc};
 
-use anyhow::{bail, Result};
-use rand::thread_rng;
-use risc0_circuit_recursion::{
+use crate::{
     cpu::CpuCircuitHal, CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
     REGISTER_GROUP_DATA,
 };
+use anyhow::{bail, Result};
+use rand::thread_rng;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
@@ -81,7 +81,7 @@ pub struct Prover {
 
 #[cfg(feature = "cuda")]
 mod cuda {
-    pub use risc0_circuit_recursion::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+    pub use crate::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
     pub use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, Rc};
@@ -101,7 +101,7 @@ mod cuda {
 
 #[cfg(feature = "metal")]
 mod metal {
-    pub use risc0_circuit_recursion::metal::MetalCircuitHal;
+    pub use crate::metal::MetalCircuitHal;
     pub use risc0_zkp::hal::metal::{
         MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
     };

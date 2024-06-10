@@ -639,7 +639,7 @@ mod sys_verify {
         receipt_claim::Unknown, recursion::prove::zkr, serde::to_vec, sha::Digestible, Assumption,
         ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt, SuccinctReceipt,
     };
-    use risc0_recursion::merkle::MerkleGroup;
+    use risc0_circuit_recursion::merkle::MerkleGroup;
 
     fn prove_hello_commit() -> Receipt {
         get_prover_server(&ProverOpts::fast())

@@ -3653,9 +3653,11 @@ version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "cfg-if",
  "cust",
  "downloader",
  "hex",
+ "lazy-regex",
  "metal",
  "nvtx",
  "rand",
@@ -3664,6 +3666,7 @@ dependencies = [
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
+ "serde",
  "sha2",
  "test-log",
  "tracing",
@@ -3773,34 +3776,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-recursion"
-version = "1.1.0-alpha.1"
-dependencies = [
- "anyhow",
- "bytemuck",
- "cfg-if",
- "cust",
- "hex",
- "lazy-regex",
- "metal",
- "nvtx",
- "rand",
- "rayon",
- "risc0-circuit-recursion",
- "risc0-circuit-recursion-sys",
- "risc0-core",
- "risc0-sys",
- "risc0-zkp",
- "serde",
- "sha2",
- "test-log",
- "tracing",
- "tracing-forest",
- "tracing-subscriber 0.3.18",
- "zip",
-]
-
-[[package]]
 name = "risc0-sys"
 version = "1.1.0-alpha.1"
 dependencies = [
@@ -3883,7 +3858,6 @@ dependencies = [
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-groth16",
- "risc0-recursion",
  "risc0-zkp",
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",

@@ -14,10 +14,10 @@
 
 use std::collections::{BTreeMap, VecDeque};
 
+use crate::{CircuitImpl, Externs};
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
-use risc0_circuit_recursion::{CircuitImpl, Externs};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStep, CircuitStepContext, CircuitStepHandler},
     field::{
@@ -139,7 +139,7 @@ impl MachineContext {
     }
 }
 
-impl risc0_circuit_recursion::Externs for MachineContext {
+impl crate::Externs for MachineContext {
     fn wom_write(&mut self, addr: BabyBearElem, val: BabyBearExtElem) {
         let addr = u32::from(addr) as usize;
 

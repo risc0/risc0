@@ -17,9 +17,12 @@ pub mod zkr;
 use std::{collections::VecDeque, fmt::Debug};
 
 use anyhow::{anyhow, ensure, Context, Result};
-use risc0_circuit_recursion::{control_id::BN254_IDENTITY_CONTROL_ID, CircuitImpl};
+use risc0_circuit_recursion::{
+    control_id::BN254_IDENTITY_CONTROL_ID,
+    prove::{DigestKind, RecursionReceipt},
+    CircuitImpl,
+};
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS;
-use risc0_recursion::prove::{DigestKind, RecursionReceipt};
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::hash_suite_from_name},
@@ -37,10 +40,10 @@ use crate::{
     ProverOpts, ReceiptClaim,
 };
 
-// Re-export risc0_recursion items that were previously here as to not
-// break dependencies.
+// Re-export risc0_circuit_recursion items that were previously here
+// as to not break dependencies.
 #[allow(unused_imports)]
-use risc0_recursion::{
+use risc0_circuit_recursion::{
     merkle::{MerkleGroup, MerkleProof},
     prove::Program,
 };
@@ -277,14 +280,14 @@ pub fn test_recursion_circuit(
 
 /// Prover for zkVM use of the recursion circuit.
 pub struct Prover {
-    prover: risc0_recursion::prove::Prover,
+    prover: risc0_circuit_recursion::prove::Prover,
     control_id: Digest,
 }
 
 impl Prover {
     fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
         Self {
-            prover: risc0_recursion::prove::Prover::new(program, &opts.hashfn),
+            prover: risc0_circuit_recursion::prove::Prover::new(program, &opts.hashfn),
             control_id,
         }
     }

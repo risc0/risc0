@@ -33,7 +33,7 @@ use crate::{
     ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session,
     SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
 };
-use risc0_recursion::{
+use risc0_circuit_recursion::{
     merkle::MerkleGroup,
     prove::{poseidon254_hal_pair, poseidon2_hal_pair},
 };

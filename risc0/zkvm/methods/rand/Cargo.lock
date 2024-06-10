@@ -488,9 +488,12 @@ version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "cfg-if",
  "hex",
  "risc0-core",
  "risc0-zkp",
+ "serde",
+ "sha2",
  "tracing",
 ]
 
@@ -533,22 +536,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-recursion"
-version = "1.1.0-alpha.1"
-dependencies = [
- "anyhow",
- "bytemuck",
- "cfg-if",
- "hex",
- "risc0-circuit-recursion",
- "risc0-core",
- "risc0-zkp",
- "serde",
- "sha2",
- "tracing",
-]
-
-[[package]]
 name = "risc0-zkp"
 version = "1.1.0-alpha.1"
 dependencies = [
@@ -582,7 +569,6 @@ dependencies = [
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-groth16",
- "risc0-recursion",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",

@@ -17,7 +17,7 @@ use anyhow::{anyhow, bail, Result};
 use risc0_circuit_recursion::control_id::{
     BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS,
 };
-use risc0_recursion::prove::Program;
+use risc0_circuit_recursion::prove::Program;
 use risc0_zkp::{core::digest::Digest, MAX_CYCLES_PO2, MIN_CYCLES_PO2};
 
 fn get_zkr(name: &str, hashfn: &str) -> Result<(Program, Digest)> {
@@ -29,7 +29,7 @@ fn get_zkr(name: &str, hashfn: &str) -> Result<(Program, Digest)> {
     };
 
     Ok((
-        risc0_recursion::prove::zkr::get_zkr(name, RECURSION_PO2)?,
+        risc0_circuit_recursion::prove::zkr::get_zkr(name, RECURSION_PO2)?,
         control_ids
             .iter()
             .copied()

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::REGISTER_GROUP_CODE;
 use anyhow::Result;
-use risc0_circuit_recursion::REGISTER_GROUP_CODE;
 use risc0_zkp::{adapter::TapsProvider, field::baby_bear::BabyBearElem};
 
 use super::{Program, CIRCUIT, RECURSION_CODE_SIZE};
@@ -22,7 +22,7 @@ pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
     assert_eq!(code_size, RECURSION_CODE_SIZE);
 
-    let u32s = risc0_circuit_recursion::zkr::get_zkr(name)?;
+    let u32s = crate::zkr::get_zkr(name)?;
     Ok(Program {
         code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
         code_size,

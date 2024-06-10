@@ -45,7 +45,7 @@ use crate::{
 };
 
 pub use self::groth16::{Groth16Receipt, Groth16ReceiptVerifierParameters};
-pub use risc0_recursion::merkle::MerkleProof;
+pub use risc0_circuit_recursion::merkle::MerkleProof;
 
 pub use self::{
     composite::{CompositeReceipt, CompositeReceiptVerifierParameters},
