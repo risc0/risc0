@@ -1,5 +1,15 @@
 # Local Proving
 
+:::info
+
+The `stark2snark` prover currently *only* works on x86 architecture, and so Apple Silicon is *currently unsupported* (even via Docker). 
+
+You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749). 
+ 
+:::
+
+----------------------------------
+
 RISC Zero offers a fully [open-source] prover.
 Users can run the [zkVM] locally, generating proofs using their own hardware.
 The [feature flags] include options to toggle between CPU and GPU proving.
@@ -7,7 +17,7 @@ The [feature flags] include options to toggle between CPU and GPU proving.
 ## Local vs. Remote Proving
 
 For most use cases, we recommend remote proving using [Bonsai].
-The primary reason to consider using local proof generation for your application is to manage private data.
+The primary reason to consider using local proof generation for your application is to manage private data. 
 
 > Whoever is generating the proofs can see all private information involved.
 
