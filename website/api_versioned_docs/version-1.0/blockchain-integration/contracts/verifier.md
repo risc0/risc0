@@ -45,9 +45,11 @@ RISC Zero deploys and manages the `RiscZeroVerifierRouter` contracts listed belo
 This contract will have verifiers added for each release of the zkVM, and will have verifiers removed in the case of security vulnerabilities.
 You can find detailed information in the [version management design][VersionManagement], including information about how to manage your own copy of the smart contracts, if your application requires it.
 
-| Contract                                                    | Network   | Address                                                                |
-| ----------------------------------------------------------- | --------- | ---------------------------------------------------------------------- |
-| [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol]  | [Sepolia] | [0x36be51af39a2d430368ffee8c664c46d2298083d][sepolia-verifier] |
+### Contract Addresses
+
+| Contract                                                   | Network   | Address                                                        |
+| ---------------------------------------------------------- | --------- | -------------------------------------------------------------- |
+| [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol] | [Sepolia] | [0x36be51af39a2d430368ffee8c664c46d2298083d][sepolia-verifier] |
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
 
