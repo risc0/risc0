@@ -60,7 +60,7 @@ pub fn handle_install(subcmd: InstallSubcmd) {
     match subcmd {
         InstallSubcmd::Rust { toolchain } => {
             InstallToolchain {
-                toolchain: toolchain.or(None),
+                toolchain,
                 repo: ToolchainRepo::Rust,
             }
             .run()
@@ -68,7 +68,7 @@ pub fn handle_install(subcmd: InstallSubcmd) {
         }
         InstallSubcmd::Cpp { toolchain } => {
             InstallToolchain {
-                toolchain: toolchain.or(None),
+                toolchain,
                 repo: ToolchainRepo::Cpp,
             }
             .run()
@@ -123,30 +123,16 @@ impl InstallToolchain {
         target: &str,
         repo: &ToolchainRepo,
     ) -> Result<(String, String)> {
-        let tag = match repo {
-            ToolchainRepo::Rust => {
-                let version = self
-                    .toolchain
-                    .clone()
-                    .unwrap_or_else(|| "latest".to_string());
-                if version == "latest" {
-                    version
-                } else {
-                    format!("tags/{}", version)
-                }
-            }
-            ToolchainRepo::Cpp => {
-                let version = self
-                    .toolchain
-                    .clone()
-                    .unwrap_or_else(|| "tags/2024.01.05".to_string());
-                if version.starts_with("tags/") {
-                    version
-                } else {
-                    format!("tags/{}", version)
-                }
-            }
-            ToolchainRepo::All => todo!(),
+        let version = self.toolchain.clone().unwrap_or_else(|| match repo {
+            ToolchainRepo::Rust => "latest".to_string(),
+            ToolchainRepo::Cpp => "tags/2024.01.05".to_string(), // TODO: Use latest when supported
+            ToolchainRepo::All => unreachable!(),
+        });
+
+        let tag = if version == "latest" || version.starts_with("tags/") {
+            version
+        } else {
+            format!("tags/{}", version)
         };
 
         let repo_name = repo
@@ -163,10 +149,10 @@ impl InstallToolchain {
             .send()
             .await?
             .error_for_status()
-            .context(format!("Could not download release info"))?
+            .context("Could not download release info")?
             .json()
             .await
-            .context("could not deserialize release info")?;
+            .context("Could not deserialize release info")?;
 
         let asset_name = repo.asset_name(target);
 
@@ -208,7 +194,7 @@ impl InstallToolchain {
         let (tag_name, download_url) = rt.block_on(self.get_download_url(&client, target, repo))?;
 
         let toolchain_dir =
-            toolchain_root_dir.join(format!("{}-{}-{target}", tag_name, repo.language()));
+            toolchain_root_dir.join(format!("{}-{}-{}", tag_name, repo.language(), target));
 
         if toolchain_dir.is_dir() {
             eprintln!(
@@ -228,7 +214,7 @@ impl InstallToolchain {
         let download_res = downloader.download(&[dl])?;
 
         for res in download_res {
-            let summary = res.context(format!("Download failed."))?;
+            let summary = res.context("Download failed.")?;
             let tarball = File::open(summary.file_name)?;
 
             eprintln!("Extracting toolchain...");
@@ -237,14 +223,14 @@ impl InstallToolchain {
                 ToolchainRepo::Rust => {
                     let decoder = GzDecoder::new(BufReader::new(tarball));
                     let mut archive = Archive::new(decoder);
-                    archive.unpack(toolchain_dir.clone())?;
+                    archive.unpack(&toolchain_dir)?;
                 }
                 ToolchainRepo::Cpp => {
                     let decoder = XzDecoder::new(BufReader::new(tarball));
                     let mut archive = Archive::new(decoder);
-                    archive.unpack(toolchain_dir.clone())?;
+                    archive.unpack(&toolchain_dir)?;
                 }
-                ToolchainRepo::All => todo!(),
+                ToolchainRepo::All => unreachable!(),
             }
         }
 
@@ -261,7 +247,7 @@ impl InstallToolchain {
         match self.repo {
             ToolchainRepo::Rust => {
                 let rust_path = self.download_toolchain(
-                    guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
                     &toolchain_dir,
                     &ToolchainRepo::Rust,
                 )?;
@@ -274,7 +260,7 @@ impl InstallToolchain {
             }
             ToolchainRepo::Cpp => {
                 let cpp_path = self.download_toolchain(
-                    guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
                     &toolchain_dir,
                     &ToolchainRepo::Cpp,
                 )?;
@@ -286,7 +272,7 @@ impl InstallToolchain {
             }
             ToolchainRepo::All => {
                 let rust_path = self.download_toolchain(
-                    guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
                     &toolchain_dir,
                     &ToolchainRepo::Rust,
                 )?;
@@ -298,7 +284,7 @@ impl InstallToolchain {
                 );
 
                 let cpp_path = self.download_toolchain(
-                    guess_host_target().ok_or(anyhow!("Unsupported host target"))?,
+                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
                     &toolchain_dir,
                     &ToolchainRepo::Cpp,
                 )?;
