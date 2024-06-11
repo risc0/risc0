@@ -13,9 +13,12 @@
 // limitations under the License.
 
 use clap::{arg, CommandFactory, Parser, Subcommand};
-use rzup::cmd::install::{handle_install, InstallSubcmd};
-use rzup::cmd::show::{handle_show, ShowSubcmd};
-use rzup::cmd::toolchain::{handle_toolchain, ToolchainSubcmd};
+use rzup::cmd::{
+    check::handle_check,
+    install::{handle_install, InstallSubcmd},
+    show::{handle_show, ShowSubcmd},
+    toolchain::{handle_toolchain, ToolchainSubcmd},
+};
 use rzup::{common, help};
 
 fn main() {
@@ -35,7 +38,8 @@ fn main() {
 
         Some(RzupSubcmd::Show { verbose, subcmd }) => handle_show(verbose, subcmd),
 
-        Some(RzupSubcmd::Check { .. }) => todo!(),
+        Some(RzupSubcmd::Check { .. }) => handle_check().expect("Error checking for updates"),
+
         Some(RzupSubcmd::Update { .. }) => todo!(),
         Some(RzupSubcmd::Default { .. }) => todo!(),
         Some(RzupSubcmd::Uninstall { .. }) => todo!(),
