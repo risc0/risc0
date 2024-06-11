@@ -1,6 +1,6 @@
 # Recursive Proving
 
-RISC Zero's zkVM uses recursive proving in order to achieve unbounded computation size, constant* proof size, proof aggregation, and proof composition.
+RISC Zero's zkVM uses recursive proving in order to achieve unbounded computation size, constant\* proof size, proof aggregation, and proof composition.
 
 The end-to-end process for proof generation is shown in the following diagram, including links to the associated crate docs:
 
@@ -91,14 +91,15 @@ compress-->groth16("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct
 ```
 
 To summarize the diagram:
-1. The program is *executed*, resulting in a collection of *Segments*.
-1. Each *Segment* is proven, resulting in a *SegmentReceipt*.
-1. Each *SegmentReceipt* is *lifted*, resulting in a *SuccinctReceipt*.
-1. Pairs of *SuccinctReceipts* are *joined*, resulting in another *SuccinctReceipt*. This continues until a single *SuccinctReceipt* remains.
-1. The final *SuccinctReceipt* is passed through *identity_p254*, which prepares for Groth16 proving.
-1. The *SuccinctReceipt* is *compressed*, generating a *Groth16Receipt*.
 
-The *Groth16Receipt* can now be posted on-chain and verified by the [RISC Zero Verifier Contract].
+1. The program is _executed_, resulting in a collection of _Segments_.
+1. Each _Segment_ is proven, resulting in a _SegmentReceipt_.
+1. Each _SegmentReceipt_ is _lifted_, resulting in a _SuccinctReceipt_.
+1. Pairs of _SuccinctReceipts_ are _joined_, resulting in another _SuccinctReceipt_. This continues until a single _SuccinctReceipt_ remains.
+1. The final _SuccinctReceipt_ is passed through _identity_p254_, which prepares for Groth16 proving.
+1. The _SuccinctReceipt_ is _compressed_, generating a _Groth16Receipt_.
+
+The _Groth16Receipt_ can now be posted on-chain and verified by the [RISC Zero Verifier Contract].
 
 ## Recursive Circuit Architecture
 
@@ -106,12 +107,12 @@ RISC Zero's zkVM consists of three circuits.
 
 1. The RISC-V Circuit is a STARK circuit that proves correct execution of RISC-V programs.
 1. The Recursion Circuit is a separate STARK circuit, that's designed to efficiently generate proofs for the verification of STARK proofs and to support the integration of custom accelerator circuits into the zkVM.
-This circuit has a similar architecture to the RISC-V Circuit, but with fewer columns and a much simpler instruction set.
-The Recursion Circuit supports a number of programs, including [lift], [join], [resolve], and [identity_p254].
-The same [proof system] is used for both the RISC-V Circuit and the Recursion Circuit.
-1. The STARK-to-SNARK Circuit is an R1CS circuit that proves verification of proofs from the *identity_p254* program.
+   This circuit has a similar architecture to the RISC-V Circuit, but with fewer columns and a much simpler instruction set.
+   The Recursion Circuit supports a number of programs, including [lift], [join], [resolve], and [identity_p254].
+   The same [proof system] is used for both the RISC-V Circuit and the Recursion Circuit.
+1. The STARK-to-SNARK Circuit is an R1CS circuit that proves verification of proofs from the _identity_p254_ program.
 
-*The size of a [Receipt] varies depending on the size of the ReceiptClaim and its ReceiptKind. For SuccinctReceipts and Groth16 Receipts, the size of the *seal* is constant.
+*The size of a [Receipt] varies depending on the size of the ReceiptClaim and its ReceiptKind. For SuccinctReceipts and Groth16 Receipts, the size of the *seal\* is constant.
 
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
 [lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
