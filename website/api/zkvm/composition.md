@@ -4,22 +4,25 @@ RISC Zero's zkVM is the only zkVM that offers a convenient API for efficiently v
 
 This feature enables rich possibilities for building modular applications. Check out the [blog post] to learn more about the power of proof composition.
 
-
 ## Start Building
+
 To use proof composition in your program, you'll need to call [`add_assumption()`] on the host-side and [`env::verify()`] on the guest-side, as demonstrated in this [code example].
 
 ## How it works
-Under the hood, proof composition works by *adding assumptions* to the [ReceiptClaim] struct, and then *resolving* those assumptions.
+
+Under the hood, proof composition works by _adding assumptions_ to the [ReceiptClaim] struct, and then _resolving_ those assumptions.
 
 ![ReceiptClaim with no assumptions][composition-no-assumptions]
 
 ### Adding assumptions
+
 When [`env::verify()`] is called inside the guest program, an [assumption] is added to the [ReceiptClaim].
 This results in a "conditional receipt."
 
 ![Adding an assumption][composition-add-assumption]
 
 ### Resolve an assumption
+
 In order to finish the process of proof composition, assumptions must be resolved.
 This is accomplished via [`resolve()`], which is called automatically when users [`verify()`][TODO - is this right?] a conditional receipt.
 
