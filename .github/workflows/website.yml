@@ -69,6 +69,7 @@ jobs:
 
   check:
     if: needs.changes.outputs.check == 'true'
+    needs: changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -134,4 +135,3 @@ jobs:
         working-directory: website/doc-test/stable
 
       - run: sccache --show-stats
-
