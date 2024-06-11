@@ -239,7 +239,7 @@ mod tests {
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SegmentReceiptVerifierParameters::default().digest(),
-            digest!("62d97bc46d0a877acb857043cbb90a6beafa21c97f01472952fd28be15b47508")
+            digest!("c41779698e58f1a53204aa5f27be49875791fbd9a299c464a0dfc4bc892e3623")
         );
     }
 }
