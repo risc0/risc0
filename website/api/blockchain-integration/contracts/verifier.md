@@ -41,7 +41,7 @@ It is recommended that you use the [RiscZeroVerifierRouter][RiscZeroVerifierRout
 Calls to `RiscZeroVerifierRouter.verify()` will be routed to the appropriate base verifier contract depending on which version of the zkVM was used to generate the receipt.
 By using the `RiscZeroVerifierRouter`, your contract can accept multiple types of receipts, including batch-verified receipts and receipts generated with future improvements to the zkVM and proofs system.
 
-RISC Zero deploys and manages the `RiscZeroVerifierRouter` contracts listed below.
+RISC Zero deploys and manages the `RiscZeroVerifierRouter` contract listed below.
 This contract will have verifiers added for each release of the zkVM, and will have verifiers removed in the case of security vulnerabilities.
 You can find detailed information in the [version management design][VersionManagement], including information about how to manage your own copy of the smart contracts, if your application requires it.
 
