@@ -79,7 +79,7 @@ jobs:
         with:
           python-version: "3.10"
       - run: npx prettier website --check
-      - run: python website/github-link-version-check.py
+      - run: python website/link-version-check.py
 
   doc-test-main:
     if: needs.changes.outputs.doc-test-main == 'true'
