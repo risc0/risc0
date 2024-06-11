@@ -51,6 +51,13 @@ You can find detailed information in the [version management design][VersionMana
 | ---------------------------------------------------------- | --------- | -------------------------------------------------------------- |
 | [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol] | [Sepolia] | [0x36be51af39a2d430368ffee8c664c46d2298083d][sepolia-verifier] |
 
+:::info
+
+The `RiscZeroVerifierRouter` is not deployed yet.
+Check back again as we will be deploying it soon.
+
+:::
+
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
 
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/27eba00a5237cbefd0c742dee73ced697df3527a/contracts/EvenNumber.sol#L46-L52
