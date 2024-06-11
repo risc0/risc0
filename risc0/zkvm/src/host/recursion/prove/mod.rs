@@ -236,12 +236,21 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 pub fn test_recursion_circuit(
     digest1: &Digest,
     digest2: &Digest,
+    po2: usize,
 ) -> Result<SuccinctReceipt<crate::receipt_claim::Unknown>> {
-    let (_, control_id) = zkr::test_recursion_circuit("poseidon2")?;
+    use risc0_circuit_recursion::prove::zkr::get_zkr;
+    use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
+
+    let program = get_zkr("test_recursion_circuit.zkr", po2)?;
+    let suite = Poseidon2HashSuite::new_suite();
+    let control_id = program.compute_control_id(suite.clone());
     let opts = ProverOpts::succinct().with_control_ids(vec![control_id]);
 
-    let mut prover = Prover::new_test_recursion_circuit([digest1, digest2], opts.clone())?;
-    let receipt = prover.prover.run()?;
+    let mut prover = Prover::new(program, control_id, opts.clone());
+    prover.add_input_digest(digest1, DigestKind::Poseidon2);
+    prover.add_input_digest(digest2, DigestKind::Poseidon2);
+
+    let receipt = prover.run()?;
 
     // Read the claim digest from the second of the global output slots.
     const DIGEST_SHORTS: usize = crate::sha::DIGEST_WORDS * 2;
@@ -267,7 +276,7 @@ pub fn test_recursion_circuit(
     };
     Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: opts.hashfn,
+        hashfn: suite.name,
         control_id: prover.control_id,
         control_inclusion_proof,
         claim: MaybePruned::Pruned(claim_digest),

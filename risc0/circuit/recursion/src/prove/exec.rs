@@ -284,7 +284,7 @@ impl<'a> RecursionExecutor<'a> {
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<usize> {
         let used_cycles = self.zkr.code_rows();
-        tracing::trace!(
+        tracing::debug!(
             "Starting recursion code of length {}/{}",
             used_cycles,
             self.executor.steps
@@ -357,7 +357,6 @@ impl<'a> ParallelHandler<'a> {
             args,
             wom,
             iop_reads,
-
             plonk_queue: Vec::new(),
             cur_iop_body: None,
         }
