@@ -24,18 +24,16 @@ use risc0_zkp::{
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use test_log::test;
 
-use super::{
-    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, prove::zkr,
-    MerkleGroup, Prover,
-};
+use super::{identity_p254, join, lift, prove::zkr, MerkleGroup, Prover};
 use crate::{
     default_prover, get_prover_server,
     receipt_claim::{MaybePruned, Unknown},
-    sha,
-    sha::Digestible,
+    sha::{self, Digestible},
     ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session,
     SuccinctReceipt, SuccinctReceiptVerifierParameters, VerifierContext, ALLOWED_CONTROL_ROOT,
+    RECURSION_PO2,
 };
+use risc0_circuit_recursion::prove::{poseidon254_hal_pair, poseidon2_hal_pair};
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
 // (signal: 11, SIGSEGV: invalid memory reference)
@@ -302,7 +300,7 @@ fn test_recursion_identity_sha256() {
     let hashfn = opts.hash_suite().unwrap().hashfn;
     let sha256_control_tree = MerkleGroup::new(opts.control_ids.clone()).unwrap();
     let sha256_control_inclusion_proof = sha256_control_tree
-        .get_proof(&sha256_recursion_receipt.control_id, hashfn.as_ref())
+        .get_proof(&prover.control_id(), hashfn.as_ref())
         .unwrap();
     let sha256_control_root = sha256_control_tree.calc_root(hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
@@ -393,6 +391,36 @@ fn test_recursion_lift_resolve_e2e() {
         .compress(&ProverOpts::default(), &composition_receipt)
         .unwrap();
     succinct_receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test]
+fn test_recursion_circuit() {
+    let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+    super::test_recursion_circuit(&digest, &digest, RECURSION_PO2).unwrap();
+}
+
+#[test]
+fn test_po2_16() {
+    use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
+
+    let po2 = 16;
+    let suite = Poseidon2HashSuite::new_suite();
+    let program =
+        risc0_circuit_recursion::prove::zkr::get_zkr("test_recursion_circuit.zkr", po2).unwrap();
+    let control_id = program.compute_control_id(suite.clone());
+    let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+    let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+    let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+    let receipt = super::test_recursion_circuit(&control_root, &digest, po2).unwrap();
+    let ctx = VerifierContext::empty()
+        .with_suites(VerifierContext::default_hash_suites())
+        .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
+            control_root,
+            inner_control_root: Some(control_root),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: CircuitImpl::CIRCUIT_INFO,
+        });
+    receipt.verify_integrity_with_context(&ctx).unwrap();
 }
 
 #[test]
