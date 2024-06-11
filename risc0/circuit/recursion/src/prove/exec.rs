@@ -14,10 +14,10 @@
 
 use std::collections::{BTreeMap, VecDeque};
 
+use crate::{CircuitImpl, Externs};
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
-use risc0_circuit_recursion::{CircuitImpl, Externs};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStep, CircuitStepContext, CircuitStepHandler},
     field::{
@@ -29,7 +29,7 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 
-use super::{plonk, Program, CIRCUIT, RECURSION_PO2};
+use super::{plonk, Program, CIRCUIT};
 
 pub struct MachineContext {
     // Contents of the write-only memory
@@ -139,7 +139,7 @@ impl MachineContext {
     }
 }
 
-impl risc0_circuit_recursion::Externs for MachineContext {
+impl crate::Externs for MachineContext {
     fn wom_write(&mut self, addr: BabyBearElem, val: BabyBearExtElem) {
         let addr = u32::from(addr) as usize;
 
@@ -273,8 +273,7 @@ impl<'a> RecursionExecutor<'a> {
         split_points: Vec<usize>,
     ) -> Self {
         let io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
-        let po2 = RECURSION_PO2;
-        let executor = Executor::new(circuit, machine, po2, &io);
+        let executor = Executor::new(circuit, machine, zkr.po2, &io);
         Self {
             zkr,
             executor,
@@ -285,7 +284,7 @@ impl<'a> RecursionExecutor<'a> {
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<usize> {
         let used_cycles = self.zkr.code_rows();
-        tracing::trace!(
+        tracing::debug!(
             "Starting recursion code of length {}/{}",
             used_cycles,
             self.executor.steps
@@ -358,7 +357,6 @@ impl<'a> ParallelHandler<'a> {
             args,
             wom,
             iop_reads,
-
             plonk_queue: Vec::new(),
             cur_iop_body: None,
         }
@@ -384,12 +382,10 @@ impl<'a> ParallelHandler<'a> {
 
         // Run the step
         let args = self.args;
+        let size = 1 << self.program.po2;
         for row in begin..end {
             self.cur_iop_body = None;
-            let ctx = CircuitStepContext {
-                size: 1 << RECURSION_PO2,
-                cycle: row,
-            };
+            let ctx = CircuitStepContext { size, cycle: row };
             CIRCUIT.step_exec(&ctx, &mut self, args).unwrap();
         }
         self
