@@ -45,6 +45,7 @@ If you are looking for your own contribution, you can also go to gist.github.com
 Important Note: Contributors can remove their attestations from GitHub at any time. They can also edit their attestations (although in this case the edit history will be visible). _Only the original version of the attestation can be valid; an edited version cannot be a valid attestation_. Note that that if any malicious contributors were able to participate in the ceremony, it does not damage the security of the ceremony, but it _does_ mean that they can pretend to have a bad attestation by editing or deleting their Gist. Therefore, a contribution with no attestation provides no security to the ceremony, but does not necessarily mean anything is wrong, either.
 
 Please exercise good judgment about whether a missing or edited attestation represents:
+
 1. A malicious contributor
 1. Someone just cleaning up old Gists
 1. A problem in the ceremony
@@ -52,8 +53,6 @@ Please exercise good judgment about whether a missing or edited attestation repr
 ## Ceremony Security
 
 We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony, and our ceremony was coordinated with the [PSE] team. This gave us tools that had been battle-tested by prior ceremonies, and moreover, by using tools written by an external team, we put substantial limits on our own ability to maliciously manipulate the ceremony software.
-
-
 
 [DefinitelySetup]: https://github.com/privacy-scaling-explorations/DefinitelySetup
 [install-circom]: https://docs.circom.io/getting-started/installation/
