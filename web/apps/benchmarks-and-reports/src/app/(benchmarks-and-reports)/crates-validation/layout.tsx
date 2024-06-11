@@ -10,7 +10,7 @@ export default function CratesIoValidationLayout({ children }) {
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
         <div>
-          <h1 className="title-sm">Crates.io Validation</h1>
+          <h1 className="text-3xl">Crates.io Validation</h1>
           <p className="text-muted-foreground text-sm">
             Each night, we test compatibility between each of the{" "}
             <Link

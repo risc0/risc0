@@ -18,7 +18,7 @@ use std::{
 
 use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputeCommandEncoderRef, ComputePipelineDescriptor,
-    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize, NSRange,
+    Device, MTLArgumentBuffersTier, MTLResourceOptions, MTLSize,
 };
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use rayon::prelude::*;
@@ -304,7 +304,8 @@ pub enum KernelArg<'a> {
 impl<T> BufferImpl<T> {
     pub fn new(name: &'static str, device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
         let bytes_len = size * mem::size_of::<T>();
-        let options = MTLResourceOptions::StorageModeManaged;
+        // TODO: detect if device supports shared mode
+        let options = MTLResourceOptions::StorageModeShared;
         let buffer = device.new_buffer(bytes_len as u64, options);
         Self {
             name,
@@ -323,7 +324,8 @@ impl<T> BufferImpl<T> {
         slice: &[T],
     ) -> Self {
         let bytes_len = mem::size_of_val(slice);
-        let options = MTLResourceOptions::StorageModeManaged;
+        // TODO: detect if device supports shared mode
+        let options = MTLResourceOptions::StorageModeShared;
         let buffer =
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
         Self {
@@ -352,14 +354,14 @@ impl<T> BufferImpl<T> {
         }
     }
 
-    fn sync(&self) {
-        let cmd_buffer = self.cmd_queue.new_command_buffer();
-        let blit_encoder = cmd_buffer.new_blit_command_encoder();
-        blit_encoder.synchronize_resource(&self.buffer.0);
-        blit_encoder.end_encoding();
-        cmd_buffer.commit();
-        cmd_buffer.wait_until_completed();
-    }
+    // fn sync(&self) {
+    //     let cmd_buffer = self.cmd_queue.new_command_buffer();
+    //     let blit_encoder = cmd_buffer.new_blit_command_encoder();
+    //     blit_encoder.synchronize_resource(&self.buffer.0);
+    //     blit_encoder.end_encoding();
+    //     cmd_buffer.commit();
+    //     cmd_buffer.wait_until_completed();
+    // }
 
     pub fn as_device_ptr(&self) -> *mut c_void {
         self.buffer.0.gpu_address() as *mut c_void
@@ -396,7 +398,8 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn get_at(&self, idx: usize) -> T {
-        self.sync();
+        // TODO: detect if device supports synchronize_resource
+        // self.sync();
         let ptr = self.buffer.0.contents() as *const T;
         let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts(ptr, len) };
@@ -404,7 +407,8 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
-        self.sync();
+        // TODO: detect if device supports synchronize_resource
+        // self.sync();
         let ptr = self.buffer.0.contents() as *const T;
         let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts(ptr, len) };
@@ -412,16 +416,18 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
-        self.sync();
+        // TODO: detect if device supports synchronize_resource
+        // self.sync();
         let ptr = self.buffer.0.contents() as *mut T;
         let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts_mut(ptr, len) };
         f(&mut slice[self.offset..self.offset + self.size]);
-        let offset = self.offset * mem::size_of::<T>();
-        let size = self.size * mem::size_of::<T>();
-        self.buffer
-            .0
-            .did_modify_range(NSRange::new(offset as u64, size as u64));
+        // TODO: detect if device supports did_modify_range
+        // let offset = self.offset * mem::size_of::<T>();
+        // let size = self.size * mem::size_of::<T>();
+        // self.buffer
+        //     .0
+        //     .did_modify_range(NSRange::new(offset as u64, size as u64));
     }
 
     fn to_vec(&self) -> Vec<T> {
@@ -524,9 +530,8 @@ impl<MH: MetalHash> MetalHal<MH> {
             }
             None => {
                 let threads_per_grid = MTLSize::new(count, 1, 1);
-                let width = pipeline_state.thread_execution_width();
-                let height = pipeline_state.max_total_threads_per_threadgroup() / width;
-                let threads_per_threadgroup = MTLSize::new(width, height, 1);
+                let threads_per_threadgroup =
+                    MTLSize::new(pipeline_state.max_total_threads_per_threadgroup(), 1, 1);
                 cmd_encoder.dispatch_threads(threads_per_grid, threads_per_threadgroup);
             }
         };

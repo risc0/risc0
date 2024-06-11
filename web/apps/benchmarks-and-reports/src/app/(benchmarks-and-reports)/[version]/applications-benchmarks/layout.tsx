@@ -19,7 +19,7 @@ export default function ApplicationsBenchmarksLayout({
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
-        <h1 className="title-sm">Applications Benchmarks</h1>
+        <h1 className="text-3xl">Applications Benchmarks</h1>
 
         <Suspense fallback={<SuspenseLoader />}>
           <ApplicationsBenchmarksCommitHashButton version={params.version} />
