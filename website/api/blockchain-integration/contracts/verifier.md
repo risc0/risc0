@@ -49,8 +49,8 @@ You can find detailed information in the [version management design][VersionMana
 
 :::info
 
-Contracts are not deployed for unreleased versions of the zkVM.
-You can use deployed contracts for a released version, or deploy the unreleased contracts yourself. TODO
+Contracts are not deployed for unreleased versions.
+You can use the [deployed contracts for a released version][doc-released-contracts].
 
 :::
 
@@ -67,3 +67,4 @@ You can use deployed contracts for a released version, or deploy the unreleased 
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm-program]: /terminology#zkvm-program
+[doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
