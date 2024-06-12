@@ -2,7 +2,7 @@
 
 ## Next (upcoming release)
 
-TBD
+TBD!
 
 ## [v1.0.0 (2024-06-04)](https://github.com/risc0/risc0/releases/tag/v1.0.0)
 
