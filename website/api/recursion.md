@@ -110,7 +110,7 @@ RISC Zero's zkVM consists of three circuits.
    This circuit has a similar architecture to the RISC-V Circuit, but with fewer columns and a much simpler instruction set.
    The Recursion Circuit supports a number of programs, including [lift], [join], [resolve], and [identity_p254].
    The same [proof system] is used for both the RISC-V Circuit and the Recursion Circuit.
-1. The STARK-to-SNARK Circuit is an R1CS circuit that proves verification of proofs from the _identity_p254_ program.
+1. The STARK-to-SNARK Circuit is an R1CS circuit that proves verification of proofs from the Recursion Circuit.
 
 
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
