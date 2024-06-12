@@ -1,6 +1,6 @@
 # Recursive Proving
 
-RISC Zero's zkVM uses recursive proving in order to achieve unbounded computation size, constant\* proof size, proof aggregation, and proof composition.
+RISC Zero's zkVM uses recursive proving in order to achieve unbounded computation size, constant proof size, proof aggregation, and proof composition.
 
 The end-to-end process for proof generation is shown in the following diagram, including links to the associated crate docs:
 
