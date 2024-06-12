@@ -112,7 +112,6 @@ RISC Zero's zkVM consists of three circuits.
    The same [proof system] is used for both the RISC-V Circuit and the Recursion Circuit.
 1. The STARK-to-SNARK Circuit is an R1CS circuit that proves verification of proofs from the _identity_p254_ program.
 
-*The size of a [Receipt] varies depending on the size of the ReceiptClaim and its ReceiptKind. For SuccinctReceipts and Groth16 Receipts, the size of the *seal\* is constant.
 
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
 [lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
