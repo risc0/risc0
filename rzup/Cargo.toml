@@ -1,19 +1,19 @@
 [package]
 name = "rzup"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
-homepage.workspace = true
-repository.workspace = true
-
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.86"
+cfg-if = "1.0.0"
 clap = { version = "4.5.4", features = ["derive"] }
 dirs = "5.0.1"
 downloader = { version = "0.2.7", default-features = false, features = [
-  "rustls-tls",
+    "rustls-tls",
 ] }
 flate2 = "1.0.30"
 fs2 = "0.4.3"

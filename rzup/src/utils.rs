@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Context};
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
+use cfg_if::cfg_if;
 use fs2::FileExt;
 use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus, Output, Stdio};
 
-pub fn risc0_data() -> Result<PathBuf> {
+pub fn version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
+
+pub fn rzup_home() -> Result<PathBuf> {
     let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
         dir.into()
     } else if let Some(home) = dirs::home_dir() {
@@ -156,29 +160,29 @@ pub fn flock(path: &Path) -> Result<FileLock> {
         .context(format!("failed to create directory `{}`", parent.display()))?;
     let file = OpenOptions::new()
         .create(true)
+        .truncate(true)
         .read(true)
         .write(true)
         .open(path)?;
     file.lock_exclusive()?;
-    return Ok(FileLock(file));
+    Ok(FileLock(file))
 }
 
-/// Try to get the host target triple.
+/// Get the host target triple.
 ///
 /// Only checks for targets that have pre-built toolchains.
-#[allow(unreachable_code)]
-pub fn guess_host_target() -> Option<&'static str> {
-    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
-    return Some("x86_64-unknown-linux-gnu");
-
-    #[cfg(all(target_arch = "x86_64", target_os = "macos"))]
-    return Some("x86_64-apple-darwin");
-
-    #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
-    return Some("aarch64-apple-darwin");
-
-    #[cfg(all(target_arch = "x86_64", target_os = "windows"))]
-    return Some("x86_64-pc-windows-msvc");
-
-    None
-}
+pub const HOST_TARGET_TRIPLE: Option<&str> = {
+    cfg_if! {
+        if #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+            Some("x86_64-unknown-linux-gnu")
+        } else if #[cfg(all(target_arch = "x86_64", target_os = "macos"))] {
+            Some("x86_64-apple-darwin")
+        } else if #[cfg(all(target_arch = "aarch64", target_os = "macos"))] {
+            Some("aarch64-apple-darwin")
+        } else if #[cfg(all(target_arch = "x86_64", target_os = "windows"))] {
+            Some("x86_64-pc-windows-msvc")
+        } else {
+            None
+        }
+    }
+};

@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::help;
+use crate::{help, utils::rzup_home};
 use clap::Subcommand;
+use std::fs;
+use std::io::Write;
+use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 #[derive(Debug, Subcommand)]
 pub enum ShowSubcmd {
@@ -29,33 +32,46 @@ pub enum ShowSubcmd {
     Home,
 }
 
-pub fn handle_show(verbose: bool, subcmd: Option<ShowSubcmd>) {
+pub fn handle_show(_verbose: bool, subcmd: Option<ShowSubcmd>) {
     match subcmd {
         Some(ShowSubcmd::ActiveToolchain { .. }) => {
-            // Placeholder for active toolchain logic
             println!("Active toolchain logic not implemented yet.");
         }
         Some(ShowSubcmd::Home) => {
-            // Placeholder for RZUP_HOME logic
             println!("RZUP_HOME logic not implemented yet.");
         }
         None => {
-            // Call the function to list all installed toolchains
-            if let Err(e) = show_installed_toolchains(verbose) {
-                eprintln!("Error showing toolchains: {}", e);
-                std::process::exit(1);
-            }
+            show().unwrap();
         }
     }
 }
 
-pub fn show_installed_toolchains(verbose: bool) -> anyhow::Result<()> {
-    use crate::utils::risc0_data;
-    use std::fs;
-    use std::io::Write;
-    use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+fn show() -> anyhow::Result<()> {
+    fn print_header(s: String) -> anyhow::Result<()> {
+        let mut stdout = StandardStream::stderr(ColorChoice::Always);
+        stdout.set_color(ColorSpec::new().set_bold(true))?;
+        writeln!(&mut stdout, "{}", s)?;
+        writeln!(&mut stdout, "{}", "-".repeat(s.len()))?;
+        writeln!(&mut stdout)?;
+        stdout.reset()?;
+        Ok(())
+    }
 
-    let toolchains_dir = risc0_data()?.join("toolchains");
+    let mut stdout = StandardStream::stderr(ColorChoice::Always);
+    stdout.set_color(ColorSpec::new().set_bold(true))?;
+    write!(&mut stdout, "rzup home: ")?;
+    stdout.reset()?;
+    writeln!(&mut stdout, "{}", rzup_home().unwrap().to_str().unwrap())?;
+
+    print_header("installed toolchains".to_string())?;
+    show_installed_toolchains(false)?;
+    print_header("active toolchains".to_string())?;
+
+    Ok(())
+}
+
+pub fn show_installed_toolchains(verbose: bool) -> anyhow::Result<()> {
+    let toolchains_dir = rzup_home()?.join("toolchains");
 
     if !toolchains_dir.exists() {
         eprintln!("No toolchains directory found.");
@@ -76,11 +92,8 @@ pub fn show_installed_toolchains(verbose: bool) -> anyhow::Result<()> {
         let toolchain_name = entry.file_name().to_string_lossy().to_string();
         if verbose {
             println!("Toolchain: {}", toolchain_name);
-            // Optionally add more detailed information about the toolchain here
         } else {
-            let mut stdout = StandardStream::stdout(ColorChoice::Always);
-            stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
-            writeln!(&mut stdout, "{}", toolchain_name)?;
+            eprintln!("{}", toolchain_name);
         }
     }
 

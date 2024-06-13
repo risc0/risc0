@@ -19,40 +19,34 @@ use rzup::cmd::{
     show::{handle_show, ShowSubcmd},
     toolchain::{handle_toolchain, ToolchainSubcmd},
 };
-use rzup::{common, help};
+use rzup::help;
+use rzup::utils;
 
 fn main() {
     let matches = Rzup::parse();
 
-    if std::env::args().len() == 1 {
-        println!("{}", Rzup::command().render_long_help());
-        std::process::exit(0);
-    }
-
-    let subcmd = matches.subcmd;
+    let Some(subcmd) = matches.subcmd else {
+        eprintln!("{}", Rzup::command().render_long_help());
+        std::process::exit(0)
+    };
 
     match subcmd {
-        Some(RzupSubcmd::Install { subcmd }) => handle_install(subcmd),
-
-        Some(RzupSubcmd::Toolchain { subcmd }) => handle_toolchain(subcmd),
-
-        Some(RzupSubcmd::Show { verbose, subcmd }) => handle_show(verbose, subcmd),
-
-        Some(RzupSubcmd::Check { .. }) => handle_check().expect("Error checking for updates"),
-
-        Some(RzupSubcmd::Update { .. }) => todo!(),
-        Some(RzupSubcmd::Default { .. }) => todo!(),
-        Some(RzupSubcmd::Uninstall { .. }) => todo!(),
-        None => todo!(),
+        RzupSubcmd::Install { subcmd } => handle_install(subcmd),
+        RzupSubcmd::Toolchain { subcmd } => handle_toolchain(subcmd),
+        RzupSubcmd::Show { verbose, subcmd } => handle_show(verbose, subcmd),
+        RzupSubcmd::Check => handle_check().expect("Error checking for updates"),
+        RzupSubcmd::Update { .. } => todo!(),
+        RzupSubcmd::Default { .. } => todo!(),
+        RzupSubcmd::Uninstall { .. } => todo!(),
     }
 }
 
 #[derive(Debug, Parser)]
 #[command(
     name = "rzup",
-    bin_name = "rustup[EXE]",
-    version = common::version(),
-    before_help = format!("rzup {}", common::version()),
+    bin_name = "rzup[EXE]",
+    version = utils::version(),
+    before_help = format!("rzup {}", utils::version()),
     after_help = help::RZUP_HELP
 )]
 pub struct Rzup {

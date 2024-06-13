@@ -35,7 +35,7 @@ use crate::{
         repo::ToolchainRepo,
         rust::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME},
     },
-    utils::{flock, guess_host_target, risc0_data},
+    utils::{flock, rzup_home, HOST_TARGET_TRIPLE},
 };
 
 #[derive(Debug, Subcommand)]
@@ -126,7 +126,6 @@ impl InstallToolchain {
         let version = self.toolchain.clone().unwrap_or_else(|| match repo {
             ToolchainRepo::Rust => "latest".to_string(),
             ToolchainRepo::Cpp => "tags/2024.01.05".to_string(), // TODO: Use latest when supported
-            ToolchainRepo::All => unreachable!(),
         });
 
         let tag = if version == "latest" || version.starts_with("tags/") {
@@ -193,8 +192,13 @@ impl InstallToolchain {
 
         let (tag_name, download_url) = rt.block_on(self.get_download_url(&client, target, repo))?;
 
-        let toolchain_dir =
-            toolchain_root_dir.join(format!("{}-{}-{}", tag_name, repo.language(), target));
+        let toolchain_dir = toolchain_root_dir.join(format!(
+            "{}-{}-{}-{}",
+            tag_name,
+            "risc0",
+            repo.language(),
+            target
+        ));
 
         if toolchain_dir.is_dir() {
             eprintln!(
@@ -230,7 +234,6 @@ impl InstallToolchain {
                     let mut archive = Archive::new(decoder);
                     archive.unpack(&toolchain_dir)?;
                 }
-                ToolchainRepo::All => unreachable!(),
             }
         }
 
@@ -238,7 +241,8 @@ impl InstallToolchain {
     }
 
     pub fn run(&self) -> Result<()> {
-        let root_dir = risc0_data()?;
+        let target = HOST_TARGET_TRIPLE.ok_or_else(|| anyhow!("Unsupported host target"))?;
+        let root_dir = rzup_home()?;
         let lockfile_path = root_dir.join("lock");
         let _lock = flock(&lockfile_path);
 
@@ -246,11 +250,8 @@ impl InstallToolchain {
 
         match self.repo {
             ToolchainRepo::Rust => {
-                let rust_path = self.download_toolchain(
-                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
-                    &toolchain_dir,
-                    &ToolchainRepo::Rust,
-                )?;
+                let rust_path =
+                    self.download_toolchain(target, &toolchain_dir, &ToolchainRepo::Rust)?;
                 let rust_chain = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
                 eprintln!(
                     "Rust Toolchain {} downloaded and installed to path {}.",
@@ -259,35 +260,8 @@ impl InstallToolchain {
                 );
             }
             ToolchainRepo::Cpp => {
-                let cpp_path = self.download_toolchain(
-                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
-                    &toolchain_dir,
-                    &ToolchainRepo::Cpp,
-                )?;
-                let cpp_chain = CppToolchain::link(&cpp_path)?;
-                eprintln!(
-                    "C++ Toolchain downloaded and installed to path {}.",
-                    cpp_chain.path.display()
-                );
-            }
-            ToolchainRepo::All => {
-                let rust_path = self.download_toolchain(
-                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
-                    &toolchain_dir,
-                    &ToolchainRepo::Rust,
-                )?;
-                let rust_chain = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
-                eprintln!(
-                    "Rust Toolchain {} downloaded and installed to path {}.",
-                    rust_chain.name,
-                    rust_chain.path.display()
-                );
-
-                let cpp_path = self.download_toolchain(
-                    guess_host_target().ok_or_else(|| anyhow!("Unsupported host target"))?,
-                    &toolchain_dir,
-                    &ToolchainRepo::Cpp,
-                )?;
+                let cpp_path =
+                    self.download_toolchain(target, &toolchain_dir, &ToolchainRepo::Cpp)?;
                 let cpp_chain = CppToolchain::link(&cpp_path)?;
                 eprintln!(
                     "C++ Toolchain downloaded and installed to path {}.",
@@ -296,7 +270,6 @@ impl InstallToolchain {
             }
         }
 
-        eprintln!("The risc0 toolchain is now ready to use.");
         Ok(())
     }
 }

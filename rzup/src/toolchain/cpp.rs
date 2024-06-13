@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{bail, Result};
 use fs_extra::dir::CopyOptions;
 
-use crate::utils::risc0_data;
+use crate::utils::rzup_home;
 
 #[derive(Clone, Debug)]
 pub struct CppToolchain {
@@ -27,7 +27,7 @@ pub struct CppToolchain {
 impl CppToolchain {
     fn get_subdir(path: &Path) -> Result<PathBuf> {
         let sub_dir: Vec<std::result::Result<std::fs::DirEntry, std::io::Error>> =
-            std::fs::read_dir(path)?.into_iter().collect();
+            std::fs::read_dir(path)?.collect();
         if sub_dir.len() != 1 {
             bail!(
                 "Expected {} to only have 1 subdirectory, found {}",
@@ -41,7 +41,7 @@ impl CppToolchain {
 
     pub fn link(path: &Path) -> Result<Self> {
         let cpp_download_dir = Self::get_subdir(path)?;
-        let r0_data = risc0_data()?;
+        let r0_data = rzup_home()?;
         fs_extra::dir::copy(
             cpp_download_dir.clone(),
             &r0_data,
