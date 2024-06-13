@@ -9,10 +9,12 @@ export async function DatasheetCommitHashButton({ version }: { version: Version 
 
   return (
     <Tooltip>
-      <TooltipTrigger>
-        <CopyButton size="sm" variant="ghost" value={commitHash}>
-          Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
-        </CopyButton>
+      <TooltipTrigger asChild>
+        <div>
+          <CopyButton size="sm" variant="ghost" value={commitHash}>
+            Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
+          </CopyButton>
+        </div>
       </TooltipTrigger>
       <TooltipContent>Last Update: {new Date(updatedAt).toLocaleString()}</TooltipContent>
     </Tooltip>

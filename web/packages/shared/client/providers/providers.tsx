@@ -12,12 +12,14 @@ import { ProgressBarProvider } from "./progress-bar-provider";
 export function Providers({ children }: PropsWithChildren) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange enableSystem enableColorScheme>
-      <ProgressBarProvider className="fixed top-0 h-[2px] bg-primary">
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster visibleToasts={3} richColors duration={8000} />
-        <Analytics />
-        <SpeedInsights />
-      </ProgressBarProvider>
+      <div vaul-drawer-wrapper="" className="flex flex-col flex-1 bg-background">
+        <ProgressBarProvider className="fixed top-0 h-[2px] bg-primary">
+          <TooltipProvider>{children}</TooltipProvider>
+          <Toaster visibleToasts={3} richColors duration={8000} />
+          <Analytics />
+          <SpeedInsights />
+        </ProgressBarProvider>
+      </div>
     </ThemeProvider>
   );
 }

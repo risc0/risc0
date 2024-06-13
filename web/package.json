@@ -12,16 +12,16 @@
   "dependencies": {
     "@joshdavenport/tailwindcss-filter-order": "0.2.0",
     "@poppinss/intl-formatter": "3.0.2",
-    "@risc0/ui": "0.0.91",
+    "@risc0/ui": "0.0.97",
     "@t3-oss/env-nextjs": "0.10.1",
     "@tanstack/match-sorter-utils": "9.0.0-alpha.0",
     "@tanstack/react-table": "9.0.0-alpha.0",
     "@vercel/analytics": "1.3.1",
-    "@vercel/speed-insights": "1.0.11",
+    "@vercel/speed-insights": "1.0.12",
     "chart.js": "2.9.4",
     "deepmerge": "4.3.1",
     "framer-motion": "11.2.10",
-    "lucide-react": "0.390.0",
+    "lucide-react": "0.394.0",
     "ms": "2.1.3",
     "next": "15.0.0-canary.22",
     "next-themes": "0.3.0",
@@ -35,7 +35,7 @@
     "zod": "3.23.8"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.8.0",
+    "@biomejs/biome": "1.8.1",
     "@next/bundle-analyzer": "15.0.0-canary.22",
     "@types/chart.js": "2.9.41",
     "@types/jest": "29.5.12",
