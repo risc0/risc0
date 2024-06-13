@@ -70,7 +70,11 @@ check_rust_installed() {
 }
 
 install_cargo_binstall() {
-  execute_with_feedback "cargo install --locked cargo-binstall --quiet" "Installing cargo-binstall"
+  if ! command -v cargo-binstall &>/dev/null; then
+    execute_with_feedback "cargo install --locked cargo-binstall --quiet" "Installing cargo-binstall"
+  else
+    echo "cargo-binstall already installed, skipping step"
+  fi
 }
 
 binstall_cargo_risczero() {
