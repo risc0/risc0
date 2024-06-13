@@ -55,6 +55,7 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 :::
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
+
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol

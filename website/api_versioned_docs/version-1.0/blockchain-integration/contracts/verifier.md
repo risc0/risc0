@@ -54,11 +54,12 @@ You can find detailed information about all the contracts in this table in the [
 | [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol]               | [Ethereum Mainnet] | [0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319][mainnet-router]   |
 | [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop.sol] | [Ethereum Mainnet] | [0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7][mainnet-estop]    |
 | [RiscZeroGroth16Verifier][RiscZeroGroth16Verifier.sol]             | [Ethereum Mainnet] | [0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C][mainnet-verifier] |
-| [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol]               | [Sepolia]          | [0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187][sepolia-router] |
-| [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop.sol] | [Sepolia]          | [0xeA41bc40DAA1d0E681c7e8eA449b89a290e922e8][sepolia-estop] |
+| [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol]               | [Sepolia]          | [0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187][sepolia-router]   |
+| [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop.sol] | [Sepolia]          | [0xeA41bc40DAA1d0E681c7e8eA449b89a290e922e8][sepolia-estop]    |
 | [RiscZeroGroth16Verifier][RiscZeroGroth16Verifier.sol]             | [Sepolia]          | [0x3d24C84FC1A2B26f9229e58ddDf11A8dfba802d0][sepolia-verifier] |
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
+
 [Ethereum Mainnet]: https://ethereum.org/nb/developers/docs/networks/#ethereum-mainnet
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/27eba00a5237cbefd0c742dee73ced697df3527a/contracts/EvenNumber.sol#L46-L52
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html
