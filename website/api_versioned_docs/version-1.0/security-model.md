@@ -23,7 +23,7 @@ RISC Zero offers the following components, each of which is ready for use on tes
 
 5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
    The control root is hard-coded into the on-chain verifier contract.
-   Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc.
+   Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement] doc.
 
 Together, these components allow developers to integrate proofs of arbitrary Rust code into their on-chain applications.
 In order to use these components, developers provide:
@@ -117,7 +117,6 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [receipt claim]: /terminology#receipt-claim
 [RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkp/src/prove/soundness.rs
-[this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [Verifier Contract]: ./blockchain-integration/contracts/verifier
-[VersionManagement@main]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
+[VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/version-management-design.md

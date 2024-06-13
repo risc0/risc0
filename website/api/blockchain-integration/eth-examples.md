@@ -26,6 +26,6 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [governance-example]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
-[foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[foundry-template]: https://github.com/risc0/risc0-foundry-template
 [steel-repo]: https://crates.io/crates/risc0-steel
 [steel-blog]: https://www.risczero.com/blog/introducing-steel

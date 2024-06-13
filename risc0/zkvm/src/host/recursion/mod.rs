@@ -14,14 +14,11 @@
 
 //! Prover implementation for the recursion VM.
 //!
-//! This module contains the recursion [Prover], and the recursion programs used with the zkVM. The
-//! recursion VM is a non-Turing-complete virtual machine (VM) optimized for algebraic constraint
-//! checking. In particular, it is well-tuned for verifying STARKs.
+//! This module contains the recursion programs used with the zkVM.
+//! As examples, the [lift], [join], and [resolve] programs are used
+//! oto compress a collection of STARK receipts for a composition into
+//! a single succinct receipt.
 //!
-//! The recursion VM runs "recursion programs", which define the functionality it will implement.
-//! As examples, the [lift], [join], and [resolve] programs are used to compress a collection of
-//! STARK receipts for a composition into a single succinct receipt.
-
 #[cfg(feature = "prove")]
 pub(crate) mod prove;
 #[cfg(test)]
@@ -38,6 +35,8 @@ pub use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_IDS, ALLOWED_CONTR
 #[cfg(feature = "prove")]
 pub use self::prove::test_recursion_circuit;
 #[cfg(feature = "prove")]
-pub use self::prove::{
-    identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, RECURSION_PO2,
+pub use self::prove::{identity_p254, join, lift, resolve, Prover, RECURSION_PO2};
+#[cfg(feature = "prove")]
+pub use risc0_circuit_recursion::prove::{
+    poseidon254_hal_pair, poseidon2_hal_pair, sha256_hal_pair, Program,
 };

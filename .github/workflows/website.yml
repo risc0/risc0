@@ -69,6 +69,7 @@ jobs:
 
   check:
     if: needs.changes.outputs.check == 'true'
+    needs: changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -79,7 +80,7 @@ jobs:
         with:
           python-version: "3.10"
       - run: npx prettier website --check
-      - run: python website/github-link-version-check.py
+      - run: python website/link-version-check.py
 
   doc-test-main:
     if: needs.changes.outputs.doc-test-main == 'true'
@@ -134,4 +135,3 @@ jobs:
         working-directory: website/doc-test/stable
 
       - run: sccache --show-stats
-

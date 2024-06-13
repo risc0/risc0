@@ -48,8 +48,7 @@ pub struct MerkleGroup {
 /// An inclusion proof for the [MerkleGroup]. Used to verify inclusion of a given recursion program
 /// in the committed set.
 #[non_exhaustive]
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(test, derive(PartialEq))]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MerkleProof {
     /// Index of the leaf for which inclusion is being proven.
     pub index: u32,
