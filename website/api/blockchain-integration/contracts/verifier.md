@@ -34,9 +34,9 @@ RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally i
 ## Deployed verifiers
 
 All of our deployed verifier contracts implement the [IRiscZeroVerifier][IRiscZeroVerifier] interface.
-It is recommended that you use the [RiscZeroVerifierRouter][RiscZeroVerifierRouter], described below.
+It is recommended that you use the [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol], described below.
 
-### RiscZeroVerifierRouter
+### Verifier Router
 
 Calls to `RiscZeroVerifierRouter.verify()` will be routed to the appropriate base verifier contract depending on which version of the zkVM was used to generate the receipt.
 By using the `RiscZeroVerifierRouter`, your contract can accept multiple types of receipts, including batch-verified receipts and receipts generated with future improvements to the zkVM and proofs system.
@@ -55,16 +55,15 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 :::
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
-
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
-[RiscZeroVerifierRouter]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierRouter.sol
+[RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierRouter.sol
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
+[doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm-program]: /terminology#zkvm-program
-[doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
