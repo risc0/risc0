@@ -2,13 +2,13 @@
 
 :::info
 
-The `stark2snark` prover currently *only* works on x86 architecture, and so Apple Silicon is *currently unsupported* (even via Docker). 
+The `stark2snark` prover currently _only_ works on x86 architecture, and so Apple Silicon is _currently unsupported_ (even via Docker).
 
-You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749). 
- 
+You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
+
 :::
 
-----------------------------------
+---
 
 To support a variety of use cases, RISC Zero allows users a variety of options for proof generation.
 
