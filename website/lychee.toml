@@ -1,0 +1,2 @@
+exclude_path = ["./build", "./node_modules"]
+max_concurrency = 5
