@@ -121,9 +121,9 @@ jobs:
 
       - name: build
         run: cargo test --release --no-run
-        working-directory: website/doc-test/main
+        working-directory: website/doc-test/stable
       - name: test
         run: cargo test --release
-        working-directory: website/doc-test/main
+        working-directory: website/doc-test/stable
 
       - run: sccache --show-stats
