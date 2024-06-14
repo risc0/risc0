@@ -14,6 +14,21 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+//! The recursion VM is a non-Turing-complete virtual machine (VM)
+//! optimized for algebraic constraint checking. In particular, it is
+//! well-tuned for verifying STARKs.
+//!
+//! The recursion VM runs "recursion programs", which define the
+//! functionality it will implement.  As examples, the [lift], [join],
+//! and [resolve] programs are used by the risc0 ZkVM to compress a
+//! collection of STARK receipts for a composition into a single
+//! succinct receipt.
+//!
+//! This is a low-level interface; users should prefer to use the
+//! `risc0_zkvm` crate.
+
+extern crate alloc;
+
 pub mod control_id;
 #[cfg(feature = "prove")]
 mod cpp;
@@ -26,6 +41,8 @@ pub mod layout;
 #[cfg(feature = "metal")]
 pub mod metal;
 mod poly_ext;
+#[cfg(feature = "prove")]
+pub mod prove;
 mod taps;
 #[cfg(feature = "prove")]
 pub mod zkr;

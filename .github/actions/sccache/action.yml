@@ -47,7 +47,8 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-    - if: runner.os == 'Linux' && inputs.disable_s3 == 'false'
+    - if: >
+        runner.os == 'Linux' && inputs.disable_s3 == 'false' && startsWith(runner.name, 'i-') == true
       run: |
         echo "SCCACHE_REGION=us-west-2" >> $GITHUB_ENV
         echo "SCCACHE_BUCKET=risc0-ci-cache" >> $GITHUB_ENV

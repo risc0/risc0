@@ -14,11 +14,11 @@
 
 use std::collections::BTreeMap;
 
-use anyhow::{bail, Result};
-use risc0_circuit_recursion::{
+use crate::{
     layout::{CodeReg, RecursionMicroInst, LAYOUT},
     micro_op, Externs,
 };
+use anyhow::{bail, Result};
 use risc0_core::field::baby_bear::{BabyBearElem as Fp, BabyBearExtElem as FpExt};
 use risc0_zkp::{
     adapter::CircuitStepContext,
