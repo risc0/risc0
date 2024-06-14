@@ -1,9 +1,0 @@
-http://127.0.0.1:8000
-http://localhost:8000
-http://localhost:8089
-https://epubs.siam.org/doi/10.1137/0108018
-
-# TODO: fix these
-# These seem to refer to the old `bonsai-foundry-template` repository:
-/contracts/BonsaiStarter.sol
-/relay/examples/offchain_request.rs
