@@ -26,7 +26,6 @@ We recommend option 1 during development, option 2 for applications involving pr
 
 :::
 
-
 [dev-mode]: ./dev-mode
 [Local Proving]: ./local-proving
 [Remote Proving]: ./remote-proving
