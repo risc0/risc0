@@ -36,8 +36,6 @@ fn main() {
         RzupSubcmd::Show { verbose, subcmd } => handle_show(verbose, subcmd),
         RzupSubcmd::Check => handle_check().expect("Error checking for updates"),
         RzupSubcmd::Update { .. } => todo!(),
-        RzupSubcmd::Default { .. } => todo!(),
-        RzupSubcmd::Uninstall { .. } => todo!(),
     }
 }
 
@@ -46,7 +44,21 @@ fn main() {
     name = "rzup",
     bin_name = "rzup[EXE]",
     version = utils::version(),
-    before_help = format!("rzup {}", utils::version()),
+    before_help = format!(
+"rzup {}
+
+    ██████  █▀▀▀██
+    ██████  █ ▄▀ █        Prove anything.
+    ██████  ██▄▄▄█       Verify everywhere.
+    ██████
+    ██████   RISC
+    ██████   ZERO
+
+Contribute      : https://github.com/risc0/
+Documentation   : https://dev.risczero.com/
+Chat & Support  : https://discord.com/invite/risczero/",
+    utils::version()
+    ),
     after_help = help::RZUP_HELP
 )]
 pub struct Rzup {
@@ -61,14 +73,14 @@ pub struct Rzup {
 #[derive(Debug, Subcommand)]
 #[command(name = "rzup", bin_name = "rzup[EXE]")]
 pub enum RzupSubcmd {
-    /// Update RISC Zero toolchains
+    /// Install RISC Zero
     #[command(after_help = help::INSTALL_HELP)]
     Install {
         #[command(subcommand)]
         subcmd: InstallSubcmd,
     },
 
-    /// Manage toolchains
+    /// Manage and install RISC Zero toolchains
     Toolchain {
         #[command(subcommand)]
         subcmd: ToolchainSubcmd,
@@ -99,10 +111,4 @@ pub enum RzupSubcmd {
 
     /// Check for updates to RISC Zero toolchains and rzup
     Check,
-
-    /// Set the default RISC Zero toolchain
-    Default,
-
-    /// Uninstall RISC Zero toolchains
-    Uninstall,
 }
