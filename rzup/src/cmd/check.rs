@@ -21,13 +21,19 @@ pub fn handle_check() -> Result<()> {
 
     let rust_repo = "https://api.github.com/repos/risc0/rust/releases/latest";
     let cpp_repo = "https://api.github.com/repos/risc0/toolchain/releases/latest";
+    let cargo_risczero_repo = "https://api.github.com/repos/risc0/risc0/releases/latest";
 
     let rt = tokio::runtime::Runtime::new()?;
 
+    let cargo_risczero_data = rt.block_on(get_latest_version(&client, cargo_risczero_repo))?;
     let rust_release_data = rt.block_on(get_latest_version(&client, rust_repo))?;
     let cpp_release_data = rt.block_on(get_latest_version(&client, cpp_repo))?;
 
     // TODO: Clean up and make pretty
+    println!(
+        "Latest cargo-risczero release: {} : ({})",
+        cargo_risczero_data.tag_name, cargo_risczero_data.published_at
+    );
     println!(
         "Latest Rust release: {} : ({})",
         rust_release_data.tag_name, rust_release_data.published_at
