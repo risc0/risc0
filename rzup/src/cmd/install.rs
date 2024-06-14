@@ -20,7 +20,7 @@ use std::{
 };
 
 use anyhow::{anyhow, Context, Result};
-use clap::{Args, Subcommand};
+use clap::Args;
 use downloader::{Download, Downloader};
 use flate2::bufread::GzDecoder;
 use reqwest::{header::HeaderMap, Client};
@@ -39,71 +39,6 @@ use crate::{
     utils::{flock, rzup_home, HOST_TARGET_TRIPLE},
 };
 
-#[derive(Debug, Subcommand)]
-pub enum InstallSubcmd {
-    /// Install Rust toolchain
-    Rust {
-        /// Toolchain version (i.e. stable or a specific version)
-        #[arg(required = false)]
-        toolchain: Option<String>,
-    },
-    /// Install C++ toolchain
-    Cpp {
-        /// Toolchain version
-        #[arg(required = false)]
-        toolchain: Option<String>,
-    },
-    /// Install cargo-risczero extension
-    CargoRisczero {
-        /// Version (i.e. latest or a specific version)
-        #[arg(required = false)]
-        version: Option<String>,
-    },
-    /// Install latest Rust toolchain and cargo-risczero extenstion
-    Default,
-}
-
-pub fn handle_install(subcmd: InstallSubcmd) {
-    match subcmd {
-        InstallSubcmd::Rust { toolchain } => {
-            InstallToolchain {
-                toolchain,
-                repo: ToolchainRepo::Rust,
-            }
-            .run()
-            .expect("Error during Rust toolchain installation");
-        }
-        InstallSubcmd::Cpp { toolchain } => {
-            InstallToolchain {
-                toolchain,
-                repo: ToolchainRepo::Cpp,
-            }
-            .run()
-            .expect("Error during C++ toolchain installation");
-        }
-        InstallSubcmd::CargoRisczero { version } => {
-            InstallCargoRisczero {
-                version: version.unwrap_or_else(|| "latest".to_string()),
-            }
-            .run()
-            .expect("Error during cargo-risczero installation");
-        }
-        InstallSubcmd::Default => {
-            InstallToolchain {
-                toolchain: Some("latest".to_string()),
-                repo: ToolchainRepo::Rust,
-            }
-            .run()
-            .expect("Error during Rust toolchain installation");
-            InstallCargoRisczero {
-                version: "latest".to_string(),
-            }
-            .run()
-            .expect("Error during cargo-risczero installation");
-        }
-    }
-}
-
 /// Release returned by Github API.
 #[derive(Deserialize)]
 struct GithubReleaseData {
@@ -120,7 +55,7 @@ struct GithubAsset {
 
 #[derive(Debug, Default, Args)]
 pub struct InstallCargoRisczero {
-    pub version: String,
+    pub version: Option<String>,
 }
 
 impl InstallCargoRisczero {
@@ -137,10 +72,10 @@ impl InstallCargoRisczero {
     }
 
     async fn get_download_url(&self, client: &Client, target: &str) -> Result<(String, String)> {
-        let tag = if self.version == "latest" || self.version.starts_with("tags/") {
-            self.version.clone()
-        } else {
-            format!("tags/{}", self.version)
+        let tag = match &self.version {
+            Some(version) if version == "latest" || version.starts_with("tags/") => version.clone(),
+            Some(version) => format!("tags/{}", version),
+            None => "latest".to_string(),
         };
 
         let release_url = format!("https://api.github.com/repos/risc0/risc0/releases/{}", tag);
@@ -207,10 +142,10 @@ impl InstallCargoRisczero {
 
             let decoder = GzDecoder::new(BufReader::new(tarball));
             let mut archive = Archive::new(decoder);
-            archive.unpack(&install_dir)?;
+            archive.unpack(install_dir)?;
         }
 
-        // Ensure permissions for rust toolchain.
+        // Ensure permissions for cargo risczero
         #[cfg(target_family = "unix")]
         {
             let binary_path = install_dir.join("cargo-risczero");
@@ -371,28 +306,30 @@ impl InstallToolchain {
                     let decoder = GzDecoder::new(BufReader::new(tarball));
                     let mut archive = Archive::new(decoder);
                     archive.unpack(&toolchain_dir)?;
+
+                    // Ensure permissions for rust toolchain.
+                    #[cfg(target_family = "unix")]
+                    {
+                        let iter1 = std::fs::read_dir(toolchain_dir.join("bin"))?;
+                        let iter2 = std::fs::read_dir(
+                            toolchain_dir.join(format!("lib/rustlib/{target}/bin")),
+                        )?;
+
+                        // Make sure the binaries can be executed.
+                        for res in iter1.chain(iter2) {
+                            let entry = res?;
+                            if entry.file_type()?.is_file() {
+                                let mut perms = entry.metadata()?.permissions();
+                                perms.set_mode(0o755);
+                                std::fs::set_permissions(entry.path(), perms)?;
+                            }
+                        }
+                    }
                 }
                 ToolchainRepo::Cpp => {
                     let decoder = XzDecoder::new(BufReader::new(tarball));
                     let mut archive = Archive::new(decoder);
                     archive.unpack(&toolchain_dir)?;
-                }
-            }
-        }
-
-        // Ensure permissions for rust toolchain.
-        #[cfg(target_family = "unix")]
-        {
-            let iter1 = std::fs::read_dir(toolchain_dir.join("bin"))?;
-            let iter2 = std::fs::read_dir(toolchain_dir.join(format!("lib/rustlib/{target}/bin")))?;
-
-            // Make sure the binaries can be executed.
-            for res in iter1.chain(iter2) {
-                let entry = res?;
-                if entry.file_type()?.is_file() {
-                    let mut perms = entry.metadata()?.permissions();
-                    perms.set_mode(0o755);
-                    std::fs::set_permissions(entry.path(), perms)?;
                 }
             }
         }

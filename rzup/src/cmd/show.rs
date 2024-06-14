@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::utils::CommandExt;
 use crate::{help, utils::rzup_home};
+use anyhow::Result;
 use clap::Subcommand;
-use std::fs;
 use std::io::Write;
+use std::{fs, process::Command};
 use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 #[derive(Debug, Subcommand)]
@@ -47,7 +49,7 @@ pub fn handle_show(_verbose: bool, subcmd: Option<ShowSubcmd>) {
 }
 
 fn show() -> anyhow::Result<()> {
-    fn print_header(s: String) -> anyhow::Result<()> {
+    fn print_header(s: String) -> Result<()> {
         let mut stdout = StandardStream::stderr(ColorChoice::Always);
         stdout.set_color(ColorSpec::new().set_bold(true))?;
         writeln!(&mut stdout, "{}", s)?;
@@ -63,14 +65,30 @@ fn show() -> anyhow::Result<()> {
     stdout.reset()?;
     writeln!(&mut stdout, "{}", rzup_home().unwrap().to_str().unwrap())?;
 
-    print_header("installed toolchains".to_string())?;
+    let extension_version = get_installed_extension_version().unwrap();
+    stdout.set_color(ColorSpec::new().set_bold(true))?;
+    write!(&mut stdout, "cargo-risczero: ")?;
+    stdout.reset()?;
+    writeln!(&mut stdout, "{}", extension_version)?;
+    print_header("\ninstalled toolchains".to_string())?;
     show_installed_toolchains(false)?;
-    print_header("active toolchains".to_string())?;
 
     Ok(())
 }
 
-pub fn show_installed_toolchains(verbose: bool) -> anyhow::Result<()> {
+pub fn get_installed_extension_version() -> Result<String> {
+    let out = Command::new("cargo")
+        .args(["risczero", "--version"])
+        .capture_stdout()
+        .expect("Error getting cargo-risczero version")
+        .split_whitespace()
+        .last()
+        .expect("Error parsing cargo-risczero version")
+        .to_string();
+    Ok(out)
+}
+
+pub fn show_installed_toolchains(verbose: bool) -> Result<()> {
     let toolchains_dir = rzup_home()?.join("toolchains");
 
     if !toolchains_dir.exists() {

@@ -16,7 +16,7 @@ use anyhow::{Context, Result};
 use reqwest::Client;
 use serde::Deserialize;
 
-pub fn handle_check() -> Result<()> {
+pub fn handle_check_all() -> Result<()> {
     let client = Client::builder().user_agent("rzup").build()?;
 
     let rust_repo = "https://api.github.com/repos/risc0/rust/releases/latest";
@@ -25,9 +25,10 @@ pub fn handle_check() -> Result<()> {
 
     let rt = tokio::runtime::Runtime::new()?;
 
-    let cargo_risczero_data = rt.block_on(get_latest_version(&client, cargo_risczero_repo))?;
-    let rust_release_data = rt.block_on(get_latest_version(&client, rust_repo))?;
-    let cpp_release_data = rt.block_on(get_latest_version(&client, cpp_repo))?;
+    let cargo_risczero_data =
+        rt.block_on(fetch_latest_release_info(&client, cargo_risczero_repo))?;
+    let rust_release_data = rt.block_on(fetch_latest_release_info(&client, rust_repo))?;
+    let cpp_release_data = rt.block_on(fetch_latest_release_info(&client, cpp_repo))?;
 
     // TODO: Clean up and make pretty
     println!(
@@ -46,7 +47,7 @@ pub fn handle_check() -> Result<()> {
     Ok(())
 }
 
-async fn get_latest_version(client: &Client, url: &str) -> Result<GithubReleaseData> {
+pub async fn fetch_latest_release_info(client: &Client, url: &str) -> Result<GithubReleaseData> {
     let response = client
         .get(url)
         .send()
@@ -61,7 +62,7 @@ async fn get_latest_version(client: &Client, url: &str) -> Result<GithubReleaseD
 }
 
 #[derive(Deserialize)]
-struct GithubReleaseData {
-    tag_name: String,
-    published_at: String,
+pub struct GithubReleaseData {
+    pub tag_name: String,
+    pub published_at: String,
 }
