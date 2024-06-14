@@ -34,6 +34,7 @@ const SHA_LOAD: usize = 16;
 const SHA_MAIN: usize = 52;
 
 const INVALID_IDX: u32 = u32::MAX;
+const NUM_PAGES: usize = 256 * 1024;
 
 const fn cycles_per_page(blocks_per_page: usize) -> usize {
     1 + SHA_INIT + (SHA_LOAD + SHA_MAIN) * blocks_per_page
@@ -79,7 +80,7 @@ impl PagedMemory {
     pub fn new(image: MemoryImage) -> Self {
         Self {
             image,
-            page_table: vec![INVALID_IDX; 256 * 1024],
+            page_table: vec![INVALID_IDX; NUM_PAGES],
             page_cache: Vec::new(),
             page_states: BTreeMap::new(),
             cycles: 0,
