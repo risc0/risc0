@@ -17,8 +17,8 @@ use clap::Subcommand;
 use reqwest::Client;
 
 use super::{
-    check::{fetch_latest_release_info, GithubReleaseData},
-    install::InstallToolchain,
+    check::fetch_release_info,
+    install::{GithubReleaseData, InstallToolchain},
     show::show_installed_toolchains,
 };
 use crate::toolchain::{build::BuildToolchain, repo::ToolchainRepo};
@@ -39,12 +39,6 @@ pub enum ToolchainSubcmd {
 
     /// Build the toolchain
     Build(BuildToolchain),
-
-    /// Check toolchain updates
-    Check {
-        #[command(subcommand)]
-        subcmd: ToolchainCheckSubcmd,
-    },
 
     /// Update toolchain
     Update {
@@ -86,21 +80,28 @@ impl ToString for ToolchainCheckSubcmd {
     }
 }
 
-pub fn get_latest_toolchain_info(subcmd: ToolchainCheckSubcmd) -> Result<GithubReleaseData> {
+pub fn get_toolchain_info(repo: ToolchainRepo, version: Option<&str>) -> Result<GithubReleaseData> {
     let client = Client::builder().user_agent("rzup").build()?;
-    let rt = tokio::runtime::Runtime::new()?;
-    match subcmd {
-        ToolchainCheckSubcmd::Rust => {
-            let rust_repo = "https://api.github.com/repos/risc0/rust/releases/latest";
-            let rust_release_data = rt.block_on(fetch_latest_release_info(&client, rust_repo))?;
-            Ok(rust_release_data)
-        }
-        ToolchainCheckSubcmd::Cpp => {
-            let cpp_repo = "https://api.github.com/repos/risc0/toolchain/releases/latest";
-            let cpp_release_data = rt.block_on(fetch_latest_release_info(&client, cpp_repo))?;
-            Ok(cpp_release_data)
-        }
-    }
+
+    let version_tag = match version {
+        Some(version) if version == "latest" || version.starts_with("tags/") => version.to_string(),
+        Some(version) => format!("tags/{}", version),
+        None => "latest".to_string(),
+    };
+
+    let repo_name = repo
+        .url()
+        .trim_start_matches("https://github.com/")
+        .trim_end_matches(".git");
+
+    let release_url = format!(
+        "https://api.github.com/repos/{}/releases/{}",
+        repo_name, version_tag
+    );
+
+    let release = fetch_release_info(&client, &release_url)?;
+
+    Ok(release)
 }
 
 pub fn handle_toolchain(subcmd: ToolchainSubcmd) {
@@ -133,16 +134,7 @@ pub fn handle_toolchain(subcmd: ToolchainSubcmd) {
                 std::process::exit(1);
             }
         }
-        ToolchainSubcmd::Check { subcmd } => {
-            let toolchain_info = get_latest_toolchain_info(subcmd.clone())
-                .expect("Error fetching latest toolchain info");
-            println!(
-                "Latest {} release: {} : ({})",
-                subcmd.to_string(),
-                toolchain_info.tag_name,
-                toolchain_info.published_at
-            );
-        }
+
         ToolchainSubcmd::Update { subcmd } => match subcmd {
             ToolchainInstallSubcmd::Rust { .. } => {
                 InstallToolchain {

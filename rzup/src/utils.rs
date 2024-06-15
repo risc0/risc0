@@ -15,10 +15,13 @@
 use anyhow::{anyhow, bail, Context, Result};
 use cfg_if::cfg_if;
 use fs2::FileExt;
-use std::fmt;
+use regex::Regex;
 use std::fs::{File, OpenOptions};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus, Output, Stdio};
+use std::{fmt, fs};
+use termcolor::{Color, ColorSpec, StandardStream, WriteColor};
 
 pub fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
@@ -186,3 +189,118 @@ pub const HOST_TARGET_TRIPLE: Option<&str> = {
         }
     }
 };
+
+pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf> {
+    let rustup_dir = dirs::home_dir()
+        .context("Failed to get home directory")?
+        .join(".rustup")
+        .join("toolchains");
+
+    let alias_path = rustup_dir.join(alias);
+
+    // Check if the alias path exists and is a symlink
+    if alias_path.exists() && fs::symlink_metadata(&alias_path)?.file_type().is_symlink() {
+        let actual_toolchain_path = fs::read_link(&alias_path)
+            .with_context(|| format!("Failed to read symlink at {:?}", alias_path))?;
+
+        // Get the absolute path of the actual toolchain directory
+        let actual_toolchain_abs_path = fs::canonicalize(&actual_toolchain_path)
+            .with_context(|| format!("Failed to canonicalize path {:?}", actual_toolchain_path))?;
+
+        return Ok(actual_toolchain_abs_path);
+    }
+
+    Err(anyhow::anyhow!("Alias not found or is not a symlink"))
+}
+pub fn get_rustc_version(alias: &str) -> Result<String> {
+    let toolchain_dir = get_toolchain_cwd(alias)?;
+    let rustc_path = toolchain_dir.join("bin").join("rustc");
+
+    if !rustc_path.exists() {
+        return Err(anyhow::anyhow!(
+            "rustc not found in the toolchain bin directory"
+        ));
+    }
+
+    // Run rustc -vV and capture the output
+    let output = Command::new(rustc_path).arg("-vV").capture_stdout()?;
+
+    let rustc_version = output
+        .lines()
+        .next()
+        .expect("Failed to get rustc version")
+        .to_string();
+
+    Ok(rustc_version)
+}
+
+pub struct ParseableToolchainDir {
+    pub name: String,
+    pub path: String,
+    pub tag_name: String,
+    pub language: String,
+    pub target: String,
+}
+
+pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
+    let dir_name = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or_else(|| anyhow!("Invalid directory path"))?;
+
+    // Regex to match the toolchain pattern
+    let re = Regex::new(r"^(?P<tag_name>.+?)-risc0-(?P<language>[^-]+)-(?P<target>.+)$")
+        .context("Failed to compile regex")?;
+
+    if let Some(captures) = re.captures(dir_name) {
+        Ok(ParseableToolchainDir {
+            name: path
+                .to_string_lossy()
+                .split('/')
+                .last()
+                .unwrap()
+                .to_string(),
+            path: path.to_string_lossy().to_string(),
+            tag_name: captures["tag_name"].to_string(),
+            language: captures["language"].to_string(),
+            target: captures["target"].to_string(),
+        })
+    } else {
+        Err(anyhow!("Invalid directory name format"))
+    }
+}
+
+// pretty print a message with specified color and style
+pub fn pretty_print_message(
+    stdout: &mut StandardStream,
+    bold: bool,
+    color: Option<Color>,
+    message: &str,
+) -> Result<()> {
+    let mut color_spec = ColorSpec::new();
+    color_spec.set_bold(bold).set_fg(color);
+    stdout.set_color(&color_spec)?;
+    write!(stdout, "{}", message)?;
+    stdout.reset()?;
+    Ok(())
+}
+
+// pretty print a message with specified color and style, followed by a newline
+pub fn pretty_println_message(
+    stdout: &mut StandardStream,
+    bold: bool,
+    color: Option<Color>,
+    message: &str,
+) -> Result<()> {
+    pretty_print_message(stdout, bold, color, message)?;
+    writeln!(stdout)?;
+    Ok(())
+}
+
+// print a pretty header
+pub fn pretty_print_header(stdout: &mut StandardStream, header: &str) -> Result<()> {
+    pretty_println_message(stdout, true, None, header)?;
+    pretty_println_message(stdout, true, None, &"-".repeat(header.len()))?;
+    pretty_println_message(stdout, false, None, "")?;
+    Ok(())
+}

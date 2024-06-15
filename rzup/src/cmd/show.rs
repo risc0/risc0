@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::utils::CommandExt;
+use crate::utils::{
+    get_rustc_version, get_toolchain_cwd, parse_toolchain_info, pretty_print_header,
+    pretty_print_message, pretty_println_message, CommandExt,
+};
 use crate::{help, utils::rzup_home};
 use anyhow::Result;
 use clap::Subcommand;
-use std::io::Write;
 use std::{fs, process::Command};
-use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
+use termcolor::{ColorChoice, StandardStream};
 
 #[derive(Debug, Subcommand)]
 pub enum ShowSubcmd {
@@ -37,10 +39,18 @@ pub enum ShowSubcmd {
 pub fn handle_show(_verbose: bool, subcmd: Option<ShowSubcmd>) {
     match subcmd {
         Some(ShowSubcmd::ActiveToolchain { .. }) => {
-            println!("Active toolchain logic not implemented yet.");
+            println!(
+                "{}",
+                get_active_toolchain_name().expect("failed to get active toolchain")
+            );
         }
         Some(ShowSubcmd::Home) => {
-            println!("RZUP_HOME logic not implemented yet.");
+            println!(
+                "{}",
+                rzup_home()
+                    .expect("failed to get rzup home")
+                    .to_string_lossy()
+            );
         }
         None => {
             show().unwrap();
@@ -48,32 +58,38 @@ pub fn handle_show(_verbose: bool, subcmd: Option<ShowSubcmd>) {
     }
 }
 
-fn show() -> anyhow::Result<()> {
-    fn print_header(s: String) -> Result<()> {
-        let mut stdout = StandardStream::stderr(ColorChoice::Always);
-        stdout.set_color(ColorSpec::new().set_bold(true))?;
-        writeln!(&mut stdout, "{}", s)?;
-        writeln!(&mut stdout, "{}", "-".repeat(s.len()))?;
-        writeln!(&mut stdout)?;
-        stdout.reset()?;
-        Ok(())
-    }
-
+pub fn show() -> Result<()> {
     let mut stdout = StandardStream::stderr(ColorChoice::Always);
-    stdout.set_color(ColorSpec::new().set_bold(true))?;
-    write!(&mut stdout, "rzup home: ")?;
-    stdout.reset()?;
-    writeln!(&mut stdout, "{}", rzup_home().unwrap().to_str().unwrap())?;
+
+    pretty_print_message(&mut stdout, true, None, "rzup home: ")?;
+    pretty_println_message(
+        &mut stdout,
+        false,
+        None,
+        rzup_home().unwrap().to_str().unwrap(),
+    )?;
 
     let extension_version = get_installed_extension_version().unwrap();
-    stdout.set_color(ColorSpec::new().set_bold(true))?;
-    write!(&mut stdout, "cargo-risczero: ")?;
-    stdout.reset()?;
-    writeln!(&mut stdout, "{}", extension_version)?;
-    print_header("\ninstalled toolchains".to_string())?;
+    pretty_print_message(&mut stdout, true, None, "cargo-risczero: ")?;
+    pretty_println_message(&mut stdout, false, None, &extension_version)?;
+
+    pretty_print_header(&mut stdout, "\ninstalled toolchains")?;
     show_installed_toolchains(false)?;
 
+    pretty_print_header(&mut stdout, "\nactive toolchain")?;
+
+    println!("{}", get_active_toolchain_name()?);
+
+    let active_rustc_version = get_rustc_version("risc0")?;
+    println!("{}", active_rustc_version);
+
     Ok(())
+}
+
+fn get_active_toolchain_name() -> Result<String> {
+    let active_toolchain_path = get_toolchain_cwd("risc0")?;
+    let active_toolchain = parse_toolchain_info(&active_toolchain_path)?;
+    Ok(active_toolchain.name)
 }
 
 pub fn get_installed_extension_version() -> Result<String> {

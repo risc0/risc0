@@ -16,9 +16,9 @@ use anyhow::Result;
 use clap::Subcommand;
 use reqwest::Client;
 
-use crate::{cmd::check::fetch_latest_release_info, help};
+use crate::{cmd::check::fetch_release_info, help};
 
-use super::{check::GithubReleaseData, install::InstallCargoRisczero};
+use super::{install::GithubReleaseData, install::InstallCargoRisczero};
 
 #[derive(Debug, Subcommand, Clone)]
 pub enum ExtensionSubcmd {
@@ -28,8 +28,6 @@ pub enum ExtensionSubcmd {
         #[arg(help = help::INSTALL_HELP)]
         version: String,
     },
-    /// Check for cargo-risczero updates
-    Check,
     /// Update cargo-risczero extension
     Update,
 }
@@ -43,15 +41,6 @@ pub fn handle_extension(subcmd: ExtensionSubcmd) {
             .run()
             .expect("Error during cargo-risczero installation");
         }
-        ExtensionSubcmd::Check => {
-            let cargo_risczero_info =
-                get_latest_extension_info().expect("Error fetching latest cargo-risczero info");
-            // TODO: Clean up and make pretty
-            println!(
-                "Latest cargo-risczero release: {} : ({})",
-                cargo_risczero_info.tag_name, cargo_risczero_info.published_at
-            );
-        }
         ExtensionSubcmd::Update => InstallCargoRisczero {
             version: Some("latest".to_string()),
         }
@@ -60,15 +49,16 @@ pub fn handle_extension(subcmd: ExtensionSubcmd) {
     }
 }
 
-pub fn get_latest_extension_info() -> Result<GithubReleaseData> {
+pub fn get_extension_info(version: Option<&str>) -> Result<GithubReleaseData> {
     let client = Client::builder().user_agent("rzup").build()?;
 
-    let cargo_risczero_repo = "https://api.github.com/repos/risc0/risc0/releases/latest";
+    let base_url = "https://api.github.com/repos/risc0/risc0/releases";
+    let url = match version {
+        Some(tag) => format!("{}/tags/{}", base_url, tag),
+        None => format!("{}/latest", base_url),
+    };
 
-    let rt = tokio::runtime::Runtime::new()?;
+    let release_data = fetch_release_info(&client, &url)?;
 
-    let cargo_risczero_data =
-        rt.block_on(fetch_latest_release_info(&client, cargo_risczero_repo))?;
-
-    Ok(cargo_risczero_data)
+    Ok(release_data)
 }

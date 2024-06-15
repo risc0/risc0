@@ -41,9 +41,10 @@ use crate::{
 
 /// Release returned by Github API.
 #[derive(Deserialize)]
-struct GithubReleaseData {
+pub struct GithubReleaseData {
     assets: Vec<GithubAsset>,
-    tag_name: String,
+    pub tag_name: String,
+    pub published_at: String,
 }
 
 /// Release asset returned by Github API.

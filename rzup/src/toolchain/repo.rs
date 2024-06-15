@@ -46,4 +46,12 @@ impl ToolchainRepo {
             Self::Cpp => "cpp",
         }
     }
+
+    pub fn from_language(language: &str) -> ToolchainRepo {
+        match language {
+            "rust" => ToolchainRepo::Rust,
+            "cpp" => ToolchainRepo::Cpp,
+            _ => panic!("Unknown language"),
+        }
+    }
 }

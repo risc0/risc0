@@ -31,7 +31,7 @@ fn main() {
     let matches = Rzup::parse();
 
     let Some(subcmd) = matches.subcmd else {
-        eprintln!("{}", Rzup::command().render_long_help());
+        println!("{}", Rzup::command().render_long_help());
         std::process::exit(0)
     };
 
@@ -49,11 +49,8 @@ fn main() {
             .run()
             .expect("Error during Rust toolchain installation");
         }
-
         RzupSubcmd::Toolchain { subcmd } => handle_toolchain(subcmd),
-
         RzupSubcmd::Extension { subcmd } => handle_extension(subcmd),
-
         RzupSubcmd::Show { verbose, subcmd } => handle_show(verbose, subcmd),
         RzupSubcmd::Check => handle_check_all().expect("Error checking for updates"),
         RzupSubcmd::Update { .. } => {

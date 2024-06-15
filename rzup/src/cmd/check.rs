@@ -14,55 +14,128 @@
 
 use anyhow::{Context, Result};
 use reqwest::Client;
-use serde::Deserialize;
+use termcolor::{Color, ColorChoice, StandardStream};
+
+use crate::{
+    toolchain::repo::ToolchainRepo,
+    utils::{
+        get_toolchain_cwd, parse_toolchain_info, pretty_print_message, pretty_println_message,
+    },
+};
+
+use super::{
+    extension::get_extension_info, install::GithubReleaseData,
+    show::get_installed_extension_version, toolchain::get_toolchain_info,
+};
 
 pub fn handle_check_all() -> Result<()> {
-    let client = Client::builder().user_agent("rzup").build()?;
+    let latest_extension_info = get_extension_info(None)?;
+    let latest_extension_version = latest_extension_info
+        .tag_name
+        .strip_prefix('v')
+        .expect("failed to strip prefix");
 
-    let rust_repo = "https://api.github.com/repos/risc0/rust/releases/latest";
-    let cpp_repo = "https://api.github.com/repos/risc0/toolchain/releases/latest";
-    let cargo_risczero_repo = "https://api.github.com/repos/risc0/risc0/releases/latest";
+    let curr_extension_version = get_installed_extension_version()?;
+    let tag = format!("v{}", curr_extension_version);
+    let curr_extension_info = get_extension_info(Some(&tag))?;
 
-    let rt = tokio::runtime::Runtime::new()?;
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
 
-    let cargo_risczero_data =
-        rt.block_on(fetch_latest_release_info(&client, cargo_risczero_repo))?;
-    let rust_release_data = rt.block_on(fetch_latest_release_info(&client, rust_repo))?;
-    let cpp_release_data = rt.block_on(fetch_latest_release_info(&client, cpp_repo))?;
+    // Check for cargo-risczero updates
+    if curr_extension_version == latest_extension_version {
+        pretty_print_message(&mut stdout, true, None, "cargo-risczero - ")?;
+        pretty_print_message(&mut stdout, true, Some(Color::Green), "Up to date ")?;
+        pretty_println_message(
+            &mut stdout,
+            false,
+            None,
+            &format!(
+                ": {} ({})",
+                curr_extension_version, latest_extension_info.published_at
+            ),
+        )?;
+    } else {
+        pretty_print_message(&mut stdout, true, None, "cargo-risczero - ")?;
+        pretty_print_message(&mut stdout, true, Some(Color::Yellow), "Update available ")?;
+        pretty_println_message(
+            &mut stdout,
+            false,
+            None,
+            &format!(
+                ": {} ({}) -> {} ({})",
+                curr_extension_version,
+                curr_extension_info.published_at,
+                latest_extension_version,
+                latest_extension_info.published_at
+            ),
+        )?;
+    }
 
-    // TODO: Clean up and make pretty
-    println!(
-        "Latest cargo-risczero release: {} : ({})",
-        cargo_risczero_data.tag_name, cargo_risczero_data.published_at
-    );
-    println!(
-        "Latest Rust release: {} : ({})",
-        rust_release_data.tag_name, rust_release_data.published_at
-    );
-    println!(
-        "Latest C++ release: {} : ({})",
-        cpp_release_data.tag_name, cpp_release_data.published_at
-    );
+    let curr_rust_toolchain = get_toolchain_cwd("risc0")?;
+    let curr_rust_info = parse_toolchain_info(&curr_rust_toolchain)?;
+
+    let latest_rust_info =
+        get_toolchain_info(ToolchainRepo::from_language(&curr_rust_info.language), None)?;
+    if curr_rust_info.tag_name == latest_rust_info.tag_name {
+        pretty_print_message(
+            &mut stdout,
+            true,
+            None,
+            &format!("{} - ", curr_rust_info.name),
+        )?;
+        pretty_print_message(&mut stdout, true, Some(Color::Green), "Up to date ")?;
+        pretty_println_message(
+            &mut stdout,
+            false,
+            None,
+            &format!(
+                ": {} ({})",
+                curr_rust_info.tag_name, latest_rust_info.published_at
+            ),
+        )?;
+    } else {
+        let curr_rust_info_ext = get_toolchain_info(
+            ToolchainRepo::from_language(&curr_rust_info.language),
+            Some(&curr_rust_info.tag_name),
+        )?;
+        pretty_print_message(
+            &mut stdout,
+            true,
+            None,
+            &format!("{} - ", curr_rust_info.name),
+        )?;
+        pretty_print_message(&mut stdout, true, Some(Color::Yellow), "Update available ")?;
+        pretty_println_message(
+            &mut stdout,
+            false,
+            None,
+            &format!(
+                ": {} ({}) -> {} ({})",
+                curr_rust_info.tag_name,
+                curr_rust_info_ext.published_at,
+                latest_rust_info.tag_name,
+                latest_rust_info.published_at
+            ),
+        )?;
+    }
 
     Ok(())
 }
 
-pub async fn fetch_latest_release_info(client: &Client, url: &str) -> Result<GithubReleaseData> {
-    let response = client
-        .get(url)
-        .send()
-        .await?
-        .error_for_status()
-        .context("Failed to fetch latest release info")?
-        .json::<GithubReleaseData>()
-        .await
-        .context("Failed to deserialize release info")?;
+pub fn fetch_release_info(client: &Client, url: &str) -> Result<GithubReleaseData> {
+    let runtime = tokio::runtime::Runtime::new().context("Failed to create Tokio runtime")?;
 
-    Ok(response)
-}
+    runtime.block_on(async {
+        let response = client
+            .get(url)
+            .send()
+            .await?
+            .error_for_status()
+            .context("Failed to fetch release info")?
+            .json::<GithubReleaseData>()
+            .await
+            .context("Failed to deserialize release info")?;
 
-#[derive(Deserialize)]
-pub struct GithubReleaseData {
-    pub tag_name: String,
-    pub published_at: String,
+        Ok(response)
+    })
 }
