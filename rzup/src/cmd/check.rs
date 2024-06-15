@@ -71,6 +71,7 @@ pub fn handle_check_all() -> Result<()> {
         )?;
     }
 
+    // Check for rust toolchain updates
     let curr_rust_toolchain = get_toolchain_cwd("risc0")?;
     let curr_rust_info = parse_toolchain_info(&curr_rust_toolchain)?;
 
@@ -118,6 +119,8 @@ pub fn handle_check_all() -> Result<()> {
             ),
         )?;
     }
+
+    // TODO: Check cpp toolchain updates
 
     Ok(())
 }

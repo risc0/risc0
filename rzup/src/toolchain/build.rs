@@ -42,6 +42,7 @@ pub struct RustBuildOutput {
     pub toolchain_dir: PathBuf,
 }
 
+// TODO: Build C toolchain path
 impl BuildToolchain {
     pub fn run(&self) -> Result<()> {
         eprintln!("Building the riscv32im-risc0-zkvm-elf toolchain...");

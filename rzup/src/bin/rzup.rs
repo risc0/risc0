@@ -49,16 +49,22 @@ fn main() {
             .run()
             .expect("Error during Rust toolchain installation");
         }
-        RzupSubcmd::Toolchain { subcmd } => handle_toolchain(subcmd),
-        RzupSubcmd::Extension { subcmd } => handle_extension(subcmd),
         RzupSubcmd::Show { verbose, subcmd } => handle_show(verbose, subcmd),
-        RzupSubcmd::Check => handle_check_all().expect("Error checking for updates"),
         RzupSubcmd::Update { .. } => {
             InstallCargoRisczero {
                 version: Some("latest".to_string()),
             }
             .run()
             .expect("Error during cargo-risczero update");
+        }
+        RzupSubcmd::Check => handle_check_all().expect("Error checking for updates"),
+        RzupSubcmd::Default { .. } => {
+            println!("Default not yet implented")
+        }
+        RzupSubcmd::Toolchain { subcmd } => handle_toolchain(subcmd),
+        RzupSubcmd::Extension { subcmd } => handle_extension(subcmd),
+        RzupSubcmd::Self_ { .. } => {
+            println!("Self not yet implemented")
         }
     }
 }
@@ -102,19 +108,6 @@ pub enum RzupSubcmd {
         #[command(flatten)]
         opts: InstallOpts,
     },
-
-    /// Manage and install RISC Zero toolchains
-    Toolchain {
-        #[command(subcommand)]
-        subcmd: ToolchainSubcmd,
-    },
-
-    /// Manage cargo-risczero extensions
-    Extension {
-        #[command(subcommand)]
-        subcmd: ExtensionSubcmd,
-    },
-
     /// Show the active and installed toolchains
     #[command(after_help = help::SHOW_HELP)]
     Show {
@@ -125,7 +118,6 @@ pub enum RzupSubcmd {
         #[command(subcommand)]
         subcmd: Option<ShowSubcmd>,
     },
-
     /// Update RISC Zero toolchains and cargo-risczero
     #[command(after_help = help::UPDATE_HELP, aliases = ["upgrade", "up"])]
     Update {
@@ -137,9 +129,22 @@ pub enum RzupSubcmd {
         #[arg(long)]
         force: bool,
     },
-
     /// Check for updates to RISC Zero toolchains and rzup
     Check,
+    /// Set the default toolchain
+    Default,
+    /// Manage and install RISC Zero toolchains
+    Toolchain {
+        #[command(subcommand)]
+        subcmd: ToolchainSubcmd,
+    },
+    /// Manage cargo-risczero extensions
+    Extension {
+        #[command(subcommand)]
+        subcmd: ExtensionSubcmd,
+    },
+    /// Modify the rzup installation
+    Self_,
 }
 
 #[derive(Debug, Default, Args, Clone)]
