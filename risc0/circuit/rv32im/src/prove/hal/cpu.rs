@@ -14,14 +14,21 @@
 
 use std::rc::Rc;
 
+use anyhow::{bail, Result};
 use rayon::prelude::*;
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, Elem, ExtElem, RootsOfUnity,
 };
+use risc0_sys::CppError;
 use risc0_zkp::{
     adapter::PolyFp,
-    core::{hash::sha::Sha256HashSuite, log2_ceil},
+    core::{
+        hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
+        log2_ceil,
+    },
+    field::baby_bear::BabyBear,
     hal::{
         cpu::{CpuBuffer, CpuHal},
         CircuitHal, Hal,
@@ -35,12 +42,52 @@ use crate::{
     REGISTER_GROUP_DATA,
 };
 
+use super::{CircuitWitnessGenerator, StepMode};
+
 #[derive(Default)]
 pub struct CpuCircuitHal;
 
 impl CpuCircuitHal {
     pub fn new() -> Self {
         Self
+    }
+}
+
+impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
+    fn generate_witness(
+        &self,
+        mode: StepMode,
+        trace: &RawPreflightTrace,
+        steps: usize,
+        count: usize,
+        ctrl: &CpuBuffer<BabyBearElem>,
+        io: &CpuBuffer<BabyBearElem>,
+        data: &CpuBuffer<BabyBearElem>,
+    ) {
+        tracing::debug!("witgen: {steps}, {count}");
+        extern "C" {
+            fn risc0_circuit_rv32im_cpu_witgen(
+                mode: u32,
+                trace: *const RawPreflightTrace,
+                steps: u32,
+                count: u32,
+                ctrl: *const BabyBearElem,
+                io: *const BabyBearElem,
+                data: *const BabyBearElem,
+            ) -> CppError;
+        }
+        unsafe {
+            risc0_circuit_rv32im_cpu_witgen(
+                mode as u32,
+                trace,
+                steps as u32,
+                count as u32,
+                ctrl.as_slice().as_ptr(),
+                io.as_slice().as_ptr(),
+                data.as_slice().as_ptr(),
+            )
+            .unwrap();
+        }
     }
 }
 
@@ -157,9 +204,14 @@ where
     }
 }
 
-pub fn get_segment_prover() -> Box<dyn SegmentProver> {
-    let suite = Sha256HashSuite::new_suite();
-    let hal = Rc::new(CpuHal::new(suite.clone()));
+pub fn segment_prover(hashfn: &str) -> Result<Box<dyn SegmentProver>> {
+    let suite = match hashfn {
+        "sha-256" => Sha256HashSuite::new_suite(),
+        "poseidon2" => Poseidon2HashSuite::new_suite(),
+        _ => bail!("Unsupported hashfn: {hashfn}"),
+    };
+
+    let hal = Rc::new(CpuHal::new(suite));
     let circuit_hal = Rc::new(CpuCircuitHal::new());
-    Box::new(SegmentProverImpl::new(hal, circuit_hal))
+    Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
 }

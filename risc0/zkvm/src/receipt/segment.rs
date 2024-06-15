@@ -12,24 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{string::String, vec::Vec};
+use alloc::{collections::BTreeSet, string::String, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use hex::FromHex;
-use risc0_binfmt::{ExitCode, SystemState};
+use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
 use risc0_circuit_rv32im::{
-    control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
+    control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
     layout, CircuitImpl, CIRCUIT,
 };
 use risc0_zkp::{
-    adapter::CircuitInfo as _, core::digest::Digest, layout::Buffer, verify::VerificationError,
+    adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
+    core::{digest::Digest, hash::sha::Sha256},
+    layout::Buffer,
+    verify::VerificationError,
 };
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use super::VerifierContext;
-use crate::{sha::Digestible, MaybePruned, ReceiptClaim};
+use crate::{sha, MaybePruned, ReceiptClaim};
 
 /// A receipt attesting to the execution of a Segment.
 ///
@@ -37,6 +39,7 @@ use crate::{sha::Digestible, MaybePruned, ReceiptClaim};
 /// consistent with the [ReceiptClaim] included in the receipt.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
@@ -47,39 +50,58 @@ pub struct SegmentReceipt {
     /// [SegmentReceipt::claim].
     pub seal: Vec<u32>,
 
-    /// Segment index within the [CompositeReceipt](crate::CompositeReceipt).
+    /// Segment index within the [Receipt](crate::Receipt)
     pub index: u32,
 
     /// Name of the hash function used to create this receipt.
     pub hashfn: String,
+
+    /// A digest of the verifier parameters that can be used to verify this receipt.
+    ///
+    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
+    /// be provided by a trusted source (e.g. packaged with the verifier code).
+    pub verifier_parameters: Digest,
 
     /// [ReceiptClaim] containing information about the execution that this receipt proves.
     pub claim: ReceiptClaim,
 }
 
 impl SegmentReceipt {
-    fn allowed_control_ids() -> impl Iterator<Item = Digest> {
-        POSEIDON2_CONTROL_ID
-            .into_iter()
-            .chain(SHA256_CONTROL_ID)
-            .chain(BLAKE2B_CONTROL_ID)
-            .map(|x| Digest::from_hex(x).unwrap())
-    }
-
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        let params = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or(VerificationError::VerifierParametersMissing)?;
+
+        // Check that the proof system and circuit info strings match what is implemented by this
+        // function. Info strings are used a version identifiers, and this verify implementation
+        // supports exactly one proof systema and circuit version at a time.
+        if params.proof_system_info != PROOF_SYSTEM_INFO {
+            return Err(VerificationError::ProofSystemInfoMismatch {
+                expected: PROOF_SYSTEM_INFO,
+                received: params.proof_system_info,
+            });
+        }
+        if params.circuit_info != CircuitImpl::CIRCUIT_INFO {
+            return Err(VerificationError::CircuitInfoMismatch {
+                expected: CircuitImpl::CIRCUIT_INFO,
+                received: params.circuit_info,
+            });
+        }
+
         tracing::debug!("SegmentReceipt::verify_integrity_with_context");
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            Self::allowed_control_ids()
-                .find(|x| x == control_id)
-                .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError {
+            params.control_ids.contains(control_id).then_some(()).ok_or(
+                VerificationError::ControlVerificationError {
                     control_id: *control_id,
-                })
+                },
+            )
         };
         let suite = ctx
             .suites
@@ -90,13 +112,16 @@ impl SegmentReceipt {
         // Receipt is consistent with the claim encoded on the seal. Now check against the
         // claim on the struct.
         let decoded_claim = decode_receipt_claim_from_seal(&self.seal)?;
-        if decoded_claim.digest() != self.claim.digest() {
+        if decoded_claim.digest::<sha::Impl>() != self.claim.digest::<sha::Impl>() {
             tracing::debug!(
                 "decoded segment receipt claim does not match claim field:\ndecoded: {:#?},\nexpected: {:#?}",
                 decoded_claim,
                 self.claim,
             );
-            return Err(VerificationError::ReceiptFormatError);
+            return Err(VerificationError::ClaimDigestMismatch {
+                expected: self.claim.digest::<sha::Impl>(),
+                received: decoded_claim.digest::<sha::Impl>(),
+            });
         }
         Ok(())
     }
@@ -104,6 +129,48 @@ impl SegmentReceipt {
     /// Return the seal for this receipt, as a vector of bytes.
     pub fn get_seal_bytes(&self) -> Vec<u8> {
         self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
+    }
+}
+
+/// Verifier parameters used to verify a [SegmentReceipt].
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct SegmentReceiptVerifierParameters {
+    /// Set of control ID with which the receipt is expected to verify.
+    pub control_ids: BTreeSet<Digest>,
+    /// Protocol info string distinguishing the proof system under which the receipt should verify.
+    pub proof_system_info: ProtocolInfo,
+    /// Protocol info string distinguishing circuit with which the receipt should verify.
+    pub circuit_info: ProtocolInfo,
+}
+
+impl Digestible for SegmentReceiptVerifierParameters {
+    /// Hash the [SegmentReceiptVerifierParameters] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>(
+            "risc0.SegmentReceiptVerifierParameters",
+            &[
+                tagged_iter::<S>("risc0.ControlIdSet", self.control_ids.iter()),
+                *S::hash_bytes(&self.proof_system_info.0),
+                *S::hash_bytes(&self.circuit_info.0),
+            ],
+            &[],
+        )
+    }
+}
+
+impl Default for SegmentReceiptVerifierParameters {
+    /// Default set of parameters used to verify a [SegmentReceipt].
+    fn default() -> Self {
+        Self {
+            control_ids: BTreeSet::from_iter(
+                POSEIDON2_CONTROL_IDS
+                    .into_iter()
+                    .chain(SHA256_CONTROL_IDS)
+                    .chain(BLAKE2B_CONTROL_IDS),
+            ),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
+        }
     }
 }
 
@@ -153,7 +220,26 @@ pub(crate) fn decode_receipt_claim_from_seal(
         pre: pre.into(),
         post: post.into(),
         exit_code,
-        input,
+        input: MaybePruned::Pruned(input),
         output: MaybePruned::Pruned(output),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SegmentReceiptVerifierParameters;
+    use crate::sha::Digestible;
+    use risc0_zkp::core::digest::digest;
+
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This
+    // struct encodes parameters used in verification, and so this value should be updated if and
+    // only if a change to the verifier parameters is expected. Updating the verifier parameters
+    // will result in incompatibility with previous versions.
+    #[test]
+    fn segment_receipt_verifier_parameters_is_stable() {
+        assert_eq!(
+            SegmentReceiptVerifierParameters::default().digest(),
+            digest!("62d97bc46d0a877acb857043cbb90a6beafa21c97f01472952fd28be15b47508")
+        );
+    }
 }

@@ -19,3 +19,4 @@ pub mod build_toolchain;
 pub mod deploy;
 pub mod install;
 pub mod new;
+pub mod verify;

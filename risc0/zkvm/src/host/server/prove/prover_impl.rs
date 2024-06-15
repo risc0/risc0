@@ -12,57 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
-use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::hal::{CircuitHal, Hal};
+use anyhow::{anyhow, bail, Context, Result};
+use risc0_circuit_rv32im::prove::SegmentProver;
 
-use super::{HalPair, ProverServer};
+use super::ProverServer;
 use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
     },
-    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt::{
+        segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+    },
+    receipt_claim::{MaybePruned, Merge, Unknown},
     sha::Digestible,
-    CompositeReceipt, Receipt, Segment, Session, VerifierContext,
+    CompositeReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
-pub struct ProverImpl<H, C>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    C: CircuitHal<H>,
-{
-    name: String,
-    hal_pair: HalPair<H, C>,
-    receipt_kind: ReceiptKind,
+pub struct ProverImpl {
+    opts: ProverOpts,
+    segment_prover: Box<dyn SegmentProver>,
 }
 
-impl<H, C> ProverImpl<H, C>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    C: CircuitHal<H>,
-{
-    /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_kind: ReceiptKind) -> Self {
+impl ProverImpl {
+    /// Construct a [ProverImpl].
+    pub fn new(opts: ProverOpts, segment_prover: Box<dyn SegmentProver>) -> Self {
         Self {
-            name: name.to_string(),
-            hal_pair,
-            receipt_kind,
+            opts,
+            segment_prover,
         }
     }
 }
 
-impl<H, C> ProverServer for ProverImpl<H, C>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    C: CircuitHal<H>,
-{
+impl ProverServer for ProverImpl {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         tracing::debug!(
-            "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
-            self.name,
+            "prove_session: exit_code = {:?}, journal = {:?}, segments: {}",
             session.exit_code,
             session.journal.as_ref().map(hex::encode),
             session.segments.len()
@@ -78,16 +65,48 @@ where
                 hook.on_post_prove_segment(&segment);
             }
         }
-        // TODO(#982): Support unresolved assumptions here.
-        let assumptions = session
+
+        let (assumptions, session_assumption_receipts) = session
             .assumptions
             .iter()
-            .map(|x| Ok(x.as_receipt()?.inner.clone()))
-            .collect::<Result<Vec<_>>>()?;
+            .cloned()
+            .unzip::<_, _, Vec<_>, Vec<_>>();
+
+        // Merge the output, including journal digest and assumptions, into the last segment.
+        let last_segment = segments.last_mut().ok_or(anyhow!("session is empty"))?;
+        last_segment
+            .claim
+            .output
+            .merge_with(
+                &session
+                    .journal
+                    .as_ref()
+                    .map(|journal| Output {
+                        journal: MaybePruned::Pruned(journal.digest()),
+                        assumptions: assumptions.into(),
+                    })
+                    .into(),
+            )
+            .context("failed to merge output into final segment claim")?;
+
+        let verifier_parameters = ctx
+            .composite_verifier_parameters()
+            .ok_or(anyhow!(
+                "composite receipt verifier parameters missing from context"
+            ))?
+            .digest();
+
+        // Collect the proven assumption receipts from the Session.
+        // TODO(#982): Support unresolved assumptions here.
+        let assumption_receipts = session_assumption_receipts
+            .into_iter()
+            .map(|a| a.into_receipt())
+            .collect::<Result<_>>()?;
+
         let composite_receipt = CompositeReceipt {
             segments,
-            assumptions,
-            journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
+            assumption_receipts,
+            verifier_parameters,
         };
 
         // Verify the receipt to catch if something is broken in the proving process.
@@ -104,23 +123,23 @@ where
         }
 
         // Compress the receipt to the requested level.
-        let receipt = match self.receipt_kind {
+        let receipt = match self.opts.receipt_kind {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
             ),
             ReceiptKind::Succinct => {
-                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
+                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
                 Receipt::new(
                     InnerReceipt::Succinct(succinct_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
                 )
             }
-            ReceiptKind::Compact => {
-                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
-                let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+            ReceiptKind::Groth16 => {
+                let succinct_receipt = self.composite_to_succinct(&composite_receipt)?;
+                let groth16_receipt = self.succinct_to_groth16(&succinct_receipt)?;
                 Receipt::new(
-                    InnerReceipt::Compact(compact_receipt),
+                    InnerReceipt::Groth16(groth16_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
                 )
             }
@@ -146,47 +165,54 @@ where
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
-
-        use crate::receipt::segment::decode_receipt_claim_from_seal;
-
-        let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
-
-        let prover =
-            SegmentProverImpl::new(self.hal_pair.hal.clone(), self.hal_pair.circuit_hal.clone());
-        let seal = prover.prove_segment(&segment.inner)?;
+        let seal = self.segment_prover.prove_segment(&segment.inner)?;
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();
 
+        let verifier_parameters = ctx
+            .segment_verifier_parameters
+            .as_ref()
+            .ok_or(anyhow!(
+                "segment receipt verifier parameters missing from context"
+            ))?
+            .digest();
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
-            hashfn,
+            hashfn: self.opts.hashfn.clone(),
             claim,
+            verifier_parameters,
         };
         receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
     }
 
-    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
         lift(receipt)
     }
 
-    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn join(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+        b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         join(a, b)
     }
 
     fn resolve(
         &self,
-        conditional: &SuccinctReceipt,
-        assumption: &SuccinctReceipt,
-    ) -> Result<SuccinctReceipt> {
+        conditional: &SuccinctReceipt<ReceiptClaim>,
+        assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         resolve(conditional, assumption)
     }
 
-    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn identity_p254(
+        &self,
+        a: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         identity_p254(a)
     }
 }

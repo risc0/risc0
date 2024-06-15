@@ -15,17 +15,6 @@
 use std::env;
 
 fn main() {
-    if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        println!(
-            "cargo:rustc-env=RECURSION_CUDA_EVAL_PATH={}",
-            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_EVAL_FATBIN").unwrap()
-        );
-        println!(
-            "cargo:rustc-env=RECURSION_CUDA_STEPS_PATH={}",
-            env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_CUDA_STEPS_FATBIN").unwrap()
-        );
-    }
-
     if env::var("CARGO_FEATURE_METAL").is_ok() {
         println!(
             "cargo:rustc-env=RECURSION_METAL_PATH={}",
@@ -50,15 +39,11 @@ fn download_zkr() {
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "48d53160fb8d7756667aadc6437120f1d252eb37ca56528877da5c9918cbe4f5";
+    const SHA256_HASH: &str = "4e8496469e1efa00efb3630d261abf345e6b2905fb64b4f3a297be88ebdf83d2";
 
     fn check_sha2(path: &Path) -> bool {
         let data = fs::read(path).unwrap();
         hex::encode(Sha256::digest(data)) == SHA256_HASH
-    }
-
-    if env::var("DOCS_RS").is_ok() {
-        return;
     }
 
     println!("cargo:rerun-if-env-changed=RECURSION_SRC_PATH");
@@ -68,6 +53,11 @@ fn download_zkr() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
     let out_path = out_dir.join(FILENAME);
+
+    if env::var("DOCS_RS").is_ok() && !out_path.exists() {
+        fs::write(&out_path, b"").unwrap();
+        return;
+    }
 
     if out_path.exists() {
         if check_sha2(&out_path) {

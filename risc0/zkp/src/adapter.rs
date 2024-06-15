@@ -14,10 +14,12 @@
 
 //! Interface between the circuit and prover/verifier
 
-use alloc::vec::Vec;
+use alloc::{str::from_utf8, vec::Vec};
+use core::fmt;
 
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
+use serde::{Deserialize, Serialize};
 
 use crate::{hal::cpu::SyncSlice, taps::TapSet};
 
@@ -127,9 +129,11 @@ pub trait TapsProvider {
     }
 }
 
-/// A protocol info string for the proof system and circuits. Used to seed the Fiat-Shamir transcript and provide domain separation between different protocol and circuit versions.
-#[derive(Debug)]
-pub struct ProtocolInfo(pub &'static [u8; 16]);
+/// A protocol info string for the proof system and circuits.
+/// Used to seed the Fiat-Shamir transcript and provide domain separation between different
+/// protocol and circuit versions.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProtocolInfo(pub [u8; 16]);
 
 impl ProtocolInfo {
     /// Encode a fixed context byte-string to elements, with one element per byte.
@@ -144,11 +148,20 @@ impl ProtocolInfo {
     }
 }
 
+impl fmt::Display for ProtocolInfo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match from_utf8(&self.0) {
+            Ok(s) => write!(f, "{}", s),
+            Err(_) => write!(f, "0x{}", hex::encode(self.0)),
+        }
+    }
+}
+
 /// Versioned info string for the proof system.
 ///
 /// NOTE: This string should be bumped with every change to the proof system, as defined by a
 /// change to checks applied by the verifier.
-pub const PROOF_SYSTEM_INFO: ProtocolInfo = ProtocolInfo(b"RISC0_STARK:v1__");
+pub const PROOF_SYSTEM_INFO: ProtocolInfo = ProtocolInfo(*b"RISC0_STARK:v1__");
 
 pub trait CircuitInfo {
     const CIRCUIT_INFO: ProtocolInfo;

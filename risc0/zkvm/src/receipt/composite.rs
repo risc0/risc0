@@ -16,18 +16,30 @@ use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use risc0_binfmt::ExitCode;
-use risc0_zkp::{core::digest::Digest, verify::VerificationError};
+use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
+use risc0_circuit_recursion::CircuitImpl;
+use risc0_zkp::{
+    adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
+    core::{digest::Digest, hash::sha::Sha256},
+    verify::VerificationError,
+};
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use super::{InnerReceipt, SegmentReceipt, VerifierContext};
-use crate::{sha::Digestible, Assumptions, MaybePruned, Output, ReceiptClaim};
+use super::{
+    Groth16ReceiptVerifierParameters, SegmentReceipt, SegmentReceiptVerifierParameters,
+    SuccinctReceiptVerifierParameters, VerifierContext,
+};
+use crate::{
+    sha, Assumption, InnerAssumptionReceipt, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+};
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
-/// continuations, and zero or more [Receipt](crate::Receipt) structs proving any assumptions.
+/// continuations, and zero or more [InnerAssumptionReceipt](crate::InnerAssumptionReceipt) structs
+/// proving any assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
+#[non_exhaustive]
 pub struct CompositeReceipt {
     /// Segment receipts forming the proof of an execution with continuations.
     pub segments: Vec<SegmentReceipt>,
@@ -37,15 +49,14 @@ pub struct CompositeReceipt {
     /// assumptions are unresolved, this receipt is only _conditionally_
     /// valid.
     // TODO(#982): Allow for unresolved assumptions in this list.
-    pub assumptions: Vec<InnerReceipt>,
+    pub assumption_receipts: Vec<InnerAssumptionReceipt>,
 
-    /// Digest of journal included in the final output of the continuation. Will
-    /// be `None` if the continuation has no output (e.g. it ended in `Fault`).
-    // NOTE: This field is needed in order to open the assumptions digest from
-    // the output digest.
-    // TODO: This field can potentially be removed since
-    // it can be included in the claim on the last segment receipt instead.
-    pub(crate) journal_digest: Option<Digest>,
+    /// A digest of the verifier parameters that can be used to verify this receipt.
+    ///
+    /// Acts as a fingerprint to identity differing proof system or circuit versions between a
+    /// prover and a verifier. Is not intended to contain the full verifier parameters, which must
+    /// be provided by a trusted source (e.g. packaged with the verifier code).
+    pub verifier_parameters: Digest,
 }
 
 impl CompositeReceipt {
@@ -69,7 +80,7 @@ impl CompositeReceipt {
             receipt.verify_integrity_with_context(ctx)?;
             tracing::debug!("claim: {:#?}", receipt.claim);
             if let Some(id) = expected_pre_state_digest {
-                if id != receipt.claim.pre.digest() {
+                if id != receipt.claim.pre.digest::<sha::Impl>() {
                     return Err(VerificationError::ImageVerificationError);
                 }
             }
@@ -85,7 +96,7 @@ impl CompositeReceipt {
                     .post
                     .as_value()
                     .map_err(|_| VerificationError::ReceiptFormatError)?
-                    .digest(),
+                    .digest::<sha::Impl>(),
             );
         }
 
@@ -93,20 +104,52 @@ impl CompositeReceipt {
         final_receipt.verify_integrity_with_context(ctx)?;
         tracing::debug!("final: {:#?}", final_receipt.claim);
         if let Some(id) = expected_pre_state_digest {
-            if id != final_receipt.claim.pre.digest() {
+            if id != final_receipt.claim.pre.digest::<sha::Impl>() {
                 return Err(VerificationError::ImageVerificationError);
             }
         }
 
-        // Verify all assumption receipts attached to this composite receipt.
-        for receipt in self.assumptions.iter() {
-            tracing::debug!("verifying assumption: {:?}", receipt.claim()?.digest());
-            receipt.verify_integrity_with_context(ctx)?;
+        // Verify all assumptions on the receipt are resolved by attached receipts.
+        // Ensure that there is one receipt for every assumption. An explicity check is required
+        // because zip will terminate if either iterator terminates.
+        let assumptions = self.assumptions()?;
+        if assumptions.len() != self.assumption_receipts.len() {
+            tracing::debug!(
+                "only {} receipts provided for {} assumptions",
+                assumptions.len(),
+                self.assumption_receipts.len()
+            );
+            return Err(VerificationError::ReceiptFormatError);
         }
-
-        // Verify decoded output digest is consistent with the journal_digest
-        // and assumptions.
-        self.verify_output_consistency(&final_receipt.claim)?;
+        for (assumption, receipt) in assumptions.into_iter().zip(self.assumption_receipts.iter()) {
+            let assumption_ctx = match assumption.control_root {
+                // If the control root is all zeroes, we should use the same verifier paramters.
+                Digest::ZERO => None,
+                // Otherwise, we should verify the assumption receipt using the guest-provided root.
+                control_root => Some(
+                    VerifierContext::empty()
+                        .with_suites(ctx.suites.clone())
+                        .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
+                            control_root,
+                            inner_control_root: None,
+                            proof_system_info: PROOF_SYSTEM_INFO,
+                            circuit_info: CircuitImpl::CIRCUIT_INFO,
+                        }),
+                ),
+            };
+            tracing::debug!("verifying assumption: {assumption:?}");
+            receipt.verify_integrity_with_context(assumption_ctx.as_ref().unwrap_or(ctx))?;
+            if receipt.claim_digest()? != assumption.claim {
+                tracing::debug!(
+                    "verifying assumption failed due to claim mismatch: assumption: {assumption:?}, receipt claim digest: {}",
+                    receipt.claim_digest()?
+                );
+                return Err(VerificationError::ClaimDigestMismatch {
+                    expected: assumption.claim,
+                    received: receipt.claim_digest()?,
+                });
+            }
+        }
 
         Ok(())
     }
@@ -124,100 +167,113 @@ impl CompositeReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?
             .claim;
 
-        // After verifying the internal consistency of this receipt, we can use
-        // self.assumptions and self.journal_digest in place of
-        // last_claim.output, which is equal.
-        self.verify_output_consistency(last_claim)?;
-        let output: Option<Output> = last_claim
+        // Remove the assumptions from the last receipt claim, as the verify routine requires every
+        // assumption to have an associated verifiable receipt.
+        // TODO(#982) Support unresolved assumptions here by only removing the proven assumptions.
+        let output = last_claim
             .output
-            .is_some()
-            .then(|| {
-                Ok(Output {
-                    journal: MaybePruned::Pruned(
-                        self.journal_digest
-                            .ok_or(VerificationError::ReceiptFormatError)?,
-                    ),
-                    // TODO(#982): Adjust this if unresolved assumptions are allowed on
-                    // CompositeReceipt.
-                    // NOTE: Proven assumptions are not included in the CompositeReceipt claim.
-                    assumptions: Assumptions(vec![]).into(),
-                })
+            .as_value()
+            .map_err(|_| VerificationError::ReceiptFormatError)?
+            .as_ref()
+            .map(|output| Output {
+                journal: output.journal.clone(),
+                assumptions: vec![].into(),
             })
-            .transpose()?;
+            .into();
 
         Ok(ReceiptClaim {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
-            input: first_claim.input,
-            output: output.into(),
+            input: first_claim.input.clone(),
+            output,
         })
     }
 
-    /// Check that the output fields in the given receipt claim are
-    /// consistent with the exit code, and with the journal_digest and
-    /// assumptions encoded on self.
-    fn verify_output_consistency(&self, claim: &ReceiptClaim) -> Result<(), VerificationError> {
-        tracing::debug!(
-            "verify_output_consistency: exit_code = {:?}",
-            claim.exit_code
-        );
-        if claim.exit_code.expects_output() && claim.output.is_some() {
-            let self_output = Output {
-                journal: MaybePruned::Pruned(
-                    self.journal_digest
-                        .ok_or(VerificationError::ReceiptFormatError)?,
-                ),
-                assumptions: self.assumptions_claim()?.into(),
-            };
-
-            // If these digests do not match, this receipt is internally inconsistent.
-            if self_output.digest() != claim.output.digest() {
-                let empty_output = claim.output.is_none()
-                    && self
-                        .journal_digest
-                        .ok_or(VerificationError::ReceiptFormatError)?
-                        == Vec::<u8>::new().digest();
-                if !empty_output {
-                    tracing::debug!(
-                        "output digest does not match: expected {:?}; decoded {:?}",
-                        &self_output,
-                        &claim.output
-                    );
-                    return Err(VerificationError::ReceiptFormatError);
-                }
-            }
-        } else {
-            // Ensure all output fields are empty. If not, this receipt is internally
-            // inconsistent.
-            if claim.output.is_some() {
-                tracing::debug!("unexpected non-empty claim output: {:?}", &claim.output);
-                return Err(VerificationError::ReceiptFormatError);
-            }
-            if !self.assumptions.is_empty() {
-                tracing::debug!(
-                    "unexpected non-empty composite receipt assumptions: {:?}",
-                    &self.assumptions
-                );
-                return Err(VerificationError::ReceiptFormatError);
-            }
-            if self.journal_digest.is_some() {
-                tracing::debug!(
-                    "unexpected non-empty composite receipt journal_digest: {:?}",
-                    &self.journal_digest
-                );
-                return Err(VerificationError::ReceiptFormatError);
-            }
-        }
-        Ok(())
+    fn assumptions(&self) -> Result<Vec<Assumption>, VerificationError> {
+        // Collect the assumptions from the output of the last segment, handling any pruned values
+        // encountered and returning and empty list if the output is None.
+        Ok(self
+            .segments
+            .last()
+            .ok_or(VerificationError::ReceiptFormatError)?
+            .claim
+            .output
+            .as_value()
+            .map_err(|_| VerificationError::ReceiptFormatError)?
+            .as_ref()
+            .map(|output| match output.assumptions.is_empty() {
+                true => Ok(Default::default()),
+                false => Ok(output
+                    .assumptions
+                    .as_value()?
+                    .iter()
+                    .map(|a| a.as_value().cloned())
+                    .collect::<Result<_, _>>()?),
+            })
+            .transpose()
+            .map_err(|_: PrunedValueError| VerificationError::ReceiptFormatError)?
+            .unwrap_or_default())
     }
+}
 
-    fn assumptions_claim(&self) -> Result<Assumptions, VerificationError> {
-        Ok(Assumptions(
-            self.assumptions
-                .iter()
-                .map(|a| Ok(a.claim()?.into()))
-                .collect::<Result<Vec<_>, _>>()?,
-        ))
+/// Verifier parameters for [CompositeReceipt][super::CompositeReceipt].
+///
+/// [CompositeReceipt][super::CompositeReceipt] is a collection of individual receipts that
+/// collectively  prove a claim. It can contain any of the individual receipt types, and so it's
+/// verifier is a combination of the verifiers for every other receipt type.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct CompositeReceiptVerifierParameters {
+    /// Verifier parameters related to [SegmentReceipt].
+    pub segment: MaybePruned<SegmentReceiptVerifierParameters>,
+    /// Verifier parameters related to [SuccinctReceipt][crate::SuccinctReceipt].
+    pub succinct: MaybePruned<SuccinctReceiptVerifierParameters>,
+    /// Verifier parameters related to [Groth16Receipt][crate::Groth16Receipt].
+    pub groth16: MaybePruned<Groth16ReceiptVerifierParameters>,
+}
+
+impl Digestible for CompositeReceiptVerifierParameters {
+    /// Hash the [Groth16ReceiptVerifierParameters] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>(
+            "risc0.CompositeReceiptVerifierParameters",
+            &[
+                &self.segment.digest::<S>(),
+                &self.succinct.digest::<S>(),
+                &self.groth16.digest::<S>(),
+            ],
+            &[],
+        )
+    }
+}
+
+impl Default for CompositeReceiptVerifierParameters {
+    /// Default set of parameters used to verify a [CompositeReceipt].
+    fn default() -> Self {
+        Self {
+            segment: MaybePruned::Value(Default::default()),
+            succinct: MaybePruned::Value(Default::default()),
+            groth16: MaybePruned::Value(Default::default()),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CompositeReceiptVerifierParameters;
+    use crate::sha::Digestible;
+    use risc0_zkp::core::digest::digest;
+
+    // Check that the verifier parameters has a stable digest (and therefore a stable value). This struct
+    // encodes parameters used in verification, and so this value should be updated if and only if
+    // a change to the verifier parameters is expected. Updating the verifier parameters will result in
+    // incompatibility with previous versions.
+    #[test]
+    fn composite_receipt_verifier_parameters_is_stable() {
+        assert_eq!(
+            CompositeReceiptVerifierParameters::default().digest(),
+            digest!("0a12bed13d02e3b2864daeb2405ce14658388b804007aa3cac696762cfe35fdb")
+        );
     }
 }

@@ -15,6 +15,7 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 mod docker;
 
@@ -346,12 +347,7 @@ fn cpp_toolchain_override() -> bool {
 pub fn build_rust_runtime() -> String {
     build_staticlib(
         "risc0-zkvm-platform",
-        &[
-            "rust-runtime",
-            "panic-handler",
-            "entrypoint",
-            "export-getrandom",
-        ],
+        &["rust-runtime", "panic-handler", "entrypoint", "getrandom"],
     )
 }
 

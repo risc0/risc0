@@ -60,7 +60,7 @@ pub struct ValidationResults {
 
     /// Holds a sample of the guest build stdout
     ///
-    /// Holds the first 200 lines of of the guest build, if the build step fails
+    /// Holds the first 200 lines of the guest build, if the build step fails
     #[serde(skip_serializing_if = "Option::is_none")]
     pub build_errors: Option<String>,
 }
@@ -260,8 +260,8 @@ impl Validator {
         cmd.env_clear();
         cmd.envs(&filtered_env);
 
-        if profile.settings.std {
-            cmd.arg("--std");
+        if !profile.settings.std {
+            cmd.arg("--no-std");
         }
 
         match self.repo() {

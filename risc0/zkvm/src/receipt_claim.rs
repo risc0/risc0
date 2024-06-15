@@ -27,16 +27,17 @@ use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
 };
+use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::{self, Digest, Sha256},
+    sha::{self, Sha256},
     SystemState,
 };
 
 // TODO(victor): Add functions to handle the `ReceiptClaim` transformations conducted as part of
 // join, resolve, and eventually resume calls. This will allow these to be used for recursion, as
-// well as deve mode recursion, and composite receipts.
+// well as dev mode recursion, and composite receipts.
 
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 ///
@@ -57,13 +58,57 @@ pub struct ReceiptClaim {
     pub exit_code: ExitCode,
 
     /// Input to the guest.
-    pub input: Digest,
+    pub input: MaybePruned<Option<Input>>,
 
     /// [Output] of the guest, including the journal and assumptions set during execution.
     pub output: MaybePruned<Option<Output>>,
 }
 
 impl ReceiptClaim {
+    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded normally (i.e.
+    /// Halted(0)) with the given image ID and journal.
+    pub fn ok(
+        image_id: impl Into<Digest>,
+        journal: impl Into<MaybePruned<Vec<u8>>>,
+    ) -> ReceiptClaim {
+        Self {
+            pre: MaybePruned::Pruned(image_id.into()),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::Halted(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: journal.into(),
+                assumptions: MaybePruned::Pruned(Digest::ZERO),
+            })
+            .into(),
+        }
+    }
+
+    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded in a normal paused
+    /// state (i.e. Paused(0)) with the given image ID and journal.
+    pub fn paused(
+        image_id: impl Into<Digest>,
+        journal: impl Into<MaybePruned<Vec<u8>>>,
+    ) -> ReceiptClaim {
+        Self {
+            pre: MaybePruned::Pruned(image_id.into()),
+            post: MaybePruned::Value(SystemState {
+                pc: 0,
+                merkle_root: Digest::ZERO,
+            }),
+            exit_code: ExitCode::Paused(0),
+            input: None.into(),
+            output: Some(Output {
+                journal: journal.into(),
+                assumptions: MaybePruned::Pruned(Digest::ZERO),
+            })
+            .into(),
+        }
+    }
+
     /// Decode a [ReceiptClaim] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
         let input = read_sha_halfs(flat)?;
@@ -79,7 +124,7 @@ impl ReceiptClaim {
         let output = read_sha_halfs(flat)?;
 
         Ok(Self {
-            input,
+            input: MaybePruned::Pruned(input),
             pre: pre.into(),
             post: post.into(),
             exit_code,
@@ -89,7 +134,7 @@ impl ReceiptClaim {
 
     /// Encode a [ReceiptClaim] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), PrunedValueError> {
-        write_sha_halfs(flat, &self.input);
+        write_sha_halfs(flat, &self.input.digest::<sha::Impl>());
         self.pre.as_value()?.encode(flat);
         self.post.as_value()?.encode(flat);
         let (sys_exit, user_exit) = self.exit_code.into_pair();
@@ -107,7 +152,7 @@ impl Digestible for ReceiptClaim {
         tagged_struct::<S>(
             "risc0.ReceiptClaim",
             &[
-                self.input,
+                self.input.digest::<S>(),
                 self.pre.digest::<S>(),
                 self.post.digest::<S>(),
                 self.output.digest::<S>(),
@@ -150,6 +195,46 @@ impl From<InvalidExitCodeError> for DecodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
 
+/// A type representing an unknown claim type.
+///
+/// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
+/// only the digest of the claim is needed, and the full claim value cannot be determined by the
+/// compiler. This allows for a collection of receipts to be created even when the underlying
+/// claims are of heterogeneous types (e.g. Vec<SuccinctReceipt<Unknown>>).
+///
+/// Note that this is an uninhabited type, similar to the [never type].
+///
+/// [never type]: https://doc.rust-lang.org/std/primitive.never.html
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub enum Unknown {}
+
+impl Digestible for Unknown {
+    fn digest<S: Sha256>(&self) -> Digest {
+        match *self { /* unreachable  */ }
+    }
+}
+
+/// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
+///
+/// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
+/// is accessible. It may become inhabited in a future release.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct Input {
+    // Private field to ensure this type cannot be constructed.
+    // By making this type uninhabited, it can be populated later without breaking backwards
+    // compatibility.
+    pub(crate) x: Unknown,
+}
+
+impl Digestible for Input {
+    /// Hash the [Input] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        match self.x { /* unreachable  */ }
+    }
+}
+
 /// Output field in the [ReceiptClaim], committing to a claimed journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -179,14 +264,49 @@ impl Digestible for Output {
     }
 }
 
-/// A list of assumptions, each a [Digest] of a [ReceiptClaim].
+/// An [assumption] made in the course of proving program execution.
+///
+/// Assumptions are generated when the guest makes a recursive verification call. Each assumption
+/// commits the statement, such that only a receipt proving that statement can be used to resolve
+/// and remove the assumption.
+///
+/// [assumption]: https://dev.risczero.com/terminology#assumption
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Assumption {
+    /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
+    /// be the digest of the claim for a different circuit such as an accelerator.
+    pub claim: Digest,
+
+    /// Commitment to the set of [recursion programs] that can be used to resolve this assumption.
+    ///
+    /// Binding the set of recursion programs also binds the circuits, and creates an assumption
+    /// resolved by independent set of circuits (e.g. keccak or Groth16 verify). Proofs of these
+    /// external claims are verified by a "lift" program implemented for the recursion VM which
+    /// brings the claim into the recursion system. This lift program is committed to in the
+    /// control root.
+    ///
+    /// A special value of all zeroes indicates "self-composition", where the control root used to
+    /// verify this claim is also used to verify the assumption.
+    ///
+    /// [recursion programs]: https://dev.risczero.com/terminology#recursion-program
+    pub control_root: Digest,
+}
+
+impl Digestible for Assumption {
+    /// Hash the [Assumption] to get a digest of the struct.
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>("risc0.Assumption", &[self.claim, self.control_root], &[])
+    }
+}
+
+/// A list of assumptions, each a [Digest] or populated value of an [Assumption].
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Assumptions(pub Vec<MaybePruned<ReceiptClaim>>);
+pub struct Assumptions(pub Vec<MaybePruned<Assumption>>);
 
 impl Assumptions {
     /// Add an assumption to the head of the assumptions list.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
+    pub fn add(&mut self, assumption: MaybePruned<Assumption>) {
         self.0.insert(0, assumption);
     }
 
@@ -213,7 +333,7 @@ impl Assumptions {
 }
 
 impl Deref for Assumptions {
-    type Target = [MaybePruned<ReceiptClaim>];
+    type Target = [MaybePruned<Assumption>];
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -242,7 +362,7 @@ impl MaybePruned<Assumptions> {
     /// Add an assumption to the head of the assumptions list.
     ///
     /// If this value is pruned, then the result will also be a pruned value.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
+    pub fn add(&mut self, assumption: MaybePruned<Assumption>) {
         match self {
             MaybePruned::Value(list) => list.add(assumption),
             MaybePruned::Pruned(list_digest) => {
@@ -279,6 +399,24 @@ impl MaybePruned<Assumptions> {
                 Ok(())
             }
         }
+    }
+}
+
+impl From<Vec<MaybePruned<Assumption>>> for Assumptions {
+    fn from(value: Vec<MaybePruned<Assumption>>) -> Self {
+        Self(value)
+    }
+}
+
+impl From<Vec<Assumption>> for Assumptions {
+    fn from(value: Vec<Assumption>) -> Self {
+        Self(value.into_iter().map(Into::into).collect())
+    }
+}
+
+impl From<Vec<Assumption>> for MaybePruned<Assumptions> {
+    fn from(value: Vec<Assumption>) -> Self {
+        Self::Value(value.into())
     }
 }
 
@@ -435,6 +573,13 @@ impl std::error::Error for PrunedValueError {}
 pub(crate) trait Merge: Digestible + Sized {
     /// Merge two structs to produce an output with a union of the fields populated in the inputs.
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError>;
+
+    /// Merge two structs to assigning self as the union of the fields populated in the two inputs.
+    fn merge_with(&mut self, other: &Self) -> Result<(), MergeInequalityError> {
+        // Not an very efficient implementation.
+        *self = self.merge(other)?;
+        Ok(())
+    }
 }
 
 /// Error returned when a merge it attempted with two values with unequal digests.
@@ -459,6 +604,7 @@ impl std::error::Error for MergeInequalityError {}
 trait MergeLeaf: Digestible + PartialEq + Clone + Sized {}
 
 impl MergeLeaf for SystemState {}
+impl MergeLeaf for Assumption {}
 impl MergeLeaf for Vec<u8> {}
 
 impl<T: MergeLeaf> Merge for T {
@@ -510,6 +656,19 @@ where
     }
 }
 
+impl<T: Merge> Merge for Option<T> {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        match (self, other) {
+            (Some(left), Some(right)) => Some(left.merge(right)).transpose(),
+            (None, None) => Ok(None),
+            _ => Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            )),
+        }
+    }
+}
+
 impl Merge for Assumptions {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         if self.0.len() != other.0.len() {
@@ -528,6 +687,12 @@ impl Merge for Assumptions {
     }
 }
 
+impl Merge for Input {
+    fn merge(&self, _other: &Self) -> Result<Self, MergeInequalityError> {
+        match self.x { /* unreachable  */ }
+    }
+}
+
 impl Merge for Output {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         Ok(Self {
@@ -537,22 +702,9 @@ impl Merge for Output {
     }
 }
 
-impl Merge for Option<Output> {
-    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
-        match (self, other) {
-            (Some(left), Some(right)) => Some(left.merge(right)).transpose(),
-            (None, None) => Ok(None),
-            _ => Err(MergeInequalityError(
-                self.digest::<sha::Impl>(),
-                other.digest::<sha::Impl>(),
-            )),
-        }
-    }
-}
-
 impl Merge for ReceiptClaim {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
-        if self.exit_code != other.exit_code || self.input != other.input {
+        if self.exit_code != other.exit_code {
             return Err(MergeInequalityError(
                 self.digest::<sha::Impl>(),
                 other.digest::<sha::Impl>(),
@@ -562,7 +714,7 @@ impl Merge for ReceiptClaim {
             pre: self.pre.merge(&other.pre)?,
             post: self.post.merge(&other.post)?,
             exit_code: self.exit_code,
-            input: self.input,
+            input: self.input.merge(&other.input)?,
             output: self.output.merge(&other.output)?,
         })
     }
@@ -588,7 +740,7 @@ mod tests {
                     pre: x.pre.rand_prune(),
                     post: x.post.rand_prune(),
                     exit_code: x.exit_code,
-                    input: x.input,
+                    input: x.input.clone(),
                     output: x.output.rand_prune(),
                 }
                 .into(),
@@ -667,7 +819,7 @@ mod tests {
             }
             .into(),
             exit_code: ExitCode::Halted(0),
-            input: Digest::ZERO,
+            input: None.into(),
             output: MaybePruned::Value(Some(Output {
                 journal: MaybePruned::Value(b"hello world".to_vec()),
                 assumptions: MaybePruned::Value(Assumptions(vec![

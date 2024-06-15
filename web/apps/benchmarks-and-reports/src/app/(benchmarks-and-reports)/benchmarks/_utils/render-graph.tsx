@@ -3,19 +3,7 @@ import Chart from "react-chartjs-2";
 import type { FormattedDataSetEntry } from "./collect-benches-per-test-case";
 
 const TOOL_COLORS = {
-  cargo: "#020077",
-  go: "#00add8",
-  benchmarkjs: "#f1e05a",
-  benchmarkluau: "#000080",
-  pytest: "#3572a5",
-  googlecpp: "#f34b7d",
-  catch2: "#f34b7d",
-  julia: "#a270ba",
-  jmh: "#b07219",
-  benchmarkdotnet: "#178600",
-  customBiggerIsBetter: "#38ff38",
-  customSmallerIsBetter: "#ff3838",
-  _: "#333333",
+  customBiggerIsBetter: "#020077",
 };
 
 export function renderGraph({
@@ -47,8 +35,9 @@ export function renderGraph({
     hover: {
       animationDuration: 0, // duration of animations when hovering an item
     },
+    responsive: true,
+    maintainAspectRatio: false,
     responsiveAnimationDuration: 0, // animation duration after a resize
-    aspectRatio: 4,
     scales: {
       xAxes: [
         {
@@ -86,7 +75,7 @@ export function renderGraph({
       event.target.style.cursor = chartElement[0] ? "pointer" : "default";
     },
     tooltips: {
-      backgroundColor: "rgba(0, 0, 0, 1)",
+      backgroundColor: "rgb(8, 8, 8)",
       callbacks: {
         afterTitle: (items) => {
           const { index } = items[0];
@@ -116,5 +105,9 @@ export function renderGraph({
     },
   };
 
-  return <Chart height={75} id={`${platformName}-${benchName}`} type="line" data={data} options={options} />;
+  return (
+    <div className="relative min-h-80 w-full">
+      <Chart id={`${platformName}-${benchName}`} type="line" data={data} options={options} />
+    </div>
+  );
 }

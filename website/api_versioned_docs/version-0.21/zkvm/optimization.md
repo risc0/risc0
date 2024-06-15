@@ -168,7 +168,7 @@ it can acted on (e.g. used as input to an `add`). It must also be written back
 to memory to store the result. Memory loads and stores (i.e. reads and writes)
 usually take one cycle.
 
-Memory access, both load and store takes exactly one cycle, expect in the case
+Memory access, both load and store takes exactly one cycle, except in the case
 of page-in and page-out operations ([discussed below](#paging)).
 
 Note that relative to a physical CPU, this is extremely fast (in terms of
@@ -509,7 +509,7 @@ below.
 [`counts`]: https://github.com/nnethercote/counts/
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.cycle_count.html
-[`env::read`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/guest/env/fn.read.html
+[`env::read`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read_slice.html
 [example-ecdsa]: https://github.com/risc0/risc0/tree/release-0.21/examples/ecdsa
 [example-waldo]: https://github.com/risc0/risc0/tree/release-0.21/examples/waldo

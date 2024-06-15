@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "fmt": "prettier . --write",
-    "check-github-link-versions": "python ./github-link-version-check.py",
-    "lint": "prettier . --check && python ./github-link-version-check.py",
+    "check-link-versions": "python ./link-version-check.py",
+    "lint": "prettier . --check && python ./link-version-check.py",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",

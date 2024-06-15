@@ -8,7 +8,6 @@ clap = { version = "4.0", features = ["derive"] }
 ethers-core = "2.0"
 ethers-providers = "2.0"
 risc0-zkvm = { path = "../../risc0/zkvm" }
-serde = "1.0"
 tokio = "1"
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

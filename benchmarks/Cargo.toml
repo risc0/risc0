@@ -10,7 +10,7 @@ members = ["methods", "shared"]
 risc0-build = { path = "../risc0/build" }
 
 [dependencies]
-clap = { version = "4.0", features = ["derive"] }
+clap = { version = "4.5", features = ["derive"] }
 csv = "1.1"
 ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = [
   "rand_core",
@@ -24,6 +24,7 @@ risc0-benchmark-lib = { path = "shared" }
 risc0-benchmark-methods = { path = "methods" }
 risc0-zkvm = { path = "../risc0/zkvm", features = ["prove"] }
 serde = { version = "1.0", features = ["derive"] }
+serde_with = "3.8"
 tabled = "0.15"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

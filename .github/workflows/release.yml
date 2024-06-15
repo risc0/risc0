@@ -15,8 +15,8 @@ permissions:
 
 env:
   RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
-  TAG: v1.0.0-rc.3
-  VERSION: "1.0.0-rc.3"
+  TAG: v1.0.0
+  VERSION: "1.0.0"
 
 jobs:
   release:

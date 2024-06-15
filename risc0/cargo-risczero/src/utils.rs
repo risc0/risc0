@@ -158,7 +158,8 @@ impl fmt::Display for ProcessError {
 
 impl std::error::Error for ProcessError {}
 
-#[derive(Debug, Default, Args)]
+#[derive(Debug, Clone, Default, Args, PartialEq, Eq)]
+#[group(multiple = false)]
 pub struct ClientEnvs {
     /// API URL for Bonsai.
     #[arg(long)]

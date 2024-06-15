@@ -229,7 +229,7 @@ mod test {
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        self::docker_build(manifest_path, &src_dir, &[]).unwrap();
+        self::docker_build(manifest_path, src_dir, &[]).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
@@ -250,7 +250,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "52d1c3712b98e343e7ec5d167cdad6ba37dbfbfe63569b1175a151123261f461",
+            "b45761ac6ceb6a603484435bdeb2463a3ec2c2957fa09a9ca12411e265e8c1dc",
         );
     }
 }

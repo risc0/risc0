@@ -12,51 +12,54 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use risc0_zkp::core::digest::Digest;
+use risc0_zkp::digest;
+
 const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2;
 
-pub type RawControlId = [&'static str; CONTROL_ID_ENTRIES];
+pub type ControlIds = [Digest; CONTROL_ID_ENTRIES];
 
-/// Control ID for SHA-256
-pub const SHA256_CONTROL_ID: RawControlId = [
-    "eab745d650de7f5f837a3fe5f1cb23b4bef2d190b7a470453f92dbdf7083c7a0", //
-    "09b42cb611dcaeae5606d6309b1b1aeb8482163cacc3225573c915eb5c28abcc", //
-    "dc9424cbe65a98cd160f1450c17ce9a3419b50aea1967f7fedb65e3f3a1db38e", //
-    "b687aa43eb3adae3661312ac42eecd123d05dc63c260c586271fc36f48c7588c", //
-    "52d851bfbb1ab05e69e9205403d7909d80025fb51c943badd5efc16b2e325da1", //
-    "6542f024bfbf6699511baae55c2c9bc85befda6188f54ccdc8d8dc1825567d75", //
-    "901332de51232ff2e3c55ba64b217dd82728ec28a6fa087f02ef6f7d409f7d1a", //
-    "831fd974bcd951dc3d0d0e802235788d4089b90a9d2578d72b67e0a80ce8715a", //
-    "802ce6a9c33242f0ff0dc5e6f63def4dea194c2016137387ef36d1c8d145e462", //
-    "ad1eda57cea9446c14c6d93859de058ca8d624e270f1f38aab7336db8aa4ea30", //
-    "97be9ed7e5f1f24c3e527c07ded11418900b128725480e179156b5dd6b032cae", //
+/// Control IDs for each power-of-two of the rv32im circuit using SHA-256.
+pub const SHA256_CONTROL_IDS: ControlIds = [
+    digest!("6d0ed860e3effc3cc00114075cb29630b583d227b5654adaf0e9a4e4926144a4"), //
+    digest!("8f4880393dbb0dccf06e78081ca4f81b56e57ca5a0d056d927d41d1f19d0eb78"), //
+    digest!("5461f6a04636ec3e513511de5b324e92ec027de3c3c2d5b56edcf28f21a2797e"), //
+    digest!("aa0fe87d397a845d6c63b7896a031e2fd9d221e02625741ce631cf060542842d"), //
+    digest!("fd2551902a296fcdc2d49ecbd7b2140b5b8adfb86023e4e2c1ad433e9d4e5487"), //
+    digest!("204f8e50713cd5da7a41c128d1dd27b722ea0d6c21c785a9a608df13dcadc108"), //
+    digest!("90d0d9c5bbb5ad02dd004a83e29a6ede8ed35d33a762bbf14f8fd323a8053fbf"), //
+    digest!("3b652874501bcbb2d3283f4a6640fbc292f9db0c3353b1b5d058c79ab9e684ed"), //
+    digest!("23ef25c5d5e356bab81c4905e499de9161596435839366c2b0e8fb3c6d8f2232"), //
+    digest!("bb795263e615f72c0fb6b8d07c8dba82d1a8b5a53870b106ffe738a4f8943dc0"), //
+    digest!("55330f0d062c6972bf3f65c4e5055544e20c9f776f6797f4428f7b3a6fbf0573"), //
 ];
 
-/// Control ID for Poseidon2
-pub const POSEIDON2_CONTROL_ID: RawControlId = [
-    "bebb4c5f19d4973b590313766e476d3d7cce5c18b2d600188d7476767a4a8614", //
-    "0296f8241298c95f780501761519030966b9902bc508b539881b0c49bf326b6e", //
-    "b3b5d8727f259c31dfa971583c8db640a4a78b5b791fd76c15e90d2c5a85e45b", //
-    "3376da16801abe4c46bf9c508d67c559a6ba4a46e0f8c602bfd9a337c9b0f40b", //
-    "61c4fc0b6df2a935904374720c967b081deb844653f81956b71c4e1e863e6e3e", //
-    "1f2a072b0e7ae7113aa1193120e2543daf39ad727c2128539c84072ae150c960", //
-    "0c31d02a1900786d81bdae23ce96ce474c8b0b7182a91457aeac5a25b79f5c65", //
-    "1ef23b55919a8313dfb56057c4174431839660377a3e22738e279c02901ad345", //
-    "d695e66e4db81a4b6e8d535a5ba1370757291d1ef7fe1973db9cb83716565637", //
-    "9ef20b736835d16fb922710871488552582aee312f0925599d3fee12934b3465", //
-    "da824e2ecc179c2c1359bb75b154f8490086cd0f85e3391cc96ffc3b8e3afa11", //
+/// Control IDs for each power-of-two of the rv32im circuit using Poseidon2.
+pub const POSEIDON2_CONTROL_IDS: ControlIds = [
+    digest!("55ba2d763ec3c016c0f97c298507115c77e0a25215e5771ba501d016edca522c"), //
+    digest!("c265954c4dcb2155e041286a246bfe400ba9d042d919aa3cb1a299651f84c13e"), //
+    digest!("467cd61da86f37347b45e64b5d4665308871bc301c67ba6c6d13c9470c3e4840"), //
+    digest!("57b2031d3881e92b85d73d2d0800a223fdaccd5e7bdd0a569c10556ec138f551"), //
+    digest!("c1f19103f8376c00fe20f62aa4370f628efe3a4a5eb1a5739466c944cf7dfe31"), //
+    digest!("548ec1774c6c833b18db2e2a1464cb1923c6c721df87b437509ba87292d20529"), //
+    digest!("ce535b3b10e4cc212842b90a918553633c4f5375dee51d4788798765df5a8750"), //
+    digest!("7dea3854a91c906f92f23a291340066ecbd5375669fe752a5047c926e4d56747"), //
+    digest!("dca31f53c5bf4c67ecdc9f1035cf5934072afc29573a1845100d6140befab657"), //
+    digest!("12da4520930b1740810a69428c02fb2fcb586763a0e3794c45196608b594dd69"), //
+    digest!("5c2dce7226ff9073b8e38919583c01375f11395111e9ae3bfd519b57f84a5e00"), //
 ];
 
-/// Control ID for Blake2b
-pub const BLAKE2B_CONTROL_ID: RawControlId = [
-    "f68c89b078e1a360c7b3d4b9c7de5d47e3f46ce92e8ddf65b8c6ca32befb45fe", //
-    "5be8f08be4f88aef8928da60b240832aa73c8e22be2cc06271a5b53b07636a2a", //
-    "3a8089e20f6f7cd55d09c861b32fedc4ccd34283ea597a5c98b5de19efc3cca5", //
-    "ee2a276a311656871b094b96844424683b1cf5a83e8e6be6cc10b8821ea7d9c5", //
-    "59d2053991478d0819e6aaa071b6d9d325093a253798b247c6746c9fc5a57594", //
-    "62a99496914f245543f96b6cee785794ce330864eb315639be6253df3ed9a80b", //
-    "3e8fc320dc63e512258f638a028b494c6dd767d813d43e1ae270120f63e9dec8", //
-    "f6df38c8532e9bb75e0eb5f9413c7feecac464ae43bd117c43e86fb932bed983", //
-    "1b368a75de706ab0c103103c65915e21e01079eea654d65180e3a0d6260c2036", //
-    "4a507faef43cd9d7bbf7561c7971c12ef0d1429ff73919cfea9479424a476bc6", //
-    "3d8fad6ffcd1b9bd31ea4730021df8f882c9afac6a55cda04f419171cf8a848e", //
+/// Control IDs for each power-of-two of the rv32im circuit using Blake2b.
+pub const BLAKE2B_CONTROL_IDS: ControlIds = [
+    digest!("1f682e2ecfc82580667b8549ce548310f79f7055195d1f3a70d11565dd7c8311"), //
+    digest!("66c3c1e1293ec0deea97cd1531a4fb202f7c57c3fa9908598519b12776272f37"), //
+    digest!("e8a718749c38e77f1a52856568669d38591e5ee3deed15e251b4cd45994e56f7"), //
+    digest!("3010f3679241489056004ab35e7b0c5feae8a6b45fe46f2c17e65e681e43ef25"), //
+    digest!("a01d6a57f7aec62ffec3edcc5347c2acb88abdb0460e516d1b7d984f487dfce4"), //
+    digest!("ba388a957a36a9a514fe5efe738f497fec585e267bcb6fb0a9d79b22f5cb34b1"), //
+    digest!("e2fba32638e85de83c7ce06c41d48bb159efa0ec58de2e3ed4c172c7fc82b6e5"), //
+    digest!("d9edf22d1c828087fec2fce4cf46261e8b6e8072b29f4beffbfc36309ae0e9d9"), //
+    digest!("f04cfc7c358eaa225ee249e88b804a92679b43adf51b5cef1d0fef40c3afbc06"), //
+    digest!("98b1e437c659b0435b5829a5d2fe697d08fc4b02641747d0f7d6b171b9c83415"), //
+    digest!("68ada0a6c57d353b2a3645d42854365acd1aa453faebda9988b75c5802f4a1be"), //
 ];

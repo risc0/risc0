@@ -1,19 +1,20 @@
 import "server-only";
 
-import env from "~/env";
+import { tryFetch } from "shared/utils/try-fetch";
+import type { Version } from "~/types/version";
 
-export async function fetchApplicationsBenchmarksCommitHash({ version }: { version: string }) {
-  const response = await fetch(
+export async function fetchApplicationsBenchmarksCommitHash({ version }: { version: Version }) {
+  const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/COMMIT_HASH.txt`,
     {
-      headers: {
-        Authorization: `token ${env.GITHUB_PAT}`,
-        Accept: "application/vnd.github.v3.raw",
-      },
-      next: { revalidate: 900 },
+      next: { revalidate: 180 }, // 3 minutes cache
     },
   );
-  const responseText = await response.text();
 
-  return responseText;
+  // error handling
+  if (error || !response.ok) {
+    throw error || new Error("Failed to fetch");
+  }
+
+  return await response.text();
 }

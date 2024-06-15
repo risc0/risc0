@@ -7,7 +7,6 @@ edition = "2021"
 forust-ml = "0.4.2"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 rmp-serde = "1.1.2"
-serde = "1.0"
 serde_json = "1.0.108"
 xgboost-methods = { path = "methods" }
 

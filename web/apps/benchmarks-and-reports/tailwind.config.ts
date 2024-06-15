@@ -1,5 +1,5 @@
 import filterOrder from "@joshdavenport/tailwindcss-filter-order";
-import tailwindConfig from "@risc0/ui/config/tailwind.config";
+import tailwindConfig from "@risc0/ui/config/tailwind.config.base";
 import deepmerge from "deepmerge";
 import type { Config } from "tailwindcss";
 
@@ -12,6 +12,7 @@ const config = deepmerge(tailwindConfig, {
       fontFamily: {
         sans: ["var(--font-europa-sans)", "system-ui"],
         mono: ["var(--font-jetbrains-mono)"],
+        "mono-raw": ["monospace"],
       },
     },
   },

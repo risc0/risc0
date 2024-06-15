@@ -8,7 +8,7 @@
   "emmet.includeLanguages": {
     "rust": "html"
   },
-  "[javascript][javascriptreact][typescript][typescriptreact][github-actions-workflow]": {
+  "[javascript][javascriptreact][typescript][typescriptreact][github-actions-workflow][json][css]": {
     "editor.defaultFormatter": "biomejs.biome",
     "editor.codeActionsOnSave": {
       "quickfix.biome": "explicit",
@@ -18,9 +18,6 @@
   },
   "biome.rename": true,
   "biome.enabled": true,
-  "rust-analyzer.cargo.extraEnv": {
-    "RISC0_SKIP_BUILD": "1"
-  },
   "files.eol": "\n",
   "git.ignoreLimitWarning": true,
   "files.associations": {
@@ -89,5 +86,15 @@
     "posix",
     "repr",
     "risczero",
-  ]
+  ],
+  "clangd.checkUpdates": true,
+  "rust-analyzer.server.extraEnv": {
+    "RISC0_SKIP_BUILD": "1",
+    "RISC0_SKIP_BUILD_KERNELS": "1",
+    "CARGO_TARGET_DIR": "target/analyzer"
+  },
+  "rust-analyzer.check.extraArgs": [
+    "--target-dir=target/analyzer"
+  ],
+  "biome.lspBin": "web/node_modules/.bin/biome"
 }

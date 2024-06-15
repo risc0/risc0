@@ -45,7 +45,7 @@ Each rule check is written as the polynomial over the data columns, for example 
 In our example $a$, $b$, and $c$ may be terms in the data columns enforcing the Fibonacci sequence rule, that $F(i) + F(i+1) = F(i + 2)$.
 
 Each rule is combined with a selector from the control columns to decide when to apply the rules.
-For example, we should check that the output of one step is equal to the input to the next, expect when we consider the first row where there is no prior step and instead it must be equal to the user input.
+For example, we should check that the output of one step is equal to the input to the next, except when we consider the first row where there is no prior step and instead it must be equal to the user input.
 This combination is via multiplication e.g. $(s)(a + b - c)$ ensures that _either_ $a + b = c$ or $s = 0$.
 
 Each rule checking column can be expressed as a multi-input, single-output polynomial, where the inputs are some combination of entries in the trace; we call these `rule-checking polynomials`.

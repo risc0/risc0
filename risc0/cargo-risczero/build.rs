@@ -17,7 +17,7 @@ mod runtime {
     use std::{env, fs, io, path::Path};
 
     use risc0_build::build_rust_runtime;
-    use zip::{write::FileOptions, CompressionMethod, ZipWriter};
+    use zip::{write::SimpleFileOptions, CompressionMethod, ZipWriter};
 
     pub fn build_and_zip_runtime() {
         // Build the risc0-zkvm-platform.a file and place it in a zip archive for
@@ -28,7 +28,7 @@ mod runtime {
         let rust_runtime = build_rust_runtime();
         let f = fs::File::create(out_dir.join("cargo-risczero.zip")).unwrap();
         let mut zip = ZipWriter::new(f);
-        let options = FileOptions::default().compression_method(CompressionMethod::Stored);
+        let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
 
         zip.start_file("risc0-zkvm-platform.a", options).unwrap();
         let mut runtime_in = fs::File::open(rust_runtime).unwrap();
@@ -43,7 +43,6 @@ fn main() {
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
             .init();
-        ();
         runtime::build_and_zip_runtime();
     }
 }

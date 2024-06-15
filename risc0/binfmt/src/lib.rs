@@ -15,6 +15,9 @@
 //! Manages formatted binaries used by the RISC Zero zkVM
 
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
+#![deny(missing_docs)]
+#![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 mod elf;
 mod exit_code;
@@ -28,7 +31,7 @@ pub use self::image::{MemoryImage, PageTableInfo};
 pub use crate::{
     elf::Program,
     exit_code::{ExitCode, InvalidExitCodeError},
-    hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
+    hash::{tagged_iter, tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
 };
 

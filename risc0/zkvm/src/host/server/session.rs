@@ -25,7 +25,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     host::{client::env::SegmentPath, prove_info::SessionStats},
     sha::Digest,
-    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
+    Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
+    ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -40,6 +41,7 @@ pub struct PageFaults {
 /// initial memory image (which includes the starting PC) and proceeds until
 /// either a sys_halt or a sys_pause syscall is encountered. This record is
 /// stored as a vector of [Segment]s.
+#[non_exhaustive]
 pub struct Session {
     /// The constituent [Segment]s of the Session. The final [Segment] will have
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
@@ -60,7 +62,7 @@ pub struct Session {
     pub post_image: MemoryImage,
 
     /// The list of assumptions made by the guest and resolved by the host.
-    pub assumptions: Vec<Assumption>,
+    pub assumptions: Vec<(Assumption, AssumptionReceipt)>,
 
     /// The hooks to be called during the proving phase.
     pub hooks: Vec<Box<dyn SessionEvents>>,
@@ -136,7 +138,7 @@ impl Session {
         journal: Option<Vec<u8>>,
         exit_code: ExitCode,
         post_image: MemoryImage,
-        assumptions: Vec<Assumption>,
+        assumptions: Vec<(Assumption, AssumptionReceipt)>,
         user_cycles: u64,
         total_cycles: u64,
         pre_state: SystemState,
@@ -178,9 +180,9 @@ impl Session {
                         assumptions: Assumptions(
                             self.assumptions
                                 .iter()
-                                .filter_map(|a| match a {
-                                    Assumption::Proven(_) => None,
-                                    Assumption::Unresolved(r) => Some(r.clone()),
+                                .filter_map(|(_, ar)| match ar {
+                                    AssumptionReceipt::Proven(_) => None,
+                                    AssumptionReceipt::Unresolved(a) => Some(a.clone().into()),
                                 })
                                 .collect::<Vec<_>>(),
                         )
@@ -206,7 +208,7 @@ impl Session {
             pre: self.pre_state.clone().into(),
             post: self.post_state.clone().into(),
             exit_code: self.exit_code,
-            input: self.input,
+            input: MaybePruned::Pruned(self.input),
             output: output.into(),
         })
     }

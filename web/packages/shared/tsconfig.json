@@ -1,5 +1,5 @@
 {
-  "extends": "@risc0/ui/tsconfig.base.json",
+  "extends": "@risc0/ui/config/tsconfig.base.json",
   "compilerOptions": {
     /* Path Aliases */
     "baseUrl": "."

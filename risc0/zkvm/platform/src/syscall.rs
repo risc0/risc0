@@ -14,7 +14,7 @@
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
-use core::{cmp::min, ptr::null_mut};
+use core::{cmp::min, ffi::CStr, ptr::null_mut, str::Utf8Error};
 
 use crate::WORD_SIZE;
 
@@ -94,11 +94,7 @@ pub mod bigint {
     pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
 }
 
-// TODO: We can probably use ffi::CStr::from_bytes_with_nul once it's
-// const-stablized instead of rolling our own structure:
-// https://github.com/rust-lang/rust/issues/101719
-
-/// A NUL-terminated name of a syscall with static lifetime.
+/// A UTF-8 NUL-terminated name of a syscall with static lifetime.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct SyscallName(*const u8);
@@ -112,15 +108,20 @@ pub struct SyscallName(*const u8);
 /// ```
 #[macro_export]
 macro_rules! declare_syscall {
-    ($(#[$meta:meta])*
-     $vis:vis $name:ident) => {
+    (
+        $(#[$meta:meta])*
+        $vis:vis $name:ident
+    ) => {
+        // Go through `CStr` to avoid `unsafe` in the caller.
         $(#[$meta])*
-        $vis const $name: $crate::syscall::SyscallName = {
-            $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
-                module_path!(),
-                "::",
-                stringify!($name),
-                "\0").as_ptr())
+        $vis const $name: $crate::syscall::SyscallName = match ::core::ffi::CStr::from_bytes_until_nul(
+            concat!(module_path!(), "::", stringify!($name), "\0").as_bytes(),
+        ) {
+            Ok(c_str) => match $crate::syscall::SyscallName::from_c_str(c_str) {
+                Ok(name) => name,
+                Err(_) => unreachable!(),
+            },
+            Err(_) => unreachable!(),
         };
     };
 }
@@ -134,13 +135,26 @@ pub mod nr {
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
-    declare_syscall!(pub SYS_VERIFY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
 }
 
 impl SyscallName {
-    pub const fn from_bytes_with_nul(ptr: *const u8) -> Self {
+    /// Converts a static C string to a system call name, if it is UTF-8.
+    #[inline]
+    pub const fn from_c_str(c_str: &'static CStr) -> Result<Self, Utf8Error> {
+        match c_str.to_str() {
+            Ok(_) => Ok(unsafe { Self::from_bytes_with_nul(c_str.as_ptr().cast()) }),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Converts a raw UTF-8 C string pointer to a system call name.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must reference a static null-terminated UTF-8 string.
+    pub const unsafe fn from_bytes_with_nul(ptr: *const u8) -> Self {
         Self(ptr)
     }
 
@@ -725,51 +739,6 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     ptr
 }
 
-/// Send an image ID and journal hash to the host to request the post state digest and system exit
-/// code from a matching ReceiptClaim with successful exit status.
-///
-/// A cooperative prover will only return if there is a verifying proof with successful exit status
-/// associated with the given image ID and journal digest; and will always return a result code of
-/// 0 to register a0. The caller must calculate the ReceiptClaim digest, using the provided post
-/// state digest and encode the digest into a public assumptions list for inclusion in the guest
-/// output.
-///
-/// # Safety
-///
-/// `image_id`, `journal_digest`, and `from_host_buf` must be aligned and dereferenceable.
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
-pub unsafe extern "C" fn sys_verify(
-    image_id: *const [u32; DIGEST_WORDS],
-    journal_digest: *const [u32; DIGEST_WORDS],
-    from_host_buf: *mut [u32; DIGEST_WORDS + 1],
-) {
-    let mut to_host = [0u32; 2 * DIGEST_WORDS];
-    to_host[..DIGEST_WORDS].copy_from_slice(unsafe { &*image_id });
-    to_host[DIGEST_WORDS..].copy_from_slice(unsafe { &*journal_digest });
-
-    let Return(a0, _) = unsafe {
-        // Send the image_id and journal_digest to the host in a syscall.
-        // Expect in return that from_host_buf is populated with the post state
-        // digest and system exit code for from a matching ReceiptClaim.
-        syscall_2(
-            nr::SYS_VERIFY,
-            from_host_buf as *mut u32,
-            DIGEST_WORDS + 1,
-            to_host.as_ptr() as u32,
-            2 * DIGEST_BYTES as u32,
-        )
-    };
-
-    // Check to ensure the host indicated success by returning 0.
-    // This should always be the case. This check is included for
-    // forwards-compatibility.
-    if a0 != 0 {
-        const MSG: &[u8] = "sys_verify returned error result".as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
-    }
-}
-
 /// Send a ReceiptClaim digest to the host to request verification.
 ///
 /// A cooperative prover will only return if there is a verifying proof
@@ -780,17 +749,25 @@ pub unsafe extern "C" fn sys_verify(
 /// # Safety
 ///
 /// `claim_digest` must be aligned and dereferenceable.
+/// `control_root` must be aligned and dereferenceable.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_verify_integrity(claim_digest: *const [u32; DIGEST_WORDS]) {
+pub unsafe extern "C" fn sys_verify_integrity(
+    claim_digest: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
+) {
+    let mut to_host = [0u32; DIGEST_WORDS * 2];
+    to_host[..DIGEST_WORDS].copy_from_slice(claim_digest.as_ref().unwrap_unchecked());
+    to_host[DIGEST_WORDS..].copy_from_slice(control_root.as_ref().unwrap_unchecked());
+
     let Return(a0, _) = unsafe {
         // Send the claim_digest to the host via software ecall.
         syscall_2(
             nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
-            claim_digest as u32,
-            DIGEST_BYTES as u32,
+            to_host.as_ptr() as u32,
+            (DIGEST_BYTES * 2) as u32,
         )
     };
 

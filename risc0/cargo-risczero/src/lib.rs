@@ -14,6 +14,8 @@
 
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
+#![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 mod commands;
 mod toolchain;
@@ -28,7 +30,7 @@ use clap::{Parser, Subcommand};
 use self::commands::build::BuildCommand;
 use self::commands::{
     build_guest::BuildGuest, build_toolchain::BuildToolchain, deploy::DeployCommand,
-    install::Install, new::NewCommand,
+    install::Install, new::NewCommand, verify::VerifyCommand,
 };
 
 #[derive(Parser)]
@@ -61,6 +63,8 @@ pub enum RisczeroCmd {
     New(NewCommand),
     /// Uploads the guest code to Bonsai.
     Deploy(DeployCommand),
+    /// Verifies if a receipt is valid.
+    Verify(VerifyCommand),
     /// Build a crate for RISC Zero.
     #[cfg(feature = "experimental")]
     BuildCrate(BuildCommand),

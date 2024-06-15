@@ -104,7 +104,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             size.as_arg(),
         ];
         let kernel = self.kernels.get("eval_check").unwrap();
-        self.hal.dispatch(&kernel, &args, domain as u64, None);
+        self.hal.dispatch(kernel, &args, domain as u64, None);
     }
 
     fn accumulate(
@@ -129,7 +129,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             wom.as_arg(),
         ];
         let kernel = self.kernels.get("step_compute_accum").unwrap();
-        self.hal.dispatch(&kernel, &args, count as u64, None);
+        self.hal.dispatch(kernel, &args, count as u64, None);
 
         use risc0_zkp::hal::Hal as _;
         self.hal.prefix_products(&wom);
@@ -143,7 +143,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             accum.as_arg(),
         ];
         let kernel = self.kernels.get("step_verify_accum").unwrap();
-        self.hal.dispatch(&kernel, &args, count as u64, None);
+        self.hal.dispatch(kernel, &args, count as u64, None);
 
         self.hal
             .dispatch_by_name("eltwise_zeroize_fp", &[accum.as_arg()], accum.size() as u64);

@@ -27,17 +27,19 @@ pub struct RawError {
 
 #[repr(C)]
 pub struct RawMemoryTransaction {
-    pub cycle: usize,
+    pub cycle: u32,
     pub addr: u32,
     pub data: u32,
 }
 
 #[repr(C)]
 pub struct RawPreflightCycle {
-    pub major: u32,
-    pub minor: u32,
-    pub mem_idx: usize,
-    pub extra_idx: usize,
+    pub major: u8,
+    pub minor: u8,
+    pub is_safe_exec: u8,
+    pub is_safe_verify_mem: u8,
+    pub mem_idx: u32,
+    pub extra_idx: u32,
 }
 
 #[repr(C)]
@@ -45,10 +47,11 @@ pub struct RawPreflightTrace {
     pub cycles: *const RawPreflightCycle,
     pub txns: *const RawMemoryTransaction,
     pub extras: *const u32,
+    pub num_cycles: u32,
+    pub num_txns: u32,
+    pub num_extras: u32,
     pub is_trace: u32,
 }
-
-unsafe impl Sync for RawPreflightTrace {}
 
 impl Default for RawError {
     fn default() -> Self {
@@ -63,60 +66,9 @@ extern "C" {
 
     pub fn risc0_circuit_string_free(str: *const RawString);
 
-    pub fn risc0_circuit_rv32im_machine_context_alloc(
-        trace: *const RawPreflightTrace,
-        steps: usize,
-    ) -> *const RawMachineContext;
-
-    pub fn risc0_circuit_rv32im_machine_context_free(ctx: *const RawMachineContext);
-
     pub fn risc0_circuit_rv32im_accum_context_alloc(steps: usize) -> *const RawAccumContext;
 
     pub fn risc0_circuit_rv32im_accum_context_free(ctx: *const RawAccumContext);
-
-    pub fn risc0_circuit_rv32im_step_exec(
-        err: *mut RawError,
-        ctx: *const RawMachineContext,
-        steps: usize,
-        cycle: usize,
-        args: *const *mut BabyBearElem,
-    );
-
-    pub fn risc0_circuit_rv32im_step_verify_mem(
-        err: *mut RawError,
-        ctx: *const RawMachineContext,
-        steps: usize,
-        cycle: usize,
-        args: *const *mut BabyBearElem,
-    );
-
-    pub fn risc0_circuit_rv32im_step_verify_bytes(
-        err: *mut RawError,
-        ctx: *const RawMachineContext,
-        steps: usize,
-        cycle: usize,
-        args: *const *mut BabyBearElem,
-    );
-
-    pub fn risc0_circuit_rv32im_sort_ram(err: *mut RawError, ctx: *const RawMachineContext);
-
-    pub fn risc0_circuit_rv32im_inject_backs_ram(
-        err: *mut RawError,
-        ctx: *const RawMachineContext,
-        steps: usize,
-        cycle: usize,
-        data: *mut BabyBearElem,
-    );
-
-    pub fn risc0_circuit_rv32im_sort_bytes(err: *mut RawError, ctx: *const RawMachineContext);
-
-    pub fn risc0_circuit_rv32im_inject_backs_bytes(
-        err: *mut RawError,
-        ctx: *const RawMachineContext,
-        steps: usize,
-        cycle: usize,
-        data: *mut BabyBearElem,
-    );
 
     pub fn risc0_circuit_rv32im_step_compute_accum(
         err: *mut RawError,
