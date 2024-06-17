@@ -273,6 +273,13 @@ impl Validator {
                 cmd.arg("--branch");
                 cmd.arg(self.repo().value());
             }
+            Repo::Path(_) => {
+                cmd.arg("--template");
+                cmd.arg("--templ-subdir");
+                cmd.arg("");
+                cmd.arg("--path");
+                cmd.arg(self.repo().value());
+            }
         }
 
         debug!(
