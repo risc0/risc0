@@ -117,6 +117,6 @@ proportional to the number of cycles and segments used.
 [prover]: /terminology#prover
 [receipt]: /terminology#receipt
 [seal]: /terminology#seal
-[tutorial-step-2]: tutorials/hello-world#step-2-host-share-private-data-as-input-with-the-guest
-[tutorial-step-3]: tutorials/hello-world#step-3-guest-read-input-and-commit-output
-[tutorial-step-4]: tutorials/hello-world#step-4-host-generate-a-receipt-and-read-its-journal-contents
+[tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
+[tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output
+[tutorial-step-4]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents
