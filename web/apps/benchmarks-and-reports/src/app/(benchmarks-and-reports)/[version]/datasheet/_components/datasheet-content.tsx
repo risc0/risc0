@@ -1,42 +1,10 @@
-import Link from "next/link";
 import { all } from "radash";
 import type { Version } from "~/types/version";
 import { fetchDatasheet } from "../_actions/fetch-datasheet";
+import { DATASHEET_FILENAMES_TO_TITLES } from "../_utils/constants";
 import { DatasheetTable } from "./datasheet-table";
 import { datasheetTableColumns } from "./datasheet-table-columns";
 import type { DatasheetTableSchema } from "./datasheet-table-schema";
-
-const FILENAMES_TO_TITLES = {
-  "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
-  "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
-  "macOS-cpu.json": "CPU only on Apple M2 Pro",
-  "Linux-cpu.json": (
-    <>
-      CPU only on{" "}
-      <Link
-        rel="noopener noreferrer"
-        target="_blank"
-        href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge"
-        className="link"
-      >
-        c6i.8xlarge
-      </Link>
-    </>
-  ),
-  "Linux-g6.xlarge.json": (
-    <>
-      CUDA on{" "}
-      <Link
-        rel="noopener noreferrer"
-        target="_blank"
-        href="https://instances.vantage.sh/aws/ec2/g6.xlarge"
-        className="link"
-      >
-        g6.xlarge
-      </Link>
-    </>
-  ),
-} as const;
 
 export async function DatasheetContent({ version }: { version: Version }) {
   const urls = Object.keys(FILENAMES_TO_TITLES);
