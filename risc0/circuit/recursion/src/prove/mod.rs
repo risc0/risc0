@@ -374,7 +374,7 @@ impl Prover {
         self.split_points = preflight.split_points;
         self.split_points.push(size);
         self.output = preflight.output;
-        machine.iop_reads = preflight.iop_reads;
+        (machine.iop_reads, machine.byte_reads) = (preflight.iop_reads, preflight.byte_reads);
         Ok(machine)
     }
 }
