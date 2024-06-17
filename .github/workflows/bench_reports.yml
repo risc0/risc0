@@ -1,8 +1,10 @@
 name: Benchmark Reports
 
 on:
-  schedule:
-    - cron: '0 7 * * *' # Nightly (ish) Pacific
+  #schedule:
+  #  - cron: '0 7 * * *' # Nightly (ish) Pacific
+  pull_request:
+    branches: [main, "release-*"]
 
   workflow_dispatch:
 
@@ -31,19 +33,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [prove]
-        device: [cpu]
-        include:
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_3090_ti
-          - os: Linux
-            feature: cuda
-            device: g6.xlarge
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
+        #os: [Linux, macOS]
+        #feature: [prove]
+        #device: [cpu]
+        os: [Linux]
+        feature: [cuda]
+        device: [g6.xlarge]
+        #include:
+        #  - os: Linux
+        #    feature: cuda
+        #    device: nvidia_rtx_3090_ti
+        #  - os: Linux
+        #    feature: cuda
+        #    device: g6.xlarge
+        #  - os: macOS
+        #    feature: metal
+        #    device: apple_m2_pro
 
     env:
       FEATURE: ${{ matrix.feature }}

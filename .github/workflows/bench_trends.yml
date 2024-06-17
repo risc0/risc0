@@ -1,12 +1,17 @@
 name: Benchmark Trends
 
 on:
-  push:
-    branches: [ main ]
-    # Only run benchmarks on changes to following paths:
+  #push:
+  #  branches: [ main ]
+  #  # Only run benchmarks on changes to following paths:
+  #  paths:
+  #    - .github/workflows/bench_trends.yml
+  #    - risc0/**
+  pull_request:
+    branches: [main, "release-*"]
     paths:
-      - .github/workflows/bench_trends.yml
-      - risc0/**
+        - .github/workflows/bench_trends.yml
+        - risc0/**
 
   workflow_dispatch:
 
@@ -35,19 +40,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [prove]
-        device: [cpu]
-        include:
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_3090_ti
-          - os: Linux
-            feature: cuda
-            device: g6.xlarge
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
+        #os: [Linux, macOS]
+        #feature: [prove]
+        #device: [cpu]
+        os: [Linux]
+        feature: [cuda]
+        device: [g6.xlarge]
+        #include:
+        #  - os: Linux
+        #    feature: cuda
+        #    device: nvidia_rtx_3090_ti
+        #  - os: Linux
+        #    feature: cuda
+        #    device: g6.xlarge
+        #  - os: macOS
+        #    feature: metal
+        #    device: apple_m2_pro
 
     env:
       FEATURE: ${{ matrix.feature }}
