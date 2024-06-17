@@ -29,4 +29,4 @@ Check out the [dev docs].
 [Education Database]: https://risczero.notion.site/5a335a1d29b44cb48c44b36ae66f366f?v=95cda72e39d3403fbfb59884afb0045d&pvs=4
 [More YouTube Content]: https://youtube.com/@risczero
 [open an issue]: https://github.com/risc0/risc0/issues/new/choose
-[Study Club]: ./studyclub
+[Study Club]: ./studyclub.md
