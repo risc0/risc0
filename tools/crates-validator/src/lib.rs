@@ -273,20 +273,6 @@ impl Validator {
                 cmd.arg("--branch");
                 cmd.arg(self.repo().value());
             }
-            Repo::Path(_) => {
-                let template_path = Path::new(self.repo().value())
-                    .join("templates")
-                    .join("rust-starter");
-                if !template_path.exists() {
-                    bail!("Failed to find {} on disk", template_path.to_string_lossy());
-                }
-                cmd.arg("--template");
-                cmd.arg(template_path);
-                cmd.arg("--templ-subdir");
-                cmd.arg("");
-                cmd.arg("--path");
-                cmd.arg(self.repo().value());
-            }
         }
 
         debug!(
