@@ -23,6 +23,19 @@ const FILENAMES_TO_TITLES = {
       </Link>
     </>
   ),
+  "Linux-g6.xlarge.json": (
+    <>
+      CUDA on{" "}
+      <Link
+        rel="noopener noreferrer"
+        target="_blank"
+        href="https://instances.vantage.sh/aws/ec2/g6.xlarge"
+        className="link"
+      >
+        g6.xlarge
+      </Link>
+    </>
+  ),
 } as const;
 
 export async function DatasheetContent({ version }: { version: Version }) {
