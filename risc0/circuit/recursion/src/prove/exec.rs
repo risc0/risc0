@@ -41,21 +41,22 @@ pub struct MachineContext {
     // Plonk accumulations for compute_accum and verify_accum phases
     plonk_accum: plonk::PlonkAccum<BabyBear>,
 
-    iop_input: VecDeque<u32>,
+    input: VecDeque<u32>,
     cur_iop_body: VecDeque<Vec<BabyBearElem>>,
-
     pub iop_reads: BTreeMap<usize, Vec<BabyBearExtElem>>,
+    pub byte_reads: BTreeMap<usize, Vec<u32>>,
 }
 
 impl MachineContext {
-    pub fn new(iop_input: VecDeque<u32>) -> Self {
+    pub fn new(input: VecDeque<u32>) -> Self {
         MachineContext {
             wom: Vec::new(),
-            iop_input,
+            input,
             cur_iop_body: VecDeque::new(),
             plonk_accum: plonk::PlonkAccum::new(),
             wom_plonk: plonk::WomPlonk::new(),
             iop_reads: BTreeMap::new(),
+            byte_reads: BTreeMap::new(),
         }
     }
 
@@ -151,6 +152,7 @@ impl crate::Externs for MachineContext {
         if *mem_contents != BabyBearExtElem::ZERO && *mem_contents != val {
             panic!("Wom {addr} overwritten with {val:?} from {mem_contents:?}");
         }
+
         self.wom[addr] = val;
     }
 
@@ -166,7 +168,7 @@ impl crate::Externs for MachineContext {
 
         assert!(self.cur_iop_body.is_empty());
         if k != 2 {
-            let arr: Vec<u32> = self.iop_input.drain(..k * count).collect();
+            let arr: Vec<u32> = self.input.drain(..k * count).collect();
             for i in 0..count {
                 let poly: Vec<BabyBearElem> = (0..k)
                     .map(|j| {
@@ -181,7 +183,7 @@ impl crate::Externs for MachineContext {
             }
         } else {
             self.cur_iop_body
-                .extend(self.iop_input.drain(..count).map(|elem| {
+                .extend(self.input.drain(..count).map(|elem| {
                     Vec::from([
                         BabyBearElem::from(elem & 0xffff),
                         BabyBearElem::from(elem >> 16),
@@ -199,6 +201,10 @@ impl crate::Externs for MachineContext {
             }
         }
         BabyBearExtElem::from_subelems(front)
+    }
+
+    fn read_input_word(&mut self) -> u32 {
+        self.input.pop_front().unwrap()
     }
 }
 
@@ -312,6 +318,7 @@ impl<'a> RecursionExecutor<'a> {
                             self.executor.steps,
                             self.executor.handler.wom.as_slice(),
                             &self.executor.handler.iop_reads,
+                            &self.executor.handler.byte_reads,
                         )
                     },
                     |handler, (start, end)| handler.run_chunk(start, end),
@@ -340,6 +347,7 @@ struct ParallelHandler<'a> {
     wom: &'a [BabyBearExtElem],
     plonk_queue: Vec<[BabyBearElem; 5]>,
     iop_reads: &'a BTreeMap<usize, Vec<BabyBearExtElem>>,
+    byte_reads: &'a BTreeMap<usize, Vec<u32>>,
     cur_iop_body: Option<&'a [BabyBearExtElem]>,
 }
 
@@ -350,6 +358,7 @@ impl<'a> ParallelHandler<'a> {
         tot_cycles: usize,
         wom: &'a [BabyBearExtElem],
         iop_reads: &'a BTreeMap<usize, Vec<BabyBearExtElem>>,
+        byte_reads: &'a BTreeMap<usize, Vec<u32>>,
     ) -> Self {
         ParallelHandler {
             program,
@@ -357,6 +366,7 @@ impl<'a> ParallelHandler<'a> {
             args,
             wom,
             iop_reads,
+            byte_reads,
             plonk_queue: Vec::new(),
             cur_iop_body: None,
         }
@@ -466,12 +476,14 @@ impl<'a> CircuitStepHandler<BabyBearElem> for ParallelHandler<'a> {
                 Ok(())
             }
             "womWrite" => {
-                // let addr = u32::from(args[0]) as usize;
-                // let val = BabyBearExtElem::from_subelems(args[1..5].into_iter().cloned());
-                // let goal = self.wom[addr];
-                // tracing::debug!("Cycle = {}, addr = {}, attempting to write = {:?}, should write
-                // = {:?}", cycle, addr, val, goal);
-                // TODO, but harmless
+                if cfg!(debug_assertions) {
+                    let addr = u32::from(args[0]) as usize;
+                    let val = BabyBearExtElem::from_subelems(args[1..5].iter().cloned());
+                    let goal = self.wom[addr];
+                    if val != goal {
+                        tracing::error!("WOM[{addr}] ERROR at cycle {cycle}, circuit writes {:?}, previously calculated = {:?}",  val, goal);
+                    }
+                }
                 Ok(())
             }
             "plonkWrite" => {
@@ -493,6 +505,17 @@ impl<'a> CircuitStepHandler<BabyBearElem> for ParallelHandler<'a> {
                 let cur_body = self.cur_iop_body.unwrap();
                 outs.clone_from_slice(cur_body[0].subelems());
                 self.cur_iop_body = Some(&cur_body[1..]);
+                Ok(())
+            }
+            "readCoefficients" => {
+                let coeffs = self.byte_reads.get(&cycle).unwrap().as_slice();
+                assert_eq!(outs.len(), coeffs.len() * 4);
+                for (out, coeff) in outs.chunks_mut(4).zip(coeffs.iter()) {
+                    let bytes = coeff.to_le_bytes();
+                    for j in 0..4 {
+                        out[j] = BabyBearElem::from(bytes[j] as u32);
+                    }
+                }
                 Ok(())
             }
             _ => panic!("Unimplemented extern {name}"),
