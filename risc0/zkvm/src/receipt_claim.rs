@@ -198,11 +198,11 @@ impl std::error::Error for DecodeError {}
 /// A type representing an unknown claim type.
 ///
 /// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
-/// only the digest of the claim is needed, and the full claim value is cannot be determined by the
+/// only the digest of the claim is needed, and the full claim value cannot be determined by the
 /// compiler. This allows for a collection of receipts to be created even when the underlying
 /// claims are of heterogeneous types (e.g. Vec<SuccinctReceipt<Unknown>>).
 ///
-/// Note that this in an uninhabited type, simmilar to the [never type].
+/// Note that this is an uninhabited type, similar to the [never type].
 ///
 /// [never type]: https://doc.rust-lang.org/std/primitive.never.html
 #[derive(Clone, Debug, Serialize, Deserialize)]

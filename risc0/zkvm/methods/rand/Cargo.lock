@@ -219,9 +219,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck"
-version = "1.14.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "374d28ec25809ee0e23827c2ab573d729e293f281dfe393500e7ad618baa61c6"
+checksum = "78834c15cb5d5efe3452d58b1e8ba890dd62d21907f867f383358198e56ebca5"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -472,7 +472,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -484,7 +484,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -496,7 +496,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "risc0-binfmt",
@@ -509,7 +509,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -517,7 +517,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -534,7 +534,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -554,7 +554,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -585,7 +585,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",

@@ -71,7 +71,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [Discord]: https://discord.gg/risczero
 [examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
 [execute]: /terminology#execute
-[execution environment]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnv.html
+[execution environment]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.ExecutorEnv.html
 [executor]: /terminology#executor
 [guest]: /terminology#guest
 [`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
@@ -88,9 +88,9 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [receipt]: /terminology#receipt
 [Receipts]: receipts.md
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
-[these docs]: https://github.com/risc0/website
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
 [verifies]: /terminology#verify
-[verifying receipts]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/struct.Receipt.html#method.verify
+[verifying receipts]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#method.verify
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md
 [zkVM Application]: ../

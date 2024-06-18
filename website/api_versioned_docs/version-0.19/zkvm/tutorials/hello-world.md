@@ -96,7 +96,7 @@ Or, if you believe you've found a bug or other problem in our code, please open 
 
 If you're ready to start building more complex projects, we recommend taking a look at the other examples in our [examples directory] for more project ideas that use zero-knowledge proofs.
 
-[Installation]: ../install
+[Installation]: ../install.md
 [cargo risczero]: https://docs.rs/cargo-risczero
 [examples directory]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [host]: /terminology#host-program

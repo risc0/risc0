@@ -29,7 +29,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm::{
     recursion::{MerkleGroup, Program},
-    Loader,
+    Loader, RECURSION_PO2,
 };
 
 #[derive(Parser)]
@@ -186,7 +186,7 @@ impl Bootstrap {
 
         zkrs.into_iter()
             .map(|(name, encoded_program)| {
-                let program = Program::from_encoded(&encoded_program);
+                let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
 
                 tracing::info!("computing control ID for {name} with {hashfn}");
                 let control_id = program.compute_control_id(hash_suite.clone());
@@ -199,7 +199,7 @@ impl Bootstrap {
 
     pub fn generate_identity_bn254_control_id() -> Digest {
         let encoded_program = get_zkr("identity.zkr").unwrap();
-        let program = Program::from_encoded(&encoded_program);
+        let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
         program.compute_control_id(Poseidon254HashSuite::new_suite())
     }
 }

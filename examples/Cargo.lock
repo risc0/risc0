@@ -609,7 +609,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.8.0-rc.3"
+version = "0.8.0"
 dependencies = [
  "reqwest 0.12.4",
  "risc0-groth16",
@@ -3865,7 +3865,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -3877,7 +3877,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3893,7 +3893,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "cc",
  "directories",
@@ -3907,13 +3907,15 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "cfg-if",
  "cust",
  "downloader",
  "hex",
+ "lazy-regex",
  "metal",
  "nvtx",
  "rand",
@@ -3922,6 +3924,7 @@ dependencies = [
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
+ "serde",
  "sha2",
  "tracing",
  "zip",
@@ -3929,7 +3932,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3940,7 +3943,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3967,7 +3970,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3978,7 +3981,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3986,7 +3989,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -4018,7 +4021,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "cc",
  "cust",
@@ -4028,7 +4031,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -4057,7 +4060,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -4093,7 +4096,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -4102,7 +4105,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "1.0.0-rc.7"
+version = "1.1.0-alpha.1"
 
 [[package]]
 name = "rkyv"
@@ -6158,6 +6161,7 @@ dependencies = [
  "primitive-types",
  "revm",
  "serde",
+ "serde_json",
  "tokio",
 ]
 
