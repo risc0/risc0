@@ -609,7 +609,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.8.0"
+version = "0.9.0-alpha.1"
 dependencies = [
  "maybe-async",
  "reqwest 0.12.4",
