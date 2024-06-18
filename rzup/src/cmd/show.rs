@@ -75,7 +75,7 @@ pub fn show() -> Result<()> {
     pretty_println_message(&mut stdout, false, None, &extension_version)?;
 
     pretty_print_header(&mut stdout, "\ninstalled toolchains")?;
-    show_installed_toolchains(false)?;
+    print_installed_toolchains(false)?;
 
     pretty_print_header(&mut stdout, "\nactive toolchain")?;
 
@@ -87,7 +87,7 @@ pub fn show() -> Result<()> {
     Ok(())
 }
 
-pub fn show_installed_toolchains(verbose: bool) -> Result<()> {
+pub fn print_installed_toolchains(verbose: bool) -> Result<()> {
     let toolchains_dir = rzup_home()?.join("toolchains");
 
     if !toolchains_dir.exists() {

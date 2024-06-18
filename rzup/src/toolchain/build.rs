@@ -20,11 +20,14 @@ use std::{
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 
-use crate::toolchain::{
-    dist::ToolchainRepo,
-    rust::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME},
-};
 use crate::utils::{ensure_binary, CommandExt};
+use crate::{
+    toolchain::{
+        repo::ToolchainRepo,
+        rust::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME},
+    },
+    utils::Repo,
+};
 
 const CONFIG_TOML: &str = include_str!("config.toml");
 

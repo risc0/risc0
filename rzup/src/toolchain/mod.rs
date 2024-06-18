@@ -14,6 +14,6 @@
 
 pub mod build;
 pub mod cpp;
-pub mod dist;
 pub mod install;
+pub mod repo;
 pub mod rust;

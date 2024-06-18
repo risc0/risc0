@@ -22,9 +22,9 @@ use rzup::{
         toolchain::{handle_toolchain, ToolchainSubcmd},
         update::handle_update,
     },
-    extension::install::InstallCargoRisczero,
+    extension::install::InstallExtension,
     help,
-    toolchain::{dist::ToolchainRepo, install::InstallToolchain},
+    toolchain::{install::InstallToolchain, repo::ToolchainRepo},
     utils,
 };
 
@@ -38,7 +38,8 @@ fn main() {
 
     match subcmd {
         RzupSubcmd::Install { opts } => {
-            InstallCargoRisczero {
+            InstallExtension {
+                repo: rzup::extension::repo::ExtensionRepo::CargoRisczero,
                 version: opts.version,
             }
             .run()

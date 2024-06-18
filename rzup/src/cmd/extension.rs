@@ -14,7 +14,10 @@
 
 use clap::Subcommand;
 
-use crate::{extension::install::InstallCargoRisczero, help};
+use crate::{
+    extension::{install::InstallExtension, repo::ExtensionRepo},
+    help,
+};
 
 #[derive(Debug, Subcommand, Clone)]
 pub enum ExtensionSubcmd {
@@ -31,13 +34,15 @@ pub enum ExtensionSubcmd {
 pub fn handle_extension(subcmd: ExtensionSubcmd) {
     match subcmd {
         ExtensionSubcmd::Use { version } => {
-            InstallCargoRisczero {
+            InstallExtension {
                 version: Some(version),
+                repo: ExtensionRepo::CargoRisczero,
             }
             .run()
             .expect("Error during cargo-risczero installation");
         }
-        ExtensionSubcmd::Update => InstallCargoRisczero {
+        ExtensionSubcmd::Update => InstallExtension {
+            repo: ExtensionRepo::CargoRisczero,
             version: Some("latest".to_string()),
         }
         .run()

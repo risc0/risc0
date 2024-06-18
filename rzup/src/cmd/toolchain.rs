@@ -14,8 +14,9 @@
 
 use clap::Subcommand;
 
-use super::show::show_installed_toolchains;
-use crate::toolchain::{build::BuildToolchain, dist::ToolchainRepo, install::InstallToolchain};
+use crate::toolchain::{build::BuildToolchain, install::InstallToolchain, repo::ToolchainRepo};
+
+use super::show::print_installed_toolchains;
 
 #[derive(Debug, Subcommand)]
 pub enum ToolchainSubcmd {
@@ -77,7 +78,7 @@ impl ToString for ToolchainCheckSubcmd {
 pub fn handle_toolchain(subcmd: ToolchainSubcmd) {
     match subcmd {
         ToolchainSubcmd::List { verbose } => {
-            if let Err(e) = show_installed_toolchains(verbose) {
+            if let Err(e) = print_installed_toolchains(verbose) {
                 eprintln!("Error showing toolchains: {}", e);
                 std::process::exit(1);
             }

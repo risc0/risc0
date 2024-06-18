@@ -16,6 +16,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use cfg_if::cfg_if;
 use fs2::FileExt;
 use regex::Regex;
+use reqwest::header::HeaderMap;
 use reqwest::Client;
 use serde::Deserialize;
 use std::fs::{File, OpenOptions};
@@ -25,9 +26,8 @@ use std::process::{Command, ExitStatus, Output, Stdio};
 use std::{fmt, fs};
 use termcolor::{Color, ColorSpec, StandardStream, WriteColor};
 
-use crate::extension::dist::fetch_extension_info;
-use crate::toolchain::dist::ToolchainRepo;
-use crate::toolchain::install::Installable;
+use crate::extension::repo::ExtensionRepo;
+use crate::toolchain::repo::ToolchainRepo;
 use crate::toolchain::rust::RUSTUP_TOOLCHAIN_NAME;
 
 /// Get the host target triple.
@@ -69,13 +69,14 @@ pub struct GithubReleaseData {
     pub published_at: String,
 }
 
+#[derive(Debug)]
 pub struct ParseableToolchainDir {
     pub name: String,
-    pub path: PathBuf,
+    pub path: std::path::PathBuf,
     pub tag_name: String,
     pub language: String,
     pub target: String,
-    pub repo: ToolchainRepo,
+    pub repo: RepoType,
 }
 
 #[derive(Debug)]
@@ -86,13 +87,25 @@ pub struct UpdateInfo {
     pub latest_version: String,
     pub latest_published_at: String,
     pub up_to_date: bool,
-    pub installable: Installable,
+    pub repo: RepoType,
 }
 /// Release asset returned by Github API.
 #[derive(Deserialize)]
 pub struct GithubAsset {
     pub browser_download_url: String,
     pub name: String,
+}
+
+#[derive(Debug)]
+pub enum RepoType {
+    Toolchain(ToolchainRepo),
+    Extension(ExtensionRepo),
+}
+
+pub trait Repo {
+    fn url(&self) -> &str;
+    fn asset_name(&self, target: &str) -> String;
+    fn fetch_info(&self, version: Option<&str>) -> Result<GithubReleaseData>;
 }
 
 pub fn version() -> &'static str {
@@ -318,25 +331,27 @@ pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
         .context("Failed to compile regex")?;
 
     if let Some(captures) = re.captures(dir_name) {
+        let language = &captures["language"];
+        let repo = match language {
+            "rust" => RepoType::Toolchain(ToolchainRepo::Rust),
+            "cpp" => RepoType::Toolchain(ToolchainRepo::Cpp),
+            "cargo-risczero" => RepoType::Extension(ExtensionRepo::CargoRisczero),
+            _ => return Err(anyhow!("Unknown language: {}", language)),
+        };
+
         Ok(ParseableToolchainDir {
-            name: path
-                .to_string_lossy()
-                .split('/')
-                .last()
-                .unwrap()
-                .to_string(),
+            name: dir_name.to_string(),
             path: path.to_path_buf(),
             tag_name: captures["tag_name"].to_string(),
-            language: captures["language"].to_string(),
+            language: language.to_string(),
             target: captures["target"].to_string(),
-            repo: ToolchainRepo::from_language(&captures["language"]),
+            repo,
         })
     } else {
         Err(anyhow!("Invalid directory name format"))
     }
 }
 
-// pretty print a message with specified color and style
 pub fn pretty_print_message(
     stdout: &mut StandardStream,
     bold: bool,
@@ -351,7 +366,6 @@ pub fn pretty_print_message(
     Ok(())
 }
 
-// pretty print a message with specified color and style, followed by a newline
 pub fn pretty_println_message(
     stdout: &mut StandardStream,
     bold: bool,
@@ -363,7 +377,6 @@ pub fn pretty_println_message(
     Ok(())
 }
 
-// print a pretty header
 pub fn pretty_print_header(stdout: &mut StandardStream, header: &str) -> Result<()> {
     pretty_println_message(stdout, true, None, header)?;
     pretty_println_message(stdout, true, None, &"-".repeat(header.len()))?;
@@ -393,7 +406,7 @@ pub fn get_updatable_items() -> Result<Vec<UpdateInfo>> {
     let mut updates = Vec::new();
 
     // Check for cargo-risczero updates
-    let latest_extension_info = fetch_extension_info(None)?;
+    let latest_extension_info = ExtensionRepo::CargoRisczero.fetch_info(None)?;
     let latest_extension_version = latest_extension_info
         .tag_name
         .strip_prefix('v')
@@ -401,7 +414,7 @@ pub fn get_updatable_items() -> Result<Vec<UpdateInfo>> {
 
     let curr_extension_version = get_installed_extension_version()?;
     let tag = format!("v{}", curr_extension_version);
-    let curr_extension_info = fetch_extension_info(Some(&tag))?;
+    let curr_extension_info = ExtensionRepo::CargoRisczero.fetch_info(Some(&tag))?;
 
     updates.push(UpdateInfo {
         name: "cargo-risczero".to_string(),
@@ -410,18 +423,22 @@ pub fn get_updatable_items() -> Result<Vec<UpdateInfo>> {
         latest_version: latest_extension_version.to_string(),
         latest_published_at: latest_extension_info.published_at.clone(),
         up_to_date: curr_extension_version == latest_extension_version,
-        installable: Installable::Extension,
+        repo: RepoType::Extension(ExtensionRepo::CargoRisczero),
     });
 
     // Check for rust toolchain updates
     let curr_rust_toolchain = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
     let curr_rust_info = parse_toolchain_info(&curr_rust_toolchain)?;
 
-    let latest_rust_info =
-        ToolchainRepo::from_language(&curr_rust_info.language).fetch_info(None)?;
+    let latest_rust_info = match curr_rust_info.repo {
+        RepoType::Toolchain(ref repo) => repo.fetch_info(None)?,
+        _ => return Err(anyhow!("Invalid repo type for rust toolchain")),
+    };
 
-    let curr_rust_info_ext = ToolchainRepo::from_language(&curr_rust_info.language)
-        .fetch_info(Some(&curr_rust_info.tag_name))?;
+    let curr_rust_info_ext = match curr_rust_info.repo {
+        RepoType::Toolchain(ref repo) => repo.fetch_info(Some(&curr_rust_info.tag_name))?,
+        _ => return Err(anyhow!("Invalid repo type for rust toolchain")),
+    };
 
     updates.push(UpdateInfo {
         name: curr_rust_info.name.clone(),
@@ -430,7 +447,7 @@ pub fn get_updatable_items() -> Result<Vec<UpdateInfo>> {
         latest_version: latest_rust_info.tag_name.clone(),
         latest_published_at: latest_rust_info.published_at.clone(),
         up_to_date: curr_rust_info.tag_name == latest_rust_info.tag_name,
-        installable: Installable::Rust,
+        repo: RepoType::Toolchain(ToolchainRepo::Rust),
     });
 
     // TODO: Check for cpp updates
@@ -454,4 +471,24 @@ pub fn fetch_release_info(client: &Client, url: &str) -> Result<GithubReleaseDat
 
         Ok(response)
     })
+}
+
+pub fn get_http_client() -> Result<Client> {
+    let mut headers = HeaderMap::new();
+    // Use api token if specified via env var.
+    // Prevents 403 errors when IP is throttled by Github API.
+    let gh_token = std::env::var("GITHUB_TOKEN")
+        .ok()
+        .map(|x| x.trim().to_string())
+        .filter(|x| !x.is_empty());
+
+    if let Some(token) = gh_token {
+        headers.insert("authorization", format!("Bearer {token}").parse()?);
+    }
+    let client = Client::builder()
+        .default_headers(headers)
+        .user_agent("rzup")
+        .build()?;
+
+    Ok(client)
 }

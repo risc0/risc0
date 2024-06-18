@@ -12,55 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::utils::{fetch_release_info, get_http_client, GithubReleaseData, Repo};
 use anyhow::Result;
 use clap::{Parser, ValueEnum};
-use reqwest::Client;
-
-use crate::utils::{fetch_release_info, GithubReleaseData};
 
 #[derive(Default, Debug, Clone, Parser, ValueEnum)]
-pub enum ToolchainRepo {
+pub enum ExtensionRepo {
     #[default]
-    Rust,
-    Cpp,
+    CargoRisczero,
 }
 
-impl ToolchainRepo {
-    pub const fn url(&self) -> &str {
+impl Repo for ExtensionRepo {
+    fn url(&self) -> &str {
         match self {
-            Self::Rust => "https://github.com/risc0/rust.git",
-            Self::Cpp => "https://github.com/risc0/toolchain.git",
+            Self::CargoRisczero => "https://github.com/risc0/risc0.git",
         }
     }
 
-    pub fn asset_name(&self, target: &str) -> String {
+    fn asset_name(&self, target: &str) -> String {
         match self {
-            Self::Rust => format!("rust-toolchain-{target}.tar.gz"),
-            Self::Cpp => match target {
-                "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.xz".to_string(),
-                "x86_64-unknown-linux-gnu" => "riscv32im-linux-x86_64.tar.xz".to_string(),
-                _ => panic!("binaries for {target} are not available"),
+            Self::CargoRisczero => match target {
+                "aarch64-apple-darwin" => "cargo-risczero-aarch64-apple-darwin.tgz".to_string(),
+                "x86_64-unknown-linux-gnu" => {
+                    "cargo-risczero-x86_64-unknown-linux-gnu.tgz".to_string()
+                }
+                _ => panic!("Binaries for target `{}` are not available", target),
             },
         }
     }
 
-    pub const fn language(&self) -> &str {
-        match self {
-            Self::Rust => "rust",
-            Self::Cpp => "cpp",
-        }
-    }
-
-    pub fn from_language(language: &str) -> ToolchainRepo {
-        match language {
-            "rust" => ToolchainRepo::Rust,
-            "cpp" => ToolchainRepo::Cpp,
-            _ => panic!("Unknown language"),
-        }
-    }
-
-    pub fn fetch_info(&self, version: Option<&str>) -> Result<GithubReleaseData> {
-        let client = Client::builder().user_agent("rzup").build()?;
+    fn fetch_info(&self, version: Option<&str>) -> Result<GithubReleaseData> {
+        let client = get_http_client()?;
 
         let version_tag = match version {
             Some(version) if version == "latest" || version.starts_with("tags/") => {
@@ -80,8 +62,6 @@ impl ToolchainRepo {
             repo_name, version_tag
         );
 
-        let release = fetch_release_info(&client, &release_url)?;
-
-        Ok(release)
+        fetch_release_info(&client, &release_url)
     }
 }

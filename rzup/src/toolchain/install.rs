@@ -23,7 +23,6 @@ use anyhow::{anyhow, Context, Result};
 use clap::Args;
 use downloader::{Download, Downloader};
 use flate2::bufread::GzDecoder;
-use reqwest::{header::HeaderMap, Client};
 use tar::Archive;
 use tempfile::tempdir;
 use xz::bufread::XzDecoder;
@@ -34,17 +33,10 @@ use crate::{
         cpp::CppToolchain,
         rust::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME},
     },
-    utils::{flock, rzup_home, GithubReleaseData, HOST_TARGET_TRIPLE},
+    utils::{flock, get_http_client, rzup_home, Repo, HOST_TARGET_TRIPLE},
 };
 
-use super::dist::ToolchainRepo;
-
-#[derive(Debug)]
-pub enum Installable {
-    Extension,
-    Cpp,
-    Rust,
-}
+use super::repo::ToolchainRepo;
 
 #[derive(Debug, Default, Args)]
 pub struct InstallToolchain {
@@ -58,41 +50,13 @@ pub struct InstallToolchain {
 }
 
 impl InstallToolchain {
-    async fn get_download_url(
-        &self,
-        client: &Client,
-        target: &str,
-        repo: &ToolchainRepo,
-    ) -> Result<(String, String)> {
+    fn get_download_url(&self, target: &str, repo: &ToolchainRepo) -> Result<(String, String)> {
         let version = self.toolchain.clone().unwrap_or_else(|| match repo {
             ToolchainRepo::Rust => "latest".to_string(),
             ToolchainRepo::Cpp => "tags/2024.01.05".to_string(), // TODO: Use latest when supported
         });
 
-        let tag = if version == "latest" || version.starts_with("tags/") {
-            version
-        } else {
-            format!("tags/{}", version)
-        };
-
-        let repo_name = repo
-            .url()
-            .trim_start_matches("https://github.com/")
-            .trim_end_matches(".git");
-
-        let release_url = format!("https://api.github.com/repos/{repo_name}/releases/{tag}");
-
-        eprintln!("Getting release info: {release_url}...");
-
-        let release: GithubReleaseData = client
-            .get(&release_url)
-            .send()
-            .await?
-            .error_for_status()
-            .context("Could not download release info")?
-            .json()
-            .await
-            .context("Could not deserialize release info")?;
+        let release = self.repo.fetch_info(Some(&version))?;
 
         let asset_name = repo.asset_name(target);
 
@@ -116,12 +80,7 @@ impl InstallToolchain {
         toolchain_root_dir: &Path,
         repo: &ToolchainRepo,
     ) -> Result<PathBuf> {
-        let headers = HeaderMap::new();
-
-        let client = Client::builder()
-            .default_headers(headers)
-            .user_agent("rzup")
-            .build()?;
+        let client = get_http_client()?;
 
         let temp_dir = tempdir()?;
 
@@ -129,17 +88,15 @@ impl InstallToolchain {
             .download_folder(temp_dir.path())
             .build_with_client(client.clone())?;
 
-        let rt = tokio::runtime::Runtime::new()?;
+        let (tag_name, download_url) = self.get_download_url(target, repo)?;
 
-        let (tag_name, download_url) = rt.block_on(self.get_download_url(&client, target, repo))?;
+        let language = match repo {
+            ToolchainRepo::Rust => "rust",
+            ToolchainRepo::Cpp => "cpp",
+        };
 
-        let toolchain_dir = toolchain_root_dir.join(format!(
-            "{}-{}-{}-{}",
-            tag_name,
-            "risc0",
-            repo.language(),
-            target
-        ));
+        let toolchain_dir =
+            toolchain_root_dir.join(format!("{}-{}-{}-{}", tag_name, "risc0", language, target));
 
         if toolchain_dir.is_dir() {
             eprintln!(
@@ -148,12 +105,6 @@ impl InstallToolchain {
             );
             fs::remove_dir_all(&toolchain_dir)?;
         }
-
-        eprintln!(
-            "Downloading {} toolchain from '{}'...",
-            repo.language(),
-            &download_url
-        );
 
         let dl = Download::new(&download_url);
         let download_res = downloader.download(&[dl])?;

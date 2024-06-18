@@ -1,55 +1,38 @@
-use std::{fs, io::BufReader, os::unix::fs::PermissionsExt, path::Path};
+// Copyright 2024 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
+use crate::extension::repo::ExtensionRepo;
+use crate::utils::{flock, get_http_client, GithubReleaseData, Repo, HOST_TARGET_TRIPLE};
 use anyhow::{anyhow, Context, Result};
 use clap::Args;
 use downloader::{Download, Downloader};
 use flate2::bufread::GzDecoder;
-use reqwest::{header::HeaderMap, Client};
+use std::{fs, io::BufReader, os::unix::fs::PermissionsExt, path::Path};
 use tar::Archive;
 use tempfile::tempdir;
 
-use crate::utils::{flock, GithubReleaseData, HOST_TARGET_TRIPLE};
-
 #[derive(Debug, Default, Args)]
-pub struct InstallCargoRisczero {
+pub struct InstallExtension {
     pub version: Option<String>,
+    pub repo: ExtensionRepo,
 }
 
-impl InstallCargoRisczero {
-    pub const fn url(&self) -> &str {
-        "https://github.com/risc0/risc0"
-    }
+impl InstallExtension {
+    fn get_download_url(&self, target: &str) -> Result<(String, String)> {
+        let release: GithubReleaseData = self.repo.fetch_info(self.version.as_deref())?;
 
-    pub fn asset_name(&self, target: &str) -> String {
-        match target {
-            "aarch64-apple-darwin" => "cargo-risczero-aarch64-apple-darwin.tgz".to_string(),
-            "x86_64-unknown-linux-gnu" => "cargo-risczero-x86_64-unknown-linux-gnu.tgz".to_string(),
-            _ => panic!("binaries for {target} are not available"),
-        }
-    }
-
-    async fn get_download_url(&self, client: &Client, target: &str) -> Result<(String, String)> {
-        let tag = match &self.version {
-            Some(version) if version == "latest" || version.starts_with("tags/") => version.clone(),
-            Some(version) => format!("tags/{}", version),
-            None => "latest".to_string(),
-        };
-
-        let release_url = format!("https://api.github.com/repos/risc0/risc0/releases/{}", tag);
-
-        eprintln!("Getting release info: {release_url}...");
-
-        let release: GithubReleaseData = client
-            .get(&release_url)
-            .send()
-            .await?
-            .error_for_status()
-            .context("Could not download release info")?
-            .json()
-            .await
-            .context("Could not deserialize release info")?;
-
-        let asset_name = self.asset_name(target);
+        let asset_name = self.repo.asset_name(target);
 
         let asset = release
             .assets
@@ -65,28 +48,17 @@ impl InstallCargoRisczero {
         Ok((release.tag_name, asset.browser_download_url.clone()))
     }
 
-    fn download_cargo_risczero(&self, target: &str, install_dir: &Path) -> Result<()> {
-        let headers = HeaderMap::new();
-
-        let client = Client::builder()
-            .default_headers(headers)
-            .user_agent("rzup")
-            .build()?;
+    fn download_extension(&self, target: &str, install_dir: &Path) -> Result<()> {
+        let client = get_http_client()?;
 
         let temp_dir = tempdir()?;
-
         let mut downloader = Downloader::builder()
             .download_folder(temp_dir.path())
             .build_with_client(client.clone())?;
 
-        let rt = tokio::runtime::Runtime::new()?;
+        let (_tag_name, download_url) = self.get_download_url(target)?;
 
-        let (_tag_name, download_url) = rt.block_on(self.get_download_url(&client, target))?;
-
-        eprintln!(
-            "Downloading cargo-risczero binary from '{}'...",
-            &download_url
-        );
+        eprintln!("Downloading extension binary from '{}'...", &download_url);
 
         let dl = Download::new(&download_url);
         let download_res = downloader.download(&[dl])?;
@@ -102,7 +74,6 @@ impl InstallCargoRisczero {
             archive.unpack(install_dir)?;
         }
 
-        // Ensure permissions for cargo risczero
         #[cfg(target_family = "unix")]
         {
             let binary_path = install_dir.join("cargo-risczero");
@@ -126,9 +97,8 @@ impl InstallCargoRisczero {
         let lockfile_path = cargo_bin_dir.join("lock");
         let _lock = flock(&lockfile_path);
 
-        self.download_cargo_risczero(target, &cargo_bin_dir)?;
+        self.download_extension(target, &cargo_bin_dir)?;
 
-        // Delete lockfile after downloading and installing
         fs::remove_file(lockfile_path)?;
 
         eprintln!(
