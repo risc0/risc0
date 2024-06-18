@@ -13,7 +13,9 @@
 // limitations under the License.
 
 pub mod check;
+pub mod default;
 pub mod extension;
 pub mod install;
 pub mod show;
 pub mod toolchain;
+pub mod update;

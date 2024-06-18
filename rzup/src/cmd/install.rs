@@ -39,6 +39,13 @@ use crate::{
     utils::{flock, rzup_home, HOST_TARGET_TRIPLE},
 };
 
+#[derive(Debug)]
+pub enum Installable {
+    Extension,
+    Cpp,
+    Rust,
+}
+
 /// Release returned by Github API.
 #[derive(Deserialize)]
 pub struct GithubReleaseData {

@@ -23,6 +23,8 @@ use std::process::{Command, ExitStatus, Output, Stdio};
 use std::{fmt, fs};
 use termcolor::{Color, ColorSpec, StandardStream, WriteColor};
 
+use crate::toolchain::repo::ToolchainRepo;
+
 pub fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
@@ -234,12 +236,45 @@ pub fn get_rustc_version(alias: &str) -> Result<String> {
     Ok(rustc_version)
 }
 
+pub fn get_installed_toolchains() -> Result<Vec<ParseableToolchainDir>> {
+    let toolchains_dir = rzup_home()?.join("toolchains");
+
+    if !toolchains_dir.exists() {
+        return Err(anyhow!("No toolchains directory found."));
+    }
+
+    let entries = fs::read_dir(&toolchains_dir)?
+        .filter_map(|res| res.ok())
+        .filter(|entry| entry.path().is_dir())
+        .collect::<Vec<_>>();
+
+    if entries.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let mut toolchains = Vec::new();
+
+    for entry in entries {
+        match parse_toolchain_info(&entry.path()) {
+            Ok(toolchain) => toolchains.push(toolchain),
+            Err(e) => eprintln!(
+                "Failed to parse toolchain info for {}: {}",
+                entry.file_name().to_string_lossy().to_string(),
+                e
+            ),
+        }
+    }
+
+    Ok(toolchains)
+}
+
 pub struct ParseableToolchainDir {
     pub name: String,
-    pub path: String,
+    pub path: PathBuf,
     pub tag_name: String,
     pub language: String,
     pub target: String,
+    pub repo: ToolchainRepo,
 }
 
 pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
@@ -260,10 +295,11 @@ pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
                 .last()
                 .unwrap()
                 .to_string(),
-            path: path.to_string_lossy().to_string(),
+            path: path.to_path_buf(),
             tag_name: captures["tag_name"].to_string(),
             language: captures["language"].to_string(),
             target: captures["target"].to_string(),
+            repo: ToolchainRepo::from_language(&captures["language"]),
         })
     } else {
         Err(anyhow!("Invalid directory name format"))

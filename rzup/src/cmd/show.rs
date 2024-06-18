@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::toolchain::rust::RUSTUP_TOOLCHAIN_NAME;
 use crate::utils::{
     get_rustc_version, get_toolchain_cwd, parse_toolchain_info, pretty_print_header,
     pretty_print_message, pretty_println_message, CommandExt,
@@ -80,14 +81,14 @@ pub fn show() -> Result<()> {
 
     println!("{}", get_active_toolchain_name()?);
 
-    let active_rustc_version = get_rustc_version("risc0")?;
+    let active_rustc_version = get_rustc_version(RUSTUP_TOOLCHAIN_NAME)?;
     println!("{}", active_rustc_version);
 
     Ok(())
 }
 
 fn get_active_toolchain_name() -> Result<String> {
-    let active_toolchain_path = get_toolchain_cwd("risc0")?;
+    let active_toolchain_path = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
     let active_toolchain = parse_toolchain_info(&active_toolchain_path)?;
     Ok(active_toolchain.name)
 }

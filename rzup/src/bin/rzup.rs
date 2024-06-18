@@ -13,8 +13,11 @@
 // limitations under the License.
 
 use clap::{arg, Args, CommandFactory, Parser, Subcommand};
+use rzup::cmd::default::handle_default;
+use rzup::cmd::default::DefaultOpts;
 use rzup::cmd::extension::handle_extension;
 use rzup::cmd::extension::ExtensionSubcmd;
+use rzup::cmd::update::handle_update;
 use rzup::help;
 use rzup::utils;
 use rzup::{
@@ -50,17 +53,9 @@ fn main() {
             .expect("Error during Rust toolchain installation");
         }
         RzupSubcmd::Show { verbose, subcmd } => handle_show(verbose, subcmd),
-        RzupSubcmd::Update { .. } => {
-            InstallCargoRisczero {
-                version: Some("latest".to_string()),
-            }
-            .run()
-            .expect("Error during cargo-risczero update");
-        }
+        RzupSubcmd::Update { .. } => handle_update(),
         RzupSubcmd::Check => handle_check_all().expect("Error checking for updates"),
-        RzupSubcmd::Default { .. } => {
-            println!("Default not yet implented")
-        }
+        RzupSubcmd::Default { opts } => handle_default(opts),
         RzupSubcmd::Toolchain { subcmd } => handle_toolchain(subcmd),
         RzupSubcmd::Extension { subcmd } => handle_extension(subcmd),
         RzupSubcmd::Self_ { .. } => {
@@ -132,7 +127,10 @@ pub enum RzupSubcmd {
     /// Check for updates to RISC Zero toolchains and rzup
     Check,
     /// Set the default toolchain
-    Default,
+    Default {
+        #[command(flatten)]
+        opts: DefaultOpts,
+    },
     /// Manage and install RISC Zero toolchains
     Toolchain {
         #[command(subcommand)]
