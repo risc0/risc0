@@ -730,6 +730,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "c-guest-host"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "risc0-build",
+ "risc0-zkvm",
+ "serde",
+ "tracing-subscriber 0.3.18",
+]
+
+[[package]]
 name = "c-kzg"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6185,6 +6196,15 @@ name = "zkevm-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+]
+
+[[package]]
+name = "zkvm-platform"
+version = "0.1.0"
+dependencies = [
+ "risc0-binfmt",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
