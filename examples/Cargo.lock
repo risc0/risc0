@@ -611,6 +611,7 @@ dependencies = [
 name = "bonsai-sdk"
 version = "0.8.0"
 dependencies = [
+ "maybe-async",
  "reqwest 0.12.4",
  "risc0-groth16",
  "serde",
@@ -2799,6 +2800,17 @@ checksum = "7574c1cf36da4798ab73da5b215bbf444f50718207754cb522201d78d1cd0ff2"
 dependencies = [
  "autocfg",
  "rawpointer",
+]
+
+[[package]]
+name = "maybe-async"
+version = "0.2.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5cf92c10c7e361d6b99666ec1c6f9805b0bea2c3bd8c78dc6fe98ac5bd78db11"
+dependencies = [
+ "proc-macro2",
+ "quote 1.0.36",
+ "syn 2.0.63",
 ]
 
 [[package]]

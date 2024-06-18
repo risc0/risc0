@@ -17,6 +17,7 @@ risc0-groth16 = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 tokio = { version = "1", features = ["full", "sync"], optional = true }
+maybe-async = "0.2"
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -30,6 +31,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1.8", features = ["v4"] }
 
 [features]
-default = ["std"]
+default = ["std", "sync_client"]
 std = ["risc0-groth16/std"]
-async = ["dep:tokio"]
+sync_client = ["maybe-async/is_sync"]
+async_client = ["dep:tokio", "reqwest/stream"]

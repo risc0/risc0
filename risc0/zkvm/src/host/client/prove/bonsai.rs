@@ -15,7 +15,7 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
-use bonsai_sdk::alpha::Client;
+use bonsai_sdk::Client;
 
 use super::Prover;
 use crate::{
