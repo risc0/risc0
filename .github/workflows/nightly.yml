@@ -1,15 +1,13 @@
 name: Nightly Tasks
 
 on:
-  pull_request:
-    branches: [main]
-  #schedule:
-  #  - cron: '0 7 * * *' # Nightly (ish) Pacific
-  #workflow_dispatch:
-  #  inputs:
-  #    crate_count:
-  #      description: 'How many crates (sorted by downloads) to test'
-  #      default: 100
+  schedule:
+    - cron: '0 7 * * *' # Nightly (ish) Pacific
+  workflow_dispatch:
+    inputs:
+      crate_count:
+        description: 'How many crates (sorted by downloads) to test'
+        default: 100
 
 env:
   RISC0_BUILD_LOCKED: 1
@@ -26,8 +24,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - name: Set the variables
         env:
-          #DEFAULT_CRATE_COUNT: 1000
-          DEFAULT_CRATE_COUNT: 100
+          DEFAULT_CRATE_COUNT: 1000
         run: echo "TOP_N_CRATES=${{ github.event.inputs.crate_count || env.DEFAULT_CRATE_COUNT }}" >> $GITHUB_ENV
 
       - run: cargo install --force --path risc0/cargo-risczero
@@ -37,9 +34,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: cargo build --release
-        working-directory: tools/crates-validator/
-
-      - run: ls -lht target/release
         working-directory: tools/crates-validator/
 
       - name: Create working directory
@@ -62,45 +56,41 @@ jobs:
         shell: bash
         working-directory: tools/crates-validator/
 
-      - run: cat ${{ runner.temp }}/crate-validation/crate-results.log
-        if: always()
-
       - name: Delete input profile
         run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
 
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
+        if: always()
 
+      - name: Upload artifact results
+        uses: actions/upload-artifact@v4
+        if: always() # upload all artifacts even on failures
+        with:
+          name: crates-test-results
+          path: ${{ runner.temp }}/crate-validation/
+          retention-days: 2
 
+      - name: Clone ghpages repo
+        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
 
-      # - name: Upload artifact results
-      #   uses: actions/upload-artifact@v4
-      #   if: always() # upload all artifacts even on failures
-      #   with:
-      #     name: crates-test-results
-      #     path: ${{ runner.temp }}/crate-validation/
-      #     retention-days: 2
+      - name: Export environment variable
+        run: |
+          echo "TEMP_DIR=${{ runner.temp }}" >> $GITHUB_ENV
+          echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
 
-      # - name: Clone ghpages repo
-      #   run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
+      - name: Commit results to risc0/ghpages
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: bash ./parse_profile_compilation_results.sh
+        working-directory: ./.github/scripts
 
-      # - name: Export environment variable
-      #   run: |
-      #     echo "TEMP_DIR=${{ runner.temp }}" >> $GITHUB_ENV
-      #     echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
-
-      # - name: Commit results to risc0/ghpages
-      #   env:
-      #     GITHUB_SHA: ${{ github.sha }}
-      #   run: bash ./parse_profile_compilation_results.sh
-      #   working-directory: ./.github/scripts
-
-#  alert_devops_if_failed:
-#    runs-on: ubuntu-latest
-#    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-#    needs: [crates_validate]
-#    steps:
-#      - name: DevOps Alert
-#        env:
-#          NEEDS: ${{ toJSON(needs) }}
-#        run: |
-#          curl -X POST -H 'Content-type: application/json' --data '{"text":"Nightly Tasks Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
+  alert_devops_if_failed:
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
+    needs: [crates_validate]
+    steps:
+      - name: DevOps Alert
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Nightly Tasks Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
