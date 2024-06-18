@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 # this is needed to gain access via OIDC to the S3 bucket for caching
-permissions: write-full
+permissions: write-all
 #  id-token: write
 #  contents: read
 
