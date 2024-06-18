@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub mod cmd;
+pub mod extension;
 pub mod help;
 pub mod toolchain;
 pub mod utils;

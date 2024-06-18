@@ -1,8 +1,10 @@
-use crate::toolchain::repo::ToolchainRepo;
-
-use super::{
-    check::get_updatable_items,
-    install::{InstallCargoRisczero, InstallToolchain, Installable},
+use crate::{
+    extension::install::InstallCargoRisczero,
+    toolchain::{
+        dist::ToolchainRepo,
+        install::{InstallToolchain, Installable},
+    },
+    utils::get_updatable_items,
 };
 
 pub fn handle_update() {

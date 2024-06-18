@@ -13,21 +13,19 @@
 // limitations under the License.
 
 use clap::{arg, Args, CommandFactory, Parser, Subcommand};
-use rzup::cmd::default::handle_default;
-use rzup::cmd::default::DefaultOpts;
-use rzup::cmd::extension::handle_extension;
-use rzup::cmd::extension::ExtensionSubcmd;
-use rzup::cmd::update::handle_update;
-use rzup::help;
-use rzup::utils;
 use rzup::{
     cmd::{
         check::handle_check_all,
-        install::{InstallCargoRisczero, InstallToolchain},
+        default::{handle_default, DefaultOpts},
+        extension::{handle_extension, ExtensionSubcmd},
         show::{handle_show, ShowSubcmd},
         toolchain::{handle_toolchain, ToolchainSubcmd},
+        update::handle_update,
     },
-    toolchain::repo::ToolchainRepo,
+    extension::install::InstallCargoRisczero,
+    help,
+    toolchain::{dist::ToolchainRepo, install::InstallToolchain},
+    utils,
 };
 
 fn main() {
@@ -124,9 +122,9 @@ pub enum RzupSubcmd {
         #[arg(long)]
         force: bool,
     },
-    /// Check for updates to RISC Zero toolchains and rzup
+    /// Check for updates to RISC Zero toolchains and cargo-risczero
     Check,
-    /// Set the default toolchain
+    /// Set the default RISC Zero toolchain
     Default {
         #[command(flatten)]
         opts: DefaultOpts,

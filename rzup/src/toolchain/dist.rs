@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
 use clap::{Parser, ValueEnum};
+use reqwest::Client;
+
+use crate::utils::{fetch_release_info, GithubReleaseData};
 
 #[derive(Default, Debug, Clone, Parser, ValueEnum)]
 pub enum ToolchainRepo {
@@ -53,5 +57,31 @@ impl ToolchainRepo {
             "cpp" => ToolchainRepo::Cpp,
             _ => panic!("Unknown language"),
         }
+    }
+
+    pub fn fetch_info(&self, version: Option<&str>) -> Result<GithubReleaseData> {
+        let client = Client::builder().user_agent("rzup").build()?;
+
+        let version_tag = match version {
+            Some(version) if version == "latest" || version.starts_with("tags/") => {
+                version.to_string()
+            }
+            Some(version) => format!("tags/{}", version),
+            None => "latest".to_string(),
+        };
+
+        let repo_name = self
+            .url()
+            .trim_start_matches("https://github.com/")
+            .trim_end_matches(".git");
+
+        let release_url = format!(
+            "https://api.github.com/repos/{}/releases/{}",
+            repo_name, version_tag
+        );
+
+        let release = fetch_release_info(&client, &release_url)?;
+
+        Ok(release)
     }
 }

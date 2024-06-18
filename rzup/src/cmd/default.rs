@@ -2,7 +2,7 @@ use clap::Args;
 
 use crate::{
     toolchain::{
-        repo::ToolchainRepo,
+        dist::ToolchainRepo,
         rust::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME},
     },
     utils::get_installed_toolchains,

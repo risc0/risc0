@@ -14,13 +14,13 @@
 
 use crate::toolchain::rust::RUSTUP_TOOLCHAIN_NAME;
 use crate::utils::{
-    get_rustc_version, get_toolchain_cwd, parse_toolchain_info, pretty_print_header,
-    pretty_print_message, pretty_println_message, CommandExt,
+    get_active_toolchain_name, get_installed_extension_version, get_rustc_version,
+    pretty_print_header, pretty_print_message, pretty_println_message,
 };
 use crate::{help, utils::rzup_home};
 use anyhow::Result;
 use clap::Subcommand;
-use std::{fs, process::Command};
+use std::fs;
 use termcolor::{ColorChoice, StandardStream};
 
 #[derive(Debug, Subcommand)]
@@ -85,24 +85,6 @@ pub fn show() -> Result<()> {
     println!("{}", active_rustc_version);
 
     Ok(())
-}
-
-fn get_active_toolchain_name() -> Result<String> {
-    let active_toolchain_path = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
-    let active_toolchain = parse_toolchain_info(&active_toolchain_path)?;
-    Ok(active_toolchain.name)
-}
-
-pub fn get_installed_extension_version() -> Result<String> {
-    let out = Command::new("cargo")
-        .args(["risczero", "--version"])
-        .capture_stdout()
-        .expect("Error getting cargo-risczero version")
-        .split_whitespace()
-        .last()
-        .expect("Error parsing cargo-risczero version")
-        .to_string();
-    Ok(out)
 }
 
 pub fn show_installed_toolchains(verbose: bool) -> Result<()> {

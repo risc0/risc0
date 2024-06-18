@@ -21,7 +21,7 @@ use anyhow::{bail, Context, Result};
 use clap::Parser;
 
 use crate::toolchain::{
-    repo::ToolchainRepo,
+    dist::ToolchainRepo,
     rust::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME},
 };
 use crate::utils::{ensure_binary, CommandExt};
@@ -37,9 +37,8 @@ pub struct BuildToolchain {
 }
 
 /// Output info of a successful rust toolchain build.
-pub struct RustBuildOutput {
-    pub target: String,
-    pub toolchain_dir: PathBuf,
+struct RustBuildOutput {
+    toolchain_dir: PathBuf,
 }
 
 // TODO: Build C toolchain path
@@ -153,11 +152,7 @@ impl BuildToolchain {
             let entry = result?;
             let toolchain_dir = entry.path().join("stage2");
             if toolchain_dir.is_dir() {
-                let target = entry.file_name().to_string_lossy().to_string();
-                return Ok(RustBuildOutput {
-                    target,
-                    toolchain_dir,
-                });
+                return Ok(RustBuildOutput { toolchain_dir });
             }
         }
 

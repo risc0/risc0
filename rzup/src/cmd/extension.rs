@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
 use clap::Subcommand;
-use reqwest::Client;
 
-use crate::{cmd::check::fetch_release_info, help};
-
-use super::{install::GithubReleaseData, install::InstallCargoRisczero};
+use crate::{extension::install::InstallCargoRisczero, help};
 
 #[derive(Debug, Subcommand, Clone)]
 pub enum ExtensionSubcmd {
@@ -47,18 +43,4 @@ pub fn handle_extension(subcmd: ExtensionSubcmd) {
         .run()
         .expect("Error during cargo-risczero update"),
     }
-}
-
-pub fn get_extension_info(version: Option<&str>) -> Result<GithubReleaseData> {
-    let client = Client::builder().user_agent("rzup").build()?;
-
-    let base_url = "https://api.github.com/repos/risc0/risc0/releases";
-    let url = match version {
-        Some(tag) => format!("{}/tags/{}", base_url, tag),
-        None => format!("{}/latest", base_url),
-    };
-
-    let release_data = fetch_release_info(&client, &url)?;
-
-    Ok(release_data)
 }

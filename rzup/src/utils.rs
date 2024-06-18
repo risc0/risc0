@@ -16,6 +16,8 @@ use anyhow::{anyhow, bail, Context, Result};
 use cfg_if::cfg_if;
 use fs2::FileExt;
 use regex::Regex;
+use reqwest::Client;
+use serde::Deserialize;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -23,7 +25,75 @@ use std::process::{Command, ExitStatus, Output, Stdio};
 use std::{fmt, fs};
 use termcolor::{Color, ColorSpec, StandardStream, WriteColor};
 
-use crate::toolchain::repo::ToolchainRepo;
+use crate::extension::dist::fetch_extension_info;
+use crate::toolchain::dist::ToolchainRepo;
+use crate::toolchain::install::Installable;
+use crate::toolchain::rust::RUSTUP_TOOLCHAIN_NAME;
+
+/// Get the host target triple.
+///
+/// Only checks for targets that have pre-built toolchains.
+pub const HOST_TARGET_TRIPLE: Option<&str> = {
+    cfg_if! {
+        if #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+            Some("x86_64-unknown-linux-gnu")
+        } else if #[cfg(all(target_arch = "x86_64", target_os = "macos"))] {
+            Some("x86_64-apple-darwin")
+        } else if #[cfg(all(target_arch = "aarch64", target_os = "macos"))] {
+            Some("aarch64-apple-darwin")
+        } else if #[cfg(all(target_arch = "x86_64", target_os = "windows"))] {
+            Some("x86_64-pc-windows-msvc")
+        } else {
+            None
+        }
+    }
+};
+
+pub struct FileLock(File);
+
+#[derive(Debug)]
+struct ProcessError {
+    status: ExitStatus,
+    #[allow(dead_code)]
+    hidden: bool,
+    stdout: Vec<u8>,
+    stderr: Vec<u8>,
+    cmd_desc: String,
+}
+
+/// Release returned by Github API.
+#[derive(Deserialize)]
+pub struct GithubReleaseData {
+    pub assets: Vec<GithubAsset>,
+    pub tag_name: String,
+    pub published_at: String,
+}
+
+pub struct ParseableToolchainDir {
+    pub name: String,
+    pub path: PathBuf,
+    pub tag_name: String,
+    pub language: String,
+    pub target: String,
+    pub repo: ToolchainRepo,
+}
+
+#[derive(Debug)]
+pub struct UpdateInfo {
+    pub name: String,
+    pub current_version: String,
+    pub current_published_at: String,
+    pub latest_version: String,
+    pub latest_published_at: String,
+    pub up_to_date: bool,
+    pub installable: Installable,
+}
+/// Release asset returned by Github API.
+#[derive(Deserialize)]
+pub struct GithubAsset {
+    pub browser_download_url: String,
+    pub name: String,
+}
 
 pub fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
@@ -121,16 +191,6 @@ pub fn check_success(
     .into())
 }
 
-#[derive(Debug)]
-struct ProcessError {
-    status: ExitStatus,
-    #[allow(dead_code)]
-    hidden: bool,
-    stdout: Vec<u8>,
-    stderr: Vec<u8>,
-    cmd_desc: String,
-}
-
 impl fmt::Display for ProcessError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "failed to execute {}", self.cmd_desc)?;
@@ -151,8 +211,6 @@ impl fmt::Display for ProcessError {
 
 impl std::error::Error for ProcessError {}
 
-pub struct FileLock(File);
-
 impl Drop for FileLock {
     fn drop(&mut self) {
         drop(self.0.unlock());
@@ -172,25 +230,6 @@ pub fn flock(path: &Path) -> Result<FileLock> {
     file.lock_exclusive()?;
     Ok(FileLock(file))
 }
-
-/// Get the host target triple.
-///
-/// Only checks for targets that have pre-built toolchains.
-pub const HOST_TARGET_TRIPLE: Option<&str> = {
-    cfg_if! {
-        if #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
-            Some("x86_64-unknown-linux-gnu")
-        } else if #[cfg(all(target_arch = "x86_64", target_os = "macos"))] {
-            Some("x86_64-apple-darwin")
-        } else if #[cfg(all(target_arch = "aarch64", target_os = "macos"))] {
-            Some("aarch64-apple-darwin")
-        } else if #[cfg(all(target_arch = "x86_64", target_os = "windows"))] {
-            Some("x86_64-pc-windows-msvc")
-        } else {
-            None
-        }
-    }
-};
 
 pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf> {
     let rustup_dir = dirs::home_dir()
@@ -259,22 +298,13 @@ pub fn get_installed_toolchains() -> Result<Vec<ParseableToolchainDir>> {
             Ok(toolchain) => toolchains.push(toolchain),
             Err(e) => eprintln!(
                 "Failed to parse toolchain info for {}: {}",
-                entry.file_name().to_string_lossy().to_string(),
+                entry.file_name().to_string_lossy(),
                 e
             ),
         }
     }
 
     Ok(toolchains)
-}
-
-pub struct ParseableToolchainDir {
-    pub name: String,
-    pub path: PathBuf,
-    pub tag_name: String,
-    pub language: String,
-    pub target: String,
-    pub repo: ToolchainRepo,
 }
 
 pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
@@ -339,4 +369,89 @@ pub fn pretty_print_header(stdout: &mut StandardStream, header: &str) -> Result<
     pretty_println_message(stdout, true, None, &"-".repeat(header.len()))?;
     pretty_println_message(stdout, false, None, "")?;
     Ok(())
+}
+
+pub fn get_active_toolchain_name() -> Result<String> {
+    let active_toolchain_path = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
+    let active_toolchain = parse_toolchain_info(&active_toolchain_path)?;
+    Ok(active_toolchain.name)
+}
+
+pub fn get_installed_extension_version() -> Result<String> {
+    let out = Command::new("cargo")
+        .args(["risczero", "--version"])
+        .capture_stdout()
+        .expect("Error getting cargo-risczero version")
+        .split_whitespace()
+        .last()
+        .expect("Error parsing cargo-risczero version")
+        .to_string();
+    Ok(out)
+}
+
+pub fn get_updatable_items() -> Result<Vec<UpdateInfo>> {
+    let mut updates = Vec::new();
+
+    // Check for cargo-risczero updates
+    let latest_extension_info = fetch_extension_info(None)?;
+    let latest_extension_version = latest_extension_info
+        .tag_name
+        .strip_prefix('v')
+        .expect("failed to strip prefix");
+
+    let curr_extension_version = get_installed_extension_version()?;
+    let tag = format!("v{}", curr_extension_version);
+    let curr_extension_info = fetch_extension_info(Some(&tag))?;
+
+    updates.push(UpdateInfo {
+        name: "cargo-risczero".to_string(),
+        current_version: curr_extension_version.clone(),
+        current_published_at: curr_extension_info.published_at.clone(),
+        latest_version: latest_extension_version.to_string(),
+        latest_published_at: latest_extension_info.published_at.clone(),
+        up_to_date: curr_extension_version == latest_extension_version,
+        installable: Installable::Extension,
+    });
+
+    // Check for rust toolchain updates
+    let curr_rust_toolchain = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
+    let curr_rust_info = parse_toolchain_info(&curr_rust_toolchain)?;
+
+    let latest_rust_info =
+        ToolchainRepo::from_language(&curr_rust_info.language).fetch_info(None)?;
+
+    let curr_rust_info_ext = ToolchainRepo::from_language(&curr_rust_info.language)
+        .fetch_info(Some(&curr_rust_info.tag_name))?;
+
+    updates.push(UpdateInfo {
+        name: curr_rust_info.name.clone(),
+        current_version: curr_rust_info.tag_name.clone(),
+        current_published_at: curr_rust_info_ext.published_at.clone(),
+        latest_version: latest_rust_info.tag_name.clone(),
+        latest_published_at: latest_rust_info.published_at.clone(),
+        up_to_date: curr_rust_info.tag_name == latest_rust_info.tag_name,
+        installable: Installable::Rust,
+    });
+
+    // TODO: Check for cpp updates
+
+    Ok(updates)
+}
+
+pub fn fetch_release_info(client: &Client, url: &str) -> Result<GithubReleaseData> {
+    let runtime = tokio::runtime::Runtime::new().context("Failed to create Tokio runtime")?;
+
+    runtime.block_on(async {
+        let response = client
+            .get(url)
+            .send()
+            .await?
+            .error_for_status()
+            .context("Failed to fetch release info")?
+            .json::<GithubReleaseData>()
+            .await
+            .context("Failed to deserialize release info")?;
+
+        Ok(response)
+    })
 }

@@ -12,16 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
 use clap::Subcommand;
-use reqwest::Client;
 
-use super::{
-    check::fetch_release_info,
-    install::{GithubReleaseData, InstallToolchain},
-    show::show_installed_toolchains,
-};
-use crate::toolchain::{build::BuildToolchain, repo::ToolchainRepo};
+use super::show::show_installed_toolchains;
+use crate::toolchain::{build::BuildToolchain, dist::ToolchainRepo, install::InstallToolchain};
 
 #[derive(Debug, Subcommand)]
 pub enum ToolchainSubcmd {
@@ -78,30 +72,6 @@ impl ToString for ToolchainCheckSubcmd {
             ToolchainCheckSubcmd::Cpp => "c++".to_string(),
         }
     }
-}
-
-pub fn get_toolchain_info(repo: ToolchainRepo, version: Option<&str>) -> Result<GithubReleaseData> {
-    let client = Client::builder().user_agent("rzup").build()?;
-
-    let version_tag = match version {
-        Some(version) if version == "latest" || version.starts_with("tags/") => version.to_string(),
-        Some(version) => format!("tags/{}", version),
-        None => "latest".to_string(),
-    };
-
-    let repo_name = repo
-        .url()
-        .trim_start_matches("https://github.com/")
-        .trim_end_matches(".git");
-
-    let release_url = format!(
-        "https://api.github.com/repos/{}/releases/{}",
-        repo_name, version_tag
-    );
-
-    let release = fetch_release_info(&client, &release_url)?;
-
-    Ok(release)
 }
 
 pub fn handle_toolchain(subcmd: ToolchainSubcmd) {
