@@ -30,7 +30,9 @@ Run `rzup` to install the RISC Zero toolchain and `cargo-risczero`.
 rzup
 ```
 
-> Note: To install a specific version instead of using the latest stable version, use `rzup --version <version>`, where the `<version>` is a [release tag](https://github.com/risc0/risc0/releases).
+> Note: To install a specific version instead of using the latest stable
+> version, use `rzup --version <version>`, where the `<version>` is a [release
+> tag](https://github.com/risc0/risc0/releases).
 >
 > The version used must match the `risc0-zkvm` version from your guest and host.
 
@@ -124,6 +126,6 @@ proportional to the number of cycles and segments used.
 [prover]: /terminology#prover
 [receipt]: /terminology#receipt
 [seal]: /terminology#seal
-[tutorial-step-2]: tutorials/hello-world#step-2-host-share-private-data-as-input-with-the-guest
-[tutorial-step-3]: tutorials/hello-world#step-3-guest-read-input-and-commit-output
-[tutorial-step-4]: tutorials/hello-world#step-4-host-generate-a-receipt-and-read-its-journal-contents
+[tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
+[tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output
+[tutorial-step-4]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents
