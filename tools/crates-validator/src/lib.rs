@@ -253,7 +253,6 @@ impl Validator {
         cmd.arg("risczero");
         cmd.arg("new");
         cmd.arg(project_name);
-        cmd.arg("--no-git");
         cmd.arg("--dest");
         cmd.arg(&self.proj_out_dir);
         cmd.arg("--guest-name=method_name");
@@ -274,9 +273,6 @@ impl Validator {
                 cmd.arg(self.repo().value());
             }
             Repo::Path(_) => {
-                cmd.arg("--template");
-                cmd.arg("--templ-subdir");
-                cmd.arg("");
                 cmd.arg("--path");
                 cmd.arg(self.repo().value());
             }
