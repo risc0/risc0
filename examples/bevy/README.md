@@ -19,12 +19,12 @@ cargo run --release
 
 ## Use Cases
 By using this demo as part of a [Bonsai application], you could build an app where on-chain payment depends on off-chain gameplay.
-To learn more about this use case, check out our Twitter thread about using Bonsai as a [zk coprocessor].
+To learn more about this use case, check out our blog post about using Bonsai as a [zk coprocessor].
 
 To link gameplay to a particular player, you may want to pair this demo with the [ECDSA] demo, which would allow a player to sign their moves.
 
 [Bonsai application]: https://dev.bonsai.xyz
-[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [ECDSA]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 
 ## Project Organization

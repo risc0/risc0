@@ -21,7 +21,7 @@ The [Bonsai Foundry Template] is the best place to get started building Bonsai a
 You may also want to check out our [Bonsai Quick Start](quickstart.md) page.
 
 [verified proofs]: https://risczero.com/news/on-chain-verification
-[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 [smart contract]: https://github.com/risc0/bonsai-foundry-template/tree/main/contracts
 [program]: https://github.com/risc0/bonsai-foundry-template/tree/main/methods/guest/src/bin
