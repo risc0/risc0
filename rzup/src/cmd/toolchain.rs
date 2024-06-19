@@ -46,7 +46,7 @@ pub enum ToolchainSubcmd {
 pub enum ToolchainInstallSubcmd {
     /// Install Rust toolchain
     Rust {
-        /// Toolchain version (i.e. stable or a specific version)
+        /// Toolchain version (i.e. 'latest' or a specific version)
         #[arg(required = false)]
         toolchain: Option<String>,
     },
@@ -56,23 +56,6 @@ pub enum ToolchainInstallSubcmd {
         #[arg(required = false)]
         toolchain: Option<String>,
     },
-}
-
-#[derive(Debug, Subcommand, Clone)]
-pub enum ToolchainCheckSubcmd {
-    /// Check rust toolchain updates
-    Rust,
-    /// Check c++ toolchain updates
-    Cpp,
-}
-
-impl ToString for ToolchainCheckSubcmd {
-    fn to_string(&self) -> String {
-        match self {
-            ToolchainCheckSubcmd::Rust => "rust".to_string(),
-            ToolchainCheckSubcmd::Cpp => "c++".to_string(),
-        }
-    }
 }
 
 pub fn handle_toolchain(subcmd: ToolchainSubcmd) {

@@ -102,7 +102,7 @@ pub enum RzupSubcmd {
         #[command(flatten)]
         opts: InstallOpts,
     },
-    /// Show the active and installed toolchains
+    /// Show the active and installed RISC Zero toolchains
     #[command(after_help = help::SHOW_HELP)]
     Show {
         /// Enable verbose output for all installed toolchains

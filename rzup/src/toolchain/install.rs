@@ -42,7 +42,6 @@ use super::repo::ToolchainRepo;
 pub struct InstallToolchain {
     #[arg(
         required = false,
-        help = help::TOOLCHAIN_ARG_HELP,
         num_args = 1..,
     )]
     pub toolchain: Option<String>,

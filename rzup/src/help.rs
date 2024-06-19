@@ -13,20 +13,31 @@
 // limitations under the License.
 
 pub static RZUP_HELP: &str = r"Discussion:
-This is the RZUP help
-";
+    rzup installs The RISC Zero zero-knowledge virtual-machine and
+    its tooling from the official release channels, enabling you to
+    easily switch toolchains and extension versions and keep them
+    updated.";
+
 pub static INSTALL_HELP: &str = r"Discussion:
-This is the RZUP help
-";
+    Installs the latest version of RISC Zero Rust toolchain and
+    the cargo-risczero extension.
+
+    This command is hidden by default and meant to bootstrap new
+    installations.";
+
 pub static SHOW_HELP: &str = r"Discussion:
-This is the RZUP help
-";
+    Shows the name of the active RISC Zero toolchain, extension,
+    and the version of zkVM's `rustc`.
+
+    If there are multiple toolchains installed then all installed
+    toolchains are listed as well.";
+
 pub static UPDATE_HELP: &str = r"Discussion:
-This is the RZUP help
-";
+    Checks RISC Zero release channels for updates and applies the
+    updates for both toolchains and extensions.";
+
 pub static SHOW_ACTIVE_TOOLCHAIN_HELP: &str = r"Discussion:
-This is the RZUP help
-";
-pub static TOOLCHAIN_ARG_HELP: &str = r"Discussion:
-This is the RZUP help
-";
+    Shows the name of the active RISC Zero toolchain.
+
+    This is useful for figuring out the active RISC Zero toolchain.
+    The toolchain is aliased as 'risc0' in the rustup toolchains.";
