@@ -459,17 +459,29 @@ pub fn fetch_release_info(client: &Client, url: &str) -> Result<GithubReleaseDat
     let runtime = tokio::runtime::Runtime::new().context("Failed to create Tokio runtime")?;
 
     runtime.block_on(async {
-        let response = client
-            .get(url)
-            .send()
-            .await?
-            .error_for_status()
-            .context("Failed to fetch release info")?
-            .json::<GithubReleaseData>()
-            .await
-            .context("Failed to deserialize release info")?;
+        let response = client.get(url).send().await;
 
-        Ok(response)
+        match response {
+            Ok(resp) => {
+                if resp.status() == 403 {
+                    return Err(anyhow!(
+                        "Access forbidden: Received a 403 status code. Try setting a GITHUB_TOKEN enivorment variable to avoid rate limits."
+                    ));
+                }
+
+                let resp = resp
+                    .error_for_status()
+                    .context("Failed to fetch release info")?;
+
+                let data = resp
+                    .json::<GithubReleaseData>()
+                    .await
+                    .context("Failed to deserialize release info")?;
+
+                Ok(data)
+            }
+            Err(e) => Err(anyhow::anyhow!("Request failed: {:?}", e)),
+        }
     })
 }
 

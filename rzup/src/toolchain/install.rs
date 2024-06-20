@@ -28,7 +28,6 @@ use tempfile::tempdir;
 use xz::bufread::XzDecoder;
 
 use crate::{
-    help,
     toolchain::{
         cpp::CppToolchain,
         rust::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME},
