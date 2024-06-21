@@ -74,12 +74,6 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
           disable_s3: ${{ env.DISABLE_S3 }}
 
-      - id: aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
-
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 
       - name: Run benchmarks
