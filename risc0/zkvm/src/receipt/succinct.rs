@@ -194,7 +194,7 @@ where
     }
 
     /// Prunes the claim, retaining its digest, and converts into a [SuccinctReceipt] with an unknown
-    /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
+    /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
     pub fn into_unknown(self) -> SuccinctReceipt<Unknown> {
         SuccinctReceipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),

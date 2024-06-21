@@ -123,7 +123,7 @@ impl CompositeReceipt {
         }
         for (assumption, receipt) in assumptions.into_iter().zip(self.assumption_receipts.iter()) {
             let assumption_ctx = match assumption.control_root {
-                // If the control root is all zeroes, we should use the same verifier paramters.
+                // If the control root is all zeroes, we should use the same verifier parameters.
                 Digest::ZERO => None,
                 // Otherwise, we should verify the assumption receipt using the guest-provided root.
                 control_root => Some(

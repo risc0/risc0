@@ -110,7 +110,7 @@ pub trait Prover {
     /// Compress a [Receipt], proving the same computation using a smaller representation.
     ///
     /// Proving will, by default, produce a [CompositeReceipt](crate::CompositeReceipt), which
-    /// may contain an arbitrary number of receipts assembled into continuations and compositions.
+    /// may contain an arbitrary number of receipts assembled into segments and assumptions.
     /// Together, these receipts collectively prove a top-level
     /// [ReceiptClaim](crate::ReceiptClaim). This function can be used to compress all of the constituent
     /// receipts of a [CompositeReceipt](crate::CompositeReceipt) into a single
@@ -122,7 +122,7 @@ pub trait Prover {
     ///
     /// Compression from [SuccinctReceipt](crate::SuccinctReceipt) to
     /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
-    /// verifier, refered to as the "STARK-to-SNARK" operation.
+    /// verifier, referred to as the "STARK-to-SNARK" operation.
     ///
     /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
     /// x86 hosts, and requires Docker to be installed. See issue
