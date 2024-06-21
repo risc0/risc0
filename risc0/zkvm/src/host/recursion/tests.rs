@@ -316,7 +316,7 @@ fn test_recursion_identity_sha256() {
         hashfn: opts.hashfn,
         control_id: control_id_sha256,
         control_inclusion_proof: sha256_control_inclusion_proof,
-        // Use the claim from the inner receipt that verifiy will only pass if they match.
+        // Use the claim from the inner receipt that verify will only pass if they match.
         claim: default_receipt.claim,
         verifier_parameters: params.digest(),
     };
