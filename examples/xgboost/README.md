@@ -2,7 +2,7 @@
 
 This example is meant to serve a guide for developers interested in using the RISC Zero for zkML applications using the popular XGBoost machine learning model. The model can be trained in Python and exported as a JSON file to into the RISC Zero zkVM.  Inference is computed within the guest code, allowing developers to submit a cryptographic receipt attesting to the correct execution of the trained model without revealing either the inputs or the model parameters.
 
-Model training takes place in a Python Jupyter Notebook using the XGBoost model from the Forust machine learning package.  The package is a pure Rust implementation of the XGBoost algorithm, complete with Python bindings.  This allowing developers to focus on data collection, feature engineering, and other machine learning related pre-processing tasks using all of the tools available in the Python machine learning ecosystem.
+Model training takes place in a Python Jupyter Notebook using the XGBoost model from the Forust machine learning package.  The package is a pure Rust implementation of the XGBoost algorithm, complete with Python bindings.  This allows developers to focus on data collection, feature engineering, and other machine learning related pre-processing tasks using all of the tools available in the Python machine learning ecosystem.
 
 The layout of this example is intended as a template for developers to train XGBoost models with their own data with minimal modifications to the host and guest code of the zkVM.
 
