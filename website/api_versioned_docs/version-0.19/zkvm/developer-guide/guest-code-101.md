@@ -94,5 +94,5 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [Bonsai]: ../../bonsai/bonsai-overview.md
 [template]: https://github.com/risc0/risc0/tree/release-0.19/templates/rust-starter
 [examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
-[these docs]: https://github.com/risc0/website
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
 [Discord]: https://discord.gg/risczero
