@@ -20,14 +20,14 @@ flowchart LR
 execute(".execute()")
 --> Session
 
-subgraph Session["<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Session.html'>Session</a>"]
+subgraph Session["<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Session.html'>Session</a>"]
 direction TB
-s1("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Segment.html'>Segment</a>")
-s2("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Segment.html'>Segment</a>")
-s3("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Segment.html'>Segment</a>")
-s4("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Segment.html'>Segment</a>")
-s5("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Segment.html'>Segment</a>")
-s6("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Segment.html'>Segment</a>")
+s1("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Segment.html'>Segment</a>")
+s2("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Segment.html'>Segment</a>")
+s3("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Segment.html'>Segment</a>")
+s4("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Segment.html'>Segment</a>")
+s5("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Segment.html'>Segment</a>")
+s6("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Segment.html'>Segment</a>")
 end
 
   s1-->ps1(".prove_segment()")
@@ -37,14 +37,14 @@ end
   s5-->ps5(".prove_segment()")
   s6-->ps6(".prove_segment()")
 
-subgraph CompositeReceipt["<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.CompositeReceipt.html'>CompositeReceipt</a>"]
+subgraph CompositeReceipt["<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.CompositeReceipt.html'>CompositeReceipt</a>"]
 direction TB
-c1("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
-c2("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
-c3("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
-c4("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
-c5("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
-c6("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
+c1("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
+c2("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
+c3("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
+c4("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
+c5("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
+c6("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SegmentReceipt.html'>SegmentReceipt</a>")
 end
 
 ps1-->c1
@@ -62,12 +62,12 @@ c4-->l4(".lift()")
 c5-->l5(".lift()")
 c6-->l6(".lift()")
 
-l1-->suc1("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
-l2-->suc2("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
-l3-->suc3("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
-l4-->suc4("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
-l5-->suc5("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
-l6-->suc6("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+l1-->suc1("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+l2-->suc2("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+l3-->suc3("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+l4-->suc4("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+l5-->suc5("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+l6-->suc6("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
 
 
 suc1-->j1(".join()")
@@ -77,27 +77,27 @@ suc4-->j2
 suc5-->j3(".join()")
 suc6-->j3
 
-j1-->suc11("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
-j2-->suc12("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
-j3-->suc13("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+j1-->suc11("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+j2-->suc12("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+j3-->suc13("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
 
 suc11-->j11(".join()")
 suc12-->j11
 
-j11-->suc21("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+j11-->suc21("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
 
 suc21-->j21(".join()")
 suc13-->j21
 
-j21-->suc31("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+j21-->suc31("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
 
 suc31-->id(".identity_p254()")
 
-id-->suc41("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
+id-->suc41("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html'>SuccinctReceipt</a>")
 
 suc41-->compress(".compress()")
 
-compress-->groth16("<a href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html'>Groth16Receipt</a>")
+compress-->groth16("<a href='https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html'>Groth16Receipt</a>")
 ```
 
 To summarize the diagram:
@@ -139,10 +139,10 @@ All of the recursion programs in the previous section output a [SuccinctReceipt]
 The final step in the recursion process is `compress()`, which outputs a [Groth16Receipt], which can be verified on-chain using the [RISC Zero Verifier Contract].
 
 [composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
-[Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
+[Groth16Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html
 [proof system]: /proof-system/proof-system-sequence-diagram
 [prove_with_opts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
-[Prover]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/trait.Prover.html#method.prove_with_opts
-[Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Receipt.html
+[Prover]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Receipt.html
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
-[SuccinctReceipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html
+[SuccinctReceipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html
