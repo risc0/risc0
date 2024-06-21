@@ -1,6 +1,6 @@
 # Proof Composition
 
-RISC Zero's zkVM is the only zkVM that offers a convenient API for efficiently verifying proofs inside the guest program.
+RISC Zero's zkVM offers a convenient API for efficiently verifying proofs inside the guest program.
 
 This feature enables rich possibilities for building modular applications. Check out the [blog post] to learn more about the power of proof composition.
 
