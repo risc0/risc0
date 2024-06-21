@@ -26,6 +26,7 @@ pub struct MerkleTreeParams {
     pub col_size: usize,
     #[cfg(test)]
     pub queries: usize,
+    #[cfg(feature = "prove")]
     pub layers: usize,
     #[cfg(test)]
     pub top_layer: usize,
@@ -57,6 +58,7 @@ impl MerkleTreeParams {
             col_size,
             #[cfg(test)]
             queries,
+            #[cfg(feature = "prove")]
             layers,
             #[cfg(test)]
             top_layer,

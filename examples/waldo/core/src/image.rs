@@ -185,8 +185,10 @@ mod zkvm {
                     let chunk = self
                         .chunks
                         .get(usize::try_from(y * self.width_chunks + x).unwrap());
-                    self.cache
-                        .insert((x, y), RgbImage::from(chunk.into()).into());
+                    self.cache.insert(
+                        (x, y),
+                        RgbImage::from(<ImageChunk as Into<RgbImage>>::into(chunk)).into(),
+                    );
                     self.cache.get(&(x, y)).unwrap()
                 }
             }
