@@ -401,7 +401,7 @@ machine, and the `cuda` feature enabled.
 
 ### RV32IM Operations with Cycle Counts
 
-Table from [https://mark.theis.site/riscv/][RISC-V operations], with RISC Zero
+Table from [https://marks.page/riscv/][RISC-V operations], with RISC Zero
 cycle counts added.
 
 | Assembly            | Name                               | Pseudocode                                     | RISC Zero Cycles                                |
@@ -510,7 +510,7 @@ below.
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.20//0.20/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read_slice.html
 [example-ecdsa]: https://github.com/risc0/risc0/tree/release-0.20/examples/ecdsa
 [example-waldo]: https://github.com/risc0/risc0/tree/release-0.20/examples/waldo
 [Executor]: https://github.com/risc0/risc0/blob/release-0.20/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
@@ -530,7 +530,7 @@ below.
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
-[RISC-V operations]: https://mark.theis.site/riscv/
+[RISC-V operations]: https://marks.page/riscv/
 [RISC-V architecture]: /reference-docs/about-risc-v
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions

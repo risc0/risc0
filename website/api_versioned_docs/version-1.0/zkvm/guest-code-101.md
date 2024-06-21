@@ -106,5 +106,5 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [quickstart]: ./quickstart.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest
-[template]: https://github.com/risc0/risc0/tree/release-1.0/templates/rust-starter
+[template]: https://github.com/risc0/risc0/tree/release-1.0/risc0/cargo-risczero/templates/rust-starter
 [zkVM]: ./zkvm_overview.md
