@@ -122,7 +122,7 @@ pub trait Prover {
     ///
     /// Compression from [SuccinctReceipt](crate::SuccinctReceipt) to
     /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
-    /// verifier, refered to as the "STARK-to-SNARK" operation.
+    /// verifier, referred to as the "STARK-to-SNARK" operation.
     ///
     /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
     /// x86 hosts, and requires Docker to be installed. See issue

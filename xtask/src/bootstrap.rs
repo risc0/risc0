@@ -140,7 +140,7 @@ impl Bootstrap {
             writeln!(&mut allowed_control_ids_str, r#"digest!("{digest}"),"#).unwrap();
         }
 
-        // Calculuate a Merkle root for the allowed control IDs and add it to the file.
+        // Calculate a Merkle root for the allowed control IDs and add it to the file.
         let merkle_group = MerkleGroup::new(allowed_control_ids).unwrap();
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
