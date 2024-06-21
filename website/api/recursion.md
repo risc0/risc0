@@ -122,6 +122,7 @@ RISC Zero's zkVM consists of three circuits.
 1. The STARK-to-SNARK Circuit is an R1CS circuit that proves verification of proofs from the Recursion Circuit.
 
 ## Recursion Programs
+
 The Recursion Circuit supports a number of programs, including `lift()`, `join()`, `resolve()`, and `identity_p254()`.
 Instead, users should access recursion via the [Prover].
 
@@ -134,6 +135,7 @@ To aid in conceptual understanding, we offer the following explanations of the r
 1. The `identity_p254()` program verifies a proof from the Recursion Prover using the Poseidon254 hash function. The identity_p254 program is used as the last step in the prover pipeline before running the Groth16 prover.
 
 ## STARK-to-SNARK Wrapping
+
 All of the recursion programs in the previous section output a [SuccinctReceipt], which is a STARK proof (~200kB)
 
 The final step in the recursion process is `compress()`, which outputs a [Groth16Receipt], which can be verified on-chain using the [RISC Zero Verifier Contract].
