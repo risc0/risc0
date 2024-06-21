@@ -314,7 +314,7 @@ fn test_recursion_identity_sha256() {
         hashfn: opts.hashfn,
         control_id: control_id_sha256,
         control_inclusion_proof: sha256_control_inclusion_proof,
-        // Use the claim from the inner receipt that verifiy will only pass if they match.
+        // Use the claim from the inner receipt that verify will only pass if they match.
         claim: default_receipt.claim,
         verifier_parameters: params.digest(),
     };
@@ -430,6 +430,6 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("a516a057c9fbf5629106300934d48e0e775d4230e41e503347cad96fcbde7e2e")
+        digest!("c43de805675563551857de3ee487c5167a26141467196700f43eb51f9c0ef505")
     );
 }

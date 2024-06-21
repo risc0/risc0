@@ -1,6 +1,6 @@
 # In-Browser Proof Verification
 
-Verify a RISC Zero program in your browser using WASM!
+Verify that a RISC Zero program is in your browser using WASM!
 
 ## Quickstart
 
