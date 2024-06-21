@@ -117,7 +117,7 @@ RISC Zero's zkVM consists of three circuits.
 
 1. The RISC-V Circuit is a STARK circuit that proves correct execution of RISC-V programs.
 1. The Recursion Circuit is a separate STARK circuit, that's designed to efficiently generate proofs for the verification of STARK proofs and to support the integration of custom accelerator circuits into the zkVM.
-   This circuit has a similar architecture to the RISC-V Circuit, but with fewer columns and a much simpler instruction set.
+   This circuit has a similar architecture to the RISC-V Circuit, but with fewer columns and an instruction set optimized for cryptography.
    The same [proof system] is used for both the RISC-V Circuit and the Recursion Circuit.
 1. The STARK-to-SNARK Circuit is an R1CS circuit that proves verification of proofs from the Recursion Circuit.
 
