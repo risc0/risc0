@@ -4,7 +4,7 @@ RISC Zero's zkVM uses recursive proving in order to achieve unbounded computatio
 
 :::tip
 
-[prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
+[Prover::prove_with_opts][prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
 
 :::
 
