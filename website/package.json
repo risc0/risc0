@@ -1,7 +1,9 @@
 {
-  "name": "docusaurus",
-  "version": "0.0.0",
+  "name": "RISC Zero Developer Website",
+  "description": "RISC Zero Documentation, Education Hub, and Resources",
+  "packageManager": "yarn@4.3.1",
   "private": true,
+  "version": "0.0.0",
   "scripts": {
     "fmt": "prettier . --write",
     "check-link-versions": "python ./link-version-check.py",
@@ -31,9 +33,9 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.0.0",
-    "@docusaurus/types": "3.0.0",
-    "prettier": "3.0.3"
+    "@docusaurus/module-type-aliases": "3.4.0",
+    "@docusaurus/types": "3.4.0",
+    "prettier": "3.3.2"
   },
   "browserslist": {
     "production": [
@@ -46,6 +48,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "description": "RISC Zero - The ZKVM"
+  }
 }
