@@ -27,7 +27,7 @@ export default function ReportsPage({
         <ProgressBarLink key={href} href={`${showVersionSelect ? `/${params.version}` : ""}${href}`} className="group">
           <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 border-2 border-border px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12 hover:border-primary">
             <div className="space-y-1">
-              <CardTitle className="font-normal text-3xl">{label}</CardTitle>
+              <CardTitle className="font-normal text-2xl">{label}</CardTitle>
               <CardDescription className="text-sm">{description}</CardDescription>
             </div>
 

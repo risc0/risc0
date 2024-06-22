@@ -6,7 +6,7 @@ export function BenchmarksHeader({ lastUpdate }: { lastUpdate: string }) {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-3xl">Benchmarks</h1>
+        <h1 className="text-2xl">Benchmarks</h1>
         <div className="text-muted-foreground text-xs">
           <span>Last Update: {lastUpdate || <Skeleton className="inline-block h-2 w-28" />}</span>
         </div>
