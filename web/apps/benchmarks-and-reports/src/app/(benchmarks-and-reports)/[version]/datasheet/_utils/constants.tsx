@@ -62,4 +62,4 @@ export const DATASHEET_FILENAMES_TO_TITLES: {
       </>
     ),
   },
-} as const;
+} as const satisfies Record<Version, Record<string, ReactNode>>;

@@ -23,4 +23,4 @@ export const APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES: {
     "macOS-cpu.csv": "CPU only on Apple M2 Pro",
     "Linux-cpu.csv": "CPU only on c6i.8xlarge",
   },
-} as const;
+} as const satisfies Record<Version, Record<string, string>>;
