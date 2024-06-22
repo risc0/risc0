@@ -9,6 +9,8 @@
 /rzup/                                 @risc0/platform @hmrtn
 /web/                                  @risc0/platform @nahoc
 /website/                              @risc0/devrel @pdg744
+/examples/                             @risc0/devrel @risc0/demos
+
 
 /groth16_proof/groth16/                @flaub @nategraf @tzerrell
 /SECURITY.md                           @kevinnassery
