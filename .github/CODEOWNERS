@@ -11,7 +11,6 @@
 /website/                              @risc0/devrel @pdg744
 /examples/                             @risc0/devrel @risc0/demos
 
-
 /groth16_proof/groth16/                @flaub @nategraf @tzerrell
 /SECURITY.md                           @kevinnassery
 control_id.rs                          @flaub @nategraf @tzerrell
