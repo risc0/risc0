@@ -13,9 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 # this is needed to gain access via OIDC to the S3 bucket for caching
-permissions: write-all
-#  id-token: write
-#  contents: read
+permissions:
+  id-token: write
+  contents: read
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -89,6 +89,7 @@ jobs:
         run: cargo bench --bench fib -F $FEATURE
 
       - name: Analyze benchmark results
+        id: analyze-bm
         uses: risc0/github-action-benchmark@v1.19.3
         with:
           name: "${{ matrix.os }}-${{ matrix.device }}"
@@ -98,9 +99,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           alert-threshold: '120%'
           comment-on-alert: true
-          fail-on-alert: true
+          fail-on-alert: false
           summary-always: true
 
+      - name: Fail if Benchmark Threshold Exceeded
+        if: contains(steps.analyze-bm.outputs.response, 'Performance alert')
+        run: |
+          echo "Benchmark threshold exceeded in previous step... check Annotations: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          exit 1
+        
       - name: Save current benchmark data
         if: github.event_name == 'push'
         run: aws s3 cp ./cache/external.json $S3_BENCH_PATH/external.json
