@@ -8,7 +8,7 @@
 
 # Specific paths requiring teams and/or individual approval
 /bonsai/                               @risc0/bonsai
-/examples/                             @risc0/devrel @risc0/demos
+/examples/                             @risc0/devrel @risc0/demos @risc0/platform
 /groth16_proof/groth16/                @flaub @nategraf @tzerrell
 /rzup/                                 @risc0/platform @hmrtn
 /SECURITY.md                           @kevinnassery
