@@ -3,10 +3,8 @@
 # Note: Order is important; the last matching pattern takes the most
 # precedence.
 
-# Platform team is requires approval for all PRs
 *                                      @risc0/platform
 
-# Specific paths requiring teams and/or individual approval
 /bonsai/                               @risc0/bonsai
 /examples/                             @risc0/devrel @risc0/demos @risc0/platform
 /rzup/                                 @risc0/platform @hmrtn
