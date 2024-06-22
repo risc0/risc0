@@ -7,7 +7,7 @@ This feature enables rich possibilities for building modular applications. Check
 :::info
 
 Although the "obvious" approach to proof composition would be to simply run the verifier inside the guest program, this approach is very expensive.
-Instead, RISC Zero's approach to composition relies on *adding* [assumptions] to the [ReceiptClaim] and then *resolving* them.
+Instead, RISC Zero's approach to composition relies on _adding_ [assumptions] to the [ReceiptClaim] and then _resolving_ them.
 
 This approach allows us to offer users a simple API for composition while still being able to access the benefits of our hyper-efficient [recursion circuit].
 
