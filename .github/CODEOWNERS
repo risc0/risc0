@@ -9,10 +9,12 @@
 # Specific paths requiring teams and/or individual approval
 /bonsai/                               @risc0/bonsai
 /examples/                             @risc0/devrel @risc0/demos @risc0/platform
-/groth16_proof/groth16/                @flaub @nategraf @tzerrell
 /rzup/                                 @risc0/platform @hmrtn
-/SECURITY.md                           @kevinnassery
 /web/                                  @risc0/platform @nahoc
 /website/                              @risc0/devrel @pdg744
+
+# These are sensitive files
+/groth16_proof/groth16/                @flaub @nategraf @tzerrell
+/SECURITY.md                           @kevinnassery
 control_id.rs                          @flaub @nategraf @tzerrell
 recursion_zkr.zip                      @flaub @nategraf @tzerrell
