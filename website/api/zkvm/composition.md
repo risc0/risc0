@@ -4,9 +4,20 @@ RISC Zero's zkVM offers a convenient API for efficiently verifying proofs inside
 
 This feature enables rich possibilities for building modular applications. Check out the [blog post] to learn more about the power of proof composition.
 
+:::info
+
+Although the "obvious" approach to proof composition would be to simply run the verifier inside the guest program, this approach is very expensive.
+Instead, RISC Zero's approach to composition relies on *adding* [assumptions] to the [ReceiptClaim] and then *resolving* them.
+
+This approach allows us to offer users a simple API for composition while still being able to access the benefits of our hyper-efficient [recursion circuit].
+
+:::
+
 ## Start Building
 
 To use proof composition in your program, you'll need to call [`add_assumption()`] on the host-side and [`env::verify()`] on the guest-side, as demonstrated in this [code example].
+
+The assumption will be automatically resolved when you call [Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
 
 ## How it works
 
@@ -24,7 +35,7 @@ This results in a "conditional receipt."
 ### Resolve an assumption
 
 In order to finish the process of proof composition, assumptions must be resolved.
-This is accomplished via [`resolve()`], which is called automatically when users [`verify()`][TODO - is this right?] a conditional receipt.
+This is accomplished via `resolve`, which is called automatically when users call [Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
 
 ![Resolving an assumption][composition-resolve]
 
@@ -32,6 +43,7 @@ For a more detailed dive into proof composition and RISC Zero's approach to recu
 
 [`add_assumption()`]: https://github.com/risc0/risc0/blob/v1.0.1/examples/composition/src/main.rs#L29
 [assumption]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Assumption.html
+[assumptions]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Assumption.html
 [blog post]: https://www.risczero.com/blog/proof-composition
 [code example]: https://github.com/risc0/risc0/tree/v1.0.1/examples/composition#readme
 [`env::verify()`]: https://github.com/risc0/risc0/blob/v1.0.1/examples/composition/methods/guest/src/main.rs#L24
@@ -41,3 +53,4 @@ For a more detailed dive into proof composition and RISC Zero's approach to recu
 [composition-no-assumptions]: /diagrams/composition-no-assumptions.png
 [composition-add-assumption]: /diagrams/composition-add-assumption.png
 [composition-resolve]: /diagrams/composition-resolve.png
+[Prover::prove_with_opts]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/trait.Prover.html#method.prove_with_opts
