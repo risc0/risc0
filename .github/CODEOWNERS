@@ -3,15 +3,16 @@
 # Note: Order is important; the last matching pattern takes the most
 # precedence.
 
+# Platform team is requires approval for all PRs
 *                                      @risc0/platform
 
+# Specific paths requiring teams and/or individual approval
 /bonsai/                               @risc0/bonsai
+/examples/                             @risc0/devrel @risc0/demos
+/groth16_proof/groth16/                @flaub @nategraf @tzerrell
 /rzup/                                 @risc0/platform @hmrtn
+/SECURITY.md                           @kevinnassery
 /web/                                  @risc0/platform @nahoc
 /website/                              @risc0/devrel @pdg744
-/examples/                             @risc0/devrel @risc0/demos
-
-/groth16_proof/groth16/                @flaub @nategraf @tzerrell
-/SECURITY.md                           @kevinnassery
 control_id.rs                          @flaub @nategraf @tzerrell
 recursion_zkr.zip                      @flaub @nategraf @tzerrell
