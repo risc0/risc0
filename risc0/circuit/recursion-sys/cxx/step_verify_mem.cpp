@@ -388,7 +388,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         reg = x53;
       }
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x54 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x54 != Fp::invalid());
     // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -444,7 +444,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x70 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x71 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x71 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -497,7 +497,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x86 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x87 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x87 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -550,7 +550,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x102 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x103 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x103 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -603,7 +603,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x118 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x119 = args[2][70 * steps + ((cycle - 0) & mask)];
     assert(x119 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -656,7 +656,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x134 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x135 = args[2][75 * steps + ((cycle - 0) & mask)];
     assert(x135 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -709,7 +709,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x150 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x151 = args[2][80 * steps + ((cycle - 0) & mask)];
     assert(x151 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -762,7 +762,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x166 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x167 = args[2][85 * steps + ((cycle - 0) & mask)];
     assert(x167 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -815,7 +815,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x182 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x183 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x183 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -909,7 +909,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
     auto x200 = args[0][10 * steps + ((cycle - 0) & mask)];
     assert(x200 != Fp::invalid());
     if (x200 != 0) {
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/wom_fini(recursion::WomFiniWrapper)/PlonkFini/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/wom_fini(recursion::WomFiniWrapper)/PlonkFini/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x201 = args[2][11 * steps + ((cycle - 0) & mask)];
       assert(x201 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -1080,7 +1080,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
           reg = x233;
         }
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x234 = args[2][26 * steps + ((cycle - 0) & mask)];
       assert(x234 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -1136,7 +1136,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x250 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x251 = args[2][31 * steps + ((cycle - 0) & mask)];
       assert(x251 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -1189,7 +1189,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x266 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x267 = args[2][0 * steps + ((cycle - 0) & mask)];
       assert(x267 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -1357,7 +1357,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
           reg = x298;
         }
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x299 = args[2][26 * steps + ((cycle - 0) & mask)];
       assert(x299 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -1413,7 +1413,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x315 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_op_shorts(recursion::BitOpShorts)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x316 = args[2][31 * steps + ((cycle - 0) & mask)];
       assert(x316 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -1466,7 +1466,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x331 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x332 = args[2][0 * steps + ((cycle - 0) & mask)];
       assert(x332 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -1598,7 +1598,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
           reg = x358;
         }
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_init(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_init(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x359 = args[2][21 * steps + ((cycle - 0) & mask)];
       assert(x359 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -1654,7 +1654,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x375 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x376 = args[2][0 * steps + ((cycle - 0) & mask)];
       assert(x376 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -1786,7 +1786,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
           reg = x402;
         }
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_fini(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_fini(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x403 = args[2][21 * steps + ((cycle - 0) & mask)];
       assert(x403 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -1842,7 +1842,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x419 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x420 = args[2][0 * steps + ((cycle - 0) & mask)];
       assert(x420 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -1974,7 +1974,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
           reg = x446;
         }
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_load(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_load(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x447 = args[2][21 * steps + ((cycle - 0) & mask)];
       assert(x447 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -2030,7 +2030,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x463 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x464 = args[2][0 * steps + ((cycle - 0) & mask)];
       assert(x464 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -2162,7 +2162,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
           reg = x490;
         }
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_mix(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_mix(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x491 = args[2][21 * steps + ((cycle - 0) & mask)];
       assert(x491 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -2218,7 +2218,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x507 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x508 = args[2][0 * steps + ((cycle - 0) & mask)];
       assert(x508 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -2422,7 +2422,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
           reg = x544;
         }
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/set_global(recursion::SetGlobal)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/set_global(recursion::SetGlobal)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x545 = args[2][35 * steps + ((cycle - 0) & mask)];
       assert(x545 != Fp::invalid());
       // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -2478,7 +2478,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x561 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/set_global(recursion::SetGlobal)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/set_global(recursion::SetGlobal)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x562 = args[2][40 * steps + ((cycle - 0) & mask)];
       assert(x562 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -2531,7 +2531,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x577 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/set_global(recursion::SetGlobal)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/set_global(recursion::SetGlobal)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x578 = args[2][45 * steps + ((cycle - 0) & mask)];
       assert(x578 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -2584,7 +2584,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         // loc("zirgen/circuit/recursion/wom.cpp":68:38)
         if (x593 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
       }
-      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+      // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x594 = args[2][0 * steps + ((cycle - 0) & mask)];
       assert(x594 != Fp::invalid());
       // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -2966,7 +2966,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         reg = x654;
       }
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x655 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x655 != Fp::invalid());
     // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -3022,7 +3022,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x671 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x672 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x672 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3075,7 +3075,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x687 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x688 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x688 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3128,7 +3128,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x703 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x704 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x704 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3181,7 +3181,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x719 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x720 = args[2][70 * steps + ((cycle - 0) & mask)];
     assert(x720 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3234,7 +3234,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x735 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x736 = args[2][75 * steps + ((cycle - 0) & mask)];
     assert(x736 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3287,7 +3287,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x751 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x752 = args[2][80 * steps + ((cycle - 0) & mask)];
     assert(x752 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3340,7 +3340,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x767 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x768 = args[2][85 * steps + ((cycle - 0) & mask)];
     assert(x768 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3393,7 +3393,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x783 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x784 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x784 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3868,7 +3868,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         reg = x854;
       }
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x855 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x855 != Fp::invalid());
     // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -3924,7 +3924,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x871 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x872 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x872 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -3977,7 +3977,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x887 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x888 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x888 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -4030,7 +4030,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x903 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x904 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x904 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -4083,7 +4083,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x919 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x920 = args[2][70 * steps + ((cycle - 0) & mask)];
     assert(x920 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -4136,7 +4136,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x935 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x936 = args[2][75 * steps + ((cycle - 0) & mask)];
     assert(x936 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -4189,7 +4189,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x951 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x952 = args[2][80 * steps + ((cycle - 0) & mask)];
     assert(x952 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -4242,7 +4242,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x967 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x968 = args[2][85 * steps + ((cycle - 0) & mask)];
     assert(x968 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -4295,7 +4295,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x983 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x984 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x984 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)
@@ -4424,7 +4424,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
         reg = x1009;
       }
     }
-    // loc("top(recursion::Top)/mux(Mux)/checked_bytes(recursion::CheckedBytes)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/mux(Mux)/checked_bytes(recursion::CheckedBytes)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x1010 = args[2][15 * steps + ((cycle - 0) & mask)];
     assert(x1010 != Fp::invalid());
     // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
@@ -4480,7 +4480,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
       // loc("zirgen/circuit/recursion/wom.cpp":68:38)
       if (x1026 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/recursion/wom.cpp:68");
     }
-    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
     auto x1027 = args[2][0 * steps + ((cycle - 0) & mask)];
     assert(x1027 != Fp::invalid());
     // loc("zirgen/circuit/recursion/wom.cpp":62:19)

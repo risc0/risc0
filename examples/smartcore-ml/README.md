@@ -56,7 +56,7 @@ let model: KMeans<{float}, u8, DenseMatrix<{float}>, Vec<u8>> = trained_model;
 let model: PCA<{float}, DenseMatrix<{float}>> = trained_model;
 ```
 
-NOTE:  Deserialization of SVC and SVR does not includes that `SVCParametersmake` field.  It must be added back into the model struct manually after deserialization.  The RISC Zero SmartCore fork has amended the visibility of the model `struct`, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after deserialization.  You must insert the same parameters that were used when training the model.
+NOTE:  Deserialization of SVC and SVR does not include that `SVCParametersmake` field.  It must be added back into the model struct manually after deserialization.  The RISC Zero SmartCore fork has amended the visibility of the model `struct`, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after deserialization.  You must insert the same parameters that were used when training the model.
 ```
 let mut model: SVC<{float}, i32, DenseMatrix<{float}>, Vec<i32>> = deserialized_svc_trained;
 let params = &SVCParameters::default().with_c(200.0).with_kernel(Kernels::linear());
@@ -84,5 +84,5 @@ You can find other model implementations and additional SmartCore features here:
 
 ## Jupyter notebook
 
-In order to run Rust code from a Jupyter notebook, you will need to have the Rust kernel installed.  Installations instructions for the kernel and for Jupyter can be found here:
+In order to run Rust code from a Jupyter notebook, you will need to have the Rust kernel installed.  Installation instructions for the kernel and for Jupyter can be found here:
 https://github.com/evcxr/evcxr/blob/main/evcxr_jupyter/README.md

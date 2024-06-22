@@ -105,7 +105,7 @@ where
     }
 
     /// Prunes the claim, retaining its digest, and converts into a [Groth16Receipt] with an unknown
-    /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
+    /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
     pub fn into_unknown(self) -> Groth16Receipt<Unknown> {
         Groth16Receipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
@@ -167,7 +167,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("310fe598e8e3e92fa805bc272d7f587898bb8b68c4d5d7938db884abaa76e15c")
+            digest!("c9faac19ced5230976543ca0fa51dd224a325cca56b1e1c9512cdf3025d53bb9")
         );
     }
 }
