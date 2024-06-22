@@ -2,7 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalPassThroughEnv": ["TURBO_TEAM", "TURBO_TOKEN"],
   "globalDependencies": ["**/.env.*local"],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
