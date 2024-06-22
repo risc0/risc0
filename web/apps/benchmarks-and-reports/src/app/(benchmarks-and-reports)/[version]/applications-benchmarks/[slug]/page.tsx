@@ -4,7 +4,7 @@ import { pick } from "radash";
 import { Suspense } from "react";
 import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
-import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
+import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../../_utils/constants";
 import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./_utils/constants";

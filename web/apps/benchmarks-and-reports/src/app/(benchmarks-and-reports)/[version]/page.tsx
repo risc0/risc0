@@ -1,10 +1,42 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
 import Image from "next/image";
 import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
-import { useRedirectIfWrongVersion } from "~/hooks/use-redirect-if-wrong-version";
 import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
-import { REPORTS } from "./_utils/constants";
+import {
+  APPLICATIONS_BENCHMARKS_DESCRIPTION,
+  BENCHMARKS_DESCRIPTION,
+  CRATES_VALIDATION_DESCRIPTION,
+  DATASHEET_DESCRIPTION,
+} from "../_utils/constants";
+import { redirectIfWrongVersion } from "../_utils/redirect-if-wrong-version";
+
+const REPORTS = [
+  {
+    label: "Crates.io Validation",
+    href: "/crates-validation",
+    description: CRATES_VALIDATION_DESCRIPTION,
+    showVersionSelect: false,
+  },
+  {
+    label: "Benchmarks",
+    href: "/benchmarks",
+    description: BENCHMARKS_DESCRIPTION,
+    showVersionSelect: false,
+  },
+  {
+    label: "Applications Benchmarks",
+    href: "/applications-benchmarks",
+    description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
+    showVersionSelect: true,
+  },
+  {
+    label: "Datasheet",
+    href: "/datasheet",
+    description: DATASHEET_DESCRIPTION,
+    showVersionSelect: true,
+  },
+] as const;
 
 export function generateStaticParams() {
   return VERSIONS.map(({ value }) => ({
@@ -19,7 +51,7 @@ export default function ReportsPage({
     version: Version;
   };
 }) {
-  useRedirectIfWrongVersion(params.version);
+  redirectIfWrongVersion(params.version);
 
   return (
     <div className="container grid max-w-screen-3xl grid-cols-1 gap-10 pt-4 lg:grid-cols-2">

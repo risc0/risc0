@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { FooterAscii } from "../_components/footer-ascii";
-import { CratesIoValidationHashButton } from "./_components/creates-io-validation-hash-button";
+import { CratesIoValidationHashButton } from "./_components/crates-io-validation-hash-button";
 
 export default function CratesIoValidationLayout({ children }) {
   return (

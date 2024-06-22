@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BENCHMARKS_DESCRIPTION } from "../[version]/_utils/constants";
+import { BENCHMARKS_DESCRIPTION } from "../_utils/constants";
 import { Benchmarks } from "./_components/benchmarks";
 
 export const metadata: Metadata = {
