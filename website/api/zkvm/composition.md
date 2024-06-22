@@ -17,7 +17,7 @@ This approach allows us to offer users a simple API for composition while still 
 
 To use proof composition in your program, you'll need to call [`add_assumption()`] on the host-side and [`env::verify()`] on the guest-side, as demonstrated in this [code example].
 
-The assumption will be automatically resolved when you call [Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
+Assumptions will be automatically resolved when you call [Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
 
 ## How it works
 
@@ -42,15 +42,15 @@ This is accomplished via `resolve`, which is called automatically when users cal
 For a more detailed dive into proof composition and RISC Zero's approach to recursive proving, check out the [Study Club recording].
 
 [`add_assumption()`]: https://github.com/risc0/risc0/blob/v1.0.1/examples/composition/src/main.rs#L29
-[assumption]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Assumption.html
-[assumptions]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Assumption.html
+[assumption]: /terminology#assumption
+[assumptions]: /terminology#assumption
 [blog post]: https://www.risczero.com/blog/proof-composition
 [code example]: https://github.com/risc0/risc0/tree/v1.0.1/examples/composition#readme
 [`env::verify()`]: https://github.com/risc0/risc0/blob/v1.0.1/examples/composition/methods/guest/src/main.rs#L24
-[`resolve()`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
 [ReceiptClaim]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ReceiptClaim.html
 [Study Club recording]: https://www.youtube.com/watch?v=x0-7Y46bQO0&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1
 [composition-no-assumptions]: /diagrams/composition-no-assumptions.png
 [composition-add-assumption]: /diagrams/composition-add-assumption.png
 [composition-resolve]: /diagrams/composition-resolve.png
 [Prover::prove_with_opts]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[recursion circuit]: /terminology#recursion-circuit
