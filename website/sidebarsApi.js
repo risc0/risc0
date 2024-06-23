@@ -175,6 +175,11 @@ export default {
       items: [
         {
           type: "doc",
+          label: "Recursion",
+          id: "recursion",
+        },
+        {
+          type: "doc",
           label: "Security Model",
           id: "security-model",
         },
