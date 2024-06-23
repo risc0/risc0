@@ -52,4 +52,4 @@ For a more detailed dive into proof composition and RISC Zero's approach to recu
 [composition-add-assumption]: /diagrams/composition-add-assumption.png
 [composition-resolve]: /diagrams/composition-resolve.png
 [Prover::prove_with_opts]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/trait.Prover.html#method.prove_with_opts
-[recursion circuit]: /terminology#recursion-circuit
+[recursion circuit]: ../recursion.md
