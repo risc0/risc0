@@ -48,5 +48,5 @@
     "@docusaurus/types": "3.4.0",
     "prettier": "3.3.2"
   },
-  "packageManager": "yarn@4.3.1"
+  "packageManager": "bun@1.1.16"
 }
