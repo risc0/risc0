@@ -27,7 +27,7 @@ Under the hood, proof composition works by _adding assumptions_ to the [ReceiptC
 
 ### Adding assumptions
 
-When [`env::verify()`] is called inside the guest program, an [assumption] is added to the [ReceiptClaim].
+When [`env::verify()`] is called inside the guest program, an [assumption][assumptions] is added to the [ReceiptClaim].
 This results in a "conditional receipt."
 
 ![Adding an assumption][composition-add-assumption]
@@ -42,7 +42,6 @@ This is accomplished via `resolve`, which is called automatically when users cal
 For a more detailed dive into proof composition and RISC Zero's approach to recursive proving, check out the [Study Club recording].
 
 [`add_assumption()`]: https://github.com/risc0/risc0/blob/v1.0.1/examples/composition/src/main.rs#L29
-[assumption]: /terminology#assumption
 [assumptions]: /terminology#assumption
 [blog post]: https://www.risczero.com/blog/proof-composition
 [code example]: https://github.com/risc0/risc0/tree/v1.0.1/examples/composition#readme
