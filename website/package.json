@@ -4,7 +4,7 @@
   "private": true,
   "description": "RISC Zero Documentation, Education Hub, and Resources",
   "scripts": {
-    "build": "USE_SIMPLE_CSS_MINIFIER=true docusaurus build",
+    "build": "docusaurus build",
     "check-link-versions": "python ./link-version-check.py",
     "clear": "docusaurus clear",
     "deploy": "docusaurus deploy",
@@ -30,18 +30,18 @@
     ]
   },
   "dependencies": {
-    "@docusaurus/core": "^3.4.0",
-    "@docusaurus/plugin-client-redirects": "^3.4.0",
-    "@docusaurus/preset-classic": "^3.4.0",
-    "@docusaurus/theme-mermaid": "^3.4.0",
-    "@mdx-js/react": "^3.0.1",
-    "clsx": "^1.2.1",
-    "prism-react-renderer": "^2.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "rehype-katex": "^7.0.0",
-    "remark-math": "^6.0.0",
-    "unist-util-visit": "^5.0.0"
+    "@docusaurus/core": "3.4.0",
+    "@docusaurus/plugin-client-redirects": "3.4.0",
+    "@docusaurus/preset-classic": "3.4.0",
+    "@docusaurus/theme-mermaid": "3.4.0",
+    "@mdx-js/react": "3.0.1",
+    "clsx": "1.2.1",
+    "prism-react-renderer": "2.3.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "rehype-katex": "7.0.0",
+    "remark-math": "6.0.0",
+    "unist-util-visit": "5.0.0"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.4.0",
