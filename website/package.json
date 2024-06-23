@@ -35,12 +35,14 @@
     "@docusaurus/preset-classic": "^3.4.0",
     "@docusaurus/theme-mermaid": "^3.4.0",
     "@mdx-js/react": "^3.0.1",
+    "@swc/core": "1.6.5",
     "clsx": "^1.2.1",
     "prism-react-renderer": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rehype-katex": "^7.0.0",
     "remark-math": "^6.0.0",
+    "swc-loader": "0.2.6",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
