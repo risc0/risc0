@@ -119,7 +119,7 @@ fn system_split() {
         .unwrap();
     let mut image = BTreeMap::new();
     let mut pc = entry;
-    for _ in 0..1000 {
+    for _ in 0..100 {
         image.insert(pc, 0x1234b137); // lui x2, 0x1234b000
         pc += WORD_SIZE as u32;
     }

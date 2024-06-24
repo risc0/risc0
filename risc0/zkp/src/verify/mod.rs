@@ -101,7 +101,7 @@ impl fmt::Display for VerificationError {
             VerificationError::UnexpectedExitCode => write!(f, "unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "invalid hash suite"),
             VerificationError::VerifierParametersMissing => {
-                write!(f, "verifier paramters were not found in verifier context for the given receipt type")
+                write!(f, "verifier parameters were not found in verifier context for the given receipt type")
             }
             VerificationError::VerifierParametersMismatch { expected, received } => {
                 write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
