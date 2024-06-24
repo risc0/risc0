@@ -734,6 +734,7 @@ impl Merge for ReceiptClaim {
     }
 }
 
+#[cfg(feature = "prove")]
 #[cfg(test)]
 mod tests {
     use hex::FromHex;
