@@ -72,6 +72,7 @@ jobs:
               - templates/**
             crates-validation:
               - *base
+              - risc0/**
               - tools/crates-validator/**
             crates-validator:
               - *base
@@ -464,6 +465,7 @@ jobs:
 
   crates-validation:
     if: needs.changes.outputs.crates-validation == 'true'
+    needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
     env:
       RUST_BACKTRACE: full
