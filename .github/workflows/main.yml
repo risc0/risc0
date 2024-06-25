@@ -34,6 +34,7 @@ jobs:
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
+      crates-validation: ${{ steps.filter.outputs.crates-validation }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
@@ -69,6 +70,9 @@ jobs:
               - *base
               - risc0/**
               - templates/**
+            crates-validation:
+              - *base
+              - tools/crates-validator/**
             crates-validator:
               - *base
               - tools/crates-validator/**
@@ -459,7 +463,7 @@ jobs:
       - run: sccache --show-stats
 
   crates-validation:
-    if: needs.changes.outputs.crates-validator == 'true'
+    if: needs.changes.outputs.crates-validation == 'true'
     runs-on: [self-hosted, prod, Linux, cpu]
     env:
       RUST_BACKTRACE: full
