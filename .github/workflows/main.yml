@@ -447,6 +447,7 @@ jobs:
     runs-on: [self-hosted, prod, macOS, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
+      TOP_N_CRATES: 10
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -455,6 +456,34 @@ jobs:
           key: macOS-default
       - run: cargo test
         working-directory: tools/crates-validator
+      - run: cargo install --force --path risc0/cargo-risczero
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo build --release
+        working-directory: tools/crates-validator/
+      - name: Create working directory
+        run: mkdir -p ${{ runner.temp }}/crate-validation/
+      - name: Generate the profile
+        run: |
+          target/release/gen-profiles \
+          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yaml \
+          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -c $TOP_N_CRATES
+        working-directory: tools/crates-validator/
+      - name: Validate profiles
+        run: |
+          target/release/main \
+          -p ${{ github.workspace }} \
+          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+        shell: bash
+        working-directory: tools/crates-validator/
+      - name: Delete input profile
+        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
+      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
+        if: always()
+      
       - run: sccache --show-stats
 
   browser:
