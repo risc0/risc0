@@ -12,101 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Context, Result};
-use cfg_if::cfg_if;
+use anyhow::{bail, Context, Result};
+use command::CommandExt;
 use fs2::FileExt;
 use regex::Regex;
-use reqwest::header::HeaderMap;
-use reqwest::Client;
-use serde::Deserialize;
-use std::fs::{File, OpenOptions};
-use std::io::Write;
-use std::path::{Path, PathBuf};
-use std::process::{Command, ExitStatus, Output, Stdio};
-use std::{fmt, fs};
-use termcolor::{Color, ColorSpec, StandardStream, WriteColor};
-
-use crate::extension::repo::ExtensionRepo;
-use crate::toolchain::repo::ToolchainRepo;
-use crate::toolchain::rust::RUSTUP_TOOLCHAIN_NAME;
-
-/// Get the host target triple.
-///
-/// Only checks for targets that have pre-built toolchains.
-pub const HOST_TARGET_TRIPLE: Option<&str> = {
-    cfg_if! {
-        if #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
-            Some("x86_64-unknown-linux-gnu")
-        } else if #[cfg(all(target_arch = "x86_64", target_os = "macos"))] {
-            Some("x86_64-apple-darwin")
-        } else if #[cfg(all(target_arch = "aarch64", target_os = "macos"))] {
-            Some("aarch64-apple-darwin")
-        } else if #[cfg(all(target_arch = "x86_64", target_os = "windows"))] {
-            Some("x86_64-pc-windows-msvc")
-        } else {
-            None
-        }
-    }
+use std::{
+    fs::{self, File, OpenOptions},
+    path::{Path, PathBuf},
+    process::Command,
 };
 
-pub struct FileLock(File);
+use crate::{errors::RzupError, extension::Extension, toolchain::Toolchain};
 
-#[derive(Debug)]
-struct ProcessError {
-    status: ExitStatus,
-    #[allow(dead_code)]
-    hidden: bool,
-    stdout: Vec<u8>,
-    stderr: Vec<u8>,
-    cmd_desc: String,
-}
-
-/// Release returned by Github API.
-#[derive(Deserialize)]
-pub struct GithubReleaseData {
-    pub assets: Vec<GithubAsset>,
-    pub tag_name: String,
-    pub published_at: String,
-}
-
-#[derive(Debug)]
-pub struct ParseableToolchainDir {
-    pub name: String,
-    pub path: std::path::PathBuf,
-    pub tag_name: String,
-    pub language: String,
-    pub target: String,
-    pub repo: RepoType,
-}
-
-#[derive(Debug)]
-pub struct UpdateInfo {
-    pub name: String,
-    pub current_version: String,
-    pub current_published_at: String,
-    pub latest_version: String,
-    pub latest_published_at: String,
-    pub up_to_date: bool,
-    pub repo: RepoType,
-}
-/// Release asset returned by Github API.
-#[derive(Deserialize)]
-pub struct GithubAsset {
-    pub browser_download_url: String,
-    pub name: String,
-}
-
-#[derive(Debug)]
-pub enum RepoType {
-    Toolchain(ToolchainRepo),
-    Extension(ExtensionRepo),
-}
-
-pub trait Repo {
-    fn url(&self) -> &str;
-    fn asset_name(&self, target: &str) -> String;
-    fn fetch_info(&self, version: Option<&str>) -> Result<GithubReleaseData>;
-}
+pub mod command;
+pub mod notify;
+pub mod target;
 
 pub fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
@@ -123,106 +43,7 @@ pub fn rzup_home() -> Result<PathBuf> {
 
     Ok(dir)
 }
-
-/// Make sure a binary exists and runs with the given arguments.
-pub fn ensure_binary(command: &str, args: &[&str]) -> Result<()> {
-    Command::new(command)
-        .args(args)
-        .stdout(std::process::Stdio::piped())
-        .run_verbose()
-        .with_context(|| format!("Could not find or execute binary: {command}"))?;
-
-    Ok(())
-}
-
-pub trait CommandExt {
-    fn as_command_mut(&mut self) -> &mut Command;
-
-    fn capture_stdout(&mut self) -> Result<String> {
-        let cmd = self.as_command_mut();
-        let output = cmd.stderr(Stdio::inherit()).output_if_success()?;
-        let str = String::from_utf8(output.stdout)
-            .map_err(|_| anyhow!("process output was not utf-8"))
-            .with_context(|| format!("failed to execute {:?}", cmd))?;
-        Ok(str)
-    }
-
-    fn run_verbose(&mut self) -> Result<()> {
-        let cmd = self.as_command_mut();
-        eprintln!(
-            "Running {} {}:",
-            cmd.get_program().to_string_lossy(),
-            cmd.get_args()
-                .map(|x| x.to_string_lossy())
-                .collect::<Vec<_>>()
-                .join(" ")
-        );
-        self.run()
-    }
-
-    fn run(&mut self) -> Result<()> {
-        let cmd = self.as_command_mut();
-        cmd.stderr(Stdio::inherit())
-            .stdout(Stdio::inherit())
-            .stdin(Stdio::inherit())
-            .output_if_success()?;
-        Ok(())
-    }
-
-    fn output_if_success(&mut self) -> Result<Output> {
-        let cmd = self.as_command_mut();
-        let output = cmd
-            .output()
-            .with_context(|| format!("failed to create process {:?}", cmd))?;
-        check_success(cmd, &output.status, &output.stdout, &output.stderr)?;
-        Ok(output)
-    }
-}
-
-impl CommandExt for Command {
-    fn as_command_mut(&mut self) -> &mut Command {
-        self
-    }
-}
-
-pub fn check_success(
-    cmd: &Command,
-    status: &ExitStatus,
-    stdout: &[u8],
-    stderr: &[u8],
-) -> Result<()> {
-    if status.success() {
-        return Ok(());
-    }
-    Err(ProcessError {
-        cmd_desc: format!("{:?}", cmd),
-        status: *status,
-        stdout: stdout.to_vec(),
-        stderr: stderr.to_vec(),
-        hidden: false,
-    }
-    .into())
-}
-
-impl fmt::Display for ProcessError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to execute {}", self.cmd_desc)?;
-        write!(f, "\n    status: {}", self.status)?;
-        if !self.stdout.is_empty() {
-            let stdout = String::from_utf8_lossy(&self.stdout);
-            let stdout = stdout.replace('\n', "\n        ");
-            write!(f, "\n    stdout:\n        {}", stdout)?;
-        }
-        if !self.stderr.is_empty() {
-            let stderr = String::from_utf8_lossy(&self.stderr);
-            let stderr = stderr.replace('\n', "\n        ");
-            write!(f, "\n    stderr:\n        {}", stderr)?;
-        }
-        Ok(())
-    }
-}
-
-impl std::error::Error for ProcessError {}
+pub struct FileLock(File);
 
 impl Drop for FileLock {
     fn drop(&mut self) {
@@ -244,13 +65,67 @@ pub fn flock(path: &Path) -> Result<FileLock> {
     Ok(FileLock(file))
 }
 
-pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf> {
-    let rustup_dir = dirs::home_dir()
-        .context("Failed to get home directory")?
-        .join(".rustup")
-        .join("toolchains");
+pub const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
+pub const CPP_TOOLCHAIN_NAME: &str = "cpp";
 
-    let alias_path = rustup_dir.join(alias);
+pub fn find_installed_toolchains() -> Result<Vec<String>> {
+    let toolchains_dir = rzup_home()?.join("toolchains");
+    if !toolchains_dir.exists() {
+        return Err(RzupError::Other(
+            "No toolchains installed. \n\nFor more information, try '--help'.".to_string(),
+        )
+        .into());
+    }
+
+    let entries = fs::read_dir(&toolchains_dir)?
+        .filter_map(|res| res.ok())
+        .filter(|entry| entry.path().is_dir())
+        .collect::<Vec<_>>();
+
+    if entries.is_empty() {
+        println!("No installed toolchains found.");
+        return Ok(Vec::new());
+    }
+
+    let string_entries = entries
+        .iter()
+        .map(|e| e.file_name().to_string_lossy().to_string())
+        .collect();
+
+    Ok(string_entries)
+}
+
+pub fn find_cargo_risczero_version() -> Result<String> {
+    let out = Command::new("cargo")
+        .args(["risczero", "--version"])
+        .capture_stdout()
+        .context(
+            "failed to detect cargo-risczero installation. \n\nFor more information, try '--help'.",
+        )?
+        .split_whitespace()
+        .last()
+        .context("Error parsing cargo-risczero version")?
+        .to_string();
+    Ok(out)
+}
+
+pub fn find_active_toolchain_name(alias: &str) -> Result<String> {
+    let active_toolchain_path = get_toolchain_cwd(alias)?;
+    let active_toolchain = parse_toolchain_info(&active_toolchain_path)?;
+    Ok(active_toolchain.name)
+}
+
+pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf> {
+    let linked_dir = match alias {
+        RUSTUP_TOOLCHAIN_NAME => dirs::home_dir()
+            .context("Failed to get home directory")?
+            .join(".rustup")
+            .join("toolchains"),
+        CPP_TOOLCHAIN_NAME => rzup_home().unwrap(),
+        _ => return Err(anyhow::anyhow!("invalid toolchain")),
+    };
+
+    let alias_path = linked_dir.join(alias);
 
     // Check if the alias path exists and is a symlink
     if alias_path.exists() && fs::symlink_metadata(&alias_path)?.file_type().is_symlink() {
@@ -266,6 +141,40 @@ pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf> {
 
     Err(anyhow::anyhow!("Alias not found or is not a symlink"))
 }
+
+pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
+    let dir_name = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or_else(|| anyhow::anyhow!("Invalid directory path"))?;
+
+    // Regex to match the toolchain pattern
+    let re = Regex::new(r"^(?P<tag_name>.+?)-risc0-(?P<language>[^-]+)-(?P<target>.+)$")
+        .context("Failed to compile regex")?;
+
+    if let Some(captures) = re.captures(dir_name) {
+        let language = &captures["language"];
+
+        Ok(ParseableToolchainDir {
+            name: dir_name.to_string(),
+            path: path.to_path_buf(),
+            tag_name: captures["tag_name"].to_string(),
+            language: language.to_string(),
+            target: captures["target"].to_string(),
+        })
+    } else {
+        Err(anyhow::anyhow!("Invalid directory name format"))
+    }
+}
+#[derive(Debug)]
+pub struct ParseableToolchainDir {
+    pub name: String,
+    pub path: std::path::PathBuf,
+    pub tag_name: String,
+    pub language: String,
+    pub target: String,
+}
+
 pub fn get_rustc_version(alias: &str) -> Result<String> {
     let toolchain_dir = get_toolchain_cwd(alias)?;
     let rustc_path = toolchain_dir.join("bin").join("rustc");
@@ -288,219 +197,129 @@ pub fn get_rustc_version(alias: &str) -> Result<String> {
     Ok(rustc_version)
 }
 
-pub fn get_installed_toolchains() -> Result<Vec<ParseableToolchainDir>> {
-    let toolchains_dir = rzup_home()?.join("toolchains");
-
-    if !toolchains_dir.exists() {
-        return Err(anyhow!("No toolchains directory found."));
-    }
-
-    let entries = fs::read_dir(&toolchains_dir)?
-        .filter_map(|res| res.ok())
-        .filter(|entry| entry.path().is_dir())
-        .collect::<Vec<_>>();
-
-    if entries.is_empty() {
-        return Ok(Vec::new());
-    }
-
-    let mut toolchains = Vec::new();
-
-    for entry in entries {
-        match parse_toolchain_info(&entry.path()) {
-            Ok(toolchain) => toolchains.push(toolchain),
-            Err(e) => eprintln!(
-                "Failed to parse toolchain info for {}: {}",
-                entry.file_name().to_string_lossy(),
-                e
-            ),
-        }
-    }
-
-    Ok(toolchains)
+#[derive(Debug)]
+pub struct UpdateInfo {
+    pub name: String,
+    pub current_version: String,
+    pub current_published_at: String,
+    pub latest_version: String,
+    pub latest_published_at: String,
+    pub up_to_date: bool,
 }
 
-pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
-    let dir_name = path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .ok_or_else(|| anyhow!("Invalid directory path"))?;
-
-    // Regex to match the toolchain pattern
-    let re = Regex::new(r"^(?P<tag_name>.+?)-risc0-(?P<language>[^-]+)-(?P<target>.+)$")
-        .context("Failed to compile regex")?;
-
-    if let Some(captures) = re.captures(dir_name) {
-        let language = &captures["language"];
-        let repo = match language {
-            "rust" => RepoType::Toolchain(ToolchainRepo::Rust),
-            "cpp" => RepoType::Toolchain(ToolchainRepo::Cpp),
-            "cargo-risczero" => RepoType::Extension(ExtensionRepo::CargoRisczero),
-            _ => return Err(anyhow!("Unknown language: {}", language)),
-        };
-
-        Ok(ParseableToolchainDir {
-            name: dir_name.to_string(),
-            path: path.to_path_buf(),
-            tag_name: captures["tag_name"].to_string(),
-            language: language.to_string(),
-            target: captures["target"].to_string(),
-            repo,
-        })
-    } else {
-        Err(anyhow!("Invalid directory name format"))
-    }
-}
-
-pub fn pretty_print_message(
-    stdout: &mut StandardStream,
-    bold: bool,
-    color: Option<Color>,
-    message: &str,
-) -> Result<()> {
-    let mut color_spec = ColorSpec::new();
-    color_spec.set_bold(bold).set_fg(color);
-    stdout.set_color(&color_spec)?;
-    write!(stdout, "{}", message)?;
-    stdout.reset()?;
-    Ok(())
-}
-
-pub fn pretty_println_message(
-    stdout: &mut StandardStream,
-    bold: bool,
-    color: Option<Color>,
-    message: &str,
-) -> Result<()> {
-    pretty_print_message(stdout, bold, color, message)?;
-    writeln!(stdout)?;
-    Ok(())
-}
-
-pub fn pretty_print_header(stdout: &mut StandardStream, header: &str) -> Result<()> {
-    pretty_println_message(stdout, true, None, header)?;
-    pretty_println_message(stdout, true, None, &"-".repeat(header.len()))?;
-    pretty_println_message(stdout, false, None, "")?;
-    Ok(())
-}
-
-pub fn get_active_toolchain_name() -> Result<String> {
-    let active_toolchain_path = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
-    let active_toolchain = parse_toolchain_info(&active_toolchain_path)?;
-    Ok(active_toolchain.name)
-}
-
-pub fn get_installed_extension_version() -> Result<String> {
-    let out = Command::new("cargo")
-        .args(["risczero", "--version"])
-        .capture_stdout()
-        .expect("Error getting cargo-risczero version")
-        .split_whitespace()
-        .last()
-        .expect("Error parsing cargo-risczero version")
-        .to_string();
-    Ok(out)
-}
-
-pub fn get_updatable_items() -> Result<Vec<UpdateInfo>> {
+pub async fn get_updatable() -> Result<Vec<UpdateInfo>> {
     let mut updates = Vec::new();
 
-    // Check for cargo-risczero updates
-    let latest_extension_info = ExtensionRepo::CargoRisczero.fetch_info(None)?;
-    let latest_extension_version = latest_extension_info
-        .tag_name
-        .strip_prefix('v')
-        .expect("failed to strip prefix");
+    if !(is_extensions_installed()?) {
+        return Err(RzupError::Other(
+            "No installed extensions detected. \n\nFor more information, try '--help'".to_string(),
+        )
+        .into());
+    }
 
-    let curr_extension_version = get_installed_extension_version()?;
-    let tag = format!("v{}", curr_extension_version);
-    let curr_extension_info = ExtensionRepo::CargoRisczero.fetch_info(Some(&tag))?;
+    if !(is_toolchains_installed()?) {
+        return Err(RzupError::Other(
+            "No installed toolchains detected. \n\nFor more information, try '--help'".to_string(),
+        )
+        .into());
+    }
+
+    // Check cargo-risczero for updates
+    let latest_cargo_risczero_version_info = Extension::CargoRiscZero.release_info(None).await?;
+    let latest_cargo_risczero_version_tag = latest_cargo_risczero_version_info.tag_name;
+    let installed_cargo_risczero_version = find_cargo_risczero_version()?;
+    let installed_cargo_risczero_tag = format!("v{}", installed_cargo_risczero_version);
+    let installed_cargo_risczero_release_info = Extension::CargoRiscZero
+        .release_info(Some(&installed_cargo_risczero_tag))
+        .await?;
 
     updates.push(UpdateInfo {
         name: "cargo-risczero".to_string(),
-        current_version: curr_extension_version.clone(),
-        current_published_at: curr_extension_info.published_at.clone(),
-        latest_version: latest_extension_version.to_string(),
-        latest_published_at: latest_extension_info.published_at.clone(),
-        up_to_date: curr_extension_version == latest_extension_version,
-        repo: RepoType::Extension(ExtensionRepo::CargoRisczero),
+        current_version: installed_cargo_risczero_version.clone(),
+        current_published_at: installed_cargo_risczero_release_info.published_at.clone(),
+        latest_version: latest_cargo_risczero_version_tag.to_string(),
+        latest_published_at: latest_cargo_risczero_version_info.published_at.clone(),
+        up_to_date: installed_cargo_risczero_tag == latest_cargo_risczero_version_tag,
     });
 
-    // Check for rust toolchain updates
-    let curr_rust_toolchain = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
-    let curr_rust_info = parse_toolchain_info(&curr_rust_toolchain)?;
-
-    let latest_rust_info = match curr_rust_info.repo {
-        RepoType::Toolchain(ref repo) => repo.fetch_info(None)?,
-        _ => return Err(anyhow!("Invalid repo type for rust toolchain")),
-    };
-
-    let curr_rust_info_ext = match curr_rust_info.repo {
-        RepoType::Toolchain(ref repo) => repo.fetch_info(Some(&curr_rust_info.tag_name))?,
-        _ => return Err(anyhow!("Invalid repo type for rust toolchain")),
-    };
+    // Check rust toolchain for updates
+    let installed_active_rust_toolchain = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
+    let installed_active_rust_toolchain_info =
+        parse_toolchain_info(&installed_active_rust_toolchain)?;
+    let latest_rust_toolchain_release_info = Toolchain::Rust.release_info(None).await?;
+    let installed_active_rust_toolchain_release_info = Toolchain::Rust
+        .release_info(Some(installed_active_rust_toolchain_info.tag_name.clone()).as_deref())
+        .await?;
 
     updates.push(UpdateInfo {
-        name: curr_rust_info.name.clone(),
-        current_version: curr_rust_info.tag_name.clone(),
-        current_published_at: curr_rust_info_ext.published_at.clone(),
-        latest_version: latest_rust_info.tag_name.clone(),
-        latest_published_at: latest_rust_info.published_at.clone(),
-        up_to_date: curr_rust_info.tag_name == latest_rust_info.tag_name,
-        repo: RepoType::Toolchain(ToolchainRepo::Rust),
+        name: installed_active_rust_toolchain_info.name.clone(),
+        current_version: installed_active_rust_toolchain_info.tag_name.clone(),
+        current_published_at: installed_active_rust_toolchain_release_info
+            .published_at
+            .clone(),
+        latest_version: latest_rust_toolchain_release_info.tag_name.clone(),
+        latest_published_at: latest_rust_toolchain_release_info.published_at.clone(),
+        up_to_date: installed_active_rust_toolchain_release_info.tag_name
+            == latest_rust_toolchain_release_info.tag_name,
     });
 
-    // TODO: Check for cpp updates
+    // Check C++ toolchain for updates
+    let installed_active_cpp_toolchain = get_toolchain_cwd(CPP_TOOLCHAIN_NAME)?;
+    let installed_active_cpp_toolchain_info =
+        parse_toolchain_info(&installed_active_cpp_toolchain)?;
+    let latest_cpp_toolchain_release_info = Toolchain::Cpp.release_info(None).await?;
+    let installed_active_cpp_toolchain_release_info = Toolchain::Cpp
+        .release_info(Some(&installed_active_cpp_toolchain_info.tag_name))
+        .await?;
+
+    updates.push(UpdateInfo {
+        name: installed_active_cpp_toolchain_info.name.clone(),
+        current_version: installed_active_cpp_toolchain_info.tag_name.clone(),
+        current_published_at: installed_active_cpp_toolchain_release_info
+            .published_at
+            .clone(),
+        latest_version: latest_cpp_toolchain_release_info.tag_name.clone(),
+        latest_published_at: latest_cpp_toolchain_release_info.published_at.clone(),
+        up_to_date: installed_active_cpp_toolchain_release_info.tag_name
+            == latest_cpp_toolchain_release_info.tag_name,
+    });
 
     Ok(updates)
 }
 
-pub fn fetch_release_info(client: &Client, url: &str) -> Result<GithubReleaseData> {
-    let runtime = tokio::runtime::Runtime::new().context("Failed to create Tokio runtime")?;
+pub fn is_extensions_installed() -> Result<bool> {
+    let extensions_dir = rzup_home()?.join("extensions");
+    if !extensions_dir.exists() {
+        return Ok(false);
+    }
+    let mut entries = fs::read_dir(&extensions_dir)?;
+    if entries.next().is_none() {
+        return Ok(false);
+    }
 
-    runtime.block_on(async {
-        let response = client.get(url).send().await;
-
-        match response {
-            Ok(resp) => {
-                if resp.status() == 403 {
-                    return Err(anyhow!(
-                        "Access forbidden: Received a 403 status code. Try setting a GITHUB_TOKEN enivorment variable to avoid rate limits."
-                    ));
-                }
-
-                let resp = resp
-                    .error_for_status()
-                    .context("Failed to fetch release info")?;
-
-                let data = resp
-                    .json::<GithubReleaseData>()
-                    .await
-                    .context("Failed to deserialize release info")?;
-
-                Ok(data)
-            }
-            Err(e) => Err(anyhow::anyhow!("Request failed: {:?}", e)),
-        }
-    })
+    Ok(true)
 }
 
-pub fn get_http_client() -> Result<Client> {
-    let mut headers = HeaderMap::new();
-    // Use api token if specified via env var.
-    // Prevents 403 errors when IP is throttled by Github API.
-    let gh_token = std::env::var("GITHUB_TOKEN")
-        .ok()
-        .map(|x| x.trim().to_string())
-        .filter(|x| !x.is_empty());
-
-    if let Some(token) = gh_token {
-        headers.insert("authorization", format!("Bearer {token}").parse()?);
+pub fn is_toolchains_installed() -> Result<bool> {
+    let extensions_dir = rzup_home()?.join("toolchains");
+    if !extensions_dir.exists() {
+        return Ok(false);
     }
-    let client = Client::builder()
-        .default_headers(headers)
-        .user_agent("rzup")
-        .build()?;
+    let mut entries = fs::read_dir(&extensions_dir)?;
+    if entries.next().is_none() {
+        return Ok(false);
+    }
 
-    Ok(client)
+    Ok(true)
+}
+
+/// Make sure a binary exists and runs with the given arguments.
+pub fn ensure_binary(command: &str, args: &[&str]) -> Result<()> {
+    Command::new(command)
+        .args(args)
+        .stdout(std::process::Stdio::piped())
+        .run_verbose()
+        .with_context(|| format!("Could not find or execute binary: {command}"))?;
+
+    Ok(())
 }

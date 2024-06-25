@@ -15,22 +15,26 @@
 use anyhow::Result;
 use termcolor::{Color, ColorChoice, StandardStream};
 
-use crate::utils::{get_updatable_items, pretty_print_message, pretty_println_message, UpdateInfo};
+use crate::utils::{
+    get_updatable,
+    notify::{pretty_msg, pretty_msgln},
+    UpdateInfo,
+};
 
-pub fn handle_check_all() -> Result<()> {
-    let updates = get_updatable_items()?;
-    print_updates(&updates);
+pub async fn handler() -> Result<()> {
+    let updates = get_updatable().await?;
+    print_updates(&updates)?;
     Ok(())
 }
 
-fn print_updates(updates: &[UpdateInfo]) {
+fn print_updates(updates: &[UpdateInfo]) -> Result<()> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
 
     for update in updates {
         if update.up_to_date {
-            pretty_print_message(&mut stdout, true, None, &format!("{} - ", update.name)).unwrap();
-            pretty_print_message(&mut stdout, true, Some(Color::Green), "Up to date ").unwrap();
-            pretty_println_message(
+            pretty_msg(&mut stdout, true, None, &format!("{} - ", update.name)).unwrap();
+            pretty_msg(&mut stdout, true, Some(Color::Green), "Up to date ").unwrap();
+            pretty_msgln(
                 &mut stdout,
                 false,
                 None,
@@ -38,13 +42,11 @@ fn print_updates(updates: &[UpdateInfo]) {
                     ": {} ({})",
                     update.current_version, update.current_published_at
                 ),
-            )
-            .unwrap();
+            )?;
         } else {
-            pretty_print_message(&mut stdout, true, None, &format!("{} - ", update.name)).unwrap();
-            pretty_print_message(&mut stdout, true, Some(Color::Yellow), "Update available ")
-                .unwrap();
-            pretty_println_message(
+            pretty_msg(&mut stdout, true, None, &format!("{} - ", update.name)).unwrap();
+            pretty_msg(&mut stdout, true, Some(Color::Yellow), "Update available ").unwrap();
+            pretty_msgln(
                 &mut stdout,
                 false,
                 None,
@@ -55,8 +57,8 @@ fn print_updates(updates: &[UpdateInfo]) {
                     update.latest_version,
                     update.latest_published_at,
                 ),
-            )
-            .unwrap();
+            )?;
         }
     }
+    Ok(())
 }

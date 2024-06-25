@@ -1,0 +1,463 @@
+// Copyright 2024 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use crate::{
+    errors::RzupError,
+    repo::GithubReleaseInfo,
+    utils::{
+        command::CommandExt, ensure_binary, flock, notify::info_msg, rzup_home, target::Target,
+        CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
+    },
+};
+use anyhow::{bail, Context, Result};
+use flate2::bufread::GzDecoder;
+use reqwest::{header::HeaderMap, Client};
+use std::{
+    env, fs,
+    io::{BufReader, Write},
+    os::unix::fs::PermissionsExt,
+    path::{Path, PathBuf},
+    process::Command,
+    str::FromStr,
+};
+use tar::Archive;
+use tempfile::tempdir;
+use xz::bufread::XzDecoder;
+
+const CONFIG_TOML: &str = include_str!("config.toml");
+
+struct BuildOutput {
+    toolchain_dir: PathBuf,
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub enum Toolchain {
+    #[default]
+    Rust,
+    Cpp,
+}
+
+impl FromStr for Toolchain {
+    type Err = RzupError;
+
+    fn from_str(input: &str) -> Result<Toolchain, Self::Err> {
+        match input.to_lowercase().as_str() {
+            "rust" => Ok(Toolchain::Rust),
+            "cpp" => Ok(Toolchain::Cpp),
+            _ => Err(RzupError::InvalidToolchain),
+        }
+    }
+}
+
+impl Toolchain {
+    pub fn to_str(self) -> &'static str {
+        match self {
+            Toolchain::Rust => "rust",
+            Toolchain::Cpp => "cpp",
+        }
+    }
+
+    fn git_url(&self) -> &'static str {
+        match self {
+            Self::Rust => "https://github.com/risc0/rust.git",
+            Self::Cpp => "https://github.com/risc0/toolchain.git",
+        }
+    }
+
+    fn api_url(&self, tag: Option<&str>) -> String {
+        let base_url = match self {
+            Self::Rust => "https://api.github.com/repos/risc0/rust/releases",
+            Self::Cpp => "https://api.github.com/repos/risc0/toolchain/releases",
+        };
+        match tag {
+            Some(tag) => format!("{}/tags/{}", base_url, tag),
+            None => format!("{}/latest", base_url),
+        }
+    }
+
+    pub async fn release_info(&self, tag: Option<&str>) -> Result<GithubReleaseInfo> {
+        let mut headers = HeaderMap::new();
+        if let Ok(token) = env::var("GITHUB_TOKEN") {
+            if !token.trim().is_empty() {
+                headers.insert("authorization", format!("Bearer {}", token).parse()?);
+            }
+        }
+
+        let client = Client::builder()
+            .default_headers(headers)
+            .user_agent("rzup")
+            .build()
+            .context("Failed to build HTTP client")?;
+
+        let url = self.api_url(tag);
+        let res = client.get(&url).send().await?;
+
+        if res.status() == 403 {
+            return Err(RzupError::Other(
+                "Rate limited by GitHub API. Please set a GitHub token in the GITHUB_TOKEN environment variable."
+                    .into(),
+            ).into());
+        }
+
+        let release_info: GithubReleaseInfo = res.json().await?;
+
+        Ok(release_info)
+    }
+
+    async fn download(
+        &self,
+        target: Target,
+        tag: Option<&str>,
+        toolchain_root_dir: &Path,
+    ) -> Result<PathBuf> {
+        let mut headers = HeaderMap::new();
+        if let Ok(token) = env::var("GITHUB_TOKEN") {
+            if !token.trim().is_empty() {
+                headers.insert("authorization", format!("Bearer {}", token).parse()?);
+            }
+        }
+
+        let client = Client::builder()
+            .default_headers(headers)
+            .user_agent("rzup")
+            .build()
+            .context("Failed to build HTTP client")?;
+
+        let temp_dir = tempdir()?;
+
+        let temp_file_path = match self {
+            Toolchain::Rust => temp_dir.path().join("tmp_r0_rust_toolchain.tar.gz"),
+            Toolchain::Cpp => temp_dir.path().join("tmp_r0_cpp_toolchain.tar.xz"),
+        };
+
+        let release_info = self.release_info(tag).await?;
+        let Some(asset) = release_info.assets.get(&target) else {
+            return Err(
+                RzupError::Other(format!("No asset found for target: {:?}", target)).into(),
+            );
+        };
+
+        info_msg("Downloading toolchain...")?;
+        let response = client.get(&asset.browser_download_url).send().await?;
+        if !response.status().is_success() {
+            return Err(RzupError::Other(format!(
+                "Failed to download asset: {:?}",
+                response.status()
+            ))
+            .into());
+        }
+
+        let mut file = fs::File::create(&temp_file_path)?;
+        let content = response.bytes().await?;
+        file.write_all(&content)?;
+
+        let toolchain_dir = toolchain_root_dir.join(format!(
+            "{}-risc0-{}-{}",
+            release_info.tag_name,
+            self.to_str(),
+            target.to_str(),
+        ));
+
+        if toolchain_dir.is_dir() {
+            let msg = format!(
+                "Toolchain path {} already exists - deleting existing files!",
+                toolchain_dir.display()
+            );
+            info_msg(&msg)?;
+            fs::remove_dir_all(&toolchain_dir)?;
+        }
+
+        let tarball = fs::File::open(temp_file_path)?;
+
+        info_msg("Extracting toolchain...")?;
+
+        match self {
+            Toolchain::Rust => {
+                let decoder = GzDecoder::new(BufReader::new(tarball));
+                let mut archive = Archive::new(decoder);
+                archive.unpack(&toolchain_dir)?;
+
+                #[cfg(target_family = "unix")]
+                {
+                    let iter1 = std::fs::read_dir(toolchain_dir.join("bin"))?;
+                    let iter2 = std::fs::read_dir(
+                        toolchain_dir.join(format!("lib/rustlib/{}/bin", target.to_str())),
+                    )?;
+
+                    for res in iter1.chain(iter2) {
+                        let entry = res?;
+                        if entry.file_type()?.is_file() {
+                            let mut perms = entry.metadata()?.permissions();
+                            perms.set_mode(0o755);
+                            std::fs::set_permissions(entry.path(), perms)?;
+                        }
+                    }
+                }
+            }
+            Toolchain::Cpp => {
+                let decoder = XzDecoder::new(BufReader::new(tarball));
+                let mut archive = Archive::new(decoder);
+                archive.unpack(&toolchain_dir)?;
+            }
+        }
+
+        Ok(toolchain_dir)
+    }
+
+    pub fn link(&self, name: &str, dir: &Path) -> Result<()> {
+        match self {
+            Toolchain::Rust => {
+                let msg = format!("Activating rustup toolchain {} at {}", name, dir.display());
+                info_msg(&msg)?;
+
+                #[cfg(not(target_os = "windows"))]
+                let rustc_exe = "rustc";
+
+                #[cfg(target_os = "windows")]
+                let rustc_exe = "rustc.exe";
+
+                let rustc_path = dir.join("bin").join(rustc_exe);
+                if !rustc_path.is_file() {
+                    bail!(
+                        "Invalid toolchain directory: rustc executable not found at {}",
+                        rustc_path.display()
+                    );
+                }
+
+                self.unlink(name)?;
+
+                Command::new("rustup")
+                    .args(["toolchain", "link", name])
+                    .arg(dir)
+                    .run_verbose()
+                    .context("Could not link toolchain: rustup not installed?")?;
+
+                let msg = format!("rustup toolchain {name} was linked successfully");
+                info_msg(&msg)?;
+
+                Ok(())
+            }
+            Toolchain::Cpp => {
+                let rzup_home = rzup_home()?;
+                let cpp_link = rzup_home.join(name);
+
+                if cpp_link.exists() {
+                    fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
+                }
+
+                std::os::unix::fs::symlink(dir, &cpp_link)
+                    .context("Failed to create symlink for cpp")?;
+
+                info_msg(&format!(
+                    "Symlink for cpp toolchain created at {}",
+                    cpp_link.display()
+                ))?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn unlink(&self, name: &str) -> Result<()> {
+        match self {
+            Toolchain::Rust => {
+                Command::new("rustup")
+                    .args(["toolchain", "remove", name])
+                    .run()
+                    .context("Could not remove existing toolchain")?;
+            }
+            Toolchain::Cpp => {
+                let rzup_home = rzup_home()?;
+                let cpp_link = rzup_home.join(name);
+
+                if cpp_link.exists() {
+                    fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub async fn install(&self, tag: Option<&str>) -> Result<()> {
+        let Some(target) = Target::host_target() else {
+            panic!("BOOO") // TODO: Dont panic
+        };
+        let root_dir = rzup_home()?;
+        let lockfile_path = root_dir.join("lock");
+        let _lock = flock(&lockfile_path);
+
+        let toolchains_root_dir = root_dir.join("toolchains");
+
+        match self {
+            Toolchain::Rust => {
+                let rust_path = self.download(target, tag, &toolchains_root_dir).await?;
+                self.link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
+            }
+            Toolchain::Cpp => {
+                let cpp_path = self.download(target, tag, &toolchains_root_dir).await?;
+                self.link(CPP_TOOLCHAIN_NAME, &cpp_path)?;
+            }
+        }
+        Ok(())
+    }
+
+    pub fn build(&self, version: Option<&str>) -> Result<()> {
+        match self {
+            Toolchain::Rust => {
+                let source_url = self.git_url();
+                let tag = version.unwrap_or("risc0");
+                let root_dir = if let Ok(dir) = std::env::var("RISC0_BUILD_DIR") {
+                    PathBuf::from(dir)
+                } else {
+                    dirs::home_dir()
+                        .context("Could not determine home dir. Set RISC0_BUILD_DIR env var!")?
+                        .join(".rzup")
+                };
+                let build_dir = root_dir.join(format!("build-{}", self.to_str()));
+                let toolchains_root_dir = rzup_home()?.join("toolchains");
+                let toolchain_name = format!("{}-{}", self.to_str(), tag);
+                let final_toolchain_dir = toolchains_root_dir.join(&toolchain_name);
+
+                if final_toolchain_dir.exists() {
+                    fs::remove_dir_all(&final_toolchain_dir)
+                        .context("Failed to remove existing toolchain directory")?;
+                }
+
+                // Ensure the build directory exists before running git commands
+                fs::create_dir_all(&build_dir)?;
+
+                self.prepare_git_repo(source_url, tag, &build_dir)?;
+
+                let build_output = self.build_toolchain(&build_dir)?;
+                self.move_toolchain(&build_output.toolchain_dir, &final_toolchain_dir)?;
+                // TODO: Figure out what stage to copy cargo from
+                self.copy_tools(&build_output.toolchain_dir)?;
+                self.link(&toolchain_name, &final_toolchain_dir)?;
+            }
+            Toolchain::Cpp => {
+                // TODO: Implement C++ toolchain build logic
+                bail!("C++ toolchain build not yet supported")
+            }
+        }
+
+        Ok(())
+    }
+
+    fn prepare_git_repo(&self, source: &str, tag: &str, path: &Path) -> Result<()> {
+        eprintln!("Preparing git repo {source} with tag/branch {tag}");
+        ensure_binary("git", &["--version"])?;
+
+        if !path.join(".git").is_dir() {
+            Command::new("git")
+                .args(["clone", source, "."])
+                .current_dir(path)
+                .run_verbose()?;
+        } else {
+            Command::new("git")
+                .args(["fetch", "--all", "--prune"])
+                .current_dir(path)
+                .run_verbose()?;
+        }
+
+        Command::new("git")
+            .args(["checkout", tag])
+            .current_dir(path)
+            .run_verbose()?;
+
+        Command::new("git")
+            .args(["reset", "--hard"])
+            .current_dir(path)
+            .run_verbose()?;
+
+        Command::new("git")
+            .args(["submodule", "update", "--init", "--recursive", "--progress"])
+            .current_dir(path)
+            .run_verbose()?;
+
+        eprintln!("Git repo ready at {}", path.display());
+
+        Ok(())
+    }
+
+    fn build_toolchain(&self, build_dir: &Path) -> Result<BuildOutput> {
+        match self {
+            Toolchain::Rust => {
+                std::fs::write(build_dir.join("config.toml"), CONFIG_TOML)?;
+
+                let has_python3 = Command::new("python3").arg("--version").run().is_ok();
+                let python_cmd = if has_python3 { "python3" } else { "python" };
+
+                Command::new(python_cmd)
+                    .env(
+                        "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
+                        "-Cpasses=loweratomic",
+                    )
+                    .current_dir(build_dir)
+                    .args(["x.py", "build"])
+                    .run_verbose()?;
+
+                Command::new(python_cmd)
+                    .env(
+                        "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
+                        "-Cpasses=loweratomic",
+                    )
+                    .args(["x.py", "build", "--stage", "2"])
+                    .current_dir(build_dir)
+                    .run_verbose()?;
+
+                eprintln!("Rust build complete!");
+
+                for result in std::fs::read_dir(build_dir.join("build"))? {
+                    let entry = result?;
+                    let build_dir = entry.path().join("stage2");
+                    if build_dir.is_dir() {
+                        return Ok(BuildOutput {
+                            toolchain_dir: build_dir,
+                        });
+                    }
+                }
+
+                bail!("Could not find build directory")
+            }
+            Toolchain::Cpp => {
+                // TODO: Implement C++ toolchain build logic
+                bail!("C++ toolchain build not yet supported")
+            }
+        }
+    }
+
+    fn move_toolchain(&self, src: &Path, dst: &Path) -> Result<()> {
+        fs::create_dir_all(dst)?;
+        for entry in fs::read_dir(src)? {
+            let entry = entry?;
+            let entry_path = entry.path();
+            let file_name = entry.file_name();
+            fs::rename(entry_path, dst.join(file_name))?;
+        }
+        Ok(())
+    }
+
+    fn copy_tools(&self, toolchain_dir: &Path) -> Result<()> {
+        let tools_bin_dir = toolchain_dir.parent().unwrap().join("stage2-tools-bin");
+        let target_bin_dir = toolchain_dir.join("bin");
+
+        for tool in tools_bin_dir.read_dir()? {
+            let tool = tool?;
+            let tool_name = tool.file_name();
+            eprintln!("copy tool: {tool_name:?}");
+            fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+        }
+
+        Ok(())
+    }
+}

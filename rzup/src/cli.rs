@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod build;
-pub mod cpp;
+pub mod check;
+pub mod extension;
 pub mod install;
-pub mod repo;
-pub mod rust;
+pub mod show;
+pub mod toolchain;
+pub mod update;

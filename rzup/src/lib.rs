@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod cmd;
+pub mod cli;
+pub mod errors;
 pub mod extension;
-pub mod help;
+pub mod repo;
 pub mod toolchain;
 pub mod utils;
