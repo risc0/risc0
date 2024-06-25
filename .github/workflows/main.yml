@@ -448,7 +448,6 @@ jobs:
     runs-on: [self-hosted, prod, macOS, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
-      TOP_N_CRATES: 10
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
