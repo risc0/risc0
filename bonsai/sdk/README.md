@@ -2,13 +2,15 @@
 
 A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 
+Both blocking and non_blocking (async) versions of the module are available.
+
 ## Example Usage
 
 ```rust
 use std::time::Duration;
 
 use anyhow::Result;
-use bonsai_sdk::Client;
+use bonsai_sdk::blocking::Client;
 use methods::{METHOD_ELF, METHOD_ID};
 use risc0_zkvm::{compute_image_id, serde::to_vec, Receipt};
 
@@ -80,7 +82,7 @@ After a STARK proof is generated, it is possible to convert the proof to SNARK.
 use std::time::Duration;
 
 use anyhow::Result;
-use bonsai_sdk::Client;
+use bonsai_sdk::blocking::Client;
 
 fn run_stark2snark(session_id: String) -> Result<()> {
     let client = Client::from_env(risc0_zkvm::VERSION)?;

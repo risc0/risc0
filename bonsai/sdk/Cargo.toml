@@ -13,11 +13,13 @@ reqwest = { version = "0.12", default-features = false, features = [
   "blocking",
   "json",
   "rustls-tls",
+  "stream",
 ] }
 risc0-groth16 = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
-tokio = { version = "1", features = ["full", "sync"], optional = true }
+tokio = { version = "1", features = ["fs"] }
+duplicate = "1.0"
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -31,7 +33,5 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1.8", features = ["v4"] }
 
 [features]
-default = ["std", "sync_client"]
+default = ["std"]
 std = ["risc0-groth16/std"]
-sync_client = ["maybe-async/is_sync"]
-async_client = ["dep:tokio", "reqwest/stream"]
