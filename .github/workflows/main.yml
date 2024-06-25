@@ -105,6 +105,7 @@ jobs:
       - check-template
       - clippy
       - crates-validator
+      - crates-validation
       - doc
       - docs-rs
       - examples
@@ -456,6 +457,18 @@ jobs:
           key: macOS-default
       - run: cargo test
         working-directory: tools/crates-validator
+      - run: sccache --show-stats
+
+  crates-validation:
+    if: needs.changes.outputs.crates-validator == 'true'
+    runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      RUST_BACKTRACE: full
+      RUST_LOG: info
+      TOP_N_CRATES: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
       - run: cargo install --force --path risc0/cargo-risczero
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
@@ -483,8 +496,6 @@ jobs:
         run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
         if: always()
-      
-      - run: sccache --show-stats
 
   browser:
     if: needs.changes.outputs.browser == 'true'
