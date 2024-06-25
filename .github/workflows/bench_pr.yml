@@ -105,6 +105,7 @@ jobs:
           external-data-json-path: ./cache/external.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           alert-threshold: '120%'
+          fail-threshold: '10000%'
           comment-on-alert: true
           fail-on-alert: false
           summary-always: true
