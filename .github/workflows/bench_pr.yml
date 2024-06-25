@@ -104,7 +104,7 @@ jobs:
           output-file-path: target/hotbench/fib/benchmark.json
           external-data-json-path: ./cache/external.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          alert-threshold: '120%'
+          alert-threshold: '100%'
           fail-threshold: '10000%'
           comment-on-alert: true
           fail-on-alert: false
