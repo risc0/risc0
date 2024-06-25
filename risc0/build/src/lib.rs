@@ -45,6 +45,8 @@ const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 pub fn risc0_data() -> Result<PathBuf> {
     let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
         dir.into()
+    } else if dirs::home_dir().is_some_and(|dir| dir.join(".rzup").exists()) {
+        dirs::home_dir().unwrap().join(".rzup")
     } else if let Some(root) = dirs::data_dir() {
         root.join("cargo-risczero")
     } else if let Some(home) = dirs::home_dir() {
