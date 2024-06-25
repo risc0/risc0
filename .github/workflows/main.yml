@@ -470,11 +470,11 @@ jobs:
     env:
       RUST_BACKTRACE: full
       RUST_LOG: info
+      TOP_N_CRATES: 10
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: echo "TOP_N_CRATES=10" >> $GITHUB_ENV
       - run: cargo install --force --path risc0/cargo-risczero
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
