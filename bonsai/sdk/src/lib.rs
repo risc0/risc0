@@ -350,7 +350,8 @@ pub mod responses {
     }
 }
 
-#[duplicate_item(
+#[cfg_attr(feature = "non_blocking",
+duplicate_item(
     [
         module_type      [non_blocking]
         maybe_async_attr [maybe_async::must_be_async]
@@ -365,7 +366,17 @@ pub mod responses {
         HttpBody         [reqwest::blocking::Body]
         HttpClient       [reqwest::blocking::Client]
     ]
-)]
+))]
+#[cfg_attr(not(feature = "non_blocking"),
+duplicate_item(
+    [
+        module_type      [blocking]
+        maybe_async_attr [maybe_async::must_be_sync]
+        File             [std::fs::File]
+        HttpBody         [reqwest::blocking::Body]
+        HttpClient       [reqwest::blocking::Client]
+    ]
+))]
 /// Client module async/async
 pub mod module_type {
     use super::*;
@@ -889,6 +900,44 @@ mod tests {
             .expect("Failed to construct client");
         let exists = client
             .upload_img(TEST_ID, data)
+            .expect("Failed to upload input");
+        assert!(!exists);
+        get_mock.assert();
+        put_mock.assert();
+    }
+
+    #[cfg(feature = "non_blocking")]
+    #[tokio::test]
+    async fn image_upload_async() {
+        let data = vec![];
+
+        let server = MockServer::start();
+
+        let put_url = format!("http://{}/upload/{TEST_ID}", server.address());
+        let response = ImgUploadRes { url: put_url };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/images/upload/{TEST_ID}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let put_mock = server.mock(|when, then| {
+            when.method(PUT).path(format!("/upload/{TEST_ID}"));
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client =
+            super::non_blocking::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+                .expect("Failed to construct client");
+        let exists = client
+            .upload_img(TEST_ID, data)
+            .await
             .expect("Failed to upload input");
         assert!(!exists);
         get_mock.assert();

@@ -438,7 +438,6 @@ dependencies = [
  "risc0-groth16",
  "serde",
  "thiserror",
- "tokio",
 ]
 
 [[package]]
