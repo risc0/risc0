@@ -557,7 +557,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Use typos with config file
-        uses: risc0/typos
+        uses: risc0/typos@v1
         with: 
           config: .github/scripts/typos.toml
 
