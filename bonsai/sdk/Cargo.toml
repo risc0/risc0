@@ -29,9 +29,9 @@ hex = "0.4"
 httpmock = "0.7"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 temp-env = "0.3"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-uuid = { version = "1.8", features = ["v4"] }
 tokio = { version = "1", default-features = false }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1.9", features = ["v4"] }
 
 [features]
 default = ["std"]
