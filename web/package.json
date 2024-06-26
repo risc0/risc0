@@ -20,8 +20,8 @@
     "@vercel/speed-insights": "1.0.12",
     "chart.js": "2.9.4",
     "deepmerge": "4.3.1",
-    "framer-motion": "11.2.11",
-    "lucide-react": "0.396.0",
+    "framer-motion": "11.2.12",
+    "lucide-react": "0.397.0",
     "next": "14.2.4",
     "next-themes": "0.3.0",
     "prism-react-renderer": "2.3.1",
@@ -31,7 +31,7 @@
     "react-dom": "18.3.1",
     "react-rainbow-ascii": "1.0.3",
     "sharp": "0.33.4",
-    "turbo": "2.0.4",
+    "turbo": "2.0.5",
     "typescript": "5.5.2",
     "zod": "3.23.8"
   },
@@ -40,7 +40,7 @@
     "@next/bundle-analyzer": "14.2.4",
     "@types/chart.js": "2.9.41",
     "@types/jest": "29.5.12",
-    "@types/node": "20.14.7",
+    "@types/node": "20.14.9",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0"
   },
