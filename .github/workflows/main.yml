@@ -30,6 +30,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      any: ${{ steps.filter.outputs.any }}
       browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
@@ -54,6 +55,8 @@ jobs:
               - Cargo.toml
               - rust-toolchain.toml
               - Cargo.lock
+            any:
+              - **/**
             browser:
               - *base
               - examples/browser-verify/**
@@ -553,7 +556,7 @@ jobs:
       - run: sccache --show-stats
 
   typos:
-    if: always()
+    if: needs.changes.outputs.any == 'true'
     needs: changes
     runs-on: ubuntu-latest
     steps:
