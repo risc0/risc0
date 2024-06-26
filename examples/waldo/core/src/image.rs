@@ -41,9 +41,9 @@ impl From<RgbImage> for ImageChunk {
     }
 }
 
-impl Into<RgbImage> for ImageChunk {
-    fn into(self: Self) -> RgbImage {
-        RgbImage::from_raw(self.width, self.height, self.data).unwrap()
+impl From<ImageChunk> for RgbImage {
+    fn from(chunk: ImageChunk) -> RgbImage {
+        RgbImage::from_raw(chunk.width, chunk.height, chunk.data).unwrap()
     }
 }
 
@@ -185,10 +185,7 @@ mod zkvm {
                     let chunk = self
                         .chunks
                         .get(usize::try_from(y * self.width_chunks + x).unwrap());
-                    self.cache.insert(
-                        (x, y),
-                        RgbImage::from(<ImageChunk as Into<RgbImage>>::into(chunk)).into(),
-                    );
+                    self.cache.insert((x, y), Box::new(RgbImage::from(chunk)));
                     self.cache.get(&(x, y)).unwrap()
                 }
             }
