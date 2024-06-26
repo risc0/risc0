@@ -1,4 +1,4 @@
-# ZKVM Crates.io Validation tools
+# ZKVM Crates.io Validation Tools
 
 This tool allows for spot or bulk testing of different crates.io crates within the zkvm. Using crates.io database export data, combined with manual additions it allows for bulk testing of build/run compatibility of crates with the risc0 zkvm.
 
