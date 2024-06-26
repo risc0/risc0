@@ -117,6 +117,7 @@ jobs:
       - docker
       - test
       # - test-crates
+      - typos
       - web
     runs-on: ubuntu-latest
     steps:
@@ -550,6 +551,16 @@ jobs:
         env:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
+
+  typos:
+    name: Spell Check with Typos
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use typos with config file
+      uses: risc0/typos
+      with: 
+        config: .github/scripts/typos.toml
 
   web:
     if: needs.changes.outputs.web == 'true'
