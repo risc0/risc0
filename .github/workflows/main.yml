@@ -553,7 +553,7 @@ jobs:
       - run: sccache --show-stats
 
   typos:
-    name: Spell Check with Typos
+    needs: changes
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
