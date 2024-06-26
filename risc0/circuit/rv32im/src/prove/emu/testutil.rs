@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
-
 use anyhow::Result;
 use risc0_binfmt::Program;
 use risc0_zkvm_platform::WORD_SIZE;
@@ -36,17 +34,34 @@ impl Syscall for NullSyscall {
     }
 }
 
-pub fn basic() -> Program {
+/// Constructs a program from an iterator of instructions starting from an entrypoint.
+fn program_from_instructions(entry: u32, instructions: impl IntoIterator<Item = u32>) -> Program {
+    let mut pc = entry;
+
     Program {
-        entry: 0x4000,
-        image: BTreeMap::from([
-            (0x4000, 0x1234b137), // lui x2, 0x1234b000
-            (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
-            (0x4008, 0x003100b3), // add x1, x2, x3
-            (0x400c, 0x000045b7), // lui a1, 0x4
-            (0x4010, 0x00000073), // ecall(halt)
-        ]),
+        entry,
+        image: instructions
+            .into_iter()
+            .map(|instr| {
+                let result = (pc, instr);
+                pc += WORD_SIZE as u32;
+                result
+            })
+            .collect(),
     }
+}
+
+pub fn basic() -> Program {
+    program_from_instructions(
+        0x4000,
+        [
+            0x1234b137, // lui x2, 0x1234b000
+            0xf387e1b7, // lui x3, 0xf387e000
+            0x003100b3, // add x1, x2, x3
+            0x000045b7, // lui a1, 0x4
+            0x00000073, // ecall(halt)
+        ],
+    )
 }
 
 pub fn simple_loop() -> Program {
@@ -65,31 +80,29 @@ pub fn simple_loop() -> Program {
     //     ecall
     //
     // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
-    Program {
-        entry: 0x4000,
-        image: BTreeMap::from([
-            (0x4000, 0x00000713), // li      a4,0
-            (0x4004, 0x06400793), // li      a5,100
-            (0x4008, 0x00170713), // add     a4,a4,1
-            (0x400c, 0xfef74ee3), // blt     a4,a5,8 <loop>
-            (0x4010, 0x010005b7), // lui     a1,0x1000
-            (0x4014, 0x00000073), // ecall
-        ]),
-    }
+    program_from_instructions(
+        0x4000,
+        [
+            0x00000713, // li      a4,0
+            0x06400793, // li      a5,100
+            0x00170713, // add     a4,a4,1
+            0xfef74ee3, // blt     a4,a5,8 <loop>
+            0x010005b7, // lui     a1,0x1000
+            0x00000073, // ecall
+        ],
+    )
 }
 
 pub fn large_text() -> Program {
-    let entry = 0x4000;
-    let mut image = BTreeMap::new();
-    let mut pc = entry;
-    for _ in 0..2500 {
-        image.insert(pc, 0x1234b137); // lui x2, 0x1234b000
-        pc += WORD_SIZE as u32;
-    }
-    image.insert(pc, 0x000055b7); // lui a1, 0x00005000
-    pc += WORD_SIZE as u32;
-    image.insert(pc, 0xc0058593); // addi a1, a1, -0x400
-    pc += WORD_SIZE as u32;
-    image.insert(pc, 0x00000073); // ecall(halt)
-    Program { entry, image }
+    let iter = (0..2500).map(|_| {
+        0x1234b137 // lui x2, 0x1234b000
+    });
+
+    let iter = iter.chain([
+        0x000055b7, // lui a1, 0x00005000
+        0xc0058593, // addi a1, a1, -0x400
+        0x00000073, // ecall(halt)
+    ]);
+
+    program_from_instructions(0x4000, iter)
 }
