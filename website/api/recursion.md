@@ -128,9 +128,11 @@ These are using internally to the [Prover] implementations to produce [SuccinctR
 
 1. The `lift` program verifies a STARK proof from the RISC-V Prover, using the Recursion Prover. This recursion proof has a single constant-time verification procedure, with respect to the original segment length, and is then used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
 
-1. The `join` program verifies two proofs from the Recursion Prover, using the Recursion Prover. By repeated application of `join`, any number of receipts for execution spans within the same session can be compressed into a single receipt for the entire session.
+1. The `join` program verifies two STARK proofs from the Recursion Prover, using the Recursion Prover. By repeated application of `join`, any number of receipts for execution spans within the same session can be compressed into a single receipt for the entire session.
 
-1. The `identity_p254` program verifies a proof from the Recursion Prover using the Recursion Prover with the Poseidon254 hash function. The identity_p254 program is used as the last step in the prover pipeline before running the Groth16 prover.
+1. The `identity_p254` program verifies a STARK proof from the Recursion Prover using the Recursion Prover with the Poseidon254 hash function. The identity_p254 program is used as the last step in the prover pipeline before running the Groth16 prover.
+
+1. The `resolve` program (used for [proof composition]) verifies two STARK proofs using the Recursion Prover, in order to remove an [assumption] from a [receipt claim].
 
 ## STARK-to-SNARK Wrapping
 
@@ -138,11 +140,14 @@ All of the recursion programs in the previous section output a [SuccinctReceipt]
 
 The final step in the recursion process is `compress()`, which outputs a [Groth16Receipt], which can be verified on-chain using the [RISC Zero Verifier Contract].
 
+[assumption]: /terminology#assumption
 [composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
+[proof composition]: ./zkvm/composition.md
 [proof system]: /proof-system/proof-system-sequence-diagram
 [prove_with_opts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [Prover]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Receipt.html
+[receipt claim]: /terminology#receipt-claim
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
 [SuccinctReceipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.SuccinctReceipt.html

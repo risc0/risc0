@@ -6,7 +6,6 @@
 .devcontainer/
 .DS_Store
 .idea/
-.vim/
 bazel-*
 ceremony/
 dist/
