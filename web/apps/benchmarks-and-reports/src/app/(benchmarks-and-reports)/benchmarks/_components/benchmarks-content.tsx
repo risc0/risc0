@@ -6,6 +6,10 @@ import { Fragment } from "react";
 import { renderGraph } from "../_utils/render-graph";
 import { BenchmarksList } from "./benchmarks-list";
 
+// benchmarks you don't want to show up in the page
+// @TODO: remove this when the benchmark is ready
+const HIDDEN_BENCHMARKS = ["Linux-g6.xlarge"];
+
 export function BenchmarksContent({ names, setSelectedPlatform, selectedPlatform, benchSet }) {
   return (
     names && (
@@ -17,11 +21,13 @@ export function BenchmarksContent({ names, setSelectedPlatform, selectedPlatform
         className="mt-6"
       >
         <TabsList>
-          {names.map((name) => (
-            <TabsTrigger className="capitalize" key={name} value={name}>
-              {joinWords(name)}
-            </TabsTrigger>
-          ))}
+          {names
+            .filter((name) => !HIDDEN_BENCHMARKS.includes(name))
+            .map((name) => (
+              <TabsTrigger className="capitalize" key={name} value={name}>
+                {joinWords(name)}
+              </TabsTrigger>
+            ))}
         </TabsList>
 
         <div className="mt-4 flex flex-row gap-8">

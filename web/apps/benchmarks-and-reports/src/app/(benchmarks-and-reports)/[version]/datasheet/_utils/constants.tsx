@@ -11,7 +11,7 @@ export const DATASHEET_FILENAMES_TO_TITLES: {
     "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
     "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
     "macOS-cpu.json": "CPU only on Apple M2 Pro",
-    "Linux-g6.xlarge.json": "CUDA on g6.xlarge",
+    //"Linux-g6.xlarge.json": "CUDA on g6.xlarge", @TODO: on hold until vetted
     "Linux-cpu.json": (
       <>
         CPU only on{" "}
