@@ -553,6 +553,7 @@ jobs:
       - run: sccache --show-stats
 
   typos:
+    if: always()
     needs: changes
     runs-on: ubuntu-latest
     steps:
