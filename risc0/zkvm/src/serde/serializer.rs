@@ -18,6 +18,8 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use super::err::{Error, Result};
 
+use crate::alloc::string::ToString;
+
 /// A writer for writing streams preferring word-based data.
 pub trait WordWrite {
     /// Write the given words to the stream.
@@ -120,11 +122,11 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
         false
     }
 
-    fn collect_str<T>(self, _: &T) -> Result<()>
+    fn collect_str<T>(self, value: &T) -> Result<()>
     where
-        T: core::fmt::Display + ?Sized,
+        T: ?Sized + core::fmt::Display,
     {
-        panic!("collect_str")
+        self.serialize_str(&value.to_string())
     }
 
     fn serialize_bool(self, v: bool) -> Result<()> {
@@ -436,6 +438,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeStructVariant for &'a mut Serializer
 mod tests {
     use alloc::string::String;
 
+    use chrono::NaiveDate;
     use serde::Serialize;
 
     use super::*;
@@ -504,5 +507,11 @@ mod tests {
             second: "abc".into(),
         };
         assert_eq!(expected, to_vec(&input).unwrap().as_slice());
+    }
+
+    #[test]
+    fn test_date() {
+        let date: NaiveDate = NaiveDate::parse_from_str("2015-09-05", "%Y-%m-%d").unwrap();
+        let _date_vec = to_vec(&date).unwrap();
     }
 }
