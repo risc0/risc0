@@ -91,9 +91,62 @@ where
     Ok(vec)
 }
 
+#[derive(Default)]
+struct ByteHandler {
+    pub status: u8,
+    pub depth: u8,
+    pub byte_holder: u32,
+}
+
+impl ByteHandler {
+    #[inline]
+    fn increase_depth(&mut self) -> Result<()> {
+        self.depth += 1;
+        Ok(())
+    }
+
+    #[inline]
+    fn decrease_depth<W: WordWrite>(&mut self, stream: &mut W) -> Result<()> {
+        self.depth -= 1;
+        if self.depth == 0 && self.status != 0 {
+            stream.write_words(&[self.byte_holder])?;
+            self.status = 0;
+        }
+        Ok(())
+    }
+
+    #[inline(always)]
+    fn reset<W: WordWrite>(&mut self, stream: &mut W) -> Result<()> {
+        if self.status != 0 {
+            stream.write_words(&[self.byte_holder])?;
+        }
+        self.status = 0;
+        Ok(())
+    }
+
+    fn handle<W: WordWrite>(&mut self, stream: &mut W, v: u8) -> Result<()> {
+        if self.depth == 0 {
+            stream.write_words(&[v as u32])?;
+        } else {
+            if self.status == 0 {
+                self.byte_holder = v as u32;
+                self.status = 1;
+            } else {
+                self.byte_holder |= (v as u32) << (self.status as usize * 8);
+                self.status = (self.status + 1) % 4;
+                if self.status == 0 {
+                    stream.write_words(&[self.byte_holder])?;
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
 /// Enables serializing to a stream
 pub struct Serializer<W: WordWrite> {
     stream: W,
+    byte_handler: ByteHandler,
 }
 
 impl<W: WordWrite> Serializer<W> {
@@ -101,7 +154,10 @@ impl<W: WordWrite> Serializer<W> {
     ///
     /// Creates a serializer that writes to `stream`.
     pub fn new(stream: W) -> Self {
-        Serializer { stream }
+        Serializer {
+            stream,
+            byte_handler: ByteHandler::default(),
+        }
     }
 }
 
@@ -152,7 +208,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u8(self, v: u8) -> Result<()> {
-        self.serialize_u32(v as u32)
+        self.byte_handler.handle(&mut self.stream, v)
     }
 
     fn serialize_u16(self, v: u16) -> Result<()> {
@@ -160,6 +216,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u32(self, v: u32) -> Result<()> {
+        self.byte_handler.reset(&mut self.stream)?;
         self.stream.write_words(&[v])
     }
 
@@ -169,6 +226,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u128(self, v: u128) -> Result<()> {
+        self.byte_handler.reset(&mut self.stream)?;
         self.stream.write_padded_bytes(&v.to_le_bytes())
     }
 
@@ -257,6 +315,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
         match len {
             Some(val) => {
+                self.byte_handler.increase_depth()?;
                 self.serialize_u32(val.try_into().unwrap())?;
                 Ok(self)
             }
@@ -265,6 +324,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple> {
+        self.byte_handler.increase_depth()?;
         Ok(self)
     }
 
@@ -273,6 +333,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
         _name: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleStruct> {
+        self.byte_handler.increase_depth()?;
         Ok(self)
     }
 
@@ -283,6 +344,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
+        self.byte_handler.increase_depth()?;
         self.serialize_u32(variant_index)?;
         Ok(self)
     }
@@ -290,6 +352,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
         match len {
             Some(val) => {
+                self.byte_handler.increase_depth()?;
                 self.serialize_u32(val.try_into().unwrap())?;
                 Ok(self)
             }
@@ -298,6 +361,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct> {
+        self.byte_handler.increase_depth()?;
         Ok(self)
     }
 
@@ -308,6 +372,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeStructVariant> {
+        self.byte_handler.increase_depth()?;
         self.serialize_u32(variant_index)?;
         Ok(self)
     }
@@ -325,7 +390,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeSeq for &'a mut Serializer<W> {
     }
 
     fn end(self) -> Result<()> {
-        Ok(())
+        self.byte_handler.decrease_depth(&mut self.stream)
     }
 }
 
@@ -341,7 +406,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeTuple for &'a mut Serializer<W> {
     }
 
     fn end(self) -> Result<()> {
-        Ok(())
+        self.byte_handler.decrease_depth(&mut self.stream)
     }
 }
 
@@ -357,7 +422,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeTupleStruct for &'a mut Serializer<W
     }
 
     fn end(self) -> Result<()> {
-        Ok(())
+        self.byte_handler.decrease_depth(&mut self.stream)
     }
 }
 
@@ -373,7 +438,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeTupleVariant for &'a mut Serializer<
     }
 
     fn end(self) -> Result<()> {
-        Ok(())
+        self.byte_handler.decrease_depth(&mut self.stream)
     }
 }
 
@@ -396,7 +461,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeMap for &'a mut Serializer<W> {
     }
 
     fn end(self) -> Result<()> {
-        Ok(())
+        self.byte_handler.decrease_depth(&mut self.stream)
     }
 }
 
@@ -412,7 +477,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeStruct for &'a mut Serializer<W> {
     }
 
     fn end(self) -> Result<()> {
-        Ok(())
+        self.byte_handler.decrease_depth(&mut self.stream)
     }
 }
 
@@ -428,7 +493,7 @@ impl<'a, W: WordWrite> serde::ser::SerializeStructVariant for &'a mut Serializer
     }
 
     fn end(self) -> Result<()> {
-        Ok(())
+        self.byte_handler.decrease_depth(&mut self.stream)
     }
 }
 
