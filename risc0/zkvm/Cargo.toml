@@ -76,8 +76,8 @@ tempfile = { version = "3", optional = true }
 typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
+chrono = { version = "0.4", default-features = false, features = ["serde"] }
 clap = { version = "4.5", features = ["derive"] }
-chrono = { version = "0.4", default-features = false, features = ["serde"]}
 criterion = { version = "0.5", features = ["html_reports"] }
 rand = "0.8"
 tracing-forest = "0.1"
