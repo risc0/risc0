@@ -185,6 +185,8 @@ impl Toolchain {
                         }
                     }
                 }
+
+                // TODO: Windows support?
             }
             Toolchain::Cpp => {
                 let decoder = XzDecoder::new(BufReader::new(tarball));
@@ -244,7 +246,12 @@ impl Toolchain {
                     fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
                 }
 
+                #[cfg(target_family = "unix")]
                 std::os::unix::fs::symlink(dir, &cpp_link)
+                    .context("Failed to create symlink for cpp")?;
+
+                #[cfg(target_family = "windows")]
+                std::os::windows::fs::symlink_file(dir, &cpp_link)
                     .context("Failed to create symlink for cpp")?;
 
                 info_msg(&format!(

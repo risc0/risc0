@@ -150,6 +150,11 @@ impl Extension {
                     perms.set_mode(0o755);
                     fs::set_permissions(&binary_path, perms)?;
                 }
+                // TODO: Check if this is necessary
+                #[cfg(target_family = "windows")]
+                {
+                    let binary_path = extension_dir.join("cargo-risczero.exe");
+                }
             }
         }
 
@@ -172,10 +177,21 @@ impl Extension {
                 let r0vm_link = cargo_bin_dir.join("r0vm");
 
                 // Create new symlinks
-                std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
-                    .context("Failed to create symlink for cargo-risczero")?;
-                std::os::unix::fs::symlink(r0vm_path, r0vm_link)
-                    .context("Failed to create symlink for r0vm")?;
+                #[cfg(target_family = "unix")]
+                {
+                    std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
+                        .context("Failed to create symlink for cargo-risczero")?;
+                    std::os::unix::fs::symlink(r0vm_path, r0vm_link)
+                        .context("Failed to create symlink for r0vm")?;
+                }
+                // TODO: Check if this is necessary
+                #[cfg(target_family = "windows")]
+                {
+                    std::os::windows::fs::symlink_file(cargo_risczero_path, cargo_risczero_link)
+                        .context("Failed to create symlink for cargo-risczero")?;
+                    std::os::windows::fs::symlink_file(r0vm_path, r0vm_link)
+                        .context("Failed to create symlink for r0vm")?;
+                }
 
                 info_msg("Symlinks for cargo-risczero and r0vm created successfully")?;
             }
@@ -209,6 +225,16 @@ impl Extension {
         Ok(())
     }
 
+    fn extension_link_exists(&self, name: &str) -> Result<bool> {
+        let cargo_bin_dir = dirs::home_dir()
+            .ok_or_else(|| anyhow!("Could not determine home directory"))?
+            .join(".cargo/bin");
+
+        let extension_link = cargo_bin_dir.join(name);
+
+        Ok(extension_link.exists())
+    }
+
     pub async fn install(&self, tag: Option<&str>) -> Result<()> {
         let target = Target::host_target()
             .ok_or_else(|| RzupError::Other("Failed to determine the host target".to_string()))?;
@@ -223,7 +249,9 @@ impl Extension {
         match self {
             Extension::CargoRiscZero => {
                 let cargo_risczero_path = self.download(target, tag, &extensions_root_dir).await?;
-                self.unlink()?;
+                if self.extension_link_exists("cargo-risczero")? {
+                    self.unlink()?;
+                }
                 self.link(&cargo_risczero_path)?;
             }
         }

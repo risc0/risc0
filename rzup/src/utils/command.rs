@@ -39,7 +39,7 @@ pub trait CommandExt {
     fn run_verbose(&mut self) -> Result<(), RzupError> {
         let cmd = self.as_command_mut();
         let msg = format!(
-            "Running {} {}:",
+            "Running {} {}...",
             cmd.get_program().to_string_lossy(),
             cmd.get_args()
                 .map(|x| x.to_string_lossy())
