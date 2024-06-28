@@ -69,7 +69,13 @@ enum RzupSubcmd {
         extension: Option<extension::Extension>,
     },
     Check,
-    Default,
+    #[command(after_help = "DEFAULT_AFTER_HELP")]
+    Default {
+        /// RISC Zero toolchain language (i.e. rust, cpp)
+        toolchain: Option<toolchain::Toolchain>,
+        /// A toolchain name
+        name: Option<String>,
+    },
     Toolchain {
         #[command(subcommand)]
         subcmd: cli::toolchain::ToolchainSubcmd,
@@ -114,7 +120,7 @@ async fn run() -> Result<()> {
             .await
         }
         RzupSubcmd::Check => cli::check::handler().await,
-        RzupSubcmd::Default => todo!(), // TODO: Add handler for default toolchain and extension linking
+        RzupSubcmd::Default { toolchain, name } => cli::default::handler(toolchain, name),
         RzupSubcmd::Toolchain { subcmd } => cli::toolchain::handler(subcmd).await,
         RzupSubcmd::Extension { subcmd } => cli::extension::handler(subcmd).await,
         RzupSubcmd::Self_ => todo!(), // TODO: Add self updater

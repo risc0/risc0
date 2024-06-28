@@ -38,13 +38,6 @@ pub enum ToolchainSubcmd {
         /// Toolchain name (rust or cpp)
         toolchain: String,
     },
-    /// Link a toolchain
-    Link {
-        /// Toolchain name (rust or cpp)
-        toolchain: String,
-        /// Directory to link the toolchain to
-        dir: String,
-    },
     /// Build a toolchain
     Build {
         /// Toolchain name (rust or cpp)
@@ -70,10 +63,6 @@ pub async fn handler(subcmd: ToolchainSubcmd) -> Result<()> {
         ToolchainSubcmd::Uninstall { toolchain } => {
             let toolchain = toolchain.parse::<Toolchain>()?;
             toolchain.unlink(toolchain.to_str()) // TODO: More specific uninstall - by name
-        }
-        ToolchainSubcmd::Link { toolchain, dir } => {
-            let toolchain = toolchain.parse::<Toolchain>()?;
-            toolchain.link(toolchain.to_str(), std::path::Path::new(&dir))
         }
         ToolchainSubcmd::Build { toolchain, version } => {
             let toolchain = toolchain.parse::<Toolchain>()?;

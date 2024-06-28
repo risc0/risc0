@@ -215,10 +215,14 @@ impl Toolchain {
         Ok(toolchain_dir)
     }
 
-    pub fn link(&self, name: &str, dir: &Path) -> Result<()> {
+    pub fn link(&self, dir: &Path) -> Result<()> {
         match self {
             Toolchain::Rust => {
-                let msg = format!("Activating rustup toolchain {} at {}", name, dir.display());
+                let msg = format!(
+                    "Activating rustup toolchain {} at {}",
+                    RUSTUP_TOOLCHAIN_NAME,
+                    dir.display()
+                );
                 info_msg(&msg)?;
 
                 #[cfg(not(target_os = "windows"))]
@@ -235,22 +239,23 @@ impl Toolchain {
                     );
                 }
 
-                self.unlink(name)?;
+                self.unlink(RUSTUP_TOOLCHAIN_NAME)?;
 
                 Command::new("rustup")
-                    .args(["toolchain", "link", name])
+                    .args(["toolchain", "link", RUSTUP_TOOLCHAIN_NAME])
                     .arg(dir)
                     .run_verbose()
                     .context("Could not link toolchain: rustup not installed?")?;
 
-                let msg = format!("rustup toolchain {name} was linked successfully");
+                let msg =
+                    format!("rustup toolchain {RUSTUP_TOOLCHAIN_NAME} was linked successfully");
                 info_msg(&msg)?;
 
                 Ok(())
             }
             Toolchain::Cpp => {
                 let rzup_home = rzup_home()?;
-                let cpp_link = rzup_home.join(name);
+                let cpp_link = rzup_home.join(CPP_TOOLCHAIN_NAME);
 
                 if cpp_link.exists() {
                     fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
@@ -270,6 +275,7 @@ impl Toolchain {
 
     pub fn unlink(&self, name: &str) -> Result<()> {
         match self {
+            // TODO: Fix this - you have to pass in risc0 as the toolchain name. Instead it should be the toolchain dir name
             Toolchain::Rust => {
                 Command::new("rustup")
                     .args(["toolchain", "remove", name])
@@ -301,11 +307,11 @@ impl Toolchain {
         match self {
             Toolchain::Rust => {
                 let rust_path = self.download(target, tag, &toolchains_root_dir).await?;
-                self.link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
+                self.link(&rust_path)?;
             }
             Toolchain::Cpp => {
                 let cpp_path = self.download(target, tag, &toolchains_root_dir).await?;
-                self.link(CPP_TOOLCHAIN_NAME, &cpp_path)?;
+                self.link(&cpp_path)?;
             }
         }
         Ok(())
@@ -342,7 +348,7 @@ impl Toolchain {
                 self.move_toolchain(&build_output.toolchain_dir, &final_toolchain_dir)?;
                 // TODO: Figure out what stage to copy cargo from
                 self.copy_tools(&build_output.toolchain_dir)?;
-                self.link(&toolchain_name, &final_toolchain_dir)?;
+                self.link(&final_toolchain_dir)?;
             }
             Toolchain::Cpp => {
                 // TODO: Implement C++ toolchain build logic
