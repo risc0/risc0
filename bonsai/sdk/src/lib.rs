@@ -491,23 +491,27 @@ pub mod module_type {
         ///
         /// # Example (blocking):
         ///
-        /// ```
+        /// ```no_run
         /// use bonsai_sdk;
         /// let url = "http://api.bonsai.xyz".to_string();
         /// let api_key = "my_secret_key".to_string();
         /// bonsai_sdk::blocking::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
         ///     .expect("Failed to construct sdk client");
         /// ```
-        ///
-        /// # Example (non-blocking):
-        ///
-        /// ```
-        /// use bonsai_sdk;
-        /// let url = "http://api.bonsai.xyz".to_string();
-        /// let api_key = "my_secret_key".to_string();
-        /// bonsai_sdk::non_blocking::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
-        ///     .expect("Failed to construct sdk client");
-        /// ```
+        #[cfg_attr(
+            feature = "non_blocking",
+            doc = r##"
+# Example (non-blocking):
+
+```no_run
+use bonsai_sdk;
+let url = "http://api.bonsai.xyz".to_string();
+let api_key = "my_secret_key".to_string();
+bonsai_sdk::non_blocking::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
+    .expect("Failed to construct sdk client");
+```
+"##
+        )]
         pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
             let client = construct_req_client(&key, risc0_version)?;
             let url = url.strip_suffix('/').unwrap_or(&url).to_string();
@@ -528,13 +532,19 @@ pub mod module_type {
         ///     .expect("Failed to construct sdk client");
         /// ```
         ///
-        /// # Example (non-blocking):
         ///
-        /// ```no_run
-        /// use bonsai_sdk;
-        /// bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
-        ///     .expect("Failed to construct sdk client");
-        /// ```
+        #[cfg_attr(
+            feature = "non_blocking",
+            doc = r##"
+# Example (non-blocking):
+
+```no_run
+use bonsai_sdk;
+bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
+    .expect("Failed to construct sdk client");
+```
+"##
+        )]
         pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
             let api_url = std::env::var(API_URL_ENVVAR).map_err(|_| SdkErr::MissingApiUrl)?;
             let api_url = api_url.strip_suffix('/').unwrap_or(&api_url);
