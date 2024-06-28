@@ -33,6 +33,9 @@ pub enum ExtensionSubcmd {
     Install {
         extension: Extension,
         version: Option<String>,
+        /// Force installation, removing existing directories
+        #[arg(short, long)]
+        force: bool,
     },
     /// Use an installed extension version
     Use {
@@ -45,9 +48,11 @@ pub enum ExtensionSubcmd {
 
 pub async fn handler(subcmd: ExtensionSubcmd) -> Result<()> {
     match subcmd {
-        ExtensionSubcmd::Install { extension, version } => {
-            extension.install(version.as_deref()).await
-        }
+        ExtensionSubcmd::Install {
+            extension,
+            version,
+            force,
+        } => extension.install(version.as_deref(), force).await,
         ExtensionSubcmd::List => {
             let extensions = find_installed_extensions()?;
             for extension in extensions {
@@ -80,8 +85,9 @@ fn parse_extenstion_version(extension: Extension, version: String) -> Result<Pat
             }
         }
     }
-    Err(anyhow::anyhow!(
-        "No matching directory found for version {}",
+    Err(anyhow::anyhow!(format!(
+        "No matching {} found for version {}. \n\nFor more information, try '--help'.",
+        extension.to_str(),
         version
-    ))
+    )))
 }

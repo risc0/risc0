@@ -49,7 +49,7 @@ impl FromStr for Extension {
 }
 
 impl Extension {
-    fn to_str(self) -> &'static str {
+    pub fn to_str(self) -> &'static str {
         match self {
             Extension::CargoRiscZero => "cargo-risczero",
         }
@@ -88,6 +88,7 @@ impl Extension {
         target: Target,
         tag: Option<&str>,
         extensions_root_dir: &Path,
+        force: bool,
     ) -> Result<PathBuf> {
         let client = http_client()?;
 
@@ -107,8 +108,18 @@ impl Extension {
         let extension_dir =
             extensions_root_dir.join(format!("{}-{}", release_info.tag_name, self.to_str()));
 
-        // Skip download if directory already exists
-        if extension_dir.is_dir() {
+        // Remove directory if it exists and force is set
+        if extension_dir.is_dir() && force {
+            let msg = format!(
+                "Extension path {} already exists - deleting existing files!",
+                extension_dir.display()
+            );
+            info_msg(&msg)?;
+            fs::remove_dir_all(&extension_dir)?;
+        }
+
+        // Skip download if directory already exists and force is not set
+        if extension_dir.is_dir() && !force {
             let msg = format!(
                 "Extension path {} already exists - skipping download.",
                 extension_dir.display()
@@ -192,8 +203,11 @@ impl Extension {
                     std::os::windows::fs::symlink_file(r0vm_path, r0vm_link)
                         .context("Failed to create symlink for r0vm")?;
                 }
-
-                info_msg("Symlinks for cargo-risczero and r0vm created successfully")?;
+                let msg = format!(
+                    "Symlinks for cargo-risczero and r0vm created successfully at {}",
+                    cargo_bin_dir.display()
+                );
+                info_msg(&msg)?;
             }
         }
         Ok(())
@@ -235,7 +249,7 @@ impl Extension {
         Ok(extension_link.exists())
     }
 
-    pub async fn install(&self, tag: Option<&str>) -> Result<()> {
+    pub async fn install(&self, tag: Option<&str>, force: bool) -> Result<()> {
         let target = Target::host_target()
             .ok_or_else(|| RzupError::Other("Failed to determine the host target".to_string()))?;
 
@@ -248,7 +262,9 @@ impl Extension {
 
         match self {
             Extension::CargoRiscZero => {
-                let cargo_risczero_path = self.download(target, tag, &extensions_root_dir).await?;
+                let cargo_risczero_path = self
+                    .download(target, tag, &extensions_root_dir, force)
+                    .await?;
                 if self.extension_link_exists("cargo-risczero")? {
                     self.unlink()?;
                 }

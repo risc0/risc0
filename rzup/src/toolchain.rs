@@ -108,6 +108,7 @@ impl Toolchain {
         target: Target,
         tag: Option<&str>,
         toolchain_root_dir: &Path,
+        force: bool,
     ) -> Result<PathBuf> {
         let client = http_client()?;
 
@@ -132,8 +133,18 @@ impl Toolchain {
             target.to_str(),
         ));
 
-        // Skip download if directory already exists
-        if toolchain_dir.is_dir() {
+        // Remove directory if it exists and force is set
+        if toolchain_dir.is_dir() && force {
+            let msg = format!(
+                "Toolchain path {} already exists - deleting existing files!",
+                toolchain_dir.display()
+            );
+            info_msg(&msg)?;
+            fs::remove_dir_all(&toolchain_dir)?;
+        }
+
+        // Skip download if directory already exists and force is not set
+        if toolchain_dir.is_dir() && !force {
             let msg = format!(
                 "Toolchain path {} already exists - skipping download.",
                 toolchain_dir.display()
@@ -185,8 +196,6 @@ impl Toolchain {
                         }
                     }
                 }
-
-                // TODO: Windows support?
             }
             Toolchain::Cpp => {
                 let decoder = XzDecoder::new(BufReader::new(tarball));
@@ -285,7 +294,7 @@ impl Toolchain {
         Ok(())
     }
 
-    pub async fn install(&self, tag: Option<&str>) -> Result<()> {
+    pub async fn install(&self, tag: Option<&str>, force: bool) -> Result<()> {
         let target = Target::host_target()
             .ok_or_else(|| RzupError::Other("Failed to determine the host target".to_string()))?;
         let root_dir = rzup_home()?;
@@ -296,11 +305,15 @@ impl Toolchain {
 
         match self {
             Toolchain::Rust => {
-                let rust_path = self.download(target, tag, &toolchains_root_dir).await?;
+                let rust_path = self
+                    .download(target, tag, &toolchains_root_dir, force)
+                    .await?;
                 self.link(&rust_path)?;
             }
             Toolchain::Cpp => {
-                let cpp_path = self.download(target, tag, &toolchains_root_dir).await?;
+                let cpp_path = self
+                    .download(target, tag, &toolchains_root_dir, force)
+                    .await?;
                 self.link(&cpp_path)?;
             }
         }

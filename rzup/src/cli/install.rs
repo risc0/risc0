@@ -21,21 +21,23 @@ use crate::{extension::Extension, toolchain::Toolchain};
 pub struct InstallOpts {
     pub name: Option<String>,
     pub version: Option<String>,
+    #[arg(short, long, help = "Force the update, ignoring existing directories")]
+    pub force: bool,
 }
 
 pub async fn handler(opts: InstallOpts) -> Result<()> {
     if opts.name.is_none() {
         // Install all default
-        Toolchain::Rust.install(None).await?;
-        Toolchain::Cpp.install(None).await?;
-        Extension::CargoRiscZero.install(None).await?;
+        Toolchain::Rust.install(None, opts.force).await?;
+        Toolchain::Cpp.install(None, opts.force).await?;
+        Extension::CargoRiscZero.install(None, opts.force).await?;
     } else {
         let name = opts.name.unwrap();
         let version = opts.version.as_deref();
         if let Ok(toolchain) = name.parse::<Toolchain>() {
-            toolchain.install(version).await?
+            toolchain.install(version, opts.force).await?
         } else if let Ok(extension) = name.parse::<Extension>() {
-            extension.install(version).await?
+            extension.install(version, opts.force).await?
         } else {
             return Err(anyhow!(
                 "invalid value '{}' for '<install>...' \n\nFor more information try '--help'.",

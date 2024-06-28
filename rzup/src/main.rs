@@ -49,7 +49,6 @@ struct Rzup {
     subcmd: Option<RzupSubcmd>,
 }
 
-// TODO: Document commands and options
 #[derive(Debug, Subcommand)]
 #[command(name = "rzup", bin_name = "rzup")]
 enum RzupSubcmd {
@@ -62,11 +61,17 @@ enum RzupSubcmd {
     Install {
         name: Option<String>,
         version: Option<String>,
+        /// Force the installation, ignoring existing installations and downloads
+        #[arg(short, long)]
+        force: bool,
     },
     #[command(after_help = "UPDATE_AFTER_HELP", aliases = ["upgrade", "up"])]
     Update {
         toolchain: Option<toolchain::Toolchain>,
         extension: Option<extension::Extension>,
+        /// Force the update, ignoring existing installations and downloads
+        #[arg(short, long)]
+        force: bool,
     },
     Check,
     #[command(after_help = "DEFAULT_AFTER_HELP")]
@@ -105,16 +110,27 @@ async fn run() -> Result<()> {
 
     match subcmd {
         RzupSubcmd::Show { subcmd } => cli::show::handler(subcmd),
-        RzupSubcmd::Install { name, version } => {
-            cli::install::handler(cli::install::InstallOpts { name, version }).await
+        RzupSubcmd::Install {
+            name,
+            version,
+            force,
+        } => {
+            cli::install::handler(cli::install::InstallOpts {
+                name,
+                version,
+                force,
+            })
+            .await
         }
         RzupSubcmd::Update {
             toolchain,
             extension,
+            force,
         } => {
             cli::update::handler(cli::update::UpdateOpts {
                 toolchain,
                 extension,
+                force,
             })
             .await
         }

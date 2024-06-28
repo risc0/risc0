@@ -20,31 +20,33 @@ use crate::{extension::Extension, toolchain::Toolchain};
 #[derive(Debug, Default, Args)]
 pub struct UpdateOpts {
     #[arg(
-        help = "TOOLCHAIN ARG HELP", // TODO
+        help = "Specify the toolchain to update",
         num_args = 1..,
     )]
     pub toolchain: Option<Toolchain>,
     #[arg(
-        help = "NOPE", // TODO
+        help = "Specify the extension to update",
         num_args = 1..,
     )]
     pub extension: Option<Extension>,
+    /// Force the update, ignoring existing installations and downloads
+    #[arg(short, long)]
+    pub force: bool,
 }
 
 pub async fn handler(opts: UpdateOpts) -> Result<()> {
-    // TODO: Check for installed component updates, then apply only iof applicable
-    // If no specific toolchain or extension is provided, update all by default
+    // Update all by default if no specific toolchain or extension is provided
     if opts.toolchain.is_none() && opts.extension.is_none() {
-        Toolchain::Rust.install(None).await?;
-        Toolchain::Cpp.install(None).await?;
-        Extension::CargoRiscZero.install(None).await?;
+        Toolchain::Rust.install(None, opts.force).await?;
+        Toolchain::Cpp.install(None, opts.force).await?;
+        Extension::CargoRiscZero.install(None, opts.force).await?;
     } else {
         // Update specific toolchain or extension if provided
         if let Some(toolchain) = opts.toolchain {
-            toolchain.install(None).await?;
+            toolchain.install(None, opts.force).await?;
         }
         if let Some(extension) = opts.extension {
-            extension.install(None).await?;
+            extension.install(None, opts.force).await?;
         }
     }
     Ok(())

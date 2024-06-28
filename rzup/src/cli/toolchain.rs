@@ -32,6 +32,9 @@ pub enum ToolchainSubcmd {
         toolchain: String,
         /// Version tag of the toolchain to install
         version: Option<String>,
+        /// Force installation, removing existing installations and downloads
+        #[arg(short, long)]
+        force: bool,
     },
     /// Uninstall a toolchain
     Uninstall {
@@ -56,9 +59,13 @@ pub async fn handler(subcmd: ToolchainSubcmd) -> Result<()> {
             }
             Ok(())
         }
-        ToolchainSubcmd::Install { toolchain, version } => {
+        ToolchainSubcmd::Install {
+            toolchain,
+            version,
+            force,
+        } => {
             let toolchain = toolchain.parse::<Toolchain>()?;
-            toolchain.install(version.as_deref()).await
+            toolchain.install(version.as_deref(), force).await
         }
         ToolchainSubcmd::Uninstall { toolchain } => {
             let toolchain = toolchain.parse::<Toolchain>()?;
