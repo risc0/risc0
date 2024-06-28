@@ -16,7 +16,9 @@ use anyhow::{bail, Context, Result};
 use command::CommandExt;
 use fs2::FileExt;
 use regex::Regex;
+use reqwest::{header::HeaderMap, Client};
 use std::{
+    env,
     fs::{self, File, OpenOptions},
     path::{Path, PathBuf},
     process::Command,
@@ -207,7 +209,7 @@ pub struct UpdateInfo {
     pub up_to_date: bool,
 }
 
-pub async fn get_updatable() -> Result<Vec<UpdateInfo>> {
+pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>> {
     let mut updates = Vec::new();
 
     if !(is_extensions_installed()?) {
@@ -342,4 +344,21 @@ fn find_all_directories(dir: &Path) -> Result<Vec<PathBuf>> {
 pub fn find_installed_extensions() -> Result<Vec<PathBuf>> {
     let extensions = find_all_directories(&rzup_home()?.join("extensions"))?;
     Ok(extensions)
+}
+
+pub fn http_client() -> Result<Client> {
+    let mut headers = HeaderMap::new();
+    if let Ok(token) = env::var("GITHUB_TOKEN") {
+        if !token.trim().is_empty() {
+            headers.insert("authorization", format!("Bearer {}", token).parse()?);
+        }
+    }
+
+    let client = Client::builder()
+        .default_headers(headers)
+        .user_agent("rzup")
+        .build()
+        .context("Failed to build HTTP client")?;
+
+    Ok(client)
 }

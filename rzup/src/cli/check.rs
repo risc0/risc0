@@ -16,13 +16,13 @@ use anyhow::Result;
 use termcolor::{Color, ColorChoice, StandardStream};
 
 use crate::utils::{
-    get_updatable,
+    get_updatable_active,
     notify::{pretty_msg, pretty_msgln},
     UpdateInfo,
 };
 
 pub async fn handler() -> Result<()> {
-    let updates = get_updatable().await?;
+    let updates = get_updatable_active().await?;
     print_updates(&updates)?;
     Ok(())
 }

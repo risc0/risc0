@@ -16,15 +16,14 @@ use crate::{
     errors::RzupError,
     repo::GithubReleaseInfo,
     utils::{
-        command::CommandExt, ensure_binary, flock, notify::info_msg, rzup_home, target::Target,
-        CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
+        command::CommandExt, ensure_binary, flock, http_client, notify::info_msg, rzup_home,
+        target::Target, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
     },
 };
 use anyhow::{bail, Context, Result};
 use flate2::bufread::GzDecoder;
-use reqwest::{header::HeaderMap, Client};
 use std::{
-    env, fs,
+    fs,
     io::{BufReader, Write},
     os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
@@ -87,18 +86,7 @@ impl Toolchain {
     }
 
     pub async fn release_info(&self, tag: Option<&str>) -> Result<GithubReleaseInfo> {
-        let mut headers = HeaderMap::new();
-        if let Ok(token) = env::var("GITHUB_TOKEN") {
-            if !token.trim().is_empty() {
-                headers.insert("authorization", format!("Bearer {}", token).parse()?);
-            }
-        }
-
-        let client = Client::builder()
-            .default_headers(headers)
-            .user_agent("rzup")
-            .build()
-            .context("Failed to build HTTP client")?;
+        let client = http_client()?;
 
         let url = self.api_url(tag);
         let res = client.get(&url).send().await?;
@@ -121,18 +109,7 @@ impl Toolchain {
         tag: Option<&str>,
         toolchain_root_dir: &Path,
     ) -> Result<PathBuf> {
-        let mut headers = HeaderMap::new();
-        if let Ok(token) = env::var("GITHUB_TOKEN") {
-            if !token.trim().is_empty() {
-                headers.insert("authorization", format!("Bearer {}", token).parse()?);
-            }
-        }
-
-        let client = Client::builder()
-            .default_headers(headers)
-            .user_agent("rzup")
-            .build()
-            .context("Failed to build HTTP client")?;
+        let client = http_client()?;
 
         let temp_dir = tempdir()?;
 
@@ -148,7 +125,26 @@ impl Toolchain {
             );
         };
 
-        info_msg("Downloading toolchain...")?;
+        let toolchain_dir = toolchain_root_dir.join(format!(
+            "{}-risc0-{}-{}",
+            release_info.tag_name,
+            self.to_str(),
+            target.to_str(),
+        ));
+
+        // TODO: Skip download (unless -force?) if dir already exists.
+        if toolchain_dir.is_dir() {
+            let msg = format!(
+                "Toolchain path {} already exists - deleting existing files!",
+                toolchain_dir.display()
+            );
+            info_msg(&msg)?;
+            fs::remove_dir_all(&toolchain_dir)?;
+        }
+
+        let msg = format!("Downloading {} toolchain...", self.to_str());
+        info_msg(&msg)?;
+
         let response = client.get(&asset.browser_download_url).send().await?;
         if !response.status().is_success() {
             return Err(RzupError::Other(format!(
@@ -162,25 +158,10 @@ impl Toolchain {
         let content = response.bytes().await?;
         file.write_all(&content)?;
 
-        let toolchain_dir = toolchain_root_dir.join(format!(
-            "{}-risc0-{}-{}",
-            release_info.tag_name,
-            self.to_str(),
-            target.to_str(),
-        ));
-
-        if toolchain_dir.is_dir() {
-            let msg = format!(
-                "Toolchain path {} already exists - deleting existing files!",
-                toolchain_dir.display()
-            );
-            info_msg(&msg)?;
-            fs::remove_dir_all(&toolchain_dir)?;
-        }
-
         let tarball = fs::File::open(temp_file_path)?;
 
-        info_msg("Extracting toolchain...")?;
+        let msg = format!("Extracting {} toolchain...", self.to_str());
+        info_msg(&msg)?;
 
         match self {
             Toolchain::Rust => {
@@ -332,7 +313,7 @@ impl Toolchain {
                 let build_dir = root_dir.join(format!("build-{}", self.to_str()));
                 let toolchains_root_dir = rzup_home()?.join("toolchains");
                 let toolchain_name = format!("{}-{}", self.to_str(), tag);
-                let final_toolchain_dir = toolchains_root_dir.join(&toolchain_name);
+                let final_toolchain_dir = toolchains_root_dir.join(toolchain_name);
 
                 if final_toolchain_dir.exists() {
                     fs::remove_dir_all(&final_toolchain_dir)

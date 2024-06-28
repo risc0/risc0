@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    env, fs,
+    fs,
     io::{BufReader, Write},
     os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
@@ -22,14 +22,13 @@ use std::{
 
 use anyhow::{anyhow, Context, Result};
 use flate2::bufread::GzDecoder;
-use reqwest::{header::HeaderMap, Client};
 use tar::Archive;
 use tempfile::tempdir;
 
 use crate::{
     errors::RzupError,
     repo::GithubReleaseInfo,
-    utils::{flock, notify::info_msg, rzup_home, target::Target},
+    utils::{flock, http_client, notify::info_msg, rzup_home, target::Target},
 };
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -56,7 +55,7 @@ impl Extension {
         }
     }
 
-    fn url(&self, tag: Option<&str>) -> String {
+    fn api_url(&self, tag: Option<&str>) -> String {
         let base_url = match self {
             Extension::CargoRiscZero => "https://api.github.com/repos/risc0/risc0/releases",
         };
@@ -67,22 +66,9 @@ impl Extension {
     }
 
     pub async fn release_info(&self, tag: Option<&str>) -> Result<GithubReleaseInfo> {
-        let mut headers = HeaderMap::new();
-        // Use api token if specified via env var.
-        // Prevents 403 errors when IP is throttled by Github API.
-        if let Ok(token) = env::var("GITHUB_TOKEN") {
-            if !token.trim().is_empty() {
-                headers.insert("authorization", format!("Bearer {}", token).parse()?);
-            }
-        }
+        let client = http_client()?;
 
-        let client = Client::builder()
-            .default_headers(headers)
-            .user_agent("rzup")
-            .build()
-            .context("Failed to build HTTP client")?;
-
-        let url = self.url(tag);
+        let url = self.api_url(tag);
         let res = client.get(&url).send().await?;
 
         if res.status() == 403 {
@@ -103,18 +89,7 @@ impl Extension {
         tag: Option<&str>,
         extensions_root_dir: &Path,
     ) -> Result<PathBuf> {
-        let mut headers = HeaderMap::new();
-        if let Ok(token) = env::var("GITHUB_TOKEN") {
-            if !token.trim().is_empty() {
-                headers.insert("authorization", format!("Bearer {}", token).parse()?);
-            }
-        }
-
-        let client = Client::builder()
-            .default_headers(headers)
-            .user_agent("rzup")
-            .build()
-            .context("Failed to build HTTP client")?;
+        let client = http_client()?;
 
         let temp_dir = tempdir()?;
 
@@ -128,8 +103,11 @@ impl Extension {
                 RzupError::Other(format!("No asset found for target: {:?}", target)).into(),
             );
         };
+        // TODO: Check if it already exists and skip download if so (unless -f)
 
-        info_msg("Downloading extension...")?;
+        let msg = format!("Downloading {} extension...", self.to_str());
+        info_msg(&msg)?;
+
         let response = client.get(&asset.browser_download_url).send().await?;
         if !response.status().is_success() {
             return Err(RzupError::Other(format!(
@@ -150,7 +128,8 @@ impl Extension {
 
         match self {
             Extension::CargoRiscZero => {
-                info_msg("Extracting extension...")?;
+                let msg = format!("Extracting {} extension...", self.to_str());
+                info_msg(&msg)?;
 
                 let decoder = GzDecoder::new(BufReader::new(tarball));
                 let mut archive = Archive::new(decoder);
@@ -169,49 +148,56 @@ impl Extension {
     }
 
     pub fn link(&self, dir: &Path) -> Result<()> {
-        let cargo_bin_dir = dirs::home_dir()
-            .ok_or_else(|| anyhow!("Could not determine home directory"))?
-            .join(".cargo/bin");
+        match self {
+            Extension::CargoRiscZero => {
+                let cargo_bin_dir = dirs::home_dir()
+                    .ok_or_else(|| anyhow!("Could not determine home directory"))?
+                    .join(".cargo/bin");
 
-        self.unlink()?;
+                self.unlink()?;
 
-        let cargo_risczero_path = dir.join("cargo-risczero");
-        let r0vm_path = dir.join("r0vm");
+                let cargo_risczero_path = dir.join("cargo-risczero");
+                let r0vm_path = dir.join("r0vm");
 
-        let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
-        let r0vm_link = cargo_bin_dir.join("r0vm");
+                let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
+                let r0vm_link = cargo_bin_dir.join("r0vm");
 
-        // Create new symlinks
-        // TODO: Check std::os::unix is appropriate for all supported systems
-        std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
-            .context("Failed to create symlink for cargo-risczero")?;
-        std::os::unix::fs::symlink(r0vm_path, r0vm_link)
-            .context("Failed to create symlink for r0vm")?;
+                // Create new symlinks
+                // TODO: Check std::os::unix is appropriate for all supported systems
+                std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
+                    .context("Failed to create symlink for cargo-risczero")?;
+                std::os::unix::fs::symlink(r0vm_path, r0vm_link)
+                    .context("Failed to create symlink for r0vm")?;
 
-        info_msg("Symlinks for cargo-risczero and r0vm created successfully")?;
-
+                info_msg("Symlinks for cargo-risczero and r0vm created successfully")?;
+            }
+        }
         Ok(())
     }
 
     pub fn unlink(&self) -> Result<()> {
-        let cargo_bin_dir = dirs::home_dir()
-            .ok_or_else(|| anyhow!("Could not determine home directory"))?
-            .join(".cargo/bin");
+        match self {
+            Extension::CargoRiscZero => {
+                let cargo_bin_dir = dirs::home_dir()
+                    .ok_or_else(|| anyhow!("Could not determine home directory"))?
+                    .join(".cargo/bin");
 
-        let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
-        let r0vm_link = cargo_bin_dir.join("r0vm");
+                let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
+                let r0vm_link = cargo_bin_dir.join("r0vm");
 
-        // Remove existing symlinks if they exist
-        if cargo_risczero_link.exists() {
-            fs::remove_file(&cargo_risczero_link)
-                .context("Failed to remove existing cargo-risczero symlink")?;
-            info_msg("Symlinks for cargo-risczero removed successfully")?;
+                // Remove existing symlinks if they exist
+                if cargo_risczero_link.exists() {
+                    fs::remove_file(&cargo_risczero_link)
+                        .context("Failed to remove existing cargo-risczero symlink")?;
+                    info_msg("Symlinks for cargo-risczero removed successfully")?;
+                }
+                if r0vm_link.exists() {
+                    fs::remove_file(&r0vm_link)
+                        .context("Failed to remove existing r0vm symlink")?;
+                    info_msg("Symlinks for r0vm removed successfully")?;
+                }
+            }
         }
-        if r0vm_link.exists() {
-            fs::remove_file(&r0vm_link).context("Failed to remove existing r0vm symlink")?;
-            info_msg("Symlinks for r0vm removed successfully")?;
-        }
-
         Ok(())
     }
 
