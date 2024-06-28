@@ -10,6 +10,7 @@ cargo-native-static = true
 [rust]
 lld = true
 llvm-tools = true
+omit-git-hash = false
 
 [llvm]
 download-ci-llvm = false
