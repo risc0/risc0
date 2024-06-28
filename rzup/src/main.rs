@@ -108,7 +108,6 @@ async fn run() -> Result<()> {
         RzupSubcmd::Install { name, version } => {
             cli::install::handler(cli::install::InstallOpts { name, version }).await
         }
-
         RzupSubcmd::Update {
             toolchain,
             extension,

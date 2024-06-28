@@ -323,3 +323,23 @@ pub fn ensure_binary(command: &str, args: &[&str]) -> Result<()> {
 
     Ok(())
 }
+
+fn find_all_directories(dir: &Path) -> Result<Vec<PathBuf>> {
+    let mut directories = Vec::new();
+
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.is_dir() {
+            directories.push(path);
+        }
+    }
+
+    Ok(directories)
+}
+
+pub fn find_installed_extensions() -> Result<Vec<PathBuf>> {
+    let extensions = find_all_directories(&rzup_home()?.join("extensions"))?;
+    Ok(extensions)
+}

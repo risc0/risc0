@@ -168,7 +168,7 @@ impl Extension {
         Ok(extension_dir)
     }
 
-    fn link(&self, dir: &Path) -> Result<()> {
+    pub fn link(&self, dir: &Path) -> Result<()> {
         let cargo_bin_dir = dirs::home_dir()
             .ok_or_else(|| anyhow!("Could not determine home directory"))?
             .join(".cargo/bin");
@@ -193,7 +193,7 @@ impl Extension {
         Ok(())
     }
 
-    fn unlink(&self) -> Result<()> {
+    pub fn unlink(&self) -> Result<()> {
         let cargo_bin_dir = dirs::home_dir()
             .ok_or_else(|| anyhow!("Could not determine home directory"))?
             .join(".cargo/bin");

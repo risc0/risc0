@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::extension::Extension;
+use std::path::PathBuf;
+
+use crate::{extension::Extension, utils::find_installed_extensions};
 use anyhow::Result;
 use clap::Subcommand;
+use regex::Regex;
 
 #[derive(Debug, Subcommand)]
 #[command(
@@ -23,14 +26,21 @@ use clap::Subcommand;
     after_help = "EXTENSION help"
 )]
 pub enum ExtensionSubcmd {
+    /// List all installed extensions
     List,
+    /// Install an extension (i.e cargo-risczero v1.0.1)
     #[command(aliases = ["add"])]
     Install {
         extension: Extension,
         version: Option<String>,
     },
-    Uninstall,
-    Use,
+    /// Use an installed extension version
+    Use {
+        extension: Extension,
+        version: String,
+    },
+    /// Uninstall an installed extension
+    Uninstall { extension: Extension },
 }
 
 pub async fn handler(subcmd: ExtensionSubcmd) -> Result<()> {
@@ -38,6 +48,40 @@ pub async fn handler(subcmd: ExtensionSubcmd) -> Result<()> {
         ExtensionSubcmd::Install { extension, version } => {
             extension.install(version.as_deref()).await
         }
-        _ => todo!(),
+        ExtensionSubcmd::List => {
+            let extensions = find_installed_extensions()?;
+            for extension in extensions {
+                eprintln!("{}", extension.file_name().unwrap().to_string_lossy());
+            }
+            Ok(())
+        }
+        ExtensionSubcmd::Use { extension, version } => {
+            let extension_path = parse_extenstion_version(extension, version)?;
+            extension.link(&extension_path)
+        }
+        ExtensionSubcmd::Uninstall { extension } => extension.unlink(),
     }
+}
+
+fn parse_extenstion_version(extension: Extension, version: String) -> Result<PathBuf> {
+    let extensions = find_installed_extensions()?;
+    let version_pattern = match extension {
+        Extension::CargoRiscZero => {
+            format!(r"^(v)?{}(?:-.+)?$", regex::escape(&version))
+        }
+    };
+
+    let re = Regex::new(&version_pattern)?;
+
+    for ext in extensions {
+        if let Some(dir_name) = ext.file_name().and_then(|name| name.to_str()) {
+            if re.is_match(dir_name) {
+                return Ok(ext);
+            }
+        }
+    }
+    Err(anyhow::anyhow!(
+        "No matching directory found for version {}",
+        version
+    ))
 }
