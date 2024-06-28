@@ -37,3 +37,7 @@ uuid = { version = "1.9", features = ["v4"] }
 default = ["std"]
 std = ["risc0-groth16/std"]
 non_blocking = ["dep:tokio"]
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true

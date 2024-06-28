@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #![deny(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 //! A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 //!
@@ -488,13 +489,23 @@ pub mod module_type {
     impl Client {
         /// Construct a [Client] from url, api key, and zkvm version
         ///
-        /// # Example:
+        /// # Example (blocking):
         ///
         /// ```
         /// use bonsai_sdk;
         /// let url = "http://api.bonsai.xyz".to_string();
         /// let api_key = "my_secret_key".to_string();
         /// bonsai_sdk::blocking::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
+        ///     .expect("Failed to construct sdk client");
+        /// ```
+        ///
+        /// # Example (non-blocking):
+        ///
+        /// ```
+        /// use bonsai_sdk;
+        /// let url = "http://api.bonsai.xyz".to_string();
+        /// let api_key = "my_secret_key".to_string();
+        /// bonsai_sdk::non_blocking::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
         ///     .expect("Failed to construct sdk client");
         /// ```
         pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
@@ -509,11 +520,19 @@ pub mod module_type {
         /// construct a client. The risc0_version should be the crate version of the
         /// risc0-zkvm crate
         ///
-        /// # Example:
+        /// # Example (blocking):
         ///
         /// ```no_run
         /// use bonsai_sdk;
         /// bonsai_sdk::blocking::Client::from_env(risc0_zkvm::VERSION)
+        ///     .expect("Failed to construct sdk client");
+        /// ```
+        ///
+        /// # Example (non-blocking):
+        ///
+        /// ```no_run
+        /// use bonsai_sdk;
+        /// bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
         ///     .expect("Failed to construct sdk client");
         /// ```
         pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
