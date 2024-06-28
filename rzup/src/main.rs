@@ -37,7 +37,7 @@ Documentation   : https://dev.risczero.com/
 Chat & Support  : https://discord.com/invite/risczero/",
     utils::version(),
 ),
-after_help = "AFTER HELP",
+after_help = cli::help::RZUP_HELP,
 version = utils::version(),
 )]
 struct Rzup {
@@ -52,43 +52,58 @@ struct Rzup {
 #[derive(Debug, Subcommand)]
 #[command(name = "rzup", bin_name = "rzup")]
 enum RzupSubcmd {
-    #[command(after_help = "SHOW AFTER HELP")]
+    /// Show the active and installed toolchains and extensions
+    #[command(after_help = cli::help::SHOW_HELP)]
     Show {
         #[command(subcommand)]
         subcmd: Option<cli::show::ShowSubcmd>,
     },
-    #[command(after_help = "INSTALL_AFTER_HELP")]
+    /// Install toolchains or extensions
+    #[command(after_help = cli::help::INSTALL_HELP)]
     Install {
+        /// Name of the toolchain or extension to install
         name: Option<String>,
+        /// Version tag of the toolchain or extension to install
         version: Option<String>,
         /// Force the installation, ignoring existing installations and downloads
         #[arg(short, long)]
         force: bool,
     },
-    #[command(after_help = "UPDATE_AFTER_HELP", aliases = ["upgrade", "up"])]
+    /// Update toolchains or extensions
+    #[command(after_help = cli::help::UPDATE_HELP, aliases = ["upgrade", "up"])]
     Update {
+        /// Toolchain to update (i.e. rust or cpp)
         toolchain: Option<toolchain::Toolchain>,
+        /// Extension to update (i.e. cargo-risczero)
         extension: Option<extension::Extension>,
         /// Force the update, ignoring existing installations and downloads
         #[arg(short, long)]
         force: bool,
     },
+    /// Check for updates to toolchains and extensions
+    #[command(after_help = cli::help::CHECK_HELP)]
     Check,
-    #[command(after_help = "DEFAULT_AFTER_HELP")]
+    /// Set the default toolchains
+    #[command(after_help = cli::help::DEFAULT_HELP)]
     Default {
-        /// RISC Zero toolchain language (i.e. rust, cpp)
+        /// RISC Zero toolchain (i.e. rust, cpp)
         toolchain: Option<toolchain::Toolchain>,
-        /// A toolchain name
+        /// The toolchain name
         name: Option<String>,
     },
+    /// Modify or query the installed toolchains
     Toolchain {
         #[command(subcommand)]
         subcmd: cli::toolchain::ToolchainSubcmd,
     },
+    /// Modify or query the installed extensions
     Extension {
         #[command(subcommand)]
         subcmd: cli::extension::ExtensionSubcmd,
     },
+    // NOTE: Hidden until prebuilt binares are gtg
+    /// Modify the rzup installation
+    #[command(hide = true)]
     Self_,
 }
 
@@ -138,6 +153,6 @@ async fn run() -> Result<()> {
         RzupSubcmd::Default { toolchain, name } => cli::default::handler(toolchain, name),
         RzupSubcmd::Toolchain { subcmd } => cli::toolchain::handler(subcmd).await,
         RzupSubcmd::Extension { subcmd } => cli::extension::handler(subcmd).await,
-        RzupSubcmd::Self_ => todo!(), // TODO: Add self updater
+        RzupSubcmd::Self_ => todo!(), // TODO: Add self once prebuilt binaries are set
     }
 }

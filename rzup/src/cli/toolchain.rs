@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{toolchain::Toolchain, utils::find_installed_toolchains};
+use crate::{cli, toolchain::Toolchain, utils::find_installed_toolchains};
 use anyhow::Result;
 use clap::Subcommand;
 
@@ -25,8 +25,7 @@ use clap::Subcommand;
 pub enum ToolchainSubcmd {
     /// List installed toolchains
     List,
-    // TODO: Help message
-    #[command(after_help = "TOOLCHAIN_INSTALLL_AFTER_HELP", aliases = ["add"])]
+    #[command(after_help = cli::help::TOOLCHAIN_HELP, aliases = ["add"])]
     Install {
         /// Toolchain name (rust or cpp)
         toolchain: String,
@@ -45,7 +44,7 @@ pub enum ToolchainSubcmd {
     Build {
         /// Toolchain name (rust or cpp)
         toolchain: String,
-        /// Version tag of the toolchain to build
+        /// Version tag or commit hash of the toolchain to build
         version: Option<String>,
     },
 }

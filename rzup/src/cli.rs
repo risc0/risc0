@@ -15,6 +15,7 @@
 pub mod check;
 pub mod default;
 pub mod extension;
+pub mod help;
 pub mod install;
 pub mod show;
 pub mod toolchain;

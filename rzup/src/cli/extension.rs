@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use crate::{extension::Extension, utils::find_installed_extensions};
+use crate::{cli, extension::Extension, utils::find_installed_extensions};
 use anyhow::Result;
 use clap::Subcommand;
 use regex::Regex;
@@ -23,7 +23,7 @@ use regex::Regex;
 #[command(
     arg_required_else_help = true,
     subcommand_required = true,
-    after_help = "EXTENSION help"
+    after_help = cli::help::EXTENSION_HELP
 )]
 pub enum ExtensionSubcmd {
     /// List all installed extensions
@@ -31,7 +31,9 @@ pub enum ExtensionSubcmd {
     /// Install an extension (i.e cargo-risczero v1.0.1)
     #[command(aliases = ["add"])]
     Install {
+        /// The extension to install (e.g., cargo-risczero)
         extension: Extension,
+        /// The version of the extension to install (e.g., v1.0.1)
         version: Option<String>,
         /// Force installation, removing existing directories
         #[arg(short, long)]
@@ -39,11 +41,16 @@ pub enum ExtensionSubcmd {
     },
     /// Use an installed extension version
     Use {
+        /// The extension to use (e.g., cargo-risczero)
         extension: Extension,
+        /// The version of the extension to use (e.g., v1.0.1)
         version: String,
     },
     /// Uninstall an installed extension
-    Uninstall { extension: Extension },
+    Uninstall {
+        /// The extension to uninstall (e.g., cargo-risczero)
+        extension: Extension,
+    },
 }
 
 pub async fn handler(subcmd: ExtensionSubcmd) -> Result<()> {
