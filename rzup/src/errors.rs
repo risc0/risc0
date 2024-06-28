@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use std::process::ExitStatus;
-
 use thiserror::Error;
 
 /// Custom error type for the rzup CLI tool.

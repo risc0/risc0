@@ -132,14 +132,14 @@ impl Toolchain {
             target.to_str(),
         ));
 
-        // TODO: Skip download (unless -force?) if dir already exists.
+        // Skip download if directory already exists
         if toolchain_dir.is_dir() {
             let msg = format!(
-                "Toolchain path {} already exists - deleting existing files!",
+                "Toolchain path {} already exists - skipping download.",
                 toolchain_dir.display()
             );
             info_msg(&msg)?;
-            fs::remove_dir_all(&toolchain_dir)?;
+            return Ok(toolchain_dir);
         }
 
         let msg = format!("Downloading {} toolchain...", self.to_str());
@@ -279,12 +279,11 @@ impl Toolchain {
     }
 
     pub async fn install(&self, tag: Option<&str>) -> Result<()> {
-        let Some(target) = Target::host_target() else {
-            panic!("BOOO") // TODO: Dont panic
-        };
+        let target = Target::host_target()
+            .ok_or_else(|| RzupError::Other("Failed to determine the host target".to_string()))?;
         let root_dir = rzup_home()?;
         let lockfile_path = root_dir.join("lock");
-        let _lock = flock(&lockfile_path);
+        let _lock = flock(&lockfile_path)?;
 
         let toolchains_root_dir = root_dir.join("toolchains");
 

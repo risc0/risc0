@@ -103,7 +103,19 @@ impl Extension {
                 RzupError::Other(format!("No asset found for target: {:?}", target)).into(),
             );
         };
-        // TODO: Check if it already exists and skip download if so (unless -f)
+
+        let extension_dir =
+            extensions_root_dir.join(format!("{}-{}", release_info.tag_name, self.to_str()));
+
+        // Skip download if directory already exists
+        if extension_dir.is_dir() {
+            let msg = format!(
+                "Extension path {} already exists - skipping download.",
+                extension_dir.display()
+            );
+            info_msg(&msg)?;
+            return Ok(extension_dir);
+        }
 
         let msg = format!("Downloading {} extension...", self.to_str());
         info_msg(&msg)?;
@@ -121,9 +133,6 @@ impl Extension {
         let content = response.bytes().await?;
         file.write_all(&content)?;
 
-        let extension_dir =
-            extensions_root_dir.join(format!("{}-{}", release_info.tag_name, self.to_str()));
-
         let tarball = fs::File::open(temp_file_path)?;
 
         match self {
@@ -133,7 +142,7 @@ impl Extension {
 
                 let decoder = GzDecoder::new(BufReader::new(tarball));
                 let mut archive = Archive::new(decoder);
-                archive.unpack(extension_dir.clone())?;
+                archive.unpack(&extension_dir)?;
                 #[cfg(target_family = "unix")]
                 {
                     let binary_path = extension_dir.join("cargo-risczero");
@@ -163,7 +172,6 @@ impl Extension {
                 let r0vm_link = cargo_bin_dir.join("r0vm");
 
                 // Create new symlinks
-                // TODO: Check std::os::unix is appropriate for all supported systems
                 std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
                     .context("Failed to create symlink for cargo-risczero")?;
                 std::os::unix::fs::symlink(r0vm_path, r0vm_link)
@@ -202,14 +210,13 @@ impl Extension {
     }
 
     pub async fn install(&self, tag: Option<&str>) -> Result<()> {
-        let Some(target) = Target::host_target() else {
-            panic!("HAHAHAHAH") // TODO: Dont panic
-        };
+        let target = Target::host_target()
+            .ok_or_else(|| RzupError::Other("Failed to determine the host target".to_string()))?;
 
         let root_dir = rzup_home()?;
 
         let lockfile_path = root_dir.join("ext-lock");
-        let _lock = flock(&lockfile_path);
+        let _lock = flock(&lockfile_path)?;
 
         let extensions_root_dir = root_dir.join("extensions");
 
