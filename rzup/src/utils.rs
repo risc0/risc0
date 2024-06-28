@@ -30,21 +30,28 @@ pub mod command;
 pub mod notify;
 pub mod target;
 
+/// Returns the current version of the rzup tool.
 pub fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
 
-pub fn rzup_home() -> Result<PathBuf> {
+/// Determines the home directory for rzup, which can be set via the
+/// `RISC0_DATA_DIR` environment variable or defaults to `.rzup` in the home directory.
+pub fn rzup_home() -> Result<PathBuf, RzupError> {
     let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
         dir.into()
     } else if let Some(home) = dirs::home_dir() {
         home.join(".rzup")
     } else {
-        bail!("Could not determine rzup directory. Set RISC0_DATA_DIR env var.");
+        return Err(RzupError::config_error(
+            "Could not determine rzup directory. Set RISC0_DATA_DIR env var.",
+        ));
     };
 
     Ok(dir)
 }
+
+/// A struct representing a file lock.
 pub struct FileLock(File);
 
 impl Drop for FileLock {
@@ -53,33 +60,49 @@ impl Drop for FileLock {
     }
 }
 
-pub fn flock(path: &Path) -> Result<FileLock> {
-    let parent = path.parent().unwrap();
-    std::fs::create_dir_all(parent)
-        .context(format!("failed to create directory `{}`", parent.display()))?;
+/// Acquires an exclusive lock on the specified file path, creating the file if it doesn't exist.
+pub fn flock(path: &Path) -> Result<FileLock, RzupError> {
+    let parent = path
+        .parent()
+        .ok_or_else(|| RzupError::file_system_error("Invalid parent directory"))?;
+    fs::create_dir_all(parent).map_err(|e| {
+        RzupError::file_system_error(format!(
+            "Failed to create directory `{}`: {}",
+            parent.display(),
+            e
+        ))
+    })?;
     let file = OpenOptions::new()
         .create(true)
         .truncate(true)
         .read(true)
         .write(true)
-        .open(path)?;
-    file.lock_exclusive()?;
+        .open(path)
+        .map_err(|e| {
+            RzupError::file_system_error(format!("Failed to open file `{}`: {}", path.display(), e))
+        })?;
+    file.lock_exclusive().map_err(|e| {
+        RzupError::file_system_error(format!("Failed to lock file `{}`: {}", path.display(), e))
+    })?;
     Ok(FileLock(file))
 }
 
 pub const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 pub const CPP_TOOLCHAIN_NAME: &str = "cpp";
 
-pub fn find_installed_toolchains() -> Result<Vec<String>> {
+/// Finds and returns a list of installed toolchains.
+pub fn find_installed_toolchains() -> Result<Vec<String>, RzupError> {
     let toolchains_dir = rzup_home()?.join("toolchains");
     if !toolchains_dir.exists() {
         return Err(RzupError::Other(
             "No toolchains installed. \n\nFor more information, try '--help'.".to_string(),
-        )
-        .into());
+        ));
     }
 
-    let entries = fs::read_dir(&toolchains_dir)?
+    let entries = fs::read_dir(&toolchains_dir)
+        .map_err(|e| {
+            RzupError::file_system_error(format!("Failed to read toolchains directory: {}", e))
+        })?
         .filter_map(|res| res.ok())
         .filter(|entry| entry.path().is_dir())
         .collect::<Vec<_>>();
@@ -97,13 +120,12 @@ pub fn find_installed_toolchains() -> Result<Vec<String>> {
     Ok(string_entries)
 }
 
+/// Finds and returns the version of the installed `cargo-risczero`.
 pub fn find_cargo_risczero_version() -> Result<String> {
     let out = Command::new("cargo")
         .args(["risczero", "--version"])
         .capture_stdout()
-        .context(
-            "failed to detect cargo-risczero installation. \n\nFor more information, try '--help'.",
-        )?
+        .with_context(|| "Failed to detect cargo-risczero installation")?
         .split_whitespace()
         .last()
         .context("Error parsing cargo-risczero version")?
@@ -111,48 +133,57 @@ pub fn find_cargo_risczero_version() -> Result<String> {
     Ok(out)
 }
 
-pub fn find_active_toolchain_name(alias: &str) -> Result<String> {
+/// Finds and returns the name of the active toolchain for a given alias.
+pub fn find_active_toolchain_name(alias: &str) -> Result<String, RzupError> {
     let active_toolchain_path = get_toolchain_cwd(alias)?;
     let active_toolchain = parse_toolchain_info(&active_toolchain_path)?;
     Ok(active_toolchain.name)
 }
 
-pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf> {
+/// Gets the current working directory of the toolchain specified by the alias.
+pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf, RzupError> {
     let linked_dir = match alias {
         RUSTUP_TOOLCHAIN_NAME => dirs::home_dir()
-            .context("Failed to get home directory")?
+            .ok_or_else(|| RzupError::config_error("Failed to get home directory"))?
             .join(".rustup")
             .join("toolchains"),
-        CPP_TOOLCHAIN_NAME => rzup_home().unwrap(),
-        _ => return Err(anyhow::anyhow!("invalid toolchain")),
+        CPP_TOOLCHAIN_NAME => rzup_home()?,
+        _ => return Err(RzupError::InvalidToolchain),
     };
 
     let alias_path = linked_dir.join(alias);
 
-    // Check if the alias path exists and is a symlink
     if alias_path.exists() && fs::symlink_metadata(&alias_path)?.file_type().is_symlink() {
-        let actual_toolchain_path = fs::read_link(&alias_path)
-            .with_context(|| format!("Failed to read symlink at {:?}", alias_path))?;
-
-        // Get the absolute path of the actual toolchain directory
-        let actual_toolchain_abs_path = fs::canonicalize(&actual_toolchain_path)
-            .with_context(|| format!("Failed to canonicalize path {:?}", actual_toolchain_path))?;
+        let actual_toolchain_path = fs::read_link(&alias_path).map_err(|e| {
+            RzupError::file_system_error(format!(
+                "Failed to read symlink at {:?}: {}",
+                alias_path, e
+            ))
+        })?;
+        let actual_toolchain_abs_path = fs::canonicalize(&actual_toolchain_path).map_err(|e| {
+            RzupError::file_system_error(format!(
+                "Failed to canonicalize path {:?}: {}",
+                actual_toolchain_path, e
+            ))
+        })?;
 
         return Ok(actual_toolchain_abs_path);
     }
 
-    Err(anyhow::anyhow!("Alias not found or is not a symlink"))
+    Err(RzupError::file_system_error(
+        "Alias not found or is not a symlink",
+    ))
 }
 
-pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
+/// Parses the toolchain information from a given path.
+pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir, RzupError> {
     let dir_name = path
         .file_name()
         .and_then(|name| name.to_str())
-        .ok_or_else(|| anyhow::anyhow!("Invalid directory path"))?;
+        .ok_or_else(|| RzupError::file_system_error("Invalid directory path"))?;
 
-    // Regex to match the toolchain pattern
     let re = Regex::new(r"^(?P<tag_name>.+?)-risc0-(?P<language>[^-]+)-(?P<target>.+)$")
-        .context("Failed to compile regex")?;
+        .map_err(|e| RzupError::parse_error(format!("Failed to compile regex: {}", e)))?;
 
     if let Some(captures) = re.captures(dir_name) {
         let language = &captures["language"];
@@ -165,9 +196,11 @@ pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir> {
             target: captures["target"].to_string(),
         })
     } else {
-        Err(anyhow::anyhow!("Invalid directory name format"))
+        Err(RzupError::parse_error("Invalid directory name format"))
     }
 }
+
+/// Struct to hold parsed toolchain directory information.
 #[derive(Debug)]
 pub struct ParseableToolchainDir {
     pub name: String,
@@ -177,28 +210,30 @@ pub struct ParseableToolchainDir {
     pub target: String,
 }
 
+/// Gets the version of `rustc` from the specified toolchain alias.
 pub fn get_rustc_version(alias: &str) -> Result<String> {
     let toolchain_dir = get_toolchain_cwd(alias)?;
     let rustc_path = toolchain_dir.join("bin").join("rustc");
 
     if !rustc_path.exists() {
-        return Err(anyhow::anyhow!(
-            "rustc not found in the toolchain bin directory"
-        ));
+        bail!("rustc not found in the toolchain bin directory");
     }
 
-    // Run rustc -vV and capture the output
-    let output = Command::new(rustc_path).arg("-vV").capture_stdout()?;
+    let output = Command::new(rustc_path)
+        .arg("-vV")
+        .capture_stdout()
+        .with_context(|| "Failed to get rustc version")?;
 
     let rustc_version = output
         .lines()
         .next()
-        .expect("Failed to get rustc version")
+        .context("Failed to get rustc version")?
         .to_string();
 
     Ok(rustc_version)
 }
 
+/// Struct to hold update information for a toolchain or extension.
 #[derive(Debug)]
 pub struct UpdateInfo {
     pub name: String,
@@ -209,24 +244,8 @@ pub struct UpdateInfo {
     pub up_to_date: bool,
 }
 
-pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>> {
-    let mut updates = Vec::new();
-
-    if !(is_extensions_installed()?) {
-        return Err(RzupError::Other(
-            "No installed extensions detected. \n\nFor more information, try '--help'".to_string(),
-        )
-        .into());
-    }
-
-    if !(is_toolchains_installed()?) {
-        return Err(RzupError::Other(
-            "No installed toolchains detected. \n\nFor more information, try '--help'".to_string(),
-        )
-        .into());
-    }
-
-    // Check cargo-risczero for updates
+/// Gets update information for the active cargo-risczero extension.
+async fn check_cargo_risczero_updates() -> Result<UpdateInfo, RzupError> {
     let latest_cargo_risczero_version_info = Extension::CargoRiscZero.release_info(None).await?;
     let latest_cargo_risczero_version_tag = latest_cargo_risczero_version_info.tag_name;
     let installed_cargo_risczero_version = find_cargo_risczero_version()?;
@@ -235,16 +254,18 @@ pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>> {
         .release_info(Some(&installed_cargo_risczero_tag))
         .await?;
 
-    updates.push(UpdateInfo {
+    Ok(UpdateInfo {
         name: "cargo-risczero".to_string(),
         current_version: installed_cargo_risczero_version.clone(),
         current_published_at: installed_cargo_risczero_release_info.published_at.clone(),
         latest_version: latest_cargo_risczero_version_tag.to_string(),
         latest_published_at: latest_cargo_risczero_version_info.published_at.clone(),
         up_to_date: installed_cargo_risczero_tag == latest_cargo_risczero_version_tag,
-    });
+    })
+}
 
-    // Check rust toolchain for updates
+/// Gets update information for the active Rust toolchain.
+async fn check_rust_toolchain_updates() -> Result<UpdateInfo, RzupError> {
     let installed_active_rust_toolchain = get_toolchain_cwd(RUSTUP_TOOLCHAIN_NAME)?;
     let installed_active_rust_toolchain_info =
         parse_toolchain_info(&installed_active_rust_toolchain)?;
@@ -253,7 +274,7 @@ pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>> {
         .release_info(Some(installed_active_rust_toolchain_info.tag_name.clone()).as_deref())
         .await?;
 
-    updates.push(UpdateInfo {
+    Ok(UpdateInfo {
         name: installed_active_rust_toolchain_info.name.clone(),
         current_version: installed_active_rust_toolchain_info.tag_name.clone(),
         current_published_at: installed_active_rust_toolchain_release_info
@@ -263,9 +284,11 @@ pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>> {
         latest_published_at: latest_rust_toolchain_release_info.published_at.clone(),
         up_to_date: installed_active_rust_toolchain_release_info.tag_name
             == latest_rust_toolchain_release_info.tag_name,
-    });
+    })
+}
 
-    // Check C++ toolchain for updates
+/// Gets update information for the active C++ toolchain.
+async fn check_cpp_toolchain_updates() -> Result<UpdateInfo, RzupError> {
     let installed_active_cpp_toolchain = get_toolchain_cwd(CPP_TOOLCHAIN_NAME)?;
     let installed_active_cpp_toolchain_info =
         parse_toolchain_info(&installed_active_cpp_toolchain)?;
@@ -274,7 +297,7 @@ pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>> {
         .release_info(Some(&installed_active_cpp_toolchain_info.tag_name))
         .await?;
 
-    updates.push(UpdateInfo {
+    Ok(UpdateInfo {
         name: installed_active_cpp_toolchain_info.name.clone(),
         current_version: installed_active_cpp_toolchain_info.tag_name.clone(),
         current_published_at: installed_active_cpp_toolchain_release_info
@@ -284,12 +307,34 @@ pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>> {
         latest_published_at: latest_cpp_toolchain_release_info.published_at.clone(),
         up_to_date: installed_active_cpp_toolchain_release_info.tag_name
             == latest_cpp_toolchain_release_info.tag_name,
-    });
+    })
+}
+
+/// Checks for updates for the active toolchains and extensions and returns a list of update information.
+pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>, RzupError> {
+    let mut updates = Vec::new();
+
+    if !is_extensions_installed()? {
+        return Err(RzupError::Other(
+            "No installed extensions detected. \n\nFor more information, try '--help'".to_string(),
+        ));
+    }
+
+    if !is_toolchains_installed()? {
+        return Err(RzupError::Other(
+            "No installed toolchains detected. \n\nFor more information, try '--help'".to_string(),
+        ));
+    }
+
+    updates.push(check_cargo_risczero_updates().await?);
+    updates.push(check_rust_toolchain_updates().await?);
+    updates.push(check_cpp_toolchain_updates().await?);
 
     Ok(updates)
 }
 
-pub fn is_extensions_installed() -> Result<bool> {
+/// Checks if any extensions are installed.
+pub fn is_extensions_installed() -> Result<bool, RzupError> {
     let extensions_dir = rzup_home()?.join("extensions");
     if !extensions_dir.exists() {
         return Ok(false);
@@ -302,7 +347,8 @@ pub fn is_extensions_installed() -> Result<bool> {
     Ok(true)
 }
 
-pub fn is_toolchains_installed() -> Result<bool> {
+/// Checks if any toolchains are installed.
+pub fn is_toolchains_installed() -> Result<bool, RzupError> {
     let extensions_dir = rzup_home()?.join("toolchains");
     if !extensions_dir.exists() {
         return Ok(false);
@@ -322,11 +368,11 @@ pub fn ensure_binary(command: &str, args: &[&str]) -> Result<()> {
         .stdout(std::process::Stdio::piped())
         .run_verbose()
         .with_context(|| format!("Could not find or execute binary: {command}"))?;
-
     Ok(())
 }
 
-fn find_all_directories(dir: &Path) -> Result<Vec<PathBuf>> {
+/// Finds and returns all directories in the specified path.
+fn find_all_directories(dir: &Path) -> Result<Vec<PathBuf>, RzupError> {
     let mut directories = Vec::new();
 
     for entry in fs::read_dir(dir)? {
@@ -341,12 +387,29 @@ fn find_all_directories(dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(directories)
 }
 
-pub fn find_installed_extensions() -> Result<Vec<PathBuf>> {
-    let extensions = find_all_directories(&rzup_home()?.join("extensions"))?;
+/// Finds and returns all installed extensions.
+pub fn find_installed_extensions() -> Result<Vec<PathBuf>, RzupError> {
+    let extensions_dir = rzup_home()?.join("extensions");
+
+    if !extensions_dir.exists() {
+        return Err(RzupError::Other(
+            "No extensions installed. \n\nFor more information, try '--help'.".to_string(),
+        ));
+    }
+
+    let extensions = find_all_directories(&extensions_dir)?;
+
+    if extensions.is_empty() {
+        return Err(RzupError::Other(
+            "No extensions installed.\n\nFor more information, try '--help'.".to_string(),
+        ));
+    }
+
     Ok(extensions)
 }
 
-pub fn http_client() -> Result<Client> {
+/// Creates and returns an HTTP client configured with GitHub token if available.
+pub fn http_client() -> Result<Client, RzupError> {
     let mut headers = HeaderMap::new();
     if let Ok(token) = env::var("GITHUB_TOKEN") {
         if !token.trim().is_empty() {
@@ -358,7 +421,7 @@ pub fn http_client() -> Result<Client> {
         .default_headers(headers)
         .user_agent("rzup")
         .build()
-        .context("Failed to build HTTP client")?;
+        .map_err(RzupError::HttpRequestFailed)?;
 
     Ok(client)
 }

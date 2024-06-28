@@ -36,4 +36,43 @@ pub enum RzupError {
     StdoutError(#[from] std::io::Error),
     #[error("{0}")]
     Other(String),
+    #[error("File system error: {0}")]
+    FileSystemError(String),
+    #[error("Command not found: {0}")]
+    CommandNotFound(String),
+    #[error("Failed to parse output: {0}")]
+    ParseError(String),
+    #[error("Network connection error")]
+    NetworkConnectionError,
+    #[error("Network timeout error")]
+    NetworkTimeoutError,
+    #[error("Configuration error: {0}")]
+    ConfigError(String),
+}
+
+impl RzupError {
+    pub fn file_system_error(message: impl Into<String>) -> Self {
+        RzupError::FileSystemError(message.into())
+    }
+    pub fn command_not_found(command: impl Into<String>) -> Self {
+        RzupError::CommandNotFound(command.into())
+    }
+    pub fn parse_error(message: impl Into<String>) -> Self {
+        RzupError::ParseError(message.into())
+    }
+    pub fn config_error(message: impl Into<String>) -> Self {
+        RzupError::ConfigError(message.into())
+    }
+}
+
+impl From<anyhow::Error> for RzupError {
+    fn from(err: anyhow::Error) -> Self {
+        RzupError::Other(err.to_string())
+    }
+}
+
+impl From<reqwest::header::InvalidHeaderValue> for RzupError {
+    fn from(err: reqwest::header::InvalidHeaderValue) -> Self {
+        RzupError::Other(err.to_string())
+    }
 }

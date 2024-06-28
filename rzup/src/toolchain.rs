@@ -220,7 +220,9 @@ impl Toolchain {
                     );
                 }
 
-                self.unlink(RUSTUP_TOOLCHAIN_NAME)?;
+                if self.toolchain_link_exists(RUSTUP_TOOLCHAIN_NAME)? {
+                    self.unlink(RUSTUP_TOOLCHAIN_NAME)?;
+                }
 
                 Command::new("rustup")
                     .args(["toolchain", "link", RUSTUP_TOOLCHAIN_NAME])
@@ -256,12 +258,13 @@ impl Toolchain {
 
     pub fn unlink(&self, name: &str) -> Result<()> {
         match self {
-            // TODO: Fix this - you have to pass in risc0 as the toolchain name. Instead it should be the toolchain dir name
             Toolchain::Rust => {
-                Command::new("rustup")
-                    .args(["toolchain", "remove", name])
-                    .run()
-                    .context("Could not remove existing toolchain")?;
+                if self.toolchain_link_exists(name)? {
+                    Command::new("rustup")
+                        .args(["toolchain", "remove", name])
+                        .run()
+                        .context("Could not remove existing toolchain")?;
+                }
             }
             Toolchain::Cpp => {
                 let rzup_home = rzup_home()?;
@@ -446,5 +449,26 @@ impl Toolchain {
         }
 
         Ok(())
+    }
+
+    fn toolchain_link_exists(&self, name: &str) -> Result<bool> {
+        match self {
+            Toolchain::Rust => {
+                let output = Command::new("rustup")
+                    .args(["toolchain", "list"])
+                    .output()
+                    .context("Failed to list rustup toolchains")?;
+
+                let toolchains = String::from_utf8(output.stdout)
+                    .context("Failed to parse rustup toolchains list")?;
+
+                Ok(toolchains.lines().any(|line| line.contains(name)))
+            }
+            Toolchain::Cpp => {
+                let rzup_home = rzup_home()?;
+                let cpp_link = rzup_home.join(name);
+                Ok(cpp_link.exists())
+            }
+        }
     }
 }
