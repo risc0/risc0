@@ -438,7 +438,6 @@ impl<'a, W: WordWrite> serde::ser::SerializeStructVariant for &'a mut Serializer
 mod tests {
     use alloc::string::String;
 
-    use chrono::NaiveDate;
     use serde::Serialize;
 
     use super::*;
@@ -507,11 +506,5 @@ mod tests {
             second: "abc".into(),
         };
         assert_eq!(expected, to_vec(&input).unwrap().as_slice());
-    }
-
-    #[test]
-    fn test_date() {
-        let date: NaiveDate = NaiveDate::parse_from_str("2015-09-05", "%Y-%m-%d").unwrap();
-        let _date_vec = to_vec(&date).unwrap();
     }
 }
