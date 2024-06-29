@@ -200,7 +200,18 @@ impl Toolchain {
             Toolchain::Cpp => {
                 let decoder = XzDecoder::new(BufReader::new(tarball));
                 let mut archive = Archive::new(decoder);
-                archive.unpack(&toolchain_dir)?;
+                let tmp_dir = tempdir()?;
+                archive.unpack(&tmp_dir)?;
+
+                // NOTE: This is to move down a directory during the unpacking phase of a toolchain
+                // i.e. unpacking `XYZ.tar.xz` to `dir` -> `dir/contents`, rather than `dir/XYZ/contents`
+                let subdir = fs::read_dir(&tmp_dir)?
+                    .filter_map(Result::ok)
+                    .map(|entry| entry.path())
+                    .find(|path| path.is_dir()) // Find the unpacked child dir
+                    .ok_or_else(|| RzupError::Other("No subdirectory found in archive".into()))?;
+                // Move subdir contents to toolchain dir
+                self.move_toolchain(&subdir, &toolchain_dir)?;
             }
         }
 
