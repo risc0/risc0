@@ -79,7 +79,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
-[Bonsai Quick Start]: ../bonsai/quickstart
+[Bonsai Quick Start]: ../bonsai/quickstart.md
 [Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
 [Bonfire Wallet]: https://twitter.com/RiscZero/status/1673692915401629698
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance#readme

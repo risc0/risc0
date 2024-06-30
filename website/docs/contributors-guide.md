@@ -7,7 +7,7 @@ _This page describes guidelines for community contributions to this [website](ht
 > - Make suggestions or report bugs via [GitHub issues](https://github.com/risc0/risc0/issues)
 > - Contribute website content or give feedback on [open pull requests](https://github.com/risc0/risc0/pulls)
 > - Contribute to the [main zkVM project](https://github.com/risc0/risc0) (see [CONTRIBUTING](https://github.com/risc0/risc0/blob/main/CONTRIBUTING.md))
-> - Contribute to our tutorials and how-to guides for our [templates](https://github.com/risc0/risc0/tree/main/templates) and [Rust examples](https://github.com/risc0/risc0/tree/v0.18.0/examples)
+> - Contribute to our tutorials and how-to guides for our [templates](https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates) and [Rust examples](https://github.com/risc0/risc0/tree/main/examples)
 > - Ask questions on [Discord](https://discord.gg/risczero)
 
 ## How To Contribute

@@ -61,7 +61,7 @@ mod entrypoint {
     static STACK_TOP: u32 = crate::memory::STACK_TOP;
 
     // Entry point; sets up global pointer and stack pointer and passes
-    // to __start.  TODO: when asm_const is stablized, use that here
+    // to __start.  TODO: when asm_const is stabilized, use that here
     // instead of defining a symbol and dereferencing it.
     core::arch::global_asm!(
         r#"

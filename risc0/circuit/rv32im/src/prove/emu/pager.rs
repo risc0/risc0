@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    collections::{BTreeMap, BTreeSet, HashMap},
+    collections::{BTreeMap, BTreeSet},
     mem::take,
 };
 
@@ -32,6 +32,9 @@ const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
 const SHA_INIT: usize = 5;
 const SHA_LOAD: usize = 16;
 const SHA_MAIN: usize = 52;
+
+const INVALID_IDX: u32 = u32::MAX;
+const NUM_PAGES: usize = 256 * 1024;
 
 const fn cycles_per_page(blocks_per_page: usize) -> usize {
     1 + SHA_INIT + (SHA_LOAD + SHA_MAIN) * blocks_per_page
@@ -60,7 +63,8 @@ enum Action {
 
 pub struct PagedMemory {
     pub image: MemoryImage,
-    page_cache: HashMap<u32, Page>,
+    page_table: Vec<u32>,
+    page_cache: Vec<Page>,
     page_states: BTreeMap<u32, PageState>,
     pub cycles: usize,
     pending_actions: Vec<Action>,
@@ -76,7 +80,8 @@ impl PagedMemory {
     pub fn new(image: MemoryImage) -> Self {
         Self {
             image,
-            page_cache: HashMap::new(),
+            page_table: vec![INVALID_IDX; NUM_PAGES],
+            page_cache: Vec::new(),
             page_states: BTreeMap::new(),
             cycles: 0,
             pending_actions: Vec::new(),
@@ -92,20 +97,23 @@ impl PagedMemory {
 
     pub fn peek(&self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
-        if let Some(cache) = self.page_cache.get(&page_idx) {
-            Ok(cache.load(addr))
-        } else {
+        let idx = self.page_table[page_idx as usize];
+        if idx == INVALID_IDX {
             self.pre_peek(addr)
+        } else {
+            Ok(self.page_cache[idx as usize].load(addr))
         }
     }
 
     pub fn load(&mut self, addr: WordAddr) -> u32 {
         let page_idx = addr.page_idx();
         // tracing::trace!("load: {addr:?}, page: 0x{page_idx:05x}");
-        if self.page_states.get(&page_idx).is_none() {
+        let mut idx = self.page_table[page_idx as usize];
+        if idx == INVALID_IDX {
             self.load_page(page_idx);
+            idx = self.page_table[page_idx as usize];
         }
-        self.page_cache.get(&page_idx).unwrap().load(addr)
+        self.page_cache[idx as usize].load(addr)
     }
 
     pub fn store(&mut self, addr: WordAddr, data: u32) -> Result<()> {
@@ -123,7 +131,8 @@ impl PagedMemory {
             self.page_changed(page_idx, PageState::Dirty);
         }
 
-        let page = self.page_cache.get_mut(&page_idx).unwrap();
+        let idx = self.page_table[page_idx as usize] as usize;
+        let page = self.page_cache.get_mut(idx).unwrap();
         let old = page.load(addr);
         self.pending_actions.push(Action::Store(addr, old));
         page.store(addr, data);
@@ -151,7 +160,8 @@ impl PagedMemory {
             // Update all 'dirty' pages into the image that accumulates over
             // segments.
             if *page_state == PageState::Dirty {
-                let page = self.page_cache.get(page_idx).unwrap();
+                let idx = self.page_table[*page_idx as usize] as usize;
+                let page = &self.page_cache[idx];
                 self.image.pages.insert(*page_idx, page.0.clone());
             }
         }
@@ -187,10 +197,8 @@ impl PagedMemory {
                     self.cycles -= cycles;
                 }
                 Action::Store(addr, data) => {
-                    self.page_cache
-                        .get_mut(&addr.page_idx())
-                        .unwrap()
-                        .store(*addr, *data);
+                    let idx = self.page_table[addr.page_idx() as usize] as usize;
+                    self.page_cache[idx].store(*addr, *data);
                 }
             }
         }
@@ -204,6 +212,7 @@ impl PagedMemory {
         self.pending_actions.clear();
         self.page_cache.clear();
         self.page_states.clear();
+        self.page_table.fill(INVALID_IDX);
         self.cycles = 0;
     }
 
@@ -221,7 +230,8 @@ impl PagedMemory {
     fn load_page(&mut self, page_idx: u32) {
         tracing::trace!("load_page: 0x{page_idx:05x}");
         let page = self.image.load_page(page_idx);
-        self.page_cache.insert(page_idx, Page(page));
+        self.page_table[page_idx as usize] = self.page_cache.len() as u32;
+        self.page_cache.push(Page(page));
         self.update(page_idx, PageState::Loaded);
         self.page_changed(page_idx, PageState::Loaded);
     }
@@ -239,7 +249,8 @@ impl PagedMemory {
                 }
             } else {
                 let page = self.image.load_page(parent_idx);
-                self.page_cache.insert(parent_idx, Page(page));
+                self.page_table[parent_idx as usize] = self.page_cache.len() as u32;
+                self.page_cache.push(Page(page));
                 self.page_changed(parent_idx, goal);
             }
 

@@ -91,7 +91,7 @@ Check out our [Bonsai on Eth] page.
 [revm]: https://github.com/bluealloy/revm
 [segments]: /terminology#segment
 [session]: /terminology#session
-[use cases]: ../use-cases
+[use cases]: ../use-cases.md
 [verify]: /terminology#verify
 [waldo]: https://www.risczero.com/news/waldo
 [zeth]: https://risczero.com/news/zeth-release

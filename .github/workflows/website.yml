@@ -17,7 +17,6 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
 
 jobs:
   # see: https://github.com/orgs/community/discussions/26822
@@ -95,6 +94,7 @@ jobs:
       - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
 
       - name: build
         run: cargo test --release --no-run
@@ -115,17 +115,15 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
           crate: cargo-binstall
           version: "1.4"
-      - run: cargo binstall -y --force cargo-risczero@0.20
+      - run: cargo binstall -y --force cargo-risczero@1.0
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
 
       - name: build
         run: cargo test --release --no-run

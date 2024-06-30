@@ -34,9 +34,9 @@ RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally i
 ## Deployed verifiers
 
 All of our deployed verifier contracts implement the [IRiscZeroVerifier][IRiscZeroVerifier] interface.
-It is recommended that you use the [RiscZeroVerifierRouter][RiscZeroVerifierRouter], described below.
+It is recommended that you use the [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol], described below.
 
-### RiscZeroVerifierRouter
+### Verifier Router
 
 Calls to `RiscZeroVerifierRouter.verify()` will be routed to the appropriate base verifier contract depending on which version of the zkVM was used to generate the receipt.
 By using the `RiscZeroVerifierRouter`, your contract can accept multiple types of receipts, including batch-verified receipts and receipts generated with future improvements to the zkVM and proofs system.
@@ -47,28 +47,36 @@ You can find detailed information in the [version management design][VersionMana
 
 ### Contract Addresses
 
-| Contract                                                   | Network   | Address                                                        |
-| ---------------------------------------------------------- | --------- | -------------------------------------------------------------- |
-| [RiscZeroGroth16Verifier.sol][RiscZeroGroth16Verifier.sol] | [Sepolia] | [0x36be51af39a2d430368ffee8c664c46d2298083d][sepolia-verifier] |
+You can find detailed information about all the contracts in this table in the [risc0-ethereum repo][risc0-ethereum-contracts]
 
-:::info
-
-The `RiscZeroVerifierRouter` is not deployed yet.
-Check back again as we will be deploying it soon.
-
-:::
+| Contract                                                           | Network            | Address                                                        |
+| ------------------------------------------------------------------ | ------------------ | -------------------------------------------------------------- |
+| [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol]               | [Ethereum Mainnet] | [0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319][mainnet-router]   |
+| [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop.sol] | [Ethereum Mainnet] | [0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7][mainnet-estop]    |
+| [RiscZeroGroth16Verifier][RiscZeroGroth16Verifier.sol]             | [Ethereum Mainnet] | [0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C][mainnet-verifier] |
+| [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol]               | [Sepolia]          | [0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187][sepolia-router]   |
+| [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop.sol] | [Sepolia]          | [0xeA41bc40DAA1d0E681c7e8eA449b89a290e922e8][sepolia-estop]    |
+| [RiscZeroGroth16Verifier][RiscZeroGroth16Verifier.sol]             | [Sepolia]          | [0x3d24C84FC1A2B26f9229e58ddDf11A8dfba802d0][sepolia-verifier] |
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
 
+[Ethereum Mainnet]: https://ethereum.org/nb/developers/docs/networks/#ethereum-mainnet
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/27eba00a5237cbefd0c742dee73ced697df3527a/contracts/EvenNumber.sol#L46-L52
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/IRiscZeroVerifier.sol
 [RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/groth16/RiscZeroGroth16Verifier.sol
-[RiscZeroVerifierRouter]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/RiscZeroVerifierRouter.sol
+[RiscZeroVerifierEmergencyStop.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/RiscZeroVerifierEmergencyStop.sol
+[RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/RiscZeroVerifierRouter.sol
 [Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/version-management-design.md
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
-[sepolia-verifier]: https://sepolia.etherscan.io/address/0x36be51af39a2d430368ffee8c664c46d2298083d#code
+[mainnet-estop]: https://etherscan.io/address/0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7#code
+[mainnet-router]: https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
+[mainnet-verifier]: https://etherscan.io/address/0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C#code
+[risc0-ethereum-contracts]: https://github.com/risc0/risc0-ethereum/tree/release-1.0/contracts
+[sepolia-estop]: https://sepolia.etherscan.io/address/0xeA41bc40DAA1d0E681c7e8eA449b89a290e922e8#code
+[sepolia-router]: https://sepolia.etherscan.io/address/0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187#code
+[sepolia-verifier]: https://sepolia.etherscan.io/address/0x3d24C84FC1A2B26f9229e58ddDf11A8dfba802d0#code
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
