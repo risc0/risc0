@@ -9,10 +9,6 @@ import { latestVersion } from "./src/versions.js";
 let config = deepmerge(nextConfigBase, {
   experimental: {
     ppr: false, // DO NOT USE PPR, breaks everything, don't bother with it
-    staleTimes: {
-      dynamic: 30,
-      static: 180,
-    },
   },
 
   // biome-ignore lint/suspicious/useAwait: needs to be async
