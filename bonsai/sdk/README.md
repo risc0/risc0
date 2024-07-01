@@ -29,8 +29,11 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
     // Add a list of assumptions
     let assumptions: Vec<String> = vec![];
 
+    // Wether to run in execute only mode
+    let execute_only = false;
+
     // Start a session running the prover
-    let session = client.create_session(image_id, input_id, assumptions)?;
+    let session = client.create_session(image_id, input_id, assumptions, execute_only)?;
     loop {
         let res = session.status(&client)?;
         if res.status == "RUNNING" {
