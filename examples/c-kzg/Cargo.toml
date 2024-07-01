@@ -1,0 +1,18 @@
+[package]
+name = "c-kzg"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+c-kzg-methods = { path = "methods" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
+serde = "1.0"
+c-kzg = { git = "https://github.com/risc0/c-kzg-4844.git", rev = "304eacb4f5fec09e837936e4ada6705ecac581f0", default-features = false, features = [
+    "std"
+] }
+c-kzg-core = { path = "core" }
+hex-literal = "0.4.1"
+
+[features]
+default = []
+prove = ["risc0-zkvm/prove"]
