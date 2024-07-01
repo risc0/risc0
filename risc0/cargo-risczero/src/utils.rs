@@ -22,7 +22,7 @@ use std::{
 };
 
 use anyhow::{anyhow, Context, Result};
-use bonsai_sdk::{alpha::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
+use bonsai_sdk::{blocking::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
 use clap::Args;
 use fs2::FileExt;
 use risc0_zkvm::VERSION;

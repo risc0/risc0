@@ -2,18 +2,20 @@
 
 A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 
+Both blocking and non_blocking (async) versions of the module are available.
+
 ## Example Usage
 
 ```rust
 use std::time::Duration;
 
 use anyhow::Result;
-use bonsai_sdk::alpha as bonsai_sdk;
+use bonsai_sdk::blocking::Client;
 use methods::{METHOD_ELF, METHOD_ID};
 use risc0_zkvm::{compute_image_id, serde::to_vec, Receipt};
 
 fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
-    let client = bonsai_sdk::Client::from_env(risc0_zkvm::VERSION)?;
+    let client = Client::from_env(risc0_zkvm::VERSION)?;
 
     // Compute the image_id, then upload the ELF with the image_id as its key.
     let image_id = hex::encode(compute_image_id(METHOD_ELF)?);
@@ -80,10 +82,10 @@ After a STARK proof is generated, it is possible to convert the proof to SNARK.
 use std::time::Duration;
 
 use anyhow::Result;
-use bonsai_sdk::alpha as bonsai_sdk;
+use bonsai_sdk::blocking::Client;
 
 fn run_stark2snark(session_id: String) -> Result<()> {
-    let client = bonsai_sdk::Client::from_env(risc0_zkvm::VERSION)?;
+    let client = Client::from_env(risc0_zkvm::VERSION)?;
 
     let snark_session = client.create_snark(session_id)?;
     eprintln!("Created snark session: {}", snark_session.uuid);
