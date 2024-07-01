@@ -21,10 +21,13 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
+use hex_literal::hex;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
+    kzg_common,
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
-    BLST_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    BLST_ELF, C_KZG_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF,
+    STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -64,6 +67,27 @@ fn cpp_test() {
         .unwrap();
     let message: String = session.journal.unwrap().decode().unwrap();
     assert_eq!(message.as_str(), "blst is such a blast");
+}
+
+#[test]
+fn ckzg_test() {
+    let proof = Proof {
+        commitment: hex!("c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").to_vec(),
+        z: hex!("5eb7004fe57383e6c88b99d839937fddf3f99279353aaf8d5c9a75f91ce33c62").to_vec(),
+        y: hex!("0000000000000000000000000000000000000000000000000000000000000000").to_vec(),
+        proof: hex!("c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").to_vec(),
+    };
+
+    let env = ExecutorEnv::builder()
+        .write(&proof)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    let session = ExecutorImpl::from_elf(ExecutorEnv::default(), C_KZG_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
 }
 
 #[test]

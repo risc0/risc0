@@ -740,6 +740,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "blst"
+version = "0.3.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62dc83a094a71d43eeadd254b1ec2d24cb6a0bb6cadce00df51f0db594711a32"
+dependencies = [
+ "cc",
+ "glob",
+ "threadpool",
+ "zeroize",
+]
+
+[[package]]
 name = "bonsai-sdk"
 version = "0.8.0"
 dependencies = [
@@ -836,6 +848,19 @@ dependencies = [
  "cc",
  "libc",
  "pkg-config",
+]
+
+[[package]]
+name = "c-kzg"
+version = "1.0.2"
+source = "git+https://github.com/risc0/c-kzg-4844.git?rev=304eacb4f5fec09e837936e4ada6705ecac581f0#304eacb4f5fec09e837936e4ada6705ecac581f0"
+dependencies = [
+ "blst",
+ "cc",
+ "glob",
+ "hex",
+ "libc",
+ "serde",
 ]
 
 [[package]]
@@ -3901,6 +3926,7 @@ dependencies = [
 name = "risc0-zkvm-methods"
 version = "1.1.0-alpha.1"
 dependencies = [
+ "c-kzg",
  "risc0-build",
  "risc0-zkvm",
  "risc0-zkvm-platform",
@@ -4535,6 +4561,15 @@ checksum = "8b9ef9bad013ada3808854ceac7b46812a6465ba368859a37e2100283d2d719c"
 dependencies = [
  "cfg-if",
  "once_cell",
+]
+
+[[package]]
+name = "threadpool"
+version = "1.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d050e60b33d41c19108b32cea32164033a9013fe3b46cbd4457559bfbf77afaa"
+dependencies = [
+ "num_cpus",
 ]
 
 [[package]]

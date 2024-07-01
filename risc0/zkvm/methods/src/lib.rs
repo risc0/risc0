@@ -16,6 +16,8 @@
 #![no_std]
 
 pub mod bench;
+#[cfg(features = "c-kzg")]
+pub mod kzg_common;
 pub mod multi_test;
 
 #[cfg(not(target_os = "zkvm"))]

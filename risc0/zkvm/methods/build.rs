@@ -11,10 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-use std::{collections::HashMap, env};
-
+#[cfg(features = "c-kzg")]
+use c_kzg::KzgSettings;
 use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
+#[cfg(features = "c-kzg")]
+use std::path::Path;
+use std::{collections::HashMap, env};
 
 fn main() {
     tracing_subscriber::fmt()
@@ -24,6 +26,18 @@ fn main() {
     if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
         // Guest shouldn't recursively depend on itself.
         return;
+    }
+
+    #[cfg(features = "c-kzg")]
+    {
+        let out_dir_env = env::var_os("OUT_DIR").unwrap();
+        let out_dir = Path::new(&out_dir_env);
+        let kzg_raw_path = out_dir.join("kzg_settings_rin");
+        let kzg_trusted_setup = Path::new("./cpp-crates/trusted_setup.txt");
+        let kzg_settings = KzgSettings::load_trusted_setup_file(kzg_trusted_setup).unwrap();
+        let kzg_setup_data = kzg_settings.to_bytes().to_vec();
+        std::fs::write(&kzg_raw_path, kzg_setup_data).unwrap();
+        env::set_var("KZG_FILE_PATH", kzg_raw_path.to_string_lossy().to_string());
     }
 
     let docker_opts = DockerOptions {
