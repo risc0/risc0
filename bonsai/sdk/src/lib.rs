@@ -221,6 +221,8 @@ pub mod responses {
         pub input: String,
         /// List of receipt UUIDs
         pub assumptions: Vec<String>,
+        /// Execute Only Mode
+        pub execute_only: bool,
     }
 
     /// Session statistics metadata file
@@ -757,6 +759,7 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             img_id: String,
             input_id: String,
             assumptions: Vec<String>,
+            execute_only: bool,
         ) -> Result<SessionId, SdkErr> {
             let url = format!("{}/sessions/create", self.url);
 
@@ -764,6 +767,7 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
                 img: img_id,
                 input: input_id,
                 assumptions,
+                execute_only,
             };
 
             let res = self.client.post(url).json(&req).send().await?;
@@ -1173,6 +1177,7 @@ mod tests {
             img: TEST_ID.to_string(),
             input: Uuid::new_v4().to_string(),
             assumptions: vec![],
+            execute_only: false,
         };
         let response = CreateSessRes {
             uuid: Uuid::new_v4().to_string(),
