@@ -388,6 +388,7 @@ pub mod module_type {
     use super::*;
 
     /// Represents a client of the REST API
+    #[derive(Clone)]
     pub struct Client {
         pub(crate) url: String,
         pub(crate) client: HttpClient,
