@@ -48,8 +48,11 @@
 //!     // Add a list of assumptions
 //!     let assumptions: Vec<String> = vec![];
 //!
+//!     // Wether to run in execute only mode
+//!     let execute_only = false;
+//!
 //!     // Start a session running the prover
-//!     let session = client.create_session(image_id, input_id, assumptions)?;
+//!     let session = client.create_session(image_id, input_id, assumptions, execute_only)?;
 //!     loop {
 //!         let res = session.status(&client)?;
 //!         if res.status == "RUNNING" {
@@ -221,6 +224,8 @@ pub mod responses {
         pub input: String,
         /// List of receipt UUIDs
         pub assumptions: Vec<String>,
+        /// Execute Only Mode
+        pub execute_only: bool,
     }
 
     /// Session statistics metadata file
@@ -383,6 +388,7 @@ pub mod module_type {
     use super::*;
 
     /// Represents a client of the REST API
+    #[derive(Clone)]
     pub struct Client {
         pub(crate) url: String,
         pub(crate) client: HttpClient,
@@ -757,6 +763,7 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             img_id: String,
             input_id: String,
             assumptions: Vec<String>,
+            execute_only: bool,
         ) -> Result<SessionId, SdkErr> {
             let url = format!("{}/sessions/create", self.url);
 
@@ -764,6 +771,7 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
                 img: img_id,
                 input: input_id,
                 assumptions,
+                execute_only,
             };
 
             let res = self.client.post(url).json(&req).send().await?;
@@ -1173,6 +1181,7 @@ mod tests {
             img: TEST_ID.to_string(),
             input: Uuid::new_v4().to_string(),
             assumptions: vec![],
+            execute_only: false,
         };
         let response = CreateSessRes {
             uuid: Uuid::new_v4().to_string(),
@@ -1194,7 +1203,12 @@ mod tests {
         let client = Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
         let res = client
-            .create_session(request.img, request.input, request.assumptions)
+            .create_session(
+                request.img,
+                request.input,
+                request.assumptions,
+                request.execute_only,
+            )
             .unwrap();
         assert_eq!(res.uuid, response.uuid);
 
