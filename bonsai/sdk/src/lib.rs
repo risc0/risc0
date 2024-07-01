@@ -48,8 +48,11 @@
 //!     // Add a list of assumptions
 //!     let assumptions: Vec<String> = vec![];
 //!
+//!     // Wether to run in execute only mode
+//!     let execute_only = false;
+//!
 //!     // Start a session running the prover
-//!     let session = client.create_session(image_id, input_id, assumptions)?;
+//!     let session = client.create_session(image_id, input_id, assumptions, execute_only)?;
 //!     loop {
 //!         let res = session.status(&client)?;
 //!         if res.status == "RUNNING" {
@@ -1199,7 +1202,12 @@ mod tests {
         let client = Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
         let res = client
-            .create_session(request.img, request.input, request.assumptions)
+            .create_session(
+                request.img,
+                request.input,
+                request.assumptions,
+                request.execute_only,
+            )
             .unwrap();
         assert_eq!(res.uuid, response.uuid);
 
