@@ -19,8 +19,7 @@ cargo run --release
 zkVM applications are organized into a [host program] and a [guest program].
 The host program can be found in [`src/main.rs`], and the guest program can be found in [`methods/guest/src/main.rs`].
 
-The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
-The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
+The [host] [executes] the guest program. This example does not produce a receipt and is intended as a test to ensure that this guest code runs without panic-ing.
 
 ## More Resources
 
