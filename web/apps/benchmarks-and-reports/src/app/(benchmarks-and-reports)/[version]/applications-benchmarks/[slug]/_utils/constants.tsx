@@ -1,10 +1,6 @@
 import type { Version } from "~/types/version";
 
-export const APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES: {
-  [K in Version]: {
-    [key: string]: string;
-  };
-} = {
+export const APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES = {
   main: {
     "macOS-apple_m2_pro.csv": "Metal on Apple M2 Pro",
     "Linux-nvidia_rtx_3090_ti.csv": "CUDA on NVIDIA RTX 3090 Ti",
@@ -23,4 +19,4 @@ export const APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES: {
     "macOS-cpu.csv": "CPU only on Apple M2 Pro",
     "Linux-cpu.csv": "CPU only on c6i.8xlarge",
   },
-} as const;
+} as const satisfies Record<Version, Record<string, string>>;

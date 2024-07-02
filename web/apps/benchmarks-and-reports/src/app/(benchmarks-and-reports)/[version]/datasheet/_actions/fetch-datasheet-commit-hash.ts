@@ -1,13 +1,14 @@
 import "server-only";
 
-import { tryFetch } from "shared/utils/try-fetch";
+import { tryit } from "radash";
 import type { Version } from "~/types/version";
 
 export async function fetchDatasheetCommitHash({ version }: { version: Version }) {
+  const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/COMMIT_HASH.txt`,
     {
-      next: { revalidate: 180 }, // 3 minutes cache
+      next: { revalidate: 30, tags: ["fetch-datasheet-commit-hash"] }, // 30s cache
     },
   );
 
@@ -16,5 +17,8 @@ export async function fetchDatasheetCommitHash({ version }: { version: Version }
     throw error || new Error("Failed to fetch");
   }
 
-  return await response.text();
+  return {
+    data: await response.text(),
+    updatedAt: Date.now(),
+  };
 }

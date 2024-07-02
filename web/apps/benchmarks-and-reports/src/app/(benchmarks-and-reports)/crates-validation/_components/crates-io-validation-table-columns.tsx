@@ -3,7 +3,16 @@
 import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dialog";
+import {
+  Credenza,
+  CredenzaBody,
+  CredenzaClose,
+  CredenzaContent,
+  CredenzaFooter,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@risc0/ui/credenza";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
@@ -87,29 +96,32 @@ export const cratesIoValidationTableColumns = [
       const resultString: string = originalString.substring(methodNameIndex + 1);
 
       return (
-        <Dialog>
-          <DialogTrigger asChild>
+        <Credenza>
+          <CredenzaTrigger asChild>
             <Badge
               title={info.getValue()}
               variant="secondary"
-              className="relative line-clamp-5 max-w-lg cursor-pointer font-mono text-[10px] md:max-w-max"
+              className="relative line-clamp-5 max-w-lg cursor-pointer border-none font-mono text-[10px] md:max-w-max"
             >
               <pre>{resultString}</pre>
 
               <Button
                 size="sm"
                 variant="outline"
-                className="absolute bottom-1 left-1 text-destructive"
+                className="absolute bottom-1 left-1 text-[10px] text-destructive"
                 startIcon={<EyeIcon />}
               >
                 View Build Errors
               </Button>
             </Badge>
-          </DialogTrigger>
+          </CredenzaTrigger>
 
-          <DialogContent className="dark max-h-full max-w-screen-3xl text-white">
-            <DialogTitle>Build Errors for {info.row.original.name}</DialogTitle>
-            <div
+          <CredenzaContent className="dark max-h-full max-w-screen-3xl text-white">
+            <CredenzaHeader>
+              <CredenzaTitle>Build Errors for {info.row.original.name}</CredenzaTitle>
+            </CredenzaHeader>
+            <CredenzaBody
+              // @ts-expect-error
               style={{ colorScheme: "dark" }}
               className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit"
             >
@@ -138,9 +150,14 @@ export const cratesIoValidationTableColumns = [
                   </pre>
                 )}
               </Highlight>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </CredenzaBody>
+            <CredenzaFooter className="flex sm:hidden">
+              <CredenzaClose asChild>
+                <Button variant="ghost">Close</Button>
+              </CredenzaClose>
+            </CredenzaFooter>
+          </CredenzaContent>
+        </Credenza>
       );
     },
   }),

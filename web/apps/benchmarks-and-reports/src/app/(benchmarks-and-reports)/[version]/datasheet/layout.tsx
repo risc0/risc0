@@ -19,7 +19,7 @@ export default function DatasheetLayout({
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
-        <h1 className="text-3xl">Datasheet</h1>
+        <h1 className="text-2xl">Datasheet</h1>
 
         <Suspense fallback={<SuspenseLoader />}>
           <DatasheetCommitHashButton version={params.version} />
