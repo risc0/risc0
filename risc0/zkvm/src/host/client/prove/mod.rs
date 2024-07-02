@@ -110,7 +110,7 @@ pub trait Prover {
     /// Compress a [Receipt], proving the same computation using a smaller representation.
     ///
     /// Proving will, by default, produce a [CompositeReceipt](crate::CompositeReceipt), which
-    /// may contain an arbitrary number of receipts assembled into continuations and compositions.
+    /// may contain an arbitrary number of receipts assembled into segments and assumptions.
     /// Together, these receipts collectively prove a top-level
     /// [ReceiptClaim](crate::ReceiptClaim). This function can be used to compress all of the constituent
     /// receipts of a [CompositeReceipt](crate::CompositeReceipt) into a single
