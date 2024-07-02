@@ -1,15 +1,16 @@
 import "server-only";
 
-import { tryFetch } from "shared/utils/try-fetch";
+import { tryit } from "radash";
 import type { CratesIoValidationTableSchema } from "../_components/crates-io-validation-table-schema";
 
 export async function fetchCratesValidationResults({
   hash,
 }: { hash: string }): Promise<CratesIoValidationTableSchema[]> {
+  const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
     {
-      next: { revalidate: 180 }, // 3 minutes cache
+      next: { revalidate: 180, tags: ["fetch-crates-validation-results"] }, // 3 minutes cache
     },
   );
 

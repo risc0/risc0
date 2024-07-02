@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CRATES_VALIDATION_DESCRIPTION } from "../[version]/_utils/constants";
+import { CRATES_VALIDATION_DESCRIPTION } from "../_utils/constants";
 import { CratesIoValidationContent } from "./_components/crates-io-validation-content";
 import { CratesIoValidationSkeleton } from "./_components/crates-io-validation-skeleton";
 
