@@ -10,6 +10,7 @@ export const APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES: {
     "Linux-nvidia_rtx_3090_ti.csv": "CUDA on NVIDIA RTX 3090 Ti",
     "macOS-cpu.csv": "CPU only on Apple M2 Pro",
     "Linux-cpu.csv": "CPU only on c6i.8xlarge",
+    "Linux-g6.xlarge.csv": "CUDA on g6.xlarge",
   },
   "release-0.21": {
     "macOS-apple_m2_pro.csv": "Metal on Apple M2 Pro",
