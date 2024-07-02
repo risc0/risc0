@@ -131,7 +131,7 @@ list][mailing-list] to get our latest announcements.
 [ecdsa]: https://github.com/risc0/risc0/tree/release-0.20/examples/ecdsa
 [JSON]: https://github.com/risc0/risc0/tree/release-0.20/examples/json
 [mailing-list]: https://fmree464va4.typeform.com/to/X3KJB85v
-[optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
+[optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
 [performance]: ./zkvm/benchmarks.md
 [proof-system]: /proof-system
 [RISC Zero]: https://risczero.com
@@ -142,6 +142,6 @@ list][mailing-list] to get our latest announcements.
 [twitter]: https://twitter.com/risczero
 [waldo]: https://risczero.com/news/waldo
 [YouTube]: https://www.youtube.com/@risczero
-[zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [zkpoex]: https://risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm_overview.md

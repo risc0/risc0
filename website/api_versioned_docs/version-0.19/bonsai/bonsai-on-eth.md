@@ -34,7 +34,7 @@ At a high level, here's how it works:
 [`IRiscZeroVerifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
 [guest program]: /terminology#guest-program
 [receipt]: /terminology#receipt
-[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 
 ### Getting Started
 

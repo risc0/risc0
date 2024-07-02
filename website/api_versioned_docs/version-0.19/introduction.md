@@ -38,8 +38,8 @@ Key among these use cases are:
 To enable ZK builders to thrive, we're working on two core products: the [zkVM] and [Bonsai].
 
 [startup]: https://risczero.com/news/series-a
-[zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
-[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
+[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
+[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
 [RISC Zero]: https://risczero.com
 [zkVM]: ./zkvm/zkvm_overview.md
 

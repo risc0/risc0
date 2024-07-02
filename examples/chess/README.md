@@ -21,10 +21,10 @@ Congratulations! You just constructed a zero-knowledge proof that the position d
 By using this demo as part of a [Bonsai application], you could build an app where on-chain payment depends on off-chain activity.
 For example, you might issue an on-chain award for the first person who can find a mate-in-one.
 
-To learn more about this use case, check out our Twitter thread about using Bonsai as a [zk coprocessor].
+To learn more about this use case, check out our blog about using Bonsai as a [zk coprocessor].
 
 [Bonsai application]: https://dev.bonsai.xyz
-[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 
 ## Project Organization
 

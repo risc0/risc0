@@ -61,7 +61,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai Quick Start]: quickstart.md
-[Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance#readme
 [Zeth]: https://www.risczero.com/news/zeth-release
 [guest program]: /terminology#guest-program
