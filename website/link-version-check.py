@@ -12,13 +12,24 @@ EXTENSIONS = [
 
 EXCEPTIONS = [
     # allow refs to trusted setup ceremony assets
-    "d4e427283027c28b38b8eda1562e8e0e68d1b0e2"
+    "d4e427283027c28b38b8eda1562e8e0e68d1b0e2",
+    # allow references to the governance example from prior versions.
+    # Related issue https://github.com/risc0/risc0-ethereum/issues/1
+    "bonsai/examples/governance",
+    # allow link to risc0-ethereum before versioning started to match with 1.0
+    "github.com/risc0/risc0-ethereum/blob/release-0.7",
+    "github.com/risc0/risc0-ethereum/blob/release-0.10",
+]
+
+REPOS = [
+    "risc0",
+    "risc0-ethereum",
 ]
 
 VERSIONED_DOCS_DIR = "website/api_versioned_docs"
 VERSIONED_PATH_RE = re.compile(r"api_versioned_docs/version-(?P<version>\d+\.\d+)")
-GITHUB_LINK_RE = re.compile(r"github\.com/risc0/risc0/(?:tree|blob)/(?P<ref>\S+?)/")
-DOCSRS_LINK_RE = re.compile(r"docs\.rs/risc0-[^/]+/(?P<ref>\S+?)/")
+GITHUB_LINK_RE = re.compile(r"github\.com/risc0/(?P<repo>\S+?)/(?:tree|blob)/(?P<ref>\S+?)/")
+DOCSRS_LINK_RE = re.compile(r"docs\.rs/(?P<crate>risc0-[^/]+)/(?P<ref>\S+?)/")
 
 
 def check_file(root, file):
@@ -33,22 +44,34 @@ def check_file(root, file):
     status = 0
     lines = file.read_text().splitlines()
     for linenum, line in enumerate(lines, 1):
-        if "bonsai/examples/governance" in line:
+        # Check the line for any of the strings in the exceptions list.
+        if any(e in line for e in EXCEPTIONS):
             continue
+
+        # Check links to files in versioned GitHub repos.
         for link in GITHUB_LINK_RE.finditer(line):
+            repo = link.group("repo")
+
+            # Only cover repos that use consistent versioning schemes.
+            if repo not in REPOS:
+                continue
+
             ref = link.group("ref")
             expected_ref = f"release-{version}"
-            if ref != expected_ref and ref not in EXCEPTIONS:
+            if ref != expected_ref:
                 print(
-                    f"{rel_path}:{linenum}\ngithub link to ref {ref}; expected {expected_ref}\n"
+                    f"{rel_path}:{linenum}\n{line}\ngithub link to {repo} at ref {ref}; expected {expected_ref}\n"
                 )
                 status = 1
+
+        # Check links to crate documentation on docs.rs.
         for link in DOCSRS_LINK_RE.finditer(line):
+            crate = link.group("crate")
             ref = link.group("ref")
             expected_ref = f"{version}"
             if ref != expected_ref:
                 print(
-                    f"{rel_path}:{linenum}\ndocs.rs link to ref {ref}; expected {expected_ref}\n"
+                    f"{rel_path}:{linenum}\n{line}\ndocs.rs link to {crate} at ref {ref}; expected {expected_ref}\n"
                 )
                 status = 1
     return status

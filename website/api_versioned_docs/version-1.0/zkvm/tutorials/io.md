@@ -281,7 +281,7 @@ Happy coding!
 [docs-hello-world]: ./hello-world.md
 [docs-remote-proving]: ../../generating-proofs/remote-proving.md
 [example-chess-core]: https://github.com/risc0/risc0/blob/release-1.0/examples/chess/core/src/lib.rs
-[example-chess-guest]: https://github.com/risc0/risc0/blob/release-1.0/examples/chess/methods/guest/src/release-1.0.rs
+[example-chess-guest]: https://github.com/risc0/risc0/blob/release-1.0/examples/chess/methods/guest/src/main.rs
 [example-chess-host]: https://github.com/risc0/risc0/blob/release-1.0/examples/chess/src/main.rs
 [example-chess]: https://github.com/risc0/risc0/tree/release-1.0/examples/chess
 [example-jwt-validator-core]: https://github.com/risc0/risc0/blob/release-1.0/examples/jwt-validator/core/src/lib.rs

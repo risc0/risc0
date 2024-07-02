@@ -15,7 +15,7 @@
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use bonsai_sdk::alpha::Client;
+use bonsai_sdk::blocking::Client;
 use cargo_metadata::MetadataCommand;
 use clap::Parser;
 use risc0_build::BuildStatus;

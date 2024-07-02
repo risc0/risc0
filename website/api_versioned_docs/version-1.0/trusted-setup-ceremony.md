@@ -17,11 +17,11 @@ There are multiple steps to verifying the security of a trusted setup ceremony. 
 
 The circuit we are securing is the RISC Zero STARK Verify circuit, which is open source and [available on GitHub][stark-verify-circom] (along with [a short library][risc0-circom-library] it depends on).
 
-To ensure that the circuit itself does not have security holes, we have used a mixture of good software engineering practices, internal security reviews, and external audits. Stay tuned for detailed reports of our audit results!
+To ensure that the circuit itself does not have security holes, we have used a mixture of good software engineering practices, internal security reviews, and external audits. We have published these audits: you can read more details and the audits themselves [here][audits-readme].
 
 ## The Transcript Matches the Circuit
 
-Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][zkey_mirror], and have a compressed version [here][zkey-compressed]) You can verify it matches the circuit using Circom and snarkjs:
+Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][zkey-mirror], and have a compressed version [here][zkey-compressed]) You can verify it matches the circuit using Circom and snarkjs:
 
 1. Install [Circom][install-circom] and [snarkjs][snarkjs].
 1. Download the [`stark_verify.circom`][stark-verify-circom] and [`risc0.circom`][risc0-circom-library] source files.
@@ -45,6 +45,7 @@ If you are looking for your own contribution, you can also go to gist.github.com
 Important Note: Contributors can remove their attestations from GitHub at any time. They can also edit their attestations (although in this case the edit history will be visible). _Only the original version of the attestation can be valid; an edited version cannot be a valid attestation_. Note that that if any malicious contributors were able to participate in the ceremony, it does not damage the security of the ceremony, but it _does_ mean that they can pretend to have a bad attestation by editing or deleting their Gist. Therefore, a contribution with no attestation provides no security to the ceremony, but does not necessarily mean anything is wrong, either.
 
 Please exercise good judgment about whether a missing or edited attestation represents:
+
 1. A malicious contributor
 1. Someone just cleaning up old Gists
 1. A problem in the ceremony
@@ -53,8 +54,7 @@ Please exercise good judgment about whether a missing or edited attestation repr
 
 We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony, and our ceremony was coordinated with the [PSE] team. This gave us tools that had been battle-tested by prior ceremonies, and moreover, by using tools written by an external team, we put substantial limits on our own ability to maliciously manipulate the ceremony software.
 
-
-
+[audits-readme]: https://github.com/risc0/rz-security/blob/main/audits/README.md
 [DefinitelySetup]: https://github.com/privacy-scaling-explorations/DefinitelySetup
 [install-circom]: https://docs.circom.io/getting-started/installation/
 [kobi-bad-ceremony-list]: https://twitter.com/kobigurk/status/1782502969453494530

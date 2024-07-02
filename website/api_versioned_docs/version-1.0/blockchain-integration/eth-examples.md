@@ -18,7 +18,7 @@ The [RISC Zero Foundry Template][foundry-template] provides a minimal applicatio
 
 This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [~160 lines of Rust][signature-aggregation], a gas savings of 66% is achieved with significant room for optimizations.
 
-[zkvm-examples]: ../zkvm/examples
+[zkvm-examples]: ../zkvm/examples.md
 [remote-proving]: ../generating-proofs/remote-proving.md
 [zeth-repo]: https://github.com/risc0/zeth
 [revm]: https://crates.io/crates/revm
@@ -26,6 +26,6 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [governance-example]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
-[foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[foundry-template]: https://github.com/risc0/risc0-foundry-template
 [steel-repo]: https://crates.io/crates/risc0-steel
 [steel-blog]: https://www.risczero.com/blog/introducing-steel

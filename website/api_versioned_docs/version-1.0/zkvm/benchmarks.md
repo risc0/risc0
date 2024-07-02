@@ -8,19 +8,19 @@ target, and includes both CPU and GPU targets. The datasheet also includes the
 RISC Zero zkVM version used and the size of several example programs to give
 context for the [cycle count] size data.
 
-## Generating your own benchmarks
+## Generating your own datasheet
 
-You can generate benchmarks yourself to get performance data for your exact
+You can generate a datsheet yourself to get performance data for your exact
 system, or if you want benchmarks for a different RISC Zero zkVM version than
 used in the datasheet.
 
-To generate benchmarks, first [install Rust and the RISC Zero
+To generate a datasheet, first [install Rust and the RISC Zero
 toolchain][install] and clone the [risc0 repository] if you haven't already done
 so. Navigate to the risc0 source code directory and, if necessary, check out the
-branch or tag you wish to generate benchmarks for. Then run:
+branch or tag you wish to generate a datasheet for. Then run:
 
 ```bash
-cargo run --release --example loop
+cargo run --release --example datasheet
 ```
 
 This will produce the benchmark data shown in the [datasheet] for your system
@@ -33,16 +33,17 @@ this, use the following commands:
 - **Metal**
 
 ```bash
-cargo run --release -F metal --example loop
+cargo run --release -F metal --example datasheet
 ```
 
 - **CUDA**
 
 ```bash
-cargo run --release -F cuda --example loop
+cargo run --release -F cuda --example datasheet
 ```
 
-We also have a Fibonacci computation benchmark, which you can run with
+We also have a benchmark based on running a simple Fibonacci guest program,
+which you can run with:
 
 ```bash
 cargo bench --bench fib
@@ -56,7 +57,7 @@ the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
 appropriate feature flag.
 
 [cycle count]: /terminology#clock-cycles
-[datasheet]: https://benchmarks.risczero.com/main/datasheet
+[datasheet]: https://benchmarks.risczero.com/release-1.0/datasheet
 [execution]: /terminology#execute
 [install]: ./install.md
 [prover]: /terminology#prover

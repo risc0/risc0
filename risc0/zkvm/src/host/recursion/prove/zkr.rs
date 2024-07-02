@@ -12,23 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::RECURSION_PO2;
 use anyhow::{anyhow, bail, Result};
-use risc0_circuit_recursion::{
-    control_id::{BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
-    REGISTER_GROUP_CODE,
+use risc0_circuit_recursion::control_id::{
+    BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS,
 };
-use risc0_zkp::{
-    adapter::TapsProvider, core::digest::Digest, field::baby_bear::BabyBearElem, MAX_CYCLES_PO2,
-    MIN_CYCLES_PO2,
-};
-
-use super::{Program, CIRCUIT, RECURSION_CODE_SIZE};
+use risc0_circuit_recursion::prove::Program;
+use risc0_zkp::{core::digest::Digest, MAX_CYCLES_PO2, MIN_CYCLES_PO2};
 
 fn get_zkr(name: &str, hashfn: &str) -> Result<(Program, Digest)> {
-    let u32s = risc0_circuit_recursion::zkr::get_zkr(name)?;
-    let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
-    assert_eq!(code_size, RECURSION_CODE_SIZE);
-
     let control_ids: &[(&str, Digest)] = match hashfn {
         "poseidon2" => &POSEIDON2_CONTROL_IDS,
         "sha-256" => &SHA256_CONTROL_IDS,
@@ -37,10 +29,7 @@ fn get_zkr(name: &str, hashfn: &str) -> Result<(Program, Digest)> {
     };
 
     Ok((
-        Program {
-            code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
-            code_size,
-        },
+        risc0_circuit_recursion::prove::zkr::get_zkr(name, RECURSION_PO2)?,
         control_ids
             .iter()
             .copied()

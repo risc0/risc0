@@ -94,7 +94,7 @@ pub trait Buffer: Sized {
     /// The type of element stored in this buffer.
     type Elem: Debug;
 
-    /// A register in this buffer, convertable from an offset.
+    /// A register in this buffer, convertible from an offset.
     type Reg: From<usize>;
 
     /// Returns the component tree rooted at the given component.

@@ -1,15 +1,17 @@
 # CODEOWNERS
 
-# Note: # Order is important; the last matching pattern takes the most
+# Note: Order is important; the last matching pattern takes the most
 # precedence.
 
-*                                      @flaub
+*                                      @risc0/platform
 
 /bonsai/                               @risc0/bonsai
-/rzup/                                 @hmrtn
-/web/                                  @nahoc
-/website/                              @pdg744
+/examples/                             @risc0/devrel @risc0/demos @risc0/platform
+/rzup/                                 @risc0/platform @hmrtn
+/web/                                  @risc0/platform @nahoc
+/website/                              @risc0/devrel @pdg744
 
+# These are sensitive files
 /groth16_proof/groth16/                @flaub @nategraf @tzerrell
 /SECURITY.md                           @kevinnassery
 control_id.rs                          @flaub @nategraf @tzerrell

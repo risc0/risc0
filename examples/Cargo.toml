@@ -3,6 +3,8 @@ resolver = "2"
 members = [
   "bevy",
   "browser-verify",
+  "c-guest/host",
+  "c-guest/platform",
   "chess",
   "chess/core",
   "composition",

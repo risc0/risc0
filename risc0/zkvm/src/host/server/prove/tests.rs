@@ -641,7 +641,7 @@ mod sys_verify {
         serde::to_vec,
         sha::Digestible,
         Assumption, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt,
-        SuccinctReceipt,
+        SuccinctReceipt, RECURSION_PO2,
     };
 
     fn prove_hello_commit() -> Receipt {
@@ -685,7 +685,7 @@ mod sys_verify {
 
     // The test_recursion_circuit is a program for the recursion VM that does some very simple
     // operations. It is used here to provide an "out-of-tree" recursion program receipt, in that
-    // this program is not in the stnadard tree of allowed recursion programs, but can should be
+    // this program is not in the standard tree of allowed recursion programs, but should be
     // verifiable in the guest via composition with the provided control root.
     fn prove_test_recursion_circuit() -> SuccinctReceipt<Unknown> {
         // Random Poseidon2 "digest" to act as the "control root".
@@ -695,7 +695,7 @@ mod sys_verify {
         let control_root = control_tree.calc_root(suite.hashfn.as_ref());
 
         let digest2 = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-        crate::recursion::test_recursion_circuit(&control_root, &digest2).unwrap()
+        crate::recursion::test_recursion_circuit(&control_root, &digest2, RECURSION_PO2).unwrap()
     }
 
     fn hello_commit_receipt() -> &'static Receipt {

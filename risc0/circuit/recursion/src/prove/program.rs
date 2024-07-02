@@ -17,9 +17,10 @@ use risc0_zkp::{
     field::baby_bear::{BabyBear, BabyBearElem},
     hal::{cpu::CpuHal, Hal},
     prove::poly_group::PolyGroup,
+    ZK_CYCLES,
 };
 
-use super::{RECURSION_CODE_SIZE, RECURSION_PO2};
+use super::RECURSION_CODE_SIZE;
 
 /// A Program for the recursion circuit (e.g. lift_20 or join).
 ///
@@ -37,16 +38,21 @@ pub struct Program {
 
     /// The number of code columns.
     pub code_size: usize,
+
+    /// 1 << po2 is the number of cycles executed.
+    pub po2: usize,
 }
 
 impl Program {
     /// Create a [Program] from a stream of data encoded by Zirgen.
-    pub fn from_encoded(encoded: &[u32]) -> Self {
+    pub fn from_encoded(encoded: &[u32], po2: usize) -> Self {
         let prog = Self {
             code: encoded.iter().copied().map(BabyBearElem::from).collect(),
             code_size: RECURSION_CODE_SIZE,
+            po2,
         };
         assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
+        assert!(prog.code.len() <= (RECURSION_CODE_SIZE * (1 << po2) - ZK_CYCLES));
         prog
     }
 
@@ -65,7 +71,7 @@ impl Program {
     /// (e.g. lift_20 or join)
     pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
         let hal = CpuHal::new(hash_suite);
-        let cycles = 1 << RECURSION_PO2;
+        let cycles = 1 << self.po2;
 
         let mut code = vec![BabyBearElem::default(); cycles * self.code_size];
 

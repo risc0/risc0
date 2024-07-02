@@ -26,9 +26,11 @@ crates that use C++ code.
 The guest C++ toolchain can be overridden by setting the
 `CC_riscv32im_risc0_zkvm_elf` and `CFLAGS_riscv32im_risc0_zkvm_elf` environment
 variables when running the `cargo build` command like so:
+
 ```bash
 CC_riscv32im_risc0_zkvm_elf="[path to C++ compiler]" CFLAGS_riscv32im_risc0_zkvm_elf="[desired cflags]" cargo build
 ```
+
 When overriding the C++ toolchain for experimentation purposes, the C++ compiler
 must be configured to generate riscv32im instructions. This can be done by setting
 `CFLAGS_riscv32im_risc0_zkvm_elf="-target riscv32-unknown-elf -march=rv32im"`

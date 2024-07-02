@@ -19,7 +19,7 @@ The [proof system sequence diagram](proof-system-sequence-diagram.md) describes 
 
 ## Lesson 1: The Execution Trace
 
-> When any code executes in the RISC Zero virtual machine, each step of that execution is recorded in an [`Execution Trace`](./what_is_a_trace.md).
+> When any code executes in the RISC Zero virtual machine, each step of that execution is recorded in an [`Execution Trace`](./what-is-a-trace.md).
 
 We show a simplified example, computing 4 steps of a Fibonacci sequence modulo 97, using two user-specified inputs.
 

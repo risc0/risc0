@@ -26,7 +26,7 @@ Below is a diagram and overview of a typical application with RISC Zero on Ether
 
 [article-coprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
 [docs-zkvm]: ../zkvm/zkvm_overview.md
-[foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[foundry-template]: https://github.com/risc0/risc0-foundry-template
 [term-journal]: /terminology#journal
 [term-snark]: /terminology#snark
 [term-stark]: /terminology#stark

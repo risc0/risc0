@@ -29,7 +29,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm::{
     recursion::{MerkleGroup, Program},
-    Loader,
+    Loader, RECURSION_PO2,
 };
 
 #[derive(Parser)]
@@ -108,7 +108,7 @@ impl Bootstrap {
     }
 
     fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<Digest>) {
-        // Recursion programs (ZKRs) that are too be included in the allowed set.
+        // Recursion programs (ZKRs) that are to be included in the allowed set.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators).
@@ -140,7 +140,7 @@ impl Bootstrap {
             writeln!(&mut allowed_control_ids_str, r#"digest!("{digest}"),"#).unwrap();
         }
 
-        // Calculuate a Merkle root for the allowed control IDs and add it to the file.
+        // Calculate a Merkle root for the allowed control IDs and add it to the file.
         let merkle_group = MerkleGroup::new(allowed_control_ids).unwrap();
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
@@ -186,7 +186,7 @@ impl Bootstrap {
 
         zkrs.into_iter()
             .map(|(name, encoded_program)| {
-                let program = Program::from_encoded(&encoded_program);
+                let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
 
                 tracing::info!("computing control ID for {name} with {hashfn}");
                 let control_id = program.compute_control_id(hash_suite.clone());
@@ -199,7 +199,7 @@ impl Bootstrap {
 
     pub fn generate_identity_bn254_control_id() -> Digest {
         let encoded_program = get_zkr("identity.zkr").unwrap();
-        let program = Program::from_encoded(&encoded_program);
+        let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
         program.compute_control_id(Poseidon254HashSuite::new_suite())
     }
 }

@@ -594,7 +594,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   Fp x282(48);
   // loc(unknown)
   Fp x283(192);
-  // loc("zirgen/circuit/recursion/recursion.cpp":18:3)
+  // loc("zirgen/circuit/recursion/recursion.cpp":23:3)
   FpExt x284 = FpExt(0);
   // loc("top(recursion::Top)/code(recursion::Code)/select(OneHot)/micro_ops(Reg)"("./zirgen/components/mux.h":49:25))
   auto x285 = args[0][1 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -602,25 +602,25 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x286 = args[0][8 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("top(recursion::Top)/code(recursion::Code)/write_addr(Reg)"("zirgen/circuit/recursion/top.cpp":23:49))
   auto x287 = args[0][0 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/extract(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/extract(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x288 = args[2][100 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/add(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/add(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x289 = args[2][91 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/sub(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/sub(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x290 = args[2][92 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mul(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mul(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x291 = args[2][93 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/inv(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/inv(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x292 = args[2][94 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/eq(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/eq(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x293 = args[2][95 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x294 = args[2][96 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x295 = args[2][97 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x296 = args[2][98 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/select(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/select(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x297 = args[2][99 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./zirgen/components/onehot.h":46:19)
   auto x298 = x288 * x10;
@@ -1146,25 +1146,25 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x558 = x287 + x1;
   // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[1](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x559 = args[0][12 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/add(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/add(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x560 = args[2][103 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/sub(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/sub(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x561 = args[2][104 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mul(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mul(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x562 = args[2][105 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/inv(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/inv(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x563 = args[2][106 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/eq(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/eq(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x564 = args[2][107 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x565 = args[2][108 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x566 = args[2][109 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x567 = args[2][110 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/select(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/select(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x568 = args[2][111 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/extract(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/extract(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x569 = args[2][112 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./zirgen/components/onehot.h":46:19)
   auto x570 = x561 * x2;
@@ -1690,25 +1690,25 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x830 = x287 + x2;
   // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[2](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x831 = args[0][16 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/add(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/add(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x832 = args[2][115 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/sub(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/sub(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x833 = args[2][116 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mul(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mul(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x834 = args[2][117 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/inv(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/inv(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x835 = args[2][118 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/eq(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/eq(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x836 = args[2][119 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x837 = args[2][120 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x838 = args[2][121 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x839 = args[2][122 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/select(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/select(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x840 = args[2][123 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/extract(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/extract(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x841 = args[2][124 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./zirgen/components/onehot.h":46:19)
   auto x842 = x833 * x2;
@@ -19148,7 +19148,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x9559 = x9557 + x9558 * poly_mix[3];
   // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   FpExt x9560 = x9551 + x9549 * x9559 * poly_mix[36];
-  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+  // loc("top(recursion::Top)/recursion::WomHeader/element(recursion::impl::WomPlonkElement)/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x9561 = args[2][0 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x9562 = x9561 - x1313;

@@ -14,11 +14,11 @@
 
 use std::collections::BTreeMap;
 
-use anyhow::{bail, Result};
-use risc0_circuit_recursion::{
+use crate::{
     layout::{CodeReg, RecursionMicroInst, LAYOUT},
-    micro_op, Externs,
+    micro_op, Externs, CHECKED_COEFFS_PER_POLY,
 };
+use anyhow::{bail, Result};
 use risc0_core::field::baby_bear::{BabyBearElem as Fp, BabyBearExtElem as FpExt};
 use risc0_zkp::{
     adapter::CircuitStepContext,
@@ -49,8 +49,15 @@ pub struct Preflight<'a, Ext: Externs> {
     // Cycles, and what IOP input elements were read during them.
     pub iop_reads: BTreeMap<usize, Vec<FpExt>>,
 
+    // Cycles, and what checked byte inputswere read during them (stored in u32s in little endian order)
+    pub byte_reads: BTreeMap<usize, Vec<u32>>,
+
     // All the data written by the program
     pub output: Vec<u32>,
+
+    // Cached powers of evaluation point for checked bytes.  Index is the WOM address of the evaluation
+    // point.
+    eval_pts: BTreeMap<u32, [FpExt; CHECKED_COEFFS_PER_POLY]>,
 }
 
 impl<'a, Ext: Externs> Preflight<'a, Ext> {
@@ -66,7 +73,9 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
 
             split_points: Vec::new(),
             iop_reads: BTreeMap::new(),
+            byte_reads: BTreeMap::new(),
             output: Vec::new(),
+            eval_pts: BTreeMap::new(),
         }
     }
 
@@ -77,12 +86,15 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         // By default we can split before this cycle.
         self.split_points.push(ctx.cycle);
 
-        trace!("top: {code:?}");
+        trace!("top[{}]: {code:?}", ctx.cycle);
         if self.get(code, LAYOUT.code.select.macro_ops) == Fp::ONE {
             self.set_macro(ctx, code)?
         }
         if self.get(code, LAYOUT.code.select.micro_ops) == Fp::ONE {
             self.set_micros(ctx, code)?
+        }
+        if self.get(code, LAYOUT.code.select.checked_bytes) == Fp::ONE {
+            self.set_checked_bytes(ctx, code)?
         }
         if self.get(code, LAYOUT.code.select.poseidon2_load) == Fp::ONE {
             let inst = LAYOUT.code.inst.poseidon2_load;
@@ -131,7 +143,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             self.set_not_splittable(ctx);
         }
         if self.get(code, LAYOUT.code.select.poseidon2_store) == Fp::ONE {
-            let inst = LAYOUT.code.inst.poseidon2_load;
+            let inst = LAYOUT.code.inst.poseidon2_store;
             let do_mont = self.get(code, inst.do_mont).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
@@ -149,6 +161,63 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             }
             self.set_not_splittable(ctx);
         }
+
+        Ok(())
+    }
+
+    fn set_checked_bytes(&mut self, ctx: &CircuitStepContext, code: &[Fp]) -> Result<()> {
+        let inst = LAYOUT.code.inst.checked_bytes;
+        let prep_full = self.get(code, inst.prep_full).as_u32();
+        let keep_coeffs = self.get(code, inst.keep_coeffs).as_u32();
+        let keep_upper_state = self.get(code, inst.keep_upper_state).as_u32();
+        if keep_coeffs == 1 {
+            for c in &mut self.poseidon2_state[0..16] {
+                *c *= Fp::from(256u32);
+            }
+        } else {
+            self.poseidon2_state[0..16].fill(Fp::new(0));
+        }
+        if keep_upper_state != 1 {
+            self.poseidon2_state[16..24].fill(Fp::new(0));
+        }
+
+        let eval_pt_addr = self.get(code, inst.eval_point);
+        trace!("Checked bytes: eval_pt={eval_pt_addr:?} prep_full = {prep_full} keep_coeffs = {keep_coeffs} keep_upper_state = {keep_upper_state}");
+
+        let write_addr = self.get(code, LAYOUT.code.write_addr);
+        let mut evaluated = FpExt::ZERO;
+        let eval_pt_pows = self
+            .eval_pts
+            .entry(eval_pt_addr.as_u32())
+            .or_insert_with(|| {
+                let eval_pt = self.externs.wom_read(eval_pt_addr);
+                let mut pows = [FpExt::from(Fp::ONE); CHECKED_COEFFS_PER_POLY];
+                for i in 1..16 {
+                    pows[i] = pows[i - 1] * eval_pt;
+                }
+                trace!("Caching eval pt {eval_pt:?} powers: {pows:?}");
+                pows
+            });
+        let mut cycle_input: Vec<u32> = Vec::new();
+        for i in 0..4 {
+            let word = self.externs.read_input_word();
+            let bytes = word.to_le_bytes();
+            for (j, b) in bytes.iter().enumerate() {
+                let elem_idx = i * 4 + j;
+                let val = Fp::new(*b as u32);
+                trace!("  loading[{elem_idx}]: {val:?}");
+                self.poseidon2_state[elem_idx] += val;
+                evaluated += val * eval_pt_pows[elem_idx];
+            }
+            cycle_input.push(word);
+        }
+        let old_elem = self.byte_reads.insert(ctx.cycle, cycle_input);
+        assert!(
+            old_elem.is_none(),
+            "Duplicate cycle reads for checked bytes cycle"
+        );
+        self.externs.wom_write(write_addr, evaluated);
+        self.set_not_splittable(ctx);
         Ok(())
     }
 
