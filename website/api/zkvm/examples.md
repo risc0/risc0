@@ -42,6 +42,8 @@ Then check out the corresponding branch of the example:
 git checkout release-$MAJOR.$MINOR # e.g. release-1.0
 ```
 
+See [Releases][releases] to check out to the latest version.
+
 ### Run the example
 
 Finally, run the example with:
@@ -58,5 +60,6 @@ cargo run --release
 [example-zkevm]: https://github.com/risc0/risc0/tree/main/examples/zkevm-demo
 [examples-dir]: https://github.com/risc0/risc0/tree/main/examples
 [install]: ./install.md
+[releases]: https://github.com/risc0/risc0/releases
 [waldo-blog]: https://risczero.com/news/waldo
 [zkpoex]: https://risczero.com/news/zkpoex
