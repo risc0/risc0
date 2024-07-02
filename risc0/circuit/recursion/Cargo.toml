@@ -23,7 +23,7 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-bytemuck = "1.12"
+bytemuck = "1.16"
 cust = { version = "0.3", optional = true }
 lazy-regex = { version = "3.1", optional = true }
 metal = { version = "0.28", optional = true }

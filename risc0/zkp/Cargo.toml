@@ -14,7 +14,7 @@ harness = false
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
-bytemuck = { version = "1.12", features = ["derive"] }
+bytemuck = { version = "1.16", features = ["derive"] }
 cfg-if = "1.0"
 cust = { version = "0.3", optional = true }
 digest = { version = "0.10", features = ["oid"] }
