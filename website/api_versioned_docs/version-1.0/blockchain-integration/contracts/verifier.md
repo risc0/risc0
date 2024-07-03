@@ -47,16 +47,32 @@ You can find detailed information in the [version management design][VersionMana
 
 ### Contract Addresses
 
-You can find detailed information about all the contracts in this table in the [risc0-ethereum repo][risc0-ethereum-contracts]
+You can find detailed information about all the contracts in this table in the [risc0-ethereum repo][risc0-ethereum-contracts]. For your convenience, here is a quick recap:
 
-| Contract                                                           | Network            | Address                                                        |
-| ------------------------------------------------------------------ | ------------------ | -------------------------------------------------------------- |
-| [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol]               | [Ethereum Mainnet] | [0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319][mainnet-router]   |
-| [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop.sol] | [Ethereum Mainnet] | [0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7][mainnet-estop]    |
-| [RiscZeroGroth16Verifier][RiscZeroGroth16Verifier.sol]             | [Ethereum Mainnet] | [0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C][mainnet-verifier] |
-| [RiscZeroVerifierRouter][RiscZeroVerifierRouter.sol]               | [Sepolia]          | [0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187][sepolia-router]   |
-| [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop.sol] | [Sepolia]          | [0xeA41bc40DAA1d0E681c7e8eA449b89a290e922e8][sepolia-estop]    |
-| [RiscZeroGroth16Verifier][RiscZeroGroth16Verifier.sol]             | [Sepolia]          | [0x3d24C84FC1A2B26f9229e58ddDf11A8dfba802d0][sepolia-verifier] |
+* RISC Zero provides official deployments on the chains listed below.
+* Each deployment includes a [router][RiscZeroVerifierRouter.sol]. This contract implements [IRiscZeroVerifier][IRiscZeroVerifier] and can be used to verify proofs from *any* supported version of zkVM. New versions can only be added by RISC Zero via the [timelock][TimelockController.sol] governance mechanism. Addresses for the router and timelocks are given below.
+* In addition to the router and timelock, each of the supported chains also has a [fixed-version verifier][RiscZeroGroth16Verifier.sol] contract for each supported versions of zkVM. These fixed-version verifiers are wrapped by [emergency-stop mechanisms][RiscZeroVerifierEmergencyStop.sol] (which implement [IRiscZeroVerifier][IRiscZeroVerifier]); RISC Zero can use the emergency-stop to shutdown the verifier in the event that a soundness bug is ever discovered in that particular version. Addresses for the emergency-stop contracts can be fetched by querying the router (using one of the "selector" values listed below); addresses for the underlying fixed-version verifiers can be fetched by querying the respective emergency-stop.
+
+Fixed-version contracts:
+
+| zkVM version | Contract version ("selector") |
+| ------------ | ----------------------------- |
+| 1.0 +        | `0x310fe598`                  |
+
+
+| Chain              | Network | RISC Zero Pubkey                                                                                         | [Timelock][TimelockController.sol]                                                                                | [Router][RiscZeroVerifierRouter.sol]                                                                              |
+| ------------------ | ------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Ethereum           | Mainnet | [pubkey](https://etherscan.io/address/0xF616A4f81857CFEe54A4A049Ec187172574bd412)                        | [contract](https://etherscan.io/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711#code)                          | [contract](https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code)                          |
+|                    | Sepolia | [pubkey](https://sepolia.etherscan.io/address/0x3a54a45e44a71020bd0af42063b9f23e8b9e387d)                | [contract](https://sepolia.etherscan.io/address/0xB4E3306129208cC8e6E75157f75f62eAe0B920a0#code)                  | [contract](https://sepolia.etherscan.io/address/0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187#code)                  |
+| Arbitrum           | Mainnet | [pubkey](https://arbiscan.io/address/0xF616A4f81857CFEe54A4A049Ec187172574bd412)                         | [contract](https://arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code)                           | [contract](https://arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code)                           |
+|                    | Sepolia | [pubkey](https://sepolia.arbiscan.io/address/0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D)                 | [contract](https://sepolia.arbiscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code)                   | [contract](https://sepolia.arbiscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code)                   |
+| Avalance (C-Chain) | Mainnet | [pubkey](https://avascan.info/blockchain/all/address/0xF616A4f81857CFEe54A4A049Ec187172574bd412)         | [contract](https://avascan.info/blockchain/c/address/0xDC986a09728F76110FF666eE7b20d99086501d15/contract)         | [contract](https://avascan.info/blockchain/c/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711/contract)         |
+|                    | Fuji    | [pubkey](https://testnet.avascan.info/blockchain/all/address/0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D) | [contract](https://testnet.avascan.info/blockchain/c/address/0xDC986a09728F76110FF666eE7b20d99086501d15/contract) | [contract](https://testnet.avascan.info/blockchain/c/address/0x0b144E07A0826182B6b59788c34b32Bfa86Fb711/contract) |
+| Base               | Mainnet | [pubkey](https://basescan.org/address/0xF616A4f81857CFEe54A4A049Ec187172574bd412)                        | [contract](https://basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code)                          | [contract](https://basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code)                          |
+|                    | Sepolia | [pubkey](https://sepolia.basescan.org/address/0x3a54A45E44a71020Bd0Af42063B9f23e8b9E387D)                | [contract](https://sepolia.basescan.org/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code)                  | [contract](https://sepolia.basescan.org/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code)                  |
+| Linea              | Mainnet | [pubkey](https://lineascan.build/address/0xF616A4f81857CFEe54A4A049Ec187172574bd412)                     | [contract](https://lineascan.build/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code)                       | [contract](https://lineascan.build/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code)                       |
+| Optimism           | Mainnet | [pubkey](https://optimistic.etherscan.io/address/0xF616A4f81857CFEe54A4A049Ec187172574bd412)             | [contract](https://optimistic.etherscan.io/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code)               | [contract](https://optimistic.etherscan.io/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code)               |
+| Polygon zkEVM      | Mainnet | [pubkey](https://zkevm.polygonscan.com/address/0xF616A4f81857CFEe54A4A049Ec187172574bd412)               | [contract](https://zkevm.polygonscan.com/address/0xdc986a09728f76110ff666ee7b20d99086501d15#code)                 | [contract](https://zkevm.polygonscan.com/address/0x0b144e07a0826182b6b59788c34b32bfa86fb711#code)                 |
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
 
@@ -68,15 +84,10 @@ You can find detailed information about all the contracts in this table in the [
 [RiscZeroVerifierEmergencyStop.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/RiscZeroVerifierEmergencyStop.sol
 [RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/RiscZeroVerifierRouter.sol
 [Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
+[TimelockController.sol]: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/version-management-design.md
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
-[mainnet-estop]: https://etherscan.io/address/0x44c220f0598345195cE99AD6A57aDfFcb9Ea33e7#code
-[mainnet-router]: https://etherscan.io/address/0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319#code
-[mainnet-verifier]: https://etherscan.io/address/0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C#code
 [risc0-ethereum-contracts]: https://github.com/risc0/risc0-ethereum/tree/release-1.0/contracts
-[sepolia-estop]: https://sepolia.etherscan.io/address/0xeA41bc40DAA1d0E681c7e8eA449b89a290e922e8#code
-[sepolia-router]: https://sepolia.etherscan.io/address/0x925d8331ddc0a1F0d96E68CF073DFE1d92b69187#code
-[sepolia-verifier]: https://sepolia.etherscan.io/address/0x3d24C84FC1A2B26f9229e58ddDf11A8dfba802d0#code
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
