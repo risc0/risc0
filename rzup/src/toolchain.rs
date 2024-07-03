@@ -22,6 +22,7 @@ use crate::{
 };
 use anyhow::{bail, Context, Result};
 use flate2::bufread::GzDecoder;
+use guess_host_triple::guess_host_triple;
 use std::{
     fs,
     io::{BufReader, Write},
@@ -345,7 +346,11 @@ impl Toolchain {
                 };
                 let build_dir = root_dir.join(format!("build-{}", self.to_str()));
                 let toolchains_root_dir = rzup_home()?.join("toolchains");
-                let toolchain_name = format!("{}-{}", self.to_str(), tag);
+                let host_triple = guess_host_triple().unwrap_or("none");
+
+                // append "-local" to denote a local build. Useful for those working toolchains by building them locally.
+                let toolchain_name =
+                    format!("{}-risc0-{}-{}-local", tag, self.to_str(), host_triple);
                 let final_toolchain_dir = toolchains_root_dir.join(toolchain_name);
 
                 if final_toolchain_dir.exists() {
@@ -360,8 +365,7 @@ impl Toolchain {
 
                 let build_output = self.build_toolchain(&build_dir)?;
                 self.move_toolchain(&build_output.toolchain_dir, &final_toolchain_dir)?;
-                // TODO: Figure out what stage to copy cargo from
-                self.copy_tools(&build_output.toolchain_dir)?;
+                self.copy_tools(&build_output.toolchain_dir, &final_toolchain_dir)?;
                 self.link(&final_toolchain_dir)?;
             }
             Toolchain::Cpp => {
@@ -467,9 +471,9 @@ impl Toolchain {
         Ok(())
     }
 
-    fn copy_tools(&self, toolchain_dir: &Path) -> Result<()> {
+    fn copy_tools(&self, toolchain_dir: &Path, toolchain_dest: &Path) -> Result<()> {
         let tools_bin_dir = toolchain_dir.parent().unwrap().join("stage2-tools-bin");
-        let target_bin_dir = toolchain_dir.join("bin");
+        let target_bin_dir = toolchain_dest.join("bin");
 
         for tool in tools_bin_dir.read_dir()? {
             let tool = tool?;
