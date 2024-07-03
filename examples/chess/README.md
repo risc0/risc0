@@ -26,7 +26,7 @@ To learn more about this use case, check out our blog about using Bonsai as a [z
 ## Project Organization
 
 zkVM applications are organized into a [host program] and a [guest program].
-The host program can be found in [`src/main.rs`], and the guest program can be found in [`methods/guest/src/main.rs`].
+The host program can be found in [`src/main.rs`][guest code], and the guest program can be found in [`methods/guest/src/main.rs`][guest code].
 
 The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
 The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
@@ -49,14 +49,12 @@ The [guest code] checks that applying the move to the initial board state is leg
 - For a video walk-through of this example, check out this [excerpt from our workshop at ZK HACK III].
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
-[`src/main.rs`]: src/main.rs
 [Bonsai application]: https://dev.bonsai.xyz
 [developer docs]: https://dev.risczero.com
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
 [executes]: https://dev.risczero.com/terminology#execute
-[guest code]: methods/guest/src/bin/checkmate.rs
+[guest code]: methods/guest/src/main.rs
 [guest program]: https://dev.risczero.com/terminology#guest-program
 [host code]: methods/guest/src/main.rs
 [host program]: https://dev.risczero.com/terminology#host-program
