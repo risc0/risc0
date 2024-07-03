@@ -14,7 +14,7 @@ Then, run the example with:
 cargo run --release
 ```
 
-Congratulations! You just constructed a zero-knowledge proof that the position defined [here] includes a mate-in-one.
+Congratulations! You just constructed a zero-knowledge proof that includes a mate-in-one.
 
 ## Use Cases
 
@@ -22,9 +22,6 @@ By using this demo as part of a [Bonsai application], you could build an app whe
 For example, you might issue an on-chain award for the first person who can find a mate-in-one.
 
 To learn more about this use case, check out our blog about using Bonsai as a [zk coprocessor].
-
-[Bonsai application]: https://dev.bonsai.xyz
-[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 
 ## Project Organization
 
@@ -52,24 +49,23 @@ The [guest code] checks that applying the move to the initial board state is leg
 - For a video walk-through of this example, check out this [excerpt from our workshop at ZK HACK III].
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-[`src/main.rs`]: src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
-[host]: https://dev.risczero.com/terminology#host
+[`src/main.rs`]: src/main.rs
+[Bonsai application]: https://dev.bonsai.xyz
+[developer docs]: https://dev.risczero.com
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
 [executes]: https://dev.risczero.com/terminology#execute
+[guest code]: methods/guest/src/bin/checkmate.rs
 [guest program]: https://dev.risczero.com/terminology#guest-program
+[host code]: methods/guest/src/main.rs
 [host program]: https://dev.risczero.com/terminology#host-program
+[host]: https://dev.risczero.com/terminology#host
+[journal]: https://dev.risczero.com/terminology#journal
 [proves the execution]: https://dev.risczero.com/terminology#prove
 [receipt]: https://dev.risczero.com/terminology#receipt
-[verify]: https://dev.risczero.com/terminology#verify
-[journal]: https://dev.risczero.com/terminology#journal
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-[here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
-[zkVM]: https://dev.risczero.com/zkvm
-[shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
 [Rust Resources]: https://dev.risczero.com/api/zkvm/rust-resources
 [shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
-[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
-[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
-[journal]: https://dev.risczero.com/terminology#journal
-[developer docs]: https://dev.risczero.com
-[excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
+[verify]: https://dev.risczero.com/terminology#verify
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
+[zkVM]: https://dev.risczero.com/zkvm
