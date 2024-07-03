@@ -93,7 +93,7 @@ pub trait ProverServer {
     /// Compress a [CompositeReceipt] into a single [SuccinctReceipt].
     ///
     /// A [CompositeReceipt] may contain an arbitrary number of receipts assembled into
-    /// continuations and compositions. Together, these receipts collectively prove a top-level
+    /// segments and assumptions. Together, these receipts collectively prove a top-level
     /// [ReceiptClaim](crate::ReceiptClaim). This function compresses all of the constituent receipts of a
     /// [CompositeReceipt] into a single [SuccinctReceipt] that proves the same top-level claim. It
     /// accomplishes this by iterative application of the recursion programs including lift, join,
