@@ -8,7 +8,7 @@ export async function fetchDatasheet({ version, url }: { version: Version; url: 
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`,
     {
-      next: { revalidate: 30, tags: ["fetch-datasheet"] }, // 30s cache
+      next: { revalidate: 180, tags: ["fetch-datasheet"] }, // 3 minutes cache
     },
   );
 

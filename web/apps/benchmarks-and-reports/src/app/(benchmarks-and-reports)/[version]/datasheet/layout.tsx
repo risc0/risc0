@@ -1,9 +1,9 @@
 import { Separator } from "@risc0/ui/separator";
 import { type PropsWithChildren, Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
-import { useRedirectIfWrongVersion } from "~/hooks/use-redirect-if-wrong-version";
 import type { Version } from "~/types/version";
 import { FooterAscii } from "../../_components/footer-ascii";
+import { redirectIfWrongVersion } from "../../_utils/redirect-if-wrong-version";
 import { DatasheetCommitHashButton } from "./_components/datasheet-commit-hash-button";
 
 export default function DatasheetLayout({
@@ -14,7 +14,7 @@ export default function DatasheetLayout({
     version: Version;
   };
 }>) {
-  useRedirectIfWrongVersion(params.version);
+  redirectIfWrongVersion(params.version);
 
   return (
     <div className="container max-w-screen-3xl">
