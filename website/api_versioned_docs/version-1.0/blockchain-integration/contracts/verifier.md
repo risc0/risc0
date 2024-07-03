@@ -49,16 +49,15 @@ You can find detailed information in the [version management design][VersionMana
 
 You can find detailed information about all the contracts in this table in the [risc0-ethereum repo][risc0-ethereum-contracts]. For your convenience, here is a quick recap:
 
-* RISC Zero provides official deployments on the chains listed below.
-* Each deployment includes a [router][RiscZeroVerifierRouter.sol]. This contract implements [IRiscZeroVerifier][IRiscZeroVerifier] and can be used to verify proofs from *any* supported version of zkVM. New versions can only be added by RISC Zero via the [timelock][TimelockController.sol] governance mechanism. Addresses for the router and timelocks are given below.
-* In addition to the router and timelock, each of the supported chains also has a [fixed-version verifier][RiscZeroGroth16Verifier.sol] contract for each supported versions of zkVM. These fixed-version verifiers are wrapped by [emergency-stop mechanisms][RiscZeroVerifierEmergencyStop.sol] (which implement [IRiscZeroVerifier][IRiscZeroVerifier]); RISC Zero can use the emergency-stop to shutdown the verifier in the event that a soundness bug is ever discovered in that particular version. Addresses for the emergency-stop contracts can be fetched by querying the router (using one of the "selector" values listed below); addresses for the underlying fixed-version verifiers can be fetched by querying the respective emergency-stop.
+- RISC Zero provides official deployments on the chains listed below.
+- Each deployment includes a [router][RiscZeroVerifierRouter.sol]. This contract implements [IRiscZeroVerifier][IRiscZeroVerifier] and can be used to verify proofs from _any_ supported version of zkVM. New versions can only be added by RISC Zero via the [timelock][TimelockController.sol] governance mechanism. Addresses for the router and timelocks are given below.
+- In addition to the router and timelock, each of the supported chains also has a [fixed-version verifier][RiscZeroGroth16Verifier.sol] contract for each supported versions of zkVM. These fixed-version verifiers are wrapped by [emergency-stop mechanisms][RiscZeroVerifierEmergencyStop.sol] (which implement [IRiscZeroVerifier][IRiscZeroVerifier]); RISC Zero can use the emergency-stop to shutdown the verifier in the event that a soundness bug is ever discovered in that particular version. Addresses for the emergency-stop contracts can be fetched by querying the router (using one of the "selector" values listed below); addresses for the underlying fixed-version verifiers can be fetched by querying the respective emergency-stop.
 
 Fixed-version contracts:
 
 | zkVM version | Contract version ("selector") |
 | ------------ | ----------------------------- |
 | 1.0 +        | `0x310fe598`                  |
-
 
 | Chain              | Network | RISC Zero Pubkey                                                                                         | [Timelock][TimelockController.sol]                                                                                | [Router][RiscZeroVerifierRouter.sol]                                                                              |
 | ------------------ | ------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
