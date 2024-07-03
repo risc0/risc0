@@ -16,13 +16,12 @@ use crate::{
     errors::RzupError,
     repo::GithubReleaseInfo,
     utils::{
-        command::CommandExt, ensure_binary, flock, http_client, notify::info_msg, rzup_home,
+        self, command::CommandExt, ensure_binary, flock, http_client, notify::info_msg, rzup_home,
         target::Target, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
     },
 };
 use anyhow::{bail, Context, Result};
 use flate2::bufread::GzDecoder;
-use guess_host_triple::guess_host_triple;
 use std::{
     fs,
     io::{BufReader, Write},
@@ -346,11 +345,13 @@ impl Toolchain {
                 };
                 let build_dir = root_dir.join(format!("build-{}", self.to_str()));
                 let toolchains_root_dir = rzup_home()?.join("toolchains");
-                let host_triple = guess_host_triple().unwrap_or("none");
+                let target = Target::host_target().ok_or_else(|| {
+                    RzupError::Other("Failed to determine the host target".to_string())
+                })?;
 
                 // append "-local" to denote a local build. Useful for those working toolchains by building them locally.
                 let toolchain_name =
-                    format!("{}-risc0-{}-{}-local", tag, self.to_str(), host_triple);
+                    format!("{}-risc0-{}-{}-local", tag, self.to_str(), target.to_str());
                 let final_toolchain_dir = toolchains_root_dir.join(toolchain_name);
 
                 if final_toolchain_dir.exists() {
