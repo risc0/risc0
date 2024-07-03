@@ -39,8 +39,10 @@ cargo risczero --version
 Then check out the corresponding branch of the example:
 
 ```bash
-git checkout release-$VERSION # e.g. release-0.19
+git checkout release-$MAJOR.$MINOR # e.g. release-1.0
 ```
+
+See [Releases][releases] to check out to the latest version.
 
 ### Run the example
 
@@ -58,5 +60,6 @@ cargo run --release
 [example-zkevm]: https://github.com/risc0/risc0/tree/main/examples/zkevm-demo
 [examples-dir]: https://github.com/risc0/risc0/tree/main/examples
 [install]: ./install.md
+[releases]: https://github.com/risc0/risc0/releases
 [waldo-blog]: https://risczero.com/news/waldo
 [zkpoex]: https://risczero.com/news/zkpoex

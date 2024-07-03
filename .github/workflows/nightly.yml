@@ -60,6 +60,7 @@ jobs:
         run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
 
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
+        if: always()
 
       - name: Upload artifact results
         uses: actions/upload-artifact@v4

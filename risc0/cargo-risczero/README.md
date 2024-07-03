@@ -85,7 +85,7 @@ automatically installed via `rustup toolchain link`.
 
 [risc-zero]: https://risczero.com
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[rust-starter]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
+[rust-starter]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter
 
 ## build
 

@@ -108,7 +108,7 @@ impl Bootstrap {
     }
 
     fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<Digest>) {
-        // Recursion programs (ZKRs) that are too be included in the allowed set.
+        // Recursion programs (ZKRs) that are to be included in the allowed set.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators).

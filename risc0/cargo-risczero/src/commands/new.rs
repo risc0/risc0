@@ -183,6 +183,10 @@ risc0_zkvm::guest::entry!(main);\n";
                 Regex::new(r"\{\{ *no_std_preamble *\}\}")?,
                 no_std_preamble.to_string(),
             ));
+            template_variables.push((
+                Regex::new(r"\{\{ *risc0_feature_std *\}\}")?,
+                "".to_string(),
+            ));
         }
         self.gen_template(dest_dir, template_variables)?;
 

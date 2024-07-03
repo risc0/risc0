@@ -14,7 +14,7 @@
 
 use crate::utils::{self, ClientEnvs};
 use anyhow::Result;
-use bonsai_sdk::alpha::SessionId;
+use bonsai_sdk::blocking::SessionId;
 use clap::Parser;
 use hex::FromHex;
 use risc0_zkvm::{sha::Digest, Receipt};
