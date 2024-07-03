@@ -29,8 +29,8 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("4043ce1426811d4f0e6a9c27256d052513c95739e9b80c74f628f313c739b75c"),
     digest!("b4edfc3f2c49f10285bcdc7493eb81063959820a59569356fb73b62c1586e01f"),
     digest!("cc1bd6753bb8fd41d41bba14bb56e90ffa9ddf4f20f7727734d140675a9cc52b"),
-    digest!("0e51536ec08ac01e42de3d2a0b2a552d8ff2c75e4ef2b5285eed23582a13ef5d"),
-    digest!("d7b56f6ef29d18203ac26960eb21160d60da6f1975124261fbe38d1364fa0e6b"),
+    digest!("22eb7f24b795b8620919ac47235a001f15cfa31751f0a421e415d01e0f506b08"),
+    digest!("ba3c4924aa2ddc6d78d3145dd03f9160bb5ce96f36fdab69730b7107ad34ea0a"),
     digest!("9cb73d556e58680259fae4568ee632684ef3a51f6465a81169f58f1c404a6816"),
     digest!("8e87f53b61b2d122003e6874c3c3bd01846b1959f860a85cc21be96f914e3040"),
     digest!("37d2fd2dda22fc35516a0c03e94d630840dfbc181494314547f12e5ee429984f"),
@@ -42,26 +42,26 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("bd680715f4b5f96fce403e387674b355763c8957552d21547352515eae90d930"),
     digest!("6d888660a8fd513d96af1c245eb8354e13423416ea8f4658f85092561b816a6c"),
     digest!("a0ce1a36fa38451527ec78663687c9560b0f947440da571f6f216641a35f7342"),
-    digest!("18386311e4b86b527f3d966de55df3271f7e52209c037b607a41a62c8b4c9f61"),
+    digest!("617d277564bc3d4e2f572474302cb43974336b4c4c4f7e4df84a395fa5fa5c50"),
 ];
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("8a2e4d46b79c2f46bae0a036182f4a0b0c0a70310e7c876f1ef889368a68522f");
+    digest!("c43de805675563551857de3ee487c5167a26141467196700f43eb51f9c0ef505");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =
-    digest!("4e160df1e119ac0e3d658755a9edf38c8feb307b34bc10b57f4538dbe122a005");
+    digest!("51b54a62f2aa599aef768744c95de8c7d89bf716e11b1179f05d6cf0bcfeb60e");
 
 /// Control IDs for included recursion programs (ZKRs), using Poseidon2 over BabyBear.
 pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [
     (
         "identity.zkr",
-        digest!("0e51536ec08ac01e42de3d2a0b2a552d8ff2c75e4ef2b5285eed23582a13ef5d"),
+        digest!("22eb7f24b795b8620919ac47235a001f15cfa31751f0a421e415d01e0f506b08"),
     ),
     (
         "join.zkr",
-        digest!("d7b56f6ef29d18203ac26960eb21160d60da6f1975124261fbe38d1364fa0e6b"),
+        digest!("ba3c4924aa2ddc6d78d3145dd03f9160bb5ce96f36fdab69730b7107ad34ea0a"),
     ),
     (
         "lift_14.zkr",
@@ -109,7 +109,7 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [
     ),
     (
         "resolve.zkr",
-        digest!("18386311e4b86b527f3d966de55df3271f7e52209c037b607a41a62c8b4c9f61"),
+        digest!("617d277564bc3d4e2f572474302cb43974336b4c4c4f7e4df84a395fa5fa5c50"),
     ),
     (
         "test_recursion_circuit.zkr",
@@ -121,11 +121,11 @@ pub const POSEIDON2_CONTROL_IDS: [(&str, Digest); 15] = [
 pub const SHA256_CONTROL_IDS: [(&str, Digest); 15] = [
     (
         "identity.zkr",
-        digest!("837e1f68eed165e971fed56ed1d67d6a3d2ccf47bae684f2c48f3f5fd8a012a4"),
+        digest!("9e1024be2b9eb84c73dd6056356dcacefec966ff22b7b57e31a7e4898976f334"),
     ),
     (
         "join.zkr",
-        digest!("3f05e906f54f94f11681350590b7b232af6b2686f57e24c4f1d8fce5ee6e6e08"),
+        digest!("e484163ed7adbca77663ad90875bb1202b9824f60fd679a40f526ec40d29ad63"),
     ),
     (
         "lift_14.zkr",
@@ -173,7 +173,7 @@ pub const SHA256_CONTROL_IDS: [(&str, Digest); 15] = [
     ),
     (
         "resolve.zkr",
-        digest!("37e7b3ff1e380743cbd33650426cc339b5f545d5256acc07717a18d59328d220"),
+        digest!("2abc94ad282abb14f88b843463be087f894ede12a327d831c3573941ea9b2ae5"),
     ),
     (
         "test_recursion_circuit.zkr",
