@@ -42,7 +42,7 @@ jobs:
       - name: Generate the profile
         run: |
           target/release/gen-profiles \
-          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yaml \
+          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
           -o ${{ runner.temp }}/crate-validation/profiles.yaml \
           -c $TOP_N_CRATES
         working-directory: tools/crates-validator/
