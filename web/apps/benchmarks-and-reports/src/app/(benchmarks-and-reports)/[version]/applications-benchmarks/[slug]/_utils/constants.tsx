@@ -1,6 +1,10 @@
 import type { Version } from "~/types/version";
 
-export const APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES = {
+export const APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES: {
+  [K in Version]: {
+    [key: string]: string;
+  };
+} = {
   main: {
     "macOS-apple_m2_pro.csv": "Metal on Apple M2 Pro",
     "Linux-nvidia_rtx_3090_ti.csv": "CUDA on NVIDIA RTX 3090 Ti",
