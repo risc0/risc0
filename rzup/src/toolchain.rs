@@ -16,7 +16,7 @@ use crate::{
     errors::RzupError,
     repo::GithubReleaseInfo,
     utils::{
-        self, command::CommandExt, ensure_binary, flock, http_client, notify::info_msg, rzup_home,
+        command::CommandExt, ensure_binary, flock, http_client, notify::info_msg, rzup_home,
         target::Target, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
     },
 };
