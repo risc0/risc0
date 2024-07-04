@@ -48,7 +48,7 @@ export function VersionSelect() {
 
   return mounted && version ? (
     <Select onValueChange={onValueChange} value={version}>
-      <SelectTrigger size="sm">
+      <SelectTrigger size="sm" aria-label="version select">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

@@ -56,7 +56,7 @@ export default function ApplicationsBenchmarksPage({
 }) {
   return (
     <Tabs className="mt-6" defaultValue={params.slug}>
-      <TabsList>
+      <TabsList className="flex justify-start flex-wrap h-auto">
         {Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version]).map((filename, index) => (
           <Link
             tabIndex={-1}
