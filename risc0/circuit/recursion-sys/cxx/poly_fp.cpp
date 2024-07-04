@@ -16174,117 +16174,117 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x8072 = x322 - x286;
   // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   FpExt x8073 = x284 + x8072 * poly_mix[0];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8074 = x862 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8075 = x862 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8076 = x862 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8077 = x862 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8078 = x832 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8079 = x833 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8080 = x834 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8081 = x324 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8082 = x324 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8083 = x324 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8084 = x324 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8085 = x326 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8086 = x328 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8087 = x330 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8088 = x832 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8089 = x832 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8090 = x833 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8091 = x326 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8092 = x326 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8093 = x326 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8094 = x328 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8095 = x328 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8096 = x328 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8097 = x330 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8098 = x330 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8099 = x330 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8100 = x8080 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8101 = x8087 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8102 = x8075 + x8075;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8103 = x8076 + x8088;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8104 = x8077 + x8089;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8105 = x8078 + x8090;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8106 = x8079 + x8079;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8107 = x8082 + x8091;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8108 = x8083 + x8092;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8109 = x8084 + x8093;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8110 = x8085 + x8096;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8111 = x8086 + x8099;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8112 = x8106 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8113 = x8111 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8114 = x8103 + x8076;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8115 = x8104 + x8089;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8116 = x8105 + x8078;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8117 = x8108 + x8094;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8118 = x8109 + x8095;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8119 = x8110 + x8098;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8120 = x8114 + x8100;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8121 = x8115 + x8077;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8122 = x8102 + x8112;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8123 = x8117 + x8101;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8124 = x8118 + x8097;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8125 = x8107 + x8113;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8126 = x8116 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8127 = x8119 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":29:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
   auto x8128 = x8074 + x8126;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":28:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:12)
   auto x8129 = x8081 + x8127;
   // loc("zirgen/components/fpext.cpp":28:5)
   auto x8130 = x835 - x8128;
@@ -16302,365 +16302,365 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x8136 = x838 - x8121;
   // loc("zirgen/components/fpext.cpp":28:5)
   FpExt x8137 = x8135 + x8136 * poly_mix[4];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8138 = x835 * x835;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8139 = x835 * x836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8140 = x835 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8141 = x835 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8142 = x835 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8143 = x835 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8144 = x835 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8145 = x835 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8146 = x835 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8147 = x835 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8148 = x835 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8149 = x835 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8150 = x836 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8151 = x836 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8152 = x836 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8153 = x837 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8154 = x837 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8155 = x837 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8156 = x838 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8157 = x838 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8158 = x838 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8159 = x836 * x836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8160 = x836 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8161 = x836 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8162 = x836 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8163 = x836 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8164 = x836 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8165 = x836 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8166 = x836 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8167 = x837 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8168 = x837 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8169 = x837 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8170 = x837 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8171 = x837 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8172 = x837 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8173 = x837 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8174 = x838 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8175 = x838 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8176 = x838 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8177 = x838 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8178 = x838 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8179 = x838 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8180 = x8156 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8181 = x8157 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8182 = x8158 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8183 = x8139 + x8139;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8184 = x8140 + x8159;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8185 = x8141 + x8160;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8186 = x8143 + x8161;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8187 = x8144 + x8162;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8188 = x8145 + x8163;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8189 = x8147 + x8164;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8190 = x8148 + x8165;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8191 = x8149 + x8166;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8192 = x8150 + x8167;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8193 = x8151 + x8170;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8194 = x8152 + x8173;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8195 = x8153 + x8153;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8196 = x8154 + x8176;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8197 = x8155 + x8179;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8198 = x8195 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8199 = x8196 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8200 = x8197 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8201 = x8183 + x8198;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8202 = x8184 + x8140;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8203 = x8185 + x8160;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8204 = x8186 + x8199;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8205 = x8187 + x8168;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8206 = x8188 + x8169;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8207 = x8190 + x8171;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8208 = x8191 + x8172;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8209 = x8192 + x8150;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8210 = x8193 + x8175;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8211 = x8194 + x8178;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8212 = x8202 + x8180;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8213 = x8203 + x8141;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8214 = x8205 + x8181;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8215 = x8206 + x8174;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8216 = x8207 + x8182;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8217 = x8208 + x8177;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8218 = x8189 + x8200;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8219 = x8201 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8220 = x8201 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8221 = x8204 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8222 = x8201 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8223 = x8201 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8224 = x8201 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8225 = x8201 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8226 = x8201 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8227 = x8201 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8228 = x8204 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8229 = x8204 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8230 = x8204 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":34:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":45:12)
   auto x8231 = x8209 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":32:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":43:12)
   auto x8232 = x8210 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8233 = x8211 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8234 = x8138 + x8231;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8235 = x8142 + x8232;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":31:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:12)
   auto x8236 = x8146 + x8233;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8237 = x8212 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8238 = x8212 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8239 = x8213 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8240 = x8213 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8241 = x8214 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8242 = x8215 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8243 = x8234 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8244 = x8234 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8245 = x8234 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8246 = x8234 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8247 = x8234 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8248 = x8234 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8249 = x8234 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8250 = x8234 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8251 = x8235 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8252 = x8235 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8253 = x8235 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8254 = x8235 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8255 = x8212 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8256 = x8212 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8257 = x8212 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8258 = x8212 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8259 = x8212 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8260 = x8212 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8261 = x8213 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8262 = x8213 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8263 = x8213 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8264 = x8213 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8265 = x8213 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8266 = x8213 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8267 = x8214 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8268 = x8214 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8269 = x8214 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8270 = x8215 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8271 = x8215 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8272 = x8215 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8273 = x8239 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8274 = x8240 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8275 = x8242 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8276 = x8237 + x8263;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8277 = x8238 + x8266;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8278 = x8241 + x8272;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8279 = x8219 + x8257;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8280 = x8220 + x8260;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8281 = x8221 + x8269;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8282 = x8244 + x8222;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8283 = x8245 + x8223;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8284 = x8246 + x8224;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8285 = x8248 + x8225;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8286 = x8249 + x8226;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8287 = x8250 + x8227;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8288 = x8252 + x8228;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8289 = x8253 + x8229;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8290 = x8254 + x8230;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8291 = x8276 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8292 = x8277 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8293 = x8278 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8294 = x8279 + x8262;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8295 = x8280 + x8265;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8296 = x8281 + x8271;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8297 = x8283 + x8255;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8298 = x8284 + x8256;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8299 = x8286 + x8258;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8300 = x8287 + x8259;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8301 = x8289 + x8267;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8302 = x8290 + x8268;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8303 = x8297 + x8273;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8304 = x8298 + x8261;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8305 = x8299 + x8274;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8306 = x8300 + x8264;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8307 = x8301 + x8275;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8308 = x8302 + x8270;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8309 = x8282 + x8291;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8310 = x8285 + x8292;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8311 = x8288 + x8293;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8312 = x8294 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8313 = x8295 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8314 = x8296 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":36:14)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":47:14)
   auto x8315 = x8243 + x8312;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":35:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":46:12)
   auto x8316 = x8247 + x8313;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":33:12)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":44:12)
   auto x8317 = x8251 + x8314;
   // loc("zirgen/components/fpext.cpp":28:5)
   auto x8318 = x839 - x8315;
@@ -16678,1607 +16678,1607 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x8324 = x1020 - x8304;
   // loc("zirgen/components/fpext.cpp":28:5)
   FpExt x8325 = x8323 + x8324 * poly_mix[8];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8326 = x839 * x8123;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8327 = x839 * x8124;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8328 = x839 * x8125;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8329 = x839 * x8129;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8330 = x839 * x835;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8331 = x839 * x836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8332 = x839 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8333 = x839 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8334 = x839 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8335 = x839 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8336 = x839 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8337 = x839 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8338 = x839 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8339 = x839 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8340 = x839 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8341 = x839 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8342 = x840 * x8124;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8343 = x840 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8344 = x840 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8345 = x840 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8346 = x841 * x8124;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8347 = x841 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8348 = x841 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8349 = x841 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8350 = x1020 * x8124;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8351 = x1020 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8352 = x1020 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8353 = x1020 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8354 = x840 * x8123;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8355 = x840 * x8125;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8356 = x840 * x8129;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8357 = x840 * x835;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8358 = x840 * x836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8359 = x840 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8360 = x840 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8361 = x840 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8362 = x840 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8363 = x840 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8364 = x840 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8365 = x840 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8366 = x841 * x8123;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8367 = x841 * x8125;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8368 = x841 * x8129;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8369 = x841 * x835;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8370 = x841 * x836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8371 = x841 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8372 = x841 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8373 = x841 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8374 = x841 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8375 = x841 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8376 = x841 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8377 = x841 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8378 = x1020 * x8123;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8379 = x1020 * x8125;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8380 = x1020 * x8129;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8381 = x1020 * x835;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8382 = x1020 * x836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8383 = x1020 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8384 = x1020 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8385 = x1020 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8386 = x1020 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8387 = x1020 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8388 = x1020 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8389 = x1020 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8390 = x8350 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8391 = x8351 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8392 = x8352 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8393 = x8353 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8394 = x8326 + x8355;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8395 = x8327 + x8354;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8396 = x8328 + x8356;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8397 = x8331 + x8357;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8398 = x8332 + x8358;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8399 = x8333 + x8359;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8400 = x8335 + x8360;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8401 = x8336 + x8361;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8402 = x8337 + x8362;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8403 = x8339 + x8363;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8404 = x8340 + x8364;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8405 = x8341 + x8365;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8406 = x8342 + x8366;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8407 = x8343 + x8371;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8408 = x8344 + x8374;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8409 = x8345 + x8377;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8410 = x8346 + x8378;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8411 = x8347 + x8383;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8412 = x8348 + x8386;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8413 = x8349 + x8389;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8414 = x8410 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8415 = x8411 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8416 = x8412 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8417 = x8413 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8418 = x8394 + x8368;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8419 = x8395 + x8367;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8420 = x8397 + x8415;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8421 = x8398 + x8369;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8422 = x8399 + x8370;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8423 = x8401 + x8372;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8424 = x8402 + x8373;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8425 = x8404 + x8375;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8426 = x8405 + x8376;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8427 = x8406 + x8379;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8428 = x8407 + x8382;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8429 = x8408 + x8385;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8430 = x8409 + x8388;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8431 = x8418 + x8390;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8432 = x8419 + x8380;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8433 = x8421 + x8391;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8434 = x8422 + x8381;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8435 = x8423 + x8392;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8436 = x8424 + x8384;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8437 = x8425 + x8393;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8438 = x8426 + x8387;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8439 = x8396 + x8414;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8440 = x8400 + x8416;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8441 = x8403 + x8417;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8442 = x8420 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8443 = x8420 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8444 = x8420 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8445 = x8420 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8446 = x8427 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":41:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":52:13)
   auto x8447 = x8428 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8448 = x8429 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8449 = x8430 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8450 = x8330 + x8447;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":40:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":51:13)
   auto x8451 = x8329 + x8446;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":39:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":50:13)
   auto x8452 = x8334 + x8448;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":38:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":49:13)
   auto x8453 = x8338 + x8449;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8454 = x8433 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8455 = x8434 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8456 = x8450 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8457 = x8450 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8458 = x8450 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8459 = x8450 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8460 = x8433 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8461 = x8433 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8462 = x8433 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8463 = x8434 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8464 = x8434 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8465 = x8434 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8466 = x8455 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8467 = x8454 + x8465;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8468 = x8442 + x8462;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8469 = x8457 + x8443;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8470 = x8458 + x8444;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8471 = x8459 + x8445;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8472 = x8467 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8473 = x8468 + x8464;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8474 = x8470 + x8460;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8475 = x8471 + x8461;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8476 = x8474 + x8466;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8477 = x8475 + x8463;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8478 = x8469 + x8472;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8479 = x8473 * x11;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":42:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":53:13)
   auto x8480 = x8456 + x8479;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8481 = x594 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8482 = x594 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8483 = x594 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8484 = x594 * x8481;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8485 = x8484 * x8482;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8486 = x8485 * x8483;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8487 = x8325 + x8486 * poly_mix[9];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8488 = x868 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8489 = x868 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8490 = x868 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8491 = x868 * x8489;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8492 = x8491 * x8490;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8493 = x8492 * x8488;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8494 = x8487 + x8493 * poly_mix[10];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8495 = x1168 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8496 = x1168 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8497 = x1168 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8498 = x1168 * x8495;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8499 = x8498 * x8496;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8500 = x8499 * x8497;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8501 = x8494 + x8500 * poly_mix[11];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8502 = x1240 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8503 = x1240 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8504 = x1240 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8505 = x1240 * x8504;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8506 = x8505 * x8502;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8507 = x8506 * x8503;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8508 = x8501 + x8507 * poly_mix[12];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8509 = x594 + x868;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8510 = x8509 + x1168;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8511 = x8510 + x1240;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8512 = x319 * x19;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8513 = x8512 * x4855;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8514 = x596 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8515 = x596 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8516 = x596 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8517 = x8513 + x8511;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8518 = x596 * x8514;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8519 = x8518 * x8515;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8520 = x8519 * x8516;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8521 = x8508 + x8520 * poly_mix[13];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8522 = x870 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8523 = x870 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8524 = x870 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8525 = x870 * x8523;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8526 = x8525 * x8524;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8527 = x8526 * x8522;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8528 = x8521 + x8527 * poly_mix[14];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8529 = x1169 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8530 = x1169 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8531 = x1169 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8532 = x1169 * x8529;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8533 = x8532 * x8530;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8534 = x8533 * x8531;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8535 = x8528 + x8534 * poly_mix[15];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8536 = x1241 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8537 = x1241 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8538 = x1241 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8539 = x1241 * x8538;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8540 = x8539 * x8536;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8541 = x8540 * x8537;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8542 = x8535 + x8541 * poly_mix[16];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8543 = x596 + x870;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8544 = x8543 + x1169;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8545 = x8544 + x1241;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8546 = x8545 * x324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8547 = x8545 * x326;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8548 = x8545 * x328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8549 = x8545 * x330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8550 = x8512 * x4856;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8551 = x598 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8552 = x598 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8553 = x598 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8554 = x8550 + x8545;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8555 = x598 * x8551;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8556 = x8555 * x8552;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8557 = x8556 * x8553;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8558 = x8511 + x8546;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8559 = x8542 + x8557 * poly_mix[17];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8560 = x872 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8561 = x872 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8562 = x872 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8563 = x872 * x8561;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8564 = x8563 * x8562;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8565 = x8564 * x8560;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8566 = x8559 + x8565 * poly_mix[18];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8567 = x1177 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8568 = x1177 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8569 = x1177 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8570 = x1177 * x8567;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8571 = x8570 * x8568;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8572 = x8571 * x8569;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8573 = x8566 + x8572 * poly_mix[19];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8574 = x1249 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8575 = x1249 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8576 = x1249 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8577 = x1249 * x8576;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8578 = x8577 * x8574;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8579 = x8578 * x8575;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8580 = x8573 + x8579 * poly_mix[20];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8581 = x598 + x872;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8582 = x8581 + x1177;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8583 = x8582 + x1249;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8584 = x8583 * x862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8585 = x8583 * x832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8586 = x8583 * x833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8587 = x8583 * x834;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8588 = x8512 * x4857;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8589 = x600 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8590 = x600 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8591 = x600 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8592 = x8588 + x8583;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8593 = x600 * x8589;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8594 = x8593 * x8590;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8595 = x8594 * x8591;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8596 = x8547 + x8585;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8597 = x8548 + x8586;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8598 = x8549 + x8587;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8599 = x8558 + x8584;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8600 = x8580 + x8595 * poly_mix[21];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8601 = x874 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8602 = x874 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8603 = x874 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8604 = x874 * x8602;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8605 = x8604 * x8603;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8606 = x8605 * x8601;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8607 = x8600 + x8606 * poly_mix[22];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8608 = x1178 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8609 = x1178 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8610 = x1178 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8611 = x1178 * x8608;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8612 = x8611 * x8609;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8613 = x8612 * x8610;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8614 = x8607 + x8613 * poly_mix[23];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8615 = x1250 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8616 = x1250 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8617 = x1250 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8618 = x1250 * x8617;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8619 = x8618 * x8615;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8620 = x8619 * x8616;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8621 = x8614 + x8620 * poly_mix[24];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8622 = x600 + x874;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8623 = x8622 + x1178;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8624 = x8623 + x1250;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8625 = x8624 * x8123;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8626 = x8624 * x8124;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8627 = x8624 * x8125;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8628 = x8624 * x8129;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8629 = x8512 * x4858;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8630 = x602 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8631 = x602 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8632 = x602 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8633 = x8629 + x8624;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8634 = x602 * x8630;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8635 = x8634 * x8631;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8636 = x8635 * x8632;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8637 = x8596 + x8627;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8638 = x8597 + x8625;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8639 = x8598 + x8626;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8640 = x8599 + x8628;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8641 = x8621 + x8636 * poly_mix[25];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8642 = x876 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8643 = x876 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8644 = x876 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8645 = x876 * x8643;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8646 = x8645 * x8644;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8647 = x8646 * x8642;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8648 = x8641 + x8647 * poly_mix[26];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8649 = x1186 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8650 = x1186 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8651 = x1186 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8652 = x1186 * x8649;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8653 = x8652 * x8650;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8654 = x8653 * x8651;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8655 = x8648 + x8654 * poly_mix[27];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8656 = x1258 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8657 = x1258 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8658 = x1258 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8659 = x1258 * x8658;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8660 = x8659 * x8656;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8661 = x8660 * x8657;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8662 = x8655 + x8661 * poly_mix[28];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8663 = x602 + x876;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8664 = x8663 + x1186;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8665 = x8664 + x1258;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8666 = x8665 * x835;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8667 = x8665 * x836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8668 = x8665 * x837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8669 = x8665 * x838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8670 = x8512 * x4859;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8671 = x604 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8672 = x604 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8673 = x604 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8674 = x8670 + x8665;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8675 = x604 * x8671;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8676 = x8675 * x8672;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8677 = x8676 * x8673;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8678 = x8637 + x8667;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8679 = x8638 + x8668;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8680 = x8639 + x8669;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8681 = x8640 + x8666;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8682 = x8662 + x8677 * poly_mix[29];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8683 = x878 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8684 = x878 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8685 = x878 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8686 = x878 * x8684;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8687 = x8686 * x8685;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8688 = x8687 * x8683;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8689 = x8682 + x8688 * poly_mix[30];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8690 = x1187 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8691 = x1187 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8692 = x1187 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8693 = x1187 * x8690;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8694 = x8693 * x8691;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8695 = x8694 * x8692;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8696 = x8689 + x8695 * poly_mix[31];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8697 = x1259 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8698 = x1259 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8699 = x1259 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8700 = x1259 * x8699;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8701 = x8700 * x8697;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8702 = x8701 * x8698;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8703 = x8696 + x8702 * poly_mix[32];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8704 = x604 + x878;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8705 = x8704 + x1187;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8706 = x8705 + x1259;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8707 = x8706 * x8216;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8708 = x8706 * x8217;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8709 = x8706 * x8218;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8710 = x8706 * x8236;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8711 = x8512 * x4860;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8712 = x606 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8713 = x606 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8714 = x606 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8715 = x8711 + x8706;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8716 = x606 * x8712;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8717 = x8716 * x8713;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8718 = x8717 * x8714;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8719 = x8678 + x8709;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8720 = x8679 + x8707;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8721 = x8680 + x8708;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8722 = x8681 + x8710;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8723 = x8703 + x8718 * poly_mix[33];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8724 = x880 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8725 = x880 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8726 = x880 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8727 = x880 * x8725;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8728 = x8727 * x8726;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8729 = x8728 * x8724;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8730 = x8723 + x8729 * poly_mix[34];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8731 = x1195 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8732 = x1195 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8733 = x1195 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8734 = x1195 * x8731;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8735 = x8734 * x8732;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8736 = x8735 * x8733;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8737 = x8730 + x8736 * poly_mix[35];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8738 = x1267 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8739 = x1267 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8740 = x1267 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8741 = x1267 * x8740;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8742 = x8741 * x8738;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8743 = x8742 * x8739;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8744 = x8737 + x8743 * poly_mix[36];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8745 = x606 + x880;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8746 = x8745 + x1195;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8747 = x8746 + x1267;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8748 = x8747 * x8214;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8749 = x8747 * x8215;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8750 = x8747 * x8204;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8751 = x8747 * x8235;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8752 = x8512 * x4861;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8753 = x608 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8754 = x608 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8755 = x608 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8756 = x8752 + x8747;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8757 = x608 * x8753;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8758 = x8757 * x8754;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8759 = x8758 * x8755;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8760 = x8719 + x8750;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8761 = x8720 + x8748;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8762 = x8721 + x8749;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8763 = x8722 + x8751;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8764 = x8744 + x8759 * poly_mix[37];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8765 = x882 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8766 = x882 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8767 = x882 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8768 = x882 * x8766;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8769 = x8768 * x8767;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8770 = x8769 * x8765;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8771 = x8764 + x8770 * poly_mix[38];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8772 = x1196 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8773 = x1196 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8774 = x1196 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8775 = x1196 * x8772;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8776 = x8775 * x8773;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8777 = x8776 * x8774;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8778 = x8771 + x8777 * poly_mix[39];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8779 = x1268 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8780 = x1268 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8781 = x1268 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8782 = x1268 * x8781;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8783 = x8782 * x8779;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8784 = x8783 * x8780;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8785 = x8778 + x8784 * poly_mix[40];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8786 = x608 + x882;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8787 = x8786 + x1196;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8788 = x8787 + x1268;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8789 = x8788 * x8307;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8790 = x8788 * x8308;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8791 = x8788 * x8311;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8792 = x8788 * x8317;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8793 = x8512 * x4862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8794 = x610 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8795 = x610 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8796 = x610 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8797 = x8793 + x8788;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8798 = x610 * x8794;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8799 = x8798 * x8795;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8800 = x8799 * x8796;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8801 = x8760 + x8791;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8802 = x8761 + x8789;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8803 = x8762 + x8790;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8804 = x8763 + x8792;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8805 = x8785 + x8800 * poly_mix[41];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8806 = x884 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8807 = x884 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8808 = x884 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8809 = x884 * x8807;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8810 = x8809 * x8808;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8811 = x8810 * x8806;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8812 = x8805 + x8811 * poly_mix[42];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8813 = x1204 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8814 = x1204 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8815 = x1204 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8816 = x1204 * x8813;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8817 = x8816 * x8814;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8818 = x8817 * x8815;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8819 = x8812 + x8818 * poly_mix[43];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8820 = x1276 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8821 = x1276 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8822 = x1276 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8823 = x1276 * x8822;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8824 = x8823 * x8820;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8825 = x8824 * x8821;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8826 = x8819 + x8825 * poly_mix[44];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8827 = x610 + x884;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8828 = x8827 + x1204;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8829 = x8828 + x1276;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8830 = x8829 * x8212;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8831 = x8829 * x8213;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8832 = x8829 * x8201;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8833 = x8829 * x8234;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8834 = x8512 * x4863;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8835 = x612 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8836 = x612 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8837 = x612 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8838 = x8834 + x8829;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8839 = x612 * x8835;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8840 = x8839 * x8836;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8841 = x8840 * x8837;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8842 = x8801 + x8832;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8843 = x8802 + x8830;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8844 = x8803 + x8831;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8845 = x8804 + x8833;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8846 = x8826 + x8841 * poly_mix[45];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8847 = x886 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8848 = x886 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8849 = x886 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8850 = x886 * x8848;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8851 = x8850 * x8849;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8852 = x8851 * x8847;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8853 = x8846 + x8852 * poly_mix[46];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8854 = x1205 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8855 = x1205 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8856 = x1205 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8857 = x1205 * x8854;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8858 = x8857 * x8855;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8859 = x8858 * x8856;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8860 = x8853 + x8859 * poly_mix[47];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8861 = x1277 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8862 = x1277 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8863 = x1277 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8864 = x1277 * x8863;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8865 = x8864 * x8861;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8866 = x8865 * x8862;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8867 = x8860 + x8866 * poly_mix[48];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8868 = x612 + x886;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8869 = x8868 + x1205;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8870 = x8869 + x1277;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8871 = x8870 * x8305;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8872 = x8870 * x8306;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8873 = x8870 * x8310;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8874 = x8870 * x8316;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8875 = x8512 * x4864;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8876 = x614 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8877 = x614 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8878 = x614 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8879 = x8875 + x8870;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8880 = x614 * x8876;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8881 = x8880 * x8877;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8882 = x8881 * x8878;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8883 = x8842 + x8873;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8884 = x8843 + x8871;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8885 = x8844 + x8872;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8886 = x8845 + x8874;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8887 = x8867 + x8882 * poly_mix[49];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8888 = x889 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8889 = x889 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8890 = x889 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8891 = x889 * x8889;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8892 = x8891 * x8890;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8893 = x8892 * x8888;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8894 = x8887 + x8893 * poly_mix[50];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8895 = x1213 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8896 = x1213 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8897 = x1213 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8898 = x1213 * x8895;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8899 = x8898 * x8896;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8900 = x8899 * x8897;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8901 = x8894 + x8900 * poly_mix[51];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8902 = x1285 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8903 = x1285 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8904 = x1285 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8905 = x1285 * x8904;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8906 = x8905 * x8902;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8907 = x8906 * x8903;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8908 = x8901 + x8907 * poly_mix[52];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8909 = x614 + x889;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8910 = x8909 + x1213;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8911 = x8910 + x1285;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8912 = x8911 * x839;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8913 = x8911 * x840;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8914 = x8911 * x841;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8915 = x8911 * x1020;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8916 = x8512 * x4841;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8917 = x617 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8918 = x617 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8919 = x617 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8920 = x8916 + x8911;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8921 = x617 * x8917;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8922 = x8921 * x8918;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8923 = x8922 * x8919;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8924 = x8883 + x8913;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8925 = x8884 + x8914;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8926 = x8885 + x8915;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8927 = x8886 + x8912;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8928 = x8908 + x8923 * poly_mix[53];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8929 = x892 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8930 = x892 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8931 = x892 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8932 = x892 * x8930;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8933 = x8932 * x8931;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8934 = x8933 * x8929;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8935 = x8928 + x8934 * poly_mix[54];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8936 = x1214 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8937 = x1214 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8938 = x1214 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8939 = x1214 * x8936;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8940 = x8939 * x8937;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8941 = x8940 * x8938;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8942 = x8935 + x8941 * poly_mix[55];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8943 = x1286 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8944 = x1286 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8945 = x1286 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8946 = x1286 * x8945;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8947 = x8946 * x8943;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8948 = x8947 * x8944;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8949 = x8942 + x8948 * poly_mix[56];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8950 = x617 + x892;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8951 = x8950 + x1214;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8952 = x8951 + x1286;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8953 = x8952 * x8437;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8954 = x8952 * x8438;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8955 = x8952 * x8441;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8956 = x8952 * x8453;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8957 = x8512 * x4842;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8958 = x620 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x8959 = x620 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x8960 = x620 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8961 = x8957 + x8952;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8962 = x620 * x8958;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8963 = x8962 * x8959;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x8964 = x8963 * x8960;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8965 = x8924 + x8955;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8966 = x8925 + x8953;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8967 = x8926 + x8954;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x8968 = x8927 + x8956;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x8969 = x8949 + x8964 * poly_mix[57];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x8970 = x895 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x8971 = x895 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x8972 = x895 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8973 = x895 * x8971;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8974 = x8973 * x8972;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x8975 = x8974 * x8970;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x8976 = x8969 + x8975 * poly_mix[58];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x8977 = x1222 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x8978 = x1222 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x8979 = x1222 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8980 = x1222 * x8977;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8981 = x8980 * x8978;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x8982 = x8981 * x8979;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x8983 = x8976 + x8982 * poly_mix[59];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x8984 = x1294 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x8985 = x1294 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x8986 = x1294 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8987 = x1294 * x8986;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8988 = x8987 * x8984;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x8989 = x8988 * x8985;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x8990 = x8983 + x8989 * poly_mix[60];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8991 = x620 + x895;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8992 = x8991 + x1222;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x8993 = x8992 + x1294;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8994 = x8993 * x8435;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8995 = x8993 * x8436;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8996 = x8993 * x8440;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x8997 = x8993 * x8452;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x8998 = x8512 * x4843;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x8999 = x623 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x9000 = x623 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x9001 = x623 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x9002 = x8998 + x8993;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9003 = x623 * x8999;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9004 = x9003 * x9000;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9005 = x9004 * x9001;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9006 = x8965 + x8996;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9007 = x8966 + x8994;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9008 = x8967 + x8995;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9009 = x8968 + x8997;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x9010 = x8990 + x9005 * poly_mix[61];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x9011 = x898 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x9012 = x898 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x9013 = x898 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9014 = x898 * x9012;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9015 = x9014 * x9013;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9016 = x9015 * x9011;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x9017 = x9010 + x9016 * poly_mix[62];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x9018 = x1223 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x9019 = x1223 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x9020 = x1223 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9021 = x1223 * x9018;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9022 = x9021 * x9019;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9023 = x9022 * x9020;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x9024 = x9017 + x9023 * poly_mix[63];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x9025 = x1295 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x9026 = x1295 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x9027 = x1295 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9028 = x1295 * x9027;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9029 = x9028 * x9025;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9030 = x9029 * x9026;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x9031 = x9024 + x9030 * poly_mix[64];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9032 = x623 + x898;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9033 = x9032 + x1223;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9034 = x9033 + x1295;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9035 = x9034 * x8431;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9036 = x9034 * x8432;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9037 = x9034 * x8439;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9038 = x9034 * x8451;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x9039 = x8512 * x4844;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x9040 = x626 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x9041 = x626 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x9042 = x626 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x9043 = x9039 + x9034;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9044 = x626 * x9040;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9045 = x9044 * x9041;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9046 = x9045 * x9042;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9047 = x9006 + x9037;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9048 = x9007 + x9035;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9049 = x9008 + x9036;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9050 = x9009 + x9038;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x9051 = x9031 + x9046 * poly_mix[65];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x9052 = x1159 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x9053 = x1159 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x9054 = x1159 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9055 = x1159 * x9053;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9056 = x9055 * x9054;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9057 = x9056 * x9052;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x9058 = x9051 + x9057 * poly_mix[66];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x9059 = x1231 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x9060 = x1231 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x9061 = x1231 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9062 = x1231 * x9059;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9063 = x9062 * x9060;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9064 = x9063 * x9061;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x9065 = x9058 + x9064 * poly_mix[67];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x9066 = x1303 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x9067 = x1303 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x9068 = x1303 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9069 = x1303 * x9068;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9070 = x9069 * x9066;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9071 = x9070 * x9067;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x9072 = x9065 + x9071 * poly_mix[68];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9073 = x626 + x1159;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9074 = x9073 + x1231;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9075 = x9074 + x1303;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9076 = x9075 * x8433;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9077 = x9075 * x8434;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9078 = x9075 * x8420;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9079 = x9075 * x8450;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x9080 = x8512 * x4845;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:19)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:19)
   auto x9081 = x866 - x1;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:34)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:34)
   auto x9082 = x866 - x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:49)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:49)
   auto x9083 = x866 - x3;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x9084 = x9080 + x9075;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9085 = x866 * x9081;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9086 = x9085 * x9082;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   auto x9087 = x9086 * x9083;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9088 = x9047 + x9078;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9089 = x9048 + x9076;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9090 = x9049 + x9077;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9091 = x9050 + x9079;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":77:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":88:9)
   FpExt x9092 = x9072 + x9087 * poly_mix[69];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:46)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:46)
   auto x9093 = x1160 - x281;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:18)
   auto x9094 = x1160 - x4;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:32)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:32)
   auto x9095 = x1160 - x8;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9096 = x1160 * x9094;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9097 = x9096 * x9095;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   auto x9098 = x9097 * x9093;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":78:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":89:9)
   FpExt x9099 = x9092 + x9098 * poly_mix[70];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:18)
   auto x9100 = x1232 - x14;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:33)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:33)
   auto x9101 = x1232 - x15;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:48)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:48)
   auto x9102 = x1232 - x282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9103 = x1232 * x9100;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9104 = x9103 * x9101;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   auto x9105 = x9104 * x9102;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":79:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":90:9)
   FpExt x9106 = x9099 + x9105 * poly_mix[71];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:37)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:37)
   auto x9107 = x1304 - x17;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:55)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:55)
   auto x9108 = x1304 - x283;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:20)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:20)
   auto x9109 = x1304 - x16;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9110 = x1304 * x9109;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9111 = x9110 * x9107;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   auto x9112 = x9111 * x9108;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":80:9)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":91:9)
   FpExt x9113 = x9106 + x9112 * poly_mix[72];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9114 = x866 + x1160;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9115 = x9114 + x1232;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":82:18)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":93:18)
   auto x9116 = x9115 + x1304;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9117 = x9116 * x8476;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9118 = x9116 * x8477;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9119 = x9116 * x8478;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:17)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:17)
   auto x9120 = x9116 * x8480;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x9121 = x8512 * x4846;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":83:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":94:13)
   auto x9122 = x9121 + x9116;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9123 = x9088 + x9119;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9124 = x9089 + x9117;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9125 = x9090 + x9118;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":85:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:11)
   auto x9126 = x9091 + x9120;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x9127 = x332 - x287;
@@ -18376,21 +18376,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x9173 = x9151 + x9167;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":19:12)
   auto x9174 = x9152 + x9168;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9175 = x321 * x4847;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9176 = x321 * x4849;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9177 = x321 * x4851;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9178 = x321 * x4853;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9179 = x321 * x4848;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9180 = x321 * x4850;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9181 = x321 * x4852;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":96:13)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":107:13)
   auto x9182 = x321 * x4854;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":20:12)
   auto x9183 = x9161 + x9174;
@@ -18432,7 +18432,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x9201 = x9181 * x2;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":17:12)
   auto x9202 = x9182 * x2;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9203 = x540 * x8517;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":21:12)
   auto x9204 = x9164 + x9190;
@@ -18550,291 +18550,291 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x9260 = x9218 + x9248;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":40:14)
   auto x9261 = x9219 + x9249;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9262 = x320 * x9251;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9263 = x9262 + x9203;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9264 = x9263 + x4881;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9265 = x318 - x9264;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9266 = x9136 + x9265 * poly_mix[78];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9267 = x320 * x9236;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9268 = x540 * x8554;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9269 = x9267 + x9268;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9270 = x9269 + x5065;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9271 = x289 - x9270;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9272 = x9266 + x9271 * poly_mix[79];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9273 = x320 * x9250;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9274 = x540 * x8592;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9275 = x9273 + x9274;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9276 = x9275 + x5072;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9277 = x290 - x9276;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9278 = x9272 + x9277 * poly_mix[80];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9279 = x320 * x9237;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9280 = x540 * x8633;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9281 = x9279 + x9280;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9282 = x9281 + x5079;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9283 = x291 - x9282;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9284 = x9278 + x9283 * poly_mix[81];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9285 = x320 * x9256;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9286 = x540 * x8674;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9287 = x9285 + x9286;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9288 = x9287 + x5086;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9289 = x292 - x9288;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9290 = x9284 + x9289 * poly_mix[82];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9291 = x320 * x9241;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9292 = x540 * x8715;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9293 = x9291 + x9292;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9294 = x9293 + x5093;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9295 = x293 - x9294;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9296 = x9290 + x9295 * poly_mix[83];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9297 = x320 * x9255;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9298 = x540 * x8756;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9299 = x9297 + x9298;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9300 = x9299 + x5100;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9301 = x294 - x9300;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9302 = x9296 + x9301 * poly_mix[84];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9303 = x320 * x9242;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9304 = x540 * x8797;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9305 = x9303 + x9304;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9306 = x9305 + x5107;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9307 = x295 - x9306;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9308 = x9302 + x9307 * poly_mix[85];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9309 = x320 * x9252;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9310 = x540 * x8838;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9311 = x9309 + x9310;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9312 = x9311 + x5114;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9313 = x296 - x9312;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9314 = x9308 + x9313 * poly_mix[86];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9315 = x320 * x9243;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9316 = x540 * x8879;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9317 = x9315 + x9316;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9318 = x9317 + x5121;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9319 = x297 - x9318;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9320 = x9314 + x9319 * poly_mix[87];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9321 = x320 * x9257;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9322 = x540 * x8920;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9323 = x9321 + x9322;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9324 = x9323 + x5128;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9325 = x288 - x9324;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9326 = x9320 + x9325 * poly_mix[88];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9327 = x320 * x9238;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9328 = x540 * x8961;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9329 = x9327 + x9328;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9330 = x9329 + x5135;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9331 = x476 - x9330;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9332 = x9326 + x9331 * poly_mix[89];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9333 = x320 * x9254;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9334 = x540 * x9002;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9335 = x9333 + x9334;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9336 = x9335 + x5142;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9337 = x590 - x9336;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9338 = x9332 + x9337 * poly_mix[90];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9339 = x320 * x9239;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9340 = x540 * x9043;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9341 = x9339 + x9340;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9342 = x9341 + x5149;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9343 = x560 - x9342;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9344 = x9338 + x9343 * poly_mix[91];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9345 = x320 * x9253;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9346 = x540 * x9084;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9347 = x9345 + x9346;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9348 = x9347 + x5156;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9349 = x561 - x9348;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9350 = x9344 + x9349 * poly_mix[92];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9351 = x320 * x9240;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9352 = x540 * x9122;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9353 = x9351 + x9352;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9354 = x9353 + x5163;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9355 = x562 - x9354;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9356 = x9350 + x9355 * poly_mix[93];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9357 = x320 * x9259;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9358 = x540 * x9175;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9359 = x9357 + x9358;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9360 = x9359 + x5170;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9361 = x563 - x9360;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9362 = x9356 + x9361 * poly_mix[94];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9363 = x320 * x9244;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9364 = x540 * x9179;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9365 = x9363 + x9364;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9366 = x9365 + x5177;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9367 = x564 - x9366;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9368 = x9362 + x9367 * poly_mix[95];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9369 = x320 * x9258;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9370 = x540 * x9176;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9371 = x9369 + x9370;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9372 = x9371 + x5184;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9373 = x565 - x9372;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9374 = x9368 + x9373 * poly_mix[96];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9375 = x320 * x9245;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9376 = x540 * x9180;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9377 = x9375 + x9376;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9378 = x9377 + x5191;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9379 = x566 - x9378;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9380 = x9374 + x9379 * poly_mix[97];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9381 = x320 * x9261;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9382 = x540 * x9177;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9383 = x9381 + x9382;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9384 = x9383 + x5198;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9385 = x567 - x9384;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9386 = x9380 + x9385 * poly_mix[98];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9387 = x320 * x9246;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9388 = x540 * x9181;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9389 = x9387 + x9388;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9390 = x9389 + x5205;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9391 = x568 - x9390;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9392 = x9386 + x9391 * poly_mix[99];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9393 = x320 * x9260;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9394 = x540 * x9178;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9395 = x9393 + x9394;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9396 = x9395 + x5212;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9397 = x569 - x9396;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9398 = x9392 + x9397 * poly_mix[100];
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9399 = x320 * x9247;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:38)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:38)
   auto x9400 = x540 * x9182;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":102:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":113:11)
   auto x9401 = x9399 + x9400;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":103:11)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":114:11)
   auto x9402 = x9401 + x5219;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   auto x9403 = x748 - x9402;
-  // loc("zirgen/circuit/recursion/checked_bytes.cpp":104:5)
+  // loc("zirgen/circuit/recursion/checked_bytes.cpp":115:5)
   FpExt x9404 = x9398 + x9403 * poly_mix[101];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x9405 = x8070 + x8071 * x9404 * poly_mix[139];
