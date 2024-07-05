@@ -20,46 +20,10 @@ const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYC
 pub type ControlIds = [Digest; CONTROL_ID_ENTRIES];
 
 /// Control IDs for each power-of-two of the rv32im circuit using SHA-256.
-pub const SHA256_CONTROL_IDS: ControlIds = [
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-];
+pub const SHA256_CONTROL_IDS: ControlIds = [{}];
 
 /// Control IDs for each power-of-two of the rv32im circuit using Poseidon2.
-pub const POSEIDON2_CONTROL_IDS: ControlIds = [
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-];
+pub const POSEIDON2_CONTROL_IDS: ControlIds = [{}];
 
 /// Control IDs for each power-of-two of the rv32im circuit using Blake2b.
-pub const BLAKE2B_CONTROL_IDS: ControlIds = [
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-    digest!("{}"), //
-];
+pub const BLAKE2B_CONTROL_IDS: ControlIds = [{}];

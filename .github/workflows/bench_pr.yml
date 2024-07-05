@@ -20,7 +20,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+  RISC0_TOOLCHAIN_VERSION: r0.1.78.0
 
 jobs:
   changes:
@@ -73,12 +73,6 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
           disable_s3: ${{ env.DISABLE_S3 }}
-
-      - id: aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
 
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 

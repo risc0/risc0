@@ -1,4 +1,4 @@
-# NOTE: This makefile is not neccessary, and equivalent commands will be run in the build.rs script.
+# NOTE: This makefile is not necessary, and equivalent commands will be run in the build.rs script.
 #       Only use this if you'd like to build manually
 
 ROOT_DIR:=$(strip $(dir $(realpath $(lastword $(MAKEFILE_LIST)))))

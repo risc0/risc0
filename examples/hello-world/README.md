@@ -56,7 +56,7 @@ the factors — without revealing any further information.
 
 ## Tutorial: Building your first zkVM Application
 
-For a step-by-step guide to building first zkVM application, we recommend [this
+For a step-by-step guide to building your first zkVM application, we recommend [this
 tutorial][tutorial]. For more materials, check out the [developer docs].
 
 [`methods/guest/src/main.rs`]: ./methods/guest/src/main.rs

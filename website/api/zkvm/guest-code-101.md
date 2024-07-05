@@ -42,7 +42,7 @@ should be sufficient for building your first application:
 ## Tools for Debugging & Optimization
 
 There are also a number of functions available to support with debugging and
-performance analysis. As above, we refer to the [`guest` module] for a full
+performance analysis. As above, we refer to the [`guest` module][risc0-zkvm-guest] for a full
 list, but include some highlights here:
 
 - **Count Cycles** <br/>

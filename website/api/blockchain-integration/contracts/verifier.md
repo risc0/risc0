@@ -18,7 +18,7 @@ contract EvenNumber {
     function set(uint256 x, bytes calldata seal) public {
         // Construct the expected journal data. Verify will fail if journal does not match.
         bytes memory journal = abi.encode(x);
-        // The verify call will revert if ther given seal is not a verifying zero-knowledge proof.
+        // The verify call will revert if the given seal is not a verifying zero-knowledge proof.
         verifier.verify(seal, IS_EVEN_ID, sha256(journal));
         number = x;
     }
