@@ -17,4 +17,4 @@ pub const RISC_ZERO_REPO_PATH_BUILD: &str = "risc0/build";
 pub const RISC_ZERO_REPO_PATH_ZKVM: &str = "risc0/zkvm";
 
 #[cfg(test)]
-pub(crate) const PATH_YAML_CONFIG: &str = "profiles/config.yaml";
+pub(crate) const PATH_YAML_CONFIG: &str = "profiles/config.yml";
