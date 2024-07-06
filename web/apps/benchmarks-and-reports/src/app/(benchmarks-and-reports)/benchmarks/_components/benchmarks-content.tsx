@@ -37,7 +37,7 @@ export function BenchmarksContent({
       defaultValue={names[0]}
       className="mt-6"
     >
-      <TabsList className="flex justify-start flex-wrap h-auto">
+      <TabsList className="flex h-auto flex-wrap justify-start">
         {names
           .filter((name) => !HIDDEN_BENCHMARKS.includes(name))
           .map((name) => (

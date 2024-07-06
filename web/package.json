@@ -37,6 +37,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
     "@next/bundle-analyzer": "15.0.0-canary.56",
+    "@total-typescript/ts-reset": "0.5.1",
     "@types/chart.js": "2.9.41",
     "@types/jest": "29.5.12",
     "@types/ms": "0.7.34",

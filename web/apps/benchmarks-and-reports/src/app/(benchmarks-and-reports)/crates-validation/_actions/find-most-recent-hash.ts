@@ -19,8 +19,8 @@ export async function findMostRecentHash(): Promise<string> {
   const responseText = await response.text();
 
   // Find the most recent timestamp
-  const mostRecent = JSON.parse(responseText.replace("[,", "[")).reduce((prev, current) =>
-    prev.timestamp > current.timestamp ? prev : current,
+  const mostRecent = (JSON.parse(responseText.replace("[,", "[")) as { timestamp: number; hash: string }[]).reduce(
+    (prev, current) => (prev.timestamp > current.timestamp ? prev : current),
   );
 
   return mostRecent.hash;
