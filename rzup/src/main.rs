@@ -16,7 +16,7 @@ use anyhow::Result;
 
 use clap::{CommandFactory, Parser, Subcommand};
 
-use rzup::{cli, extension, toolchain, utils};
+use rzup::{cli, extension, toolchain};
 
 #[derive(Debug, Parser)]
 #[command(
