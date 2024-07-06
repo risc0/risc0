@@ -18,3 +18,35 @@ pub mod extension;
 pub mod repo;
 pub mod toolchain;
 pub mod utils;
+
+use std::fs;
+
+use crate::utils::notify::info_msg;
+use anyhow::{anyhow, Context, Result};
+
+pub struct Rzup;
+
+impl Rzup {
+    pub fn version() -> &'static str {
+        env!("CARGO_PKG_VERSION")
+    }
+    pub async fn update() -> Result<()> {
+        // TODO
+        Ok(())
+    }
+
+    pub fn uninstall() -> Result<()> {
+        let cargo_bin_path = dirs::home_dir()
+            .ok_or_else(|| anyhow!("Could not determine home directory"))?
+            .join(".cargo/bin");
+
+        let rzup_path = cargo_bin_path.join("rzup");
+
+        if rzup_path.exists() {
+            fs::remove_file(&rzup_path).context("Failed to remove rzup.")?;
+            let msg = format!("Uninstalled rzup from {}", cargo_bin_path.display());
+            info_msg(&msg)?;
+        }
+        Ok(())
+    }
+}

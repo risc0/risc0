@@ -30,11 +30,6 @@ pub mod command;
 pub mod notify;
 pub mod target;
 
-/// Returns the current version of the rzup tool.
-pub fn version() -> &'static str {
-    env!("CARGO_PKG_VERSION")
-}
-
 /// Determines the home directory for rzup, which can be set via the
 /// `RISC0_DATA_DIR` environment variable or defaults to `.rzup` in the home directory.
 pub fn rzup_home() -> Result<PathBuf, RzupError> {

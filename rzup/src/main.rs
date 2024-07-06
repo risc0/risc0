@@ -35,10 +35,10 @@ use rzup::{cli, extension, toolchain, utils};
 Contribute      : https://github.com/risc0/
 Documentation   : https://dev.risczero.com/
 Chat & Support  : https://discord.com/invite/risczero/",
-    utils::version(),
+    rzup::Rzup::version(),
 ),
 after_help = cli::help::RZUP_HELP,
-version = utils::version(),
+version = rzup::Rzup::version(),
 )]
 struct Rzup {
     /// Enable verbose output
@@ -101,10 +101,11 @@ enum RzupSubcmd {
         #[command(subcommand)]
         subcmd: cli::extension::ExtensionSubcmd,
     },
-    // NOTE: Hidden until prebuilt binares are gtg
     /// Modify the rzup installation
-    #[command(hide = true)]
-    Self_,
+    Self_ {
+        #[command(subcommand)]
+        subcmd: cli::self_::SelfSubcmd,
+    },
 }
 
 #[tokio::main]
@@ -153,6 +154,6 @@ async fn run() -> Result<()> {
         RzupSubcmd::Default { toolchain, name } => cli::default::handler(toolchain, name),
         RzupSubcmd::Toolchain { subcmd } => cli::toolchain::handler(subcmd).await,
         RzupSubcmd::Extension { subcmd } => cli::extension::handler(subcmd).await,
-        RzupSubcmd::Self_ => todo!(), // TODO: Add self once prebuilt binaries are set
+        RzupSubcmd::Self_ { subcmd } => cli::self_::handler(subcmd).await,
     }
 }

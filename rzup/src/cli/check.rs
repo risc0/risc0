@@ -28,6 +28,7 @@ pub async fn handler() -> Result<()> {
 }
 
 fn print_updates(updates: &[UpdateInfo]) -> Result<()> {
+    // TODO: Check for rzup updates
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
 
     for update in updates {
