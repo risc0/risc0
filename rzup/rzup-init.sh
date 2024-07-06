@@ -21,17 +21,20 @@ set -eu -o pipefail
 # for a 64-bit macOS system (arm64):
 # BASE_URL/rzup-arm64-darwin
 
-# Temporary release URL
+# NOTE: Temporary release URL
 RZUP_BINARY_UPDATE_ROOT="${RZUP_BINARY_UPDATE_ROOT:-https://github.com/hmrtn/asset-test/releases/download/test1/}"
 QUIET=no
 
 CARGO_BIN_DIR="${HOME}/.cargo/bin"
 
+# Deprecated version directory path
+DEPRECATED_RISC0_DIR="${HOME}/.risc0"
+
 usage() {
     cat <<EOF
 rzup-init
 
-The installer for rzup from RISC Zero.
+The installer for rzup, from RISC Zero.
 
 Usage: rzup-init.sh [OPTIONS]
 
@@ -76,10 +79,14 @@ main() {
     fi
     _file="${_dir}/rzup"
 
+    # Remove the deprecated version if it exists
+    if [ -f "$DEPRECATED_RISC0_DIR/bin/rzup" ]; then
+        rm -rf "$DEPRECATED_RISC0_DIR"
+    fi
+
     # Remove the old version if it exists
     if [ -f "$CARGO_BIN_DIR/rzup" ]; then
         rm "$CARGO_BIN_DIR/rzup"
-        info "Removed old version of rzup"
     fi
 
     for arg in "$@"; do
