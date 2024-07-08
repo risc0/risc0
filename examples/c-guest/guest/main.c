@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "platform.h"
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
 
 union u32_cast {
   uint32_t value;
