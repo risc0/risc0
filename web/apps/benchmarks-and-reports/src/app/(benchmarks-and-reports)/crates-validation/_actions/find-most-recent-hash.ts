@@ -1,12 +1,13 @@
 import "server-only";
 
-import { tryFetch } from "shared/utils/try-fetch";
+import { tryit } from "radash";
 
 export async function findMostRecentHash(): Promise<string> {
+  const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
-      next: { revalidate: 180 }, // 3 minutes cache
+      next: { revalidate: 180, tags: ["fetch-most-recent-hash"] }, // 3 minutes cache
     },
   );
 
