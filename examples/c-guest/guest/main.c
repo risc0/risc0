@@ -14,6 +14,7 @@
 
 #include "platform.h"
 #include <stdint.h>
+#include <assert.h>
 
 union u32_cast {
   uint32_t value;
@@ -27,8 +28,8 @@ int main() {
   // Read two u32 values from the host, assuming LE byte order.
   union u32_cast a;
   union u32_cast b;
-  env_read(a.buffer, 4);
-  env_read(b.buffer, 4);
+  assert(env_read(a.buffer, 4) == 4);
+  assert(env_read(b.buffer, 4) == 4);
 
   a.value *= b.value;
 
