@@ -21,7 +21,6 @@ pub mod utils;
 
 use std::fs;
 
-// use crate::utils::notify::info_msg;
 use anyhow::{anyhow, Context, Result};
 
 pub struct Rzup;
