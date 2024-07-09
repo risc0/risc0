@@ -194,6 +194,13 @@ The [recursion circuit] is capable of efficiently evaluating polynomial constrai
 
 For a list of all supported recursion programs, see the documentation for the [zkVM API Client].
 
+### Reproducible Build
+A compilation process is called "reproducible" if it reliably produces the same binary file, on a byte-by-byte level.
+
+In the context of RISC Zero application development, reproducible builds allow for a clear linkage between the guest code and the resulting [Image ID].
+
+To get reproducible builds for your zkVM application, use [`cargo risczero build`](https://docs.rs/crate/cargo-risczero/latest).
+
 ### RISC-V
 
 The 5th edition of UC Berkeley's reduced instruction set computer architecture.
