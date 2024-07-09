@@ -15,6 +15,7 @@
 use anyhow::{bail, Context, Result};
 use command::CommandExt;
 use fs2::FileExt;
+use lazy_static::lazy_static;
 use regex::Regex;
 use reqwest::{header::HeaderMap, Client};
 use std::{
@@ -22,13 +23,29 @@ use std::{
     fs::{self, File, OpenOptions},
     path::{Path, PathBuf},
     process::Command,
+    sync::atomic::{AtomicBool, Ordering},
 };
 
-use crate::{errors::RzupError, extension::Extension, toolchain::Toolchain};
+use crate::{errors::RzupError, extension::Extension, toolchain::Toolchain, verbose_msg};
 
 pub mod command;
 pub mod notify;
 pub mod target;
+
+// Global verbosity (set with -v flag)
+lazy_static! {
+    static ref VERBOSE: AtomicBool = AtomicBool::new(false);
+}
+
+/// Set the verbosity flag
+pub fn set_verbose(verbose: bool) {
+    VERBOSE.store(verbose, Ordering::SeqCst);
+}
+
+/// Check if verbose mode is enabled
+pub fn is_verbose() -> bool {
+    VERBOSE.load(Ordering::SeqCst)
+}
 
 /// Determines the home directory for rzup, which can be set via the
 /// `RISC0_DATA_DIR` environment variable or defaults to `.rzup` in the home directory.
@@ -67,6 +84,7 @@ pub fn flock(path: &Path) -> Result<FileLock, RzupError> {
             e
         ))
     })?;
+    verbose_msg!(format!("Creating lockfile at path {}", path.display()));
     let file = OpenOptions::new()
         .create(true)
         .truncate(true)
@@ -137,6 +155,7 @@ pub fn find_active_toolchain_name(alias: &str) -> Result<String, RzupError> {
 
 /// Gets the current working directory of the toolchain specified by the alias.
 pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf, RzupError> {
+    verbose_msg!(format!("Getting toolchain {} working directory", alias));
     let linked_dir = match alias {
         RUSTUP_TOOLCHAIN_NAME => dirs::home_dir()
             .ok_or_else(|| RzupError::config_error("Failed to get home directory"))?
@@ -162,6 +181,11 @@ pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf, RzupError> {
             ))
         })?;
 
+        verbose_msg!(format!(
+            "Found toolchain absolute path at {}",
+            actual_toolchain_abs_path.display()
+        ));
+
         return Ok(actual_toolchain_abs_path);
     }
 
@@ -172,6 +196,10 @@ pub fn get_toolchain_cwd(alias: &str) -> Result<PathBuf, RzupError> {
 
 /// Parses the toolchain information from a given path.
 pub fn parse_toolchain_info(path: &Path) -> Result<ParseableToolchainDir, RzupError> {
+    verbose_msg!(format!(
+        "Parsing toolchain information at {}",
+        path.display()
+    ));
     let dir_name = path
         .file_name()
         .and_then(|name| name.to_str())

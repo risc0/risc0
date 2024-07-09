@@ -16,9 +16,7 @@ use std::process::{Command, ExitStatus, Output, Stdio};
 
 use anyhow::Context;
 
-use crate::errors::RzupError;
-
-use super::notify::info_msg;
+use crate::{errors::RzupError, info_msg, verbose_msg};
 
 /// Trait extension for Command to provide additional functionalities.
 pub trait CommandExt {
@@ -27,6 +25,14 @@ pub trait CommandExt {
     /// Captures the stdout of the command if it executes successfully.
     fn capture_stdout(&mut self) -> Result<String, RzupError> {
         let cmd = self.as_command_mut();
+        verbose_msg!(format!(
+            "Running command: {} wih args: {}",
+            cmd.get_program().to_string_lossy(),
+            cmd.get_args()
+                .map(|x| x.to_string_lossy())
+                .collect::<Vec<_>>()
+                .join(" ")
+        ));
         let output = cmd.stderr(Stdio::inherit()).output_if_success()?;
         let str = String::from_utf8(output.stdout)
             .map_err(|_| RzupError::Other("process output was not utf-8".to_string()))
@@ -38,15 +44,14 @@ pub trait CommandExt {
     /// Runs the command with verbose output.
     fn run_verbose(&mut self) -> Result<(), RzupError> {
         let cmd = self.as_command_mut();
-        let msg = format!(
+        info_msg!(format!(
             "Running {} {}...",
             cmd.get_program().to_string_lossy(),
             cmd.get_args()
                 .map(|x| x.to_string_lossy())
                 .collect::<Vec<_>>()
                 .join(" ")
-        );
-        info_msg(&msg)?;
+        ));
         self.run()
     }
 

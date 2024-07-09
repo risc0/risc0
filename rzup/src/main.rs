@@ -16,7 +16,7 @@ use anyhow::Result;
 
 use clap::{CommandFactory, Parser, Subcommand};
 
-use rzup::{cli, extension, toolchain};
+use rzup::{cli, extension, toolchain, utils};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -118,6 +118,9 @@ async fn main() {
 
 async fn run() -> Result<()> {
     let matches = Rzup::parse();
+
+    // Set verbosity flag based on the CLI argument
+    utils::set_verbose(matches.verbose);
 
     let Some(subcmd) = matches.subcmd else {
         eprintln!("{}", Rzup::command().render_long_help());

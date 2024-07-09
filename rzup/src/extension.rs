@@ -27,8 +27,10 @@ use tempfile::tempdir;
 
 use crate::{
     errors::RzupError,
+    info_msg,
     repo::GithubReleaseInfo,
-    utils::{flock, http_client, notify::info_msg, rzup_home, target::Target},
+    utils::{flock, http_client, rzup_home, target::Target},
+    verbose_msg,
 };
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -69,6 +71,9 @@ impl Extension {
         let client = http_client()?;
 
         let url = self.api_url(tag);
+
+        verbose_msg!(format!("Getting extension release info from {}", &url));
+
         let res = client.get(&url).send().await?;
 
         if res.status() == 403 {
@@ -110,27 +115,31 @@ impl Extension {
 
         // Remove directory if it exists and force is set
         if extension_dir.is_dir() && force {
-            let msg = format!(
+            info_msg!(format!(
                 "Extension path {} already exists - deleting existing files!",
                 extension_dir.display()
-            );
-            info_msg(&msg)?;
+            ));
+
+            verbose_msg!(format!("deleting {}", extension_dir.display()));
+
             fs::remove_dir_all(&extension_dir)?;
         }
 
         // Skip download if directory already exists and force is not set
         if extension_dir.is_dir() && !force {
-            let msg = format!(
+            info_msg!(format!(
                 "Extension path {} already exists - skipping download.",
                 extension_dir.display()
-            );
-            info_msg(&msg)?;
+            ));
             return Ok(extension_dir);
         }
 
-        let msg = format!("Downloading {} extension...", self.to_str());
-        info_msg(&msg)?;
+        info_msg!(format!("Downloading {} extension...", self.to_str()));
 
+        verbose_msg!(format!(
+            "Requesting extension download from {}",
+            &asset.browser_download_url
+        ));
         let response = client.get(&asset.browser_download_url).send().await?;
         if !response.status().is_success() {
             return Err(RzupError::Other(format!(
@@ -140,23 +149,43 @@ impl Extension {
             .into());
         }
 
+        verbose_msg!(format!(
+            "Creating temporary path at {}",
+            &temp_file_path.display()
+        ));
+
         let mut file = fs::File::create(&temp_file_path)?;
         let content = response.bytes().await?;
+
+        verbose_msg!(format!(
+            "Writing contents to file {}",
+            temp_file_path.display()
+        ));
+
         file.write_all(&content)?;
 
         let tarball = fs::File::open(temp_file_path)?;
 
         match self {
             Extension::CargoRiscZero => {
-                let msg = format!("Extracting {} extension...", self.to_str());
-                info_msg(&msg)?;
+                info_msg!(format!("Extracting {} extension...", self.to_str()));
 
                 let decoder = GzDecoder::new(BufReader::new(tarball));
                 let mut archive = Archive::new(decoder);
+
+                verbose_msg!(format!(
+                    "Unpacking {} to {}",
+                    self.to_str(),
+                    &extension_dir.display()
+                ));
+
                 archive.unpack(&extension_dir)?;
                 #[cfg(target_family = "unix")]
                 {
                     let binary_path = extension_dir.join("cargo-risczero");
+
+                    verbose_msg!("Setting extension permissons to 0o755");
+
                     let mut perms = fs::metadata(&binary_path)?.permissions();
                     perms.set_mode(0o755);
                     fs::set_permissions(&binary_path, perms)?;
@@ -187,6 +216,12 @@ impl Extension {
                 let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
                 let r0vm_link = cargo_bin_dir.join("r0vm");
 
+                verbose_msg!(format!(
+                    "Creating symlinks from {} to {}",
+                    cargo_risczero_path.display(),
+                    cargo_risczero_link.display()
+                ));
+
                 // Create new symlinks
                 #[cfg(target_family = "unix")]
                 {
@@ -203,11 +238,10 @@ impl Extension {
                     std::os::windows::fs::symlink_file(r0vm_path, r0vm_link)
                         .context("Failed to create symlink for r0vm")?;
                 }
-                let msg = format!(
+                info_msg!(format!(
                     "Symlinks for cargo-risczero and r0vm created successfully at {}",
                     cargo_bin_dir.display()
-                );
-                info_msg(&msg)?;
+                ));
             }
         }
         Ok(())
@@ -225,14 +259,20 @@ impl Extension {
 
                 // Remove existing symlinks if they exist
                 if cargo_risczero_link.exists() {
+                    verbose_msg!(format!(
+                        "Removing cargo-risczero symlink at {}",
+                        cargo_risczero_link.display()
+                    ));
+
                     fs::remove_file(&cargo_risczero_link)
                         .context("Failed to remove existing cargo-risczero symlink")?;
-                    info_msg("Symlinks for cargo-risczero removed successfully")?;
+                    info_msg!("Symlinks for cargo-risczero removed successfully");
                 }
                 if r0vm_link.exists() {
+                    verbose_msg!(format!("Removing r0vm symlink at {}", r0vm_link.display()));
                     fs::remove_file(&r0vm_link)
                         .context("Failed to remove existing r0vm symlink")?;
-                    info_msg("Symlinks for r0vm removed successfully")?;
+                    info_msg!("Symlinks for r0vm removed successfully");
                 }
             }
         }

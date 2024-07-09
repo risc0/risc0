@@ -14,11 +14,13 @@
 
 use crate::{
     errors::RzupError,
+    info_msg,
     repo::GithubReleaseInfo,
     utils::{
-        command::CommandExt, ensure_binary, flock, http_client, notify::info_msg, rzup_home,
-        target::Target, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
+        command::CommandExt, ensure_binary, flock, http_client, rzup_home, target::Target,
+        CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
     },
+    verbose_msg,
 };
 use anyhow::{bail, Context, Result};
 use flate2::bufread::GzDecoder;
@@ -89,6 +91,9 @@ impl Toolchain {
         let client = http_client()?;
 
         let url = self.api_url(tag);
+
+        verbose_msg!(format!("Getting toolchain release info from {}", &url));
+
         let res = client.get(&url).send().await?;
 
         if res.status() == 403 {
@@ -119,6 +124,11 @@ impl Toolchain {
             Toolchain::Cpp => temp_dir.path().join("tmp_r0_cpp_toolchain.tar.xz"),
         };
 
+        verbose_msg!(format!(
+            "Created temp toolchain filepath at {}",
+            temp_file_path.display()
+        ));
+
         let release_info = self.release_info(tag).await?;
         let Some(asset) = release_info.assets.get(&target) else {
             return Err(
@@ -135,27 +145,34 @@ impl Toolchain {
 
         // Remove directory if it exists and force is set
         if toolchain_dir.is_dir() && force {
-            let msg = format!(
+            info_msg!(format!(
                 "Toolchain path {} already exists - deleting existing files!",
                 toolchain_dir.display()
-            );
-            info_msg(&msg)?;
+            ));
+
+            verbose_msg!(format!(
+                "Removing toolchain directory at {}",
+                toolchain_dir.display()
+            ));
+
             fs::remove_dir_all(&toolchain_dir)?;
         }
 
         // Skip download if directory already exists and force is not set
         if toolchain_dir.is_dir() && !force {
-            let msg = format!(
+            info_msg!(format!(
                 "Toolchain path {} already exists - skipping download.",
                 toolchain_dir.display()
-            );
-            info_msg(&msg)?;
+            ));
             return Ok(toolchain_dir);
         }
 
-        let msg = format!("Downloading {} toolchain...", self.to_str());
-        info_msg(&msg)?;
+        info_msg!(format!("Downloading {} toolchain...", self.to_str()));
 
+        verbose_msg!(format!(
+            "Requesting toolchain download from {}",
+            &asset.browser_download_url
+        ));
         let response = client.get(&asset.browser_download_url).send().await?;
         if !response.status().is_success() {
             return Err(RzupError::Other(format!(
@@ -165,19 +182,36 @@ impl Toolchain {
             .into());
         }
 
+        verbose_msg!(format!(
+            "Creating temporary path at {}",
+            &temp_file_path.display()
+        ));
+
         let mut file = fs::File::create(&temp_file_path)?;
         let content = response.bytes().await?;
+
+        verbose_msg!(format!(
+            "Writing contents to file {}",
+            temp_file_path.display()
+        ));
+
         file.write_all(&content)?;
 
         let tarball = fs::File::open(temp_file_path)?;
 
-        let msg = format!("Extracting {} toolchain...", self.to_str());
-        info_msg(&msg)?;
+        info_msg!(format!("Extracting {} toolchain...", self.to_str()));
 
         match self {
             Toolchain::Rust => {
                 let decoder = GzDecoder::new(BufReader::new(tarball));
                 let mut archive = Archive::new(decoder);
+
+                verbose_msg!(format!(
+                    "Unpacking {} to {}",
+                    self.to_str(),
+                    &toolchain_dir.display()
+                ));
+
                 archive.unpack(&toolchain_dir)?;
 
                 #[cfg(target_family = "unix")]
@@ -191,6 +225,10 @@ impl Toolchain {
                         let entry = res?;
                         if entry.file_type()?.is_file() {
                             let mut perms = entry.metadata()?.permissions();
+                            verbose_msg!(format!(
+                                "Setting permissons for {} to 0o755",
+                                entry.file_name().to_string_lossy()
+                            ));
                             perms.set_mode(0o755);
                             std::fs::set_permissions(entry.path(), perms)?;
                         }
@@ -201,6 +239,13 @@ impl Toolchain {
                 let decoder = XzDecoder::new(BufReader::new(tarball));
                 let mut archive = Archive::new(decoder);
                 let tmp_dir = tempdir()?;
+
+                verbose_msg!(format!(
+                    "Unpacking {} to {}",
+                    self.to_str(),
+                    &toolchain_dir.display()
+                ));
+
                 archive.unpack(&tmp_dir)?;
 
                 // NOTE: This is to move down a directory during the unpacking phase of a toolchain
@@ -210,6 +255,13 @@ impl Toolchain {
                     .map(|entry| entry.path())
                     .find(|path| path.is_dir()) // Find the unpacked child dir
                     .ok_or_else(|| RzupError::Other("No subdirectory found in archive".into()))?;
+
+                verbose_msg!(format!(
+                    "Moving toolchain from {} to {}",
+                    subdir.display(),
+                    toolchain_dir.display()
+                ));
+
                 // Move subdir contents to toolchain dir
                 self.move_toolchain(&subdir, &toolchain_dir)?;
             }
@@ -221,12 +273,11 @@ impl Toolchain {
     pub fn link(&self, dir: &Path) -> Result<()> {
         match self {
             Toolchain::Rust => {
-                let msg = format!(
+                info_msg!(format!(
                     "Activating rustup toolchain {} at {}",
                     RUSTUP_TOOLCHAIN_NAME,
                     dir.display()
-                );
-                info_msg(&msg)?;
+                ));
 
                 #[cfg(not(target_os = "windows"))]
                 let rustc_exe = "rustc";
@@ -246,15 +297,21 @@ impl Toolchain {
                     self.unlink(RUSTUP_TOOLCHAIN_NAME)?;
                 }
 
+                verbose_msg!(format!(
+                    "Creating symlinks from {} to {}",
+                    dir.display(),
+                    RUSTUP_TOOLCHAIN_NAME
+                ));
+
                 Command::new("rustup")
                     .args(["toolchain", "link", RUSTUP_TOOLCHAIN_NAME])
                     .arg(dir)
                     .run_verbose()
                     .context("Could not link toolchain: rustup not installed?")?;
 
-                let msg =
-                    format!("rustup toolchain {RUSTUP_TOOLCHAIN_NAME} was linked successfully");
-                info_msg(&msg)?;
+                info_msg!(format!(
+                    "rustup toolchain {RUSTUP_TOOLCHAIN_NAME} was linked successfully"
+                ));
 
                 Ok(())
             }
@@ -263,9 +320,14 @@ impl Toolchain {
                 let cpp_link = rzup_home.join(CPP_TOOLCHAIN_NAME);
 
                 if cpp_link.exists() {
+                    verbose_msg!(format!("Removing symlink {}", cpp_link.display()));
                     fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
                 }
 
+                verbose_msg!(format!(
+                    "Creating symnlink for toolchain at {}",
+                    cpp_link.display()
+                ));
                 #[cfg(target_family = "unix")]
                 std::os::unix::fs::symlink(dir, &cpp_link)
                     .context("Failed to create symlink for cpp")?;
@@ -274,10 +336,10 @@ impl Toolchain {
                 std::os::windows::fs::symlink_file(dir, &cpp_link)
                     .context("Failed to create symlink for cpp")?;
 
-                info_msg(&format!(
+                info_msg!(format!(
                     "Symlink for cpp toolchain created at {}",
                     cpp_link.display()
-                ))?;
+                ));
                 Ok(())
             }
         }
@@ -287,6 +349,7 @@ impl Toolchain {
         match self {
             Toolchain::Rust => {
                 if self.toolchain_link_exists(name)? {
+                    verbose_msg!(format!("Removing toolchain link {}", &name));
                     Command::new("rustup")
                         .args(["toolchain", "remove", name])
                         .run()
@@ -298,6 +361,7 @@ impl Toolchain {
                 let cpp_link = rzup_home.join(name);
 
                 if cpp_link.exists() {
+                    verbose_msg!(format!("Removing symlink at {}", cpp_link.display()));
                     fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
                 }
             }

@@ -16,11 +16,12 @@ use anyhow::Result;
 use clap::Subcommand;
 use termcolor::StandardStream;
 
-use crate::utils::{
-    find_active_toolchain_name, find_cargo_risczero_version, find_installed_toolchains,
-    get_gcc_version, get_rustc_version,
-    notify::{pretty_header, pretty_msg, pretty_msgln},
-    rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
+use crate::{
+    pretty_header, pretty_msg, pretty_msgln,
+    utils::{
+        find_active_toolchain_name, find_cargo_risczero_version, find_installed_toolchains,
+        get_gcc_version, get_rustc_version, rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
+    },
 };
 
 #[derive(Debug, Subcommand)]
@@ -56,20 +57,20 @@ pub fn handler(subcmd: Option<ShowSubcmd>) -> Result<()> {
 fn show_all(entries: Vec<String>) -> Result<()> {
     let mut stdout = StandardStream::stderr(termcolor::ColorChoice::Always);
 
-    pretty_msg(&mut stdout, true, None, "rzup home: ")?;
-    pretty_msgln(&mut stdout, false, None, rzup_home()?.to_str().unwrap())?;
+    pretty_msg!(&mut stdout, true, None, "rzup home: ");
+    pretty_msgln!(&mut stdout, false, None, rzup_home()?.to_str().unwrap());
 
     let cargo_risczero_version = find_cargo_risczero_version()?;
 
-    pretty_msg(&mut stdout, true, None, "cargo-risczero: ")?;
-    pretty_msgln(&mut stdout, false, None, &cargo_risczero_version)?;
+    pretty_msg!(&mut stdout, true, None, "cargo-risczero: ");
+    pretty_msgln!(&mut stdout, false, None, &cargo_risczero_version);
 
-    pretty_header(&mut stdout, "\ninstalled toolchains")?;
+    pretty_header!(&mut stdout, "\ninstalled toolchains");
     for entry in entries {
         eprintln!("{}", entry);
     }
 
-    pretty_header(&mut stdout, "\nactive toolchains")?;
+    pretty_header!(&mut stdout, "\nactive toolchains");
     eprint!("{}", find_active_toolchain_name(RUSTUP_TOOLCHAIN_NAME)?);
     let active_rustc_version = get_rustc_version(RUSTUP_TOOLCHAIN_NAME)?;
     eprintln!("\t({})", active_rustc_version);

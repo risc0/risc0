@@ -12,53 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::Write;
+#[macro_export]
+macro_rules! info_msg {
+    ($msg:expr) => {{
+        use std::io::Write;
+        use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
-
-use crate::errors::RzupError;
-
-pub fn info_msg(msg: &str) -> Result<(), RzupError> {
-    let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    let mut color_spec = ColorSpec::new();
-    color_spec.set_bold(true);
-    stdout.set_color(&color_spec)?;
-    write!(stdout, "info: ")?;
-    stdout.reset()?;
-    writeln!(stdout, "{}", msg)?;
-    stdout.flush()?;
-    Ok(())
+        let mut stdout = StandardStream::stdout(ColorChoice::Always);
+        let mut color_spec = ColorSpec::new();
+        color_spec.set_bold(true);
+        stdout.set_color(&color_spec).expect("Failed to set color");
+        write!(stdout, "info: ").expect("Failed to write info label");
+        stdout.reset().expect("Failed to reset color");
+        writeln!(stdout, "{}", $msg).expect("Failed to write message");
+        stdout.flush().expect("Failed to flush stdout");
+    }};
 }
 
-pub fn pretty_msg(
-    stdout: &mut StandardStream,
-    bold: bool,
-    color: Option<Color>,
-    message: &str,
-) -> Result<(), RzupError> {
-    let mut color_spec = ColorSpec::new();
-    color_spec.set_bold(bold).set_fg(color);
-    stdout.set_color(&color_spec)?;
-    write!(stdout, "{}", message)?;
-    stdout.flush()?;
-    Ok(())
+#[macro_export]
+macro_rules! verbose_msg {
+    ($msg:expr) => {{
+        use std::io::Write;
+        use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+        use $crate::utils::is_verbose;
+
+        if is_verbose() {
+            let mut stdout = StandardStream::stdout(ColorChoice::Always);
+            let mut color_spec = ColorSpec::new();
+            color_spec.set_bold(true).set_fg(Some(Color::Yellow));
+            stdout.set_color(&color_spec).expect("Failed to set color");
+            write!(stdout, "verbose: ").expect("Failed to write verbose label");
+            stdout.reset().expect("Failed to reset color");
+            writeln!(stdout, "{}", $msg).expect("Failed to write message");
+            stdout.flush().expect("Failed to flush stdout");
+        }
+    }};
 }
 
-pub fn pretty_msgln(
-    stdout: &mut StandardStream,
-    bold: bool,
-    color: Option<Color>,
-    message: &str,
-) -> Result<(), RzupError> {
-    pretty_msg(stdout, bold, color, message)?;
-    writeln!(stdout)?;
-    stdout.flush()?;
-    Ok(())
+#[macro_export]
+macro_rules! pretty_msg {
+    ($stdout:expr, $bold:expr, $color:expr, $message:expr) => {{
+        use std::io::Write;
+        use termcolor::{ColorSpec, WriteColor};
+
+        let mut color_spec = ColorSpec::new();
+        color_spec.set_bold($bold).set_fg($color);
+        $stdout.set_color(&color_spec).expect("Failed to set color");
+        write!($stdout, "{}", $message).expect("Failed to write message");
+        $stdout.flush().expect("Failed to flush stdout");
+    }};
 }
 
-pub fn pretty_header(stdout: &mut StandardStream, header: &str) -> Result<(), RzupError> {
-    pretty_msgln(stdout, true, None, header)?;
-    pretty_msgln(stdout, true, None, &"-".repeat(header.len()))?;
-    pretty_msgln(stdout, false, None, "")?;
-    Ok(())
+#[macro_export]
+macro_rules! pretty_msgln {
+    ($stdout:expr, $bold:expr, $color:expr, $message:expr) => {{
+        use std::io::Write;
+        pretty_msg!($stdout, $bold, $color, $message);
+        writeln!($stdout).expect("Failed to write newline");
+        $stdout.flush().expect("Failed to flush stdout");
+    }};
+}
+
+#[macro_export]
+macro_rules! pretty_header {
+    ($stdout:expr, $header:expr) => {{
+        pretty_msgln!($stdout, true, None, $header);
+        pretty_msgln!($stdout, true, None, &"-".repeat($header.len()));
+        pretty_msgln!($stdout, false, None, "");
+    }};
 }

@@ -21,7 +21,7 @@ pub mod utils;
 
 use std::fs;
 
-use crate::utils::notify::info_msg;
+// use crate::utils::notify::info_msg;
 use anyhow::{anyhow, Context, Result};
 
 pub struct Rzup;
@@ -43,9 +43,13 @@ impl Rzup {
         let rzup_path = cargo_bin_path.join("rzup");
 
         if rzup_path.exists() {
+            verbose_msg!(format!("Removing rzup from {}", rzup_path.display()));
+
             fs::remove_file(&rzup_path).context("Failed to remove rzup.")?;
-            let msg = format!("Uninstalled rzup from {}", cargo_bin_path.display());
-            info_msg(&msg)?;
+            info_msg!(format!(
+                "Uninstalled rzup from {}",
+                cargo_bin_path.display()
+            ));
         }
         Ok(())
     }

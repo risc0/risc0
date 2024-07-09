@@ -16,7 +16,7 @@ use std::str::FromStr;
 
 use cfg_if::cfg_if;
 
-use crate::errors::RzupError;
+use crate::{errors::RzupError, verbose_msg};
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Target {
     Aarch64AppleDarwin,
@@ -36,16 +36,22 @@ impl Target {
     }
 
     pub fn host_target() -> Option<Self> {
+        verbose_msg!(format!("Detecting host target..."));
         cfg_if! {
             if #[cfg(all(target_arch = "x86_64", target_os = "linux"))] {
+                verbose_msg!(format!("Detected target: {}", Target::X86_64UnknownLinuxGnu.to_str()));
                 Some(Target::X86_64UnknownLinuxGnu)
             } else if #[cfg(all(target_arch = "x86_64", target_os = "macos"))] {
+                verbose_msg!(format!("Detected target: {}", Target::X86_64AppleDarwin.to_str()));
                 Some(Target::X86_64AppleDarwin)
             } else if #[cfg(all(target_arch = "aarch64", target_os = "macos"))] {
+                verbose_msg!(format!("Detected target: {}", Target::Aarch64AppleDarwin.to_str()));
                 Some(Target::Aarch64AppleDarwin)
             } else if #[cfg(all(target_arch = "x86_64", target_os = "windows"))] {
+                verbose_msg!(format!("Detected target: {}", Target::X86_64PCWindowsMsvc.to_str()));
                 Some(Target::X86_64PCWindowsMsvc)
             } else {
+                verbose_msg!("Could not detect host target")
                 None
             }
         }

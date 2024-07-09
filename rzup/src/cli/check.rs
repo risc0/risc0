@@ -15,10 +15,9 @@
 use anyhow::Result;
 use termcolor::{Color, ColorChoice, StandardStream};
 
-use crate::utils::{
-    get_updatable_active,
-    notify::{pretty_msg, pretty_msgln},
-    UpdateInfo,
+use crate::{
+    pretty_msg, pretty_msgln,
+    utils::{get_updatable_active, UpdateInfo},
 };
 
 pub async fn handler() -> Result<()> {
@@ -33,32 +32,32 @@ fn print_updates(updates: &[UpdateInfo]) -> Result<()> {
 
     for update in updates {
         if update.up_to_date {
-            pretty_msg(&mut stdout, true, None, &format!("{} - ", update.name)).unwrap();
-            pretty_msg(&mut stdout, true, Some(Color::Green), "Up to date ").unwrap();
-            pretty_msgln(
+            pretty_msg!(&mut stdout, true, None, &format!("{} - ", update.name));
+            pretty_msg!(&mut stdout, true, Some(Color::Green), "Up to date ");
+            pretty_msgln!(
                 &mut stdout,
                 false,
                 None,
-                &format!(
+                format!(
                     ": {} ({})",
                     update.current_version, update.current_published_at
-                ),
-            )?;
+                )
+            );
         } else {
-            pretty_msg(&mut stdout, true, None, &format!("{} - ", update.name)).unwrap();
-            pretty_msg(&mut stdout, true, Some(Color::Yellow), "Update available ").unwrap();
-            pretty_msgln(
+            pretty_msg!(&mut stdout, true, None, &format!("{} - ", update.name));
+            pretty_msg!(&mut stdout, true, Some(Color::Yellow), "Update available ");
+            pretty_msgln!(
                 &mut stdout,
                 false,
                 None,
-                &format!(
+                format!(
                     ": {} ({}) -> {} ({})",
                     update.current_version,
                     update.current_published_at,
                     update.latest_version,
                     update.latest_published_at,
-                ),
-            )?;
+                )
+            );
         }
     }
     Ok(())
