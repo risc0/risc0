@@ -73,13 +73,6 @@ The control root plays a key role in enforcing zkVM version control. Each [contr
 This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit]. <br/>
 See also: [Code reference for control root]
 
-### Deterministic Builds
-
-Our [cargo risczero] tool offers a deterministic compilation from user-written Rust code to RISC-V binary.
-Compiled binary files are identified by their [imageID].
-
-Deterministic builds are made possible by running the `cargo` compiler inside a Docker container. Without deterministic builds, the zkVM only proves correct execution of a given binary file. With deterministic builds, users can prove correct execution of Rust code.
-
 ### ELF Binary
 
 The executable format for the [RISC-V] instruction set.
@@ -197,9 +190,9 @@ For a list of all supported recursion programs, see the documentation for the [z
 ### Reproducible Build
 A compilation process is called "reproducible" if it reliably produces the same binary file, on a byte-by-byte level.
 
-In the context of RISC Zero application development, reproducible builds allow for a clear linkage between the guest code and the resulting [Image ID].
+In the context of RISC Zero application development, reproducible builds allow for a clear linkage between the [guest code] and the resulting [Image ID].
 
-To get reproducible builds for your zkVM application, use [`cargo risczero build`](https://docs.rs/crate/cargo-risczero/latest).
+To get reproducible builds for your zkVM application, use [`cargo risczero build`]. Reproducible builds are made possible by running the `cargo` compiler inside a Docker container.
 
 ### RISC-V
 
@@ -266,6 +259,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [assumption]: #assumption
 [assumptions]: #assumption
 [cargo risczero]: https://docs.rs/crate/cargo-risczero/latest
+[`cargo risczero build`]: https://docs.rs/crate/cargo-risczero/latest
 [circuit]: #circuit
 [clock cycles]: #clock-cycles
 [Code reference for control root]: https://github.com/risc0/risc0/blob/v0.21.0/risc0/circuit/recursion/src/control_id.rs#L16
