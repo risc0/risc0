@@ -46,7 +46,8 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.4.0",
     "@docusaurus/types": "3.4.0",
-    "prettier": "3.3.2"
+    "prettier": "3.3.2",
+    "swc-loader": "0.2.6"
   },
-  "packageManager": "bun@1.1.16"
+  "packageManager": "bun@1.1.18"
 }
