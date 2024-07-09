@@ -73,6 +73,13 @@ The control root plays a key role in enforcing zkVM version control. Each [contr
 This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit]. <br/>
 See also: [Code reference for control root]
 
+### Deterministic Build
+A compilation process is called "deterministic" (or "reproducible") if it reliably produces the same binary file, on a byte-by-byte level.
+
+In the context of RISC Zero application development, deterministic builds are necessary to ensure a clear linkage between the [guest program] and the resulting [ImageID].
+
+To access deterministic builds for your zkVM application, use [`cargo risczero build`]. Deterministic builds are made possible by running the `cargo` compiler inside a Docker container.
+
 ### ELF Binary
 
 The executable format for the [RISC-V] instruction set.
@@ -186,13 +193,6 @@ The recursion circuit is used to aggregate and compose [proofs].
 The [recursion circuit] is capable of efficiently evaluating polynomial constraints, and was specifically designed to verify STARK proofs. Programs written for this circuit are loaded into the [control columns]. Each recursion program is identified by a [Control ID].
 
 For a list of all supported recursion programs, see the documentation for the [zkVM API Client].
-
-### Reproducible Build
-A compilation process is called "reproducible" if it reliably produces the same binary file, on a byte-by-byte level.
-
-In the context of RISC Zero application development, reproducible builds are necessary to ensure a clear linkage between the [guest program] and the resulting [ImageID].
-
-To get reproducible builds for your zkVM application, use [`cargo risczero build`]. Reproducible builds are made possible by running the `cargo` compiler inside a Docker container.
 
 ### RISC-V
 
