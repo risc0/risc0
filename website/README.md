@@ -4,6 +4,7 @@ This website is built using [Docusaurus 2](https://docusaurus.io/), a modern sta
 
 ### Installation
 
+First, [install bun] on your machine. Then, run:
 ```console
 bun install
 ```
@@ -39,3 +40,5 @@ GIT_USER=<Your GitHub username> bun run deploy
 ```
 
 If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+
+[install bun]: https://bun.sh/docs/installation
