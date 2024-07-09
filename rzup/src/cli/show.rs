@@ -18,7 +18,7 @@ use termcolor::StandardStream;
 
 use crate::utils::{
     find_active_toolchain_name, find_cargo_risczero_version, find_installed_toolchains,
-    get_rustc_version,
+    get_gcc_version, get_rustc_version,
     notify::{pretty_header, pretty_msg, pretty_msgln},
     rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
 };
@@ -73,7 +73,8 @@ fn show_all(entries: Vec<String>) -> Result<()> {
     eprint!("{}", find_active_toolchain_name(RUSTUP_TOOLCHAIN_NAME)?);
     let active_rustc_version = get_rustc_version(RUSTUP_TOOLCHAIN_NAME)?;
     eprintln!("\t({})", active_rustc_version);
-    eprintln!("{}", find_active_toolchain_name(CPP_TOOLCHAIN_NAME)?);
-
+    let active_gcc_version = get_gcc_version(CPP_TOOLCHAIN_NAME)?;
+    eprint!("{}", find_active_toolchain_name(CPP_TOOLCHAIN_NAME)?);
+    eprintln!("\t({})", active_gcc_version);
     Ok(())
 }

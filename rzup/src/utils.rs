@@ -228,6 +228,32 @@ pub fn get_rustc_version(alias: &str) -> Result<String> {
     Ok(rustc_version)
 }
 
+/// Gets the version of `gcc` from the specified toolchain alias.
+pub fn get_gcc_version(alias: &str) -> Result<String> {
+    let toolchain_dir = get_toolchain_cwd(alias)?;
+    let gcc_path = toolchain_dir.join("bin").join("riscv32-unknown-elf-gcc");
+
+    if !gcc_path.exists() {
+        bail!("gcc not found in the toolchain bin directory");
+    }
+
+    let output = Command::new(gcc_path)
+        .arg("--version")
+        .capture_stdout()
+        .context("Failed to get gcc version")?;
+
+    let gcc_version_line = output.lines().next().context("Failed to get gcc version")?;
+
+    let version_regex = Regex::new(r"(\d+\.\d+\.\d+)")?;
+
+    let parsed_gcc_version = version_regex
+        .captures(gcc_version_line)
+        .and_then(|caps| caps.get(1).map(|v| v.as_str().to_string()))
+        .context("Failed to parse gcc version")?;
+
+    Ok(format!("gcc {}", parsed_gcc_version))
+}
+
 /// Struct to hold update information for a toolchain or extension.
 #[derive(Debug)]
 pub struct UpdateInfo {
