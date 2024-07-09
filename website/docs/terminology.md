@@ -190,7 +190,7 @@ For a list of all supported recursion programs, see the documentation for the [z
 ### Reproducible Build
 A compilation process is called "reproducible" if it reliably produces the same binary file, on a byte-by-byte level.
 
-In the context of RISC Zero application development, reproducible builds allow for a clear linkage between the [guest program] and the resulting [ImageID].
+In the context of RISC Zero application development, reproducible builds are necessary to ensure a clear linkage between the [guest program] and the resulting [ImageID].
 
 To get reproducible builds for your zkVM application, use [`cargo risczero build`]. Reproducible builds are made possible by running the `cargo` compiler inside a Docker container.
 
