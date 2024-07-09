@@ -10,7 +10,6 @@ While all of the [zkVM examples][zkvm-examples] can be run on Bonsai by [configu
 
 This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [~160 lines of Rust][signature-aggregation], a gas savings of 66% is achieved with significant room for optimizations.
 
-
 [zkvm-examples]: /api/zkvm/examples
 [remote-proving]: /api/zkvm/quickstart#remote-proving
 [zeth-repo]: https://github.com/risc0/zeth
