@@ -11,10 +11,4 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-pub const RISC_ZERO_REPO_GIT: &str = "https://github.com/risc0/risc0.git";
-pub const RISC_ZERO_REPO_PATH_BUILD: &str = "risc0/build";
-pub const RISC_ZERO_REPO_PATH_ZKVM: &str = "risc0/zkvm";
-
-#[cfg(test)]
-pub(crate) const PATH_YAML_CONFIG: &str = "profiles/config.yml";
+include!(concat!(env!("OUT_DIR"), "/methods.rs"));
