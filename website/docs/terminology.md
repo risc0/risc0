@@ -73,7 +73,7 @@ The control root plays a key role in enforcing zkVM version control. Each [contr
 This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit]. <br/>
 See also: [Code reference for control root]
 
-### Deterministic Build
+### Deterministic Builds
 A compilation process is called "deterministic" (or "reproducible") if it reliably produces the same binary file, on a byte-by-byte level.
 
 In the context of RISC Zero application development, deterministic builds are necessary to ensure a clear linkage between the [guest program] and the resulting [ImageID].
