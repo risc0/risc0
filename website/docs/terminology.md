@@ -74,6 +74,7 @@ This design allows for updates to the [RISC-V circuit] without necessitating a n
 See also: [Code reference for control root]
 
 ### Deterministic Builds
+
 A compilation process is called "deterministic" (or "reproducible") if it reliably produces the same binary file, on a byte-by-byte level.
 
 In the context of RISC Zero application development, deterministic builds are necessary to ensure a clear linkage between the [guest program] and the resulting [ImageID].
