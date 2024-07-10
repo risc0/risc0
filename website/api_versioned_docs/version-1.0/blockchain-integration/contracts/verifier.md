@@ -93,4 +93,4 @@ Users seeking to pin to a specific version of zkVM can use the following table t
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
-[term-zkvm-program]: /terminology#zkvm-program
+[term-zkvm-program]: ../../zkvm/

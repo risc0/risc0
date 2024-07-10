@@ -69,5 +69,5 @@ You can choose to use this contract or deploy your own.
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-image-id]: /terminology#image-id
-[term-zkvm-program]: /terminology#zkvm-program
+[term-zkvm-program]: ../../zkvm/
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template

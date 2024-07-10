@@ -4,7 +4,7 @@
 
 ## Contents
 
-- [FAQ](#faq)
+- [FAQ](#contents)
   - [Contents](#contents)
   - [ZK Basics](#zk-basics)
   - [Building on the zkVM](#building-on-the-zkvm)

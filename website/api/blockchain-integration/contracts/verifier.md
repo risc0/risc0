@@ -67,4 +67,4 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
-[term-zkvm-program]: /terminology#zkvm-program
+[term-zkvm-program]: ../../zkvm/
