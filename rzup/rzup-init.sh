@@ -25,7 +25,18 @@ set -euo pipefail
 RZUP_BINARY_UPDATE_ROOT="${RZUP_BINARY_UPDATE_ROOT:-https://github.com/hmrtn/asset-test/releases/download/test1/}"
 QUIET=no
 
-CARGO_BIN_DIR="${HOME}/.cargo/bin"
+# Set XDG_DATA_HOME based on OS
+_ostype="$(uname -s)"
+case "$_ostype" in
+  Darwin)
+    XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/Library/Application Support}"
+    ;;
+  *)
+    XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
+    ;;
+esac
+
+RZUP_BIN_DIR="${XDG_DATA_HOME}/risc0/rzup/bin"
 DEPRECATED_RISC0_DIR="${HOME}/.risc0"
 
 usage() {
@@ -73,7 +84,7 @@ main() {
   _file="${_dir}/rzup"
 
   [ -f "$DEPRECATED_RISC0_DIR/bin/rzup" ] && rm -rf "$DEPRECATED_RISC0_DIR"
-  [ -f "$CARGO_BIN_DIR/rzup" ] && rm "$CARGO_BIN_DIR/rzup"
+  [ -f "$RZUP_BIN_DIR/rzup" ] && rm "$RZUP_BIN_DIR/rzup"
 
   for arg in "$@"; do
     case "$arg" in
@@ -93,15 +104,26 @@ main() {
   ensure chmod u+x "$_file"
   [ ! -x "$_file" ] && err "Cannot execute $_file"
 
-  ensure mkdir -p "$CARGO_BIN_DIR"
-  ensure mv "$_file" "$CARGO_BIN_DIR"
+  ensure mkdir -p "$RZUP_BIN_DIR"
+  ensure mv "$_file" "$RZUP_BIN_DIR"
 
-  info "rzup has been installed to $CARGO_BIN_DIR"
-  update_path
+  info "rzup has been installed to $RZUP_BIN_DIR"
+
+  detect_shell
+
+  # add rzup to PATH if it isn't already present
+  if [[ ":$PATH:" != *":${RZUP_BIN_DIR}:"* ]]; then
+      info "Adding rzup to PATH in ${PROFILE}"
+      {
+          echo
+          echo "export PATH=\"\$PATH:$RZUP_BIN_DIR\""
+      } >> "$PROFILE"
+  else
+      info "rzup found in PATH"
+  fi
 
   info "🎉 rzup installed!"
-  echo "Run the following commands to install the zkVM:"
-  echo "  source ${PROFILE}"
+  echo "Run the following command to install the zkVM:"
   echo "  rzup install"
 }
 
@@ -129,22 +151,6 @@ get_architecture() {
   RETVAL="$_arch"
 }
 
-update_path() {
-  detect_shell
-  if [[ ":$PATH:" != *":${CARGO_BIN_DIR}:"* ]]; then
-    info "Adding rzup to PATH in ${PROFILE}"
-    case "$PREF_SHELL" in
-    fish) echo "set -x PATH \$PATH $CARGO_BIN_DIR" >>"$PROFILE" ;;
-    *) echo "export PATH=\"\$PATH:$CARGO_BIN_DIR\"" >>"$PROFILE" ;;
-    esac
-    info "Run the following commands to update your shell:"
-    info "source ${PROFILE}"
-    info "rzup"
-  else
-    info "rzup is already in your PATH"
-  fi
-}
-
 detect_shell() {
   case $SHELL in
   */zsh)
@@ -163,7 +169,9 @@ detect_shell() {
     PROFILE="$HOME/.profile"
     PREF_SHELL='ash'
     ;;
-  *) err "Could not detect shell, manually add ${CARGO_BIN_DIR} to your PATH." ;;
+  *)
+    err "Could not detect shell. Please manually add ${RZUP_BIN_DIR} to your PATH."
+    ;;
   esac
   info "Detected your preferred shell as ${PREF_SHELL}"
 }
@@ -214,3 +222,4 @@ downloader() {
 }
 
 main "$@" || exit 1
+
