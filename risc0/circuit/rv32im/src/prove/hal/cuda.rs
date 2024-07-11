@@ -52,7 +52,6 @@ pub struct CudaCircuitHal<CH: CudaHash> {
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
-    #[tracing::instrument(name = "CudaCircuitHal::new", skip_all)]
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         Self { hal }
     }
@@ -140,7 +139,6 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
 }
 
 impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
-    #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
         check: &CudaBuffer<BabyBearElem>,
@@ -200,7 +198,6 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         nvtx::range_pop!();
     }
 
-    #[tracing::instrument(skip_all)]
     fn accumulate(
         &self,
         ctrl: &CudaBuffer<BabyBearElem>,

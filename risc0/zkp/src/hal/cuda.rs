@@ -160,7 +160,6 @@ impl CudaHash for CudaHashPoseidon {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn hash_rows(&self, output: &BufferImpl<Digest>, matrix: &BufferImpl<BabyBearElem>) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
@@ -206,7 +205,6 @@ impl CudaHash for CudaHashPoseidon2 {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn hash_rows(&self, output: &BufferImpl<Digest>, matrix: &BufferImpl<BabyBearElem>) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
