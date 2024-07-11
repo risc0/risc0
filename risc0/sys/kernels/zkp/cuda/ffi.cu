@@ -79,65 +79,6 @@ const char* risc0_zkp_cuda_gather_sample(
   return launchKernel(gather_sample, size, 0, dst, src, idx, size, stride);
 }
 
-const char* risc0_zkp_cuda_poseidon_fold(const Fp* round_constants,
-                                         const Fp* mds,
-                                         const Fp* partial_comp_matrix,
-                                         const Fp* partial_comp_offset,
-                                         Fp* output,
-                                         const Fp* input,
-                                         uint32_t output_size) {
-  return launchKernel(poseidon_fold,
-                      output_size,
-                      0,
-                      round_constants,
-                      mds,
-                      partial_comp_matrix,
-                      partial_comp_offset,
-                      output,
-                      input,
-                      output_size);
-}
-
-const char* risc0_zkp_cuda_poseidon_rows(const Fp* round_constants,
-                                         const Fp* mds,
-                                         const Fp* partial_comp_matrix,
-                                         const Fp* partial_comp_offset,
-                                         Fp* output,
-                                         const Fp* matrix,
-                                         uint32_t row_size,
-                                         uint32_t col_size) {
-  return launchKernel(poseidon_rows,
-                      row_size,
-                      0,
-                      round_constants,
-                      mds,
-                      partial_comp_matrix,
-                      partial_comp_offset,
-                      output,
-                      matrix,
-                      row_size,
-                      col_size);
-}
-
-const char* risc0_zkp_cuda_poseidon2_fold(const Fp* round_constants,
-                                          const Fp* m_int_diag,
-                                          Fp* output,
-                                          const Fp* input,
-                                          uint32_t output_size) {
-  return launchKernel(
-      poseidon2_fold, output_size, 0, round_constants, m_int_diag, output, input, output_size);
-}
-
-const char* risc0_zkp_cuda_poseidon2_rows(const Fp* round_constants,
-                                          const Fp* m_int_diag,
-                                          Fp* output,
-                                          const Fp* matrix,
-                                          uint32_t row_size,
-                                          uint32_t col_size) {
-  return launchKernel(
-      poseidon2_rows, row_size, 0, round_constants, m_int_diag, output, matrix, row_size, col_size);
-}
-
 const char*
 risc0_zkp_cuda_sha_rows(ShaDigest* output, const Fp* matrix, uint32_t rowSize, uint32_t colSize) {
   return launchKernel(sha_rows, rowSize, 0, output, matrix, rowSize, colSize);
