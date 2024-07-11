@@ -39,6 +39,7 @@ parking_lot = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-sys = { workspace = true, optional = true }
+wgpu = { version = "0.20" }
 
 [dev-dependencies]
 criterion = "0.5"

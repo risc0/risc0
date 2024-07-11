@@ -20,6 +20,7 @@ pub mod cuda;
 pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
+pub mod wgpu;
 
 use std::{
     fmt::Debug,
