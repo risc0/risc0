@@ -52,8 +52,8 @@ pub fn is_verbose() -> bool {
 pub fn rzup_home() -> Result<PathBuf, RzupError> {
     let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
         dir.into()
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".rzup")
+    } else if let Some(home) = dirs::data_dir() {
+        home.join("risc0")
     } else {
         return Err(RzupError::config_error(
             "Could not determine rzup directory. Set RISC0_DATA_DIR env var.",
