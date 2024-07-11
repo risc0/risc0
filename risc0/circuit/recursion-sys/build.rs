@@ -46,6 +46,7 @@ fn build_cuda_kernels() {
         .files([
             "kernels/cuda/eval_check.cu",
             "kernels/cuda/ffi.cu",
+            "kernels/cuda/ffi_supra.cu",
             "kernels/cuda/step_compute_accum.cu",
             "kernels/cuda/step_verify_accum.cu",
         ])

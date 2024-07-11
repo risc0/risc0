@@ -4942,8 +4942,7 @@ dependencies = [
 [[package]]
 name = "sppark"
 version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb266b15daead53670d477d7e136b8fc92d46e31bb9007ac46d304df23689a4b"
+source = "git+https://github.com/dot-asm/sppark#be6cb028bfda93666aed9d221b0c22f72a6af24f"
 dependencies = [
  "cc",
  "which 4.4.2",

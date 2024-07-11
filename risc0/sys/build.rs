@@ -49,6 +49,7 @@ fn build_cuda_kernels() {
             "kernels/zkp/cuda/all.cu",
             "kernels/zkp/cuda/ffi.cu",
             "kernels/zkp/cuda/supra_ntt_api.cu",
+            "kernels/zkp/cuda/supra/supra_cuda_api.cu",
         ])
         .deps([
             "kernels/zkp/cuda/cuda.h",
