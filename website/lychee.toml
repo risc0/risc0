@@ -8,9 +8,4 @@ max_retries = 3
 exclude = [
   # rate limited
   "https://epubs.siam.org/doi/10.1137/0108018",
-
-  # TODO: fix these
-  # These seem to refer to the old `bonsai-foundry-template` repository:
-  "/contracts/BonsaiStarter.sol",
-  "/relay/examples/offchain_request.rs",
 ]
