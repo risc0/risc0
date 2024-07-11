@@ -37,7 +37,8 @@ use crate::{
 };
 
 #[repr(C)]
-pub enum AccumOpType {
+enum AccumOpType {
+    #[allow(dead_code)]
     Add,
     Multiply,
 }
@@ -135,7 +136,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let count = steps - ZK_CYCLES;
 
         let wom = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
-        let wom = UnifiedBuffer::from_slice(&wom).unwrap();
+        let wom = DeviceBuffer::from_slice(&wom).unwrap();
 
         tracing::info_span!("step_compute_accum").in_scope(|| {
             extern "C" {
