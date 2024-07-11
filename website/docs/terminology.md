@@ -77,7 +77,7 @@ See also: [Code reference for control root]
 
 A compilation process is called "deterministic" (or "reproducible") if it reliably produces the same binary file, on a byte-by-byte level.
 
-In the context of RISC Zero application development, deterministic builds are necessary to ensure a clear linkage between the [guest program] and the resulting [ImageID].
+In the context of RISC Zero application development, deterministic builds are necessary to ensure a clear linkage between the source code for the [guest program] and the resulting [Image ID][ImageID].
 
 To access deterministic builds for your zkVM application, use [`cargo risczero build`]. Deterministic builds are made possible by running the `rustc` compiler inside a Docker container.
 
