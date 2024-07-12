@@ -279,6 +279,7 @@ impl Toolchain {
                     dir.display()
                 ));
 
+                // TODO: Check if necessary
                 #[cfg(not(target_os = "windows"))]
                 let rustc_exe = "rustc";
 
@@ -330,6 +331,7 @@ impl Toolchain {
                 std::os::unix::fs::symlink(dir, &cpp_link)
                     .context("Failed to create symlink for cpp")?;
 
+                // TODO: Check if necessary
                 #[cfg(target_family = "windows")]
                 std::os::windows::fs::symlink_file(dir, &cpp_link)
                     .context("Failed to create symlink for cpp")?;

@@ -22,6 +22,7 @@ pub enum Target {
     Aarch64AppleDarwin,
     X86_64UnknownLinuxGnu,
     X86_64AppleDarwin,
+    // TODO: Check if necessary
     X86_64PCWindowsMsvc,
 }
 
