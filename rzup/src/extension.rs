@@ -258,7 +258,7 @@ impl Extension {
                 let r0vm_link = cargo_bin_dir.join("r0vm");
 
                 // Remove existing symlinks if they exist
-                if cargo_risczero_link.exists() {
+                if fs::symlink_metadata(&cargo_risczero_link).is_ok() {
                     verbose_msg!(format!(
                         "Removing cargo-risczero symlink at {}",
                         cargo_risczero_link.display()
@@ -268,7 +268,7 @@ impl Extension {
                         .context("Failed to remove existing cargo-risczero symlink")?;
                     info_msg!("Symlinks for cargo-risczero removed successfully");
                 }
-                if r0vm_link.exists() {
+                if fs::symlink_metadata(&r0vm_link).is_ok() {
                     verbose_msg!(format!("Removing r0vm symlink at {}", r0vm_link.display()));
                     fs::remove_file(&r0vm_link)
                         .context("Failed to remove existing r0vm symlink")?;
@@ -277,16 +277,6 @@ impl Extension {
             }
         }
         Ok(())
-    }
-
-    fn extension_link_exists(&self, name: &str) -> Result<bool> {
-        let cargo_bin_dir = dirs::home_dir()
-            .ok_or_else(|| anyhow!("Could not determine home directory"))?
-            .join(".cargo/bin");
-
-        let extension_link = cargo_bin_dir.join(name);
-
-        Ok(extension_link.exists())
     }
 
     pub async fn install(&self, tag: Option<&str>, force: bool) -> Result<()> {
@@ -305,9 +295,6 @@ impl Extension {
                 let cargo_risczero_path = self
                     .download(target, tag, &extensions_root_dir, force)
                     .await?;
-                if self.extension_link_exists("cargo-risczero")? {
-                    self.unlink()?;
-                }
                 self.link(&cargo_risczero_path)?;
             }
         }

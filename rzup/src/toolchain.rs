@@ -293,9 +293,7 @@ impl Toolchain {
                     );
                 }
 
-                if self.toolchain_link_exists(RUSTUP_TOOLCHAIN_NAME)? {
-                    self.unlink(RUSTUP_TOOLCHAIN_NAME)?;
-                }
+                self.unlink(RUSTUP_TOOLCHAIN_NAME)?;
 
                 verbose_msg!(format!(
                     "Creating symlinks from {} to {}",
@@ -319,7 +317,7 @@ impl Toolchain {
                 let rzup_home = rzup_home()?;
                 let cpp_link = rzup_home.join(CPP_TOOLCHAIN_NAME);
 
-                if cpp_link.exists() {
+                if fs::symlink_metadata(&cpp_link).is_ok() {
                     verbose_msg!(format!("Removing symlink {}", cpp_link.display()));
                     fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
                 }
@@ -360,7 +358,7 @@ impl Toolchain {
                 let rzup_home = rzup_home()?;
                 let cpp_link = rzup_home.join(name);
 
-                if cpp_link.exists() {
+                if self.toolchain_link_exists(name)? {
                     verbose_msg!(format!("Removing symlink at {}", cpp_link.display()));
                     fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
                 }
@@ -566,7 +564,7 @@ impl Toolchain {
             Toolchain::Cpp => {
                 let rzup_home = rzup_home()?;
                 let cpp_link = rzup_home.join(name);
-                Ok(cpp_link.exists())
+                Ok(fs::symlink_metadata(cpp_link).is_ok())
             }
         }
     }
