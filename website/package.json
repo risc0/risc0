@@ -1,39 +1,21 @@
 {
-  "name": "docusaurus",
+  "name": "risc-zero-developer-website",
   "version": "0.0.0",
   "private": true,
+  "description": "RISC Zero Documentation, Education Hub, and Resources",
   "scripts": {
-    "fmt": "prettier . --write",
-    "check-github-link-versions": "python ./github-link-version-check.py",
-    "lint": "prettier . --check && python ./github-link-version-check.py",
-    "docusaurus": "docusaurus",
-    "start": "docusaurus start",
     "build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
+    "check-link-versions": "python ./link-version-check.py",
     "clear": "docusaurus clear",
+    "deploy": "docusaurus deploy",
+    "docusaurus": "docusaurus",
+    "fmt": "prettier . --write",
+    "lint": "prettier . --check && python ./link-version-check.py",
     "serve": "docusaurus serve",
-    "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids"
-  },
-  "dependencies": {
-    "@docusaurus/core": "3.0.0",
-    "@docusaurus/plugin-client-redirects": "3.0.0",
-    "@docusaurus/preset-classic": "3.0.0",
-    "@docusaurus/theme-mermaid": "3.0.0",
-    "@mdx-js/react": "3.0.0",
-    "clsx": "^1.2.1",
-    "prism-react-renderer": "^2.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "rehype-katex": "^7.0.0",
-    "remark-math": "^6.0.0",
-    "unist-util-visit": "^5.0.0"
-  },
-  "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.0.0",
-    "@docusaurus/types": "3.0.0",
-    "prettier": "3.0.3"
+    "start": "docusaurus start",
+    "swizzle": "docusaurus swizzle",
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "write-translations": "docusaurus write-translations"
   },
   "browserslist": {
     "production": [
@@ -47,5 +29,25 @@
       "last 1 safari version"
     ]
   },
-  "description": "RISC Zero - The ZKVM"
+  "dependencies": {
+    "@docusaurus/core": "3.4.0",
+    "@docusaurus/plugin-client-redirects": "3.4.0",
+    "@docusaurus/preset-classic": "3.4.0",
+    "@docusaurus/theme-mermaid": "3.4.0",
+    "@mdx-js/react": "3.0.1",
+    "clsx": "1.2.1",
+    "prism-react-renderer": "2.3.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "rehype-katex": "7.0.0",
+    "remark-math": "6.0.0",
+    "unist-util-visit": "5.0.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "3.4.0",
+    "@docusaurus/types": "3.4.0",
+    "prettier": "3.3.2",
+    "swc-loader": "0.2.6"
+  },
+  "packageManager": "bun@1.1.18"
 }

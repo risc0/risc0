@@ -18,6 +18,8 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use super::err::{Error, Result};
 
+use crate::alloc::string::ToString;
+
 /// A writer for writing streams preferring word-based data.
 pub trait WordWrite {
     /// Write the given words to the stream.
@@ -25,7 +27,7 @@ pub trait WordWrite {
 
     /// Write the given bytes to the stream, padding up to the next word
     /// boundary.
-    // TODO: Do we still want to to pad the bytes now that we have
+    // TODO: Do we still want to pad the bytes now that we have
     // posix-style I/O that can read things into buffers right where
     // we want them to be?  If we don't, we could change the
     // serialization buffers to use Vec<u8> instead of Vec<u32>,
@@ -120,11 +122,11 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
         false
     }
 
-    fn collect_str<T>(self, _: &T) -> Result<()>
+    fn collect_str<T>(self, value: &T) -> Result<()>
     where
-        T: core::fmt::Display + ?Sized,
+        T: ?Sized + core::fmt::Display,
     {
-        panic!("collect_str")
+        self.serialize_str(&value.to_string())
     }
 
     fn serialize_bool(self, v: bool) -> Result<()> {

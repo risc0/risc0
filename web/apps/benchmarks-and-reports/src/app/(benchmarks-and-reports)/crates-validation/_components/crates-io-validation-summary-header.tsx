@@ -11,14 +11,14 @@ export function CratesIoValidationSummaryHeader({ data }: { data: CratesIoValida
   const neutralPercentage = (neutralCount / data.length) * 100;
 
   return (
-    <div className="flex items-center gap-6">
-      <h2 className="subtitle">Crates Build Status Summary</h2>
+    <div className="flex flex-wrap items-center justify-between gap-1 sm:justify-start sm:gap-6">
+      <h2 className="text-xl">Crates Build Status Summary</h2>
       <h3 className="flex flex-row items-center gap-6 text-muted-foreground text-sm">
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <div className="flex cursor-help flex-row items-center">
               <CheckCircle2Icon className="mr-1 size-3 text-green-600 dark:text-green-400" />
-              <div>
+              <div className="truncate">
                 <span className="text-green-600 dark:text-green-400">{successCount}</span>{" "}
                 <span className="ml-1 text-xs">({Math.floor(successPercentage)}%)</span>
               </div>
@@ -34,7 +34,7 @@ export function CratesIoValidationSummaryHeader({ data }: { data: CratesIoValida
           <TooltipTrigger asChild>
             <div className="flex cursor-help flex-row items-center">
               <CircleAlertIcon className="mr-1 size-3 text-red-600 dark:text-red-400" />
-              <div>
+              <div className="truncate">
                 <span className="text-red-600 dark:text-red-400">{buildFailCount}</span>{" "}
                 <span className="ml-1 text-xs">({Math.floor(buildFailPercentage)}%)</span>
               </div>
@@ -50,7 +50,7 @@ export function CratesIoValidationSummaryHeader({ data }: { data: CratesIoValida
           <TooltipTrigger asChild>
             <div className="flex cursor-help flex-row items-center">
               <CircleDotIcon className="mr-1 size-3 text-neutral-600 dark:text-neutral-400" />
-              <div>
+              <div className="truncate">
                 <span className="text-neutral-600 dark:text-neutral-400">{neutralCount}</span>{" "}
                 <span className="ml-1 text-xs">({Math.floor(neutralPercentage)}%)</span>
               </div>

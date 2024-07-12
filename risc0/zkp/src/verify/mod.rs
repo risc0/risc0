@@ -101,7 +101,7 @@ impl fmt::Display for VerificationError {
             VerificationError::UnexpectedExitCode => write!(f, "unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "invalid hash suite"),
             VerificationError::VerifierParametersMissing => {
-                write!(f, "verifier paramters were not found in verifier context for the given receipt type")
+                write!(f, "verifier parameters were not found in verifier context for the given receipt type")
             }
             VerificationError::VerifierParametersMismatch { expected, received } => {
                 write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
@@ -395,7 +395,7 @@ where
             return Err(VerificationError::InvalidProof);
         }
 
-        // Set the mix mix value, pseudorandom value used for FRI batching
+        // Set the mix value, pseudorandom value used for FRI batching
         let mix = iop.random_ext_elem();
         // tracing::debug!("mix = {mix:?}");
 
@@ -459,7 +459,7 @@ where
     /// Read the globals (i.e. outputs) from the IOP, and mix them into the Fiat-Shamir state.
     ///
     /// NOTE: The globals are the only values known to the verifier, and constitute the public
-    /// statement of of the prover. In many scenarios, they are the first values sent to the
+    /// statement of the prover. In many scenarios, they are the first values sent to the
     /// verifier by the prover, and therefore should be committed at the start of verification.
     fn execute(&mut self, iop: &mut ReadIOP<'a, F>) {
         let slice = iop.read_field_elem_slice(C::OUTPUT_SIZE + 1);

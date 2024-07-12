@@ -10,8 +10,8 @@ on:
         description: "risc0-ethereum branch to checkout"
         required: false
         default: 'main'
-      bonsai-foundry-template-branch:
-        description: "bonsai-foundry-template branch to checkout"
+      risc0-foundry-template-branch:
+        description: "risc0-foundry-template branch to checkout"
         required: false
         default: 'main'
 
@@ -26,10 +26,10 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+  RISC0_TOOLCHAIN_VERSION: r0.1.78.0
   RISC0_PATH: ${{ github.workspace }}/risc0
   RISC0_ETHEREUM_PATH: ${{ github.workspace }}/risc0-ethereum
-  BONSAI_FOUNDRY_TEMPLATE_PATH: ${{ github.workspace }}/bonsai-foundry-template
+  RISC0_FOUNDRY_TEMPLATE_PATH: ${{ github.workspace }}/risc0-foundry-template
 
 jobs:
   changes:
@@ -46,6 +46,7 @@ jobs:
           filters: |
             base: &base
               - .github/actions/**
+              - .github/cargo_local_patch.py
               - .github/workflows/risc0-ethereum.yml
               - Cargo.toml
               - rust-toolchain.toml
@@ -81,6 +82,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: 'risc0'
+      # Determine the branch for risc0-ethereum
+      - name: Set risc0-ethereum branch
+        run: |
+          if [[ "${{ github.event.pull_request.base.ref }}" == release-* ]]; then
+            echo "RISC0_ETHEREUM_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
+          else
+            echo "RISC0_ETHEREUM_BRANCH=main" >> $GITHUB_ENV
+          fi
       # Checkout risc0-ethereum
       - name: Checkout risc0-ethereum
         uses: actions/checkout@v4
@@ -89,16 +98,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'risc0-ethereum'
-          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'main' }}
-      # Checkout bonsai-foundry-template
+          ref: ${{ github.event.inputs.risc0-ethereum-branch || env.RISC0_ETHEREUM_BRANCH }}
+      # Checkout risc0-foundry-template
       - name: Checkout foundry-template
         uses: actions/checkout@v4
         with:
-          repository: 'risc0/bonsai-foundry-template'
+          repository: 'risc0/risc0-foundry-template'
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
-          path: 'bonsai-foundry-template'
-          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
+          path: 'risc0-foundry-template'
+          ref: ${{ github.event.inputs.risc0-foundry-template-branch || 'dev' }}
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
         with:
@@ -117,14 +126,14 @@ jobs:
         working-directory: risc0
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
+          version: nightly-cafc2606a2187a42b236df4aa65f4e8cdfcea970
       # Apply local patch
       - name: Local patch on risc0-ethereum
         run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py  .
         working-directory:  ${{ env.RISC0_ETHEREUM_PATH }}
-      - name: Local patch on bonsai-foundry-template
+      - name: Local patch on risc0-foundry-template
         run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py  .
-        working-directory:  ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
+        working-directory:  ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
       # Run Bootstrap-groth16 to update test receipt for checking
       # the latest groth16 prover against the solidity verifier on risc0-ethereum
       - name: Bootstrap-groth16 test receipt
@@ -142,16 +151,16 @@ jobs:
       - name: forge test on risc0-ethereum
         run: forge test -vvv
         working-directory: ${{ env.RISC0_ETHEREUM_PATH }}/contracts
-      # Build and test bonsai-foundry-template
-      - name: build bonsai-foundry-template
+      # Build and test risc0-foundry-template
+      - name: build risc0-foundry-template
         run: cargo build
-        working-directory: ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
-      - name: build bonsai-foundry-template contracts
+        working-directory: ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
+      - name: build risc0-foundry-template contracts
         run: forge build
-        working-directory: ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
+        working-directory: ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
       - name: run foundry tests in dev mode
         env:
           RISC0_DEV_MODE: true
         run: forge test -vvv
-        working-directory: ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
+        working-directory: ${{ env.RISC0_FOUNDRY_TEMPLATE_PATH }}
       - run: sccache --show-stats

@@ -6,7 +6,6 @@
 .devcontainer/
 .DS_Store
 .idea/
-.vim/
 bazel-*
 ceremony/
 dist/
@@ -17,3 +16,4 @@ tmp/
 *.pb
 tools/smoke-test/Cargo.lock
 compile_commands.json
+.vercel

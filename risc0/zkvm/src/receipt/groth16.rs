@@ -57,6 +57,15 @@ impl<Claim> Groth16Receipt<Claim>
 where
     Claim: Digestible + Debug + Clone + Serialize,
 {
+    /// Create a [Groth16Receipt] from the given seal, claim, and verifier parameters digest.
+    pub fn new(seal: Vec<u8>, claim: MaybePruned<Claim>, verifier_parameters: Digest) -> Self {
+        Self {
+            seal,
+            claim,
+            verifier_parameters,
+        }
+    }
+
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
@@ -96,7 +105,7 @@ where
     }
 
     /// Prunes the claim, retaining its digest, and converts into a [Groth16Receipt] with an unknown
-    /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
+    /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
     pub fn into_unknown(self) -> Groth16Receipt<Unknown> {
         Groth16Receipt {
             claim: MaybePruned::Pruned(self.claim.digest::<sha::Impl>()),
@@ -158,7 +167,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("f7ca3f2cfe1cde247417d317852c696a0e4a42acaf51205e6af54a58fa6c64fe")
+            digest!("c9faac19ced5230976543ca0fa51dd224a325cca56b1e1c9512cdf3025d53bb9")
         );
     }
 }

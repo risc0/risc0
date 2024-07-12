@@ -1,23 +1,12 @@
 await import("./src/env.js");
+
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { nextConfigBase } from "@risc0/ui/config/next.config.base.js";
+import deepmerge from "deepmerge";
 import { latestVersion } from "./src/versions.js";
 
 /** @type {import("next").NextConfig} */
-let config = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  reactStrictMode: true,
-  transpilePackages: ["@risc0/ui"],
-  experimental: {
-    caseSensitiveRoutes: true,
-  },
-  images: {
-    dangerouslyAllowSVG: false,
-    contentDispositionType: "attachment",
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-  },
-
+let config = deepmerge(nextConfigBase, {
   // biome-ignore lint/suspicious/useAwait: needs to be async
   async redirects() {
     return [
@@ -33,7 +22,7 @@ let config = {
       },
     ];
   },
-};
+});
 
 if (process.env.ANALYZE === "true") {
   config = withBundleAnalyzer({

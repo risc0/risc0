@@ -36,7 +36,7 @@ The documentation on this site will teach you how to write software for the RISC
 
 ### [`zkvM Quick Start`]
 
-[`zkVM Quick Start`]: ./quickstart
+[`zkVM Quick Start`]: ./quickstart.md
 
 ## Building a zkVM Application
 
@@ -85,15 +85,15 @@ Read the [article](https://risczero.com/news/zeth-release).
 [cargo]: https://doc.rust-lang.org/cargo/index.html
 [imageID]: /terminology#image-id
 [Bonsai]: ../bonsai/
-[receipt]: developer-guide/receipts
+[receipt]: developer-guide/receipts.md
 [ELF binary]: /terminology#elf-binary
 [execution trace]: /terminology#execution-trace
 [executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[guest program]: developer-guide/guest-code-101
-[guest programs]: developer-guide/guest-code-101
+[guest program]: developer-guide/guest-code-101.md
+[guest programs]: developer-guide/guest-code-101.md
 [host]: /terminology#host-program
-[host program]: developer-guide/host-code-101
+[host program]: developer-guide/host-code-101.md
 [performance benchmarks]: ./benchmarks.md
 [prove]: /terminology#validity-proof
 [proofs]: /terminology#validity-proof
@@ -105,4 +105,4 @@ Read the [article](https://risczero.com/news/zeth-release).
 [zkVM Quick Start]: ./quickstart.md
 [zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.18/examples
 [session]: /terminology#session
-[Host Code 101]: developer-guide/host-code-101
+[Host Code 101]: developer-guide/host-code-101.md

@@ -17,7 +17,6 @@
 #include "context.h"
 #include "fp.h"
 #include "fpext.h"
-#include <algorithm>
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -36,6 +35,7 @@
 #pragma GCC diagnostic pop
 #endif
 
+#include <array>
 #include <cstdint>
 
 using namespace risc0;

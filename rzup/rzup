@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+VERSION=0.1.1
+
 VERBOSE_MODE=1
 
 print_banner() {
+  echo "rzup v$VERSION"
   cat <<"EOF"
 
     ██████  █▀▀▀██
@@ -67,7 +70,11 @@ check_rust_installed() {
 }
 
 install_cargo_binstall() {
-  execute_with_feedback "cargo install cargo-binstall --quiet" "Installing cargo-binstall"
+  if ! command -v cargo-binstall &>/dev/null; then
+    execute_with_feedback "cargo install cargo-binstall --version '=1.6.9' --locked --quiet" "Installing cargo-binstall"
+  else
+    echo "cargo-binstall already installed, skipping step"
+  fi
 }
 
 binstall_cargo_risczero() {

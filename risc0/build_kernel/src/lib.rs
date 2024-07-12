@@ -271,11 +271,23 @@ impl KernelBuild {
     }
 
     fn compile_metal(&mut self, output: &str) {
+        let target = env::var("TARGET").unwrap();
+        let sdk_name = if target.ends_with("ios") {
+            "iphoneos"
+        } else if target.ends_with("ios-sim") {
+            "iphonesimulator"
+        } else if target.ends_with("darwin") {
+            "macosx"
+        } else {
+            panic!("unsupported target: {target}")
+        };
+
         self.cached_compile(
             output,
             "metallib",
             METAL_INCS,
             &[],
+            &[sdk_name.to_string()],
             |out_dir, out_path, sys_inc_dir, _flags| {
                 let files: Vec<_> = self.files.iter().map(|x| x.as_path()).collect();
 
@@ -287,7 +299,7 @@ impl KernelBuild {
                             fs::create_dir_all(parent).unwrap();
                         }
                         let mut cmd = Command::new("xcrun");
-                        cmd.args(["--sdk", "macosx"]);
+                        cmd.args(["--sdk", sdk_name]);
                         cmd.arg("metal");
                         cmd.arg("-o").arg(&air_path);
                         cmd.arg("-c").arg(src);
@@ -306,7 +318,7 @@ impl KernelBuild {
                     .collect();
 
                 let result = Command::new("xcrun")
-                    .args(["--sdk", "macosx"])
+                    .args(["--sdk", sdk_name])
                     .arg("metallib")
                     .args(air_paths)
                     .arg("-o")
@@ -326,6 +338,7 @@ impl KernelBuild {
         extension: &str,
         assets: &[(&str, &str)],
         flags: &[String],
+        tags: &[String],
         inner: F,
     ) {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
@@ -341,6 +354,9 @@ impl KernelBuild {
         let mut hasher = Hasher::new();
         for flag in flags {
             hasher.add_flag(flag);
+        }
+        for tag in tags {
+            hasher.add_flag(tag);
         }
         for src in self.files.iter() {
             hasher.add_file(src);

@@ -1,22 +1,25 @@
 [package]
 name = "bonsai-sdk"
 description = "Bonsai Software Development Kit"
-version = "0.8.0-rc.2"
+version = "0.9.0-alpha.2"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+duplicate = "1.0"
+maybe-async = "0.2"
 reqwest = { version = "0.12", default-features = false, features = [
   "blocking",
   "json",
   "rustls-tls",
+  "stream",
 ] }
 risc0-groth16 = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
-tokio = { version = "1", features = ["full", "sync"], optional = true }
+tokio = { version = "1", features = ["fs"], optional = true }
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -26,10 +29,15 @@ hex = "0.4"
 httpmock = "0.7"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 temp-env = "0.3"
+tokio = { version = "1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-uuid = { version = "1.8", features = ["v4"] }
+uuid = { version = "1.9", features = ["v4"] }
 
 [features]
 default = ["std"]
 std = ["risc0-groth16/std"]
-async = ["dep:tokio"]
+non_blocking = ["dep:tokio"]
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true

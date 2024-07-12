@@ -60,7 +60,7 @@ pub struct ValidationResults {
 
     /// Holds a sample of the guest build stdout
     ///
-    /// Holds the first 200 lines of of the guest build, if the build step fails
+    /// Holds the first 200 lines of the guest build, if the build step fails
     #[serde(skip_serializing_if = "Option::is_none")]
     pub build_errors: Option<String>,
 }
@@ -253,7 +253,6 @@ impl Validator {
         cmd.arg("risczero");
         cmd.arg("new");
         cmd.arg(project_name);
-        cmd.arg("--no-git");
         cmd.arg("--dest");
         cmd.arg(&self.proj_out_dir);
         cmd.arg("--guest-name=method_name");
@@ -274,16 +273,6 @@ impl Validator {
                 cmd.arg(self.repo().value());
             }
             Repo::Path(_) => {
-                let template_path = Path::new(self.repo().value())
-                    .join("templates")
-                    .join("rust-starter");
-                if !template_path.exists() {
-                    bail!("Failed to find {} on disk", template_path.to_string_lossy());
-                }
-                cmd.arg("--template");
-                cmd.arg(template_path);
-                cmd.arg("--templ-subdir");
-                cmd.arg("");
                 cmd.arg("--path");
                 cmd.arg(self.repo().value());
             }

@@ -168,8 +168,8 @@ kernel void poseidon2_rows(const device Fp* ROUND_CONSTANTS,
                            const device Fp* M_INT_DIAG,
                            device Fp* out,
                            const device Fp* matrix,
-                           device uint32_t& count,
-                           device uint32_t& col_size,
+                           const device uint32_t& count,
+                           const device uint32_t& col_size,
                            uint gid [[thread_position_in_grid]]) {
   Fp cells[CELLS];
   uint used = 0;

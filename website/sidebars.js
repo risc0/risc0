@@ -30,13 +30,18 @@ export default {
       items: [
         {
           type: "doc",
-          label: "STARK by hand",
-          id: "proof-system/stark-by-hand",
+          label: "Sequence Diagram",
+          id: "proof-system/proof-system-sequence-diagram",
         },
         {
           type: "doc",
-          label: "Sequence Diagram",
-          id: "proof-system/proof-system-sequence-diagram",
+          label: "Execution Traces",
+          id: "proof-system/what-is-a-trace",
+        },
+        {
+          type: "doc",
+          label: "STARK by Hand",
+          id: "proof-system/stark-by-hand",
         },
         {
           type: "link",

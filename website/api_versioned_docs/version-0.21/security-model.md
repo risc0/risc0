@@ -99,9 +99,9 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-[lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
-[join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
-[resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
+[lift]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.ApiClient.html#method.lift
+[join]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.ApiClient.html#method.join
+[resolve]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.ApiClient.html#method.resolve
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [execution trace]: /terminology#execution-trace
@@ -114,4 +114,4 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [security calculator]: https://github.com/risc0/risc0/pull/1661
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
-[Verifier Contract]: ./blockchain-integration/contracts/verifier
+[Verifier Contract]: ./blockchain-integration/contracts/verifier.md

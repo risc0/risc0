@@ -167,7 +167,7 @@ unsafe extern "C" fn __start() -> ! {
 static STACK_TOP: u32 = risc0_zkvm_platform::memory::STACK_TOP;
 
 // Entry point; sets up global pointer and stack pointer and passes
-// to zkvm_start.  TODO: when asm_const is stablized, use that here
+// to zkvm_start.  TODO: when asm_const is stabilized, use that here
 // instead of defining a symbol and dereferencing it.
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(

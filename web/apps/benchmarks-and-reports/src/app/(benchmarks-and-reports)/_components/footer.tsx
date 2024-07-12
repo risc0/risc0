@@ -2,19 +2,34 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <div className="space-x-2 pt-2 pb-6 text-center text-muted-foreground text-xs">
+    <div className="space-x-2 py-6 text-center text-muted-foreground text-xs">
       <span>
         Built by{" "}
-        <Link className="link text-muted-foreground" href="https://www.risczero.com" target="_blank">
+        <Link
+          rel="noopener noreferrer"
+          className="link text-muted-foreground"
+          href="https://www.risczero.com"
+          target="_blank"
+        >
           Risc Zero
         </Link>
       </span>
       <span>•</span>
-      <Link target="_blank" className="link text-muted-foreground" href="https://dev.risczero.com/api/">
+      <Link
+        rel="noopener noreferrer"
+        target="_blank"
+        className="link text-muted-foreground"
+        href="https://dev.risczero.com/api/"
+      >
         Docs
       </Link>
       <span>•</span>
-      <Link target="_blank" className="link text-muted-foreground" href="https://github.com/risc0/risc0/">
+      <Link
+        rel="noopener noreferrer"
+        target="_blank"
+        className="link text-muted-foreground"
+        href="https://github.com/risc0/risc0/"
+      >
         GitHub
       </Link>
     </div>

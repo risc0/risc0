@@ -160,6 +160,7 @@ fn system_split() {
     let hal = CpuHal::new(suite.clone());
 
     let segments = result.segments;
+    assert_eq!(segments.len(), 2);
     for segment in segments {
         let seal = prover.prove_segment(&segment).unwrap();
         let checker = ControlCheck::new(&hal, segment.po2);

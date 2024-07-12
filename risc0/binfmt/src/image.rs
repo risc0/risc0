@@ -36,7 +36,7 @@ use crate::{elf::Program, Digestible, SystemState};
 /// proper, this includes some metadata about the page table.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MemoryImage {
-    /// Sparse memory memory image as a map from page index to page.
+    /// Sparse memory image as a map from page index to page.
     pub pages: BTreeMap<u32, Vec<u8>>,
 
     /// Metadata about the structure of the page table

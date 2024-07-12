@@ -421,7 +421,7 @@ where
     }
 
     /// Prunes the claim, retaining its digest, and converts into a [FakeReceipt] with an unknown
-    /// claim type. Can be used to get receipts of a uniform type across heterogenous claims.
+    /// claim type. Can be used to get receipts of a uniform type across heterogeneous claims.
     pub fn into_unknown(self) -> FakeReceipt<Unknown> {
         FakeReceipt {
             claim: MaybePruned::Pruned(self.claim.digest()),
@@ -553,7 +553,7 @@ impl From<ReceiptClaim> for AssumptionReceipt {
     }
 }
 
-/// An enumeration of receipt types simmilar to [InnerReceipt], but for use in [AssumptionReceipt].
+/// An enumeration of receipt types similar to [InnerReceipt], but for use in [AssumptionReceipt].
 /// Instead of proving only RISC-V execution with [ReceiptClaim], this type can prove any claim
 /// implemented by one of its inner types.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -676,7 +676,7 @@ impl VerifierContext {
         }
     }
 
-    /// Return the mapping of hash suites used in the defaul [VerifierContext].
+    /// Return the mapping of hash suites used in the default [VerifierContext].
     pub fn default_hash_suites() -> BTreeMap<String, HashSuite<BabyBear>> {
         BTreeMap::from([
             ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),

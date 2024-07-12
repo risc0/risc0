@@ -74,6 +74,6 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [verify]: /terminology#verify
 [Verifying]: /terminology#verify
 [examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
-[these docs]: https://github.com/risc0/website
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
 [Discord]: https://discord.gg/risczero
-[zkVM Quick Start]: ../quickstart
+[zkVM Quick Start]: ../quickstart.md

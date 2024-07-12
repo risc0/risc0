@@ -77,6 +77,11 @@ export default {
         },
         {
           type: "doc",
+          label: "Proof Composition",
+          id: "zkvm/composition",
+        },
+        {
+          type: "doc",
           label: "Rust Resources",
           id: "zkvm/rust-resources",
         },
@@ -173,6 +178,11 @@ export default {
       label: "Reference",
       collapsed: true,
       items: [
+        {
+          type: "doc",
+          label: "Recursion",
+          id: "recursion",
+        },
         {
           type: "doc",
           label: "Security Model",

@@ -2,7 +2,7 @@
 
 Welcome to the zkVM Quick Start page! Here are the steps to create your first proof:
 
-1. Install the `cargo-risczero` toolchain.
+1. Install the RISC Zero toolchain with `rzup`.
 2. Create a new project using the `cargo-risczero` tool.
 3. Familiarize yourself with the project's structure.
 4. Run your project in dev-mode.
@@ -18,16 +18,21 @@ zkVM. A proof of execution is a **[receipt]**; it contains a public part - a
 
 ## 1. Install the RISC Zero Toolchain
 
-First, make sure you [install Rust], then install the RISC Zero toolchain by
-running the following:
+Install `rzup` by running the following command:
 
 ```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
+curl -L https://risczero.com/install | bash
 ```
 
-> Note: To install a specific version instead of using the latest stable version, use `cargo binstall cargo-risczero@<version>`, where the version is a [release tag](https://github.com/risc0/risc0/releases).
+Run `rzup` to install the RISC Zero toolchain and `cargo-risczero`.
+
+```bash
+rzup
+```
+
+> Note: To install a specific version instead of using the latest stable
+> version, use `rzup --version <version>`, where the `<version>` is a [release
+> tag](https://github.com/risc0/risc0/releases).
 >
 > The version used must match the `risc0-zkvm` version from your guest and host.
 
@@ -121,6 +126,6 @@ proportional to the number of cycles and segments used.
 [prover]: /terminology#prover
 [receipt]: /terminology#receipt
 [seal]: /terminology#seal
-[tutorial-step-2]: tutorials/hello-world#step-2-host-share-private-data-as-input-with-the-guest
-[tutorial-step-3]: tutorials/hello-world#step-3-guest-read-input-and-commit-output
-[tutorial-step-4]: tutorials/hello-world#step-4-host-generate-a-receipt-and-read-its-journal-contents
+[tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
+[tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output
+[tutorial-step-4]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents

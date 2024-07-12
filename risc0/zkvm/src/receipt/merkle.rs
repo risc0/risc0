@@ -48,8 +48,7 @@ pub struct MerkleGroup {
 /// An inclusion proof for the [MerkleGroup]. Used to verify inclusion of a given recursion program
 /// in the committed set.
 #[non_exhaustive]
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(test, derive(PartialEq))]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MerkleProof {
     /// Index of the leaf for which inclusion is being proven.
     pub index: u32,
@@ -61,7 +60,7 @@ pub struct MerkleProof {
 #[cfg(feature = "prove")]
 impl MerkleGroup {
     /// Create a new [MerkleGroup] from the given leaves.
-    /// Will fail is too many leaves are given for the default depth.
+    /// Will fail if too many leaves are given for the default depth.
     pub fn new(leaves: Vec<Digest>) -> Result<Self> {
         let max_len = 1 << ALLOWED_CODE_MERKLE_DEPTH;
         ensure!(
@@ -167,6 +166,7 @@ impl MerkleProof {
 }
 
 #[cfg(test)]
+#[cfg(feature = "prove")]
 mod tests {
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 

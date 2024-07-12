@@ -1,4 +1,4 @@
-import { isNil } from "lodash-es";
+import { isNil } from "./is-nil";
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
 

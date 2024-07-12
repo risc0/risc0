@@ -17,7 +17,7 @@ fn main() {
     // `let env = ExecutorEnv::builder().build().unwrap();`
     // However, this `env` does not have any inputs.
     //
-    // To add add guest input to the executor environment, use
+    // To add guest input to the executor environment, use
     // ExecutorEnvBuilder::write().
     // To access this method, you'll need to use ExecutorEnv::builder(), which
     // creates an ExecutorEnvBuilder. When you're done adding input, call

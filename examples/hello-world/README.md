@@ -24,8 +24,8 @@ factors of 391.
 ## Use Cases
 
 Writing an application for the RISC Zero [zkVM] is the easiest way for software
-developers to produce zero-knowledge proofs. Whether you're [building for
-blockchains][bonsai-tweet] or not, RISC Zero offers the most flexible and mature
+developers to produce zero-knowledge proofs. Whether you're building for
+blockchains or not, RISC Zero offers the most flexible and mature
 ecosystem for developing applications that involve ZKPs.
 
 You can run the zkVM locally and your secrets will never leave your own machine,
@@ -56,12 +56,11 @@ the factors — without revealing any further information.
 
 ## Tutorial: Building your first zkVM Application
 
-For a step-by-step guide to building first zkVM application, we recommend [this
+For a step-by-step guide to building your first zkVM application, we recommend [this
 tutorial][tutorial]. For more materials, check out the [developer docs].
 
 [`methods/guest/src/main.rs`]: ./methods/guest/src/main.rs
 [`src/main.rs`]: ./src/main.rs
-[bonsai-tweet]: https://twitter.com/RiscZero/status/1677316664772132864
 [Bonsai]: https://dev.bonsai.xyz
 [developer docs]: https://dev.risczero.com/zkvm
 [executes]: https://dev.risczero.com/terminology#execute

@@ -1,29 +1,41 @@
 # cargo-risczero
 
-Cargo extension to help create, manage, and test [RISC Zero][risc-zero] projects. The default template generated from the `cargo risczero new` command supports both local and remote proving. Refer to the README in [the rust-starter template][rust-starter] for more information.
+Cargo extension to help create, manage, and test [RISC Zero][risc-zero]
+projects. The default template generated from the `cargo risczero new` command
+supports both local and remote proving. Refer to the README in [the rust-starter
+template][rust-starter] for more information.
 
 ## Installation
 
-To install this Cargo subcommand, first you'll want to [install Rust][install-rust] and then you'll execute:
+To install this Cargo subcommand, first you'll want to [install
+Rust][install-rust] and then you'll execute:
 
 ```bash
 cargo install cargo-binstall
 cargo binstall cargo-risczero
+```
 
-## Installing from local source. Note: this can be very slow.
+To install from local source, use:
+
+```bash
 cargo install --path risc0/cargo-risczero
 ```
 
 After that you can verify it works via:
+
 ```bash
 cargo risczero --version
 ```
 ### Docker
-In order to use the `build` command, you will need `docker` available in your PATH. For developer machines, this is simple with [Docker Desktop.](https://docs.docker.com/desktop/)
+
+In order to use the `build` command, you will need `docker` available in your
+PATH. For developer machines, this is simple with [Docker
+Desktop.](https://docs.docker.com/desktop/)
 
 ## install
 
-The `install` command installs the latest RISC Zero toolchain. This toolchain is needed to compile guest programs into ELF binaries that the zkVM can execute.
+The `install` command installs the latest RISC Zero toolchain. This toolchain is
+needed to compile guest programs into ELF binaries that the zkVM can execute.
 
 ```bash
 cargo risczero install
@@ -38,14 +50,16 @@ rustup toolchain list --verbose | grep risc0
 Note that the following pre-built host targets are available:
 
 * `aarch64-apple-darwin`
-* `x86_64-apple-darwin`
 * `x86_64-unknown-linux-gnu`
 
-If you'd like to install the toolchain on a host not listed above, you can use the `build-toolchain` command to build the toolchain locally.
+If you'd like to install the toolchain on a host not listed above, you can use
+the `build-toolchain` command to build the toolchain locally.
 
 ## new
 
-The `new` command will create a new project from an existing template. It defaults to the [rust-starter template][rust-starter] but can be used with other templates locally or hosted on github.
+The `new` command will create a new project from an existing template. It
+defaults to the [rust-starter template][rust-starter] but can be used with other
+templates locally or hosted on github.
 
 ### Examples
 
@@ -65,19 +79,26 @@ cargo risczero new my_project --template https://github.com/risc0/risc0-rust-sta
 
 ## build-toolchain
 
-Use the `build-toolchain` command to build the toolchain locally for your host. Warning: this may take a long time. The resulting toolchain will be automatically installed via `rustup toolchain link`.
+Use the `build-toolchain` command to build the toolchain locally for your host.
+Warning: this may take a long time. The resulting toolchain will be
+automatically installed via `rustup toolchain link`.
 
 [risc-zero]: https://risczero.com
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[rust-starter]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
+[rust-starter]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter
 
 ## build
 
-Use the `build` command to build guest code for the zkVM target `riscv32im-risc0-zkvm-elf` deterministically.
+Use the `build` command to build guest code for the zkVM target
+`riscv32im-risc0-zkvm-elf` deterministically.
 
 The compiled ELF is saved in: `./target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/`
 
-With this containerized build process, we ensure that all builds of your guest code, regardless of the machine or local environment, will produce the same ImageID. The ImageID, and its importance to [security,](https://dev.risczero.com/faq#security) is explained in more detail in our [developer FAQ.](https://dev.risczero.com/faq#zkvm-application-design)
+With this containerized build process, we ensure that all builds of your guest
+code, regardless of the machine or local environment, will produce the same
+ImageID. The ImageID, and its importance to
+[security,](https://dev.risczero.com/faq#security) is explained in more detail
+in our [developer FAQ.](https://dev.risczero.com/faq#zkvm-application-design)
 
 Note: The build command requires the docker CLI installed and in your PATH.
 
