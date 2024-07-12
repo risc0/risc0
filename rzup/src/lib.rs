@@ -22,6 +22,7 @@ pub mod utils;
 use std::fs;
 
 use anyhow::{anyhow, Context, Result};
+use std::process::Command;
 
 pub struct Rzup;
 
@@ -30,7 +31,24 @@ impl Rzup {
         env!("CARGO_PKG_VERSION")
     }
     pub async fn update() -> Result<()> {
-        // TODO
+        // Run the curl command to download and execute the rzup-init.sh script
+        // NOTE: This requires curl - we should look into fallbacks
+        let output = Command::new("sh")
+            .arg("-c")
+            .arg("curl -L https://risczero.com/install | bash")
+            .output()
+            .expect("Failed to execute update command");
+
+        // Check if the command was successful
+        if output.status.success() {
+            info_msg!("rzup has been updated successfully.");
+        } else {
+            info_msg!("Failed to update rzup.");
+            if let Some(code) = output.status.code() {
+                eprintln!("Exit code: {}", code);
+            }
+        }
+
         Ok(())
     }
 
