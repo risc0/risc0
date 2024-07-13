@@ -95,6 +95,7 @@ pub enum MultiTestSpec {
     TooManySha,
     AlignedAlloc,
     AllocZeroed,
+    SysFork,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

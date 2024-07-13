@@ -95,7 +95,7 @@ impl<'a> ExecutorImpl<'a> {
         image: MemoryImage,
         profiler: Option<Rc<RefCell<Profiler>>>,
     ) -> Result<Self> {
-        let syscall_table = SyscallTable::new(&env);
+        let syscall_table = SyscallTable::from_env(&env);
         Ok(Self {
             env,
             image,
@@ -234,6 +234,10 @@ struct ContextAdapter<'a> {
 }
 
 impl<'a> SyscallContext for ContextAdapter<'a> {
+    fn get_pc(&self) -> u32 {
+        self.ctx.get_pc()
+    }
+
     fn get_cycle(&self) -> u64 {
         self.ctx.get_cycle()
     }
@@ -244,6 +248,18 @@ impl<'a> SyscallContext for ContextAdapter<'a> {
 
     fn load_u8(&mut self, addr: u32) -> Result<u8> {
         self.ctx.peek_u8(ByteAddr(addr))
+    }
+
+    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
+        self.ctx.peek_region(ByteAddr(addr), size)
+    }
+
+    fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        self.ctx.peek_page(page_idx)
+    }
+
+    fn load_u32(&mut self, addr: u32) -> Result<u32> {
+        self.ctx.peek_u32(ByteAddr(addr))
     }
 }
 

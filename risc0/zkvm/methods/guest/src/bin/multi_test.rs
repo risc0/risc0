@@ -23,7 +23,7 @@ use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
 };
-use core::arch::asm;
+use core::{arch::asm, ptr};
 
 use getrandom::getrandom;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
@@ -36,7 +36,9 @@ use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TE
 use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
-    syscall::{bigint, sys_bigint, sys_log, sys_read, sys_read_words, sys_write},
+    syscall::{
+        bigint, sys_bigint, sys_fork, sys_halt, sys_log, sys_read, sys_read_words, sys_write,
+    },
     PAGE_SIZE,
 };
 
@@ -332,15 +334,21 @@ fn main() {
         MultiTestSpec::AllocZeroed => {
             // Bump allocator was modified to not manually zero memory in the zkVM. Simple test to
             // ensure that zkVM memory is zeroed in initialization.
-            let array: &[u32; 512] = unsafe {
-                // Allocate some arbitrary amount of bytes
-                let layout = Layout::new::<[u32; 512]>();
-                let ptr = alloc_zeroed(layout);
 
-                &*(ptr as *const [u32; 512])
-            };
+            let layout = Layout::new::<[u32; 512]>();
+            // Allocate some arbitrary amount of bytes
+            let array: &[u32; 512] = unsafe { &*(alloc_zeroed(layout) as *const [u32; 512]) };
             for value in array {
                 assert_eq!(*value, 0);
+            }
+        }
+        MultiTestSpec::SysFork => {
+            let pid = unsafe { sys_fork() };
+            if pid == 0 {
+                env::log("child");
+                sys_halt(0, ptr::null());
+            } else {
+                env::log("parent");
             }
         }
     }

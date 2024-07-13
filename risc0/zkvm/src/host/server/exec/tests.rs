@@ -1132,6 +1132,11 @@ fn out_of_bounds_ecall() {
     run_test(MultiTestSpec::OutOfBoundsEcall);
 }
 
+#[test]
+fn sys_fork() {
+    run_test(MultiTestSpec::SysFork);
+}
+
 #[cfg(feature = "docker")]
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};

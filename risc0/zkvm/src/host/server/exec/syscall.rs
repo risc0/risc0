@@ -22,8 +22,8 @@ use risc0_zkvm_platform::{
     fileno,
     syscall::{
         nr::{
-            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
-            SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_LOG, SYS_PANIC,
+            SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName,
@@ -42,6 +42,8 @@ use crate::{
     Assumption,
 };
 
+use super::fork::SysFork;
+
 /// A host-side implementation of a system call.
 pub trait Syscall {
     /// Invokes the system call.
@@ -55,6 +57,9 @@ pub trait Syscall {
 
 /// Access to memory and machine state for syscalls.
 pub trait SyscallContext {
+    /// Returns the current program counter.
+    fn get_pc(&self) -> u32;
+
     /// Returns the current cycle being executed.
     fn get_cycle(&self) -> u64;
 
@@ -64,14 +69,14 @@ pub trait SyscallContext {
     /// Loads an individual byte from memory.
     fn load_u8(&mut self, addr: u32) -> Result<u8>;
 
+    /// Loads an individual word from memory.
+    fn load_u32(&mut self, addr: u32) -> Result<u32>;
+
     /// Loads bytes from the given region of memory.
-    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
-        let mut region = Vec::new();
-        for addr in addr..addr + size {
-            region.push(self.load_u8(addr)?);
-        }
-        Ok(region)
-    }
+    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>>;
+
+    /// Load a page from memory at the specified page index.
+    fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
 }
 
 #[derive(Clone)]
@@ -80,7 +85,13 @@ pub(crate) struct SyscallTable<'a> {
 }
 
 impl<'a> SyscallTable<'a> {
-    pub fn new(env: &ExecutorEnv<'a>) -> Self {
+    pub fn new() -> Self {
+        Self {
+            inner: HashMap::new(),
+        }
+    }
+
+    pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
         let mut this = Self {
             inner: HashMap::new(),
         };
@@ -88,16 +99,17 @@ impl<'a> SyscallTable<'a> {
         let sys_verify = SysVerify::new(env.assumptions.clone());
 
         let posix_io = env.posix_io.clone();
-        this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
+        this.with_syscall(SYS_ARGC, Args(env.args.clone()))
+            .with_syscall(SYS_ARGV, Args(env.args.clone()))
+            .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
+            .with_syscall(SYS_FORK, SysFork)
+            .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_LOG, posix_io.clone())
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_RANDOM, SysRandom)
-            .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_READ, posix_io.clone())
-            .with_syscall(SYS_WRITE, posix_io)
             .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
-            .with_syscall(SYS_ARGC, Args(env.args.clone()))
-            .with_syscall(SYS_ARGV, Args(env.args.clone()));
+            .with_syscall(SYS_WRITE, posix_io);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
             this.inner

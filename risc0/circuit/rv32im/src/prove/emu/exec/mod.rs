@@ -80,16 +80,16 @@ pub trait SyscallContext {
     fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8>;
 
     /// Loads bytes from the given region of memory.
-    fn peek_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
-        let mut region = Vec::new();
-        for i in 0..size {
-            region.push(self.peek_u8(addr + i)?);
-        }
-        Ok(region)
-    }
+    fn peek_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>>;
+
+    /// Load a page from memory at the specified page index.
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
 
     /// Returns the current cycle count.
     fn get_cycle(&self) -> u64;
+
+    /// Returns the current program counter.
+    fn get_pc(&self) -> u32;
 }
 
 pub struct ExecutorResult {
@@ -733,6 +733,26 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
         let bytes = word.to_le_bytes();
         let byte_offset = addr.0 as usize % WORD_SIZE;
         Ok(bytes[byte_offset])
+    }
+
+    fn peek_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        let mut region = Vec::new();
+        for i in 0..size {
+            region.push(self.peek_u8(addr + i)?);
+        }
+        Ok(region)
+    }
+
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        let addr = self.pager.image.info.get_page_addr(page_idx);
+        if !is_guest_memory(addr) {
+            bail!("{page_idx:?} is an invalid guest page_idx");
+        }
+        Ok(self.pager.peek_page(page_idx))
+    }
+
+    fn get_pc(&self) -> u32 {
+        EmuContext::get_pc(self).0
     }
 }
 

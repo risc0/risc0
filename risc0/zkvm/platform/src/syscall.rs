@@ -130,6 +130,7 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
@@ -784,4 +785,11 @@ pub unsafe extern "C" fn sys_verify_integrity(
 #[cfg(not(feature = "export-syscalls"))]
 extern "C" {
     pub fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
+}
+
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_fork() -> u32 {
+    let Return(a0, _) = syscall_0(nr::SYS_FORK, null_mut(), 0);
+    a0
 }
