@@ -7,7 +7,7 @@ This page provides an outline of the key practices that we utilize to harden our
 The key mechanisms that drive our process evolution are:
 * External critique from customers, partners, and the security community
 * Escape analysis of production defects and postmortem analysis of security incidents
-* Identifying new potential activities based on industry frameworks including [NIST SSDF](https://csrc.nist.gov/Projects/ssdf), [ISO 27002:2022](https://www.iso.org/standard/75652.html), [BSIMM 14](https://www.synopsys.com/software-integrity/software-security-services/bsimm-maturity-model.html), [the ReKT test](https://www.risczero.com/blog/risc-zero-take-the-rekt-test), and [OWASP SAAAM](https://owasp.org/www-project-samm/).
+* Identifying new potential activities based on industry frameworks including [NIST SSDF], [ISO 27002:2022], [BSIMM 14], [the ReKT test], and [OWASP SAAAM].
 * Use of a maturity framework (known as FACTORS) to self-assess process maturity in the following areas:
     * F: Friction (pain felt across stakeholders)
     * A: Automation (is there an opportunity to automate this process further)
