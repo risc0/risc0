@@ -64,4 +64,4 @@ The verification phase is where the security of the product is tested. This phas
 This phase validates if the objectives of the security plan have been met. This minimally includes verifying that:
 * Findings from phase 4 have been addressed.
 * Any necessary changes to the formal threat model have been made.
-* Operational security processes are in place (e.g. IR and Bug bounty).
+* Operational security processes are in place (e.g. IR and [Bug bounty]).
