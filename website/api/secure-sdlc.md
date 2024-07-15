@@ -8,7 +8,7 @@ The key mechanisms that drive our process evolution are:
 * External critique from customers, partners, and the security community
 * Escape analysis of production defects and postmortem analysis of security incidents
 * Identifying new potential activities based on industry frameworks including [NIST SSDF], [ISO 27002:2022], [BSIMM 14], [the ReKT test], and [OWASP SAAAM].
-* Use of a maturity framework (known as [FACTORS]) to self-assess process maturity in the following areas:
+* Use of a maturity framework (known as FACTORS) to self-assess process maturity in the following areas:
     * F: Friction (pain felt across stakeholders)
     * A: Automation (is there an opportunity to automate this process further)
     * C: Coverage (both breadth and depth)
