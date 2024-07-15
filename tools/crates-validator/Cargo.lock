@@ -322,9 +322,9 @@ dependencies = [
 
 [[package]]
 name = "db-dump"
-version = "0.7.0"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08ce908474957c3f12cd3cab5e6d87c2435b52930c9806f1ade8a2d7806cb974"
+checksum = "ab3b2733a3e32e7ad9fcc3a5697cb4769fb9331e705567623c1c57e93cb398e9"
 dependencies = [
  "chrono",
  "csv",
