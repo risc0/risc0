@@ -54,7 +54,7 @@ Passing proofs through the Recursion Prover resolves this warning: recursion pro
 
 :::
 
-# Cryptographic Security
+## Cryptographic Security
 
 In analyzing the cryptographic security of our system, we consider two primary questions:
 

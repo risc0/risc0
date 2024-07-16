@@ -72,9 +72,7 @@ The Bonsai ETH Relay connects your Ethereum dApps to Bonsai. Smart contract deve
 
 We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort. To learn more, read our [litepaper].
 
-[waitlist]: https://bonsai.xyz/apply
 [litepaper]: /litepaper
-[zkVM]: ../zkvm/
 [Request access here]: https://bonsai.xyz/apply
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk

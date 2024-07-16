@@ -121,7 +121,6 @@ proportional to the number of cycles and segments used.
 [guest]: /terminology#guest-program
 [hello-world]: ./tutorials/hello-world.md
 [host]: /terminology#host-program
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [journal]: /terminology#journal
 [prover]: /terminology#prover
 [receipt]: /terminology#receipt

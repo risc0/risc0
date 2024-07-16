@@ -32,10 +32,8 @@ should be sufficient for building your first application:
 
 - **Reading inputs** <br/>
   [`env::read`], [`env::read_slice`], and [`env::stdin`]
-
 - **Writing private outputs to [host]**<br/>
   [`env::write`], [`env::write_slice`], [`env::stdout`], [`env::stderr`]
-
 - **Committing public outputs to [journal]**<br/>
   [`env::commit`], [`env::commit_slice`]
 
@@ -47,7 +45,6 @@ list, but include some highlights here:
 
 - **Count Cycles** <br/>
   [`env::cycle_count`]
-
 - **Print a debug message**<br/>
   [`env::log`]
 
@@ -62,11 +59,9 @@ In our [template] and [examples], there's a bit of boilerplate code before
 - `#![no_std]` <br/>
   The guest code should be as lightweight as possible for performance reasons.
   So, since we aren't using `std`, we exclude it.
-
 - `#![no_main]` <br/>
   The guest code is never launched as a standalone Rust executable, so we
   specify `#![no_main]`.
-
 - `risc0_zkvm_guest::entry!(main);` <br/>
   We must make the guest code available for the host to launch, and to do that
   we must specify which function to call when the host starts executing this
