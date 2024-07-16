@@ -6,11 +6,13 @@
   "scripts": {
     "build": "docusaurus build",
     "check-link-versions": "python ./link-version-check.py",
+    "check-markdown": "remark . --quiet --frail",
     "clear": "docusaurus clear",
     "deploy": "docusaurus deploy",
     "docusaurus": "docusaurus",
     "fmt": "prettier . --write",
-    "lint": "prettier . --check && python ./link-version-check.py",
+    "fmt-markdown": "remark . --output",
+    "lint": "prettier . --check && python ./link-version-check.py && remark . --quiet --frail",
     "serve": "docusaurus serve",
     "start": "docusaurus start",
     "swizzle": "docusaurus swizzle",
@@ -29,6 +31,35 @@
       "last 1 safari version"
     ]
   },
+  "remarkConfig": {
+    "settings": {
+      "bullet": "-",
+      "emphasis": "_",
+      "rule": "-",
+      "resourceLink": true,
+      "tightDefinitions": true
+    },
+    "plugins": [
+      "remark-preset-lint-consistent",
+      "remark-preset-lint-recommended",
+      "remark-preset-lint-markdown-style-guide",
+      "remark-frontmatter",
+      "remark-math",
+      ["remark-lint-no-emphasis-as-heading", false],
+      ["remark-lint-heading-style", false],
+      ["remark-lint-no-shortcut-reference-link", false],
+      ["remark-lint-no-undefined-references", false],
+      ["remark-lint-maximum-line-length", false],
+      ["remark-lint-definition-case", false],
+      ["remark-lint-heading-increment", false],
+      ["remark-lint-list-item-spacing", false],
+      ["remark-lint-no-heading-punctuation", false],
+      ["remark-lint-ordered-list-marker-value", false],
+      ["remark-lint-unordered-list-marker-style", false],
+      ["remark-lint-maximum-heading-length", false],
+      ["remark-lint-emphasis-marker", "_"]
+    ]
+  },
   "dependencies": {
     "@docusaurus/core": "3.4.0",
     "@docusaurus/plugin-client-redirects": "3.4.0",
@@ -40,14 +71,19 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "rehype-katex": "7.0.0",
-    "remark-math": "6.0.0",
     "unist-util-visit": "5.0.0"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.4.0",
     "@docusaurus/types": "3.4.0",
     "prettier": "3.3.3",
+    "remark-cli": "12.0.1",
+    "remark-math": "6.0.0",
+    "remark-preset-lint-consistent": "6.0.0",
+    "remark-preset-lint-markdown-style-guide": "6.0.0",
+    "remark-preset-lint-recommended": "7.0.0",
+    "remark-toc": "9.0.0",
     "swc-loader": "0.2.6"
   },
-  "packageManager": "bun@1.1.18"
+  "packageManager": "bun@1.1.20"
 }

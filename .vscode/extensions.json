@@ -9,6 +9,7 @@
     "serayuzgur.crates",
     "stkb.rewrap",
     "tamasfe.even-better-toml",
-    "valentjn.vscode-ltex"
+    "valentjn.vscode-ltex",
+    "unifiedjs.vscode-remark"
   ]
 }

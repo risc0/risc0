@@ -8,6 +8,10 @@
   "emmet.includeLanguages": {
     "rust": "html"
   },
+  "[markdown]": {
+    "editor.defaultFormatter": "unifiedjs.vscode-remark",
+    "editor.formatOnSave": true
+  },
   "[javascript][javascriptreact][typescript][typescriptreact][github-actions-workflow][json][css]": {
     "editor.defaultFormatter": "biomejs.biome",
     "editor.codeActionsOnSave": {
