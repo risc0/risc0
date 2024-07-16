@@ -102,4 +102,4 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [template]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter
-[zkVM]: ./zkvm_overview.md
+[zkVM]: ./zkvm-overview.md

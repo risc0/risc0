@@ -101,4 +101,4 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [receipt-verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [tutorial]: ./tutorials/hello-world.md
-[zkVM]: ./zkvm_overview.md
+[zkVM]: ./zkvm-overview.md

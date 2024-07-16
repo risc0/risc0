@@ -78,7 +78,7 @@ You're welcome to join [our Discord community](https://discord.gg/risczero) to d
 
 Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.youtube.com/@risczero), and [sign up for our mailing list](https://fmree464va4.typeform.com/to/X3KJB85v) to get our latest announcements.
 
-[The RISC Zero zkVM]: zkvm/zkvm_overview.md
+[The RISC Zero zkVM]: zkvm/zkvm-overview.md
 [Bonsai]: bonsai/bonsai-overview.md
 [The RISC Zero Proof System]: /proof-system
 [docs.rs]: https://docs.rs/risc0-zkvm/0.18/

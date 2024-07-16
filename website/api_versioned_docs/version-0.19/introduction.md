@@ -78,7 +78,7 @@ You're welcome to join [our Discord community](https://discord.gg/risczero) to d
 
 Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.youtube.com/@risczero), and [sign up for our mailing list](https://fmree464va4.typeform.com/to/X3KJB85v) to get our latest announcements.
 
-[The RISC Zero zkVM]: zkvm/zkvm_overview.md
+[The RISC Zero zkVM]: zkvm/zkvm-overview.md
 [Bonsai]: bonsai/bonsai-overview.md
 [The RISC Zero Proof System]: /proof-system
 [docs.rs]: https://docs.rs/risc0-zkvm/0.19/
@@ -86,7 +86,7 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 [zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
 [RISC Zero]: https://risczero.com
-[zkVM]: ./zkvm/zkvm_overview.md
+[zkVM]: ./zkvm/zkvm-overview.md
 [April 2022]: https://www.risczero.com/news/announce
 [JSON]: https://github.com/risc0/risc0/tree/release-0.19/examples/json
 [Where's Waldo]: https://risczero.com/news/waldo

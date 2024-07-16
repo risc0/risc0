@@ -58,7 +58,7 @@ Hopefully, these guides and the [zkVM Quick Start] page will be sufficient for y
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[zkVM application]: ../zkvm_overview.md
+[zkVM application]: ../zkvm-overview.md
 [receipt]: /terminology#receipt
 [validity proof]: /terminology#validity-proof
 [execution]: /terminology#execution-trace

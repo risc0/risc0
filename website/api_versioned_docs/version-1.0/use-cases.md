@@ -59,4 +59,4 @@ Check out our [Getting Started] page.
 [waldo]: https://risczero.com/news/waldo
 [Zeth]: https://risczero.com/news/zeth-release
 [zkpoex]: https://risczero.com/news/zkpoex
-[zkVM]: ./zkvm/zkvm_overview.md
+[zkVM]: ./zkvm/zkvm-overview.md

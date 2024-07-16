@@ -37,7 +37,7 @@ We have an [FAQ](/faq) that discusses some frequently encountered problems. You 
 
 ## Diving deeper
 
-We have [extensive resources](../zkvm/zkvm_overview.md) on writing zkVM code.
+We have [extensive resources](../zkvm/zkvm-overview.md) on writing zkVM code.
 
 Many of these resources assume you are developing without the aid of Bonsai. Here are some differences you might encounter when reading these docs:
 

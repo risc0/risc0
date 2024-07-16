@@ -26,9 +26,9 @@ You can see the latest results in our [Crate Validation Report].
 
 ![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
 
-[RISC Zero zkVM]: ../zkvm_overview.md
-[zkVM application]: ../zkvm_overview.md
-[zkVM applications]: ../zkvm_overview.md
+[RISC Zero zkVM]: ../zkvm-overview.md
+[zkVM application]: ../zkvm-overview.md
+[zkVM applications]: ../zkvm-overview.md
 [Rust]: https://www.rust-lang.org/
 [Rust Installation]: https://www.rust-lang.org/tools/install
 [Rust Book]: https://doc.rust-lang.org/book

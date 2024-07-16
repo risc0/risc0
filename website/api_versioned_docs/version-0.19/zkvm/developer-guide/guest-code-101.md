@@ -65,8 +65,8 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [journal]: /terminology#journal
 [zkVM Quick Start]: ../quickstart.md
 [Hello World demo]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world
-[zkVM Application]: ../zkvm_overview.md
-[zkVM]: ../zkvm_overview.md
+[zkVM Application]: ../zkvm-overview.md
+[zkVM]: ../zkvm-overview.md
 [Bonsai]: ../../bonsai/bonsai-overview.md
 [template]: https://github.com/risc0/risc0/tree/release-0.19/templates/rust-starter
 [examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
