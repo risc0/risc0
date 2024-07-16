@@ -8,10 +8,8 @@ Welcome to the [RISC Zero] documentation! This site contains documentation for:
 
 - **[Bonsai]**: A software development stack that allows on-chain and off-chain
   applications to request and receive proofs from our zkVM.
-
 - **[The RISC Zero zkVM][zkVM]**: A high-performance tool for proving correct
   execution of arbitrary code.
-
 - **[The RISC Zero Proof System][proof-system]**: The cryptographic techniques
   underlying the zkVM.
 

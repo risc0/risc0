@@ -77,14 +77,12 @@ Users seeking to pin to a specific version of zkVM can use the following table t
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
 
-[Ethereum Mainnet]: https://ethereum.org/nb/developers/docs/networks/#ethereum-mainnet
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/27eba00a5237cbefd0c742dee73ced697df3527a/contracts/EvenNumber.sol#L46-L52
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/IRiscZeroVerifier.sol
 [RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [RiscZeroVerifierEmergencyStop.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/RiscZeroVerifierEmergencyStop.sol
 [RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/src/RiscZeroVerifierRouter.sol
-[Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
 [TimelockController.sol]: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/version-management-design.md
 [foundry-template]: https://github.com/risc0/risc0-foundry-template

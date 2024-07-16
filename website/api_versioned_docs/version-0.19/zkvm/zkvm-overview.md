@@ -18,14 +18,6 @@ Our demos show how to:
 - use JPG crates to [prove you can find Waldo]
 - use Rust-Ethereum crates like [revm], [ethers], and [alloy] to **[prove correct construction of Ethereum blocks]**.
 
-[revm]: https://github.com/bluealloy/revm
-[ethers]: https://github.com/ethers-io/ethers.js
-[alloy]: https://github.com/alloy-rs
-[prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess#zk-checkmate
-[proofs about private data]: https://github.com/risc0/risc0/tree/release-0.19/examples/json#json-example
-[prove you can find Waldo]: https://www.risczero.com/news/waldo
-[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
-
 On any other proving platform, building any of these projects requires starting from the ground up.
 By letting developers use the primitives they need, the RISC Zero zkVM makes verifiable software development a practical reality for projects of all scales.
 
@@ -35,8 +27,6 @@ We offer an open-source prover that can prove computations of any size on standa
 The documentation on this site will teach you how to write software for the RISC Zero zkVM, how to use the zkVM to generate proofs on your own machine, and how to use Bonsai for remote proof generation.
 
 ### [`zkvM Quick Start`]
-
-[`zkVM Quick Start`]: ./quickstart.md
 
 ## Building a zkVM Application
 
@@ -91,30 +81,30 @@ Check out [Bonsai].
 _Curious about Zeth?_<br/>
 Read the [article](https://risczero.com/news/zeth-release).
 
-[cargo]: https://doc.rust-lang.org/cargo/index.html
 [continuations]: https://www.risczero.com/news/continuations
 [imageID]: /terminology#image-id
 [Bonsai]: ../bonsai/bonsai-overview.md
 [receipt]: developer-guide/receipts.md
 [ELF binary]: /terminology#elf-binary
-[execution trace]: /terminology#execution-trace
 [executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: developer-guide/guest-code-101.md
-[guest programs]: developer-guide/guest-code-101.md
-[host]: /terminology#host-program
-[host program]: developer-guide/host-code-101.md
 [performance benchmarks]: benchmarks.md
 [prove]: /terminology#validity-proof
-[proofs]: /terminology#validity-proof
 [prover]: /terminology#prover
 [publicly shared outputs]: /terminology#journal
 [segments]: /terminology#segment
 [verify]: /terminology#verify
-[zero-knowledge virtual machine]: /terminology#zero-knowledge-virtual-machine-zkvm
-[zkvm]: https://github.com/risc0/risc0#readme
 [zkVM Quick Start]: ./quickstart.md
 [zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [zkVM-term]: /terminology#zero-knowledge-virtual-machine-zkvm
 [session]: /terminology#session
 [Host Code 101]: developer-guide/host-code-101.md
+[revm]: https://github.com/bluealloy/revm
+[ethers]: https://github.com/ethers-io/ethers.js
+[alloy]: https://github.com/alloy-rs
+[prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess#zk-checkmate
+[proofs about private data]: https://github.com/risc0/risc0/tree/release-0.19/examples/json#json-example
+[prove you can find Waldo]: https://www.risczero.com/news/waldo
+[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
+[`zkVM Quick Start`]: ./quickstart.md

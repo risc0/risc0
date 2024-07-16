@@ -11,16 +11,12 @@ RISC Zero offers the following components, each of which is ready for use on tes
 ## Overview of Components
 
 1. The **cargo risczero** tool, which compiles user-written Rust code into RISC-V ELF binaries [deterministically].
-
 2. The **RISC-V Prover**, which executes and proves ELF binaries produced by the `cargo risczero` tool.
-
 3. The **Recursion Prover**, which is used to aggregate proofs from the RISC-V Prover.
    The recursion prover supports a small number of programs, including [lift], [join], and [resolve].
    Each recursion program is identified by a [control ID], and the full list of allowed programs is identified by the [control root].
-
 4. The **STARK-to-SNARK Prover**, which verifies proofs from the RISC Zero Recursion Prover, compressing the STARK into a Groth16 SNARK.
    The [control root] is passed to as a public input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.
-
 5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
    The control root is hard-coded into the on-chain verifier contract.
    Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement] doc.
@@ -58,7 +54,7 @@ Passing proofs through the Recursion Prover resolves this warning: recursion pro
 
 :::
 
-# Cryptographic Security
+## Cryptographic Security
 
 In analyzing the cryptographic security of our system, we consider two primary questions:
 
