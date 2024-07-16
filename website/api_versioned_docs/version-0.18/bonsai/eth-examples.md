@@ -18,5 +18,3 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [governance-example]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.18/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
-[foundry-template]: https://github.com/risc0/bonsai-foundry-template
-[eth-relay]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/ethereum-relay
