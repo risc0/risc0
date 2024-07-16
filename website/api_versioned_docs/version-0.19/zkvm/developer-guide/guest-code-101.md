@@ -23,24 +23,10 @@ To support various use cases, there are a number of functions that can be called
 
 - **Reading inputs** <br/>
   [`env::read`], [`env::read_slice`], and [`env::stdin`]
-
-[`env::read`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.read_slice.html
-[`env::stdin`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stdin.html
-
 - **Writing private outputs to [host]**<br/>
   [`env::write`], [`env::write_slice`], [`env::stdout`], [`env::stderr`]
-
-[`env::write`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.write.html
-[`env::write_slice`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.write_slice.html
-[`env::stdout`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stdout.html
-[`env::stderr`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stderr.html
-
 - **Committing public outputs to [journal]**<br/>
   `env::commit`, `env::commit_slice`
-
-[`env::commit`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.commit.html
-[`env::commit_slice`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.commit_slice.html
 
 ## Tools for Debugging & Optimization
 
@@ -48,12 +34,8 @@ There are also a number of functions available to support with debugging and per
 
 - **Count Cycles** <br/>
   [`env::get_cycle_count`]
-
 - **Print a debug message**<br/>
   [`env::log`]
-
-[`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.get_cycle_count.html
-[`env::log`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.log.html
 
 For more information on optimization & performance, see our pages on [Cryptography Acceleration](acceleration.md) and [Benchmarking](../benchmarks.md).
 
@@ -63,10 +45,8 @@ In our [template] and [examples], there's a bit of boilerplate code before `main
 
 - `#![no_std]` <br/>
   The guest code should be as lightweight as possible for performance reasons. So, since we aren't using `std`, we exclude it.
-
 - `#![no_main]` <br/>
   The guest code is never launched as a standalone Rust executable, so we specify `#![no_main]`.
-
 - `risc0_zkvm_guest::entry!(main);` <br/>
   We must make the guest code available for the host to launch, and to do that we must specify which function to call when the host starts executing this guest code. We use the `risc0_zkvm_guest::entry!` macro to indicate the initial guest function to call, which in this case is `main`.
 
@@ -83,12 +63,8 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [host]: /terminology#host
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
 [journal]: /terminology#journal
-[method]: /terminology#method
 [zkVM Quick Start]: ../quickstart.md
-[zkVM Overview]: ../zkvm_overview.md
 [Hello World demo]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world
-[risc0/examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
-[guest environment commands]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/index.html
 [zkVM Application]: ../zkvm_overview.md
 [zkVM]: ../zkvm_overview.md
 [Bonsai]: ../../bonsai/bonsai-overview.md
@@ -96,3 +72,12 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [these docs]: https://github.com/risc0/risc0/issues/new/choose
 [Discord]: https://discord.gg/risczero
+[`env::read`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.read.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::stdin`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stdin.html
+[`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.get_cycle_count.html
+[`env::log`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.log.html
+[`env::write`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.write.html
+[`env::write_slice`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.write_slice.html
+[`env::stdout`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stdout.html
+[`env::stderr`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stderr.html

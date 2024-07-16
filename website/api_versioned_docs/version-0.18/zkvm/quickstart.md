@@ -72,11 +72,8 @@ Options such as GPU acceleration and skipping the proof generation are documente
 [zkVM]: ../zkvm/
 [guest program]: /terminology#guest-program
 [Bonsai]: ../bonsai/bonsai-overview.md
-[install]: ./install.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [zkVM demo applications]: https://github.com/risc0/risc0/tree/release-0.18/examples/
 [cargo risczero]: https://docs.rs/cargo-risczero
 [Hello World tutorial]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world/tutorial.md
-[demo applications]: https://github.com/risc0/risc0/tree/release-0.18/examples
-[Bonsai Quick Start]: ../../bonsai/quickstart
 [request access]: https://bonsai.xyz/apply
