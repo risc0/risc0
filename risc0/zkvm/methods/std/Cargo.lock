@@ -687,7 +687,7 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "elf",
@@ -699,7 +699,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -715,7 +715,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -727,7 +727,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "risc0-binfmt",
@@ -740,7 +740,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -748,7 +748,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -766,7 +766,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -786,7 +786,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -809,7 +809,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "bytemuck",
  "getrandom",
