@@ -74,7 +74,6 @@ In addition to the links in the sidebar, we recommend the following resources:
 [Groth16 receipt]: /terminology#groth16-receipt
 [Groth16 Circuit]: /terminology#groth16-circuit
 [guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
-[ImageID]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
 [news]: https://risczero.com/news
 [open-source]: https://risczero.com/news/open-source
@@ -86,8 +85,6 @@ In addition to the links in the sidebar, we recommend the following resources:
 [Recursion Circuit]: /terminology#recursion-circuit
 [RISC-V Circuit]: /terminology#risc-v-circuit
 [segment]: /terminology#segment
-[SegmentReceipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipts.html
-[SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
 [Sequence Diagram]: ./proof-system-sequence-diagram.md
 [session]: /terminology#session
 [Study Club]: ../studyclub.md

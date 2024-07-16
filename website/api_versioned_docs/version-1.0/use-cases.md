@@ -58,6 +58,5 @@ Check out our [Getting Started] page.
 [performance]: ./zkvm/benchmarks.md
 [waldo]: https://risczero.com/news/waldo
 [Zeth]: https://risczero.com/news/zeth-release
-[zk-coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [zkpoex]: https://risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm_overview.md

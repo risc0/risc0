@@ -257,33 +257,26 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [About STARKs]: ./reference-docs/about-starks.md
 [About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups/#validity-proofs
 [Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
-[assumption]: #assumption
 [assumptions]: #assumption
-[cargo risczero]: https://docs.rs/crate/cargo-risczero/latest
 [`cargo risczero build`]: https://docs.rs/crate/cargo-risczero/latest
 [circuit]: #circuit
 [clock cycles]: #clock-cycles
 [Code reference for control root]: https://github.com/risc0/risc0/blob/v0.21.0/risc0/circuit/recursion/src/control_id.rs#L16
 [commit]: #commit
-[compose]: #composition
 [composition]: #composition
 [conditional]: #conditional
 [continuations]: #continuations
 [Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [Continuations blog]: https://www.risczero.com/news/continuations
 [control ID]: #control-id
-[control root]: #control-root
-[deterministic-builds]: #deterministic-builds
 [ELF binary]: #elf-binary
 [env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
-[execute]: #execute
 [executes]: #execute
 [execution]: #execute
 [executed]: #executor
 [executor]: #executor
 [Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Executor.html
 [execution trace]: #execution-trace
-[Groth16]: #groth16
 [Groth16 Circuit]: #groth16-circuit
 [guest]: #guest-program
 [guest program]: #guest-program
@@ -293,7 +286,6 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [ImageID excerpt from Study Club]: https://www.youtube.com/watch?v=QwzrBHHkzFE&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=4
 [journal]: #journal
 [method]: #method
-[prove]: #prove
 [proves]: #prove
 [proven]: #prover
 [prover]: #prover

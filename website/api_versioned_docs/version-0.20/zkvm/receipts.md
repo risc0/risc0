@@ -70,5 +70,4 @@ is:
 [serde]: https://crates.io/crates/serde
 [validity proof]: /terminology#validity-proof
 [verify]: /terminology#verify
-[quickstart]: ./quickstart.md
 [zkvm]: ./zkvm_overview.md
