@@ -54,8 +54,10 @@ rustdoc-args = ["--cfg", "docsrs"]
 features = ["prove", "std"]
 
 [features]
-default = []
+circuit_debug = []
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
+default = []
+metal_prefix_products = []
 prove = [
   "dep:ff",
   "dep:ndarray",
@@ -67,4 +69,3 @@ prove = [
   "std",
 ]
 std = ["anyhow/std"]
-circuit_debug = []
