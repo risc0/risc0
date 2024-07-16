@@ -82,12 +82,10 @@ terms of [cycle count] of the three Fibonacci implementations. This can be
 helpful in understanding the efficiency of various algorithms and their
 performance implications.
 
-:::tip\[Explore]
-
+:::tip[Explore]
 Use the pprof web interface to compare the performance of the 3 Fibonacci
 implementations. Refer to the [pprof docs][pprof] for more information about the
 web interface.
-
 :::
 
 <!-- prettier-ignore-start -->

@@ -48,10 +48,8 @@ You can find detailed information in the [version management design][VersionMana
 ### Contract Addresses
 
 :::info
-
 Contracts are not deployed for unreleased versions.
 You can use the [deployed contracts for a released version][doc-released-contracts].
-
 :::
 
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->

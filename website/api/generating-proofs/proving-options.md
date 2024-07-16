@@ -1,11 +1,9 @@
 # Options for Proof Generation
 
 :::info
-
 The `stark2snark` prover currently _only_ works on x86 architecture, and so Apple Silicon is _currently unsupported_ (even via Docker).
 
 You can find out more info on the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
-
 :::
 
 ---
@@ -21,9 +19,7 @@ Users can choose between:
 We recommend option 1 during development, option 2 for applications involving private inputs, and option 3 for all other applications.
 
 :::tip
-
 [prove\_with\_opts][prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
-
 :::
 
 [dev-mode]: ./dev-mode.md

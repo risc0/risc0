@@ -45,6 +45,7 @@
       "remark-preset-lint-markdown-style-guide",
       "remark-frontmatter",
       "remark-gfm",
+      "remark-directive",
       "remark-math",
       [
         "remark-lint-no-emphasis-as-heading",

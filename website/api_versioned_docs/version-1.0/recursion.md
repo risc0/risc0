@@ -3,9 +3,7 @@
 RISC Zero's zkVM uses recursive proving in order to achieve unbounded computation size, constant proof size, proof aggregation, and proof composition.
 
 :::tip
-
 [Prover::prove\_with\_opts][prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
-
 :::
 
 The rest of this page describes low-level details that are not necessary for users.

@@ -5,12 +5,10 @@ RISC Zero's zkVM offers a convenient API for efficiently verifying proofs inside
 This feature enables rich possibilities for building modular applications. Check out the [blog post] to learn more about the power of proof composition.
 
 :::info
-
 Although the "obvious" approach to proof composition would be to simply run the verifier inside the guest program, this approach doesn't result in compression.
 Instead, RISC Zero's approach to composition relies on _adding_ [assumptions] to the [ReceiptClaim] and then _resolving_ them.
 
 This approach allows us to offer users a simple API for composition while still being able to access the benefits of our hyper-efficient [recursion circuit].
-
 :::
 
 ## Start Building
