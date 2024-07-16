@@ -72,14 +72,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
       - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
+      - run: bun install
+        working-directory: website
       - name: lint
-        run: npm run lint
+        run: bun run lint
         working-directory: website
 
   doc-test-main:
