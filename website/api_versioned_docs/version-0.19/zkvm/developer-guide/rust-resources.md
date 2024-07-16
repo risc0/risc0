@@ -32,9 +32,6 @@ You can see the latest results in our [Crate Validation Report].
 [Rust]: https://www.rust-lang.org/
 [Rust Installation]: https://www.rust-lang.org/tools/install
 [Rust Book]: https://doc.rust-lang.org/book
-[Cargo Installation]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[Cargo Book]: https://doc.rust-lang.org/cargo
-[Cargo]: https://doc.rust-lang.org/cargo
 [`risc0-zkvm` crate]: https://docs.rs/risc0-zkvm
 [Crate Validation Report]: https://reports.risczero.com/crates-validation
 [other Rust crates]: https://github.com/risc0/risc0#rust-libraries

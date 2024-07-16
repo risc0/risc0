@@ -100,10 +100,8 @@ If you're ready to start building more complex projects, we recommend taking a l
 [cargo risczero]: https://docs.rs/cargo-risczero
 [examples directory]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [host]: /terminology#host-program
-[guest]: terminology#guest-program
 [receipt]: /terminology#receipt
 [journal]: /terminology#journal
-[seal]: /terminology#seal
 [Discord]: https://discord.gg/risczero
 [issue]: https://github.com/risc0/risc0/issues
 [prover]: /terminology#prover
