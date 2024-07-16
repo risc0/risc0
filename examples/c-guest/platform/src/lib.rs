@@ -150,6 +150,6 @@ pub unsafe extern "C" fn env_commit(hasher: *mut sha256_state, bytes_ptr: *const
 /// # Safety
 /// Assumes that the buffer has at least `len` bytes allocated.
 #[no_mangle]
-pub unsafe extern "C" fn env_read(bytes_ptr: *mut u8, len: u32) {
-    sys_read(fileno::STDIN, bytes_ptr, len as usize);
+pub unsafe extern "C" fn env_read(bytes_ptr: *mut u8, len: u32) -> usize {
+    sys_read(fileno::STDIN, bytes_ptr, len as usize)
 }
