@@ -735,6 +735,18 @@ dependencies = [
 
 [[package]]
 name = "c-kzg"
+version = "0.1.0"
+dependencies = [
+ "c-kzg 1.0.2",
+ "c-kzg-core",
+ "c-kzg-methods",
+ "hex-literal",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "c-kzg"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac926d808fb72fe09ebf471a091d6d72918876ccf0b4989766093d2d0d24a0ef"
@@ -746,6 +758,34 @@ dependencies = [
  "hex",
  "libc",
  "serde",
+]
+
+[[package]]
+name = "c-kzg"
+version = "1.0.2"
+source = "git+https://github.com/risc0/c-kzg-4844.git?rev=304eacb4f5fec09e837936e4ada6705ecac581f0#304eacb4f5fec09e837936e4ada6705ecac581f0"
+dependencies = [
+ "blst",
+ "cc",
+ "glob",
+ "hex",
+ "libc",
+ "serde",
+]
+
+[[package]]
+name = "c-kzg-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "c-kzg-methods"
+version = "0.1.0"
+dependencies = [
+ "c-kzg 1.0.2",
+ "risc0-build",
 ]
 
 [[package]]
@@ -2856,9 +2896,9 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5637e166ea14be6063a3f8ba5ccb9a4159df7d8f6d61c02fc3d480b1f90dcfcb"
+checksum = "7ecfd3296f8c56b7c1f6fbac3c71cefa9d78ce009850c45000015f206dc7fa21"
 dependencies = [
  "bitflags 2.5.0",
  "block",
@@ -3848,7 +3888,7 @@ version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d360a88223d85709d2e95d4609eb1e19c649c47e28954bfabae5e92bb37e83e"
 dependencies = [
- "c-kzg",
+ "c-kzg 0.1.1",
  "k256",
  "num",
  "once_cell",
@@ -3870,7 +3910,7 @@ dependencies = [
  "auto_impl",
  "bitflags 2.5.0",
  "bitvec",
- "c-kzg",
+ "c-kzg 0.1.1",
  "enumn",
  "hashbrown 0.14.5",
  "hex",

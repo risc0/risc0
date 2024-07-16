@@ -26,9 +26,9 @@ We recommend option 1 during development, option 2 for applications involving pr
 
 :::
 
-[dev-mode]: ./dev-mode
-[Local Proving]: ./local-proving
-[Remote Proving]: ./remote-proving
+[dev-mode]: ./dev-mode.md
+[Local Proving]: ./local-proving.md
+[Remote Proving]: ./remote-proving.md
 [Bonsai]: https://bonsai.xyz
 [prove_with_opts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
