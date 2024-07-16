@@ -82,7 +82,7 @@ We estimate that it would cost over 400 billion USD of computational resources t
 These estimates are based on the approach used in [this article by Justin Thaler].
 The napkin math here is as follows:
 
-- Thaler estimated $1.6 million to launch a viable attack against an 80 bit STARK system.
+- Thaler estimated \$1.6 million to launch a viable attack against an 80 bit STARK system.
 - 98 bits is $2^{18}$ times more secure than 80 bits.
 
 The analysis for bits of security for the RISC-V and Recursion Prover can be found in the [security calculator].

@@ -25,8 +25,8 @@ If you need to install Rust or encounter problems, take a look at our [full inst
 
 ## 2. Initialize a New Project
 
-Once you've installed the toolchain, you can initialize a new project using the [starter template] by running:
-[starter template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
+Once you've installed the toolchain, you can initialize a new project using the \[starter template] by running:
+\[starter template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
 
 ```bash
 cargo risczero new my_project

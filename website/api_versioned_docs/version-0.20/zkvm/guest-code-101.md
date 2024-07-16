@@ -42,7 +42,7 @@ should be sufficient for building your first application:
 ## Tools for Debugging & Optimization
 
 There are also a number of functions available to support with debugging and
-performance analysis. As above, we refer to the [`guest` module] for a full
+performance analysis. As above, we refer to the \[`guest` module] for a full
 list, but include some highlights here:
 
 - **Count Cycles** <br/>
@@ -78,7 +78,7 @@ In our [template] and [examples], there's a bit of boilerplate code before
 Hopefully, this guide and the [zkVM Quick Start][quickstart] page will be
 sufficient for you to build your first [zkVM application][zkVM]!
 
-If you run into problems, don't be a stranger! You can file an issue on [these
+If you run into problems, don't be a stranger! You can file an issue on \[these
 docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [acceleration]: ./acceleration.md

@@ -96,7 +96,7 @@ support for generating pprof files for cycle counts.
 
 [Sampling CPU profilers], as implemented by pprof and perf, provide a view of
 where your program is spending its time. It does so by recording the current
-call stack at a sampling interval. RISC Zero provides a "sampling" [^1] CPU
+call stack at a sampling interval. RISC Zero provides a "sampling" \[^1] CPU
 profiler for guest execution.
 
 One very useful visualization of this data is as a [flamegraph], such as the one
@@ -196,7 +196,7 @@ Merkle inclusion proof for the page against the image ID. These hashing
 operations required take a number of cycles.
 
 **A page-in operation takes between 1094 and 5130 cycles; 1130 cycles on
-average.**[^2]
+average.**\[^2]
 
 The very first page-in takes longer, 5130 cycles, because it needs to traverse
 up the page table (i.e. Merkle tree) all the way to the root, which is equal to
@@ -324,7 +324,7 @@ RISC Zero’s riscv32im implementation includes a number of special purpose
 operations, including two “accelerators” for cryptographic functions: SHA-256
 and [256-bit modular multiplication][bigint]. By implementing these operations
 directly in the “hardware” of the zkVM, programs that use these accelerators
-execute faster and can be proven with significantly less resources [^3].
+execute faster and can be proven with significantly less resources \[^3].
 
 For more information about cryptography acceleration, [cryptography
 acceleration][acceleration].
@@ -416,14 +416,14 @@ cycle counts added.
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
 | BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| LB rd,offset(rs1)   | Load Byte                          | rd ← s8[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LH rd,offset(rs1)   | Load Half                          | rd ← s16[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LW rd,offset(rs1)   | Load Word                          | rd ← s32[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1)  | Store Byte                         | u8[rs1 + offset] ← rs2                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SH rs2,offset(rs1)  | Store Half                         | u16[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SW rs2,offset(rs1)  | Store Word                         | u32[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
 | SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
 | SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
@@ -461,38 +461,39 @@ below.
 
 | Selector | Description                | Operations                                                                                                                       | Cycles                  |
 | -------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| HALT     | Halt execution             | Set system exit code to a0. Load 32-bytes output digest from \[a1\]. Set output digest global. Halt execution.                   | 1 + paging              |
-| SOFTWARE | Receive data from the host | Write host-provided data to the memory range [a0 .. a0 + a1 * 4]                                                                 | 1 + ⌈ a1 / 4 ⌉ + paging |
-| SHA-256  | SHA-256 hash               | Compute the Merkle–Damgård compression of the region [a2 .. a2 + a3 * 64] with initial state \[a1\]. Write the digest to \[a0\]. | 6 + 68 \* a2 + paging   |
-| BIGINT   | 256-bit modular operation  | if a1 = 0, \[a0\] ← \[a2\] ⋅ \[a3\] (mod \[a4\])                                                                                 | 10 + paging             |
+| HALT     | Halt execution             | Set system exit code to a0. Load 32-bytes output digest from \[a1]. Set output digest global. Halt execution.                   | 1 + paging              |
+| SOFTWARE | Receive data from the host | Write host-provided data to the memory range \[a0 .. a0 + a1 \* 4]                                                                 | 1 + ⌈ a1 / 4 ⌉ + paging |
+| SHA-256  | SHA-256 hash               | Compute the Merkle–Damgård compression of the region \[a2 .. a2 + a3 \* 64] with initial state \[a1]. Write the digest to \[a0]. | 6 + 68 \* a2 + paging   |
+| BIGINT   | 256-bit modular operation  | if a1 = 0, \[a0] ← \[a2] ⋅ \[a3] (mod \[a4])                                                                                 | 10 + paging             |
 
 ---
 
 <!-- prettier-ignore-start -->
-[^1]:
-    Here “sampling” is in quotes because the profiler actually captures the call
-    stack at every cycle of program execution. Capturing a call stack on every
-    cycle of execution is not done in most programs on physical CPUs for a few
-    reasons:
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-    <!-- -->
-    In zkVM execution, executions are generally short and all execution is
-    synchronous and is not subject to any deviations in behavior due to
-    measurement overhead.
+
+\[^1]:
+Here “sampling” is in quotes because the profiler actually captures the call
+stack at every cycle of program execution. Capturing a call stack on every
+cycle of execution is not done in most programs on physical CPUs for a few
+reasons: <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
+\- It would be cost prohibitive to do so for all but quite short program
+executions.
+\- Introducing such heavy profiling would actually alter the performance
+characteristics in significant ways. <!-- -->
+In zkVM execution, executions are generally short and all execution is
+synchronous and is not subject to any deviations in behavior due to
+measurement overhead.
+
 <!-- prettier-ignore-end -->
 
-[^2]:
-    An implementation of cycle-accounting for paging operations is implemented
-    in the [Executor].
+\[^2]:
+An implementation of cycle-accounting for paging operations is implemented
+in the [Executor].
 
-[^3]:
-    This is similar to the cryptography support such as [AES-NI] or the [SHA
+\[^3]:
+This is similar to the cryptography support such as [AES-NI] or the [SHA
+extensions][SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
-    compute otherwise expensive operations in fewer instruction cycles.
+compute otherwise expensive operations in fewer instruction cycles.
 
 [acceleration]: ./acceleration.md
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
@@ -516,14 +517,14 @@ below.
 [Executor]: https://github.com/risc0/risc0/blob/release-0.21/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
-[hibernates]: https://en.wikipedia.org/wiki/Hibernation_(computing)
+[hibernates]: https://en.wikipedia.org/wiki/Hibernation_\(computing\)
 [ilp]: https://en.wikipedia.org/wiki/Instruction-level_parallelism
 [image ID]: /terminology#image-id
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
 [op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
-[os-page]: https://en.wikipedia.org/wiki/Page_(computer_memory)
+[os-page]: https://en.wikipedia.org/wiki/Page_\(computer_memory\)
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [perf-book]: https://nnethercote.github.io/perf-book/
 [pprof]: https://github.com/google/pprof

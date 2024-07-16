@@ -8,7 +8,7 @@ To confirm that a [Receipt] was honestly generated, use [Receipt::verify()].
 
 The [Receipt] includes a [journal], which contains the public outputs of the
 [Session]. The contents of the [journal] are specified by calling
-[env::commit()] and [env::commit_slice()] in the [guest] code.
+[env::commit()] and [env::commit\_slice()][env::commit_slice()] in the [guest] code.
 
 In addition to the journal, a receipt makes a number of claims about the program
 execution. These claims are summarized in the [ReceiptClaim].

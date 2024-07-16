@@ -49,7 +49,7 @@ More generally, multiplying by a 4th root of unity is a rotation of order 4.`
 
 ## Additional References:
 
-- [Slides](https://drive.google.com/file/d/146BOC_hHH0703OcKT-LwjIb3S0NYkGh0/view?usp=share_link), [video recording](https://www.youtube.com/watch?v=BKViygqOW3I&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=3), and [practice problems](./about-finite-fields-exercises.md) from RISC Zero Study Club
+- [Slides](https://drive.google.com/file/d/146BOC_hHH0703OcKT-LwjIb3S0NYkGh0/view?usp=share_link), [video recording](https://www.youtube.com/watch?v=BKViygqOW3I\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=3), and [practice problems](./about-finite-fields-exercises.md) from RISC Zero Study Club
 - [David Forney's Introduction to Finite Fields (Chapter 7)](https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/pages/readings-and-lecture-notes/)
 - [Guruswami's Basics of Finite Fields](http://www.cs.cmu.edu/~venkatg/teaching/codingtheory-au14/notes/finite-fields.pdf)
 - [A. Sutherland's notes on finite fields and integer arithmetic](https://math.mit.edu/classes/18.783/2017/LectureNotes3.pdf)

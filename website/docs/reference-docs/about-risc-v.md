@@ -17,5 +17,5 @@ A succinct summary of the architecture is available [here](https://github.com/ja
 
 For more on how these ideas fit into RISC Zero's system, we recommend:
 
-- RISC Zero's talk from zk Summit 7: [Encoding Von-Neumann Architectures in Zero-Knowledge Proof Systems](https://www.youtube.com/watch?v=od033ugtlYQ&list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1&index=7)
-- RISC Zero Study Club: What is RISC-V and what does it have to do with RISC Zero's zkVM -- [video](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=5&t=1s) and [slides](https://drive.google.com/file/d/1p7E5Sgi__5_CevGKHpTwrlb0KWjSaYPU/view)
+- RISC Zero's talk from zk Summit 7: [Encoding Von-Neumann Architectures in Zero-Knowledge Proof Systems](https://www.youtube.com/watch?v=od033ugtlYQ\&list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1\&index=7)
+- RISC Zero Study Club: What is RISC-V and what does it have to do with RISC Zero's zkVM -- [video](https://www.youtube.com/watch?v=11DIflEwx50\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=5\&t=1s) and [slides](https://drive.google.com/file/d/1p7E5Sgi__5_CevGKHpTwrlb0KWjSaYPU/view)

@@ -8,7 +8,7 @@ In this document, we present an overview to the RISC Zero STARK protocol, as wel
 RISC Zero's [receipts][Receipt] are built on the shoulders of several recent advances in the world of zero-knowledge cryptography.
 The core of the proof system is [STARK]-based, implementing [DEEP-ALI & FRI].
 This proof system is used to generate zero-knowledge validity proofs for RISC Zero's RISC-V circuit and RISC Zero's recursion circuit.
-Users may also be interested in reading about the [RISC Zero Groth16 Circuit], which enables on-chain verification.
+Users may also be interested in reading about the \[RISC Zero Groth16 Circuit], which enables on-chain verification.
 
 At a high level, the design of the RISC Zero STARK protocol is very similar to the system described in [ethSTARK], and the system implemented in [Winterfell].
 
@@ -39,17 +39,17 @@ These enhancements are described well in [From AIRs to RAPs].
 
 We use this Auxiliary Execution Trace to support:
 
-1. A permutation argument for [memory verification](https://www.youtube.com/watch?v=dYuEPvRLwLo&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N&index=5)<br/>
+1. A permutation argument for [memory verification](https://www.youtube.com/watch?v=dYuEPvRLwLo\&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N\&index=5)<br/>
    The permutation argument is currently implemented as a grand product accumulator argument, as in [PLONK](https://eprint.iacr.org/2019/953.pdf).
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit.<br/>
    Here, operations corresponding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
 
-1. A lookup argument for range checks<br/>
+2. A lookup argument for range checks<br/>
    The lookup argument is currently implemented using the approach described in [PLOOKUP].
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit. <br/>
    Here, the tables and the witness are committed in the main trace, and grand product accumulators are committed in the auxiliary trace.
 
-1. A big integer accelerator to enable [fast cryptographic operations][acceleration]<br/>
+3. A big integer accelerator to enable [fast cryptographic operations][acceleration]<br/>
    The bigint accelerator implements multiplication of `a` and `b` by asking the host to provide the product `c` as non-deterministic advice. Then, the verifier provides randomness `r`, and the constraints enforce that when `a`, `b`, and `c` are interpreted as polynomials, `a(r) * b(r) == c(r)`. <br/>
    Here, `a`, `b`, and `c` are committed in the main trace, and the evaluations at `r` are committed in the auxiliary trace.
 

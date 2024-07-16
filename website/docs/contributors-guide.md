@@ -56,7 +56,7 @@ We typically organize reference docs according to the following sections; we use
 
 > **Topic**
 >
-> _Topic is used to [concise explanation of relevance to RISC Zero]_
+> _Topic is used to \[concise explanation of relevance to RISC Zero]_
 >
 > - Documentation
 > - Basic Function

@@ -4,7 +4,7 @@ Verifiable computation is a game changer for the resilience and economics of
 operating the computing infrastructure we all rely on. It creates a number of
 emergent use cases which we are excited to enable. Key among these are:
 
-- [ZK Coprocessors][zk-coprocessor], which enable blockchain applications to reduce gas costs by
+- \[ZK Coprocessors]\[zk-coprocessor], which enable blockchain applications to reduce gas costs by
   moving the expensive part of their application logic off-chain
 - Optimistic rollups with ZK fraud proofs, including [our work with Optimism][optimism]
 

@@ -76,7 +76,7 @@ For more information on passing and verifying receipts, check out our page on
 Hopefully, this guide and the [zkVM Quick Start][quickstart] page will be
 sufficient for you to build your first [zkVM application][zkVM]!
 
-If you run into problems, don't be a stranger! You can file an issue on [these
+If you run into problems, don't be a stranger! You can file an issue on \[these
 docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [Bonsai]: ../generating-proofs/remote-proving.md

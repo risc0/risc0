@@ -5,7 +5,7 @@ circuits, including two “accelerators” for cryptographic functions: SHA-256 
 [256-bit modular multiplication][bigint], referred to as "bigint"
 multiplication. By implementing these operations directly in the “hardware” of
 the zkVM, programs that use these accelerators execute faster and can be proven
-with significantly less resources [^1].
+with significantly less resources \[^1].
 
 ## Accelerated Crates
 
@@ -52,10 +52,11 @@ RustCrypto's secp256k1 ECDSA library. This fork starts from the base
 implementation, and changes the core operations to use the accelerated 256-bit
 modular multiplication instruction. E.g. [`FieldElement8x32R0::mul`][field-mul].
 
-[^1]:
-    This is similar to the cryptography support such as [AES-NI] or the [SHA
+\[^1]:
+This is similar to the cryptography support such as [AES-NI] or the [SHA
+extensions][SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
-    compute otherwise expensive operations in fewer instruction cycles.
+compute otherwise expensive operations in fewer instruction cycles.
 
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [bigint]: https://github.com/risc0/risc0/pull/466

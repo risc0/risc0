@@ -24,11 +24,11 @@ To ensure that the circuit itself does not have security holes, we have used a m
 Our ceremony transcript is included in the `zkey` published on ceremony.pse.dev in the "Download ZKey" tab of the [RISC Zero STARK-to-SNARK Prover page][pse-risc0-ceremony]. (We mirror this file [here][zkey-mirror].) You can verify it matches the circuit using Circom and snarkjs:
 
 1. Install [Circom][install-circom] and [snarkjs][snarkjs].
-1. Download the [`stark_verify.circom`][stark-verify-circom] and [`risc0.circom`][risc0-circom-library] source files.
-1. Download the Powers of Tau (`ptau`) file we used for our ceremony; we used the Hermez rollup with `2^23` powers of tau, which is linked in [the snarkjs readme][snarkjs] or available directly [here][powers-of-tau-hez-23] (mirrored [here][powers-of-tau-hez-23-our-mirror]).
-1. Generate the `r1cs` file from the `circom` source files, by running `circom stark_verify.circom --r1cs` in the directory where you downloaded these files. This should generate the same `r1cs` file as listed in our [p0tion configuration][p0tion-config] (available directly [here][r1cs-file]). The SHA-256 hash of this file (i.e. as computed by `shasum -a 256`) is `84d3c34b7c0eb55ad1b16b24f75e0b9de307f7b74089ea4a20a998390ee24178`.
-1. Prepare JavaScript to use a large amount of memory: Its default settings generally are insufficient to verify this circuit. On my system, I needed to run `export NODE_OPTIONS="--max-old-space-size=32768"`.
-1. Use snarkjs to verify that the transcript matches this circuit and powers of tau, by running `snarkjs zkey verify stark_verify.r1cs powersOfTau28_hez_final_23.ptau stark_verify_final.zkey`. You should see a list of contribution hashes (attestations) followed by the message `snarkJS: ZKey Ok!`.
+2. Download the [`stark_verify.circom`][stark-verify-circom] and [`risc0.circom`][risc0-circom-library] source files.
+3. Download the Powers of Tau (`ptau`) file we used for our ceremony; we used the Hermez rollup with `2^23` powers of tau, which is linked in [the snarkjs readme][snarkjs] or available directly [here][powers-of-tau-hez-23] (mirrored [here][powers-of-tau-hez-23-our-mirror]).
+4. Generate the `r1cs` file from the `circom` source files, by running `circom stark_verify.circom --r1cs` in the directory where you downloaded these files. This should generate the same `r1cs` file as listed in our [p0tion configuration][p0tion-config] (available directly [here][r1cs-file]). The SHA-256 hash of this file (i.e. as computed by `shasum -a 256`) is `84d3c34b7c0eb55ad1b16b24f75e0b9de307f7b74089ea4a20a998390ee24178`.
+5. Prepare JavaScript to use a large amount of memory: Its default settings generally are insufficient to verify this circuit. On my system, I needed to run `export NODE_OPTIONS="--max-old-space-size=32768"`.
+6. Use snarkjs to verify that the transcript matches this circuit and powers of tau, by running `snarkjs zkey verify stark_verify.r1cs powersOfTau28_hez_final_23.ptau stark_verify_final.zkey`. You should see a list of contribution hashes (attestations) followed by the message `snarkJS: ZKey Ok!`.
 
 ## Contributor Attestations Match the Transcript
 
@@ -47,8 +47,8 @@ Important Note: Contributors can remove their attestations from GitHub at any ti
 Please exercise good judgment about whether a missing or edited attestation represents:
 
 1. A malicious contributor
-1. Someone just cleaning up old Gists
-1. A problem in the ceremony
+2. Someone just cleaning up old Gists
+3. A problem in the ceremony
 
 ## Ceremony Security
 

@@ -22,7 +22,7 @@ We recommend option 1 during development, option 2 for applications involving pr
 
 :::tip
 
-[prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
+[prove\_with\_opts][prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
 
 :::
 

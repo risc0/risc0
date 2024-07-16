@@ -17,7 +17,7 @@ This approach allows us to offer users a simple API for composition while still 
 
 To use proof composition in your program, you'll need to call [`add_assumption()`] on the host-side and [`env::verify()`] on the guest-side, as demonstrated in this [code example].
 
-Assumptions will be automatically resolved when you call [Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
+Assumptions will be automatically resolved when you call [Prover::prove\_with\_opts][Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
 
 ## How it works
 
@@ -35,7 +35,7 @@ This results in a "conditional receipt."
 ### Resolve an assumption
 
 In order to finish the process of proof composition, assumptions must be resolved.
-This is accomplished via `resolve`, which is called automatically when users call [Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
+This is accomplished via `resolve`, which is called automatically when users call [Prover::prove\_with\_opts][Prover::prove_with_opts] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
 
 ![Resolving an assumption][composition-resolve]
 

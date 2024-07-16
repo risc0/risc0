@@ -21,8 +21,7 @@ cargo risczero new hello-world --guest-name hello_guest
 cd hello-world
 ```
 
-In the project folder, `hello-world`, build and run the project using `cargo run
---release`. Use this command any time you'd like to check your progress.
+In the project folder, `hello-world`, build and run the project using `cargo run --release`. Use this command any time you'd like to check your progress.
 
 ## Step 2 (Host): Share private data as input with the guest
 
