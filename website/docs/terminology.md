@@ -75,10 +75,11 @@ See also: [Code reference for control root]
 
 ### Deterministic Builds
 
-Our [cargo risczero] tool offers a deterministic compilation from user-written Rust code to RISC-V binary.
-Compiled binary files are identified by their [imageID].
+A compilation process is called "deterministic" (or "reproducible") if it reliably produces the same binary file, on a byte-by-byte level.
 
-Deterministic builds are made possible by running the `cargo` compiler inside a Docker container. Without deterministic builds, the zkVM only proves correct execution of a given binary file. With deterministic builds, users can prove correct execution of Rust code.
+In the context of RISC Zero application development, deterministic builds are necessary to ensure a clear linkage between the source code for the [guest program] and the resulting [Image ID][ImageID].
+
+To access deterministic builds for your zkVM application, use [`cargo risczero build`]. Deterministic builds are made possible by running the `rustc` compiler inside a Docker container.
 
 ### ELF Binary
 
@@ -259,6 +260,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [assumption]: #assumption
 [assumptions]: #assumption
 [cargo risczero]: https://docs.rs/crate/cargo-risczero/latest
+[`cargo risczero build`]: https://docs.rs/crate/cargo-risczero/latest
 [circuit]: #circuit
 [clock cycles]: #clock-cycles
 [Code reference for control root]: https://github.com/risc0/risc0/blob/v0.21.0/risc0/circuit/recursion/src/control_id.rs#L16
