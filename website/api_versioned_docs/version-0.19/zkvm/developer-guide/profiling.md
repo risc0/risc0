@@ -178,7 +178,7 @@ To visualize the profiling data using `pprof`, run:
 pprof -http=127.0.0.1:8089 ../target/riscv-guest/riscv32im-risc0-zkvm-elf/release/fibonacci profile.pb
 ```
 
-Then navigate to http://localhost:8089 in your browser.
+Then navigate to [http://localhost:8089](http://localhost:8089) in your browser.
 
 ## What to Expect
 

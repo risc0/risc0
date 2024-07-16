@@ -18,7 +18,7 @@ support for generating pprof files for cycle counts.
 
 [Sampling CPU profilers][profiler], as implemented by pprof and perf, provide a
 view of where your program is spending its time. It does so by recording the
-current call stack at a sampling interval. RISC Zero provides a "sampling" \[^1]
+current call stack at a sampling interval. RISC Zero provides a "sampling" [^1]
 CPU profiler for guest execution.
 
 ## Usage
@@ -92,11 +92,16 @@ web interface.
 
 <!-- prettier-ignore-start -->
 
-\[^1]:
-Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons: <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-\- It would be cost prohibitive to do so for all but quite short program executions.
-\- Introducing such heavy profiling would actually alter the performance characteristics in significant ways. <!-- -->
-In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
+[^1]: Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
+
+    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
+
+    - It would be cost prohibitive to do so for all but quite short program executions.
+    - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
+
+    <!-- -->
+
+    In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
 
 <!-- prettier-ignore-end -->
 

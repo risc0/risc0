@@ -132,7 +132,7 @@ These are using internally to the [Prover] implementations to produce [SuccinctR
 
 ## STARK-to-SNARK Wrapping
 
-All of the recursion programs in the previous section output a [SuccinctReceipt], which is a STARK proof (~200kB)
+All of the recursion programs in the previous section output a [SuccinctReceipt], which is a STARK proof (\~200kB)
 
 The final step in the recursion process is `compress()`, which outputs a [Groth16Receipt], which can be verified on-chain using the [RISC Zero Verifier Contract].
 
