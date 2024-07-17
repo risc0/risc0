@@ -97,7 +97,7 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 ### Extended Main Execution Trace
 
-- The Prover runs a computation in order to generate an [`Execution Trace`](./what_is_a_trace.md).
+- The Prover runs a computation in order to generate an [`Execution Trace`](./what-is-a-trace.md).
   - The `trace` is organized into `columns`, and the columns are categorized as `control columns`, `data columns`, and `auxiliary/accum columns`.
     - The `control columns` handle system initialization and shutdown, the initial program code to load into memory before execution, and other control signals that don't depend on the program execution.
     - The `data columns` contain the input and the computation data, both of which are private. These columns are committed in two orderings:

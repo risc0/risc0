@@ -42,7 +42,7 @@ should be sufficient for building your first application:
 ## Tools for Debugging & Optimization
 
 There are also a number of functions available to support with debugging and
-performance analysis. As above, we refer to the [`guest` module] for a full
+performance analysis. As above, we refer to the [`guest` module][risc0-zkvm-guest] for a full
 list, but include some highlights here:
 
 - **Count Cycles** <br/>
@@ -106,5 +106,5 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [quickstart]: ./quickstart.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
-[template]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
+[template]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter
 [zkVM]: ./zkvm_overview.md

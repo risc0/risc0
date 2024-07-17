@@ -1,0 +1,12 @@
+language = "C"
+
+[defines]
+"target_os = zkvm" = "DEFINE_ZKVM"
+"feature = export-syscalls" = "DEFINE_SYSCALLS"
+"feature = export-libm" = "DEFINE_LIBM"
+"feature = entrypoint" = "DEFINE_ENTRYPOINT"
+
+[parse]
+parse_deps = true
+extra_bindings = ["risc0-zkvm-platform"]
+clean = true

@@ -21,45 +21,45 @@ pub type ControlIds = [Digest; CONTROL_ID_ENTRIES];
 
 /// Control IDs for each power-of-two of the rv32im circuit using SHA-256.
 pub const SHA256_CONTROL_IDS: ControlIds = [
-    digest!("6d0ed860e3effc3cc00114075cb29630b583d227b5654adaf0e9a4e4926144a4"), //
-    digest!("8f4880393dbb0dccf06e78081ca4f81b56e57ca5a0d056d927d41d1f19d0eb78"), //
-    digest!("5461f6a04636ec3e513511de5b324e92ec027de3c3c2d5b56edcf28f21a2797e"), //
-    digest!("aa0fe87d397a845d6c63b7896a031e2fd9d221e02625741ce631cf060542842d"), //
-    digest!("fd2551902a296fcdc2d49ecbd7b2140b5b8adfb86023e4e2c1ad433e9d4e5487"), //
-    digest!("204f8e50713cd5da7a41c128d1dd27b722ea0d6c21c785a9a608df13dcadc108"), //
-    digest!("90d0d9c5bbb5ad02dd004a83e29a6ede8ed35d33a762bbf14f8fd323a8053fbf"), //
-    digest!("3b652874501bcbb2d3283f4a6640fbc292f9db0c3353b1b5d058c79ab9e684ed"), //
-    digest!("23ef25c5d5e356bab81c4905e499de9161596435839366c2b0e8fb3c6d8f2232"), //
-    digest!("bb795263e615f72c0fb6b8d07c8dba82d1a8b5a53870b106ffe738a4f8943dc0"), //
-    digest!("55330f0d062c6972bf3f65c4e5055544e20c9f776f6797f4428f7b3a6fbf0573"), //
+    digest!("fa82a26d5e99ae1abcabc424cfb79264fbdb098615d5fc10dc843753f8998d82"), // rv32im po2=13
+    digest!("e24a177f14dbc745c6f5ec2b7aecf5e474193aaad1ed13a8e2a9c6ca08b129df"), // rv32im po2=14
+    digest!("83b916c5a88ec9d3b39a6a102273fe1f4644a6747a16dda4f52b7e4cf6a595fd"), // rv32im po2=15
+    digest!("89a28a558e290bc212520d767344e0ced2fa9faaaf12fdbef67c6a824e0f269d"), // rv32im po2=16
+    digest!("9133ae1e559cf7432e89731bbf73ed37d1a14703d7c5cdde1b69d1e0b9307363"), // rv32im po2=17
+    digest!("6ee4730e73eb1772750874958e4ffac9291705a1f79e9a11b7712270ea6747e8"), // rv32im po2=18
+    digest!("9c0498f6267afc352ed7def9d8421899526139e2909a3cdbd1cbe34ee5d73412"), // rv32im po2=19
+    digest!("a7a1079a925e06581200bd943371aa44eaa5a553a5f5a92b27a416cbbc7bee3e"), // rv32im po2=20
+    digest!("0d85ecb4d16be50857cf50883e5b66e3f7185b2aeb5a7479cfad24ec61306b9b"), // rv32im po2=21
+    digest!("a60d1c94faf9ca4be54d70518502139d260882d0d981d6199152b9e1468db984"), // rv32im po2=22
+    digest!("5a10d231bc367d19130b29acb569eb7f3827b67e47a271f947e3e209945283f1"), // rv32im po2=23
 ];
 
 /// Control IDs for each power-of-two of the rv32im circuit using Poseidon2.
 pub const POSEIDON2_CONTROL_IDS: ControlIds = [
-    digest!("55ba2d763ec3c016c0f97c298507115c77e0a25215e5771ba501d016edca522c"), //
-    digest!("c265954c4dcb2155e041286a246bfe400ba9d042d919aa3cb1a299651f84c13e"), //
-    digest!("467cd61da86f37347b45e64b5d4665308871bc301c67ba6c6d13c9470c3e4840"), //
-    digest!("57b2031d3881e92b85d73d2d0800a223fdaccd5e7bdd0a569c10556ec138f551"), //
-    digest!("c1f19103f8376c00fe20f62aa4370f628efe3a4a5eb1a5739466c944cf7dfe31"), //
-    digest!("548ec1774c6c833b18db2e2a1464cb1923c6c721df87b437509ba87292d20529"), //
-    digest!("ce535b3b10e4cc212842b90a918553633c4f5375dee51d4788798765df5a8750"), //
-    digest!("7dea3854a91c906f92f23a291340066ecbd5375669fe752a5047c926e4d56747"), //
-    digest!("dca31f53c5bf4c67ecdc9f1035cf5934072afc29573a1845100d6140befab657"), //
-    digest!("12da4520930b1740810a69428c02fb2fcb586763a0e3794c45196608b594dd69"), //
-    digest!("5c2dce7226ff9073b8e38919583c01375f11395111e9ae3bfd519b57f84a5e00"), //
+    digest!("30dae603fcd283331d01105ea129ce43a0957a59b4f0013359a5642dfda0ba26"), // rv32im po2=13
+    digest!("2afea6024b79430b49f60518f27d7262f2ec5b1306a9030cc2e4d955e5dc5964"), // rv32im po2=14
+    digest!("8dc2760e1e24082cb66c83470c24a8017e95ce4d5eab170522f783418d545e72"), // rv32im po2=15
+    digest!("35feaa4eebbefd45b0a36a350671c82154f90c660389ed3a8ff7bd2a30805973"), // rv32im po2=16
+    digest!("7436486fdf9a7d3a3f8a03263bc7541a3c173c2ab5d2eb2c53939d0243dc0d16"), // rv32im po2=17
+    digest!("3abdc115ddf6af1977863c29c0f2b91f8c0c2a1c35e82158104b651f6a07a816"), // rv32im po2=18
+    digest!("17d75c070f373f333bbbaf33a688bb74fc05670435cd5d6378d37b608448e300"), // rv32im po2=19
+    digest!("f3cf1217485c403cea526b1e52e70835c31bdc6e3016ee12916f6c6561fc0977"), // rv32im po2=20
+    digest!("4043ce1426811d4f0e6a9c27256d052513c95739e9b80c74f628f313c739b75c"), // rv32im po2=21
+    digest!("b4edfc3f2c49f10285bcdc7493eb81063959820a59569356fb73b62c1586e01f"), // rv32im po2=22
+    digest!("cc1bd6753bb8fd41d41bba14bb56e90ffa9ddf4f20f7727734d140675a9cc52b"), // rv32im po2=23
 ];
 
 /// Control IDs for each power-of-two of the rv32im circuit using Blake2b.
 pub const BLAKE2B_CONTROL_IDS: ControlIds = [
-    digest!("1f682e2ecfc82580667b8549ce548310f79f7055195d1f3a70d11565dd7c8311"), //
-    digest!("66c3c1e1293ec0deea97cd1531a4fb202f7c57c3fa9908598519b12776272f37"), //
-    digest!("e8a718749c38e77f1a52856568669d38591e5ee3deed15e251b4cd45994e56f7"), //
-    digest!("3010f3679241489056004ab35e7b0c5feae8a6b45fe46f2c17e65e681e43ef25"), //
-    digest!("a01d6a57f7aec62ffec3edcc5347c2acb88abdb0460e516d1b7d984f487dfce4"), //
-    digest!("ba388a957a36a9a514fe5efe738f497fec585e267bcb6fb0a9d79b22f5cb34b1"), //
-    digest!("e2fba32638e85de83c7ce06c41d48bb159efa0ec58de2e3ed4c172c7fc82b6e5"), //
-    digest!("d9edf22d1c828087fec2fce4cf46261e8b6e8072b29f4beffbfc36309ae0e9d9"), //
-    digest!("f04cfc7c358eaa225ee249e88b804a92679b43adf51b5cef1d0fef40c3afbc06"), //
-    digest!("98b1e437c659b0435b5829a5d2fe697d08fc4b02641747d0f7d6b171b9c83415"), //
-    digest!("68ada0a6c57d353b2a3645d42854365acd1aa453faebda9988b75c5802f4a1be"), //
+    digest!("1a7f7747c8716881e4e90c36128958ff730e59994cc624dc37a7ad58b1b55045"), // rv32im po2=13
+    digest!("3abb9f97c96ccd3b9c79477a9ffa6aec4cf3a478594158b7996c303131086f1e"), // rv32im po2=14
+    digest!("e62527b7ea63e68243d8a2017d3884d08f9124526da3a2cf44a6e117de018404"), // rv32im po2=15
+    digest!("3f66b9557123bba91b459ff231e0427e677c216a328b634ff28fc984d2a07529"), // rv32im po2=16
+    digest!("50feac663f707817cbc4b9cc0f0fa2852cd8612a8b567e00713e293ecb4d13c0"), // rv32im po2=17
+    digest!("c1c16aa53313bccc806643cf08d39d33b8a07ba5665519880d53e2808950da88"), // rv32im po2=18
+    digest!("49e896cbd61bee4ab937877a1f62941fb38a728d528487d08fc5e28e84d8c09c"), // rv32im po2=19
+    digest!("ba77e8ec037cea89033de1d4c9bc81bdfd7072018f697d0c8189e2d6fc859af6"), // rv32im po2=20
+    digest!("87f1d53aa67abf141f10d14075de1c32b6ac818110bc1e5a90021ea9b8024c31"), // rv32im po2=21
+    digest!("04d5432e6e4ce69dcf868b08418c1a30ef9e4d0cf350e889e1c2436095b06058"), // rv32im po2=22
+    digest!("d0a94a254af9bfc8e457d5f84afe5150d680579cff65e37140720aa112e63b9f"), // rv32im po2=23
 ];

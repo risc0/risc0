@@ -36,7 +36,7 @@ The documentation on this site will teach you how to write software for the RISC
 
 ### [`zkvM Quick Start`]
 
-[`zkVM Quick Start`]: ./quickstart
+[`zkVM Quick Start`]: ./quickstart.md
 
 ## Building a zkVM Application
 

@@ -88,7 +88,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [receipt]: /terminology#receipt
 [Receipts]: receipts.md
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
-[these docs]: https://github.com/risc0/website
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
 [verifies]: /terminology#verify
 [verifying receipts]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#method.verify
 [zkVM Quick Start]: ../quickstart.md

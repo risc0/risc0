@@ -114,4 +114,4 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [security calculator]: https://github.com/risc0/risc0/pull/1661
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
-[Verifier Contract]: ./blockchain-integration/contracts/verifier
+[Verifier Contract]: ./blockchain-integration/contracts/verifier.md

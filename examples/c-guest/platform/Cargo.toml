@@ -1,0 +1,9 @@
+[package]
+name = "zkvm-platform"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-binfmt = { path = "../../../risc0/binfmt", default-features = false }
+risc0-zkp = { path = "../../../risc0/zkp", default-features = false }
+risc0-zkvm-platform = { path = "../../../risc0/zkvm/platform", features = ["rust-runtime", "export-syscalls"] }

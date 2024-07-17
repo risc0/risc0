@@ -110,7 +110,7 @@ impl Segment {
 
 /// A reference to a [Segment].
 ///
-/// This allows implementors to determine the best way to represent this in an
+/// This allows implementers to determine the best way to represent this in an
 /// pluggable manner. See the [SimpleSegmentRef] for a very basic
 /// implementation.
 pub trait SegmentRef: Send {

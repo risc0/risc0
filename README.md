@@ -63,7 +63,7 @@ running the zkVM is called the _host_. The guest and the host can communicate
 with each other during the execution of the method, but the host cannot modify
 the execution of the guest in any way, or the proof being generated will be
 invalid. During execution, the guest code can write to a special append-only log
-called the _journal_ that represents the official output of the computation.
+called the _journal_ which represents the official output of the computation.
 
 Presuming the method terminated correctly, a _receipt_ is produced, which
 provides the proof of correct execution. This receipt consists of 2 parts: the
@@ -75,9 +75,9 @@ was done to the journal or the seal, the receipt will fail to verify.
 Additionally, it is cryptographically infeasible to generate a valid receipt
 unless the output of the journal is the exactly correct output for some valid
 execution of the method whose image ID matches the receipt. In summary, the
-receipt acts as a zero knowledge proof of correct execution.
+receipt acts as a zero-knowledge proof of correct execution.
 
-Because the protocol is zero knowledge, the verifier cannot infer anything about
+Because the protocol is zero-knowledge, the verifier cannot infer anything about
 the details of the execution or any data passed between the host and the guest
 (aside from what is implied by the data written to the journal and the correct
 execution of the code).
@@ -152,7 +152,7 @@ Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for the full instructions.
 
 | crate                       | [crates.io]                                                                                                      | [docs.rs](https://docs.rs)                                                                                    |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| bonsai-sdk                  | [![x](https://img.shields.io/badge/crates.io-v0.8-orange)](https://crates.io/crates/bonsai-sdk)                  | [![](https://img.shields.io/docsrs/bonsai-sdk)](https://docs.rs/bonsai-sdk)                                   |
+| bonsai-sdk                  | [![x](https://img.shields.io/badge/crates.io-v0.9-orange)](https://crates.io/crates/bonsai-sdk)                  | [![](https://img.shields.io/docsrs/bonsai-sdk)](https://docs.rs/bonsai-sdk)                                   |
 | risc0-binfmt                | [![x](https://img.shields.io/badge/crates.io-v1.0-orange)](https://crates.io/crates/risc0-binfmt)                | [![](https://img.shields.io/docsrs/risc0-binfmt)](https://docs.rs/risc0-binfmt)                               |
 | risc0-build                 | [![x](https://img.shields.io/badge/crates.io-v1.0-orange)](https://crates.io/crates/risc0-build)                 | [![](https://img.shields.io/docsrs/risc0-build)](https://docs.rs/risc0-build)                                 |
 | risc0-build-kernel          | [![x](https://img.shields.io/badge/crates.io-v1.0-orange)](https://crates.io/crates/risc0-build-kernel)          | [![](https://img.shields.io/docsrs/risc0-build-kernel)](https://docs.rs/risc0-build-kernel)                   |

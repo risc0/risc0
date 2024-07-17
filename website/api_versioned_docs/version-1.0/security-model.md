@@ -123,5 +123,5 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkp/src/prove/soundness.rs
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
-[Verifier Contract]: ./blockchain-integration/contracts/verifier
+[Verifier Contract]: ./blockchain-integration/contracts/verifier.md
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/version-management-design.md

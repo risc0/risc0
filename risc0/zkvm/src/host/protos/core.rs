@@ -36,7 +36,7 @@ pub struct ReceiptMetadata {
     pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 /// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
-/// In Rust, they are distinct types becaue Rust needs to size everything on the
+/// In Rust, they are distinct types because Rust needs to size everything on the
 /// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
 /// have different sizes. Protobuf handles this without issue.
 #[allow(clippy::derive_partial_eq_without_eq)]
