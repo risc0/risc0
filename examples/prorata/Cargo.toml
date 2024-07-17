@@ -14,5 +14,4 @@ rust_decimal = "1.29"
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-metal = ["risc0-zkvm/metal"]
 prove = ["risc0-zkvm/prove"]

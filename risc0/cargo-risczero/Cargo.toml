@@ -71,5 +71,4 @@ experimental = [
   "dep:zip",
   "risc0-zkvm/prove",
 ]
-metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]

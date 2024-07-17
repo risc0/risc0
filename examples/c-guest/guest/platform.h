@@ -307,7 +307,7 @@ void env_commit(struct sha256_state *hasher, const uint8_t *bytes_ptr, uint32_t 
  * # Safety
  * Assumes that the buffer has at least `len` bytes allocated.
  */
-void env_read(uint8_t *bytes_ptr, uint32_t len);
+uint32_t env_read(uint8_t *bytes_ptr, uint32_t len);
 
 #if defined(DEFINE_SYSCALLS)
 /**
