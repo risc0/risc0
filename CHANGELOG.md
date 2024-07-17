@@ -4,6 +4,12 @@
 
 TBD
 
+## [v1.0.3 (2024-07-16)](https://github.com/risc0/risc0/releases/tag/v1.0.3)
+
+### 🛠 Fixes
+
+* Fix client/server version compatibility.
+
 ## [v1.0.2 (2024-07-11)](https://github.com/risc0/risc0/releases/tag/v1.0.2)
 
 ### ⚡️ Features
