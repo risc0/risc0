@@ -118,11 +118,11 @@ proofs.
 [cargo-risczero]: https://docs.rs/cargo-risczero
 [Discord]: https://discord.gg/risczero
 [examples]: ../examples.md
-[guest]: /terminology#guest-program
-[host]: /terminology#host-program
+[guest]: /website/docs/terminology.md#guest-program
+[host]: /website/docs/terminology.md#host-program
 [install]: ../install.md
 [issue]: https://github.com/risc0/risc0/issues/new/choose
-[journal]: /terminology#journal
-[prover]: /terminology#prover
-[receipt]: /terminology#receipt
-[seal]: /terminology#seal
+[journal]: /website/docs/terminology.md#journal
+[prover]: /website/docs/terminology.md#prover
+[receipt]: /website/docs/terminology.md#receipt
+[seal]: /website/docs/terminology.md#seal
