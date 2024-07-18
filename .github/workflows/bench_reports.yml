@@ -31,15 +31,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [prove]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: prove
+            device: cpu
           - os: Linux
             feature: cuda
             device: nvidia_rtx_3090_ti
           - os: macOS
-            feature: metal
+            feature: prove
             device: apple_m2_pro
 
     env:
