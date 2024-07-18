@@ -185,7 +185,12 @@ export default {
         },
         {
           type: "doc",
-          label: "Security Model",
+          label: "Secure Development Lifecycle",
+          id: "secure-sdlc",
+        },
+        {
+          type: "doc",
+          label: "Cryptographic Security",
           id: "security-model",
         },
         {
