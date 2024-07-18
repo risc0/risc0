@@ -515,14 +515,14 @@ below.
 [example-waldo]: https://github.com/risc0/risc0/tree/release-1.0/examples/waldo
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
-[hibernates]: https://en.wikipedia.org/wiki/Hibernation_\(computing\)
+[hibernates]: https://en.wikipedia.org/wiki/Hibernation_%28computing%29
 [ilp]: https://en.wikipedia.org/wiki/Instruction-level_parallelism
 [image ID]: /terminology#image-id
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
 [op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
-[os-page]: https://en.wikipedia.org/wiki/Page_\(computer_memory\)
+[os-page]: https://en.wikipedia.org/wiki/Page_%28computer_memory%29
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [perf-book]: https://nnethercote.github.io/perf-book/
 [pprof]: https://github.com/google/pprof
