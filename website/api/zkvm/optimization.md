@@ -52,7 +52,7 @@ Don’t assume you know what the bottlenecks are. Measure and experiment.
 If you make a function 100x faster (or ∞x faster) but it only takes 1% of your
 execution time, you’ll see less than 1% improvement in performance. This is
 generally referred to as [Amdahl’s Law][amdhal], and practically it means you
-shouldn't waste your time optimizing something that's not the taking a
+shouldn't waste your time optimizing something that's not taking a
 significant portion of execution time.
 
 ### Measuring by printing to console
