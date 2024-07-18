@@ -246,10 +246,6 @@ impl<'a> SyscallContext for ContextAdapter<'a> {
         self.ctx.peek_register(idx).unwrap()
     }
 
-    fn load_u8(&mut self, addr: u32) -> Result<u8> {
-        self.ctx.peek_u8(ByteAddr(addr))
-    }
-
     fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
         self.ctx.peek_region(ByteAddr(addr), size)
     }

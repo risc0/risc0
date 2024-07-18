@@ -75,7 +75,8 @@ impl<'a> ChildExecutor<'a> {
         // The return value of sys_fork is the pid, so set a0 to PID_CHILD.
         registers[REG_A0] = PID_CHILD;
 
-        let posix_io = PosixIo::default();
+        let mut posix_io = PosixIo::new();
+        posix_io.with_write_fd(4, vec![]);
 
         let mut syscall_table = SyscallTable::new();
         syscall_table
@@ -281,10 +282,6 @@ impl<'a> SyscallContext for ChildExecutor<'a> {
 
     fn load_register(&mut self, idx: usize) -> u32 {
         EmuContext::load_register(self, idx).unwrap()
-    }
-
-    fn load_u8(&mut self, addr: u32) -> Result<u8> {
-        ChildExecutor::load_u8(self, ByteAddr(addr))
     }
 
     fn load_u32(&mut self, addr: u32) -> Result<u32> {

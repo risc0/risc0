@@ -787,9 +787,21 @@ extern "C" {
     pub fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
 }
 
+/// sys_fork() creates a new process by duplicating the calling process. The new
+/// process is referred to as the child process. The calling process is referred
+/// to as the parent process.
+///
+/// The child process and the parent process run in separate memory spaces. At
+/// the time of sys_fork() both memory spaces have the same content.
+///
+/// # Return Value
+///
+/// On success, the PID of the child process (1) is returned in the parent, and
+/// 0 is returned in the child. On failure, -1 is returned in the parent, no
+/// child process is created.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_fork() -> u32 {
-    let Return(a0, _) = syscall_0(nr::SYS_FORK, null_mut(), 0);
+pub extern "C" fn sys_fork() -> u32 {
+    let Return(a0, _) = unsafe { syscall_0(nr::SYS_FORK, null_mut(), 0) };
     a0
 }

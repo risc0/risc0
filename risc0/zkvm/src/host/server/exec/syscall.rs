@@ -66,9 +66,6 @@ pub trait SyscallContext {
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
 
-    /// Loads an individual byte from memory.
-    fn load_u8(&mut self, addr: u32) -> Result<u8>;
-
     /// Loads an individual word from memory.
     fn load_u32(&mut self, addr: u32) -> Result<u32>;
 
@@ -92,9 +89,7 @@ impl<'a> SyscallTable<'a> {
     }
 
     pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
-        let mut this = Self {
-            inner: HashMap::new(),
-        };
+        let mut this = Self::new();
 
         let sys_verify = SysVerify::new(env.assumptions.clone());
 

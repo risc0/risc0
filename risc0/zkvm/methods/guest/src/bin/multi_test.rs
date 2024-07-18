@@ -28,7 +28,10 @@ use core::{arch::asm, ptr};
 use getrandom::getrandom;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
-    guest::{env, memory_barrier, sha},
+    guest::{
+        env::{self, next_fd, FdReader, FdWriter, Read as _, Write as _},
+        memory_barrier, sha,
+    },
     sha::{Digest, Sha256},
     Assumption, ReceiptClaim,
 };
@@ -343,12 +346,20 @@ fn main() {
             }
         }
         MultiTestSpec::SysFork => {
-            let pid = unsafe { sys_fork() };
+            let content = [3, 1, 3, 3, 7];
+            let fd = next_fd();
+            let pid = sys_fork();
             if pid == 0 {
                 env::log("child");
+                let mut writer = FdWriter::new(fd, |_| {});
+                writer.write_slice(&content);
                 sys_halt(0, ptr::null());
             } else {
                 env::log("parent");
+                let mut reader = FdReader::new(fd);
+                let mut buf: [u32; 5] = [0; 5];
+                reader.read_slice(&mut buf);
+                assert_eq!(buf, content);
             }
         }
     }
