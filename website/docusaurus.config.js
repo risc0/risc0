@@ -4,7 +4,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import katex from "rehype-katex";
 import math from "remark-math";
-import rustCode from "./src/remark/rust";
+import rustCode from "./src/remark/rust.js";
 
 const baseUrl = process.env.BASE_URL ?? "/";
 
