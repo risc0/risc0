@@ -47,6 +47,7 @@
       "remark-gfm",
       "remark-directive",
       "remark-math",
+      "./remark-append-md.js",
       [
         "remark-lint-no-emphasis-as-heading",
         false
@@ -124,6 +125,7 @@
     "remark-preset-lint-markdown-style-guide": "6.0.0",
     "remark-preset-lint-recommended": "7.0.0",
     "remark-toc": "9.0.0",
+    "remark-wiki-link": "2.0.1",
     "swc-loader": "0.2.6"
   },
   "packageManager": "bun@1.1.20"
