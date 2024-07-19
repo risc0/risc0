@@ -4,9 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-risc0-build = { path = "../../../risc0/build" }
-risc0-zkvm = { path = "../../../risc0/zkvm" }
-semver = "1.0"
+util = { path = "../../util" }
 
 [package.metadata.risc0]
 methods = ["guest"]

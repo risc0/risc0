@@ -1,0 +1,10 @@
+[package]
+name = "util"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+
+[dependencies]
+risc0-zkvm = { path = "../../risc0/zkvm" }
+risc0-build = { path = "../../risc0/build" }
