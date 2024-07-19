@@ -2223,6 +2223,8 @@ name = "hello-world-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm",
+ "semver",
 ]
 
 [[package]]
@@ -4189,6 +4191,7 @@ dependencies = [
  "prost",
  "rand",
  "rayon",
+ "regex",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",

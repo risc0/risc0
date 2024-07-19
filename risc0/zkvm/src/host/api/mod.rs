@@ -125,6 +125,8 @@ impl ConnectionWrapper {
 pub trait Connector {
     /// Create a client-server connection
     fn connect(&self) -> Result<ConnectionWrapper>;
+    /// TODO
+    fn server_path(&self) -> Option<PathBuf>;
 }
 
 struct ParentProcessConnector {
@@ -150,6 +152,10 @@ impl ParentProcessConnector {
 }
 
 impl Connector for ParentProcessConnector {
+    fn server_path(&self) -> Option<PathBuf> {
+        Some(self.server_path.clone())
+    }
+
     fn connect(&self) -> Result<ConnectionWrapper> {
         let addr = self.listener.local_addr()?;
         let child = Command::new(&self.server_path)
@@ -200,6 +206,10 @@ impl TcpConnector {
 }
 
 impl Connector for TcpConnector {
+    fn server_path(&self) -> Option<PathBuf> {
+        None
+    }
+
     fn connect(&self) -> Result<ConnectionWrapper> {
         tracing::debug!("connect");
         let stream = TcpStream::connect(&self.addr)?;

@@ -5,6 +5,8 @@ edition = "2021"
 
 [build-dependencies]
 risc0-build = { path = "../../../risc0/build" }
+risc0-zkvm = { path = "../../../risc0/zkvm" }
+semver = "1.0"
 
 [package.metadata.risc0]
 methods = ["guest"]

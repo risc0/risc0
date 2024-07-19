@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::Path;
+use std::process::Command;
+use std::{path::Path, string::String};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
@@ -410,6 +411,22 @@ impl Client {
         }
 
         result
+    }
+
+    /// get the version of the server
+    pub fn get_server_version(&self) -> Result<semver::Version> {
+        let server_path = match self.connector.server_path() {
+            None => bail!("something went wrong"),
+            Some(path) => path,
+        };
+        let output = Command::new(server_path.as_os_str()).arg("--version").output()?;
+        let version_output = String::from_utf8(output.stdout)?;
+        let reg = regex::Regex::new(r".* (.*)\n$")?;
+        let caps = match reg.captures(&version_output) {
+            Some(caps) => caps,
+            None => bail!("failed to parse server version number"),
+        };
+        return semver::Version::parse(&caps[1]).map_err(|e| anyhow!(e));
     }
 
     fn connect(&self) -> Result<ConnectionWrapper> {
