@@ -41,7 +41,7 @@ Don't worry -- each `TODO` comes with instructions for what you need to do, and 
 
 ## 4. Run your project, locally or remotely
 
-The readme for your project includes instructions for how to run it, both locally or remotely.
+The README for your project includes instructions for how to run it, both locally or remotely.
 You can build your example and run the prover locally with:
 
 ```bash
@@ -57,7 +57,7 @@ You can build and run your zkVM applications using your own hardware, or you can
 ### Local Proving
 
 To run the zkVM on your own machine, we recommend at least 16GB of RAM.
-The readme files on the [zkVM demo applications] show `cargo` commands for local proof generation.
+The README files on the [zkVM demo applications] show `cargo` commands for local proof generation.
 
 ### Remote Proving
 

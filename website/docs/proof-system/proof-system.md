@@ -51,7 +51,7 @@ generate proofs on their own hardware using the implementations available at our
 [GitHub]. Users may also choose to delegate the work of proof generation to
 [Bonsai].
 
-Read more about our philosophy on open-source software [here][open-source].
+[Read more about our philosophy on open-source software][open-source].
 
 ## Learn More
 

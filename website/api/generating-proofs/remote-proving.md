@@ -35,7 +35,7 @@ You can request your individual limits using the [user/quotas][external-api-user
 
 ### Understanding cycle counts
 
-You can log the cycle count and other performance info for your zkVM Guest program by following the instructions [here][docs-executor-statistics].
+You can log the cycle count and other performance info for your zkVM Guest program by following [these instructions][docs-executor-statistics].
 
 [docs-executor-statistics]: ../zkvm/quickstart.md#executor-statistics
 [docs-zkVM]: ../zkvm/zkvm-overview.md

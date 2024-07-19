@@ -69,7 +69,7 @@ compiler, state continuations, and continuous improvements to the proving
 algorithm, Bonsai enables anyone to generate highly performant ZK proofs for a
 variety of applications.
 
-Read more on Bonsai [here][Bonsai].
+[Read more on Bonsai ][Bonsai].
 
 ## The RISC Zero zkVM
 

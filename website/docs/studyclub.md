@@ -17,9 +17,9 @@ Join the session: [Zoom link] <br/>
 
 Join the conversation on [Discord](https://discord.gg/risczero).
 
-## Past Sessions
+### Past Sessions
 
-Full recordings and slides from past sessions are available [here](https://www.youtube.com/playlist?list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl)
+Full recordings and slides from past sessions are [available on YouTube](https://www.youtube.com/playlist?list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl).
 
 ### Showcases & Use Cases
 
@@ -51,7 +51,7 @@ Full recordings and slides from past sessions are available [here](https://www.y
 - [Intro to FRI](https://www.youtube.com/watch?v=YiYN6UgE8sQ\&list=PLcPzhUaCxlCi6rRRiIlkzJ_YELUlKO4Mz)
 - [FRI Mechanics: Folding, Committing, and Batching](https://www.youtube.com/watch?v=wqRuoyH3Mqk\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=8)
 
-## Other Educational Videos
+### Other Educational Videos
 
 You may also be interested in some of our other [talks and podcasts](https://www.youtube.com/watch?v=MYYb5TXdm4c\&list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1) or our developer-focused workshops from [ZKHack III](https://www.youtube.com/watch?v=ZFVjooWdXVE\&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5) and [ZKHack Lisbon](https://www.youtube.com/watch?v=saVD9qo3aJ0).
 

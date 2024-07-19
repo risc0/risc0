@@ -45,7 +45,7 @@ Bonsai lets you integrate zero-knowledge proofs directly into any smart contract
 
 Our zkVM is the foundation of Bonsai and enables widespread language compatibility with support for provable Rust code and the potential for zero-knowledge provable code in any language that compiles to RISC-V like C++, Rust, Go, and more. With a combination of recursive proofs, a bespoke circuit compiler, state continuations, and continuous improvements to the proving algorithm, Bonsai enables anyone to generate highly performant ZK proofs for a variety of applications.
 
-Read more on Bonsai [here](./bonsai/bonsai-overview.md).
+[Read more on Bonsai](./bonsai/bonsai-overview.md).
 
 ## The RISC Zero zkVM
 
