@@ -15,7 +15,7 @@ _This page describes guidelines for community contributions to this [website](ht
 - All changes to this website are managed through GitHub pull requests, so you'll need a [GitHub Account](https://github.com) to contribute.
 - You can suggest an edit directly via the `Edit this Page` button at the bottom of each page.
 - To create a new page, you can use the [GitHub browser interface](https://github.com/risc0/risc0/tree/main/website); the content is in `src/pages` and `docs`.
-  - Please read about [the navbar and sidebars](./contributors-guide.md#navbar-and-sidebars) and [categories of documentation](./contributors-guide.md#categories-of-documentation) before creating a new page.
+  - Please read about [the navbar and sidebars](./contributors-guide.md#navbar-and-sidebars) before creating a new page.
 - If you want to clone the repository and work locally, you may want to check out the [Docusaurus documentation](https://docusaurus.io/docs/installation).
   We like to use `bun run start` to run a local build, especially when we're working with changes that involve links or sidebars.
 
