@@ -29,6 +29,7 @@ npm test -- --$BROWSER
 ```
 
 where `$BROWSER` is one of
+
 - `chrome`
 - `firefox`
 - `safari`

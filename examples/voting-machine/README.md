@@ -6,11 +6,11 @@ A simple voting machine built on the RISC Zero platform.
 
 ## Overview
 
-A *voting machine* is a state machine with three operations:
+A _voting machine_ is a state machine with three operations:
 
-* *Initialize*, which officials use to configure the machine;
-* *Submit ballot*, which voters use to submit their ballot;
-* *Freeze*, which reveals the current vote count & puts the machine into a state where it no longer accepts ballots.
+- _Initialize_, which officials use to configure the machine;
+- _Submit ballot_, which voters use to submit their ballot;
+- _Freeze_, which reveals the current vote count & puts the machine into a state where it no longer accepts ballots.
 
 Every time the voting machine updates its state it prints a "receipt" that
 commits it to that state. At the end of the election, officials can publish the

@@ -10,20 +10,20 @@ as, for example, the inputs provided) is revealed by publishing the
 Additional (non-reference) resources for using our zkVM that you may also
 find helpful, especially if you're new to the RISC Zero zkVM. These include:
 
-* Our [zkVM Tutorial], which walks you through writing your first zkVM
+- Our [zkVM Tutorial], which walks you through writing your first zkVM
   project.
-* The [`cargo risczero` tool]. It includes a `new` command which generates
+- The [`cargo risczero` tool]. It includes a `new` command which generates
   code for building and launching a zkVM guest and guidance on where
   projects most commonly modify host and guest code.
-* The [examples], which contains various examples using our zkVM.
-* [This clip][zkHack] from our presentation at ZK Hack III gives an overview
+- The [examples], which contains various examples using our zkVM.
+- [This clip][zkHack] from our presentation at ZK Hack III gives an overview
   of the RISC Zero zkVM. [Our YouTube channel][YouTube] has many more videos
   as well.
-* We track zkVM issues with known workarounds using the [rust guest
+- We track zkVM issues with known workarounds using the [rust guest
   workarounds] GitHub tag. If you're having problems running your code in
   the zkVM, you can see if there's a workaround, and if you're using a
   workaround, you can track when it gets resolved to a permanent solution.
-* And more on [the RISC Zero developer website][dev-docs]!
+- And more on [the RISC Zero developer website][dev-docs]!
 
 # Crate Feature Flags
 

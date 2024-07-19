@@ -1,6 +1,6 @@
 # Mini zkEVM on RISC Zero
 
-***Check out our [blogpost](https://www.risczero.com/news/continuations) on this example!***
+_**Check out our [blogpost](https://www.risczero.com/news/continuations) on this example!**_
 
 A demo of how to run an EVM engine within the Risc Zero zkVM. It uses the [revm](https://crates.io/crates/revm) crate as an EVM interpreter and does a pre-flight pass to capture all the relevant data from an Ethereum JSON-RPC interface.
 
@@ -8,14 +8,12 @@ Currently, this demo accepts an Ethereum transaction hash and replays the transa
 
 ## Limitations
 
-* It currently defaults to the revm default forkid which is BERLIN. Older transactions might vary in results.
-* This demo only runs pre-existing transactions by tx_hash.
+- It currently defaults to the revm default forkid which is BERLIN. Older transactions might vary in results.
+- This demo only runs pre-existing transactions by tx\_hash.
 
 ## Dependencies
 
 Follow the [examples guide] to install dependencies and check out the correct version of the example.
-
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 ## Building
 
@@ -48,3 +46,5 @@ Then run the test with:
 ```bash
 cargo test -p zkevm-core
 ```
+
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

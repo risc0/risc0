@@ -468,8 +468,6 @@ below.
 
 ---
 
-<!-- prettier-ignore-start -->
-
 [^1]: Here “sampling” is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
@@ -487,8 +485,6 @@ below.
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
-
-<!-- prettier-ignore-end -->
 
 [^2]: This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to

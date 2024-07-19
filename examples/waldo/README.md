@@ -1,15 +1,11 @@
 # Where's Waldo
 
-***Check out our [blogpost](https://www.risczero.com/news/waldo) about this example!***
+_**Check out our [blogpost](https://www.risczero.com/news/waldo) about this example!**_
 
 [Where's Waldo] is a [favorite analogy] for zero-knowledge proofs. In
 particular, there is this visual that if you take a Where's Waldo image and
 cover it up with a big piece of cardboard with a small cutout that just shows
 Waldo, you can prove you _know_ where he is while keeping that location secret.
-
-[Where's Waldo]: https://en.wikipedia.org/wiki/Where%27s_Wally%3F
-[favorite analogy]:
-    https://medium.com/swlh/a-zero-knowledge-proof-for-wheres-wally-930c21e55399
 
 But these days, why not implement a real zero-knowledge proof to show you know
 where Waldo is?
@@ -24,11 +20,9 @@ without revealing Waldo's coordinates.
 
 Follow the [examples guide] to install dependencies and check out the correct version of the example.
 
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-
 ### Run the Prover to construct a Receipt
 
-Now, you're ready to construct a [receipt] that proves you know where Waldo is located. From the `waldo` folder, run:
+Now, you're ready to construct a receipt that proves you know where Waldo is located. From the `waldo` folder, run:
 
 ```bash
 # Prove that you know where Waldo is in waldo.webp
@@ -47,9 +41,6 @@ cargo run --bin verify -- -i waldo.webp -r receipt.bin
 ```
 
 Running the verifier proves that the contents of the [journal] were indeed constructed by the binary file associated with the expected [ImageID].
-
-[journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
-[ImageID]: https://dev.risczero.com/terminology#image-id
 
 ## Approach
 
@@ -103,8 +94,6 @@ trait, many of the image operations provided in the `image` crate, and by
 [others], can be used on `ImageOracle` inside the guest. A similar approach
 could be used to produce a provable blur, image down-scaling, and more.
 
-[others]: https://docs.rs/imageproc/latest/imageproc/
-
 ## Run this example
 
 First, make sure [rustup](https://rustup.rs) is installed. This project uses a
@@ -122,3 +111,10 @@ cargo run --release --bin prove -- -i waldo.webp -x 1150 -y 291 --width 58 --hei
 # Verify that the prover actually found Waldo.
 cargo run --release --bin verify -- -i waldo.webp -r receipt.bin
 ```
+
+[Where's Waldo]: https://en.wikipedia.org/wiki/Where%27s_Wally%3F
+[favorite analogy]: https://medium.com/swlh/a-zero-knowledge-proof-for-wheres-wally-930c21e55399
+[others]: https://docs.rs/imageproc/latest/imageproc/
+[journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
+[ImageID]: https://dev.risczero.com/terminology#image-id
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

@@ -26,6 +26,7 @@ After that you can verify it works via:
 ```bash
 cargo risczero --version
 ```
+
 ### Docker
 
 In order to use the `build` command, you will need `docker` available in your
@@ -49,8 +50,8 @@ rustup toolchain list --verbose | grep risc0
 
 Note that the following pre-built host targets are available:
 
-* `aarch64-apple-darwin`
-* `x86_64-unknown-linux-gnu`
+- `aarch64-apple-darwin`
+- `x86_64-unknown-linux-gnu`
 
 If you'd like to install the toolchain on a host not listed above, you can use
 the `build-toolchain` command to build the toolchain locally.
@@ -83,10 +84,6 @@ Use the `build-toolchain` command to build the toolchain locally for your host.
 Warning: this may take a long time. The resulting toolchain will be
 automatically installed via `rustup toolchain link`.
 
-[risc-zero]: https://risczero.com
-[install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[rust-starter]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter
-
 ## build
 
 Use the `build` command to build guest code for the zkVM target
@@ -113,3 +110,7 @@ ImageID: 417778745b43c82a20db33a55c2b1d6e0805e0fa7eec80c9654e7321121e97af - "tar
 ImageID: c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/hello_commit"
 ImageID: a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
 ```
+
+[risc-zero]: https://risczero.com
+[install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[rust-starter]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter

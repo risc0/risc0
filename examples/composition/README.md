@@ -3,10 +3,8 @@
 This example demonstrates a basic usage of the proof composition feature.
 It builds upon the [hello world example], where the [guest program] verified that the prover knows a factorization of a composite number.
 
-To use proof composition, you'll need to use `add_assumption()` in the [host] side implementation (see the [`src/main.rs`] file), 
-and `env::verify()` for the [guest] side (see [`methods/guest/src/main.rs`]). 
-
-[hello world example]: ../hello-world
+To use proof composition, you'll need to use `add_assumption()` in the [host] side implementation (see the [`src/main.rs`] file),
+and `env::verify()` for the [guest] side (see [`methods/guest/src/main.rs`]).
 
 ## Quick Start
 
@@ -17,8 +15,6 @@ Then, run the example with:
 ```bash
 cargo run --release
 ```
-
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 ## Use Cases
 
@@ -43,19 +39,20 @@ By calculating this "encryption" in the zkVM, we produce a single receipt that v
 
 Some use cases for composition include:
 
-* Splitting a program into multiple parts, proven by different parties, to preserve privacy and data ownership of each party.
-  * E.g. Produce a proof that a ciphertext is a correct encryption of some value to a valid public key.
-  * E.g. Produce a proof for a database query by joining receipts from the query over each privately held shard.
-* Aggregating many proofs into one for efficient batch verification.
-  * E.g. Produce a proof for a block of transactions, where each transaction is itself verified by a receipt.
-* Creating a single receipt for a workflow that might be split into many different operations.
-  * E.g. Produce a single receipt for the result of an image processing pipeline, where different filters are in their own guests.
+- Splitting a program into multiple parts, proven by different parties, to preserve privacy and data ownership of each party.
+  - E.g. Produce a proof that a ciphertext is a correct encryption of some value to a valid public key.
+  - E.g. Produce a proof for a database query by joining receipts from the query over each privately held shard.
+- Aggregating many proofs into one for efficient batch verification.
+  - E.g. Produce a proof for a block of transactions, where each transaction is itself verified by a receipt.
+- Creating a single receipt for a workflow that might be split into many different operations.
+  - E.g. Produce a single receipt for the result of an image processing pipeline, where different filters are in their own guests.
 
+[hello world example]: ../hello-world
 [`env::verify`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.verify.html
-
 [`src/main.rs`]: src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [host]: https://dev.risczero.com/terminology#host
 [guest]: https://dev.risczero.com/terminology#guest-program
 [guest program]: https://dev.risczero.com/terminology#guest-program
 [receipts]: https://dev.risczero.com/terminology#receipt
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

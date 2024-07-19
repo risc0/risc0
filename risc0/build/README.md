@@ -1,4 +1,3 @@
-
 Build RISC Zero zkVM guest code and provide handles to the host side.
 
 In order for the host to execute guest code in the [RISC Zero
@@ -16,8 +15,8 @@ repository](https://github.com/risc0/risc0-rust-starter). In that repository,
 directory](https://github.com/risc0/risc0-rust-starter/tree/main/methods).
 
 Guest methods are embedded for the host to use by calling
-[embed_methods](crate::embed_methods) (or
-[embed_methods_with_options](crate::embed_methods_with_options)) in a [build
+[embed\_methods](crate::embed_methods) (or
+[embed\_methods\_with\_options](crate::embed_methods_with_options)) in a [build
 script](https://doc.rust-lang.org/cargo/reference/build-scripts.html). An
 example `build.rs` file would look like:
 
@@ -51,7 +50,7 @@ include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 
 This process will generate an image ID (`*_ID`) and the contents of an ELF
 file (`*_ELF`). The names will be derived from the name of the ELF
-binary, which will be converted to ALL_CAPS to comply with Rust naming
+binary, which will be converted to ALL\_CAPS to comply with Rust naming
 conventions. Thus, if a method binary is named `multiply`, the image ID
 will be named `methods::MULTIPLY_ID` and the contents of the ELF file will
 be named `methods::MULTIPLY_ELF`. These are included at the beginning

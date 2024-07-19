@@ -1,4 +1,4 @@
-# password_checker
+# password\_checker
 
 This simple password checker is implemented in Rust. The program is implemented in two parts: a policy checker (that runs in the zkVM) and a host driver (an ordinary command-line program that uses the zkVM to run the policy checker).
 
@@ -14,8 +14,6 @@ Then, run the example with:
 cargo run --release
 ```
 
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-
 ## Why use zkVM to run this?
 
 Our goal is to run our own password check locally without having to share our password directly with a recipient, preferring instead to share only a PBKDF2 SHA-256 password hash.
@@ -24,7 +22,7 @@ Because the validity-checking and hashing functionality runs on the zkVM, it gen
 ## Project organization
 
 The main program that calls a method in the guest zkVM is in [src/main.rs](src/main.rs).
-The code that runs inside the zkVM is in [methods/guest/src/bin/pw_checker.rs](methods/guest/src/bin/pw_checker.rs).
+The code that runs inside the zkVM is in [methods/guest/src/bin/pw\_checker.rs](methods/guest/src/bin/pw_checker.rs).
 The rest of the project is build support.
 
 For the main RISC Zero project, see [here](https://github.com/risc0/risc0).
@@ -35,4 +33,6 @@ This is example code meant to illustrate the fundamentals of programming with th
 
 ## Video Tutorial
 
-For a walk-through of the fundamentals of this example, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=Yg_BGqj_6lg&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5).
+For a walk-through of the fundamentals of this example, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=Yg_BGqj_6lg\&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5\&index=5).
+
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

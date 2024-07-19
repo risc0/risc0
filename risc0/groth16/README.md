@@ -2,7 +2,7 @@
 
 # Groth16
 
-This library implements a verifier for the Groth16 protocol over the BN_254 elliptic curve.
+This library implements a verifier for the Groth16 protocol over the BN\_254 elliptic curve.
 
 ## Example
 
@@ -40,4 +40,3 @@ crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
 [risc0-zkvm]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/
 
 <!-- cargo-rdme end -->
-

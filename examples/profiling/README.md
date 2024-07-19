@@ -3,6 +3,7 @@
 In this example we demonstrate how to profile on the RISC Zero zkVM guest programs, using the Fibonacci sequence calculation as an example.
 
 <!-- NOTE: This content matches the docs under website/api/zkvm/developer-guide/profiling.md -->
+
 ## Background
 
 Profiling tools, like [pprof] and [perf], allow collecting performance information over the entire execution of your program, and help create visualizations for the performance of your program.
@@ -12,10 +13,6 @@ RISC Zero has experimental support for generating pprof files for cycle counts.
 It does so by recording the current call stack at a sampling interval.
 RISC Zero provides a "sampling" [^1] CPU profiler for guest execution.
 
-[pprof]: https://github.com/google/pprof
-[perf]: https://perf.wiki.kernel.org/index.php/Main_Page
-[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
-
 ## Usage
 
 ### Step 1: Prerequisites
@@ -23,8 +20,6 @@ RISC Zero provides a "sampling" [^1] CPU profiler for guest execution.
 First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Additionally, you will need to [install Go], which bundles with it the [pprof] tool.
-
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 ### Step 2: Running
 
@@ -69,18 +64,23 @@ This can be helpful in understanding the efficiency of various algorithms and th
 Use the pprof web interface to compare the performance of the 3 Fibonacci implementations.
 Refer to the [pprof docs] for more information about the web interface.
 
+[^1]: Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
+
+    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
+
+    - It would be cost prohibitive to do so for all but quite short program executions.
+    - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
+
+    <!-- -->
+
+    In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
+
+[pprof]: https://github.com/google/pprof
+[perf]: https://perf.wiki.kernel.org/index.php/Main_Page
+[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [install Go]: https://go.dev/doc/install
 [official pprof documentation]: https://github.com/google/pprof/blob/main/doc/README.md
 [cycle count]: https://dev.risczero.com/terminology#clock-cycles
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [pprof docs]: https://github.com/google/pprof/blob/main/doc/README.md#web-interface-1
-
-<!-- prettier-ignore-start -->
-[^1]:
-    Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-    - It would be cost prohibitive to do so for all but quite short program executions.
-    - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
-    <!-- -->
-    In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
-<!-- prettier-ignore-end -->
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

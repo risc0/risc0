@@ -12,29 +12,6 @@
 [![Discord chat][discord-badge]][discord-url]
 [![Twitter][twitter-badge]][twitter-url]
 
-[actions-badge]: https://img.shields.io/github/actions/workflow/status/risc0/risc0/main.yml?branch=main
-[actions-url]: https://github.com/risc0/risc0/actions?query=workflow%3ACI+branch%3Amain
-[crates-badge]: https://img.shields.io/badge/crates.io-v1.0-orange
-[crates-url]: https://crates.io/crates/risc0-zkvm
-[discord-badge]: https://img.shields.io/discord/953703904086994974.svg?logo=discord&style=flat-square
-[discord-url]: https://discord.gg/risczero
-[licence-badge]: https://img.shields.io/github/license/risc0/risc0?color=blue
-[licence-url]: https://github.com/risc0/risc0/blob/main/LICENSE
-[twitter-badge]: https://img.shields.io/twitter/follow/risczero
-[twitter-url]: https://twitter.com/risczero
-[cargo-binstall]: https://github.com/cargo-bins/cargo-binstall#cargo-binaryinstall
-[cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
-[crates.io]: https://crates.io
-[examples]: https://github.com/risc0/risc0/tree/main/examples
-[install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[risc-v]: https://en.wikipedia.org/wiki/RISC-V
-[quickstart]: https://dev.risczero.com/api/zkvm/quickstart
-[zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
-[zksummit10-talk]: https://www.youtube.com/watch?v=wkIBN2CGJdc
-[security-model]: https://dev.risczero.com/api/security-model
-[proof-system-in-detail]: https://dev.risczero.com/proof-system-in-detail.pdf
-[soundness.rs]: risc0/zkp/src/prove/soundness.rs
-
 RISC Zero is a zero-knowledge verifiable general computing platform based on
 [zk-STARKs][zk-proof] and the [RISC-V] microarchitecture.
 
@@ -183,3 +160,23 @@ The following feature flags are present in one or more of the crates listed abov
 ## License
 
 This project is licensed under the Apache2 license. See [LICENSE](LICENSE).
+
+[actions-badge]: https://img.shields.io/github/actions/workflow/status/risc0/risc0/main.yml?branch=main
+[actions-url]: https://github.com/risc0/risc0/actions?query=workflow%3ACI+branch%3Amain
+[crates-badge]: https://img.shields.io/badge/crates.io-v1.0-orange
+[crates-url]: https://crates.io/crates/risc0-zkvm
+[discord-badge]: https://img.shields.io/discord/953703904086994974.svg?logo=discord&style=flat-square
+[discord-url]: https://discord.gg/risczero
+[licence-badge]: https://img.shields.io/github/license/risc0/risc0?color=blue
+[licence-url]: https://github.com/risc0/risc0/blob/main/LICENSE
+[twitter-badge]: https://img.shields.io/twitter/follow/risczero
+[twitter-url]: https://twitter.com/risczero
+[cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
+[crates.io]: https://crates.io
+[install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[risc-v]: https://en.wikipedia.org/wiki/RISC-V
+[quickstart]: https://dev.risczero.com/api/zkvm/quickstart
+[zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
+[zksummit10-talk]: https://www.youtube.com/watch?v=wkIBN2CGJdc
+[security-model]: https://dev.risczero.com/api/security-model
+[proof-system-in-detail]: https://dev.risczero.com/proof-system-in-detail.pdf
