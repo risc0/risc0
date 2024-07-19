@@ -79,7 +79,7 @@ fn fwd_rev_ab_test(program: Program) {
             use crate::prove::hal::cuda::CudaCircuitHalSha256;
             let hal = Rc::new(CudaHalSha256::new());
             let circuit_hal = CudaCircuitHalSha256::new(hal.clone());
-        } else if #[cfg(feature = "metal")] {
+        } else if #[cfg(any(target_os = "macos", target_os = "ios"))] {
             use risc0_zkp::hal::metal::MetalHalSha256;
             use crate::prove::hal::metal::MetalCircuitHal;
             let hal = Rc::new(MetalHalSha256::new());
