@@ -26,7 +26,8 @@ module.exports = function remarkAppendMd(options = {}) {
             let fullPath;
             if (urlPath.startsWith('/')) {
               // Absolute path
-              fullPath = path.join(projectRoot, urlPath);
+              // do nothing
+              // fullPath = path.join(projectRoot, urlPath);
             } else {
               // Relative path
               fullPath = path.resolve(baseDir, urlPath);

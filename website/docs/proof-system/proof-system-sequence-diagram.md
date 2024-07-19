@@ -8,7 +8,7 @@ In this document, we present an overview to the RISC Zero STARK protocol, as wel
 RISC Zero's [receipts][Receipt] are built on the shoulders of several recent advances in the world of zero-knowledge cryptography.
 The core of the proof system is [STARK]-based, implementing [DEEP-ALI & FRI].
 This proof system is used to generate zero-knowledge validity proofs for RISC Zero's RISC-V circuit and RISC Zero's recursion circuit.
-Users may also be interested in reading about the \[RISC Zero Groth16 Circuit], which enables on-chain verification.
+Users may also be interested in reading about the [RISC Zero Groth16 Circuit][groth16-circuit], which enables on-chain verification.
 
 At a high level, the design of the RISC Zero STARK protocol is very similar to the system described in [ethSTARK], and the system implemented in [Winterfell].
 
@@ -157,6 +157,7 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [ethSTARK]: https://eprint.iacr.org/2021/582.pdf
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
 [Image ID]: /terminology#image-id
+[groth16-circuit]: /terminology#groth16-circuit
 [log derivative]: https://eprint.iacr.org/2022/1530.pdf
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

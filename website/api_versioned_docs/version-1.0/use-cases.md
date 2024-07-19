@@ -4,7 +4,7 @@ Verifiable computation is a game changer for the resilience and economics of
 operating the computing infrastructure we all rely on. It creates a number of
 emergent use cases which we are excited to enable. Key among these are:
 
-- \[ZK Coprocessors]\[zk-coprocessor], which enable blockchain applications to reduce gas costs by
+- [ZK Coprocessors][zk-coprocessors], which enable blockchain applications to reduce gas costs by
   moving the expensive part of their application logic off-chain
 - Optimistic rollups with ZK fraud proofs, including [our work with Optimism][optimism]
 
@@ -60,3 +60,4 @@ Check out our [Getting Started] page.
 [Zeth]: https://risczero.com/news/zeth-release
 [zkpoex]: https://risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm-overview.md
+[zk-coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability

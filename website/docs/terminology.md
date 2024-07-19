@@ -191,7 +191,7 @@ The recursion circuit is used to aggregate and compose [proofs].
 
 ### Recursion Program
 
-The [recursion circuit] is capable of efficiently evaluating polynomial constraints, and was specifically designed to verify STARK proofs. Programs written for this circuit are loaded into the \[control columns]. Each recursion program is identified by a [Control ID].
+The [recursion circuit] is capable of efficiently evaluating polynomial constraints, and was specifically designed to verify STARK proofs. Programs written for this circuit are loaded into the control columns. Each recursion program is identified by a [Control ID].
 
 For a list of all supported recursion programs, see the documentation for the [zkVM API Client].
 

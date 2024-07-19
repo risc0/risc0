@@ -73,12 +73,12 @@ In our [template] and [examples], there's a bit of boilerplate code before
 Hopefully, this guide and the [zkVM Quick Start][quickstart] page will be
 sufficient for you to build your first [zkVM application][zkVM]!
 
-If you run into problems, don't be a stranger! You can file an issue on \[these
-docs] or the [examples], and we're happy to answer questions on [Discord].
+If you run into problems, don't be a stranger! You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [acceleration]: ./acceleration.md
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
 [Discord]: https://discord.gg/risczero
 [`env::read`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html

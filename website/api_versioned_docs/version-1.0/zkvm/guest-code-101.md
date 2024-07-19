@@ -14,8 +14,7 @@ you get started building applications for [Bonsai] and the [zkVM].
   the [guest] receives an input from the [host], and then commits a value to
   the [journal].
 
-The full functionality of the guest is documented in the [`guest`
-module][risc0-zkvm-guest] of the [`risc0-zkvm` Rust crate][risc0-zkvm].
+The full functionality of the guest is documented in the [`guest` module][risc0-zkvm-guest] of the [`risc0-zkvm` Rust crate][risc0-zkvm].
 
 ## Basic Guest Functionality: Reading, Writing, and Committing
 
@@ -40,7 +39,7 @@ should be sufficient for building your first application:
 ## Tools for Debugging & Optimization
 
 There are also a number of functions available to support with debugging and
-performance analysis. As above, we refer to the \[`guest` module] for a full
+performance analysis. As above, we refer to the [`guest` module][risc0-zkvm-guest] for a full
 list, but include some highlights here:
 
 - **Count Cycles** <br/>
@@ -73,8 +72,7 @@ In our [template] and [examples], there's a bit of boilerplate code before
 Hopefully, this guide and the [zkVM Quick Start][quickstart] page will be
 sufficient for you to build your first [zkVM application][zkVM]!
 
-If you run into problems, don't be a stranger! You can file an issue on \[these
-docs] or the [examples], and we're happy to answer questions on [Discord].
+If you run into problems, don't be a stranger! You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [acceleration]: ./acceleration.md
 [benchmarks]: ./benchmarks.md
@@ -103,3 +101,4 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/guest
 [template]: https://github.com/risc0/risc0/tree/release-1.0/risc0/cargo-risczero/templates/rust-starter
 [zkVM]: ./zkvm-overview.md
+[these docs]: https://github.com/risc0/risc0/issues/new/choose

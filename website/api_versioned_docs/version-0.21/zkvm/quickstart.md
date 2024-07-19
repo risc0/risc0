@@ -73,8 +73,7 @@ Note that since proofs are now being generated, the execution time will be
 significantly longer than when running in dev-mode. To create a proof with the
 zkVM on your own machine, we recommend at least 16 GB of RAM. To avoid these
 hardware requirements, consider using [Bonsai] to generate proofs remotely, as
-it will be significantly faster than running proofs locally. You can \[request
-access] to Bonsai to set additional flags.
+it will be significantly faster than running proofs locally. You can [request access] to Bonsai to set additional flags.
 
 ### Executor Statistics
 
@@ -120,3 +119,4 @@ proportional to the number of cycles and segments used.
 [tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
 [tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output
 [tutorial-step-4]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents
+[request access]: https://bonsai.xyz/apply

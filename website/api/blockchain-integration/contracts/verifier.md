@@ -59,7 +59,7 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierRouter.sol
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
-[doc-released-contracts]: /api/blockchain-integration/contracts/verifier.md#contract-addresses
+[doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
