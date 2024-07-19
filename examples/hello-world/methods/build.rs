@@ -20,7 +20,7 @@ macro_rules! println_build {
 
 fn main() {
     let client_version = risc0_zkvm::get_version().unwrap();
-    let server_version = risc0_zkvm::ApiClient::new().unwrap().get_server_version().unwrap();
+    let server_version = risc0_zkvm::get_server_version().unwrap();
     if !client_version.pre.is_empty()
         && server_version.pre.is_empty()
         && client_version != server_version

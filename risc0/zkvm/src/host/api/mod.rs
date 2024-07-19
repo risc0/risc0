@@ -33,8 +33,9 @@ use std::{
     thread,
     time::Duration,
 };
+use semver::Version;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 
@@ -126,7 +127,7 @@ pub trait Connector {
     /// Create a client-server connection
     fn connect(&self) -> Result<ConnectionWrapper>;
     /// TODO
-    fn server_path(&self) -> Option<PathBuf>;
+    fn get_version(&self) -> Result<Version>;
 }
 
 struct ParentProcessConnector {
@@ -152,8 +153,15 @@ impl ParentProcessConnector {
 }
 
 impl Connector for ParentProcessConnector {
-    fn server_path(&self) -> Option<PathBuf> {
-        Some(self.server_path.clone())
+    fn get_version(&self) -> Result<Version> {
+        let output = Command::new(self.server_path.as_os_str()).arg("--version").output()?;
+        let version_output = String::from_utf8(output.stdout)?;
+        let reg = regex::Regex::new(r".* (.*)\n$")?;
+        let caps = match reg.captures(&version_output) {
+            Some(caps) => caps,
+            None => bail!("failed to parse server version number"),
+        };
+        semver::Version::parse(&caps[1]).map_err(|e| anyhow!(e))
     }
 
     fn connect(&self) -> Result<ConnectionWrapper> {
@@ -206,8 +214,8 @@ impl TcpConnector {
 }
 
 impl Connector for TcpConnector {
-    fn server_path(&self) -> Option<PathBuf> {
-        None
+    fn get_version(&self) -> Result<semver::Version> {
+        bail!("TcpConnector does not have a semver")
     }
 
     fn connect(&self) -> Result<ConnectionWrapper> {
