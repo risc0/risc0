@@ -40,7 +40,7 @@ risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true }
 serde = { version = "1", features = ["derive"] }
-syn = "2.0.68"
+syn = "2.0.71"
 tar = "0.4"
 tempfile = "3"
 text_io = "0.1.12"
