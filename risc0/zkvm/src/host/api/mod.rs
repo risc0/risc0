@@ -20,6 +20,7 @@ pub(crate) mod server;
 #[cfg(feature = "prove")]
 mod tests;
 
+use semver::Version;
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -33,7 +34,6 @@ use std::{
     thread,
     time::Duration,
 };
-use semver::Version;
 
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
@@ -154,7 +154,9 @@ impl ParentProcessConnector {
 
 impl Connector for ParentProcessConnector {
     fn get_version(&self) -> Result<Version> {
-        let output = Command::new(self.server_path.as_os_str()).arg("--version").output()?;
+        let output = Command::new(self.server_path.as_os_str())
+            .arg("--version")
+            .output()?;
         let version_output = String::from_utf8(output.stdout)?;
         let reg = regex::Regex::new(r".* (.*)\n$")?;
         let caps = match reg.captures(&version_output) {
