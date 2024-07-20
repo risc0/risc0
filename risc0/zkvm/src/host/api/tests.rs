@@ -49,6 +49,10 @@ impl TestClientConnector {
 }
 
 impl Connector for TestClientConnector {
+    fn get_version(&self) -> Result<semver::Version> {
+        unimplemented!()
+    }
+
     fn connect(&self) -> Result<ConnectionWrapper> {
         let (stream, _) = self.listener.accept()?;
         Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
