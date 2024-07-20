@@ -154,7 +154,12 @@ impl ParentProcessConnector {
 
 impl Connector for ParentProcessConnector {
     fn get_version(&self) -> Result<Version> {
-        let output = Command::new(self.server_path.as_os_str())
+        let mut server_path: PathBuf = self.server_path.clone();
+        if let Ok(path) = std::env::var("RISC0_SERVER_PATH"){
+            server_path = PathBuf::from(path.to_string());
+        }
+
+        let output = Command::new(server_path.as_os_str())
             .arg("--version")
             .output()?;
         let version_output = String::from_utf8(output.stdout)?;
