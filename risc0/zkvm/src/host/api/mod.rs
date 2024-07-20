@@ -155,7 +155,7 @@ impl ParentProcessConnector {
 impl Connector for ParentProcessConnector {
     fn get_version(&self) -> Result<Version> {
         let mut server_path: PathBuf = self.server_path.clone();
-        if let Ok(path) = std::env::var("RISC0_SERVER_PATH"){
+        if let Ok(path) = std::env::var("RISC0_SERVER_PATH") {
             server_path = PathBuf::from(path.to_string());
         }
 
