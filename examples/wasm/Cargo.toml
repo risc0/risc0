@@ -11,4 +11,4 @@ wat = "<1.0.72"
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "wasm-methods/prove"]

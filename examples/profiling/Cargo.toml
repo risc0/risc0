@@ -12,4 +12,4 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "fibonacci-methods/prove"]

@@ -15,4 +15,4 @@ serial_test = "3.1"
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "wordle-methods/prove"]

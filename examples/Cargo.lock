@@ -493,7 +493,7 @@ dependencies = [
 name = "bevy-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -785,7 +785,7 @@ name = "c-kzg-methods"
 version = "0.1.0"
 dependencies = [
  "c-kzg 1.0.2",
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -874,7 +874,7 @@ dependencies = [
 name = "chess-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -992,7 +992,7 @@ dependencies = [
 name = "composition-example-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -1419,7 +1419,7 @@ dependencies = [
 name = "digital-signature-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -1534,7 +1534,7 @@ dependencies = [
 name = "ecdsa-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -1831,7 +1831,7 @@ dependencies = [
 name = "fibonacci-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -2117,7 +2117,7 @@ dependencies = [
 name = "groth16-verifier-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -2625,7 +2625,7 @@ dependencies = [
 name = "json-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -2677,7 +2677,7 @@ dependencies = [
 name = "jwt-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -3273,7 +3273,7 @@ dependencies = [
 name = "password-checker-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -3512,7 +3512,7 @@ dependencies = [
 name = "prorata-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -4719,7 +4719,7 @@ dependencies = [
 name = "sha-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -4902,7 +4902,7 @@ dependencies = [
 name = "smartcore-ml-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -5694,7 +5694,7 @@ dependencies = [
 name = "voting-machine-methods"
 version = "0.12.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -5732,7 +5732,7 @@ dependencies = [
 name = "waldo-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -5863,7 +5863,7 @@ dependencies = [
 name = "wasm-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -6192,7 +6192,7 @@ dependencies = [
 name = "wordle-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -6238,7 +6238,7 @@ dependencies = [
 name = "xgboost-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]
@@ -6330,7 +6330,7 @@ dependencies = [
 name = "zkevm-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
+ "util",
 ]
 
 [[package]]

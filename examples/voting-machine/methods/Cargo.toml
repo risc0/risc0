@@ -7,4 +7,7 @@ edition = "2021"
 methods = ["guest"]
 
 [build-dependencies]
-risc0-build = { path = "../../../risc0/build" }
+util = { path = "../../util" }
+
+[features]
+prove = ["util/prove"]

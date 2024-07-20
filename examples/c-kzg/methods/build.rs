@@ -25,5 +25,5 @@ fn main() {
     std::fs::write(&kzg_raw_path, kzg_setup_data).unwrap();
     env::set_var("KZG_FILE_PATH", kzg_raw_path.to_string_lossy().to_string());
 
-    risc0_build::embed_methods();
+    util::build_example();
 }

@@ -17,4 +17,4 @@ zkevm-methods = { path = "methods" }
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "zkevm-methods/prove"]

@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 risc0-zkvm = { path = "../../risc0/zkvm" }
 risc0-build = { path = "../../risc0/build" }
+
+[features]
+prove = []

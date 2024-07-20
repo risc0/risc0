@@ -18,4 +18,4 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "digital-signature-methods/prove"]

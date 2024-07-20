@@ -4,7 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-util = { path = "../../util" }
+util = { path = "../../util/" }
 
 [package.metadata.risc0]
 methods = ["guest"]
+
+[features]
+prove = ["util/prove"]

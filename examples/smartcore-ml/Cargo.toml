@@ -15,4 +15,4 @@ smartcore-ml-methods = { path = "methods" }
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "smartcore-ml-methods/prove"]

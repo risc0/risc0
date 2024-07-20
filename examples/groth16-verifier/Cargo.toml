@@ -12,4 +12,4 @@ serde_json = "1.0"
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "groth16-verifier-methods/prove"]

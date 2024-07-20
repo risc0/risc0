@@ -13,4 +13,4 @@ shakmaty = "0.27"
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "chess-methods/prove"]

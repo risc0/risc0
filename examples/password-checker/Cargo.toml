@@ -12,4 +12,4 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
-prove = ["risc0-zkvm/prove"]
+prove = ["risc0-zkvm/prove", "password-checker-methods/prove"]

@@ -13,5 +13,5 @@
 // limitations under the License.
 
 fn main() {
-    risc0_build::embed_methods();
+    util::build_example();
 }

@@ -7,7 +7,10 @@ edition = "2021"
 release = false
 
 [build-dependencies]
-risc0-build = { path = "../../../risc0/build" }
+util = { path = "../../util" }
 
 [package.metadata.risc0]
 methods = ["guest"]
+
+[features]
+prove = ["util/prove"]
