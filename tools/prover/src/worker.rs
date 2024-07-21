@@ -27,15 +27,20 @@ impl workerpool::Worker for Worker {
 
     fn execute(&mut self, job: Job) -> Job {
         println!("{:?}", job.task);
-        let receipt = match job.kind {
-            JobKind::Segment(segment) => self.prove_and_lift(segment),
-            JobKind::Join(left, right) => self.join(left, right),
-            JobKind::Receipt(receipt) => receipt,
-        };
-        Job {
-            task: job.task,
-            kind: JobKind::Receipt(receipt),
-        }
+        std::panic::catch_unwind(|| {
+            let receipt = match job.kind {
+                JobKind::Segment(segment) => self.prove_and_lift(segment),
+                JobKind::Join(left, right) => self.join(left, right),
+                JobKind::Receipt(receipt) => receipt,
+            };
+            Job {
+                task: job.task,
+                kind: JobKind::Receipt(receipt),
+            }
+        })
+        .unwrap_or_else(|_| {
+            std::process::abort();
+        })
     }
 }
 
