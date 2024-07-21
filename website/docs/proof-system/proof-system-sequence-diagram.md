@@ -156,8 +156,8 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
 [ethSTARK]: https://eprint.iacr.org/2021/582.pdf
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
-[Image ID]: /terminology#image-id
 [groth16-circuit]: /terminology#groth16-circuit
+[Image ID]: /terminology#image-id
 [log derivative]: https://eprint.iacr.org/2022/1530.pdf
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

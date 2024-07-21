@@ -40,14 +40,14 @@ This is accomplished via `resolve`, which is called automatically when users cal
 For a more detailed dive into proof composition and RISC Zero's approach to recursive proving, check out the [Study Club recording].
 
 [`add_assumption()`]: https://github.com/risc0/risc0/blob/release-1.0/examples/composition/src/main.rs#L29
+[`env::verify()`]: https://github.com/risc0/risc0/blob/release-1.0/examples/composition/methods/guest/src/main.rs#L24
 [assumptions]: /terminology#assumption
 [blog post]: https://www.risczero.com/blog/proof-composition
 [code example]: https://github.com/risc0/risc0/tree/release-1.0/examples/composition#readme
-[`env::verify()`]: https://github.com/risc0/risc0/blob/release-1.0/examples/composition/methods/guest/src/main.rs#L24
-[ReceiptClaim]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ReceiptClaim.html
-[Study Club recording]: https://www.youtube.com/watch?v=x0-7Y46bQO0&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1
-[composition-no-assumptions]: /diagrams/composition-no-assumptions.png
 [composition-add-assumption]: /diagrams/composition-add-assumption.png
+[composition-no-assumptions]: /diagrams/composition-no-assumptions.png
 [composition-resolve]: /diagrams/composition-resolve.png
 [Prover::prove_with_opts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[ReceiptClaim]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ReceiptClaim.html
 [recursion circuit]: ../recursion.md
+[Study Club recording]: https://www.youtube.com/watch?v=x0-7Y46bQO0&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1

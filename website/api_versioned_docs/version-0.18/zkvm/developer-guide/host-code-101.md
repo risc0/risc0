@@ -67,6 +67,7 @@ Hopefully, this guide and the [zkVM Quick Start] page will be sufficient for you
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
+[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
 [Bonsai]: ../../bonsai/
 [Discord]: https://discord.gg/risczero
 [examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
@@ -84,9 +85,8 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [Prover]: /terminology#prover
 [receipt]: /terminology#receipt
 [Receipts]: receipts.md
-[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
 [these docs]: https://github.com/risc0/risc0/issues/new/choose
 [verifying receipts]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#method.verify
-[zkVM Quick Start]: ../quickstart.md
-[zkVM Application]: ../
 [zkVM]: ../
+[zkVM Application]: ../
+[zkVM Quick Start]: ../quickstart.md

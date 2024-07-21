@@ -114,7 +114,6 @@ proportional to the number of cycles and segments used.
 >
 > _That's all it takes to build and run a minimal RISC Zero application._
 
-[request access]: https://bonsai.xyz/apply
 [Bonsai]: ../generating-proofs/remote-proving.md
 [dev-mode]: ../generating-proofs/dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
@@ -124,6 +123,7 @@ proportional to the number of cycles and segments used.
 [journal]: /terminology#journal
 [prover]: /terminology#prover
 [receipt]: /terminology#receipt
+[request access]: https://bonsai.xyz/apply
 [seal]: /terminology#seal
 [tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
 [tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output

@@ -103,20 +103,20 @@ Read the [article][zeth].
 [Bonsai]: ../bonsai/bonsai-overview.md
 [chess]: https://github.com/risc0/risc0/tree/release-0.20/examples/chess#zk-checkmate
 [continuations]: https://www.risczero.com/news/continuations
+[ELF binary]: /terminology#elf-binary
 [ethers]: https://github.com/ethers-io/ethers.js
 [examples]: ./examples.md
-[imageID]: /terminology#image-id
-[receipt]: ./receipts.md
-[ELF binary]: /terminology#elf-binary
 [executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: ./guest-code-101.md
 [host program]: ./host-code-101.md
+[imageID]: /terminology#image-id
 [journal]: /terminology#journal
 [json]: https://github.com/risc0/risc0/tree/release-0.20/examples/json
 [prove]: /terminology#validity-proof
 [prover]: /terminology#prover
 [quickstart]: ./quickstart.md
+[receipt]: ./receipts.md
 [revm]: https://github.com/bluealloy/revm
 [segments]: /terminology#segment
 [session]: /terminology#session

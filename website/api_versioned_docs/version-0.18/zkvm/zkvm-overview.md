@@ -72,27 +72,27 @@ Check out [Bonsai].
 _Curious about Zeth?_<br/>
 Read the [article](https://risczero.com/news/zeth-release).
 
-[imageID]: /terminology#image-id
+[`zkVM Quick Start`]: ./quickstart.md
+[alloy]: https://github.com/alloy-rs
 [Bonsai]: ../bonsai/
-[receipt]: developer-guide/receipts.md
 [ELF binary]: /terminology#elf-binary
+[ethers]: https://github.com/ethers-io/ethers.js
 [executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: developer-guide/guest-code-101.md
+[Host Code 101]: developer-guide/host-code-101.md
+[imageID]: /terminology#image-id
 [performance benchmarks]: ./benchmarks.md
+[proofs about private data]: https://github.com/risc0/risc0/tree/release-0.18/examples/json#json-example
 [prove]: /terminology#validity-proof
+[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
+[prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess#zk-checkmate
+[prove you can find Waldo]: https://www.risczero.com/news/waldo
 [prover]: /terminology#prover
 [publicly shared outputs]: /terminology#journal
-[verify]: /terminology#verify
-[zkVM Quick Start]: ./quickstart.md
-[zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.18/examples
-[session]: /terminology#session
-[Host Code 101]: developer-guide/host-code-101.md
-[`zkVM Quick Start`]: ./quickstart.md
+[receipt]: developer-guide/receipts.md
 [revm]: https://github.com/bluealloy/revm
-[ethers]: https://github.com/ethers-io/ethers.js
-[alloy]: https://github.com/alloy-rs
-[prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess#zk-checkmate
-[proofs about private data]: https://github.com/risc0/risc0/tree/release-0.18/examples/json#json-example
-[prove you can find Waldo]: https://www.risczero.com/news/waldo
-[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
+[session]: /terminology#session
+[verify]: /terminology#verify
+[zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.18/examples
+[zkVM Quick Start]: ./quickstart.md

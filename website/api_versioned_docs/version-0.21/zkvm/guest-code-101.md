@@ -75,21 +75,21 @@ sufficient for you to build your first [zkVM application][zkVM]!
 
 If you run into problems, don't be a stranger! You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
+[`env::commit_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.commit_slice.html
+[`env::commit`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.commit.html
+[`env::cycle_count`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.cycle_count.html
+[`env::log`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.log.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::read`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read.html
+[`env::stderr`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.stderr.html
+[`env::stdin`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.stdin.html
+[`env::stdout`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.stdout.html
+[`env::write_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.write_slice.html
+[`env::write`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.write.html
 [acceleration]: ./acceleration.md
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
-[`env::read`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read_slice.html
-[`env::stdin`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.stdin.html
-[`env::cycle_count`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.cycle_count.html
-[`env::log`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.log.html
-[`env::write`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.write.html
-[`env::write_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.write_slice.html
-[`env::stdout`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.stdout.html
-[`env::stderr`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.stderr.html
-[`env::commit`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.commit.html
-[`env::commit_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.commit_slice.html
 [examples]: ./examples.md
 [from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
 [guest]: /terminology#guest
@@ -101,5 +101,5 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest
 [template]: https://github.com/risc0/risc0/tree/release-0.21/templates/rust-starter
-[zkVM]: ./zkvm-overview.md
 [these docs]: https://github.com/risc0/risc0/issues/new/choose
+[zkVM]: ./zkvm-overview.md

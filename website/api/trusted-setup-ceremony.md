@@ -68,5 +68,5 @@ We used the open-source tools [p0tion] and [DefinitelySetup] to run our ceremony
 [risc0-circom-library]: https://github.com/risc0/risc0/blob/d4e427283027c28b38b8eda1562e8e0e68d1b0e2/compact_proof/groth16/risc0.circom
 [snarkjs]: https://github.com/iden3/snarkjs
 [stark-verify-circom]: https://github.com/risc0/risc0/blob/d4e427283027c28b38b8eda1562e8e0e68d1b0e2/compact_proof/groth16/stark_verify.circom
-[zkey-mirror]: https://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify_final.zkey
 [zkey-compressed]: https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-05-17.1/stark_verify_final.zkey.gz
+[zkey-mirror]: https://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify_final.zkey

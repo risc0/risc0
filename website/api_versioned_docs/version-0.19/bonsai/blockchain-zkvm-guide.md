@@ -40,16 +40,16 @@ We have [extensive resources](../zkvm/zkvm-overview.md) on writing zkVM code. Ma
 - You might see our zkVM documentation refer to sessions, and segments. These code-level concepts are related to [continuations](https://www.risczero.com/news/continuations), a feature that lets us design our zkVM program proof work to be parallelizable and not limited by the size of the program to be proven. Bonsai takes advantage of this feature to parallelize proofs about off-chain computation. If you're reading about these in zkVM documentation, you're almost certainly looking at host-side details that you don't need in order to write provable code.
 
 [Bonsai]: bonsai-overview.md
-[Rust]: https://www.rust-lang.org/
 [Bonsai Quick Start]: quickstart.md
+[committing]: /terminology#commit
 [Discord]: https://discord.gg/risczero
+[executed]: /terminology#execute
+[guest]: /terminology#guest
 [guest program]: /terminology#guest-program
 [Guest programs]: /terminology#guest-program
-[proves]: /terminology#validity-proof
-[executed]: /terminology#execute
-[verify]: /terminology#verify
-[guest]: /terminology#guest
 [host]: /terminology#host
-[receipt]: /terminology#receipt
-[committing]: /terminology#commit
 [journal]: /terminology#journal
+[proves]: /terminology#validity-proof
+[receipt]: /terminology#receipt
+[Rust]: https://www.rust-lang.org/
+[verify]: /terminology#verify

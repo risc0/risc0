@@ -112,8 +112,8 @@ proportional to the number of cycles and segments used.
 >
 > _That's all it takes to build and run a minimal RISC Zero application._
 
-[bonsai-access]: https://bonsai.xyz/apply
 [Bonsai]: ../generating-proofs/remote-proving.md
+[bonsai-access]: https://bonsai.xyz/apply
 [dev-mode]: ../generating-proofs/dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest]: /terminology#guest-program

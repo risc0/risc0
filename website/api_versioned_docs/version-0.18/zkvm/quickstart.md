@@ -68,12 +68,12 @@ Additional information is available in the [starter template](https://github.com
 
 Options such as GPU acceleration and skipping the proof generation are documented in the [feature flags].
 
-[zkVM]: ../zkvm/
-[guest program]: /terminology#guest-program
 [Bonsai]: ../bonsai/bonsai-overview.md
-[feature flags]: https://github.com/risc0/risc0#feature-flags
-[zkVM demo applications]: https://github.com/risc0/risc0/tree/release-0.18/examples/
 [cargo risczero]: https://docs.rs/cargo-risczero
+[feature flags]: https://github.com/risc0/risc0#feature-flags
+[guest program]: /terminology#guest-program
 [Hello World tutorial]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world/tutorial.md
 [request access]: https://bonsai.xyz/apply
 [starter-template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
+[zkVM]: ../zkvm/
+[zkVM demo applications]: https://github.com/risc0/risc0/tree/release-0.18/examples/

@@ -91,15 +91,15 @@ Knowing these statistics is useful for estimating the cost of your application b
 [Bonsai]: ../bonsai/quickstart.md
 [dev-mode]: ./dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
+[Generate a receipt]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents
+[guest]: /terminology#guest-program
+[Hello World tutorial]: tutorials/hello-world.md
+[host]: /terminology#host-program
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[journal]: /terminology#journal
+[prover]: /terminology#prover
+[receipt]: /terminology#receipt
+[request access]: https://bonsai.xyz/apply
+[seal]: /terminology#seal
 [Share private data]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
 [Share the guest's results]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output
-[Generate a receipt]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents
-[Hello World tutorial]: tutorials/hello-world.md
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[host]: /terminology#host-program
-[guest]: /terminology#guest-program
-[receipt]: /terminology#receipt
-[journal]: /terminology#journal
-[seal]: /terminology#seal
-[prover]: /terminology#prover
-[request access]: https://bonsai.xyz/apply

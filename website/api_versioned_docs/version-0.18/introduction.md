@@ -78,21 +78,21 @@ You're welcome to join [our Discord community](https://discord.gg/risczero) to d
 
 Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.youtube.com/@risczero), and [sign up for our mailing list](https://fmree464va4.typeform.com/to/X3KJB85v) to get our latest announcements.
 
-[The RISC Zero zkVM]: zkvm/zkvm-overview.md
-[Bonsai]: bonsai/bonsai-overview.md
-[The RISC Zero Proof System]: /proof-system
-[docs.rs]: https://docs.rs/risc0-zkvm/0.18/
-[startup]: https://risczero.com/news/series-a
-[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
-[RISC Zero]: https://risczero.com
-[zkVM]: ./zkvm/
-[top 1000 Rust crates]: https://reports.risczero.com/crates-validation
-[performance]: https://dev.risczero.com/zkvm/benchmarks
-[continuations]: https://risczero.com/news/continuations
 [April 2022]: https://www.risczero.com/news/announce
+[Bonsai]: bonsai/bonsai-overview.md
+[continuations]: https://risczero.com/news/continuations
+[docs.rs]: https://docs.rs/risc0-zkvm/0.18/
+[ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.18/examples/ecdsa
 [JSON]: https://github.com/risc0/risc0/tree/release-0.18/examples/json
+[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
+[performance]: https://dev.risczero.com/zkvm/benchmarks
+[RISC Zero]: https://risczero.com
+[startup]: https://risczero.com/news/series-a
+[The RISC Zero Proof System]: /proof-system
+[The RISC Zero zkVM]: zkvm/zkvm-overview.md
+[top 1000 Rust crates]: https://reports.risczero.com/crates-validation
 [Where's Waldo]: https://risczero.com/news/waldo
 [ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess
+[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [ZK Proof of Exploit]: https://risczero.com/news/zkpoex
-[ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.18/examples/ecdsa
+[zkVM]: ./zkvm/

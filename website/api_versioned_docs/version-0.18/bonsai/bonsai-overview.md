@@ -72,12 +72,12 @@ The Bonsai ETH Relay connects your Ethereum dApps to Bonsai. Smart contract deve
 
 We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort. To learn more, read our [litepaper].
 
+[`cargo risczero`]: https://crates.io/crates/cargo-risczero
+[Bonfire Wallet]: https://ethglobal.com/showcase/bonfire-wallet-n1dzp
+[Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
+[Bonsai Quick Start]: ../bonsai/quickstart.md
+[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
+[Bonsai SDK]: https://crates.io/crates/bonsai-sdk
+[Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance#readme
 [litepaper]: /litepaper
 [Request access here]: https://bonsai.xyz/apply
-[`cargo risczero`]: https://crates.io/crates/cargo-risczero
-[Bonsai SDK]: https://crates.io/crates/bonsai-sdk
-[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
-[Bonsai Quick Start]: ../bonsai/quickstart.md
-[Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[Bonfire Wallet]: https://ethglobal.com/showcase/bonfire-wallet-n1dzp
-[Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance#readme

@@ -57,27 +57,27 @@ Hopefully, this guide and the [zkVM Quick Start] page will be sufficient for you
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[guest]: /terminology#guest
-[guest code]: /terminology#guest
-[`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
-[host]: /terminology#host
-[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
-[journal]: /terminology#journal
-[zkVM Quick Start]: ../quickstart.md
-[Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
-[zkVM Application]: ../
-[zkVM]: ../
-[Bonsai]: ../../bonsai/
-[template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
-[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
-[these docs]: https://github.com/risc0/risc0/issues/new/choose
-[Discord]: https://discord.gg/risczero
-[`env::read`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.read_slice.html
-[`env::stdin`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.stdin.html
 [`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.get_cycle_count.html
 [`env::log`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.log.html
-[`env::write`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.write.html
-[`env::write_slice`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.write_slice.html
-[`env::stdout`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.stdout.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::read`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.read.html
 [`env::stderr`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.stderr.html
+[`env::stdin`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.stdin.html
+[`env::stdout`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.stdout.html
+[`env::write_slice`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.write_slice.html
+[`env::write`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.write.html
+[`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
+[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
+[Bonsai]: ../../bonsai/
+[Discord]: https://discord.gg/risczero
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
+[guest]: /terminology#guest
+[guest code]: /terminology#guest
+[Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
+[host]: /terminology#host
+[journal]: /terminology#journal
+[template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
+[zkVM]: ../
+[zkVM Application]: ../
+[zkVM Quick Start]: ../quickstart.md

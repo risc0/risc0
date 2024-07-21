@@ -67,18 +67,18 @@ Check out our [Bonsai on Eth] page.
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Bonsai on Eth]: ../blockchain-integration/bonsai-on-eth.md
-[examples]: ./examples.md
-[imageID]: /terminology#image-id
-[receipt]: ./receipts.md
 [ELF binary]: /terminology#elf-binary
+[examples]: ./examples.md
 [executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: ./guest-code-101.md
 [host program]: ./host-code-101.md
+[imageID]: /terminology#image-id
 [journal]: /terminology#journal
 [prove]: /terminology#validity-proof
 [prover]: /terminology#prover
 [quickstart]: ./quickstart.md
+[receipt]: ./receipts.md
 [session]: /terminology#session
 [use cases]: ../use-cases.md
 [verify]: /terminology#verify

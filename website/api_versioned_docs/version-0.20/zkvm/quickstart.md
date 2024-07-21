@@ -115,8 +115,8 @@ proportional to the number of cycles and segments used.
 [journal]: /terminology#journal
 [prover]: /terminology#prover
 [receipt]: /terminology#receipt
+[request access]: https://bonsai.xyz/apply
 [seal]: /terminology#seal
 [tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
 [tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output
 [tutorial-step-4]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents
-[request access]: https://bonsai.xyz/apply

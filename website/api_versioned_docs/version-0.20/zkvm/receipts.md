@@ -64,8 +64,8 @@ is:
 [Image ID]: /terminology#image-id
 [journal]: /terminology#journal
 [receipt]: /terminology#receipt
-[receipt.verify()]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/struct.Receipt.html#method.verify
 [receipt.journal]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/struct.Receipt.html#structfield.journal
+[receipt.verify()]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/struct.Receipt.html#method.verify
 [seal]: /terminology#seal
 [serde]: https://crates.io/crates/serde
 [validity proof]: /terminology#validity-proof

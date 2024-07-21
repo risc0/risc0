@@ -92,9 +92,9 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [Prover]: /terminology#prover
 [quickstart]: ./quickstart.md
 [receipt]: /terminology#receipt
-[Receipts]: ./receipts.md
 [receipt-verify]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.Receipt.html#method.verify
+[Receipts]: ./receipts.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
 [tutorial]: ./tutorials/hello-world.md
 [zkVM]: ./zkvm-overview.md
-[these docs]: https://github.com/risc0/risc0/issues/new/choose

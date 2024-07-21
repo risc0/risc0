@@ -254,11 +254,11 @@ Verifying [session] receipts requires checking the validity of each [segment] an
 A virtual machine that runs trusted code and generates proofs.
 RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [STARK]-based proof system.
 
-[About STARKs]: ./reference-docs/about-starks.md
+[`cargo risczero build`]: https://docs.rs/crate/cargo-risczero/latest
 [About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups/#validity-proofs
+[About STARKs]: ./reference-docs/about-starks.md
 [Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
 [assumptions]: #assumption
-[`cargo risczero build`]: https://docs.rs/crate/cargo-risczero/latest
 [circuit]: #circuit
 [clock cycles]: #clock-cycles
 [Code reference for control root]: https://github.com/risc0/risc0/blob/v0.21.0/risc0/circuit/recursion/src/control_id.rs#L16
@@ -266,17 +266,17 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [composition]: #composition
 [conditional]: #conditional
 [continuations]: #continuations
-[Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [Continuations blog]: https://www.risczero.com/news/continuations
+[Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [control ID]: #control-id
 [ELF binary]: #elf-binary
 [env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
+[executed]: #executor
 [executes]: #execute
 [execution]: #execute
-[executed]: #executor
+[execution trace]: #execution-trace
 [executor]: #executor
 [Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Executor.html
-[execution trace]: #execution-trace
 [Groth16 Circuit]: #groth16-circuit
 [guest]: #guest-program
 [guest program]: #guest-program
@@ -286,32 +286,32 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [ImageID excerpt from Study Club]: https://www.youtube.com/watch?v=QwzrBHHkzFE&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=4
 [journal]: #journal
 [method]: #method
-[proves]: #prove
+[proof]: #validity-proof
+[proofs]: #validity-proof
 [proven]: #prover
 [prover]: #prover
 [Prover documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Prover.html
+[proves]: #prove
 [receipt]: #receipt
-[receipts]: #receipt
 [receipt claim]: #receipt-claim
+[receipts]: #receipt
 [recursion]: #recursion
 [Recursion Circuit]: #recursion-circuit
 [recursion program]: #recursion-program
+[RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
 [RISC-V]: #risc-v
 [RISC-V Circuit]: #risc-v-circuit
-[RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
 [Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [seal]: #seal
 [Segment]: #segment
 [Segments]: #segment
-[session]: #session
 [Sequence Diagram for RISC Zero's STARK]: ./proof-system/proof-system-sequence-diagram.md
+[session]: #session
 [STARK]: #stark
 [STARK by Hand]: ./proof-system/stark-by-hand.md
-[zk-stark]: #stark
-[proof]: #validity-proof
-[proofs]: #validity-proof
 [validity proof]: #validity-proof
-[verifying]: #verify
 [verifies]: #verify
+[verifying]: #verify
+[zk-stark]: #stark
 [zkVM]: #zero-knowledge-virtual-machine-zkvm
 [zkVM API Client]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ApiClient.html#

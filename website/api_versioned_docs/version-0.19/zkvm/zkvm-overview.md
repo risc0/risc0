@@ -81,30 +81,30 @@ Check out [Bonsai].
 _Curious about Zeth?_<br/>
 Read the [article](https://risczero.com/news/zeth-release).
 
-[continuations]: https://www.risczero.com/news/continuations
-[imageID]: /terminology#image-id
+[`zkVM Quick Start`]: ./quickstart.md
+[alloy]: https://github.com/alloy-rs
 [Bonsai]: ../bonsai/bonsai-overview.md
-[receipt]: developer-guide/receipts.md
+[continuations]: https://www.risczero.com/news/continuations
 [ELF binary]: /terminology#elf-binary
+[ethers]: https://github.com/ethers-io/ethers.js
 [executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: developer-guide/guest-code-101.md
+[Host Code 101]: developer-guide/host-code-101.md
+[imageID]: /terminology#image-id
 [performance benchmarks]: benchmarks.md
+[proofs about private data]: https://github.com/risc0/risc0/tree/release-0.19/examples/json#json-example
 [prove]: /terminology#validity-proof
+[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
+[prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess#zk-checkmate
+[prove you can find Waldo]: https://www.risczero.com/news/waldo
 [prover]: /terminology#prover
 [publicly shared outputs]: /terminology#journal
-[segments]: /terminology#segment
-[verify]: /terminology#verify
-[zkVM Quick Start]: ./quickstart.md
-[zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
-[zkVM-term]: /terminology#zero-knowledge-virtual-machine-zkvm
-[session]: /terminology#session
-[Host Code 101]: developer-guide/host-code-101.md
+[receipt]: developer-guide/receipts.md
 [revm]: https://github.com/bluealloy/revm
-[ethers]: https://github.com/ethers-io/ethers.js
-[alloy]: https://github.com/alloy-rs
-[prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess#zk-checkmate
-[proofs about private data]: https://github.com/risc0/risc0/tree/release-0.19/examples/json#json-example
-[prove you can find Waldo]: https://www.risczero.com/news/waldo
-[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
-[`zkVM Quick Start`]: ./quickstart.md
+[segments]: /terminology#segment
+[session]: /terminology#session
+[verify]: /terminology#verify
+[zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
+[zkVM Quick Start]: ./quickstart.md
+[zkVM-term]: /terminology#zero-knowledge-virtual-machine-zkvm

@@ -66,6 +66,6 @@ modular multiplication instruction. E.g. [`FieldElement8x32R0::mul`][field-mul].
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.1..k256/v0.13.1-risczero.1
 [RustCrypto-crypto-bigint]: https://github.com/risc0/RustCrypto-crypto-bigint/tree/risczero
-[RustCrypto-hashes]: https://github.com/risc0/RustCrypto-hashes/tree/risczero
 [RustCrypto-elliptic-curves]: https://github.com/risc0/RustCrypto-elliptic-curves/tree/risczero
+[RustCrypto-hashes]: https://github.com/risc0/RustCrypto-hashes/tree/risczero
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions

@@ -100,20 +100,20 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
-[examples]: https://www.pcmag.com/news/zuckerbergs-meta-is-spending-billions-to-buy-350000-nvidia-h100-gpus
-[lift]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.lift
-[join]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.join
-[resolve]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.resolve
+[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
-[execution trace]: /terminology#execution-trace
-[ethSTARK documentation]: https://eprint.iacr.org/2021/582
 [deterministically]: /terminology#deterministic-builds
+[ethSTARK documentation]: https://eprint.iacr.org/2021/582
+[examples]: https://www.pcmag.com/news/zuckerbergs-meta-is-spending-billions-to-buy-350000-nvidia-h100-gpus
+[execution trace]: /terminology#execution-trace
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
+[join]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.join
+[lift]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.lift
 [proof-system]: pathname:///proof-system-in-detail.pdf
 [receipt claim]: /terminology#receipt-claim
+[resolve]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ApiClient.html#method.resolve
 [RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkp/src/prove/soundness.rs
-[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [Verifier Contract]: ./blockchain-integration/contracts/verifier.md
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.0/contracts/version-management-design.md
