@@ -22,6 +22,7 @@ members = [
   "risc0/zkvm/receipts",
   "rzup",
   "tools/hotbench",
+  "tools/prover",
   "website/doc-test/main",
   "xtask",
 ]
