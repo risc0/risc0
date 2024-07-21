@@ -85,7 +85,6 @@ jobs:
               - *base
               - examples/**
               - risc0/**
-              - tools/prover/**
             risc0:
               - *base
               - risc0/**
@@ -95,6 +94,7 @@ jobs:
               - compact_proof/**
               - external/**
               - risc0/**
+              - tools/prover/**
             test-crates:
               - *base
               - risc0/**
@@ -250,6 +250,8 @@ jobs:
         if: matrix.device == 'cpu'
       - run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
+      - run: cargo run -F $FEATURE
+        working-directory: tools/prover
       - run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
       - run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
@@ -306,8 +308,6 @@ jobs:
         env:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
-      - run: cargo run -F $FEATURE
-        working-directory: tools/prover
       - run: sccache --show-stats
 
   # test-crates:
