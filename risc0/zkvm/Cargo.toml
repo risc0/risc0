@@ -63,11 +63,11 @@ tracing = { version = "0.1", default-features = false, features = [
 addr2line = { version = "0.22", features = ["rustc-demangle"], optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
-bytes = { version = "1.4", features = ["serde"], optional = true }
+bytes = { version = "1.6", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 lazy-regex = { version = "3.1", optional = true }
 nvtx = { version = "1.3", optional = true }
-prost = { version = "0.12", optional = true }
+prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rustc-demangle = { version = "0.1", optional = true }
@@ -76,6 +76,7 @@ tempfile = { version = "3", optional = true }
 typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
+chrono = { version = "0.4", default-features = false, features = ["serde"] }
 clap = { version = "4.5", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 rand = "0.8"
@@ -119,12 +120,6 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 dual = []
-metal = [
-  "prove",
-  "risc0-circuit-recursion/metal",
-  "risc0-circuit-rv32im/metal",
-  "risc0-zkp/metal",
-]
 default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test

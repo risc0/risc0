@@ -4,8 +4,6 @@
 
 set -eo pipefail
 
-clear
-
 echo "💾 Installing rzup"
 
 BASE_DIR=${XDG_CONFIG_HOME:-$HOME}

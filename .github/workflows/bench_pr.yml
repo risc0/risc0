@@ -20,7 +20,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+  RISC0_TOOLCHAIN_VERSION: r0.1.78.0
 
 jobs:
   changes:
@@ -38,7 +38,7 @@ jobs:
             trigger-bench:
               - .github/workflows/bench_pr.yml
               - risc0/**
-  
+
   bench:
     runs-on:
       labels: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
@@ -47,15 +47,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [prove]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: prove
+            device: cpu
           - os: Linux
             feature: cuda
             device: nvidia_rtx_3090_ti
           - os: macOS
-            feature: metal
+            feature: prove
             device: apple_m2_pro
 
     env:
@@ -87,7 +87,7 @@ jobs:
           else
               echo "Previous Benchmark data for ${{ matrix.os }}-${{ matrix.device }} exists... Continuing..."
           fi
-      
+
       - name: (New Benchmarks / Re-Baseline) Upload Initial Benchmark Data
         if: env.NEW_BENCHMARK == 'true'
         run: aws s3 cp target/hotbench/fib/benchmark.json $S3_BENCH_PATH/external.json

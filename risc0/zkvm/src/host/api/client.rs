@@ -349,11 +349,30 @@ impl Client {
         result
     }
 
-    /// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
+    /// Compress a [Receipt], proving the same computation using a smaller representation.
     ///
-    /// The identity_p254 program is used as the last step in the prover pipeline before running the
-    /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
-    /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
+    /// Proving will, by default, produce a [CompositeReceipt](crate::CompositeReceipt), which
+    /// may contain an arbitrary number of receipts assembled into segments and assumptions.
+    /// Together, these receipts collectively prove a top-level
+    /// [ReceiptClaim](crate::ReceiptClaim). This function can be used to compress all of the constituent
+    /// receipts of a [CompositeReceipt](crate::CompositeReceipt) into a single
+    /// [SuccinctReceipt](crate::SuccinctReceipt) or [Groth16Receipt](crate::Groth16Receipt) that proves the same top-level claim.
+    ///
+    /// Compression from [Groth16Receipt](crate::CompositeReceipt) to
+    /// [SuccinctReceipt](crate::SuccinctReceipt) is accomplished by iterative application of the
+    /// recursion programs including lift, join, and resolve.
+    ///
+    /// Compression from [SuccinctReceipt](crate::SuccinctReceipt) to
+    /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
+    /// verifier, refered to as the "STARK-to-SNARK" operation.
+    ///
+    /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
+    /// x86 hosts, and requires Docker to be installed. See issue
+    /// [#1749](https://github.com/risc0/risc0/issues/1749) for more information.
+    ///
+    /// If the receipt is already at least as compressed as the requested compression level (e.g.
+    /// it is already succinct or Groth16 and a succinct receipt is required) this function is a
+    /// no-op. As a result, it is idempotent.
     pub fn compress(
         &self,
         opts: &ProverOpts,
@@ -666,14 +685,7 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
 
 fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
     if requested.pre.is_empty() {
-        let comparator = semver::Comparator {
-            op: semver::Op::Tilde,
-            major: requested.major,
-            minor: Some(requested.minor),
-            patch: Some(requested.patch),
-            pre: semver::Prerelease::EMPTY,
-        };
-        comparator.matches(server)
+        requested.major == server.major && requested.minor == server.minor
     } else {
         requested == server
     }
@@ -698,7 +710,7 @@ mod tests {
         assert!(test("0.18.0", "0.18.1"));
         assert!(test("0.18.1", "0.18.1"));
         assert!(test("0.18.1", "0.18.2"));
-        assert!(!test("0.18.1", "0.18.0"));
+        assert!(test("0.18.1", "0.18.0"));
         assert!(!test("0.18.0", "0.19.0"));
 
         assert!(test("1.0.0", "1.0.0"));
@@ -708,6 +720,7 @@ mod tests {
         assert!(!test("1.0.0", "0.18.0"));
         assert!(!test("1.0.0", "2.0.0"));
         assert!(!test("1.1.0", "1.0.0"));
+        assert!(test("1.0.3", "1.0.1"));
 
         assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
         assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));

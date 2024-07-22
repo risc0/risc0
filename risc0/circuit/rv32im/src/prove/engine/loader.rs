@@ -366,12 +366,15 @@ impl Loader {
         self.cycle += 1;
     }
 
-    // Compute the `ControlId` associated with the given HAL
-    pub fn compute_control_id_table<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<Digest> {
+    // Compute the `ControlId` associated with the given HAL, along with a textual description.
+    pub fn compute_control_id_table<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<(String, Digest)> {
         // Make the digest for each level
         let mut table = Vec::new();
         for po2 in MIN_CYCLES_PO2..MAX_CYCLES_PO2 {
-            table.push(Self::compute_control_id(hal, po2));
+            table.push((
+                format!("rv32im po2={po2}"),
+                Self::compute_control_id(hal, po2),
+            ));
         }
         table
     }

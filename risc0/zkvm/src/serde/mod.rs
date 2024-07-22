@@ -48,9 +48,9 @@ pub use serializer::{to_vec, to_vec_with_capacity, Serializer, WordWrite};
 
 #[cfg(test)]
 mod tests {
-    use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
-
     use crate::serde::{from_slice, to_vec};
+    use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
+    use chrono::NaiveDate;
 
     #[test]
     fn test_vec_round_trip() {
@@ -74,6 +74,14 @@ mod tests {
         let input: (u32, u64) = (1, 2);
         let data = to_vec(&input).unwrap();
         let output: (u32, u64) = from_slice(data.as_slice()).unwrap();
+        assert_eq!(input, output);
+    }
+
+    #[test]
+    fn naive_date_round_trip() {
+        let input: NaiveDate = NaiveDate::parse_from_str("2015-09-05", "%Y-%m-%d").unwrap();
+        let date_vec = to_vec(&input).unwrap();
+        let output: NaiveDate = from_slice(date_vec.as_slice()).unwrap();
         assert_eq!(input, output);
     }
 }

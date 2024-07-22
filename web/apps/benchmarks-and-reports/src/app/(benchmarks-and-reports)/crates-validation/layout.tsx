@@ -3,14 +3,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { FooterAscii } from "../_components/footer-ascii";
-import { CratesIoValidationHashButton } from "./_components/creates-io-validation-hash-button";
+import { CratesIoValidationHashButton } from "./_components/crates-io-validation-hash-button";
 
 export default function CratesIoValidationLayout({ children }) {
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
         <div>
-          <h1 className="text-3xl">Crates.io Validation</h1>
+          <h1 className="text-2xl">Crates.io Validation</h1>
           <p className="text-muted-foreground text-sm">
             Each night, we test compatibility between each of the{" "}
             <Link

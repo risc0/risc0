@@ -2,10 +2,9 @@ import { Tabs, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import Link from "next/link";
 import { pick } from "radash";
 import { Suspense } from "react";
-import { replace } from "string-ts";
 import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
-import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
+import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../../_utils/constants";
 import { ApplicationsBenchmarksContent } from "./_components/applications-benchmarks-content";
 import { ApplicationsBenchmarksSkeleton } from "./_components/applications-benchmarks-skeleton";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./_utils/constants";
@@ -13,7 +12,7 @@ import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./_utils/constants"
 export function generateStaticParams() {
   return VERSIONS.flatMap(({ value }) => {
     return Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[value]).map((filename) => ({
-      slug: replace(filename, ".csv", ""),
+      slug: filename.replace(".csv", ""),
       version: value,
     }));
   });
@@ -63,9 +62,9 @@ export default function ApplicationsBenchmarksPage({
             tabIndex={-1}
             key={filename}
             replace
-            href={`/${params.version}/applications-benchmarks/${replace(filename, ".csv", "")}`}
+            href={`/${params.version}/applications-benchmarks/${filename.replace(".csv", "")}`}
           >
-            <TabsTrigger value={replace(filename, ".csv", "")}>
+            <TabsTrigger value={filename.replace(".csv", "")}>
               {Object.values(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version])[index]}
             </TabsTrigger>
           </Link>
