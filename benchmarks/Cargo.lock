@@ -2770,6 +2770,7 @@ dependencies = [
  "prost",
  "rand",
  "rayon",
+ "regex",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
