@@ -12,6 +12,6 @@ sha-methods = { path = "methods" }
 hex = "0.4"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "sha-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "sha-methods/prove"]

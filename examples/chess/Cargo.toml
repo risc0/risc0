@@ -11,6 +11,6 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 shakmaty = "0.27"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "chess-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "chess-methods/prove"]

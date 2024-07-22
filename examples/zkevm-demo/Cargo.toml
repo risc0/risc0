@@ -15,6 +15,6 @@ zkevm-core = { path = "core", features = ["ethers"] }
 zkevm-methods = { path = "methods" }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "zkevm-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "zkevm-methods/prove"]

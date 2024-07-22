@@ -13,6 +13,6 @@ smartcore = { git = "https://github.com/risc0/smartcore.git", rev = "4bd3cadd50e
 smartcore-ml-methods = { path = "methods" }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "smartcore-ml-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "smartcore-ml-methods/prove"]

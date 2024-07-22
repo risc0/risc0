@@ -12,6 +12,6 @@ rand_core = "0.6.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "ecdsa-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "ecdsa-methods/prove"]

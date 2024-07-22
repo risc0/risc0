@@ -10,6 +10,6 @@ rand = "0.8"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "password-checker-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "password-checker-methods/prove"]

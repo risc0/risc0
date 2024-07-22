@@ -11,6 +11,6 @@ serde_json = "1.0.108"
 xgboost-methods = { path = "methods" }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "xgboost-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "xgboost-methods/prove"]

@@ -14,6 +14,6 @@ waldo-core = { path = "core" }
 waldo-methods = { path = "methods" }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "waldo-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "waldo-methods/prove"]

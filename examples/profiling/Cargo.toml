@@ -10,6 +10,6 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "fibonacci-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "fibonacci-methods/prove"]

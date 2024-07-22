@@ -12,6 +12,6 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 rust_decimal = "1.29"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "prorata-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "prorata-methods/prove"]

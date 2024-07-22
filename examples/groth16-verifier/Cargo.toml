@@ -10,6 +10,7 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 serde_json = "1.0"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "groth16-verifier-methods/prove"]
+
 default = []
 prove = ["risc0-zkvm/prove", "groth16-verifier-methods/prove"]

@@ -9,6 +9,6 @@ bevy-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "bevy-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "bevy-methods/prove"]

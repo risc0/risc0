@@ -13,6 +13,6 @@ wordle-methods = { path = "methods" }
 serial_test = "3.1"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "wordle-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "wordle-methods/prove"]

@@ -16,6 +16,6 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "digital-signature-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "digital-signature-methods/prove"]

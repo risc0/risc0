@@ -9,6 +9,6 @@ wasm-methods = { path = "methods" }
 wat = "<1.0.72"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda", "wasm-methods/prove"]
 default = []
 prove = ["risc0-zkvm/prove", "wasm-methods/prove"]
