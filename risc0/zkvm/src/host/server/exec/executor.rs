@@ -259,8 +259,8 @@ impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
         self.ctx.peek_u32(ByteAddr(addr))
     }
 
-    fn syscall_table(&self) -> SyscallTable<'a> {
-        self.syscall_table.clone()
+    fn syscall_table(&self) -> &SyscallTable<'a> {
+        &self.syscall_table
     }
 }
 

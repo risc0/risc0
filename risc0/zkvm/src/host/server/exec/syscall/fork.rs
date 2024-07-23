@@ -72,7 +72,7 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         // The return value of sys_fork is the pid, so set a0 to PID_CHILD.
         registers[REG_A0] = PID_CHILD;
 
-        let syscall_table = ctx.syscall_table();
+        let syscall_table = ctx.syscall_table().clone();
 
         Ok(Self {
             ctx,
@@ -313,7 +313,7 @@ impl<'a, 'b> SyscallContext<'a> for ChildExecutor<'a, 'b> {
         }
     }
 
-    fn syscall_table(&self) -> SyscallTable<'a> {
+    fn syscall_table(&self) -> &SyscallTable<'a> {
         unimplemented!()
     }
 }

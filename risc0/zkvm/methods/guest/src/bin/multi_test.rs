@@ -338,10 +338,13 @@ fn main() {
         MultiTestSpec::AllocZeroed => {
             // Bump allocator was modified to not manually zero memory in the zkVM. Simple test to
             // ensure that zkVM memory is zeroed in initialization.
+            let array: &[u32; 512] = unsafe {
+                // Allocate some arbitrary amount of bytes
+                let layout = Layout::new::<[u32; 512]>();
+                let ptr = alloc_zeroed(layout);
 
-            let layout = Layout::new::<[u32; 512]>();
-            // Allocate some arbitrary amount of bytes
-            let array: &[u32; 512] = unsafe { &*(alloc_zeroed(layout) as *const [u32; 512]) };
+                &*(ptr as *const [u32; 512])
+            };
             for value in array {
                 assert_eq!(*value, 0);
             }

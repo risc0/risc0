@@ -79,7 +79,7 @@ pub(crate) trait SyscallContext<'a> {
     fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
 
     /// Access the syscall table.
-    fn syscall_table(&self) -> SyscallTable<'a>;
+    fn syscall_table(&self) -> &SyscallTable<'a>;
 }
 
 #[derive(Clone)]
