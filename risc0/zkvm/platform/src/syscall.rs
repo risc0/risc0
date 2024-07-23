@@ -818,9 +818,14 @@ pub extern "C" fn sys_fork() -> i32 {
 ///
 /// On success, zero is returned.  On error, -1 is returned, and `pipefd` is
 /// left unchanged.
+///
+/// # Safety
+///
+/// `pipefd` must be aligned, dereferenceable, and have capacity for 2 u32
+/// values.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_PIPE, pipefd, 2) };
+pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
+    let Return(a0, _) = syscall_0(nr::SYS_PIPE, pipefd, 2);
     a0 as i32
 }

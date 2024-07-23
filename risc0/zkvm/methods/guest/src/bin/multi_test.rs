@@ -352,7 +352,7 @@ fn main() {
         MultiTestSpec::SysFork => {
             let content = [3, 1, 3, 3, 7];
             let mut pipe = [0u32; 2];
-            sys_pipe(pipe.as_mut_ptr());
+            unsafe { sys_pipe(pipe.as_mut_ptr()) };
             let pid = sys_fork();
             if pid == 0 {
                 env::log("child");
