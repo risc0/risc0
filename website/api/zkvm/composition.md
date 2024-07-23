@@ -17,20 +17,20 @@ To use proof composition in your program, you'll need to call [`add_assumption()
 
 Assumptions will be automatically resolved when you call [`Prover::prove_with_opts`] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.
 
-## How it works
+## How It Works
 
 Under the hood, proof composition works by _adding assumptions_ to the [ReceiptClaim] struct, and then _resolving_ those assumptions.
 
 ![ReceiptClaim with no assumptions][composition-no-assumptions]
 
-### Adding assumptions
+### Adding Assumptions
 
 When [`env::verify()`] is called inside the guest program, an [assumption][assumptions] is added to the [ReceiptClaim].
 This results in a "conditional receipt."
 
 ![Adding an assumption][composition-add-assumption]
 
-### Resolve an assumption
+### Resolve an Assumption
 
 In order to finish the process of proof composition, assumptions must be resolved.
 This is accomplished via `resolve`, which is called automatically when users call [`Prover::prove_with_opts`] using `ReceiptKind::Succinct` or `ReceiptKind::Groth16`.

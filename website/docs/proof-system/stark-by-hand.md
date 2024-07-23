@@ -10,14 +10,14 @@ Specifically, constructing RISC Zero's zk-STARK uses the DEEP-ALI protocol & the
 In this series of 12 brief lessons, we walk through a simplified numerical example of the construction of RISC Zero's STARK.
 
 - [Google Sheet version](https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing)
-- [PDF Version](https://dev.risczero.com/STARK-by-hand.pdf)
+- [PDF Version](https://dev.risczero.com/STARK-by-hand.pdf) (PDF)
 - [Python Version](https://dev.risczero.com/didactic_stark.py)
 
 If you make sense of these 12 lessons, you'll have a solid handle on the mechanics of a zk-STARK (and we'd likely love to [hire you](https://jobs.ashbyhq.com/RiscZero)).
 
 The [proof system sequence diagram](proof-system-sequence-diagram.md) describes this process in more generality; we suggest going back and forth between this document and the sequence diagram.
 
-## Lesson 1: The Execution Trace
+## Lesson 1: the Execution Trace
 
 > When any code executes in the RISC Zero virtual machine, each step of that execution is recorded in an [`Execution Trace`](./what-is-a-trace.md).
 
@@ -34,7 +34,7 @@ In this example, our trace consists of 6 `columns`.
 >
 > The full implementation also has `Accumulator Columns`, allowing for [RISC-V] memory emulation. The `Accumulator Columns` are not necessary in this simplified example.
 
-## Lesson 2: Rule checks to validate a computation
+## Lesson 2: Rule Checks to Validate a Computation
 
 Here, we introduce a number of rule-checking cells in order to demonstrate the validity of the execution.
 In this example, we show six rules specific to generating Fibonacci numbers.
@@ -143,7 +143,7 @@ In this example, the degree of the `mixed constraint polynomial` is equal to the
 In more complicated examples, composing our `rule checking polynomials` with our `trace polynomials` would yield `high degree constraint polynomials.`
 In that case, we'd add an extra step at the end of Lesson 9 to split our `high degree validity polynomial` into a few `low degree validity polynomials`.
 
-## Lesson 8: The Core of the RISC Zero STARK
+## Lesson 8: the Core of the RISC Zero STARK
 
 > The Prover constructs the `validity polynomial` by dividing the `mixed constraint polynomial` from the previous lesson by the publicly known `zeros polynomial`.
 >
@@ -174,7 +174,7 @@ The Prover evaluates V(x) over the $5, 5^4, \ldots, 5^{94}$, commits the values 
 > The DEEP-ALI technique allows us to achieve a high degree of soundness with a single test.
 > The details of DEEP are described in the following lesson.
 
-## Lesson 9: The DEEP Technique
+## Lesson 9: the DEEP Technique
 
 > The DEEP technique is a means of improving the security level associated with a single query by sampling from a larger domain than the commitment domain.
 >
@@ -359,7 +359,7 @@ Specifically, if the Verifier query is $g$, the Prover provides evaluations of:
 The Verifier checks the Merkle branches for each of these evaluations and also checks that the evaluations from one round to the next are consistent.
 This includes checking that the evaluations for $f_2$ are consistent with the evaluation of $f_3(g^8)$.
 
-### Checking the Evaluations are Consistent
+### Checking the Evaluations Are Consistent
 
 The Verifier can confirm the evaluations for $f_{i-1}$ and $f_{i}$ are consistent by checking that
 

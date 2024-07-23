@@ -47,7 +47,7 @@ cargo risczero new my_project --guest-name guest_code_for_zk_proof
 
 There is a list of options in the [feature flags].
 
-## 3. Project structure
+## 3. Project Structure
 
 The [Hello World tutorial][hello-world] contains step-by-step instructions on
 how to:

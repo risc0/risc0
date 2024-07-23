@@ -33,4 +33,4 @@ We recommend the following external references on STARKs:
 
 ### Most Technical
 
-- [The STARK paper (Ben-Sasson et al, 2018)](https://eprint.iacr.org/2018/046.pdf)
+- [The STARK paper (Ben-Sasson et al, 2018)](https://eprint.iacr.org/2018/046.pdf) (PDF)

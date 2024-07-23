@@ -25,7 +25,7 @@ Bonsai combines three key ingredients to produce a unique network that will enab
 - A proving system that directly integrates into any smart contract or chain
 - A universal rollup that distributes any computations proven on Bonsai to every chain
 
-### Zero-Knowledge Proofs For Every Chain And Application
+### Zero-Knowledge Proofs for Every Chain And Application
 
 Bonsai allows for zero-knowledge proofs to be built into the entire web3 ecosystem by acting as an independent zero-knowledge proving network that chains and dApps can call from smart contracts or validators to generate zero-knowledge proofs. The proofs are then posted onto blockchains such as Ethereum, zero-knowledge L2s, app chains, and L1s. This enables verifiable off-chain compute; applications can rely on Bonsai for the majority of their smart contract logic and state change calculations without the use of a blockchain VM (EVM). The state changes and smart contract execution are fully verified by Bonsai’s ZK proofs which are posted on-chain. The resulting smart contract is more compact, functional, and gas efficient.
 
@@ -83,7 +83,7 @@ Bonsai is a massively parallel, chain-agnostic, and general purpose network desi
 
 **Image Hub:** The image hub will allow developers to store functions and program images that can be executed by blockchain smart contracts through the Bonsai API. Program images in this case can vary in complexity from basic DeFi swap functions to complex light clients and even Geth. All execution of these images will be ZK provable through Bonsai and our zkVM. The image hub provides extremely powerful programming primitives to developers and will enable the creation of complex stateful workflows that span multiple blockchains. It will enable Bonsai to act as a shared execution layer between any chain and increase the functionality of smart contracts by many magnitudes.
 
-### Future components
+### Future Components
 
 **State Store:** The Bonsai State Store will enable developers to store state on Bonsai instead of needing to maintain state on the settlement layer (Layer 1 Ethereum etc). This will increase gas savings and reduce contract complexity for the application while enhancing the functionality of code executed on Bonsai. Variables within the state store are represented by Key/Value pairs which store the state on Bonsai for easy accessibility within Bonsai functions/program images.
 

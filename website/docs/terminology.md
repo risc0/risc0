@@ -11,7 +11,7 @@ This assumption can be proven and resolved later, either through [recursion] or 
 A mathematical construct that acts as the "CPU" of the [zkVM] in a manner that enables creating [proofs]. <br/>
 See also: [Arithmetic Circuits]
 
-### Clock cycles
+### Clock Cycles
 
 The smallest unit of compute in the zkVM [circuit], analogous to a clock cycle on a physical CPU.
 The complexity of a [guest program]'s [execution] is measured in clock cycles as they directly affect the memory, proof size, and time performance of the [zkVM].
@@ -134,7 +134,7 @@ See also: [Rust crate for zkVM guest]
 
 The system the [zkVM] runs on.
 
-### Host program
+### Host Program
 
 The [host]-native, untrusted portion of a [zkVM] application.
 The host program loads the [guest program] and provides inputs to the guest program as necessary.

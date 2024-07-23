@@ -20,15 +20,7 @@
       false
     ],
     [
-      "remark-lint-heading-style",
-      false
-    ],
-    [
       "remark-lint-no-shortcut-reference-link",
-      false
-    ],
-    [
-      "remark-lint-no-undefined-references",
       false
     ],
     [
@@ -53,10 +45,6 @@
     ],
     [
       "remark-lint-ordered-list-marker-value",
-      false
-    ],
-    [
-      "remark-lint-unordered-list-marker-style",
       false
     ],
     [

@@ -17,7 +17,7 @@ you'll need is contained in the [`risc0-zkvm` crate][risc0-zkvm]. For more
 complex applications, you may also want to check out our [other Rust
 crates][rust-libraries].
 
-## Using Rust Crates inside the zkVM
+## Using Rust Crates Inside the zkVM
 
 A major advantage of the [RISC Zero zkVM][zkvm-overview] is that you can use
 Rust crates inside your [zkVM applications][zkvm-overview]. Being able to easily

@@ -41,6 +41,6 @@ For general references, we recommend the following:
 ### Very Technical
 
 - [PLONK paper](https://eprint.iacr.org/2019/953)
-- [PLOOKUP paper](https://eprint.iacr.org/2020/315.pdf)
+- [PLOOKUP paper](https://eprint.iacr.org/2020/315.pdf) (PDF)
 
 [receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

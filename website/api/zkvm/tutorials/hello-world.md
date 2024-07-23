@@ -8,7 +8,7 @@ following the steps in this guide, you will learn how:
 - the zkVM executes and generates a proof of a guest program
 - the guest writes public output
 
-## Step 1: Create a new project
+## Step 1: Create a New Project
 
 Firstly, visit the [installation][install] page for how to install all the
 necessary software. Next, using the `cargo-risczero` tool create a `hello-world`
@@ -23,7 +23,7 @@ cd hello-world
 
 In the project folder, `hello-world`, build and run the project using `cargo run --release`. Use this command any time you'd like to check your progress.
 
-## Step 2 (Host): Share private data as input with the guest
+## Step 2 (Host): Share Private Data as Input with the Guest
 
 zkVM or a [prover] runs on the **[host]**. The host code is in
 `hello-world/host/src/main.rs`. The host creates an executor environment
@@ -41,7 +41,7 @@ fn main() {
 }
 ```
 
-## Step 3 (Guest): Read input and commit output
+## Step 3 (Guest): Read Input and Commit Output
 
 Now, let's look at the guest code located in `methods/guest/src/main.rs`. This
 is the portion of the code that will be proven. In the code snippet below, the
@@ -68,7 +68,7 @@ Notice, by committing any private information to the journal, we make this
 private data public. We want to avoid committing sensitive data to public
 journal.
 
-## Step 4 (Host): Generate a receipt and read its journal contents
+## Step 4 (Host): Generate a Receipt and Read Its Journal Contents
 
 Let's look at how the host generates a receipt and extracts the [journal]'s
 contents. We get a receipt, extract a journal from the receipt, and verify it.

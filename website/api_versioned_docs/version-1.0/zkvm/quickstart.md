@@ -8,7 +8,7 @@ Welcome to the zkVM Quick Start page! Here are the steps to create your first pr
 4. Run your project in dev-mode.
 5. Run your project locally to generate a zk-proof.
 
-## Concept break
+## Concept Break
 
 The zkVM provides a zero-knowledge proof of the correct execution of Rust-based
 program. The **[host]** is responsible for launching the zkVM (or a
@@ -45,7 +45,7 @@ cargo risczero new my_project --guest-name guest_code_for_zk_proof
 
 There is a list of options in the [feature flags].
 
-## 3. Project structure
+## 3. Project Structure
 
 The [Hello World tutorial][hello-world] contains step-by-step instructions on
 how to:

@@ -110,7 +110,7 @@ In addition to being far easier to build on, we're also delivering on
 Given the ease of development and the performance, the zkVM is the clear choice
 for your ZK needs.
 
-## Connect with us
+## Connect with Us
 
 If you want to report a bug or contribute to our code, you can do so on
 [GitHub][risc0-repo].

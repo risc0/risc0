@@ -2,7 +2,7 @@
 
 _A brief introduction to the RISC Zero [receipt]._
 
-## What is a receipt?
+## What Is a Receipt?
 
 A receipt gives the results of your program along with proof that they were produced honestly.
 
@@ -20,7 +20,7 @@ the seal is the opaque blob that cryptographically attests to the validity of th
 
 <!-- End receipt definition. -->
 
-## How are receipts used?
+## How Are Receipts Used?
 
 Suppose Alice and Bob have agreed on some computation that needs to get done.
 In particular, they've agreed on some zkVM [guest program], and they each have access to the source code and the [Image ID] for that guest program.

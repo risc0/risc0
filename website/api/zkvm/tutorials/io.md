@@ -1,4 +1,4 @@
-# Understanding I/O in the zkVM
+# Understanding I/O In the zkVM
 
 In the [Hello World Tutorial][docs-hello-world], we had a brief introduction to
 how to perform I/O operations in the zkVM. Now we'll dive deeper into the subject.
@@ -34,7 +34,7 @@ If your application handles sensitive data, it's important to be aware of
 specifically which data is [`commit`][source-env::commit]ed to the journal, avoiding
 any sensitive data to be included in the proof.
 
-## Sending data from the host to the guest
+## Sending Data from the Host to the Guest
 
 The [`stdin`][stdin] file descriptor is used to send input data from the host to
 the guest.
@@ -59,7 +59,7 @@ let env = ExecutorEnv::builder().write(&input)?.build()?;
 Since we mentioned the `read`/`write` methods and their `_slice` variants, let's
 take a moment to understand the difference between them.
 
-## A note on performance
+## A Note on Performance
 
 During the process of sending data from host to guest and vice-versa, we can
 either do so while (de)serializing the data or by sending raw bytes.
@@ -80,7 +80,7 @@ shouldn't be a problem.
 We have a [more detailed explanation][docs-guest-code-optmization] on guest code
 optimization if you want to learn more about this topic.
 
-## Sending _Private_ data from the guest
+## Sending _Private_ Data from the Guest
 
 Back where we were, after getting data from the host and performing some
 transformations on it, we might want to send _private_ data back.
@@ -122,7 +122,7 @@ composition in a capable proving service like [Bonsai][docs-remote-proving] to
 speed up the proof generation.
 :::
 
-## Sending _Public_ data from the guest
+## Sending _Public_ Data from the Guest
 
 We saw how to send _private_ data directly to the host, but we might also want
 to [`commit`][source-env::commit] _public_ data, attesting to some fact that we
@@ -146,7 +146,7 @@ On the host side, (or any other regular program that has access to the
 calling the [`Journal`][source-Journal]'s method
 [`decode`][source-Journal::decode].
 
-## Reading _Private_ data in the host
+## Reading _Private_ Data in the Host
 
 Once we sent data from the guest, we can read it back in the host by leveraging
 the [`from_slice`][source-from_slice] method. This method is used to deserialize
@@ -177,7 +177,7 @@ let receipt = prover.prove(env, ELF).unwrap().receipt;
 let public_data = receipt.journal.decode()?;
 ```
 
-## Sharing data structures between host and guest
+## Sharing Data Structures Between Host and Guest
 
 A good pattern to follow when handling shared data structures between the host
 and guest is to have a common `core` module that contains the shared data
@@ -196,7 +196,7 @@ Similarly, the [Chess example][example-chess] does the same with its
 
 Other examples leveraging this pattern can be found in the [examples page].
 
-## Putting it all together
+## Putting It All Together
 
 Now that we've covered some details about I/O in the zkVM, let's see how a real
 program implements it in practice.

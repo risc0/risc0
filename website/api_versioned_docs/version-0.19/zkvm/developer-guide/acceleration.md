@@ -29,7 +29,7 @@ When using cryptography indirectly, e.g. via the `cookie`, `oauth2`, or `revm`, 
 
 An example of how to use these crates to accelerate ECDSA signature verification can be in the [ECDSA example](https://github.com/risc0/risc0/tree/release-0.19/examples/ecdsa). Note the [use of the patched versions](https://github.com/risc0/risc0/blob/release-0.19/examples/ecdsa/methods/guest/Cargo.toml#L13-L18) of `sha2`, `crypto-bigint` and `k256` crates used in the guest's `Cargo.toml`.
 
-## Adding Accelerator Support To Crates
+## Adding Accelerator Support to Crates
 
 It's possible to add accelerator support for your own crates.
 

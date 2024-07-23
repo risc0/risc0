@@ -11,7 +11,7 @@ new approach.
 
 ## Background
 
-### What is the zkVM, really?
+### What Is the zkVM, Really?
 
 **The zkVM is essentially a CPU.**
 
@@ -21,7 +21,7 @@ implementation of an [x86] or [ARM] architecture. This biggest difference is
 that the zkVM is implemented with [arithmetic circuits], in software, instead of
 circuitry made from silicon and copper.
 
-### What is a “cycle”?
+### What Is a “Cycle”?
 
 Both in the zkVM and on physical CPUs, the cost of an operation is measured in
 “clock cycles”.
@@ -34,7 +34,7 @@ a “cycle”.
 **Proving times for the zkVM are directly related to the number of cycles in an
 execution.**
 
-## General techniques and advice
+## General Techniques and Advice
 
 **Start by applying general techniques and best practices for optimizing your
 code.**
@@ -44,7 +44,7 @@ covers a range of topics important to performance, and gives applicable advice
 for optimization. If you are new to optimization, or new to Rust, we recommend
 you read this guide.
 
-### Don’t assume, measure.
+### Don’t Assume, Measure.
 
 Performance is complex, in the zkVM as on a physical CPU.
 Don’t assume you know what the bottlenecks are. Measure and experiment.
@@ -55,7 +55,7 @@ generally referred to as [Amdahl’s Law][amdhal], and practically it means you
 shouldn't waste your time optimizing something that's not the taking a
 significant portion of execution time.
 
-### Measuring by printing to console
+### Measuring by Printing to Console
 
 Starting simple, measure by adding an `eprintln!` line to your guest code to
 measure how long an operation takes, and how many times it is called.
@@ -161,7 +161,7 @@ effect in the zkVM.
 See the [table in the appendix][appendix] for more information about cycle
 counts per operation.
 
-### Memory access costs one cycle, except when it doesn’t
+### Memory Access Costs One Cycle, Except When It Doesn’t
 
 [RISC-V operations] require data to be loaded from memory to [registers] before
 it can acted on (e.g. used as input to an `add`). It must also be written back
@@ -218,7 +218,7 @@ locality and L1/2 cache usage. Using fewer pages, using the same page repeatedly
 instead of a random access pattern, and condensing the range of addresses
 accessed can all help reduce paging overhead. It’s best to experiment.
 
-### The zkVM does not have native floating point operations
+### The Zkvm Does Not Have Native Floating Point Operations
 
 The RISC Zero zkVM does not implement the RISC-V floating point instructions. As
 a result, all floating point operations are emulated in software. In contrast to
@@ -227,7 +227,7 @@ integer operations that take 1-2 cycles, floating point operations can take
 
 **When possible, use integers instead of floating point numbers.**
 
-### Unaligned data access is significantly more expensive
+### Unaligned Data Access Is Significantly More Expensive
 
 CPUs define a standard size of data for operation; and this is referred to as a
 word. In RISC-V 32-bit ISA, the size of a word is 32 bits (4 bytes). Memory is
@@ -245,7 +245,7 @@ If you are defining structs that containing small primitive typed fields (e.g.
 paying extra care to the [alignment of those fields][alignment]. Additionally,
 if you are slicing into byte arrays, try to do so at word-aligned indices.
 
-### When reading data as raw bytes, use `env::read_slice`
+### When Reading Data as Raw Bytes, Use `env::read_slice`
 
 When reading input into the guest, [`env::read`] is the main API to use. It
 automatically deserializes the input bytes into structs, like in this [snippet
@@ -304,7 +304,7 @@ let env = ExecutorEnv::builder()
         .unwrap();
 ```
 
-### When you only need part of the input data, try Merklizing it
+### When You Only Need Part of the Input Data, Try Merklizing It
 
 Some programs only need part of the whole available data. [Where’s
 Waldo][example-waldo] is an example of this. The full input is an image, but
@@ -318,7 +318,7 @@ the computation, consider splitting it into some notion of a chunks and building
 it as a Merkle tree. You can use the [code for Where’s Waldo][waldo-merkle] as a
 starting point.
 
-### Cryptography in the guest can utilize accelerator circuits
+### Cryptography in the Guest Can Utilize Accelerator Circuits
 
 RISC Zero’s riscv32im implementation includes a number of special purpose
 operations, including two “accelerators” for cryptographic functions: SHA-256
@@ -334,7 +334,7 @@ per 64-byte block and 6 cycles to initialize. A 256-bit modular multiply takes
 10 cycles. This includes basic memory operation cycles, but does not include
 page-in or page-out operations that are triggered.
 
-### Memory access is synchronous
+### Memory Access Is Synchronous
 
 On a physical CPU, memory access is asynchronous to register operations; meaning
 arithmetic or logic operations on registers can run while the CPU is waiting for
@@ -347,7 +347,7 @@ In the zkVM, all memory operations are synchronous, regardless of if the data is
 currently paged-in. **Memory prefetching does not help (but can hurt) zkVM guest
 performance.**
 
-### All execution is single-threaded
+### All Execution Is Single-Threaded
 
 The zkVM has one core and one thread of execution. As a result, there is no need
 or use for multi-threading. **Using `async` routines, locking, or atomic
@@ -382,7 +382,7 @@ CUDA runtime needs to be installed. When building the zkVM from source, a
 compatible version of the CUDA toolkit needs to be installed on the build
 machine, and the `cuda` feature enabled.
 
-## TL;DR and quick wins
+## TL;DR and Quick Wins
 
 - [Profile your applications][profiling] to find where cycles are being spent.
 - Try different [compiler settings][profiles]
