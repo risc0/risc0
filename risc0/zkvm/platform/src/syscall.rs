@@ -220,8 +220,8 @@ macro_rules! impl_syscall {
                 ::core::arch::asm!(
                     "ecall",
                     in("t0") $crate::syscall::ecall::SOFTWARE,
-                    inout("a0") from_host => a0,
-                    inout("a1") from_host_words => a1,
+                    inlateout("a0") from_host => a0,
+                    inlateout("a1") from_host_words => a1,
                     in("a2") syscall.as_ptr()
                         $(,in("a3") $a0
                           $(,in("a4") $a1

@@ -309,7 +309,7 @@ impl<'a, 'b> SyscallContext<'a> for ChildExecutor<'a, 'b> {
     }
 
     fn syscall_table(&self) -> &SyscallTable<'a> {
-        unimplemented!()
+        &self.syscall_table
     }
 }
 

@@ -17,14 +17,7 @@
 mod fork;
 mod pipe;
 
-use std::{
-    cell::RefCell,
-    cmp::min,
-    collections::HashMap,
-    io::{Read, Write},
-    rc::Rc,
-    str::from_utf8,
-};
+use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc};
 
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
@@ -54,9 +47,6 @@ use crate::{
 };
 
 use self::{fork::SysFork, pipe::SysPipe};
-
-// This is an arbitrary maximum number of open file descriptors allowed.
-const MAX_FD: u32 = 1000;
 
 /// A host-side implementation of a system call.
 pub(crate) trait Syscall {
@@ -117,23 +107,22 @@ impl<'a> SyscallTable<'a> {
     }
 
     pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
-        let posix_io = env.posix_io.clone();
-        let mut this = Self::new(posix_io.clone());
+        let mut this = Self::new(env.posix_io.clone());
 
         let sys_verify = SysVerify::new(env.assumptions.clone());
 
-        this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
-            .with_syscall(SYS_LOG, posix_io.clone())
-            .with_syscall(SYS_PANIC, SysPanic)
-            .with_syscall(SYS_RANDOM, SysRandom)
-            .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
-            .with_syscall(SYS_READ, posix_io.clone())
-            .with_syscall(SYS_WRITE, posix_io)
-            .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
+        this.with_syscall(SYS_ARGC, Args(env.args.clone()))
+            .with_syscall(SYS_ARGV, Args(env.args.clone()))
+            .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
             .with_syscall(SYS_FORK, SysFork)
+            .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
+            .with_syscall(SYS_LOG, SysLog)
+            .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_PIPE, SysPipe::default())
-            .with_syscall(SYS_ARGC, Args(env.args.clone()))
-            .with_syscall(SYS_ARGV, Args(env.args.clone()));
+            .with_syscall(SYS_RANDOM, SysRandom)
+            .with_syscall(SYS_READ, SysRead)
+            .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
+            .with_syscall(SYS_WRITE, SysWrite);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
             this.inner
@@ -155,6 +144,33 @@ impl<'a> SyscallTable<'a> {
 
     pub(crate) fn get_syscall(&self, name: &str) -> Option<&Rc<RefCell<(dyn Syscall + 'a)>>> {
         self.inner.get(name)
+    }
+}
+
+struct SysLog;
+impl Syscall for SysLog {
+    fn syscall(
+        &mut self,
+        _syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let writer = ctx
+            .syscall_table()
+            .posix_io
+            .borrow()
+            .get_writer(fileno::STDOUT)?;
+
+        tracing::debug!("sys_log({buf_len} bytes)");
+
+        let msg = format!("R0VM[{}] ", ctx.get_cycle());
+        writer
+            .borrow_mut()
+            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
+        Ok((0, 0))
     }
 }
 
@@ -184,7 +200,7 @@ impl Syscall for SysGetenv {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = from_utf8(&from_guest)?;
+        let msg = std::str::from_utf8(&from_guest)?;
 
         match self.0.get(msg) {
             None => Ok((u32::MAX, 0)),
@@ -209,7 +225,7 @@ impl Syscall for SysPanic {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = from_utf8(&from_guest)?;
+        let msg = std::str::from_utf8(&from_guest)?;
         bail!("Guest panicked: {msg}");
     }
 }
@@ -420,40 +436,11 @@ impl<'a> Syscall for SysSliceIo<'a> {
     }
 }
 
-impl<'a> Syscall for PosixIo<'a> {
+struct SysRead;
+impl Syscall for SysRead {
     fn syscall(
         &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        // TODO: Is there a way to use "match" here instead of if statements?
-        if syscall == SYS_READ.as_str() {
-            self.sys_read(ctx, to_guest)
-        } else if syscall == SYS_WRITE.as_str() {
-            self.sys_write(ctx)
-        } else if syscall == SYS_LOG.as_str() {
-            self.sys_log(ctx)
-        } else {
-            bail!("Unknown syscall {syscall}")
-        }
-    }
-}
-
-impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
-    fn syscall(
-        &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        self.borrow_mut().syscall(syscall, ctx, to_guest)
-    }
-}
-
-impl<'a> PosixIo<'a> {
-    fn sys_read(
-        &mut self,
+        _syscall: &str,
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
@@ -470,7 +457,7 @@ impl<'a> PosixIo<'a> {
             "Word-aligned read buffer must be fully filled"
         );
 
-        let reader = self.get_reader(fd)?;
+        let reader = ctx.syscall_table().posix_io.borrow().get_reader(fd)?;
 
         // So that we don't have to deal with short reads, keep
         // reading until we get EOF or fill the buffer.
@@ -509,56 +496,26 @@ impl<'a> PosixIo<'a> {
             u32::from_le_bytes(to_guest_end),
         ))
     }
+}
 
-    fn sys_write(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
+struct SysWrite;
+impl Syscall for SysWrite {
+    fn syscall(
+        &mut self,
+        _syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
         let fd = ctx.load_register(REG_A3);
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let buf_len = ctx.load_register(REG_A5);
         let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
-        let writer = self.get_writer(fd)?;
+        let writer = ctx.syscall_table().posix_io.borrow().get_writer(fd)?;
 
         tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
-    }
-
-    fn sys_log(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        // write to stdout, but be sure to point it to where the file descriptor is pointing
-        let writer = self.get_writer(fileno::STDOUT)?;
-
-        tracing::debug!("sys_log({buf_len} bytes)");
-
-        let msg = format!("R0VM[{}] ", ctx.get_cycle());
-        writer
-            .borrow_mut()
-            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
-        Ok((0, 0))
-    }
-
-    fn find_free_fd(&self) -> Option<u32> {
-        (0..MAX_FD).find(|&i| !self.read_fds.contains_key(&i) && !self.write_fds.contains_key(&i))
-    }
-
-    fn alloc_shared_read_fd<T>(&mut self, reader: Rc<RefCell<T>>) -> Option<u32>
-    where
-        T: Read + 'a,
-    {
-        let fd = self.find_free_fd()?;
-        self.read_fds.insert(fd, reader);
-        Some(fd)
-    }
-
-    fn alloc_shared_write_fd<T>(&mut self, writer: Rc<RefCell<T>>) -> Option<u32>
-    where
-        T: Write + 'a,
-    {
-        let fd = self.find_free_fd()?;
-        self.write_fds.insert(fd, writer);
-        Some(fd)
     }
 }
 

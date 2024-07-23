@@ -12,18 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, collections::VecDeque, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::VecDeque,
+    io::{Read, Write},
+    rc::Rc,
+};
 
 use anyhow::{anyhow, Result};
 
+use crate::host::client::posix_io::PosixIo;
+
 use super::{Syscall, SyscallContext};
 
-type Pipe = Rc<RefCell<VecDeque<u8>>>;
+// This is an arbitrary maximum number of open file descriptors allowed.
+const MAX_FD: u32 = 1000;
 
 #[derive(Default)]
-pub(crate) struct SysPipe {
-    pipes: Vec<Pipe>,
-}
+pub(crate) struct SysPipe {}
 
 impl Syscall for SysPipe {
     fn syscall(
@@ -32,22 +38,30 @@ impl Syscall for SysPipe {
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let pipe = Rc::new(RefCell::new(VecDeque::new()));
-        self.pipes.push(pipe.clone());
-
         let posix_io = &ctx.syscall_table().posix_io;
-        let read_fd = posix_io
+        let pipe = Rc::new(RefCell::new(VecDeque::new()));
+        (to_guest[0], to_guest[1]) = posix_io
             .borrow_mut()
-            .alloc_shared_read_fd(pipe.clone())
-            .ok_or(anyhow!("No free read file descriptors"))?;
-        let write_fd = posix_io
-            .borrow_mut()
-            .alloc_shared_write_fd(pipe)
-            .ok_or(anyhow!("No free write file descriptors"))?;
-
-        // only write to_guest if both succeed
-        (to_guest[0], to_guest[1]) = (read_fd, write_fd);
-
+            .alloc_pipe(pipe)
+            .ok_or(anyhow!("Could not allocate pipe"))?;
         Ok((0, 0))
+    }
+}
+
+impl<'a> PosixIo<'a> {
+    fn find_free_fd(&self, start: u32) -> Option<u32> {
+        (start..MAX_FD)
+            .find(|&i| !self.read_fds.contains_key(&i) && !self.write_fds.contains_key(&i))
+    }
+
+    fn alloc_pipe<T>(&mut self, pipe: Rc<RefCell<T>>) -> Option<(u32, u32)>
+    where
+        T: Read + Write + 'a,
+    {
+        let read_fd = self.find_free_fd(0)?;
+        let write_fd = self.find_free_fd(read_fd)?;
+        self.read_fds.insert(read_fd, pipe.clone());
+        self.write_fds.insert(write_fd, pipe);
+        Some((read_fd, write_fd))
     }
 }
