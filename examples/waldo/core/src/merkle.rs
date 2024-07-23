@@ -41,7 +41,7 @@ pub type Node = Digest;
 ///
 /// MerkleTree is a wrapper around the `merkle_light::merkle::MerkleTree`,
 /// created to integrate with the RISC0 SHA256 coprocessor, functionality to act
-/// as a vector oracle for the for the guest, and some convenient functions.
+/// as a vector oracle for the guest, and some convenient functions.
 pub struct MerkleTree<Element>
 where
     Element: Hashable<ShaHasher>,

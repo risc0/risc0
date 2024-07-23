@@ -135,7 +135,7 @@
  * name, such as some OS thread creation APIs.  This API support resource naming though 
  * both through resource objects and functions following the pattern 
  * nvtxName[RESOURCE_TYPE][A|W](identifier, name).  Resource objects introduced in NVTX_VERSION 2 
- * supersede the other functions with a a more general method of assigning names to OS resources,
+ * supersede the other functions with a more general method of assigning names to OS resources,
  * along with associating them to domains too.  The older nvtxName* functions are only associated 
  * with the default domain.
  * \section EXTENSIONS Optional Extensions
