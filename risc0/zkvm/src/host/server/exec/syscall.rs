@@ -130,10 +130,10 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io)
             .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
-            .with_syscall(SYS_ARGC, Args(env.args.clone()))
-            .with_syscall(SYS_ARGV, Args(env.args.clone()))
             .with_syscall(SYS_FORK, SysFork)
-            .with_syscall(SYS_PIPE, SysPipe::default());
+            .with_syscall(SYS_PIPE, SysPipe::default())
+            .with_syscall(SYS_ARGC, Args(env.args.clone()))
+            .with_syscall(SYS_ARGV, Args(env.args.clone()));
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
             this.inner
