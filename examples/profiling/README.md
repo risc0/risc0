@@ -1,4 +1,4 @@
-# Profiling guest code
+# Profiling Guest Code
 
 In this example we demonstrate how to profile on the RISC Zero zkVM guest programs, using the Fibonacci sequence calculation as an example.
 

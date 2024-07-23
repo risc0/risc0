@@ -6,7 +6,7 @@ ELF file and the corresponding ImageID. This crate contains the functions needed
 to take zkVM guest code, build a corresponding ELF file and ImageID, and make
 the ImageID and a path to the ELF file available for the host to use.
 
-## Using risc0-build to build guest methods
+## Using `risc0-build` to Build Guest Methods
 
 Using this crate can be a bit delicate, so we encourage you to follow along in
 our [RISC Zero Rust Starter

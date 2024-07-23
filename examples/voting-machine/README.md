@@ -1,4 +1,4 @@
-# Voting machine on RISC Zero
+# Voting Machine on RISC Zero
 
 A simple voting machine built on the RISC Zero platform.
 
@@ -17,7 +17,7 @@ commits it to that state. At the end of the election, officials can publish the
 full list of receipts and voters can check to ensure theirs is included. In this
 way, voters can confirm that their vote was counted.
 
-## Running the tests
+## Running the Tests
 
 Follow the [examples guide] to install dependencies and check out the correct version of the example.
 

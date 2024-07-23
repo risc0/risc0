@@ -1,4 +1,4 @@
-# C-KZG crate test
+# C-KZG Crate Test
 
 This code demonstrates that Ethereum's c-kzg-4844 crate runs on the zkVM guest. Since verification takes about 100 million segments, this only runs the executor.
 

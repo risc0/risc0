@@ -18,7 +18,7 @@ To install the necessary dependencies, run:
 ./scripts/install_prover.sh
 ```
 
-## Manual installation
+## Manual Installation
 
 All the following commands must be run from the `groth16_proof` directory.
 

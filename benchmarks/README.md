@@ -1,6 +1,6 @@
 # Benchmarks
 
-## How to update the ghpages
+## How to Update the ghpages
 
 On every PR merged to `main`, the benchmark results will be pushed to the [https://github.com/risc0/ghpages/tree/dev](https://github.com/risc0/ghpages/tree/dev) branch. After reviewing the result, you should create a PR on the ghpages repo to publish on [https://reports.risczero.com/](https://reports.risczero.com/).
 
@@ -11,30 +11,30 @@ For previewing results:
 - Switch to the `dev` branch of the `ghpages` repo.
 - Use a development server like [five-server](https://github.com/yandeu/five-server) for HTML previewing; VSCode users can find an extension
 
-## Running all the benchmarks
+## Running All the Benchmarks
 
 ### CPU
 
 ```console
-$ cargo run --release
+cargo run --release
 ```
 
 ### Metal
 
 ```console
-$ cargo run --release -F metal
+cargo run --release -F metal
 ```
 
 ### CUDA
 
 ```console
-$ cargo run --release -F cuda
+cargo run --release -F cuda
 ```
 
-## Running specific benchmark
+## Running Specific Benchmark
 
 ```console
-$ cargo run --release -F metal -- big-sha2
+cargo run --release -F metal -- big-sha2
 ```
 
 ### `big-sha2`
