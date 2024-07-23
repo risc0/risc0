@@ -16,7 +16,7 @@
 //! RISC Zero zkVM. Soundness for STARK protocols can be analyzed under a
 //! number of different cryptographic assumptions.
 //!
-//! 1. Conjectured soundness using the Toy Problem Conjecture from [ethSTARK]
+//! 1. Conjectured soundness using the Toy Problem Conjecture from ethSTARK
 //! 2. Conjectured soundness using Conjecture 8.4 from [Proximity Gaps] and
 //!   Conjecture 2.3 from [DEEP-FRI]
 //! 3. Proven soundness in the list-decoding regime
