@@ -21,15 +21,12 @@ use risc0_zkvm_platform::{
     memory::is_guest_memory,
     syscall::{
         ecall,
-        nr::{SYS_LOG, SYS_PANIC, SYS_WRITE},
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_MAX, REG_T0},
     },
     PAGE_SIZE, WORD_SIZE,
 };
 
-use crate::host::client::posix_io::PosixIo;
-
-use super::syscall::{SysPanic, Syscall, SyscallContext, SyscallTable};
+use super::{Syscall, SyscallContext, SyscallTable};
 
 const PAGE_WORDS: usize = PAGE_SIZE / WORD_SIZE;
 const INVALID_IDX: u32 = u32::MAX;
@@ -56,8 +53,8 @@ impl Syscall for SysFork {
 
 struct Page(Vec<u8>);
 
-struct ChildExecutor<'a> {
-    ctx: &'a mut dyn SyscallContext,
+struct ChildExecutor<'a, 'b> {
+    ctx: &'b mut dyn SyscallContext<'a>,
     pc: ByteAddr,
     registers: [u32; REG_MAX],
     page_table: Vec<u32>,
@@ -66,8 +63,8 @@ struct ChildExecutor<'a> {
     syscall_table: SyscallTable<'a>,
 }
 
-impl<'a> ChildExecutor<'a> {
-    pub fn new(ctx: &'a mut dyn SyscallContext) -> Result<Self> {
+impl<'a, 'b> ChildExecutor<'a, 'b> {
+    pub fn new(ctx: &'b mut dyn SyscallContext<'a>) -> Result<Self> {
         // Start the child process one instruction past the ecall.
         let pc = ByteAddr(ctx.get_pc() + WORD_SIZE as u32);
 
@@ -75,14 +72,7 @@ impl<'a> ChildExecutor<'a> {
         // The return value of sys_fork is the pid, so set a0 to PID_CHILD.
         registers[REG_A0] = PID_CHILD;
 
-        let mut posix_io = PosixIo::new();
-        posix_io.with_write_fd(4, vec![]);
-
-        let mut syscall_table = SyscallTable::new();
-        syscall_table
-            .with_syscall(SYS_LOG, posix_io.clone())
-            .with_syscall(SYS_PANIC, SysPanic)
-            .with_syscall(SYS_WRITE, posix_io);
+        let syscall_table = ctx.syscall_table();
 
         Ok(Self {
             ctx,
@@ -136,7 +126,7 @@ impl<'a> ChildExecutor<'a> {
         // to guest is not needed.
         if !into_guest_ptr.is_null() {
             Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
-            // self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?
+            self.store_region(into_guest_ptr, bytemuck::cast_slice(&into_guest))?
         }
 
         self.store_register(REG_A0, a0)?;
@@ -180,9 +170,26 @@ impl<'a> ChildExecutor<'a> {
         let byte_offset = addr.0 as usize % WORD_SIZE;
         Ok(bytes[byte_offset])
     }
+
+    fn store_region(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
+        slice
+            .iter()
+            .enumerate()
+            .try_for_each(|(i, x)| self.store_u8(addr + i, *x))
+    }
+
+    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+        let addr = Self::check_guest_addr(addr)?;
+        let word = self.load_memory(addr.waddr())?;
+        let mut bytes = word.to_le_bytes();
+        let byte_offset = addr.0 as usize % WORD_SIZE;
+        bytes[byte_offset] = byte;
+        let word = u32::from_le_bytes(bytes);
+        self.store_memory(addr.waddr(), word)
+    }
 }
 
-impl<'a> EmuContext for ChildExecutor<'a> {
+impl<'a, 'b> EmuContext for ChildExecutor<'a, 'b> {
     fn ecall(&mut self) -> Result<bool> {
         match EmuContext::load_register(self, REG_T0)? {
             ecall::HALT => self.ecall_halt(),
@@ -271,7 +278,7 @@ impl<'a> EmuContext for ChildExecutor<'a> {
     }
 }
 
-impl<'a> SyscallContext for ChildExecutor<'a> {
+impl<'a, 'b> SyscallContext<'a> for ChildExecutor<'a, 'b> {
     fn get_pc(&self) -> u32 {
         self.pc.0
     }
@@ -304,6 +311,10 @@ impl<'a> SyscallContext for ChildExecutor<'a> {
         } else {
             Ok(self.page_cache[idx as usize].0.clone())
         }
+    }
+
+    fn syscall_table(&self) -> SyscallTable<'a> {
+        unimplemented!()
     }
 }
 

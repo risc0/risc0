@@ -134,6 +134,7 @@ pub mod nr {
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
+    declare_syscall!(pub SYS_PIPE);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
@@ -787,12 +788,12 @@ extern "C" {
     pub fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
 }
 
-/// sys_fork() creates a new process by duplicating the calling process. The new
-/// process is referred to as the child process. The calling process is referred
-/// to as the parent process.
+/// `sys_fork()` creates a new process by duplicating the calling process. The
+/// new process is referred to as the child process. The calling process is
+/// referred to as the parent process.
 ///
 /// The child process and the parent process run in separate memory spaces. At
-/// the time of sys_fork() both memory spaces have the same content.
+/// the time of `sys_fork()` both memory spaces have the same content.
 ///
 /// # Return Value
 ///
@@ -801,7 +802,25 @@ extern "C" {
 /// child process is created.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub extern "C" fn sys_fork() -> u32 {
+pub extern "C" fn sys_fork() -> i32 {
     let Return(a0, _) = unsafe { syscall_0(nr::SYS_FORK, null_mut(), 0) };
-    a0
+    a0 as i32
+}
+
+/// `sys_pipe()` creates a pipe, a unidirectional data channel that can be used
+/// for interprocess communication. The pointer `pipefd` is used to return two
+/// file descriptors referring to the ends of the pipe. `pipefd[0]` refers to
+/// the read end of the pipe. `pipefd[1]` refers to the write end of the pipe.
+/// Data written to the write end of the pipe is buffered by the host until it
+/// is read from the read end of the pipe.
+///
+/// # Return Value
+///
+/// On success, zero is returned.  On error, -1 is returned, and `pipefd` is
+/// left unchanged.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
+    let Return(a0, _) = unsafe { syscall_0(nr::SYS_PIPE, pipefd, 2) };
+    a0 as i32
 }

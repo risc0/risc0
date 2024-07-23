@@ -29,7 +29,7 @@ use getrandom::getrandom;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{
-        env::{self, next_fd, FdReader, FdWriter, Read as _, Write as _},
+        env::{self, FdReader, FdWriter, Read as _, Write as _},
         memory_barrier, sha,
     },
     sha::{Digest, Sha256},
@@ -40,7 +40,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_fork, sys_halt, sys_log, sys_read, sys_read_words, sys_write,
+        bigint, sys_bigint, sys_fork, sys_halt, sys_log, sys_pipe, sys_read, sys_read_words,
+        sys_write,
     },
     PAGE_SIZE,
 };
@@ -347,16 +348,17 @@ fn main() {
         }
         MultiTestSpec::SysFork => {
             let content = [3, 1, 3, 3, 7];
-            let fd = next_fd();
+            let mut pipe = [0u32; 2];
+            sys_pipe(pipe.as_mut_ptr());
             let pid = sys_fork();
             if pid == 0 {
                 env::log("child");
-                let mut writer = FdWriter::new(fd, |_| {});
+                let mut writer = FdWriter::new(pipe[1], |_| {});
                 writer.write_slice(&content);
                 sys_halt(0, ptr::null());
             } else {
                 env::log("parent");
-                let mut reader = FdReader::new(fd);
+                let mut reader = FdReader::new(pipe[0]);
                 let mut buf: [u32; 5] = [0; 5];
                 reader.read_slice(&mut buf);
                 assert_eq!(buf, content);

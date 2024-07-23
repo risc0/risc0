@@ -229,11 +229,12 @@ impl<'a> ExecutorImpl<'a> {
     }
 }
 
-struct ContextAdapter<'a> {
-    ctx: &'a mut dyn NewSyscallContext,
+struct ContextAdapter<'a, 'b> {
+    ctx: &'b mut dyn NewSyscallContext,
+    syscall_table: SyscallTable<'a>,
 }
 
-impl<'a> SyscallContext for ContextAdapter<'a> {
+impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
     fn get_pc(&self) -> u32 {
         self.ctx.get_pc()
     }
@@ -257,6 +258,10 @@ impl<'a> SyscallContext for ContextAdapter<'a> {
     fn load_u32(&mut self, addr: u32) -> Result<u32> {
         self.ctx.peek_u32(ByteAddr(addr))
     }
+
+    fn syscall_table(&self) -> SyscallTable<'a> {
+        self.syscall_table.clone()
+    }
 }
 
 impl<'a> NewSyscall for ExecutorImpl<'a> {
@@ -266,7 +271,10 @@ impl<'a> NewSyscall for ExecutorImpl<'a> {
         ctx: &mut dyn NewSyscallContext,
         into_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let mut ctx = ContextAdapter { ctx };
+        let mut ctx = ContextAdapter {
+            ctx,
+            syscall_table: self.syscall_table.clone(),
+        };
         self.syscall_table
             .get_syscall(syscall)
             .context(format!("Unknown syscall: {syscall:?}"))?

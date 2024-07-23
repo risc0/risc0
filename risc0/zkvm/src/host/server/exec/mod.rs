@@ -19,7 +19,6 @@
 //! contains an execution trace of the specified program.
 
 pub(crate) mod executor;
-pub(crate) mod fork;
 pub(crate) mod profiler;
 mod proto;
 pub(crate) mod syscall;

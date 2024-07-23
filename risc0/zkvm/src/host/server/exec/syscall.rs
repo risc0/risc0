@@ -14,18 +14,21 @@
 
 //! Handlers for two-way private I/O between host and guest.
 
+mod fork;
+mod pipe;
+mod posix_io;
+
 use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
 
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use risc0_zkvm_platform::{
-    fileno,
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_LOG, SYS_PANIC,
-            SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_PIPE, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
-        reg_abi::{REG_A3, REG_A4, REG_A5},
+        reg_abi::{REG_A3, REG_A4},
         SyscallName,
     },
     WORD_SIZE,
@@ -42,10 +45,10 @@ use crate::{
     Assumption,
 };
 
-use super::fork::SysFork;
+use self::{fork::SysFork, pipe::SysPipe};
 
 /// A host-side implementation of a system call.
-pub trait Syscall {
+pub(crate) trait Syscall {
     /// Invokes the system call.
     fn syscall(
         &mut self,
@@ -56,7 +59,7 @@ pub trait Syscall {
 }
 
 /// Access to memory and machine state for syscalls.
-pub trait SyscallContext {
+pub(crate) trait SyscallContext<'a> {
     /// Returns the current program counter.
     fn get_pc(&self) -> u32;
 
@@ -74,26 +77,31 @@ pub trait SyscallContext {
 
     /// Load a page from memory at the specified page index.
     fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
+
+    /// Access the syscall table.
+    fn syscall_table(&self) -> SyscallTable<'a>;
 }
 
 #[derive(Clone)]
 pub(crate) struct SyscallTable<'a> {
     pub(crate) inner: HashMap<String, Rc<RefCell<dyn Syscall + 'a>>>,
+    pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
 }
 
 impl<'a> SyscallTable<'a> {
-    pub fn new() -> Self {
+    pub fn new(posix_io: Rc<RefCell<PosixIo<'a>>>) -> Self {
         Self {
             inner: HashMap::new(),
+            posix_io,
         }
     }
 
     pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
-        let mut this = Self::new();
+        let posix_io = env.posix_io.clone();
+        let mut this = Self::new(posix_io.clone());
 
         let sys_verify = SysVerify::new(env.assumptions.clone());
 
-        let posix_io = env.posix_io.clone();
         this.with_syscall(SYS_ARGC, Args(env.args.clone()))
             .with_syscall(SYS_ARGV, Args(env.args.clone()))
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
@@ -101,6 +109,7 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_LOG, posix_io.clone())
             .with_syscall(SYS_PANIC, SysPanic)
+            .with_syscall(SYS_PIPE, SysPipe::default())
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
@@ -388,135 +397,6 @@ impl<'a> Syscall for SysSliceIo<'a> {
                 (0, 0)
             }
         })
-    }
-}
-
-impl<'a> Syscall for PosixIo<'a> {
-    fn syscall(
-        &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        // TODO: Is there a way to use "match" here instead of if statements?
-        if syscall == SYS_READ.as_str() {
-            self.sys_read(ctx, to_guest)
-        } else if syscall == SYS_WRITE.as_str() {
-            self.sys_write(ctx)
-        } else if syscall == SYS_LOG.as_str() {
-            self.sys_log(ctx)
-        } else {
-            bail!("Unknown syscall {syscall}")
-        }
-    }
-}
-
-impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
-    fn syscall(
-        &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        self.borrow_mut().syscall(syscall, ctx, to_guest)
-    }
-}
-
-impl<'a> PosixIo<'a> {
-    fn sys_read(
-        &mut self,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        let fd = ctx.load_register(REG_A3);
-        let nbytes = ctx.load_register(REG_A4) as usize;
-
-        tracing::trace!(
-            "sys_read(fd: {fd}, nbytes: {nbytes}, into: {} bytes)",
-            to_guest.len() * WORD_SIZE
-        );
-
-        assert!(
-            nbytes >= to_guest.len() * WORD_SIZE,
-            "Word-aligned read buffer must be fully filled"
-        );
-
-        let reader = self
-            .read_fds
-            .get_mut(&fd)
-            .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
-
-        // So that we don't have to deal with short reads, keep
-        // reading until we get EOF or fill the buffer.
-        let read_all = |mut buf: &mut [u8]| -> Result<usize> {
-            let mut tot_nread = 0;
-            while !buf.is_empty() {
-                let nread = reader.borrow_mut().read(buf)?;
-                if nread == 0 {
-                    break;
-                }
-                tot_nread += nread;
-                (_, buf) = buf.split_at_mut(nread);
-            }
-            Ok(tot_nread)
-        };
-
-        let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
-        let nread_main = read_all(to_guest_u8)?;
-
-        tracing::trace!("read: {nread_main}, requested: {}", to_guest_u8.len());
-
-        // It's possible that there's an unaligned word at the end
-        let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
-            nbytes - nread_main
-        } else {
-            // We encountered an EOF. There's nothing left to read
-            0
-        };
-
-        // Fill unaligned word out.
-        let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-        let nread_end = read_all(&mut to_guest_end[0..unaligned_end])?;
-
-        Ok((
-            (nread_main + nread_end) as u32,
-            u32::from_le_bytes(to_guest_end),
-        ))
-    }
-
-    fn sys_write(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        let fd = ctx.load_register(REG_A3);
-        let buf_ptr = ctx.load_register(REG_A4);
-        let buf_len = ctx.load_register(REG_A5);
-        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
-        let writer = self
-            .write_fds
-            .get_mut(&fd)
-            .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
-
-        tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
-
-        writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
-        Ok((0, 0))
-    }
-
-    fn sys_log(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        // write to stdout, but be sure to point it to where the file descriptor is pointing
-        let writer = self
-            .write_fds
-            .get_mut(&fileno::STDOUT)
-            .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
-
-        tracing::debug!("sys_log({buf_len} bytes)");
-
-        let msg = format!("R0VM[{}] ", ctx.get_cycle());
-        writer
-            .borrow_mut()
-            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
-        Ok((0, 0))
     }
 }
 

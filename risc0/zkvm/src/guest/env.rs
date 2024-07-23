@@ -102,9 +102,6 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 /// information leakage through the post-state digest.
 static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
-// The next available file descriptor after the JOURNAL.
-static mut NEXT_FD: u32 = 4;
-
 pub(crate) fn init() {
     unsafe {
         HASHER.set(Sha256::new()).unwrap();
@@ -538,15 +535,6 @@ pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     FdWriter::new(fileno::JOURNAL, |bytes| {
         unsafe { HASHER.get_mut().unwrap_unchecked().update(bytes) };
     })
-}
-
-/// Return the next available file descriptor.
-pub fn next_fd() -> u32 {
-    unsafe {
-        let fd = NEXT_FD;
-        NEXT_FD = NEXT_FD + 1;
-        fd
-    }
 }
 
 /// Return a reader for the standard input
