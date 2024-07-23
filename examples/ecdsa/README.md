@@ -43,10 +43,10 @@ example of how to use the big integer accelerator circuit to speed up other cryp
 
 [^2]: About 17s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
 
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [RustCrypto]: https://docs.rs/k256/latest/k256/
 [1]: https://semaphore.appliedzkp.org/
 [2]: https://medium.com/@boneh/using-zk-proofs-to-fight-disinformation-17e7d57fe52f
 [3]: https://minaprotocol.com/
 [4]: methods/guest/Cargo.toml
 [5]: https://github.com/risc0/RustCrypto-elliptic-curves/pull/1
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

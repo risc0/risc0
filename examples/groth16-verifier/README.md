@@ -1,6 +1,6 @@
 # Groth16 Verifier Example
 
-This **experimental** example demonstrates the verification of a proof from another proof system, in this case Groth16 over the BN\_254 curve, within the zkVM.
+This **experimental** example demonstrates the verification of a proof from another proof system, in this case Groth16 over the `BN_254` curve, within the zkVM.
 
 ## Summary
 
@@ -13,22 +13,22 @@ Specifically, you will learn:
 
 ## Performance
 
-This example requires \~500M cycles to run and therefore will take some time to prove locally. We recommend running it on [Bonsai] or just running in [DEV\_MODE][DEV_MODE].
+This example requires \~500M cycles to run and therefore will take some time to prove locally. We recommend running it on [Bonsai] or just running in [`DEV_MODE`][DEV_MODE].
 
 ## Quick Start
 
 First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
-Then, run the example in [DEV\_MODE][DEV_MODE] with:
+Then, run the example in [`DEV_MODE`][DEV_MODE] with:
 
 ```bash
 RISC0_DEV_MODE=1 cargo run --release
 ```
 
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[0xPARC]: https://github.com/0xPARC
 [Bonsai]: https://bonsai.xyz/apply
 [DEV_MODE]: https://dev.risczero.com/api/generating-proofs/dev-mode
-[tutorial]: https://docs.circom.io/getting-started/proving-circuits/
 [ECDSA-circuit]: https://github.com/0xPARC/circom-ecdsa
-[0xPARC]: https://github.com/0xPARC
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[tutorial]: https://docs.circom.io/getting-started/proving-circuits/
 [zkSudoku]: https://github.com/vplasencia/zkSudoku

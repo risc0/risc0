@@ -31,20 +31,20 @@ The receipt can be passed to a third party, who can examine the [journal] to che
 
 For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-[developer docs]: https://dev.risczero.com/zkvm
-[zkVM]: https://dev.risczero.com/zkvm
-[bevy]: https://bevyengine.org/
-[`src/main.rs`]: src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
-[host]: https://dev.risczero.com/terminology#host
+[`src/main.rs`]: src/main.rs
+[bevy]: https://bevyengine.org/
+[Bonsai application]: https://dev.bonsai.xyz
+[developer docs]: https://dev.risczero.com/zkvm
+[ECDSA]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [executes]: https://dev.risczero.com/terminology#execute
 [guest program]: https://dev.risczero.com/terminology#guest-program
+[host]: https://dev.risczero.com/terminology#host
 [host program]: https://dev.risczero.com/terminology#host-program
+[journal]: https://dev.risczero.com/terminology#journal
 [proves the execution]: https://dev.risczero.com/terminology#prove
 [receipt]: https://dev.risczero.com/terminology#receipt
 [verify]: https://dev.risczero.com/terminology#verify
-[journal]: https://dev.risczero.com/terminology#journal
-[Bonsai application]: https://dev.bonsai.xyz
 [zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[ECDSA]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[zkVM]: https://dev.risczero.com/zkvm

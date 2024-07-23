@@ -111,6 +111,6 @@ ImageID: c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38 - "tar
 ImageID: a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
 ```
 
-[risc-zero]: https://risczero.com
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[risc-zero]: https://risczero.com
 [rust-starter]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter

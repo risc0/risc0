@@ -112,9 +112,9 @@ cargo run --release --bin prove -- -i waldo.webp -x 1150 -y 291 --width 58 --hei
 cargo run --release --bin verify -- -i waldo.webp -r receipt.bin
 ```
 
-[Where's Waldo]: https://en.wikipedia.org/wiki/Where%27s_Wally%3F
-[favorite analogy]: https://medium.com/swlh/a-zero-knowledge-proof-for-wheres-wally-930c21e55399
-[others]: https://docs.rs/imageproc/latest/imageproc/
-[journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
-[ImageID]: https://dev.risczero.com/terminology#image-id
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[favorite analogy]: https://medium.com/swlh/a-zero-knowledge-proof-for-wheres-wally-930c21e55399
+[ImageID]: https://dev.risczero.com/terminology#image-id
+[journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
+[others]: https://docs.rs/imageproc/latest/imageproc/
+[Where's Waldo]: https://en.wikipedia.org/wiki/Where%27s_Wally%3F

@@ -3,7 +3,7 @@
 RISC Zero's zkVM uses recursive proving in order to achieve unbounded computation size, constant proof size, proof aggregation, and proof composition.
 
 :::tip
-[Prover::prove\_with\_opts][prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
+[`Prover::prove_with_opts`] allows users to choose between [composite, succinct or groth16 receipts].
 :::
 
 The rest of this page describes low-level details that are not necessary for users.
@@ -124,9 +124,9 @@ RISC Zero's zkVM consists of three circuits.
 The Recursion Circuit supports a number of programs, including `lift`, `join`, `resolve`, and `identity_p254`.
 These are using internally to the [Prover] implementations to produce [SuccinctReceipt] and [Groth16Receipt].
 
-1. The `lift` program verifies a STARK proof from the RISC-V Prover, using the Recursion Prover. This recursion proof has a single constant-time verification procedure, with respect to the original segment length, and is then used as the input to all other recursion programs (e.g. join, resolve, and identity\_p254).
+1. The `lift` program verifies a STARK proof from the RISC-V Prover, using the Recursion Prover. This recursion proof has a single constant-time verification procedure, with respect to the original segment length, and is then used as the input to all other recursion programs (e.g. `join`, `resolve`, and `identity_p254`).
 2. The `join` program verifies two proofs from the Recursion Prover, using the Recursion Prover. By repeated application of `join`, any number of receipts for execution spans within the same session can be compressed into a single receipt for the entire session.
-3. The `identity_p254` program verifies a proof from the Recursion Prover using the Recursion Prover with the Poseidon254 hash function. The identity\_p254 program is used as the last step in the prover pipeline before running the Groth16 prover.
+3. The `identity_p254` program verifies a proof from the Recursion Prover using the Recursion Prover with the Poseidon254 hash function. The `identity_p254` program is used as the last step in the prover pipeline before running the Groth16 prover.
 
 ## STARK-to-SNARK Wrapping
 
@@ -134,10 +134,10 @@ All of the recursion programs in the previous section output a [SuccinctReceipt]
 
 The final step in the recursion process is `compress()`, which outputs a [Groth16Receipt], which can be verified on-chain using the [RISC Zero Verifier Contract].
 
+[`Prover::prove_with_opts`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html
 [proof system]: /proof-system/proof-system-sequence-diagram
-[prove_with_opts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [Prover]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
 [SuccinctReceipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html

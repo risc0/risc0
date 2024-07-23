@@ -220,7 +220,7 @@ See also: [Session]
 ### Session
 
 The [execution trace] of a [guest program].
-The session's execution starts from an initial memory image (which includes the starting program counter) and proceeds until either a sys\_halt or a sys\_pause syscall is encountered.
+The session's execution starts from an initial memory image (which includes the starting program counter) and proceeds until either a `sys_halt` or a `sys_pause` syscall is encountered.
 This record is stored as a vector of [Segments].
 
 ### STARK

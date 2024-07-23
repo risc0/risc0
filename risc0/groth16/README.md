@@ -2,7 +2,7 @@
 
 # Groth16
 
-This library implements a verifier for the Groth16 protocol over the BN\_254 elliptic curve.
+This library implements a verifier for the Groth16 protocol over the `BN_254` elliptic curve.
 
 ## Example
 
@@ -26,7 +26,7 @@ fn verify() {
 
 ## STARK to SNARK
 
-It also provides the [stark_to_snark][docker::stark_to_snark] function to run a prover Groth16
+It also provides the \[stark\_to\_snark]\[docker::stark\_to\_snark] function to run a prover Groth16
 recursion prover via Docker. After generating a RISC Zero STARK proof, this function can be
 used to transform it into a Groth16 proof. This function becomes available when the `prove`
 feature flag is enabled.

@@ -26,12 +26,12 @@ The [host] [executes] the guest program. This example does not produce a receipt
 - For a video walk-through of this example, check out this [excerpt from our workshop at ZK HACK III].
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-[`src/main.rs`]: src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
-[host]: https://dev.risczero.com/terminology#host
+[`src/main.rs`]: src/main.rs
+[developer docs]: https://dev.risczero.com
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
 [executes]: https://dev.risczero.com/terminology#execute
 [guest program]: https://dev.risczero.com/terminology#guest-program
+[host]: https://dev.risczero.com/terminology#host
 [host program]: https://dev.risczero.com/terminology#host-program
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-[developer docs]: https://dev.risczero.com
-[excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9

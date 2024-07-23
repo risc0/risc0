@@ -39,21 +39,21 @@ The [guest code] confirms the JWT's integrity using the public key and records t
 
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-[`src/main.rs`]: src/main.rs
-[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [`core/src/lib.rs`]: core/src/lib.rs
-[host]: https://dev.risczero.com/terminology#host
-[guest program]: https://dev.risczero.com/terminology#guest-program
-[host program]: https://dev.risczero.com/terminology#host-program
-[receipt]: https://dev.risczero.com/terminology#receipt
-[journal]: https://dev.risczero.com/terminology#journal
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-[zkVM]: https://dev.risczero.com/zkvm
-[Rust Resources]: https://dev.risczero.com/api/zkvm/rust-resources
-[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
-[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
-[developer docs]: https://dev.risczero.com
-[jwt-compact]: https://github.com/slowli/jwt-compact
+[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
+[`src/main.rs`]: src/main.rs
 [Bonsai application]: https://dev.bonsai.xyz
-[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [Bonsai Pay Demonstration Application]: https://github.com/risc0/demos/tree/main/bonsai-pay
+[developer docs]: https://dev.risczero.com
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
+[guest program]: https://dev.risczero.com/terminology#guest-program
+[host]: https://dev.risczero.com/terminology#host
+[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
+[host program]: https://dev.risczero.com/terminology#host-program
+[journal]: https://dev.risczero.com/terminology#journal
+[jwt-compact]: https://github.com/slowli/jwt-compact
+[receipt]: https://dev.risczero.com/terminology#receipt
+[Rust Resources]: https://dev.risczero.com/api/zkvm/rust-resources
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
+[zkVM]: https://dev.risczero.com/zkvm

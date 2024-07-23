@@ -75,12 +75,12 @@ Refer to the [pprof docs] for more information about the web interface.
 
     In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
 
-[pprof]: https://github.com/google/pprof
-[perf]: https://perf.wiki.kernel.org/index.php/Main_Page
-[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+[cycle count]: https://dev.risczero.com/terminology#clock-cycles
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [install Go]: https://go.dev/doc/install
 [official pprof documentation]: https://github.com/google/pprof/blob/main/doc/README.md
-[cycle count]: https://dev.risczero.com/terminology#clock-cycles
-[flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
+[perf]: https://perf.wiki.kernel.org/index.php/Main_Page
+[pprof]: https://github.com/google/pprof
 [pprof docs]: https://github.com/google/pprof/blob/main/doc/README.md#web-interface-1
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/

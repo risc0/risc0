@@ -9,7 +9,7 @@ Currently, this demo accepts an Ethereum transaction hash and replays the transa
 ## Limitations
 
 - It currently defaults to the revm default forkid which is BERLIN. Older transactions might vary in results.
-- This demo only runs pre-existing transactions by tx\_hash.
+- This demo only runs pre-existing transactions by `tx_hash`.
 
 ## Dependencies
 

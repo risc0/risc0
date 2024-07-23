@@ -1,4 +1,4 @@
-# password\_checker
+# `password_checker`
 
 This simple password checker is implemented in Rust. The program is implemented in two parts: a policy checker (that runs in the zkVM) and a host driver (an ordinary command-line program that uses the zkVM to run the policy checker).
 
@@ -22,7 +22,7 @@ Because the validity-checking and hashing functionality runs on the zkVM, it gen
 ## Project organization
 
 The main program that calls a method in the guest zkVM is in [src/main.rs](src/main.rs).
-The code that runs inside the zkVM is in [methods/guest/src/bin/pw\_checker.rs](methods/guest/src/bin/pw_checker.rs).
+The code that runs inside the zkVM is in [`methods/guest/src/bin/pw_checker.rs`](methods/guest/src/bin/pw_checker.rs).
 The rest of the project is build support.
 
 For the main RISC Zero project, see [here](https://github.com/risc0/risc0).

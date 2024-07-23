@@ -47,12 +47,12 @@ Some use cases for composition include:
 - Creating a single receipt for a workflow that might be split into many different operations.
   - E.g. Produce a single receipt for the result of an image processing pipeline, where different filters are in their own guests.
 
-[hello world example]: ../hello-world
 [`env::verify`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.verify.html
-[`src/main.rs`]: src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
-[host]: https://dev.risczero.com/terminology#host
+[`src/main.rs`]: src/main.rs
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [guest]: https://dev.risczero.com/terminology#guest-program
 [guest program]: https://dev.risczero.com/terminology#guest-program
+[hello world example]: ../hello-world
+[host]: https://dev.risczero.com/terminology#host
 [receipts]: https://dev.risczero.com/terminology#receipt
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
