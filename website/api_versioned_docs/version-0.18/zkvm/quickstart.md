@@ -37,7 +37,7 @@ See the [cargo risczero] docs for other options for initialization.
 
 In the codebase for your new project, you'll find a handful of places marked `TODO`, where you'll need to make some changes in order to build your first project.
 
-Don't worry -- each `TODO` comes with instructions for what you need to do, and the [Hello World tutorial] contains step-by-step instructions.
+Don't worry ― each `TODO` comes with instructions for what you need to do, and the [Hello World tutorial] contains step-by-step instructions.
 
 ## 4. Run your project, locally or remotely
 

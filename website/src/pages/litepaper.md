@@ -91,11 +91,11 @@ Bonsai is a massively parallel, chain-agnostic, and general purpose network desi
 
 ## Blockchain Use Cases
 
-### Scaling - Off-Chain Smart Contract Execution
+### Scaling ― Off-Chain Smart Contract Execution
 
 Bonsai allows smart contracts to execute an arbitrary amount of code off-chain and generates a proof attesting to the validity of the code execution and state change. This leads to large gains in the **scalability, functionality, and interoperability of blockchains.**
 
-**Scalability** - By simply moving code execution away from a blockchain VM, smart contracts will require orders of magnitude less gas as fewer lines of code need to be executed on chain. This will help reduce the gas costs of any smart contract and lead to significantly lower fees across DEXs, lending protocols, NFT marketplaces, and more. It is plausible that with Bonsai there will be an upper limit of gas fees per smart contract regardless of contract complexity. With Bonsai, smart contracts can converge roughly to the following:
+**Scalability** ― By simply moving code execution away from a blockchain VM, smart contracts will require orders of magnitude less gas as fewer lines of code need to be executed on chain. This will help reduce the gas costs of any smart contract and lead to significantly lower fees across DEXs, lending protocols, NFT marketplaces, and more. It is plausible that with Bonsai there will be an upper limit of gas fees per smart contract regardless of contract complexity. With Bonsai, smart contracts can converge roughly to the following:
 
 ```solidity
 contract simulation_bonsai {
@@ -112,7 +112,7 @@ contract simulation_bonsai {
 }
 ```
 
-**Functionality** - Off-chain execution also allows functions to take advantage of Rust/C++/etc. libraries and crates. This is because off-chain execution is not bounded by the limitations of existing L1 execution layers. Instead, smart contract code on Bonsai can be executed like a traditional executable on the RISC Zero zkVM, which allows for more performant and complex smart contracts. This also enables libraries and crates that open up functionality within contracts, especially those built on traditional monolithic L1s .
+**Functionality** ― Off-chain execution also allows functions to take advantage of Rust/C++/etc. libraries and crates. This is because off-chain execution is not bounded by the limitations of existing L1 execution layers. Instead, smart contract code on Bonsai can be executed like a traditional executable on the RISC Zero zkVM, which allows for more performant and complex smart contracts. This also enables libraries and crates that open up functionality within contracts, especially those built on traditional monolithic L1s .
 
 **Example:** **Ethereum On Chain Order Book**
 

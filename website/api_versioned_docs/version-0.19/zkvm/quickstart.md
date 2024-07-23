@@ -17,7 +17,7 @@ Welcome to the zkVM Quick Start page! Here are the steps to create your first pr
 
 The zkVM provides a zero-knowledge proof of the correct execution of Rust-based program.
 The **[host]** is responsible for launching the zkVM (or a **[prover]**), and then the **[guest]** is the program that runs inside the zkVM.
-A proof of execution is a **[receipt]**; it contains a public part - a **[journal]** and an encryption part - a **[seal]**.
+A proof of execution is a **[receipt]**; it contains a public part ― a **[journal]** and an encryption part ― a **[seal]**.
 
 ## 1. Install the RISC Zero Toolchain
 

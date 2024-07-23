@@ -2,7 +2,7 @@
 
 The seal on a RISC Zero receipt is generated using a **zk-STARK**: a _zero knowledge, scalable, transparent argument of knowledge._
 
-STARKs are a highly technical process - an innovation in the world of zero-knowledge cryptography introduced by Eli Ben-Sasson et. al in 2018.
+STARKs are a highly technical process ― an innovation in the world of zero-knowledge cryptography introduced by Eli Ben-Sasson et. al in 2018.
 In order to prove the integrity of a computation with a STARK, the prover arithmetizes the entire question.
 By encoding the [execution trace](../proof-system/what-is-a-trace.md) into [polynomials](about-finite-fields.md), the statement of computational integrity is reduced to a statement about polynomial division.
 
