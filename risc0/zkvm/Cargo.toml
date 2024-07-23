@@ -63,11 +63,11 @@ tracing = { version = "0.1", default-features = false, features = [
 addr2line = { version = "0.22", features = ["rustc-demangle"], optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
-bytes = { version = "1.4", features = ["serde"], optional = true }
+bytes = { version = "1.6", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 lazy-regex = { version = "3.1", optional = true }
 nvtx = { version = "1.3", optional = true }
-prost = { version = "0.12", optional = true }
+prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rustc-demangle = { version = "0.1", optional = true }
