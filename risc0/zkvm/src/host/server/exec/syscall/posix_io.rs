@@ -15,6 +15,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{bail, Result};
+use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::{
     fileno,
     syscall::{
@@ -120,7 +121,7 @@ impl<'a> PosixIo<'a> {
 
     fn sys_write(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
         let fd = ctx.load_register(REG_A3);
-        let buf_ptr = ctx.load_register(REG_A4);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let buf_len = ctx.load_register(REG_A5);
         let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
         let writer = self.get_writer(fd)?;
@@ -132,7 +133,7 @@ impl<'a> PosixIo<'a> {
     }
 
     fn sys_log(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
         // write to stdout, but be sure to point it to where the file descriptor is pointing

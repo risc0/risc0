@@ -22,6 +22,7 @@ use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8}
 
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
+use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::{
     syscall::{
         nr::{
@@ -69,11 +70,20 @@ pub(crate) trait SyscallContext<'a> {
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
 
+    /// Loads an individual byte from memory.
+    fn load_u8(&mut self, addr: ByteAddr) -> Result<u8>;
+
     /// Loads an individual word from memory.
-    fn load_u32(&mut self, addr: u32) -> Result<u32>;
+    fn load_u32(&mut self, addr: ByteAddr) -> Result<u32>;
 
     /// Loads bytes from the given region of memory.
-    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>>;
+    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        let mut region = Vec::new();
+        for i in 0..size {
+            region.push(self.load_u8(addr + i)?);
+        }
+        Ok(region)
+    }
 
     /// Load a page from memory at the specified page index.
     fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
@@ -161,7 +171,7 @@ impl Syscall for SysGetenv {
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
         let msg = from_utf8(&from_guest)?;
@@ -186,7 +196,7 @@ impl Syscall for SysPanic {
         ctx: &mut dyn SyscallContext,
         _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
         let msg = from_utf8(&from_guest)?;
@@ -298,7 +308,7 @@ impl Syscall for SysVerify {
         ctx: &mut dyn SyscallContext,
         _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let from_guest_ptr = ctx.load_register(REG_A3);
+        let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
         let from_guest_len = ctx.load_register(REG_A4);
         let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
@@ -372,7 +382,7 @@ impl<'a> Syscall for SysSliceIo<'a> {
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         let mut stored_result = self.stored_result.borrow_mut();
-        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
         Ok(match stored_result.take() {

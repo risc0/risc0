@@ -247,16 +247,16 @@ impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
         self.ctx.peek_register(idx).unwrap()
     }
 
-    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
-        self.ctx.peek_region(ByteAddr(addr), size)
-    }
-
     fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
         self.ctx.peek_page(page_idx)
     }
 
-    fn load_u32(&mut self, addr: u32) -> Result<u32> {
-        self.ctx.peek_u32(ByteAddr(addr))
+    fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
+        self.ctx.peek_u8(addr)
+    }
+
+    fn load_u32(&mut self, addr: ByteAddr) -> Result<u32> {
+        self.ctx.peek_u32(addr)
     }
 
     fn syscall_table(&self) -> &SyscallTable<'a> {

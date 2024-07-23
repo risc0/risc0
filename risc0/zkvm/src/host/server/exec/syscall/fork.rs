@@ -242,7 +242,7 @@ impl<'a, 'b> EmuContext for ChildExecutor<'a, 'b> {
         let page_idx = addr.page_idx();
         let idx = self.page_table[page_idx as usize];
         let data = if idx == INVALID_IDX {
-            self.ctx.load_u32(addr.baddr().0)?
+            self.ctx.load_u32(addr.baddr())?
         } else {
             self.page_cache[idx as usize].load(addr)
         };
@@ -291,17 +291,12 @@ impl<'a, 'b> SyscallContext<'a> for ChildExecutor<'a, 'b> {
         EmuContext::load_register(self, idx).unwrap()
     }
 
-    fn load_u32(&mut self, addr: u32) -> Result<u32> {
-        ChildExecutor::load_memory(self, ByteAddr(addr).waddr())
+    fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
+        ChildExecutor::load_u8(self, addr)
     }
 
-    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
-        let addr = ByteAddr(addr);
-        let mut region = Vec::new();
-        for i in 0..size {
-            region.push(self.load_u8(addr + i)?);
-        }
-        Ok(region)
+    fn load_u32(&mut self, addr: ByteAddr) -> Result<u32> {
+        ChildExecutor::load_memory(self, addr.waddr())
     }
 
     fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
