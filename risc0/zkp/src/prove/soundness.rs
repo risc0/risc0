@@ -89,7 +89,6 @@ pub fn conjectured_strict<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
 }
 
 /// Compute the system security following the Toy Model conjecture of ethSTARK.
-/// [ethSTARK]: https://eprint.iacr.org/2021/582
 /// This conjecture states that:
 /// 1. any AIR is as secure as the "simplest AIR" (1 column and degree 1
 ///    constraint).
