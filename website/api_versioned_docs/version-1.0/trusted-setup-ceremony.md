@@ -17,7 +17,7 @@ There are multiple steps to verifying the security of a trusted setup ceremony. 
 
 The circuit we are securing is the RISC Zero STARK Verify circuit, which is open source and [available on GitHub][stark-verify-circom] (along with [a short library][risc0-circom-library] it depends on).
 
-To ensure that the circuit itself does not have security holes, we have used a mixture of good software engineering practices, internal security reviews, and external audits. We have published these audits: [you can read more details and the audits themselves][audits-readme].
+To ensure that the circuit itself does not have security holes, we have used a mixture of good software engineering practices, internal security reviews, and external audits. We have published these audits: you can read more details and the audits themselves [here][audits-readme].
 
 ## The Transcript Matches the Circuit
 
