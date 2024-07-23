@@ -59,7 +59,7 @@ In analyzing the cryptographic security of our system, we consider two primary q
 
 The first question is about the **soundness** of the protocol, and the second question is whether the protocol is **zero-knowledge**.
 
-Soundness is often quantified in terms of “[bits]” — our system currently targets 98 bits of security.
+Soundness is often quantified in terms of "[bits]" — our system currently targets 98 bits of security.
 
 | Prover                | Cryptographic Assumptions                                                                                                                     | Bits of Security | Quantum Safe? |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------- |

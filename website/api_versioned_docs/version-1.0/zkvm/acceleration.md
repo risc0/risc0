@@ -1,9 +1,9 @@
 # Cryptography Acceleration
 
-RISC Zero’s rv32im implementation includes a number of specialized extension
-circuits, including two “accelerators” for cryptographic functions: SHA-256 and
+RISC Zero's rv32im implementation includes a number of specialized extension
+circuits, including two "accelerators" for cryptographic functions: SHA-256 and
 [256-bit modular multiplication][bigint], referred to as "bigint"
-multiplication. By implementing these operations directly in the “hardware” of
+multiplication. By implementing these operations directly in the "hardware" of
 the zkVM, programs that use these accelerators execute faster and can be proven
 with significantly less resources [^1].
 
