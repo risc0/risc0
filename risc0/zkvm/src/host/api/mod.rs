@@ -20,6 +20,7 @@ pub(crate) mod server;
 #[cfg(feature = "prove")]
 mod tests;
 
+use semver::Version;
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -34,11 +35,11 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 
-use crate::{ExitCode, Journal};
+use crate::{get_version, ExitCode, Journal};
 
 mod pb {
     pub(crate) mod api {
@@ -125,6 +126,8 @@ impl ConnectionWrapper {
 pub trait Connector {
     /// Create a client-server connection
     fn connect(&self) -> Result<ConnectionWrapper>;
+    /// Get the version of the server
+    fn get_version(&self) -> Result<Version>;
 }
 
 struct ParentProcessConnector {
@@ -134,10 +137,35 @@ struct ParentProcessConnector {
 
 impl ParentProcessConnector {
     pub fn new<P: AsRef<Path>>(server_path: P) -> Result<Self> {
-        Ok(Self {
+        let conn = Self {
             server_path: server_path.as_ref().to_path_buf(),
             listener: TcpListener::bind("127.0.0.1:0")?,
-        })
+        };
+        // Check the version of the client and server to ensure that they're compatible
+        let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let server_version = conn.get_version()?;
+        if !client::check_server_version(&client_version, &server_version) {
+            let server_suggestion = if client_version.pre.is_empty() {
+                format!("1. Install r0vm server version {}.{}\n", server_version.major, server_version.minor)
+            } else {
+                format!("1. Your risc0 dependencies are using a pre-released version {client_version}.\n   \
+                If you encounter this error message when running code on the risc0 codebase, you must\n   \
+                either run the command `git checkout origin/release-{}.{}` to checkout the version of the\n   \
+                risc0 code that is compatible with your server or build the r0vm server from source\n   \
+                https://github.com/risc0/risc0/blob/main/CONTRIBUTING.md\n", server_version.major, server_version.minor)
+            };
+            let msg = format!(
+                        "Your installation of the r0vm server is not compatible with your host's risc0-zkvm crate.\n\
+                        Do one of the following to fix this issue\n\n\
+                        {server_suggestion}\
+                        2. Change the risc0-zkvm and risc0-build dependencies in your project to {}.{}\n\n\
+                        risc0-zkvm version: {client_version}\n\
+                        r0vm server version: {server_version}", server_version.major, server_version.minor);
+            tracing::warn!("{msg}");
+            bail!(msg);
+        } else {
+            return Ok(conn);
+        }
     }
 
     fn spawn_fail(&self) -> String {
@@ -184,6 +212,24 @@ impl Connector for ParentProcessConnector {
             ParentProcessConnection::new(child, stream),
         )))
     }
+
+    fn get_version(&self) -> Result<Version> {
+        let mut server_path: PathBuf = self.server_path.clone();
+        if let Ok(path) = std::env::var("RISC0_SERVER_PATH") {
+            server_path = PathBuf::from(path.to_string());
+        }
+
+        let output = Command::new(server_path.as_os_str())
+            .arg("--version")
+            .output()?;
+        let version_output = String::from_utf8(output.stdout)?;
+        let reg = regex::Regex::new(r".* (.*)\n$")?;
+        let caps = match reg.captures(&version_output) {
+            Some(caps) => caps,
+            None => bail!("failed to parse server version number"),
+        };
+        semver::Version::parse(&caps[1]).map_err(|e| anyhow!(e))
+    }
 }
 
 struct TcpConnector {
@@ -204,6 +250,10 @@ impl Connector for TcpConnector {
         tracing::debug!("connect");
         let stream = TcpStream::connect(&self.addr)?;
         Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
+    }
+
+    fn get_version(&self) -> Result<Version> {
+        bail!("TcpConnector does not have a semver")
     }
 }
 
