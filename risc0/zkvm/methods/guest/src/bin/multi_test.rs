@@ -357,7 +357,7 @@ fn main() {
             if pid == 0 {
                 env::log("child");
                 let mut writer = FdWriter::new(pipe[1], |_| {});
-                writer.write_slice(&MSG);
+                writer.write_slice(MSG);
                 sys_exit(0);
             } else {
                 env::log("parent");
