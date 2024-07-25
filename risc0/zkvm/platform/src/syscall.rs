@@ -838,6 +838,7 @@ pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
 #[no_mangle]
 pub extern "C" fn sys_exit(status: i32) -> ! {
     let Return(a0, _) = unsafe { syscall_0(nr::SYS_EXIT, null_mut(), 0) };
+    #[allow(clippy::empty_loop)]
     loop {
         // prevent dishonest provers from relying on the ability to prove the
         // child process rather than the intended parent process.
