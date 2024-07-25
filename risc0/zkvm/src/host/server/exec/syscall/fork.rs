@@ -165,11 +165,11 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         tracing::trace!("load_string: {addr:?}");
         let mut buf = Vec::new();
         loop {
-            let bytes = self.load_u8(addr)?;
-            if bytes == 0 {
+            let byte = self.load_u8(addr)?;
+            if byte == 0 {
                 break;
             }
-            buf.push(bytes);
+            buf.push(byte);
             addr += 1u32;
         }
         Ok(String::from_utf8(buf)?)
