@@ -130,6 +130,7 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
@@ -828,4 +829,17 @@ pub extern "C" fn sys_fork() -> i32 {
 pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
     let Return(a0, _) = syscall_0(nr::SYS_PIPE, pipefd, 2);
     a0 as i32
+}
+
+/// `sys_exit()` causes normal process termination.
+///
+/// Currently the `status` is unused and ignored.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub extern "C" fn sys_exit(status: i32) -> ! {
+    let Return(a0, _) = unsafe { syscall_0(nr::SYS_EXIT, null_mut(), 0) };
+    loop {
+        // prevent dishonest provers from relying on the ability to prove the
+        // child process rather than the intended parent process.
+    }
 }

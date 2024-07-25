@@ -23,7 +23,7 @@ use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
 };
-use core::{arch::asm, ptr};
+use core::arch::asm;
 
 use getrandom::getrandom;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
@@ -40,7 +40,7 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_fork, sys_halt, sys_log, sys_pipe, sys_read, sys_read_words,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_read, sys_read_words,
         sys_write,
     },
     PAGE_SIZE,
@@ -350,21 +350,33 @@ fn main() {
             }
         }
         MultiTestSpec::SysFork => {
-            let content = [3, 1, 3, 3, 7];
+            const MSG: &[u8] = b"hello";
             let mut pipe = [0u32; 2];
             unsafe { sys_pipe(pipe.as_mut_ptr()) };
             let pid = sys_fork();
             if pid == 0 {
                 env::log("child");
                 let mut writer = FdWriter::new(pipe[1], |_| {});
-                writer.write_slice(&content);
-                sys_halt(0, ptr::null());
+                writer.write_slice(&MSG);
+                sys_exit(0);
             } else {
                 env::log("parent");
                 let mut reader = FdReader::new(pipe[0]);
-                let mut buf: [u32; 5] = [0; 5];
+                let mut buf: [u8; MSG.len()] = [0; MSG.len()];
                 reader.read_slice(&mut buf);
-                assert_eq!(buf, content);
+                assert_eq!(buf, MSG);
+            }
+        }
+        MultiTestSpec::SysForkFork => {
+            let pid = sys_fork();
+            if pid == 0 {
+                sys_fork();
+            }
+        }
+        MultiTestSpec::SysForkJournalPanic => {
+            let pid = sys_fork();
+            if pid == 0 {
+                env::commit_slice(b"should panic");
             }
         }
     }

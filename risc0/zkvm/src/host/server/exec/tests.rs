@@ -1137,6 +1137,18 @@ fn sys_fork() {
     run_test(MultiTestSpec::SysFork);
 }
 
+#[test]
+#[should_panic(expected = "Unknown syscall")]
+fn sys_fork_fork_panic() {
+    run_test(MultiTestSpec::SysForkFork);
+}
+
+#[test]
+#[should_panic(expected = "Bad write file descriptor 3")]
+fn sys_fork_journal_panic() {
+    run_test(MultiTestSpec::SysForkJournalPanic);
+}
+
 #[cfg(feature = "docker")]
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};

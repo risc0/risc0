@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{cell::RefCell, rc::Rc};
+
 use anyhow::{bail, Context as _, Result};
 use risc0_circuit_rv32im::prove::emu::{
     addr::{ByteAddr, WordAddr},
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
 };
 use risc0_zkvm_platform::{
+    fileno,
     memory::is_guest_memory,
     syscall::{
         ecall,
+        nr::{SYS_EXIT, SYS_FORK},
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_MAX, REG_T0},
     },
     PAGE_SIZE, WORD_SIZE,
@@ -59,7 +63,7 @@ struct ChildExecutor<'a, 'b> {
     registers: [u32; REG_MAX],
     page_table: Vec<u32>,
     page_cache: Vec<Page>,
-    halt: bool,
+    exit: bool,
     syscall_table: SyscallTable<'a>,
 }
 
@@ -72,7 +76,15 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         // The return value of sys_fork is the pid, so set a0 to PID_CHILD.
         registers[REG_A0] = PID_CHILD;
 
-        let syscall_table = ctx.syscall_table().clone();
+        let mut syscall_table = ctx.syscall_table().clone();
+
+        // remove the ability to write to the JOURNAL from a child process.
+        let mut posix_io = ctx.syscall_table().posix_io.borrow().clone();
+        posix_io.write_fds.remove(&fileno::JOURNAL);
+        syscall_table.posix_io = Rc::new(RefCell::new(posix_io));
+
+        // avoid the possibility of fork bombs.
+        syscall_table.inner.remove(&SYS_FORK.as_str().to_string());
 
         Ok(Self {
             ctx,
@@ -80,22 +92,17 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
             registers,
             page_table: vec![INVALID_IDX; NUM_PAGES],
             page_cache: vec![],
-            halt: false,
+            exit: false,
             syscall_table,
         })
     }
 
     pub fn run(&mut self) -> Result<()> {
         let mut emu = Emulator::new();
-        while !self.halt {
+        while !self.exit {
             emu.step(self)?;
         }
         Ok(())
-    }
-
-    fn ecall_halt(&mut self) -> Result<bool> {
-        self.halt = true;
-        Ok(true)
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
@@ -110,6 +117,11 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         let name_end = name_ptr + syscall_name.len();
         Self::check_guest_addr(name_end)?;
         tracing::trace!("ecall_software({syscall_name}, into_guest: {into_guest_len})");
+
+        if syscall_name == SYS_EXIT.as_str() {
+            self.exit = true;
+            return Ok(true);
+        }
 
         let syscall = self
             .syscall_table
@@ -192,7 +204,6 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
 impl<'a, 'b> EmuContext for ChildExecutor<'a, 'b> {
     fn ecall(&mut self) -> Result<bool> {
         match EmuContext::load_register(self, REG_T0)? {
-            ecall::HALT => self.ecall_halt(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }

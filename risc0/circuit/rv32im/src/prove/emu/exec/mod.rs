@@ -80,6 +80,8 @@ pub trait SyscallContext {
     fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8>;
 
     /// Loads bytes from the given region of memory.
+    ///
+    /// A region may span multiple pages.
     fn peek_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
         for i in 0..size {
@@ -89,6 +91,9 @@ pub trait SyscallContext {
     }
 
     /// Load a page from memory at the specified page index.
+    ///
+    /// This is used by sys_fork in order to build a copy-on-write page cache to
+    /// inherit pages from the parent process.
     fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
 
     /// Returns the current cycle count.
@@ -744,7 +749,7 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
         let addr = self.pager.image.info.get_page_addr(page_idx);
         if !is_guest_memory(addr) {
-            bail!("{page_idx:?} is an invalid guest page_idx");
+            bail!("{page_idx} is an invalid guest page_idx");
         }
         Ok(self.pager.peek_page(page_idx))
     }

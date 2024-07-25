@@ -76,7 +76,7 @@ pub(crate) trait SyscallContext<'a> {
     /// Loads an individual word from memory.
     fn load_u32(&mut self, addr: ByteAddr) -> Result<u32>;
 
-    /// Loads bytes from the given region of memory.
+    /// Loads bytes from the given region of memory. A region may span multiple pages.
     fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
         for i in 0..size {
@@ -144,33 +144,6 @@ impl<'a> SyscallTable<'a> {
 
     pub(crate) fn get_syscall(&self, name: &str) -> Option<&Rc<RefCell<(dyn Syscall + 'a)>>> {
         self.inner.get(name)
-    }
-}
-
-struct SysLog;
-impl Syscall for SysLog {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let writer = ctx
-            .syscall_table()
-            .posix_io
-            .borrow()
-            .get_writer(fileno::STDOUT)?;
-
-        tracing::debug!("sys_log({buf_len} bytes)");
-
-        let msg = format!("R0VM[{}] ", ctx.get_cycle());
-        writer
-            .borrow_mut()
-            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
-        Ok((0, 0))
     }
 }
 
@@ -515,6 +488,33 @@ impl Syscall for SysWrite {
         tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
+        Ok((0, 0))
+    }
+}
+
+struct SysLog;
+impl Syscall for SysLog {
+    fn syscall(
+        &mut self,
+        _syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let writer = ctx
+            .syscall_table()
+            .posix_io
+            .borrow()
+            .get_writer(fileno::STDOUT)?;
+
+        tracing::debug!("sys_log({buf_len} bytes)");
+
+        let msg = format!("R0VM[{}] ", ctx.get_cycle());
+        writer
+            .borrow_mut()
+            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
         Ok((0, 0))
     }
 }

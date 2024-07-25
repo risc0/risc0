@@ -96,6 +96,8 @@ pub enum MultiTestSpec {
     AlignedAlloc,
     AllocZeroed,
     SysFork,
+    SysForkFork,
+    SysForkJournalPanic,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
