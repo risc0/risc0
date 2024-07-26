@@ -4,6 +4,13 @@
 
 TBD
 
+## [v1.0.4 (2024-07-26)](https://github.com/risc0/risc0/releases/tag/v1.0.4)
+
+### 🛠 Fixes
+
+* Apply a workaround for LLVM compiler bug for rv32im to ensure that lower bits of addresses are preserved.
+* Fix panic by remove page_size parameter from serialized MemoryImage
+
 ## [v1.0.3 (2024-07-16)](https://github.com/risc0/risc0/releases/tag/v1.0.3)
 
 ### 🛠 Fixes
