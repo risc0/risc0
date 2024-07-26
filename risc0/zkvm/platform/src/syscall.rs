@@ -331,7 +331,7 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
         asm!(
             "ecall",
             in("t0") t0,
-            inout("a0") index => a0,
+            inlateout("a0") index => a0,
         );
         a0
     }
