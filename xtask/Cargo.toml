@@ -7,7 +7,7 @@ edition = { workspace = true }
 bincode = "1.3"
 clap = { version = "4.5", features = ["derive", "env"] }
 hex = "0.4"
-prost-build = "0.12"
+prost-build = "0.13"
 protobuf-src = "1.1"
 regex = "1"
 risc0-circuit-recursion = { workspace = true, features = ["prove"], optional = true }
