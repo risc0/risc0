@@ -133,7 +133,7 @@ More details and options for `cargo risczero` are given in
 
 For more guidance on how to use RISC Zero, how RISC Zero projects are typically
 structured, and other resources useful to developers new to RISC Zero, see our
-[Getting Started page][quickstart].
+[Getting Started page](https://dev.risczero.com/api/getting-started).
 
 ## Building from source
 
