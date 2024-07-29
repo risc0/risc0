@@ -559,7 +559,7 @@ jobs:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
 
-  rzup-binary-new-upload:
+  rzup-binary-upload:
     #if: >
     #  contains(github.ref, 'release-') && 
     #  github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
@@ -571,13 +571,11 @@ jobs:
         os: [Linux]
         arch: [X64, ARM64]
     env:
-      BINARY_OUTPUT_PATH: target/build/release/rzup
+      BINARY_OUTPUT_PATH: target/release/rzup
       S3_ARTIFACTS_PATH: s3://risc0-artifacts/rzup/${{ matrix.os }}-${{ matrix.arch }}-cpu
     steps:
-      - name: Generate rzup Binary
+      - name: Generate `rzup` Binary
         run: cargo build --release -p rzup
-        working-directory: rzup/
-      - run: ls -lhta $BINARY_OUTPUT_PATH
       - name: Upload Binary to Artifacts S3 Bucket
         run: aws s3 cp $BINARY_OUTPUT_PATH $S3_ARTIFACTS_PATH/
 
