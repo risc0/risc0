@@ -64,7 +64,7 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
           disable_s3: ${{ env.DISABLE_S3 }}
 
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- install rust $RISC0_TOOLCHAIN_VERSION
 
       - name: Run benchmarks
         run: cargo bench -F $FEATURE --bench fib

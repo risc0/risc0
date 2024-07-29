@@ -122,7 +122,7 @@ jobs:
       - name: Install risczero toolchain
         run: |
           cargo install --force --path risc0/cargo-risczero
-          cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+          cargo run --bin rzup -- install rust $RISC0_TOOLCHAIN_VERSION
         working-directory: risc0
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:

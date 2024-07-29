@@ -66,7 +66,7 @@ jobs:
           crate: cargo-binstall
           version: "1.4"
       - run: cargo binstall -y --force cargo-risczero@${{ env.VERSION }}
-      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- install rust $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo run

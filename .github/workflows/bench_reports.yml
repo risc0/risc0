@@ -58,7 +58,7 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
 
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- install rust $RISC0_TOOLCHAIN_VERSION
 
       - name: Save commit hash to a file
         run: |
