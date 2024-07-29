@@ -63,5 +63,5 @@
     "remark-wiki-link": "2.0.1",
     "swc-loader": "0.2.6"
   },
-  "packageManager": "bun@1.1.20"
+  "packageManager": "bun@1.1.21"
 }
