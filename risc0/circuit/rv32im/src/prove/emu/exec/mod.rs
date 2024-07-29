@@ -431,8 +431,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         tracing::debug!("[{}] ecall_sha", self.insn_cycles);
         let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
-        let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
-        let mut block2_ptr = self.load_guest_addr_from_register(REG_A3)?;
         let count = self.load_register(REG_A4)?;
 
         let state_in: [u8; DIGEST_BYTES] = self.load_array_from_guest(state_in_ptr)?;
@@ -441,25 +439,30 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             *word = word.to_be();
         }
 
-        // tracing::debug!("ecall_sha: start state: {state:08x?}");
-        let mut block = [0u32; BLOCK_WORDS];
+        if count > 0 {
+            let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
+            let mut block2_ptr = self.load_guest_addr_from_register(REG_A3)?;
 
-        for _ in 0..count {
-            let (digest1, digest2) = block.split_at_mut(DIGEST_WORDS);
-            for (i, word) in digest1.iter_mut().enumerate() {
-                *word = self.load_u32_from_guest(block1_ptr + (i * WORD_SIZE))?;
-            }
-            for (i, word) in digest2.iter_mut().enumerate() {
-                *word = self.load_u32_from_guest(block2_ptr + (i * WORD_SIZE))?;
-            }
-            // tracing::debug!("Compressing block {block:02x?}");
-            sha2::compress256(
-                &mut state,
-                &[*GenericArray::from_slice(bytemuck::cast_slice(&block))],
-            );
+            // tracing::debug!("ecall_sha: start state: {state:08x?}");
+            let mut block = [0u32; BLOCK_WORDS];
 
-            block1_ptr += BLOCK_BYTES;
-            block2_ptr += BLOCK_BYTES;
+            for _ in 0..count {
+                let (digest1, digest2) = block.split_at_mut(DIGEST_WORDS);
+                for (i, word) in digest1.iter_mut().enumerate() {
+                    *word = self.load_u32_from_guest(block1_ptr + (i * WORD_SIZE))?;
+                }
+                for (i, word) in digest2.iter_mut().enumerate() {
+                    *word = self.load_u32_from_guest(block2_ptr + (i * WORD_SIZE))?;
+                }
+                // tracing::debug!("Compressing block {block:02x?}");
+                sha2::compress256(
+                    &mut state,
+                    &[*GenericArray::from_slice(bytemuck::cast_slice(&block))],
+                );
+
+                block1_ptr += BLOCK_BYTES;
+                block2_ptr += BLOCK_BYTES;
+            }
         }
 
         // tracing::debug!("ecall_sha: final state: {state:08x?}");
