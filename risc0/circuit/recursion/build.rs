@@ -15,7 +15,9 @@
 use std::env;
 
 fn main() {
-    if env::var("CARGO_FEATURE_METAL").is_ok() {
+    if env::var("CARGO_FEATURE_PROVE").is_ok()
+        && env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios")
+    {
         println!(
             "cargo:rustc-env=RECURSION_METAL_PATH={}",
             env::var("DEP_RISC0_CIRCUIT_RECURSION_SYS_METAL_KERNEL").unwrap()

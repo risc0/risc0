@@ -34,7 +34,7 @@ fn main() {
         build_cuda_kernels();
     }
 
-    if env::var("CARGO_FEATURE_METAL").is_ok() {
+    if env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios") {
         println!(
             "cargo:metal_root={}",
             manifest_dir.join("kernels/zkp/metal").to_string_lossy()

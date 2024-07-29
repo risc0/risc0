@@ -4,6 +4,30 @@
 
 TBD
 
+## [v1.0.3 (2024-07-16)](https://github.com/risc0/risc0/releases/tag/v1.0.3)
+
+### 🛠 Fixes
+
+* Fix client/server version compatibility.
+
+## [v1.0.2 (2024-07-11)](https://github.com/risc0/risc0/releases/tag/v1.0.2)
+
+### ⚡️ Features
+* Improve executor performance by 2x.
+* `bonsai-sdk`: enable execute-only mode. This will run the guest program but will not produce a receipt. This can be used to quickly measure the complexity of the guest program.
+* `bonsai-sdk`: simplify the SDK by using the `maybe_async` crate.
+
+### 🛠 Fixes
+
+* Fix `no_std` starter template.
+* Fix serialization of structs such as `NaiveDate` which calls into `collect_str`.
+
+## [v1.0.1 (2024-06-04)](https://github.com/risc0/risc0/releases/tag/v1.0.1)
+
+### 🛠 Fixes
+
+* Fix issue with building CUDA kernels.
+
 ## [v1.0.0 (2024-06-04)](https://github.com/risc0/risc0/releases/tag/v1.0.0)
 
 ### 🔥 Prover Performance Improvements
