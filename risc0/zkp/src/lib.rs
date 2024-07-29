@@ -46,7 +46,7 @@ pub const MIN_CYCLES: usize = 1 << MIN_CYCLES_PO2; // 8K
 pub const MAX_CYCLES_PO2: usize = 24;
 pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2; // 16M
 
-/// 50 FRI queries gives ~100 bits of conjectured security
+/// 50 FRI queries is sufficient to achieve our security target of 99 bits (conjectured security)
 pub const QUERIES: usize = 50;
 pub const ZK_CYCLES: usize = 1994; // TODO: Ideally we'd compute ZK_CYCLES programmatically
 pub const MIN_PO2: usize = core::log2_ceil(1 + ZK_CYCLES);
