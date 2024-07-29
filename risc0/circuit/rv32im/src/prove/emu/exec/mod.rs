@@ -378,10 +378,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn ecall_software(&mut self) -> Result<bool> {
         tracing::debug!("[{}] ecall_software", self.insn_cycles);
         let into_guest_ptr = ByteAddr(self.load_register(REG_A0)?);
-        if !is_guest_memory(into_guest_ptr.0) && !into_guest_ptr.is_null() {
+        let into_guest_len = self.load_register(REG_A1)? as usize;
+        if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
-        let into_guest_len = self.load_register(REG_A1)? as usize;
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.peek_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
@@ -410,7 +410,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
-        if !into_guest_ptr.is_null() {
+        if into_guest_len > 0 && !into_guest_ptr.is_null() {
             Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
             self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?
         }
