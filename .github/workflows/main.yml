@@ -574,6 +574,8 @@ jobs:
       BINARY_OUTPUT_PATH: target/release/rzup
       S3_ARTIFACTS_PATH: s3://risc0-artifacts/rzup/${{ matrix.os }}-${{ matrix.arch }}-cpu
     steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
       - name: Generate `rzup` Binary
         run: cargo build --release -p rzup
       - name: Upload Binary to Artifacts S3 Bucket
