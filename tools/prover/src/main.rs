@@ -30,6 +30,7 @@ fn main() {
     let iterations = 100;
     let env = ExecutorEnv::builder()
         .write_slice(&[iterations])
+        // Use a low segment size to generate more jobs in this example.
         .segment_limit_po2(15)
         .build()
         .unwrap();
