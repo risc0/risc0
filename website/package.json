@@ -60,8 +60,7 @@
     "remark-preset-lint-recommended": "7.0.0",
     "remark-sort-definitions": "2.0.0",
     "remark-toc": "9.0.0",
-    "remark-wiki-link": "2.0.1",
-    "swc-loader": "0.2.6"
+    "remark-wiki-link": "2.0.1"
   },
   "packageManager": "bun@1.1.21"
 }
