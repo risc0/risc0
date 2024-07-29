@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "description": "RISC Zero Documentation, Education Hub, and Resources",
+  "overrides": {
+    "mdast-util-to-string": "^4.0.0"
+  },
   "scripts": {
     "build": "docusaurus build",
     "check-link-versions": "python ./link-version-check.py",
