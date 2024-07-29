@@ -571,14 +571,15 @@ jobs:
         os: [Linux]
         arch: [X64, ARM64]
     env:
-      BINARY_OUTPUT_PATH: target/build/release
+      BINARY_OUTPUT_PATH: target/build/release/rzup
       S3_ARTIFACTS_PATH: s3://risc0-artifacts/rzup/${{ matrix.os }}-${{ matrix.arch }}-cpu
     steps:
       - name: Generate rzup Binary
-        run: cargo build --release
+        run: cargo build --release -p rzup
+        working-directory: rzup/
       - run: ls -lhta $BINARY_OUTPUT_PATH
       - name: Upload Binary to Artifacts S3 Bucket
-        run: aws s3 cp $BINARY_OUTPUT_PATH/rzup $S3_ARTIFACTS_PATH/
+        run: aws s3 cp $BINARY_OUTPUT_PATH $S3_ARTIFACTS_PATH/
 
   web:
     if: needs.changes.outputs.web == 'true'
