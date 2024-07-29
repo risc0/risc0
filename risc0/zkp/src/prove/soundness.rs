@@ -14,14 +14,25 @@
 
 //! A soundness calculator for the RISC Zero STARK protocol that secures the
 //! RISC Zero zkVM. Soundness for STARK protocols can be analyzed under a
-//! number of different cryptographic assumptions. RISC Zero targets 100 bits
-//! of conjectured soundness, using the Toy Problem Conjecture. For
-//! completeness, we also include analysis in three other regimes:
+//! number of different cryptographic assumptions.
 //!
-//! - Conjectured soundness using Conjecture 8.4 from [Proximity Gaps] and
+//! 1. Conjectured soundness using the Toy Problem Conjecture from ethSTARK
+//! 2. Conjectured soundness using Conjecture 8.4 from [Proximity Gaps] and
 //!   Conjecture 2.3 from [DEEP-FRI]
-//! - Proven soundness in the list-decoding regime
-//! - Proven soundness in the unique-decoding regime
+//! 3. Proven soundness in the list-decoding regime
+//! 4. Proven soundness in the unique-decoding regime
+//!
+//! With default parameters, RISC Zero's zkVM targets 99 bits of conjectured soundness,
+//! using the Toy Problem Conjecture.
+//!
+//! This target assumes a SEGMENT_SIZE of 2^20 cycles.
+//! Increasing SEGMENT_SIZE to the maximum of 2^24 cycles reduces the result to 95 bits of conjectured soundness.
+//!
+//! Use the following command to run the calculator:
+//! RUST_LOG=risc0_zkp=info cargo run --release
+//!
+//! Running the calculator results in a terminal printout for scenarios (1) and (3) in the list above.
+//! The calculator also includes code for scenarios (2) and (4).
 
 use risc0_core::field::{baby_bear, ExtElem};
 
