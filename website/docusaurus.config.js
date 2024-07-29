@@ -70,15 +70,15 @@ export default async function createConfigAsync() {
             customCss: require.resolve("./src/css/custom.css"),
           },
           sitemap: {
-            lastmod: 'date',
-            changefreq: 'weekly',
+            lastmod: "date",
+            changefreq: "weekly",
             priority: 0.5,
-            ignorePatterns: ['/tags/**'],
-            filename: 'sitemap.xml',
+            ignorePatterns: ["/tags/**"],
+            filename: "sitemap.xml",
             createSitemapItems: async (params) => {
-              const {defaultCreateSitemapItems, ...rest} = params;
+              const { defaultCreateSitemapItems, ...rest } = params;
               const items = await defaultCreateSitemapItems(rest);
-              return items.filter((item) => !item.url.includes('/page/'));
+              return items.filter((item) => !item.url.includes("/page/"));
             },
           },
         }),
