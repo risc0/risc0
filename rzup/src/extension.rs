@@ -184,7 +184,7 @@ impl Extension {
                 {
                     let binary_path = extension_dir.join("cargo-risczero");
 
-                    verbose_msg!("Setting extension permissons to 0o755");
+                    verbose_msg!("Setting extension permissions to 0o755");
 
                     let mut perms = fs::metadata(&binary_path)?.permissions();
                     perms.set_mode(0o755);

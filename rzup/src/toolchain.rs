@@ -226,7 +226,7 @@ impl Toolchain {
                         if entry.file_type()?.is_file() {
                             let mut perms = entry.metadata()?.permissions();
                             verbose_msg!(format!(
-                                "Setting permissons for {} to 0o755",
+                                "Setting permissions for {} to 0o755",
                                 entry.file_name().to_string_lossy()
                             ));
                             perms.set_mode(0o755);
