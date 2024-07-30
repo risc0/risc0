@@ -65,29 +65,49 @@ pub fn basic() -> Program {
 }
 
 pub fn simple_loop() -> Program {
+    loop_with_iters(100)
+}
+
+pub fn loop_with_iters(iters: u32) -> Program {
     // loop.asm:
     //
     // .global _boot
     // .text
     //
     // _boot:
-    //     li      a4,0
-    //     li      a5,100
+    //     li      a4, 0         # i = 0
+    //     lui     a5, 0xFFFFF   # Fill upper 20 bits
+    //     addi    a5, a5, -1    # Fill lower 12 bits
     // loop:
-    //     addi    a4,a4,1
-    //     blt     a4,a5,loop
-    //     lui     a1,0x1000
-    //     ecall
+    //     addi    a4, a4, 1     # i++
+    //     bltu    a4, a5, loop  # if (i < iters) goto loop
+    //     lui     a1, 0x1000    # Set digest address to dummy null page
+    //     ecall                 # Halt (and catch fire)
     //
     // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
+    //
+    // NOTE: The loop condition uses `bltu` instead of `blt` because `iters` is
+    // unsigned.
+
+    // Pack `iters` into `a5` by encoding it directly in the instructions as:
+    // - Load Upper Imm (20 bits)
+    // - ADD Immediate (12 bits)
+    //
+    // This is based off the instruction encoding for setting all 32 bits:
+    // - 0xfffff7b7: lui  a5, 0xFFFFF
+    // - 0xfff78793: addi a5, a5, -1
+    let lui_a5 = (iters & 0xfffff000) | 0x7b7;
+    let addi_a5 = ((iters & 0xfff) << 20) | 0x78793;
+
     program_from_instructions(
         0x4000,
         [
-            0x00000713, // li      a4,0
-            0x06400793, // li      a5,100
-            0x00170713, // add     a4,a4,1
-            0xfef74ee3, // blt     a4,a5,8 <loop>
-            0x010005b7, // lui     a1,0x1000
+            0x00000713, // li      a4, 0
+            lui_a5,     // lui     a5, (top 20 bits of `iters`)
+            addi_a5,    // addi    a5, a5, (bottom 12 bits of `iters`)
+            0x00170713, // addi    a4, a4, 1
+            0xfef76ee3, // bltu    a4, a5, 0xc <loop>
+            0x010005b7, // lui     a1, 0x1000
             0x00000073, // ecall
         ],
     )

@@ -141,7 +141,7 @@ fn system_split() {
         assert_eq!(trace.pre.txns.len(), 9968);
         assert_eq!(trace.pre.extras.len(), 24);
         assert_eq!(trace.body.cycles.len(), 4386);
-        assert_eq!(trace.body.txns.len(), 5377);
+        assert_eq!(trace.body.txns.len(), 5380);
         assert_eq!(trace.body.extras.len(), 15);
         let page_reads: Vec<_> = trace
             .pre
