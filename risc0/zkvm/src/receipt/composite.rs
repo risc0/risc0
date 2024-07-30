@@ -16,6 +16,7 @@ use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
@@ -37,7 +38,7 @@ use crate::{
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
 /// continuations, and zero or more [InnerAssumptionReceipt](crate::InnerAssumptionReceipt) structs
 /// proving any assumptions.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshDeserialize, BorshSerialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct CompositeReceipt {

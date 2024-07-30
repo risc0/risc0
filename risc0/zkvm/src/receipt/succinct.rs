@@ -15,6 +15,7 @@
 use alloc::{collections::VecDeque, string::String, vec::Vec};
 use core::fmt::Debug;
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{control_id::ALLOWED_CONTROL_ROOT, CircuitImpl, CIRCUIT};
 use risc0_core::field::baby_bear::BabyBearElem;
@@ -38,7 +39,7 @@ use crate::{
 /// computations, and with an arbitrary number of segments linked via composition.
 ///
 /// [STARK]: https://dev.risczero.com/terminology#stark
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct SuccinctReceipt<Claim>
