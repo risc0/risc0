@@ -683,7 +683,7 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
     }
 }
 
-fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
+pub(crate) fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
     if requested.pre.is_empty() {
         requested.major == server.major && requested.minor == server.minor
     } else {
