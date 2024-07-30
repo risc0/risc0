@@ -570,6 +570,9 @@ jobs:
       matrix:
         os: [Linux]
         arch: [X64, ARM64]
+        include:
+          - os: macOS
+            arch: ARM64
     env:
       BINARY_OUTPUT_PATH: target/release/rzup
       S3_ARTIFACTS_PATH: s3://risc0-artifacts/rzup/${{ matrix.os }}-${{ matrix.arch }}-cpu
