@@ -1,8 +1,6 @@
 #include <ff/baby_bear.hpp>
 #include <ntt/ntt.cuh>
 
-#ifndef __CUDA_ARCH__
-
 extern "C" RustError::by_value sppark_init() {
   uint32_t lg_domain_size = 1;
   uint32_t domain_size = 1U << lg_domain_size;
@@ -59,7 +57,7 @@ extern "C" RustError::by_value sppark_batch_expand(
 }
 
 extern "C" RustError::by_value
-batch_NTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
+sppark_batch_NTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
   if (lg_domain_size == 0)
     return RustError{cudaSuccess};
 
@@ -89,7 +87,7 @@ batch_NTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
 }
 
 extern "C" RustError::by_value
-batch_iNTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
+sppark_batch_iNTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
   if (lg_domain_size == 0)
     return RustError{cudaSuccess};
 
@@ -119,7 +117,7 @@ batch_iNTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
 }
 
 extern "C" RustError::by_value
-batch_zk_shift(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
+sppark_batch_zk_shift(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
   if (lg_domain_size == 0)
     return RustError{cudaSuccess};
 
@@ -142,5 +140,3 @@ batch_zk_shift(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
 
   return RustError{cudaSuccess};
 }
-
-#endif

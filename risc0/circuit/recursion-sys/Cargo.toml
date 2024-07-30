@@ -11,7 +11,7 @@ links = "risc0-circuit-recursion-sys"
 [dependencies]
 risc0-core = { workspace = true }
 risc0-sys = { workspace = true }
-sppark = { version = "0.1.6", optional = true }
+sppark = { workspace = true, optional = true }
 
 [build-dependencies]
 glob = "0.3"

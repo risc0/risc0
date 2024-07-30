@@ -1,20 +1,19 @@
 // This code is automatically generated
 
-#include "fp.h"
-#include "fpext.h"
+#include "supra/fp.h"
 
 #include <cstdint>
 
 constexpr size_t INV_RATE = 4;
 __constant__ FpExt poly_mix[210];
 
-__device__ FpExt poly_fp(uint32_t idx,
-                         uint32_t size,
-                         const Fp* ctrl,
-                         const Fp* out,
-                         const Fp* data,
-                         const Fp* mix,
-                         const Fp* accum) {
+static __device__ __forceinline__ FpExt poly_fp(uint32_t idx,
+                                                uint32_t size,
+                                                const Fp* ctrl,
+                                                const Fp* out,
+                                                const Fp* data,
+                                                const Fp* mix,
+                                                const Fp* accum) {
   uint32_t mask = size - 1;
   Fp x0(1);
   Fp x1(0);
@@ -18855,9 +18854,9 @@ __global__ void eval_check(Fp* check,
     Fp x = pow(rou, cycle);
     Fp y = pow(Fp(3) * x, 1 << po2);
     FpExt ret = tot * inv(y - Fp(1));
-    check[domain * 0 + cycle] = ret.elems[0];
-    check[domain * 1 + cycle] = ret.elems[1];
-    check[domain * 2 + cycle] = ret.elems[2];
-    check[domain * 3 + cycle] = ret.elems[3];
+    check[domain * 0 + cycle] = ret[0];
+    check[domain * 1 + cycle] = ret[1];
+    check[domain * 2 + cycle] = ret[2];
+    check[domain * 3 + cycle] = ret[3];
   }
 }
