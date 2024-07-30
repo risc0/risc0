@@ -47,16 +47,16 @@ pub fn is_verbose() -> bool {
     VERBOSE.load(Ordering::SeqCst)
 }
 
-/// Determines the home directory for rzup, which can be set via the
-/// `RISC0_DATA_DIR` environment variable or defaults to `.rzup` in the home directory.
+/// Determines the home directory for risc0, which can be set via the
+/// `RISC0_HOME` environment variable or defaults to `.risc0` in the home directory.
 pub fn rzup_home() -> Result<PathBuf, RzupError> {
-    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+    let dir = if let Ok(dir) = std::env::var("RISC0_HOME") {
         dir.into()
-    } else if let Some(home) = dirs::data_dir() {
-        home.join("risc0")
+    } else if let Some(home) = dirs::home_dir() {
+        home.join(".risc0")
     } else {
         return Err(RzupError::config_error(
-            "Could not determine rzup directory. Set RISC0_DATA_DIR env var.",
+            "Could not determine rzup directory. Set RISC0_HOME env var.",
         ));
     };
 
