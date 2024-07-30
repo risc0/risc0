@@ -412,11 +412,6 @@ impl Client {
         result
     }
 
-    /// get the version of the server
-    pub fn get_server_version(&self) -> Result<semver::Version> {
-        self.connector.get_version()
-    }
-
     fn connect(&self) -> Result<ConnectionWrapper> {
         let mut conn = self.connector.connect()?;
 

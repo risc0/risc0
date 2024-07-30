@@ -123,7 +123,7 @@ pub use {
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
                 bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-                Executor, Prover, ProverOpts, ReceiptKind,
+                get_server_version, Executor, Prover, ProverOpts, ReceiptKind,
             },
         },
     },
@@ -158,13 +158,6 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// [semver::Version].
 pub fn get_version() -> Result<Version, semver::Error> {
     Version::parse(VERSION)
-}
-
-/// Reports the current version of the currently installed r0vm server version
-/// as represented by a [semver::Version].
-#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
-pub fn get_server_version() -> Result<Version> {
-    crate::ApiClient::new().unwrap().get_server_version()
 }
 
 /// Returns `true` if dev mode is enabled.

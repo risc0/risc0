@@ -17,9 +17,11 @@ pub(crate) mod external;
 #[cfg(feature = "prove")]
 pub(crate) mod local;
 
-use std::{path::PathBuf, rc::Rc};
+use std::{path::PathBuf, process::Command, rc::Rc};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use lazy_regex::regex_captures;
+use semver::Version;
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
@@ -367,4 +369,17 @@ pub(crate) fn get_r0vm_path() -> PathBuf {
     std::env::var("RISC0_SERVER_PATH")
         .unwrap_or("r0vm".to_string())
         .into()
+}
+
+/// Reports the current version of the currently installed r0vm server version
+/// as represented by a [semver::Version].
+pub fn get_server_version() -> Result<Version> {
+    let server_path = get_r0vm_path();
+    let output = Command::new(server_path.as_os_str())
+        .arg("--version")
+        .output()?;
+    let cmd_output = String::from_utf8(output.stdout)?;
+    let (_, version_str) = regex_captures!(r".* (.*)\n$", &cmd_output)
+        .ok_or(anyhow!("failed to parse server version number"))?;
+    Version::parse(&version_str).map_err(|e| anyhow!(e))
 }

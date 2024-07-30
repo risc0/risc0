@@ -20,7 +20,6 @@ pub(crate) mod server;
 #[cfg(feature = "prove")]
 mod tests;
 
-use semver::Version;
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -37,7 +36,6 @@ use std::{
 
 use anyhow::{anyhow, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
-use lazy_regex::regex_captures;
 use prost::Message;
 
 use crate::{ExitCode, Journal};
@@ -128,8 +126,6 @@ impl ConnectionWrapper {
 pub trait Connector {
     /// Create a client-server connection
     fn connect(&self) -> Result<ConnectionWrapper>;
-    /// TODO
-    fn get_version(&self) -> Result<Version>;
 }
 
 struct ParentProcessConnector {
@@ -155,21 +151,6 @@ impl ParentProcessConnector {
 }
 
 impl Connector for ParentProcessConnector {
-    fn get_version(&self) -> Result<Version> {
-        let mut server_path: PathBuf = self.server_path.clone();
-        if let Ok(path) = std::env::var("RISC0_SERVER_PATH") {
-            server_path = PathBuf::from(path.to_string());
-        }
-
-        let output = Command::new(server_path.as_os_str())
-            .arg("--version")
-            .output()?;
-        let cmd_output = String::from_utf8(output.stdout)?;
-        let (_, version_str) = regex_captures!(r".* (.*)\n$", &cmd_output)
-            .ok_or(anyhow!("failed to parse server version number"))?;
-        semver::Version::parse(&version_str).map_err(|e| anyhow!(e))
-    }
-
     fn connect(&self) -> Result<ConnectionWrapper> {
         let addr = self.listener.local_addr()?;
         let child = Command::new(&self.server_path)
@@ -222,10 +203,6 @@ impl TcpConnector {
 
 #[cfg(feature = "prove")]
 impl Connector for TcpConnector {
-    fn get_version(&self) -> Result<semver::Version> {
-        anyhow::bail!("TcpConnector does not have a semver")
-    }
-
     fn connect(&self) -> Result<ConnectionWrapper> {
         tracing::debug!("connect");
         let stream = TcpStream::connect(&self.addr)?;
