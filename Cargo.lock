@@ -4029,7 +4029,6 @@ dependencies = [
  "prost 0.13.1",
  "rand",
  "rayon",
- "regex",
  "risc0-binfmt",
  "risc0-build",
  "risc0-circuit-recursion",

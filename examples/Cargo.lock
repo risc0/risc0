@@ -4181,7 +4181,6 @@ dependencies = [
  "prost",
  "rand",
  "rayon",
- "regex",
  "risc0-binfmt",
  "risc0-build",
  "risc0-circuit-recursion",

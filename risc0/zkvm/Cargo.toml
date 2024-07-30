@@ -110,6 +110,7 @@ client = [
   "dep:bincode",
   "dep:bonsai-sdk",
   "dep:bytes",
+  "dep:lazy-regex",
   "dep:risc0-build",
   "dep:prost",
   "dep:tempfile",
