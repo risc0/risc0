@@ -1,4 +1,4 @@
-// Copyright 2022 Risc0, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "eltwise.cu"
-#include "fri.cu"
-#include "mix.cu"
-#include "ntt.cu"
-#include "sha.cu"
+#pragma once
+
+#include <ff/baby_bear.hpp>
+
+static __device__ bb31_t pow(bb31_t b, int e) {
+  return b ^ (unsigned int)e;
+}
+
+static __device__ bb31_t inv(bb31_t a) {
+  return a.reciprocal();
+}
+
+typedef bb31_t Fp;
+typedef bb31_4_t Fp4;
+typedef bb31_4_t FpExt;

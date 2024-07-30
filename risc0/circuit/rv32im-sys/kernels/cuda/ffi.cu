@@ -499,29 +499,4 @@ const char* risc0_circuit_rv32im_cuda_step_verify_accum(AccumContext* ctx,
   return nullptr;
 }
 
-const char* risc0_circuit_rv32im_cuda_eval_check(Fp* check,
-                                                 const Fp* ctrl,
-                                                 const Fp* data,
-                                                 const Fp* accum,
-                                                 const Fp* mix,
-                                                 const Fp* out,
-                                                 const Fp& rou,
-                                                 uint32_t po2,
-                                                 uint32_t domain,
-                                                 const FpExt* poly_mix_pows) {
-  try {
-    CUDA_OK(cudaDeviceSynchronize());
-
-    CudaStream stream;
-    auto cfg = getSimpleConfig(domain);
-    cudaMemcpyToSymbol(poly_mix, poly_mix_pows, sizeof(poly_mix));
-    eval_check<<<cfg.grid, cfg.block, 0, stream>>>(
-        check, ctrl, data, accum, mix, out, rou, po2, domain);
-    CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::runtime_error& err) {
-    return strdup(err.what());
-  }
-  return nullptr;
-}
-
 } // extern "C"

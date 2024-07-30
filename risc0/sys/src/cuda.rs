@@ -14,6 +14,8 @@
 
 use cust::memory::DevicePointer;
 
+pub use sppark::Error as SpparkError;
+
 extern "C" {
     pub fn sppark_init() -> sppark::Error;
 
@@ -25,21 +27,47 @@ extern "C" {
         poly_count: u32,
     ) -> sppark::Error;
 
-    pub fn batch_NTT(
+    pub fn sppark_batch_NTT(
         d_inout: DevicePointer<u8>,
         lg_domain_size: u32,
         poly_count: u32,
     ) -> sppark::Error;
 
-    pub fn batch_iNTT(
+    pub fn sppark_batch_iNTT(
         d_inout: DevicePointer<u8>,
         lg_domain_size: u32,
         poly_count: u32,
     ) -> sppark::Error;
 
-    pub fn batch_zk_shift(
+    pub fn sppark_batch_zk_shift(
         d_inout: DevicePointer<u8>,
         lg_domain_size: u32,
         poly_count: u32,
+    ) -> sppark::Error;
+
+    pub fn sppark_poseidon_fold(
+        d_out: DevicePointer<u8>,
+        d_in: DevicePointer<u8>,
+        num_hashes: usize,
+    ) -> sppark::Error;
+
+    pub fn sppark_poseidon_rows(
+        d_out: DevicePointer<u8>,
+        d_in: DevicePointer<u8>,
+        count: u32,
+        col_size: u32,
+    ) -> sppark::Error;
+
+    pub fn sppark_poseidon2_fold(
+        d_out: DevicePointer<u8>,
+        d_in: DevicePointer<u8>,
+        num_hashes: usize,
+    ) -> sppark::Error;
+
+    pub fn sppark_poseidon2_rows(
+        d_out: DevicePointer<u8>,
+        d_in: DevicePointer<u8>,
+        count: u32,
+        col_size: u32,
     ) -> sppark::Error;
 }
