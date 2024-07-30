@@ -4,10 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-util = { path = "../../util/" }
+risc0-build = { path = "../../../risc0/build" }
+util = { path = "../../util/", optional = true }
 
 [package.metadata.risc0]
 methods = ["guest"]
 
 [features]
-prove = ["util/prove"]
+client = ["dep:util"]
+default = ["client"]
+prove = ["dep:util", "util/prove"]

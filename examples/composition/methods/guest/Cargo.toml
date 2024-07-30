@@ -9,4 +9,4 @@ edition = "2021"
 risc0-zkvm = { path = "../../../../risc0/zkvm", features = [
   "std",
 ], default-features = false }
-hello-world-methods = { path = "../../../hello-world/methods" }
+hello-world-methods = { path = "../../../hello-world/methods", default-features = false }

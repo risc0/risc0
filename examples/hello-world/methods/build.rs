@@ -13,5 +13,8 @@
 // limitations under the License.
 
 fn main() {
+    #[cfg(feature = "client")]
     util::build_example();
+    #[cfg(not(feature = "client"))]
+    risc0_build::embed_methods();
 }

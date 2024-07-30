@@ -35,8 +35,9 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
+use lazy_regex::regex_captures;
 use prost::Message;
 
 use crate::{ExitCode, Journal};
@@ -163,13 +164,10 @@ impl Connector for ParentProcessConnector {
         let output = Command::new(server_path.as_os_str())
             .arg("--version")
             .output()?;
-        let version_output = String::from_utf8(output.stdout)?;
-        let reg = regex::Regex::new(r".* (.*)\n$")?;
-        let caps = match reg.captures(&version_output) {
-            Some(caps) => caps,
-            None => bail!("failed to parse server version number"),
-        };
-        semver::Version::parse(&caps[1]).map_err(|e| anyhow!(e))
+        let cmd_output = String::from_utf8(output.stdout)?;
+        let (_, version_str) = regex_captures!(r".* (.*)\n$", &cmd_output)
+            .ok_or(anyhow!("failed to parse server version number"))?;
+        semver::Version::parse(&version_str).map_err(|e| anyhow!(e))
     }
 
     fn connect(&self) -> Result<ConnectionWrapper> {
@@ -225,7 +223,7 @@ impl TcpConnector {
 #[cfg(feature = "prove")]
 impl Connector for TcpConnector {
     fn get_version(&self) -> Result<semver::Version> {
-        bail!("TcpConnector does not have a semver")
+        anyhow::bail!("TcpConnector does not have a semver")
     }
 
     fn connect(&self) -> Result<ConnectionWrapper> {
