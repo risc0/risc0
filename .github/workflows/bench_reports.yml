@@ -38,6 +38,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_3090_ti
+          - os: Linux
+            feature: cuda
+            device: g6.xlarge
           - os: macOS
             feature: prove
             device: apple_m2_pro
