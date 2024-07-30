@@ -50,42 +50,6 @@ __global__ void batch_evaluate_any(
 __global__ void gather_sample(
     Fp* dst, const Fp* src, const uint32_t idx, const uint32_t size, const uint32_t stride);
 
-__global__ void multi_ntt_fwd_step(
-    Fp* io, const Fp* rou, const uint32_t nBits, const uint32_t sBits, const uint32_t cSize);
-
-__global__ void multi_ntt_rev_step(
-    Fp* io, const Fp* rou, const uint32_t nBits, const uint32_t sBits, const uint32_t cSize);
-
-__global__ void poseidon_fold(const Fp* ROUND_CONSTANTS,
-                              const Fp* MDS,
-                              const Fp* PARTIAL_COMP_MATRIX,
-                              const Fp* PARTIAL_COMP_OFFSET,
-                              Fp* output,
-                              const Fp* input,
-                              uint32_t output_size);
-
-__global__ void poseidon_rows(const Fp* ROUND_CONSTANTS,
-                              const Fp* MDS,
-                              const Fp* PARTIAL_COMP_MATRIX,
-                              const Fp* PARTIAL_COMP_OFFSET,
-                              Fp* out,
-                              const Fp* matrix,
-                              uint32_t count,
-                              uint32_t col_size);
-
-__global__ void poseidon2_fold(const Fp* ROUND_CONSTANTS,
-                               const Fp* M_INT_DIAG,
-                               Fp* output,
-                               const Fp* input,
-                               uint32_t output_size);
-
-__global__ void poseidon2_rows(const Fp* ROUND_CONSTANTS,
-                               const Fp* M_INT_DIAG,
-                               Fp* out,
-                               const Fp* matrix,
-                               uint32_t count,
-                               uint32_t col_size);
-
 __global__ void sha_rows(ShaDigest* out, const Fp* matrix, uint32_t count, uint32_t colSize);
 
 __global__ void sha_fold(ShaDigest* out, const ShaDigest* in, uint32_t count);

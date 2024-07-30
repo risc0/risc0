@@ -14,9 +14,6 @@
 
 #pragma once
 
-#include "fp.h"
-#include "fpext.h"
-
 #include <cstdint>
 
 namespace risc0::circuit::recursion {

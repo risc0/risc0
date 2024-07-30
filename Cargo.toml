@@ -52,6 +52,7 @@ risc0-sys = { version = "1.1.0-alpha.1", default-features = false, path = "risc0
 risc0-zkp = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "1.1.0-alpha.1", default-features = false, path = "risc0/zkvm/platform" }
+sppark = "0.1.7"
 
 [profile.bench]
 lto = true

@@ -31,9 +31,7 @@ use crate::{
     core::{
         digest::Digest,
         hash::{
-            poseidon::{self, PoseidonHashSuite},
-            poseidon2::{self, Poseidon2HashSuite},
-            sha::Sha256HashSuite,
+            poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
             HashSuite,
         },
         log2_ceil,
@@ -141,57 +139,24 @@ impl CudaHash for CudaHashSha256 {
 
 pub struct CudaHashPoseidon {
     suite: HashSuite<BabyBear>,
-    round_constants: BufferImpl<BabyBearElem>,
-    mds: BufferImpl<BabyBearElem>,
-    partial_comp_matrix: BufferImpl<BabyBearElem>,
-    partial_comp_offset: BufferImpl<BabyBearElem>,
 }
 
 impl CudaHash for CudaHashPoseidon {
-    fn new(hal: &CudaHal<Self>) -> Self {
-        let round_constants =
-            hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
-        let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
-        let partial_comp_matrix =
-            hal.copy_from_elem("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
-        let partial_comp_offset =
-            hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
+    fn new(_hal: &CudaHal<Self>) -> Self {
         CudaHashPoseidon {
             suite: PoseidonHashSuite::new_suite(),
-            round_constants,
-            mds,
-            partial_comp_matrix,
-            partial_comp_offset,
         }
     }
 
     fn hash_fold(&self, io: &BufferImpl<Digest>, output_size: usize) {
-        let input = io.as_device_ptr_with_offset(2 * output_size);
-        let output = io.as_device_ptr_with_offset(output_size);
+        let err = unsafe {
+            let input = io.as_device_ptr_with_offset(2 * output_size);
+            let output = io.as_device_ptr_with_offset(output_size);
 
-        extern "C" {
-            fn risc0_zkp_cuda_poseidon_fold(
-                round_constants: DevicePointer<u8>,
-                mds: DevicePointer<u8>,
-                partial_comp_matrix: DevicePointer<u8>,
-                partial_comp_offset: DevicePointer<u8>,
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                output_size: u32,
-            ) -> CppError;
-        }
-
-        unsafe {
-            risc0_zkp_cuda_poseidon_fold(
-                self.round_constants.as_device_ptr(),
-                self.mds.as_device_ptr(),
-                self.partial_comp_matrix.as_device_ptr(),
-                self.partial_comp_offset.as_device_ptr(),
-                output,
-                input,
-                output_size as u32,
-            )
-            .unwrap();
+            sppark_poseidon_fold(output, input, output_size)
+        };
+        if err.code != 0 {
+            panic!("Failure during hash_fold: {err}");
         }
     }
 
@@ -200,31 +165,16 @@ impl CudaHash for CudaHashPoseidon {
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
 
-        extern "C" {
-            fn risc0_zkp_cuda_poseidon_rows(
-                round_constants: DevicePointer<u8>,
-                mds: DevicePointer<u8>,
-                partial_comp_matrix: DevicePointer<u8>,
-                partial_comp_offset: DevicePointer<u8>,
-                output: DevicePointer<u8>,
-                matrix: DevicePointer<u8>,
-                row_size: u32,
-                col_size: u32,
-            ) -> CppError;
-        }
-
-        unsafe {
-            risc0_zkp_cuda_poseidon_rows(
-                self.round_constants.as_device_ptr(),
-                self.mds.as_device_ptr(),
-                self.partial_comp_matrix.as_device_ptr(),
-                self.partial_comp_offset.as_device_ptr(),
+        let err = unsafe {
+            sppark_poseidon_rows(
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
                 row_size as u32,
                 col_size as u32,
             )
-            .unwrap();
+        };
+        if err.code != 0 {
+            panic!("Failure during hash_rows: {err}");
         }
     }
 
@@ -235,45 +185,23 @@ impl CudaHash for CudaHashPoseidon {
 
 pub struct CudaHashPoseidon2 {
     suite: HashSuite<BabyBear>,
-    round_constants: BufferImpl<BabyBearElem>,
-    m_int_diag: BufferImpl<BabyBearElem>,
 }
 
 impl CudaHash for CudaHashPoseidon2 {
-    fn new(hal: &CudaHal<Self>) -> Self {
-        let round_constants =
-            hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
-        let m_int_diag = hal.copy_from_elem("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
+    fn new(_hal: &CudaHal<Self>) -> Self {
         CudaHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
-            round_constants,
-            m_int_diag,
         }
     }
 
     fn hash_fold(&self, io: &BufferImpl<Digest>, output_size: usize) {
-        let input = io.as_device_ptr_with_offset(2 * output_size);
-        let output = io.as_device_ptr_with_offset(output_size);
-
-        extern "C" {
-            fn risc0_zkp_cuda_poseidon2_fold(
-                round_constants: DevicePointer<u8>,
-                m_int_diag: DevicePointer<u8>,
-                output: DevicePointer<u8>,
-                input: DevicePointer<u8>,
-                output_size: u32,
-            ) -> CppError;
-        }
-
-        unsafe {
-            risc0_zkp_cuda_poseidon2_fold(
-                self.round_constants.as_device_ptr(),
-                self.m_int_diag.as_device_ptr(),
-                output,
-                input,
-                output_size as u32,
-            )
-            .unwrap();
+        let err = unsafe {
+            let input = io.as_device_ptr_with_offset(2 * output_size);
+            let output = io.as_device_ptr_with_offset(output_size);
+            sppark_poseidon2_fold(output, input, output_size)
+        };
+        if err.code != 0 {
+            panic!("Failure during hash_fold: {err}");
         }
     }
 
@@ -282,27 +210,16 @@ impl CudaHash for CudaHashPoseidon2 {
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
 
-        extern "C" {
-            fn risc0_zkp_cuda_poseidon2_rows(
-                round_constants: DevicePointer<u8>,
-                m_int_diag: DevicePointer<u8>,
-                output: DevicePointer<u8>,
-                matrix: DevicePointer<u8>,
-                row_size: u32,
-                col_size: u32,
-            ) -> CppError;
-        }
-
-        unsafe {
-            risc0_zkp_cuda_poseidon2_rows(
-                self.round_constants.as_device_ptr(),
-                self.m_int_diag.as_device_ptr(),
+        let err = unsafe {
+            sppark_poseidon2_rows(
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
-                row_size as u32,
-                col_size as u32,
+                row_size.try_into().unwrap(),
+                col_size.try_into().unwrap(),
             )
-            .unwrap();
+        };
+        if err.code != 0 {
+            panic!("Failure during hash_rows: {err}");
         }
     }
 
@@ -584,7 +501,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
             assert!(n_bits < Self::Elem::MAX_ROU_PO2);
 
             let err = unsafe {
-                batch_NTT(
+                sppark_batch_NTT(
                     output.as_device_ptr(),
                     n_bits.try_into().unwrap(),
                     poly_count.try_into().unwrap(),
@@ -604,7 +521,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         assert!(n_bits < Self::Elem::MAX_ROU_PO2);
 
         let err = unsafe {
-            batch_iNTT(
+            sppark_batch_iNTT(
                 io.as_device_ptr(),
                 n_bits.try_into().unwrap(),
                 count.try_into().unwrap(),
@@ -722,7 +639,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         assert_eq!(io.size(), poly_count * (1 << bits));
 
         let err = unsafe {
-            batch_zk_shift(
+            sppark_batch_zk_shift(
                 io.as_device_ptr(),
                 bits.try_into().unwrap(),
                 poly_count.try_into().unwrap(),

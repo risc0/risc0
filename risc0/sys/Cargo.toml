@@ -14,7 +14,7 @@ risc0-build-kernel = { workspace = true }
 
 [dependencies]
 cust = { version = "0.3", optional = true }
-sppark = { version = "0.1.6", optional = true }
+sppark = { workspace = true, optional = true }
 
 [features]
 default = []
