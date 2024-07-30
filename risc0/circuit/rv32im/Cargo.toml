@@ -31,7 +31,7 @@ crossbeam = { version = "0.8", optional = true }
 crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
 derive-debug = { version = "0.1", optional = true }
-lazy-regex = { version = "3.1", optional = true }
+lazy-regex = { version = "3.2", optional = true }
 nvtx = { version = "1.3", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }

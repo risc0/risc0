@@ -55,7 +55,7 @@ impl Client {
 
     /// Construct a [Client] based on environment variables.
     pub fn from_env() -> Result<Self> {
-        Client::new_sub_process(get_r0vm_path())
+        Client::new_sub_process(get_r0vm_path()?)
     }
 
     /// Construct a [Client] using the specified [Connector] to establish a
@@ -677,7 +677,7 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
     }
 }
 
-fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
+pub(crate) fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
     if requested.pre.is_empty() {
         requested.major == server.major && requested.minor == server.minor
     } else {

@@ -21,20 +21,6 @@ using namespace risc0::circuit::recursion;
 
 extern "C" {
 
-const char* risc0_circuit_recursion_cuda_eval_check(Fp* check,
-                                                    const Fp* ctrl,
-                                                    const Fp* data,
-                                                    const Fp* accum,
-                                                    const Fp* mix,
-                                                    const Fp* out,
-                                                    const Fp& rou,
-                                                    uint32_t po2,
-                                                    uint32_t domain,
-                                                    const FpExt* poly_mix_pows) {
-  cudaMemcpyToSymbol(poly_mix, poly_mix_pows, sizeof(poly_mix));
-  return launchKernel(eval_check, domain, 0, check, ctrl, data, accum, mix, out, rou, po2, domain);
-}
-
 const char* risc0_circuit_recursion_cuda_step_compute_accum(
     const Fp* ctrl, const Fp* data, const Fp* mix, FpExt* wom, uint32_t steps, uint32_t count) {
   return launchKernel(step_compute_accum, count, 0, ctrl, data, mix, wom, steps, count);
