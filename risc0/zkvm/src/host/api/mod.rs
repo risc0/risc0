@@ -188,7 +188,7 @@ fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
     let cmd_output = String::from_utf8(output.stdout)?;
     let (_, version_str) = regex_captures!(r".* (.*)\n$", &cmd_output)
         .ok_or(anyhow!("failed to parse server version number"))?;
-    Version::parse(&version_str).map_err(|e| anyhow!(e))
+    Version::parse(version_str).map_err(|e| anyhow!(e))
 }
 
 impl Connector for ParentProcessConnector {
