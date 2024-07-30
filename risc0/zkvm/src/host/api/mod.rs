@@ -60,6 +60,7 @@ trait RootMessage: Message {}
 pub trait Connection {
     fn stream(&self) -> &TcpStream;
     fn close(&mut self) -> Result<i32>;
+    #[cfg(feature = "prove")]
     fn try_clone(&self) -> Result<Box<dyn Connection>>;
 }
 
@@ -232,12 +233,13 @@ impl Connector for ParentProcessConnector {
     }
 }
 
+#[cfg(feature = "prove")]
 struct TcpConnector {
     addr: String,
 }
 
+#[cfg(feature = "prove")]
 impl TcpConnector {
-    #[cfg(feature = "prove")]
     pub(crate) fn new(addr: &str) -> Self {
         Self {
             addr: addr.to_string(),
@@ -245,6 +247,7 @@ impl TcpConnector {
     }
 }
 
+#[cfg(feature = "prove")]
 impl Connector for TcpConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         tracing::debug!("connect");
@@ -262,6 +265,7 @@ struct ParentProcessConnection {
     stream: TcpStream,
 }
 
+#[cfg(feature = "prove")]
 struct TcpConnection {
     stream: TcpStream,
 }
@@ -282,17 +286,20 @@ impl Connection for ParentProcessConnection {
         Ok(status.code().unwrap_or_default())
     }
 
+    #[cfg(feature = "prove")]
     fn try_clone(&self) -> Result<Box<dyn Connection>> {
         unimplemented!()
     }
 }
 
+#[cfg(feature = "prove")]
 impl TcpConnection {
     pub fn new(stream: TcpStream) -> Self {
         Self { stream }
     }
 }
 
+#[cfg(feature = "prove")]
 impl Connection for TcpConnection {
     fn stream(&self) -> &TcpStream {
         &self.stream

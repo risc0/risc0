@@ -2216,6 +2216,7 @@ version = "0.1.0"
 dependencies = [
  "hello-world-methods",
  "risc0-zkvm",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -4182,6 +4183,7 @@ dependencies = [
  "rayon",
  "regex",
  "risc0-binfmt",
+ "risc0-build",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",

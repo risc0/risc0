@@ -16,7 +16,7 @@ extern crate alloc;
 
 use alloc::{collections::BTreeMap, vec, vec::Vec};
 
-use anyhow::{ensure, Result};
+use anyhow::{anyhow, ensure, Result};
 use risc0_zkp::core::{
     digest::Digest,
     hash::sha::{Impl, Sha256, BLOCK_BYTES, SHA256_INIT},
@@ -24,6 +24,7 @@ use risc0_zkp::core::{
 use risc0_zkvm_platform::{
     memory::{GUEST_MAX_MEM, MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,
+    PAGE_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
@@ -47,10 +48,7 @@ pub struct MemoryImage {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-struct PersistentPageTableInfo {
-    page_size: u32,
-    page_table_addr: u32,
-}
+struct PersistentPageTableInfo;
 
 /// Structure representing the page table for zkVM memory.
 ///
@@ -85,17 +83,14 @@ pub struct PageTableInfo {
 impl TryFrom<PersistentPageTableInfo> for PageTableInfo {
     type Error = anyhow::Error;
 
-    fn try_from(value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
-        PageTableInfo::new(value.page_table_addr, value.page_size)
+    fn try_from(_value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
+        Ok(PageTableInfo::default())
     }
 }
 
 impl From<PageTableInfo> for PersistentPageTableInfo {
-    fn from(value: PageTableInfo) -> Self {
-        Self {
-            page_size: value.page_size,
-            page_table_addr: value.page_table_addr,
-        }
+    fn from(_value: PageTableInfo) -> Self {
+        Self
     }
 }
 
@@ -118,6 +113,12 @@ const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
 
+impl Default for PageTableInfo {
+    fn default() -> Self {
+        Self::new(PAGE_TABLE.start() as u32, PAGE_SIZE as u32).unwrap()
+    }
+}
+
 impl PageTableInfo {
     /// Crate a new page table info struct with the given address and page size.
     pub fn new(page_table_addr: u32, page_size: u32) -> Result<Self> {
@@ -133,7 +134,9 @@ impl PageTableInfo {
         let mut remain = max_mem;
         while remain >= page_size {
             let num_pages = remain / page_size;
-            remain = num_pages * DIGEST_BYTES as u32;
+            remain = num_pages
+                .checked_mul(DIGEST_BYTES as u32)
+                .ok_or(anyhow!("Invalid page_size specified"))?;
             layers.push(remain);
             page_table_size += remain;
         }

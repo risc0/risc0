@@ -55,7 +55,7 @@ impl Client {
 
     /// Construct a [Client] based on environment variables.
     pub fn from_env() -> Result<Self> {
-        Client::new_sub_process(get_r0vm_path())
+        Client::new_sub_process(get_r0vm_path()?)
     }
 
     /// Construct a [Client] using the specified [Connector] to establish a
