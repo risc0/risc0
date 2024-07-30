@@ -569,7 +569,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [Linux]
-        arch: [X64, ARM64]
+        arch: [X64]
         include:
           - os: macOS
             arch: ARM64
