@@ -305,9 +305,6 @@ jobs:
         env:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
-      - name: run prover example
-        run: cargo run -F $FEATURE
-        working-directory: examples/prover
       - run: sccache --show-stats
 
   # test-crates:

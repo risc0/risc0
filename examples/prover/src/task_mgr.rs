@@ -17,7 +17,7 @@ use std::{
     sync::mpsc::{Receiver, Sender},
 };
 
-use risc0_zkvm::{ReceiptClaim, Segment, SuccinctReceipt};
+use risc0_zkvm::{Asset, ReceiptClaim, SuccinctReceipt};
 use workerpool::Pool;
 
 use crate::{
@@ -28,7 +28,7 @@ use crate::{
 type TaskNumber = usize;
 
 pub enum JobKind {
-    Segment(Segment),
+    Segment(Asset),
     Join(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>),
     Receipt(SuccinctReceipt<ReceiptClaim>),
 }
@@ -39,7 +39,7 @@ pub struct Job {
 }
 
 pub struct TaskManager {
-    segments: HashMap<u32, Segment>,
+    segments: HashMap<u32, Asset>,
     receipts: HashMap<TaskNumber, SuccinctReceipt<ReceiptClaim>>,
     pending_tasks: BTreeMap<TaskNumber, Task>,
     completed: HashSet<TaskNumber>,
@@ -62,8 +62,8 @@ impl TaskManager {
         }
     }
 
-    pub fn add_segment(&mut self, segment: Segment) {
-        self.segments.insert(segment.index, segment);
+    pub fn add_segment(&mut self, idx: u32, segment: Asset) {
+        self.segments.insert(idx, segment);
     }
 
     pub fn add_task(&mut self, task: Task) {

@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    ApiClient, Asset, AssetRequest, ProverOpts, ReceiptClaim, Segment, SuccinctReceipt,
-};
+use risc0_zkvm::{ApiClient, Asset, AssetRequest, ProverOpts, ReceiptClaim, SuccinctReceipt};
 
 use crate::task_mgr::{Job, JobKind};
 
@@ -45,14 +43,12 @@ impl workerpool::Worker for Worker {
 }
 
 impl Worker {
-    fn prove_and_lift(&self, segment: Segment) -> SuccinctReceipt<ReceiptClaim> {
+    fn prove_and_lift(&self, segment: Asset) -> SuccinctReceipt<ReceiptClaim> {
         let opts = ProverOpts::default();
         let client = ApiClient::new().unwrap();
-        let segment = bincode::serialize(&segment).unwrap();
 
-        let segment_asset = Asset::Inline(segment.into());
         let segment_receipt = client
-            .prove_segment(&opts, segment_asset, AssetRequest::Inline)
+            .prove_segment(&opts, segment, AssetRequest::Inline)
             .unwrap();
 
         let segment_receipt_asset = segment_receipt.try_into().unwrap();
