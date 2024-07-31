@@ -20,6 +20,11 @@ use super::exec::{Syscall, SyscallContext};
 
 pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
 
+/// SHA256 digest of empty commit and assumption.
+const EMPTY_DIGEST_WORDS: &[u32] = &[
+    0x5C176F83, 0x53F3C062, 0x42651683, 0x340B8B7E, 0x19D2D1F6, 0xAE4D7602, 0xB8C606B4, 0xB075B53D,
+];
+
 #[derive(Default)]
 pub struct NullSyscall;
 
@@ -85,7 +90,7 @@ pub fn loop_with_iters(limit: u32, step: u32) -> Program {
     //     bltu    a4, a6, exit  # if (i < step)  goto exit (step overflow)
     //     bltu    a4, a5, loop  # if (i < limit) goto loop
     // exit:
-    //     lui     a1, 0x1000    # Set digest address to dummy null page
+    //     lui     a1, 0x1000    # Set output to digest (see `digest_addr`)
     //     ecall                 # Halt (and catch fire)
     //
     // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
@@ -94,6 +99,7 @@ pub fn loop_with_iters(limit: u32, step: u32) -> Program {
 
     #[derive(Clone, Copy)]
     enum Reg {
+        A1 = 0b01011,
         A5 = 0b01111,
         A6 = 0b10000,
     }
@@ -129,7 +135,12 @@ pub fn loop_with_iters(limit: u32, step: u32) -> Program {
     let [lui_a5, addi_a5] = enc_load_u32(Reg::A5, limit);
     let [lui_a6, addi_a6] = enc_load_u32(Reg::A6, step);
 
-    program_from_instructions(
+    // Store the digest at offset past the instruction stream. We only need the
+    // `lui` instruction because the low 12 bits are not set.
+    let digest_addr = 0x10000;
+    let [lui_a1, _] = enc_load_u32(Reg::A1, digest_addr);
+
+    let mut program = program_from_instructions(
         0x4000,
         [
             // _boot:
@@ -143,10 +154,23 @@ pub fn loop_with_iters(limit: u32, step: u32) -> Program {
             0x01076463, // bltu  a4, a6, 20 <exit>  [i < step on overflow]
             0xfef76ce3, // bltu  a4, a5, 14 <loop>  [i < limit]
             // exit:
-            0x010005b7, // lui   a1, 0x1000
+            lui_a1,     // lui   a1, (digest address)
             0x00000073, // ecall
         ],
-    )
+    );
+
+    // Write output digest.
+    {
+        let mut current_addr = digest_addr;
+
+        program.image.extend(EMPTY_DIGEST_WORDS.iter().map(|&word| {
+            let addr = current_addr;
+            current_addr += WORD_SIZE as u32;
+            (addr, word)
+        }));
+    }
+
+    program
 }
 
 pub fn large_text() -> Program {
