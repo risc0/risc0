@@ -45,7 +45,7 @@ impl workerpool::Worker for Worker {
 impl Worker {
     fn prove_and_lift(&self, segment: Asset) -> SuccinctReceipt<ReceiptClaim> {
         let opts = ProverOpts::default();
-        let client = ApiClient::new().unwrap();
+        let client = ApiClient::from_env().unwrap();
 
         let segment_receipt = client
             .prove_segment(&opts, segment, AssetRequest::Inline)
@@ -63,7 +63,7 @@ impl Worker {
         right: SuccinctReceipt<ReceiptClaim>,
     ) -> SuccinctReceipt<ReceiptClaim> {
         let opts = ProverOpts::default();
-        let client = ApiClient::new().unwrap();
+        let client = ApiClient::from_env().unwrap();
         let left_asset = left.try_into().unwrap();
         let right_asset = right.try_into().unwrap();
         client

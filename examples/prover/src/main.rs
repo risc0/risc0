@@ -43,7 +43,7 @@ fn prover_example() {
         .build()
         .unwrap();
 
-    let client = ApiClient::new().unwrap();
+    let client = ApiClient::from_env().unwrap();
     let mut segment_idx = 0;
     let session = client
         .execute(
