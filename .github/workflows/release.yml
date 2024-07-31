@@ -31,9 +31,6 @@ jobs:
             target: aarch64-apple-darwin
     env:
       TARGET: ${{ matrix.target }}
-      RZUP_BINARY_OUTPUT_PATH: target/release/rzup
-      RZUP_S3_ARTIFACTS_PATH: s3://risc0-artifacts/rzup/$TARGET
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,10 +56,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
           # tag: ${{ env.TAG }} # only for testing
-      - name: Generate `rzup` Binary
-        run: cargo build --release -p rzup
-      - name: Upload Binary to Artifacts S3 Bucket
-        run: aws s3 cp $RZUP_BINARY_OUTPUT_PATH $RZUP_S3_ARTIFACTS_PATH/
 
       # wait for recently uploaded release asset to become available,
       # otherwise cargo-binstall sometimes errors with 404.
