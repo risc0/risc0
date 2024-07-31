@@ -9,7 +9,7 @@ repository = { workspace = true }
 links = "risc0-sys"
 
 [build-dependencies]
-cc = "1.0"
+cc = "1.1"
 risc0-build-kernel = { workspace = true }
 
 [dependencies]
