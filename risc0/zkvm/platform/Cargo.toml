@@ -10,7 +10,7 @@ repository = { workspace = true }
 # This crate should have as few dependencies as possible so it can be
 # used as many places as possible to share the platform definitions.
 [target.'cfg(target_os = "zkvm")'.dependencies]
-bytemuck = { version = "1.13", optional = true }
+bytemuck = { version = "1.16", optional = true }
 getrandom = { version = "0.2", features = ["custom"], optional = true }
 libm = { version = "0.2", optional = true }
 
