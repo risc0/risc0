@@ -8,8 +8,7 @@ import { renderGraph } from "../_utils/render-graph";
 import { BenchmarksList } from "./benchmarks-list";
 
 // benchmarks you don't want to show up in the page
-// @TODO: remove this when the benchmark is ready
-const HIDDEN_BENCHMARKS = ["Linux-g6.xlarge"];
+const HIDDEN_BENCHMARKS: string[] = [];
 
 export function BenchmarksContent({
   names,

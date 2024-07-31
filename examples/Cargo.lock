@@ -250,7 +250,7 @@ dependencies = [
  "ark-std",
  "derivative",
  "hashbrown 0.13.2",
- "itertools 0.10.5",
+ "itertools",
  "num-traits",
  "zeroize",
 ]
@@ -267,7 +267,7 @@ dependencies = [
  "ark-std",
  "derivative",
  "digest",
- "itertools 0.10.5",
+ "itertools",
  "num-bigint 0.4.5",
  "num-traits",
  "paste",
@@ -735,6 +735,18 @@ dependencies = [
 
 [[package]]
 name = "c-kzg"
+version = "0.1.0"
+dependencies = [
+ "c-kzg 1.0.2",
+ "c-kzg-core",
+ "c-kzg-methods",
+ "hex-literal",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "c-kzg"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac926d808fb72fe09ebf471a091d6d72918876ccf0b4989766093d2d0d24a0ef"
@@ -746,6 +758,34 @@ dependencies = [
  "hex",
  "libc",
  "serde",
+]
+
+[[package]]
+name = "c-kzg"
+version = "1.0.2"
+source = "git+https://github.com/risc0/c-kzg-4844.git?rev=304eacb4f5fec09e837936e4ada6705ecac581f0#304eacb4f5fec09e837936e4ada6705ecac581f0"
+dependencies = [
+ "blst",
+ "cc",
+ "glob",
+ "hex",
+ "libc",
+ "serde",
+]
+
+[[package]]
+name = "c-kzg-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "c-kzg-methods"
+version = "0.1.0"
+dependencies = [
+ "c-kzg 1.0.2",
+ "risc0-build",
 ]
 
 [[package]]
@@ -2176,6 +2216,7 @@ version = "0.1.0"
 dependencies = [
  "hello-world-methods",
  "risc0-zkvm",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -2523,15 +2564,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
-dependencies = [
- "either",
-]
-
-[[package]]
 name = "itoa"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2675,9 +2707,9 @@ dependencies = [
 
 [[package]]
 name = "lazy-regex"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d12be4595afdf58bd19e4a9f4e24187da2a66700786ff660a418e9059937a4c"
+checksum = "576c8060ecfdf2e56995cf3274b4f2d71fa5e4fa3607c1c0b63c10180ee58741"
 dependencies = [
  "lazy-regex-proc_macros",
  "once_cell",
@@ -2686,9 +2718,9 @@ dependencies = [
 
 [[package]]
 name = "lazy-regex-proc_macros"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44bcd58e6c97a7fcbaffcdc95728b393b8d98933bfadad49ed4097845b57ef0b"
+checksum = "9efb9e65d4503df81c615dc33ff07042a9408ac7f26b45abee25566f7fbfd12c"
 dependencies = [
  "proc-macro2",
  "quote 1.0.36",
@@ -2856,9 +2888,9 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5637e166ea14be6063a3f8ba5ccb9a4159df7d8f6d61c02fc3d480b1f90dcfcb"
+checksum = "7ecfd3296f8c56b7c1f6fbac3c71cefa9d78ce009850c45000015f206dc7fa21"
 dependencies = [
  "bitflags 2.5.0",
  "block",
@@ -3477,9 +3509,9 @@ dependencies = [
 
 [[package]]
 name = "prost"
-version = "0.12.6"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "deb1435c188b76130da55f17a466d252ff7b1418b2ad3e037d127b94e3411f29"
+checksum = "e13db3d3fde688c61e2446b4d843bc27a7e8af269a69440c0308021dc92333cc"
 dependencies = [
  "bytes",
  "prost-derive",
@@ -3487,12 +3519,12 @@ dependencies = [
 
 [[package]]
 name = "prost-derive"
-version = "0.12.6"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81bddcdb20abf9501610992b6759a4c888aef7d1a7247ef75e2404275ac24af1"
+checksum = "18bec9b0adc4eba778b33684b7ba3e7137789434769ee3ce3930463ef904cfca"
 dependencies = [
  "anyhow",
- "itertools 0.12.1",
+ "itertools",
  "proc-macro2",
  "quote 1.0.36",
  "syn 2.0.66",
@@ -3848,7 +3880,7 @@ version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d360a88223d85709d2e95d4609eb1e19c649c47e28954bfabae5e92bb37e83e"
 dependencies = [
- "c-kzg",
+ "c-kzg 0.1.1",
  "k256",
  "num",
  "once_cell",
@@ -3870,7 +3902,7 @@ dependencies = [
  "auto_impl",
  "bitflags 2.5.0",
  "bitvec",
- "c-kzg",
+ "c-kzg 0.1.1",
  "enumn",
  "hashbrown 0.14.5",
  "hex",
@@ -4150,6 +4182,7 @@ dependencies = [
  "rand",
  "rayon",
  "risc0-binfmt",
+ "risc0-build",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
@@ -4901,9 +4934,9 @@ dependencies = [
 
 [[package]]
 name = "sppark"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb266b15daead53670d477d7e136b8fc92d46e31bb9007ac46d304df23689a4b"
+checksum = "a075ecc826f50c645a1e6bb2f94560ded74ec7584a6061e72470802a2eee350c"
 dependencies = [
  "cc",
  "which 4.4.2",

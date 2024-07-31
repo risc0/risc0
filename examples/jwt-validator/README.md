@@ -19,10 +19,10 @@ Congratulations! You've successfully constructed a zero-knowledge proof attestin
 By using this demo as part of a [Bonsai application], you could build an app where an onchain application would like to verify an offchain account.
 For example, you might want an identity provider to issue a JWT through a sign-in web-application, whereby a proof of the issued authentication or session token can be used to validate the users connected wallet address and account ownership for later onchain use.
 
-To learn more about this use case, check out our Twitter thread about using Bonsai as a [zk coprocessor] or its direct implementation in our [Bonsai Pay Demonstration Application] using Google's Sign-In-with-Google SDK.
+To learn more about this use case, check out our blog post Bonsai as a [zk coprocessor] or its direct implementation in our [Bonsai Pay Demonstration Application] using Google's Sign-In-with-Google SDK.
 
 [Bonsai application]: https://dev.bonsai.xyz
-[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [Bonsai Pay Demonstration Application]: https://github.com/risc0/demos/tree/main/bonsai-pay
 
 ## Project Organization

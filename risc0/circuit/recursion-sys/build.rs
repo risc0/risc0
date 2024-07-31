@@ -26,7 +26,7 @@ fn main() {
         build_cuda_kernels();
     }
 
-    if env::var("CARGO_FEATURE_METAL").is_ok() {
+    if env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios") {
         build_metal_kernels();
     }
 }
@@ -46,6 +46,7 @@ fn build_cuda_kernels() {
         .files([
             "kernels/cuda/eval_check.cu",
             "kernels/cuda/ffi.cu",
+            "kernels/cuda/ffi_supra.cu",
             "kernels/cuda/step_compute_accum.cu",
             "kernels/cuda/step_verify_accum.cu",
         ])

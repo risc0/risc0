@@ -43,17 +43,39 @@ const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
 pub fn risc0_data() -> Result<PathBuf> {
-    if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
-        Ok(dir.into())
-    } else if dirs::home_dir().is_some_and(|dir| dir.join(".rzup").exists()) {
-        Ok(dirs::home_dir().unwrap().join(".rzup"))
-    } else if let Some(root) = dirs::data_dir() {
-        Ok(root.join("cargo-risczero"))
+    risc0_data_new().or_else(|_| risc0_data_compat())
+}
+
+// use the new location from rzup install.
+fn risc0_data_new() -> Result<PathBuf> {
+    let dir = if let Ok(dir) = std::env::var("RISC0_HOME") {
+        dir.into()
     } else if let Some(home) = dirs::home_dir() {
-        Ok(home.join(".cargo-risczero"))
+        home.join(".risc0")
     } else {
-        anyhow::bail!("Could not determine cargo-risczero data dir. Set RISC0_DATA_DIR env var.");
+        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
+    };
+
+    if !dir.join("r0vm").is_dir() {
+        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     }
+
+    Ok(dir)
+}
+
+// check for backwards compatible cargo risczero install.
+fn risc0_data_compat() -> Result<PathBuf> {
+    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+        dir.into()
+    } else if let Some(root) = dirs::data_dir() {
+        root.join("cargo-risczero")
+    } else if let Some(home) = dirs::home_dir() {
+        home.join(".cargo-risczero")
+    } else {
+        anyhow::bail!("Could not determine risc0 data dir. Set RISC0_DATA_DIR env var.");
+    };
+
+    Ok(dir)
 }
 
 #[derive(Debug, Deserialize)]
