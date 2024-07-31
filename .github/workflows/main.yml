@@ -94,7 +94,6 @@ jobs:
               - compact_proof/**
               - external/**
               - risc0/**
-              - tools/prover/**
             test-crates:
               - *base
               - risc0/**
@@ -250,9 +249,6 @@ jobs:
       - name: run fibonacci benchmark
         run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
-      - name: run prover example
-        run: cargo run -F $FEATURE
-        working-directory: tools/prover
       - name: run datasheet generator
         run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
       - name: check benches
@@ -309,6 +305,9 @@ jobs:
         env:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
+      - name: run prover example
+        run: cargo run -F $FEATURE
+        working-directory: examples/prover
       - run: sccache --show-stats
 
   # test-crates:
