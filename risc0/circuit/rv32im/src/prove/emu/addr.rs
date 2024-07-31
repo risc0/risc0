@@ -16,6 +16,8 @@ use std::{fmt, ops};
 
 use risc0_zkvm_platform::WORD_SIZE;
 
+use super::pager::PAGE_WORDS;
+
 #[derive(Clone, Copy, PartialEq)]
 pub struct ByteAddr(pub u32);
 
@@ -56,6 +58,10 @@ impl WordAddr {
     pub const fn baddr(self) -> ByteAddr {
         ByteAddr(self.0 * WORD_SIZE as u32)
     }
+
+    pub fn page_idx(&self) -> u32 {
+        self.0 / PAGE_WORDS as u32
+    }
 }
 
 impl fmt::Debug for ByteAddr {
@@ -66,7 +72,7 @@ impl fmt::Debug for ByteAddr {
 
 impl fmt::Debug for WordAddr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "0x{:08x}$", self.0)
+        write!(f, "0x{:08x}", self.baddr().0)
     }
 }
 
