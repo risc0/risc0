@@ -39,18 +39,15 @@ fn build_cpu_kernels() {
 fn build_cuda_kernels() {
     KernelBuild::new(KernelType::Cuda)
         .files([
+            "kernels/cuda/eval_check.cu",
             "kernels/cuda/ffi.cu",
+            "kernels/cuda/ffi_supra.cu",
             "kernels/cuda/step_compute_accum.cu",
             "kernels/cuda/step_exec.cu",
             "kernels/cuda/step_verify_accum.cu",
             "kernels/cuda/step_verify_bytes.cu",
             "kernels/cuda/step_verify_mem.cu",
         ])
-        // Note: we default to -O1 because -O3 can take upwards of 5 hours (or more)
-        // to compile on the current CUDA toolchain. Using -O1 only shows a ~10%
-        // decrease in performance but a compile time in the minutes.
-        // Use RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing.
-        .file_opt("kernels/cuda/eval_check.cu", 1)
         .deps([
             "kernels/cuda/bigint.cu",
             "kernels/cuda/context.h",

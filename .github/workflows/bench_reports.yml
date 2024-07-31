@@ -22,7 +22,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: r0.1.78.0
+  RISC0_TOOLCHAIN_VERSION: r0.1.79.0
 
 jobs:
   bench:
@@ -38,6 +38,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_3090_ti
+          - os: Linux
+            feature: cuda
+            device: g6.xlarge
           - os: macOS
             feature: prove
             device: apple_m2_pro

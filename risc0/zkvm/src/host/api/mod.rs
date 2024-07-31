@@ -34,11 +34,13 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
+use lazy_regex::regex_captures;
 use prost::Message;
+use semver::Version;
 
-use crate::{ExitCode, Journal};
+use crate::{get_version, ExitCode, Journal};
 
 mod pb {
     pub(crate) mod api {
@@ -135,6 +137,35 @@ struct ParentProcessConnector {
 
 impl ParentProcessConnector {
     pub fn new<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        // Check the version of the client and server to ensure that they're compatible
+        let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let server_version = get_server_version(&server_path)?;
+        if !client::check_server_version(&client_version, &server_version) {
+            let server_suggestion = if client_version.pre.is_empty() {
+                format!(
+                    "1. Install r0vm server version {}.{}\n",
+                    server_version.major, server_version.minor
+                )
+            } else {
+                format!("1. Your risc0 dependencies are using a pre-released version {client_version}.\n   \
+                    If you encounter this error message when running code on the risc0 codebase, you must\n   \
+                    either run the command `git checkout origin/release-{}.{}` to checkout the version of the\n   \
+                    risc0 code that is compatible with your server or build the r0vm server from source\n   \
+                    https://github.com/risc0/risc0/blob/main/CONTRIBUTING.md\n", server_version.major, server_version.minor
+                )
+            };
+            let msg = format!(
+                "Your installation of the r0vm server is not compatible with your host's risc0-zkvm crate.\n\
+                Do one of the following to fix this issue:\n\n\
+                {server_suggestion}\
+                2. Change the risc0-zkvm and risc0-build dependencies in your project to {}.{}\n\n\
+                risc0-zkvm version: {client_version}\n\
+                r0vm server version: {server_version}", server_version.major, server_version.minor
+            );
+            tracing::warn!("{msg}");
+            bail!(msg);
+        }
+
         Ok(Self {
             server_path: server_path.as_ref().to_path_buf(),
             listener: TcpListener::bind("127.0.0.1:0")?,
@@ -148,6 +179,16 @@ impl ParentProcessConnector {
             self.server_path.to_string_lossy()
         )
     }
+}
+
+fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
+    let output = Command::new(server_path.as_ref().as_os_str())
+        .arg("--version")
+        .output()?;
+    let cmd_output = String::from_utf8(output.stdout)?;
+    let (_, version_str) = regex_captures!(r".* (.*)\n$", &cmd_output)
+        .ok_or(anyhow!("failed to parse server version number"))?;
+    Version::parse(version_str).map_err(|e| anyhow!(e))
 }
 
 impl Connector for ParentProcessConnector {

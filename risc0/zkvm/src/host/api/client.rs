@@ -55,7 +55,7 @@ impl Client {
 
     /// Construct a [Client] based on environment variables.
     pub fn from_env() -> Result<Self> {
-        Client::new_sub_process(get_r0vm_path())
+        Client::new_sub_process(get_r0vm_path()?)
     }
 
     /// Construct a [Client] using the specified [Connector] to establish a
@@ -457,8 +457,8 @@ impl Client {
             env_vars: env.env_vars.clone(),
             args: env.args.clone(),
             slice_ios: env.slice_io.borrow().inner.keys().cloned().collect(),
-            read_fds: env.posix_io.borrow().read_fds.keys().cloned().collect(),
-            write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
+            read_fds: env.posix_io.borrow().read_fds(),
+            write_fds: env.posix_io.borrow().write_fds(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
             trace_events: (!env.trace.is_empty()).then_some(()),
@@ -632,10 +632,7 @@ impl Client {
         tracing::debug!("on_posix_read: {fd}, {nread}");
         let mut from_host = vec![0; nread];
         let posix_io = env.posix_io.borrow();
-        let reader = posix_io
-            .read_fds
-            .get(&fd)
-            .ok_or(anyhow!("Bad read file descriptor: {fd}"))?;
+        let reader = posix_io.get_reader(fd)?;
         let nread = reader.borrow_mut().read(&mut from_host)?;
         let slice = from_host[..nread].to_vec();
         Ok(slice.into())
@@ -644,10 +641,7 @@ impl Client {
     fn on_posix_write(&self, env: &ExecutorEnv<'_>, fd: u32, from_guest: Bytes) -> Result<()> {
         tracing::debug!("on_posix_write: {fd}");
         let posix_io = env.posix_io.borrow();
-        let writer = posix_io
-            .write_fds
-            .get(&fd)
-            .ok_or(anyhow!("Bad write file descriptor: {fd}"))?;
+        let writer = posix_io.get_writer(fd)?;
         writer.borrow_mut().write_all(&from_guest)?;
         Ok(())
     }
@@ -683,7 +677,7 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
     }
 }
 
-fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
+pub(crate) fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
     if requested.pre.is_empty() {
         requested.major == server.major && requested.minor == server.minor
     } else {
