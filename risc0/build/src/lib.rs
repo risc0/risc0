@@ -39,7 +39,7 @@ use serde::Deserialize;
 
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
-pub const NEW_RZUP_INDICATOR_NAME: &str = "new-rzup";
+const NEW_RZUP_INDICATOR_NAME: &str = "new-rzup";
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
