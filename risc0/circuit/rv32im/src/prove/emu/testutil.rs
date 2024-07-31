@@ -65,10 +65,10 @@ pub fn basic() -> Program {
 }
 
 pub fn simple_loop() -> Program {
-    loop_with_iters(100)
+    loop_with_iters(100, 1)
 }
 
-pub fn loop_with_iters(iters: u32) -> Program {
+pub fn loop_with_iters(limit: u32, step: u32) -> Program {
     // loop.asm:
     //
     // .global _boot
@@ -76,38 +76,55 @@ pub fn loop_with_iters(iters: u32) -> Program {
     //
     // _boot:
     //     li      a4, 0         # i = 0
-    //     lui     a5, 0xFFFFF   # Fill upper 20 bits
-    //     addi    a5, a5, -1    # Fill lower 12 bits
+    //     lui     a5, 0xfffff   # Fill upper 20 bits of `limit`
+    //     addi    a5, a5, -1    # Fill lower 12 bits of `limit`
+    //     lui     a6, 0xfffff   # Fill upper 20 bits of `step`
+    //     addi    a6, a6, -1    # Fill lower 12 bits of `step`
     // loop:
-    //     addi    a4, a4, 1     # i++
-    //     bltu    a4, a5, loop  # if (i < iters) goto loop
+    //     add     a4, a4, a6    # i += step
+    //     bltu    a4, a6, exit  # if (i < step)  goto exit (step overflow)
+    //     bltu    a4, a5, loop  # if (i < limit) goto loop
+    // exit:
     //     lui     a1, 0x1000    # Set digest address to dummy null page
     //     ecall                 # Halt (and catch fire)
     //
     // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
     //
-    // NOTE: The loop condition uses `bltu` instead of `blt` because `iters` is
-    // unsigned.
+    // NOTE: Checks use `bltu` instead of `blt` because of `u32`.
 
-    // Pack `iters` into `a5` by encoding it directly in the instructions as:
+    // Pack `limit` into `a5` by encoding it directly in the instructions as:
     // - Load Upper Imm (20 bits)
     // - ADD Immediate (12 bits)
     //
     // This is based off the instruction encoding for setting all 32 bits:
-    // - 0xfffff7b7: lui  a5, 0xFFFFF
+    // - 0xfffff7b7: lui  a5, 0xfffff
     // - 0xfff78793: addi a5, a5, -1
-    let lui_a5 = (iters & 0xfffff000) | 0x7b7;
-    let addi_a5 = ((iters & 0xfff) << 20) | 0x78793;
+    let lui_a5 = (limit & 0xfffff000) | 0x7b7;
+    let addi_a5 = ((limit & 0xfff) << 20) | 0x78793;
+
+    // Pack `step` into `a6` similarly to `limit`.
+    //
+    // This is based off the instruction encoding for setting all 32 bits:
+    // - 0xfffff837: lui  a6, 0xfffff
+    // - 0xfff80813: addi a6, a6, -1
+    let lui_a6 = (step & 0xfffff000) | 0x837;
+    let addi_a6 = ((step & 0xfff) << 20) | 0x80813;
 
     program_from_instructions(
         0x4000,
         [
-            0x00000713, // li      a4, 0
-            lui_a5,     // lui     a5, (top 20 bits of `iters`)
-            addi_a5,    // addi    a5, a5, (bottom 12 bits of `iters`)
-            0x00170713, // addi    a4, a4, 1
-            0xfef76ee3, // bltu    a4, a5, 0xc <loop>
-            0x010005b7, // lui     a1, 0x1000
+            // _boot:
+            0x00000713, // li    a4, 0
+            lui_a5,     // lui   a5,     (upper 20 bits of `limit`)
+            addi_a5,    // addi  a5, a5, (lower 12 bits of `limit`)
+            lui_a6,     // lui   a6,     (upper 20 bits of `step`)
+            addi_a6,    // addi  a6, a6, (lower 12 bits of `step`)
+            // loop:
+            0x01070733, // add   a4, a4, a6         [i += step]
+            0x01076463, // bltu  a4, a6, 20 <exit>  [i < step on overflow]
+            0xfef76ce3, // bltu  a4, a5, 14 <loop>  [i < limit]
+            // exit:
+            0x010005b7, // lui   a1, 0x1000
             0x00000073, // ecall
         ],
     )
