@@ -18,6 +18,8 @@ use clap::{CommandFactory, Parser, Subcommand};
 
 use rzup::{cli, extension, toolchain, utils};
 
+use std::fs::OpenOptions;
+
 #[derive(Debug, Parser)]
 #[command(
     name = "rzup",
@@ -117,6 +119,15 @@ async fn main() {
 }
 
 async fn run() -> Result<()> {
+    // this is a rust revamp of rzup. Before this version, we had a shell
+    // script. In order to facilitate compatibility, we touch a file in a known
+    // location to indicate to the client that a new version of rzup has been
+    // installed.
+    OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(utils::rzup_home()?.join("new-rzup"))?;
+
     let matches = Rzup::parse();
 
     // Set verbosity flag based on the CLI argument

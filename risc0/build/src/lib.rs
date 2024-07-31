@@ -39,6 +39,7 @@ use serde::Deserialize;
 
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
+pub const NEW_RZUP_INDICATOR_NAME: &str = "new-rzup";
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
@@ -56,7 +57,7 @@ fn risc0_data_new() -> Result<PathBuf> {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     };
 
-    if !dir.join("r0vm").is_dir() && !dir.join("toolchains").is_dir() {
+    if !dir.join(NEW_RZUP_INDICATOR_NAME).is_file() {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     }
 
