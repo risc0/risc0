@@ -92,23 +92,42 @@ pub fn loop_with_iters(limit: u32, step: u32) -> Program {
     //
     // NOTE: Checks use `bltu` instead of `blt` because of `u32`.
 
-    // Pack `limit` into `a5` by encoding it directly in the instructions as:
-    // - Load Upper Imm (20 bits)
-    // - ADD Immediate (12 bits)
-    //
-    // This is based off the instruction encoding for setting all 32 bits:
-    // - 0xfffff7b7: lui  a5, 0xfffff
-    // - 0xfff78793: addi a5, a5, -1
-    let lui_a5 = (limit & 0xfffff000) | 0x7b7;
-    let addi_a5 = ((limit & 0xfff) << 20) | 0x78793;
+    #[derive(Clone, Copy)]
+    enum Reg {
+        A5 = 0b01111,
+        A6 = 0b10000,
+    }
 
-    // Pack `step` into `a6` similarly to `limit`.
-    //
-    // This is based off the instruction encoding for setting all 32 bits:
-    // - 0xfffff837: lui  a6, 0xfffff
-    // - 0xfff80813: addi a6, a6, -1
-    let lui_a6 = (step & 0xfffff000) | 0x837;
-    let addi_a6 = ((step & 0xfff) << 20) | 0x80813;
+    /// Encodes a pair of `lui` (Load Upper Imm) and `addi` (ADD Immediate)
+    /// instructions for loading a 32-bit value into the given register.
+    ///
+    /// This is based off the instruction encodings for setting all 32 bits:
+    /// - 0xfffff7b7: lui  a5, 0xfffff
+    /// - 0xfff78793: addi a5, a5, -1
+    /// - 0xfffff837: lui  a6, 0xfffff
+    /// - 0xfff80813: addi a6, a6, -1
+    fn enc_load_u32(reg: Reg, val: u32) -> [u32; 2] {
+        // Decompose value into high 20 bits and low 12 bits:
+        let val_hi = val & 0xfffff000;
+        let val_lo = val & 0xfff;
+
+        // Encode register in `rd` and `rs1` offsets:
+        let out_reg = (reg as u32) << 7;
+        let in_reg = (reg as u32) << 15;
+
+        // `lui` clears the register and sets the high 20 bits, which is also
+        // encoded in the instruction at the high 20 bits.
+        let lui = 0b0110111 | out_reg | val_hi;
+
+        // `addi` adds a 12-bit immediate value, which is encoded in the
+        // instruction at the high 12 bits.
+        let addi = 0b0010011 | out_reg | in_reg | (val_lo << 20);
+
+        [lui, addi]
+    }
+
+    let [lui_a5, addi_a5] = enc_load_u32(Reg::A5, limit);
+    let [lui_a6, addi_a6] = enc_load_u32(Reg::A6, step);
 
     program_from_instructions(
         0x4000,
