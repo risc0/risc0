@@ -340,7 +340,7 @@ The Prover sends a vector of 1024 evaluations, which the Verifier interpolates t
 > The queries serve as a random challenge, testing the legitimacy of the Prover's commitments.
 > Loosely speaking, with a blow-up factor of $4$, a single query will catch a cheating Prover $\frac{3}{4}$ of the time.
 > In other words, a single query provides $2$ bits of security.
-> The RISC Zero zkVM uses $50$ queries and a blow-up factor of 4, which amounts to ~100 bits of security.
+> The RISC Zero zkVM uses $50$ queries and a blow-up factor of 4, which amounts to \~100 bits of security.
 >
 > Note that the paragraph above is a substantial simplification of the full security analysis.
 > For a more thorough security analysis, see our [cryptographic security model] page and our [security calculator].
