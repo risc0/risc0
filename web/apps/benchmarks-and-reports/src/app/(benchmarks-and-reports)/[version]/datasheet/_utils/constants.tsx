@@ -9,9 +9,21 @@ export const DATASHEET_FILENAMES_TO_TITLES: {
 } = {
   main: {
     "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
-    "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
     "macOS-cpu.json": "CPU only on Apple M2 Pro",
-    //"Linux-g6.xlarge.json": "CUDA on g6.xlarge", @TODO: on hold until vetted
+    "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
+    "Linux-g6.xlarge.json": (
+      <>
+        CUDA on{" "}
+        <Link
+          rel="noopener noreferrer"
+          target="_blank"
+          href="https://instances.vantage.sh/aws/ec2/g6.xlarge"
+          className="link"
+        >
+          g6.xlarge
+        </Link>
+      </>
+    ),
     "Linux-cpu.json": (
       <>
         CPU only on{" "}

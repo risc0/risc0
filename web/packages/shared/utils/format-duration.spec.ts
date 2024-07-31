@@ -3,9 +3,9 @@ import { formatDuration } from './format-duration';
 describe('formatDuration', () => {
   it('should return undefined for null or undefined', () => {
     // @ts-expect-error -- tests
-    expect(formatDuration(null)).toBeUndefined();
+    expect(formatDuration(null)).toBe("");
     // @ts-expect-error -- tests
-    expect(formatDuration(undefined)).toBeUndefined();
+    expect(formatDuration(undefined)).toBe("");
   });
 
   it('should return nanoseconds correctly', () => {
@@ -25,11 +25,12 @@ describe('formatDuration', () => {
   });
 
   it('should return minutes correctly', () => {
-    expect(formatDuration(1000 * 1000 * 1000 * 60)).toBe('1.00m');
+    expect(formatDuration(1000 * 1000 * 1000 * 60)).toBe('1m 0s');
+    expect(formatDuration(1000 * 1000 * 1000 * 60 + 1000 * 1000 * 1000 * 80)).toBe('2m 20s');
   });
 
   it('should return hours correctly', () => {
-    expect(formatDuration(1000 * 1000 * 1000 * 60 * 60)).toBe('1.00h');
+    expect(formatDuration(1000 * 1000 * 1000 * 60 * 60)).toBe('1h 0m');
   });
 
   it('should return the correct value for non-exact durations', () => {

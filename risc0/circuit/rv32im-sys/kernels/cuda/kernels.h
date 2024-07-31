@@ -14,9 +14,6 @@
 
 #pragma once
 
-#include "fp.h"
-#include "fpext.h"
-
 #include <cstdio>
 
 extern __constant__ FpExt poly_mix[210];
