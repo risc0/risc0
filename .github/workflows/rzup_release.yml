@@ -1,0 +1,39 @@
+name: rzup Release
+
+on:
+  workflow_dispatch
+
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  release-rzup:
+    if: github.ref == 'main'
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", cpu]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            target: x86_64-unknown-linux-gnu
+          - os: macOS
+            target: aarch64-apple-darwin
+    env:
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ env.TARGET }}
+      - name: Generate `rzup` Binary
+        run: cargo build --release -p rzup
+      - name: Upload Binary to Artifacts S3 Bucket
+        run: aws s3 cp $BINARY_OUTPUT_PATH $S3_ARTIFACTS_PATH/
+        env:
+          BINARY_OUTPUT_PATH: target/release/rzup
+          S3_ARTIFACTS_PATH: s3://risc0-artifacts/rzup/$TARGET
