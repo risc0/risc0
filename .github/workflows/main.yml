@@ -246,16 +246,16 @@ jobs:
       - name: test risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
-        if: matrix.device == 'cpu'
-      - run: cargo run -F $FEATURE -- fibonacci
+      - name: run fibonacci benchmark
+        run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
-      - run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
-      - run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
+      - name: run datasheet generator
+        run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
+      - name: check benches
+        run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
       - run: cargo check -p risc0-core
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
@@ -298,8 +298,11 @@ jobs:
       - name: build
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
-      - name: test
-        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE
+      - name: test in dev mode
+        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE --workspace --exclude prover
+        working-directory: examples
+      - name: test prover example
+        run: cargo test --locked -F $FEATURE -p prover
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
