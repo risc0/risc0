@@ -56,7 +56,7 @@ fn risc0_data_new() -> Result<PathBuf> {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     };
 
-    if !dir.join("r0vm").is_dir() {
+    if !dir.join("r0vm").is_dir() && !dir.join("cpp").is_dir() {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     }
 
