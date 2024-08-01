@@ -319,7 +319,7 @@ impl Toolchain {
                 let cpp_link = rzup_home.join(CPP_TOOLCHAIN_NAME);
 
                 if let Ok(s) = fs::symlink_metadata(&cpp_link) {
-                    info_msg!(format!("meta: {:?}", s));
+                    info_msg!(format!("path: {}  meta: {:?}", cpp_link.display(), s));
                 }
 
                 if fs::symlink_metadata(&cpp_link).is_ok() && fs::read_link(&cpp_link)? == dir {
