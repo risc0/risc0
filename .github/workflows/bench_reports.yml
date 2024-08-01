@@ -60,7 +60,7 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
 
       - run: cargo run --bin rzup -- install rust $RISC0_RUST_TOOLCHAIN_VERSION
-      - run: cargo run --bin rzup -- install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
 
       - name: Save commit hash to a file
         run: |
