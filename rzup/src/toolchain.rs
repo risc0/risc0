@@ -318,9 +318,11 @@ impl Toolchain {
                 let rzup_home = rzup_home()?;
                 let cpp_link = rzup_home.join(CPP_TOOLCHAIN_NAME);
 
-                if fs::symlink_metadata(&cpp_link).is_ok()
-                    && fs::read_link(cpp_link.clone()).unwrap() == dir
-                {
+                if let Ok(s) = fs::symlink_metadata(&cpp_link) {
+                    info_msg!(format!("meta: {:?}", s));
+                }
+
+                if fs::symlink_metadata(&cpp_link).is_ok() && fs::read_link(&cpp_link)? == dir {
                     info_msg!(format!("cpp symlink already exists"));
                     return Ok(());
                 }
