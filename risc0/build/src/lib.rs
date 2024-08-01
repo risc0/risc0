@@ -43,7 +43,7 @@ pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 // rzup implementation, the new implementation will place a file with this name
 // under risc0_data. This is used to indicate to the client and risc0-build that
 // the new rust implementation of rzup is being used.
-const NEW_RZUP_INDICATOR_NAME: &str = "new-rzup";
+const NEW_RZUP_INDICATOR_NAME: &str = ".rzup";
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
