@@ -39,11 +39,11 @@ use serde::Deserialize;
 
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
-// in order to tell the difference between the rzup bash script and the new rust
-// rzup implementation, the new implementation will place a file with this name
-// under `$RISC0_HOME`. This is used to indicate to the client and risc0-build that
-// the new rust implementation of rzup is being used.
-const NEW_RZUP_INDICATOR_NAME: &str = ".rzup";
+/// This const represents a filename that is used in the use to indicate to in
+/// order to indicate to the client and the risc0-build crate that the new rust
+/// implementation of rzup is in use. The rust implementation of rzup will place
+/// a file with this name under `$RISC0_HOME`.
+pub const RUST_RZUP_INDICATOR: &str = ".rzup";
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
