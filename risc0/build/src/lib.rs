@@ -61,7 +61,7 @@ fn risc0_data_new() -> Result<PathBuf> {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     };
 
-    if !dir.join(NEW_RZUP_INDICATOR_NAME).exists() {
+    if !dir.join(RUST_RZUP_INDICATOR).exists() {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     }
 
