@@ -40,8 +40,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_read, sys_read_words,
-        sys_write,
+        bigint, sys_bigint, sys_execute_zkr, sys_exit, sys_fork, sys_log, sys_pipe, sys_read,
+        sys_read_words, sys_write,
     },
     PAGE_SIZE,
 };
@@ -378,6 +378,46 @@ fn main() {
             if pid == 0 {
                 env::commit_slice(b"should panic");
             }
+        }
+        MultiTestSpec::RunUnconstrained {
+            unconstrained,
+            cycles,
+        } => {
+            // Calculate cycles left to target after paging in program and input:
+            let cycles_left: u32 = (cycles - env::cycle_count()).try_into().unwrap();
+            env::log("Starting running unconstrained");
+
+            let f = || {
+                // Unfortunately we can't use env::cycle_count since
+                // it's always zero when running unconstrained.
+
+                const CYCLES_PER_LOOP: u32 = 2; // Determined empirically
+
+                for _ in 0..cycles_left / CYCLES_PER_LOOP {
+                    unsafe { asm!("") }
+                }
+            };
+            if unconstrained {
+                // test
+                env::run_unconstrained(f);
+                env::log("Done running unconstrained");
+            } else {
+                // control
+                f();
+                env::log("Done running control");
+            }
+        }
+        MultiTestSpec::SysExecuteZkr {
+            control_id,
+            input,
+            claim_digest,
+            control_root,
+        } => {
+            unsafe {
+                sys_execute_zkr(control_id.as_ref(), input.as_ptr(), input.len());
+            }
+            env::verify_assumption(claim_digest, control_root)
+                .expect("env::verify_integrity returned error");
         }
     }
 }
