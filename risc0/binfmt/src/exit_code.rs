@@ -14,6 +14,7 @@
 
 use core::fmt;
 
+#[cfg(feature = "borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 
@@ -25,9 +26,8 @@ use serde::{Deserialize, Serialize};
 /// similar to exit codes used in Linux, chosen by the guest program to indicate
 /// additional information (e.g. 0 to indicate success or 1 to indicate an
 /// error).
-#[derive(
-    Clone, Copy, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize,
-)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest program. A halted program cannot be
