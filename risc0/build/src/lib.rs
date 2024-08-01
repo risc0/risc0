@@ -39,6 +39,11 @@ use serde::Deserialize;
 
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
+/// This const represents a filename that is used in the use to indicate to in
+/// order to indicate to the client and the risc0-build crate that the new rust
+/// implementation of rzup is in use. The rust implementation of rzup will place
+/// a file with this name under `$RISC0_HOME`.
+pub const RUST_RZUP_INDICATOR: &str = ".rzup";
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
@@ -56,7 +61,7 @@ fn risc0_data_new() -> Result<PathBuf> {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     };
 
-    if !dir.join("r0vm").is_dir() {
+    if !dir.join(RUST_RZUP_INDICATOR).exists() {
         anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     }
 
