@@ -41,7 +41,7 @@ pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
 // in order to tell the difference between the rzup bash script and the new rust
 // rzup implementation, the new implementation will place a file with this name
-// under risc0_data. This is used to indicate to the client and risc0-build that
+// under `$RISC0_HOME`. This is used to indicate to the client and risc0-build that
 // the new rust implementation of rzup is being used.
 const NEW_RZUP_INDICATOR_NAME: &str = ".rzup";
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
