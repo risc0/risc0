@@ -318,10 +318,13 @@ impl Toolchain {
                 let rzup_home = rzup_home()?;
                 let cpp_link = rzup_home.join(CPP_TOOLCHAIN_NAME);
 
-                if fs::symlink_metadata(&cpp_link).is_ok() {
-                    verbose_msg!(format!("Removing symlink {}", cpp_link.display()));
-                    fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
+                if fs::symlink_metadata(&cpp_link).is_ok() && fs::read_link(cpp_link.clone()).unwrap() == dir {
+                    info_msg!(format!("cpp symlink already exists"));
+                    return Ok(());
                 }
+
+                verbose_msg!(format!("Removing symlink {}", cpp_link.display()));
+                fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
 
                 verbose_msg!(format!(
                     "Creating symnlink for toolchain at {}",
