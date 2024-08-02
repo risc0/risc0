@@ -180,21 +180,13 @@ impl Extension {
                 ));
 
                 archive.unpack(&extension_dir)?;
-                #[cfg(target_family = "unix")]
-                {
-                    let binary_path = extension_dir.join("cargo-risczero");
+                let binary_path = extension_dir.join("cargo-risczero");
 
-                    verbose_msg!("Setting extension permissons to 0o755");
+                verbose_msg!("Setting extension permissons to 0o755");
 
-                    let mut perms = fs::metadata(&binary_path)?.permissions();
-                    perms.set_mode(0o755);
-                    fs::set_permissions(&binary_path, perms)?;
-                }
-                // TODO: Check if this is necessary
-                #[cfg(target_family = "windows")]
-                {
-                    let binary_path = extension_dir.join("cargo-risczero.exe");
-                }
+                let mut perms = fs::metadata(&binary_path)?.permissions();
+                perms.set_mode(0o755);
+                fs::set_permissions(&binary_path, perms)?;
             }
         }
 
@@ -223,21 +215,10 @@ impl Extension {
                 ));
 
                 // Create new symlinks
-                #[cfg(target_family = "unix")]
-                {
-                    std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
-                        .context("Failed to create symlink for cargo-risczero")?;
-                    std::os::unix::fs::symlink(r0vm_path, r0vm_link)
-                        .context("Failed to create symlink for r0vm")?;
-                }
-                // TODO: Check if this is necessary
-                #[cfg(target_family = "windows")]
-                {
-                    std::os::windows::fs::symlink_file(cargo_risczero_path, cargo_risczero_link)
-                        .context("Failed to create symlink for cargo-risczero")?;
-                    std::os::windows::fs::symlink_file(r0vm_path, r0vm_link)
-                        .context("Failed to create symlink for r0vm")?;
-                }
+                std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
+                    .context("Failed to create symlink for cargo-risczero")?;
+                std::os::unix::fs::symlink(r0vm_path, r0vm_link)
+                    .context("Failed to create symlink for r0vm")?;
                 info_msg!(format!(
                     "Symlinks for cargo-risczero and r0vm created successfully at {}",
                     cargo_bin_dir.display()
