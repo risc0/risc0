@@ -100,7 +100,7 @@ pub use {
         client::prove::local::LocalProver,
         recursion::RECURSION_PO2,
         server::{
-            exec::executor::ExecutorImpl,
+            exec::{compose::register_zkr, executor::ExecutorImpl},
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
