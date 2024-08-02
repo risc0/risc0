@@ -16,7 +16,7 @@ use risc0_circuit_rv32im_sys::ffi::{RawMemoryTransaction, RawPreflightCycle, Raw
 use risc0_zkp::field::baby_bear::BabyBearElem;
 
 use crate::{
-    layout::{self, LAYOUT},
+    layout::{DataReg, LAYOUT},
     prove::emu::{
         addr::{ByteAddr, WordAddr},
         mux::{Major, TopMux},
@@ -43,8 +43,8 @@ impl<'a> Injector<'a> {
         Self { steps, cycle, data }
     }
 
-    fn get_idx(&self, reg: usize) -> usize {
-        reg * self.steps + self.cycle - 1
+    fn get_idx(&self, reg: &DataReg) -> usize {
+        reg.offset * self.steps + self.cycle - 1
     }
 
     fn set_pc(&mut self, pc: ByteAddr) {
@@ -53,28 +53,32 @@ impl<'a> Injector<'a> {
         let bot2 = bytes[3] & 0b11;
         let top2 = bytes[3] >> 2 & 0b11;
         let pc = LAYOUT.mux.body.pc;
-        self.data[self.get_idx(pc.bytes[0])] = (bytes[0] as u32).into(); // body->pc.bytes[0]
-        self.data[self.get_idx(pc.bytes[1])] = (bytes[1] as u32).into(); // body->pc.bytes[1]
-        self.data[self.get_idx(pc.bytes[2])] = (bytes[2] as u32).into(); // body->pc.bytes[2]
-        self.data[self.get_idx(pc.twits[0])] = (bot2 as u32).into(); // body->pc.twits[0]
-        self.data[self.get_idx(pc.twits[1])] = (top2 as u32).into(); // body->pc.twits[1]
+        self.data[self.get_idx(pc.bytes[0])] = (bytes[0] as u32).into();
+        self.data[self.get_idx(pc.bytes[1])] = (bytes[1] as u32).into();
+        self.data[self.get_idx(pc.bytes[2])] = (bytes[2] as u32).into();
+        self.data[self.get_idx(pc.twits[0])] = (bot2 as u32).into();
+        self.data[self.get_idx(pc.twits[1])] = (top2 as u32).into();
     }
 
     fn set_user_mode(&mut self) {
-        self.data[self.get_idx(99)] = 0u32.into();
+        let user_mode = LAYOUT.mux.body.user_mode;
+        self.data[self.get_idx(user_mode)] = 0u32.into();
     }
 
     fn set_next_major(&mut self, major: Major) {
-        self.data[self.get_idx(100)] = major.as_u32().into(); // body->nextMajor
+        let next_major = LAYOUT.mux.body.next_major;
+        self.data[self.get_idx(next_major)] = major.as_u32().into();
     }
 
     fn set_halt(&mut self, sys_exit_code: u8, user_exit_code: u8, write_addr: WordAddr) {
-        self.data[self.get_idx(109)] = 0u32.into(); // body->majorSelect->at(MajorType::kECall): 8
-        self.data[self.get_idx(113)] = 0u32.into(); // body->majorSelect->at(MajorType::kPageFault): 12
-        self.data[self.get_idx(116)] = 1u32.into(); // body->majorSelect->at(MajorType::kHalt): 15
-        self.data[self.get_idx(117)] = (sys_exit_code as u32).into(); // HaltCycle::sysExitCode
-        self.data[self.get_idx(118)] = (user_exit_code as u32).into(); // HaltCycle::userExitCode
-        self.data[self.get_idx(119)] = write_addr.0.into(); // HaltCycle::writeAddr
+        let major_select = LAYOUT.mux.body.major_select;
+        let halt_cycle = LAYOUT.mux.body.major_mux;
+        self.data[self.get_idx(major_select[Major::ECall as usize])] = 0u32.into();
+        self.data[self.get_idx(major_select[Major::PageFault as usize])] = 0u32.into();
+        self.data[self.get_idx(major_select[Major::Halt as usize])] = 1u32.into();
+        self.data[self.get_idx(halt_cycle.sys_exit_code)] = (sys_exit_code as u32).into();
+        self.data[self.get_idx(halt_cycle.user_exit_code)] = (user_exit_code as u32).into();
+        self.data[self.get_idx(halt_cycle.write_addr)] = write_addr.0.into();
     }
 }
 

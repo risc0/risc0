@@ -23,4 +23,4 @@ layout_buffer!(code, BabyBearElem);
 layout_buffer!(data, BabyBearElem);
 layout_buffer!(out, BabyBearElem);
 
-include! {"layout.rs.inc"}
+include! {"layout.inc.rs"}

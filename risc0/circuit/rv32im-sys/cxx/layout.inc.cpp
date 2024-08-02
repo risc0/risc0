@@ -35,13 +35,24 @@ struct RamHeader {
   RamPlonkVerifier verifier;
   MixReg4LayoutArray7LayoutArray mix;
 };
+struct HaltCycle {
+  DataReg sysExitCode;
+  DataReg userExitCode;
+  DataReg writeAddr;
+};
+using DataReg16LayoutArray = std::array<DataReg, 16>;
+using DataReg2LayoutArray = std::array<DataReg, 2>;
 struct PcReg {
-  DataReg twits;
-  DataReg bytes;
+  DataReg2LayoutArray twits;
+  DataReg3LayoutArray bytes;
 };
 struct BodyStep {
+  DataReg nextMajor;
+  DataReg userMode;
   Global global;
   RamHeader header;
+  HaltCycle majorMux;
+  DataReg16LayoutArray majorSelect;
   PcReg pc;
 };
 struct Mux {
@@ -58,7 +69,9 @@ struct Top {
 constexpr Top kLayout =
     Top{.halted = 2,
         .mux =
-            Mux{.body = BodyStep{.global =
+            Mux{.body = BodyStep{.nextMajor = 100,
+                                 .userMode = 99,
+                                 .global =
                                      Global{.sysExitCode = 104,
                                             .userExitCode = 105,
                                             .input =
@@ -190,7 +203,28 @@ constexpr Top kLayout =
                                                                                             33,
                                                                                             34,
                                                                                             35}}},
-                                 .pc = PcReg{.twits = 70, .bytes = 6}},
+                                 .majorMux = HaltCycle{.sysExitCode = 117,
+                                                       .userExitCode = 118,
+                                                       .writeAddr = 119},
+                                 .majorSelect =
+                                     DataReg16LayoutArray{101,
+                                                          102,
+                                                          103,
+                                                          104,
+                                                          105,
+                                                          106,
+                                                          107,
+                                                          108,
+                                                          109,
+                                                          110,
+                                                          111,
+                                                          112,
+                                                          113,
+                                                          114,
+                                                          115,
+                                                          116},
+                                 .pc = PcReg{.twits = DataReg2LayoutArray{70, 71},
+                                             .bytes = DataReg3LayoutArray{6, 7, 8}}},
                 .ramFini =
                     RamHeader{
                         .accum = AccumReg4LayoutArray{24, 25, 26, 27},

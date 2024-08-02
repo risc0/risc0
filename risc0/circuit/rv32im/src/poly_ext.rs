@@ -548,8 +548,8 @@ PolyExtStep::Get(595), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)(compi
 PolyExtStep::Mul(383, 3), // components/onehot.h:46
 PolyExtStep::Add(382, 384), // components/onehot.h:46
 PolyExtStep::AndEqz(0, 385), // components/onehot.h:40
-PolyExtStep::Get(601), // zirgen/circuit/rv32im/v1/edsl/body.cpp:60
-PolyExtStep::AndEqz(137, 386), // zirgen/circuit/rv32im/v1/edsl/body.cpp:60
+PolyExtStep::Get(601), // zirgen/circuit/rv32im/v1/edsl/body.cpp:71
+PolyExtStep::AndEqz(137, 386), // zirgen/circuit/rv32im/v1/edsl/body.cpp:71
 PolyExtStep::GetGlobal(0, 36), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[0](U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 37), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[0](U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 38), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[0](U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
@@ -657,7 +657,7 @@ PolyExtStep::Sub(437, 437), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(180, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(439, 439), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(181, 449), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(138, 85, 182), // zirgen/circuit/rv32im/v1/edsl/body.cpp:62
+PolyExtStep::AndCond(138, 85, 182), // zirgen/circuit/rv32im/v1/edsl/body.cpp:73
 PolyExtStep::GetGlobal(0, 52), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 53), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 54), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
@@ -738,7 +738,7 @@ PolyExtStep::AndEqz(223, 446), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(224, 447), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(225, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(226, 449), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(183, 197, 227), // zirgen/circuit/rv32im/v1/edsl/body.cpp:68
+PolyExtStep::AndCond(183, 197, 227), // zirgen/circuit/rv32im/v1/edsl/body.cpp:79
 PolyExtStep::GetGlobal(0, 32), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 33), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 34), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
@@ -750,75 +750,75 @@ PolyExtStep::Mul(489, 17), // components/u32.h:27
 PolyExtStep::Add(486, 491), // components/u32.h:24
 PolyExtStep::Add(494, 492), // components/u32.h:24
 PolyExtStep::Add(495, 493), // components/u32.h:24
-PolyExtStep::Sub(496, 490), // zirgen/circuit/rv32im/v1/edsl/body.cpp:76
-PolyExtStep::Add(497, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Sub(496, 490), // zirgen/circuit/rv32im/v1/edsl/body.cpp:89
+PolyExtStep::Add(497, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(498, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(499, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(500, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(501, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(502, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(503, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Get(291), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits(Twit)/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Sub(504, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(506, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Get(291), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Sub(504, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(506, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Get(293), // components/bits.h:68
 PolyExtStep::Sub(508, 507), // components/bits.h:68
 PolyExtStep::AndEqz(228, 509), // components/bits.h:68
-PolyExtStep::Sub(0, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::Mul(508, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::Get(371), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::Sub(512, 511), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(229, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::Sub(3, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
-PolyExtStep::Mul(512, 514), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
-PolyExtStep::AndEqz(230, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
-PolyExtStep::AndCond(0, 303, 231), // zirgen/circuit/rv32im/v1/edsl/body.cpp:58
+PolyExtStep::Sub(0, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::Mul(508, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::Get(371), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::Sub(512, 511), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(229, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::Sub(3, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::Mul(512, 514), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(230, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndCond(0, 303, 231), // zirgen/circuit/rv32im/v1/edsl/body.cpp:69
 PolyExtStep::Get(373), // Top/mux(Mux)/reset(ResetStep)/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(490, 516), // components/bits.h:27
 PolyExtStep::AndEqz(0, 517), // components/bits.h:27
 PolyExtStep::AndEqz(233, 385), // components/onehot.h:40
 PolyExtStep::Get(70), // Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
 PolyExtStep::Get(72), // Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
-PolyExtStep::Get(292), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits(Twit)/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(294), // Top/mux(Mux)/reset(ResetStep)/PCReg/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(292), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(294), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits[1](Twit)/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(74), // Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
-PolyExtStep::Mul(519, 6), // zirgen/circuit/rv32im/v1/edsl/body.cpp:29
-PolyExtStep::Mul(520, 17), // zirgen/circuit/rv32im/v1/edsl/body.cpp:31
-PolyExtStep::Mul(521, 22), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
-PolyExtStep::Mul(522, 19), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Add(518, 523), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
-PolyExtStep::Add(527, 526), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
-PolyExtStep::Add(528, 524), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
-PolyExtStep::Add(529, 525), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
-PolyExtStep::Sub(530, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
-PolyExtStep::Add(531, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Mul(519, 6), // zirgen/circuit/rv32im/v1/edsl/body.cpp:40
+PolyExtStep::Mul(520, 17), // zirgen/circuit/rv32im/v1/edsl/body.cpp:42
+PolyExtStep::Mul(521, 22), // zirgen/circuit/rv32im/v1/edsl/body.cpp:43
+PolyExtStep::Mul(522, 19), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::Add(518, 523), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
+PolyExtStep::Add(527, 526), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
+PolyExtStep::Add(528, 524), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
+PolyExtStep::Add(529, 525), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
+PolyExtStep::Sub(530, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
+PolyExtStep::Add(531, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(532, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(533, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(534, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(535, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(536, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(537, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(538, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(539, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(538, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(539, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 540), // components/bits.h:68
 PolyExtStep::AndEqz(234, 541), // components/bits.h:68
-PolyExtStep::AndEqz(235, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(236, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
-PolyExtStep::Get(378), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(380), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(382), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(384), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(386), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(388), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(390), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(392), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(394), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(396), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(398), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(400), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(402), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(404), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(406), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[15](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::AndEqz(235, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(236, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::Get(378), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[1](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(380), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[2](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(382), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[3](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(384), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[4](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(386), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[5](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(388), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[6](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(390), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[7](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(392), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[8](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(394), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[9](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(396), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[10](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(398), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[11](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(400), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[12](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(402), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[13](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(404), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[14](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(406), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[15](Reg)(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(543, 3), // components/onehot.h:46
 PolyExtStep::Mul(544, 20), // components/onehot.h:46
 PolyExtStep::Mul(545, 18), // components/onehot.h:46
@@ -847,12 +847,12 @@ PolyExtStep::Add(580, 567), // components/onehot.h:46
 PolyExtStep::Add(581, 568), // components/onehot.h:46
 PolyExtStep::Add(582, 569), // components/onehot.h:46
 PolyExtStep::Add(583, 570), // components/onehot.h:46
-PolyExtStep::Sub(584, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:88
-PolyExtStep::AndEqz(0, 585), // zirgen/circuit/rv32im/v1/edsl/body.cpp:88
-PolyExtStep::Get(408), // Top/mux(Mux)/body(BodyStep)/Mux/15(HaltCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/body.cpp:90)
-PolyExtStep::Sub(386, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:90
-PolyExtStep::AndEqz(238, 587), // zirgen/circuit/rv32im/v1/edsl/body.cpp:90
-PolyExtStep::Get(412), // Top/mux(Mux)/body(BodyStep)/Mux/15(HaltCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/body.cpp:92)
+PolyExtStep::Sub(584, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:101
+PolyExtStep::AndEqz(0, 585), // zirgen/circuit/rv32im/v1/edsl/body.cpp:101
+PolyExtStep::Get(408), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:103)
+PolyExtStep::Sub(386, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:103
+PolyExtStep::AndEqz(238, 587), // zirgen/circuit/rv32im/v1/edsl/body.cpp:103
+PolyExtStep::Get(412), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:105)
 PolyExtStep::Sub(312, 588), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(239, 589), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(240, 396), // zirgen/components/ram.cpp:169
@@ -873,7 +873,7 @@ PolyExtStep::AndEqz(248, 595), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 109), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(596, 350), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(249, 597), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(588, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:95
+PolyExtStep::Add(588, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:108
 PolyExtStep::Sub(338, 598), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(250, 599), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(251, 409), // zirgen/components/ram.cpp:169
@@ -894,7 +894,7 @@ PolyExtStep::AndEqz(259, 605), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 113), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(606, 376), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(260, 607), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(588, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:95
+PolyExtStep::Add(588, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:108
 PolyExtStep::Sub(364, 608), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(261, 609), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(262, 425), // zirgen/components/ram.cpp:169
@@ -915,7 +915,7 @@ PolyExtStep::AndEqz(270, 615), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 117), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(616, 422), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(271, 617), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(588, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:95
+PolyExtStep::Add(588, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:108
 PolyExtStep::Sub(441, 618), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(272, 619), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(273, 444), // zirgen/components/ram.cpp:169
@@ -936,12 +936,12 @@ PolyExtStep::AndEqz(281, 625), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 121), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(626, 439), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(282, 627), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(237, 85, 283), // zirgen/circuit/rv32im/v1/edsl/body.cpp:86
-PolyExtStep::Get(602), // Top/mux(Mux)/reset(ResetStep)/Reg(zirgen/circuit/rv32im/v1/edsl/body.cpp:102)
-PolyExtStep::Get(413), // Top/mux(Mux)/body(BodyStep)/Mux/15(HaltCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/body.cpp:101)
-PolyExtStep::Sub(386, 628), // zirgen/circuit/rv32im/v1/edsl/body.cpp:102
-PolyExtStep::AndEqz(0, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:102
-PolyExtStep::Add(629, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:106
+PolyExtStep::AndCond(237, 85, 283), // zirgen/circuit/rv32im/v1/edsl/body.cpp:99
+PolyExtStep::Get(602), // Top/mux(Mux)/reset(ResetStep)/Reg(zirgen/circuit/rv32im/v1/edsl/body.cpp:115)
+PolyExtStep::Get(413), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:114)
+PolyExtStep::Sub(386, 628), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
+PolyExtStep::AndEqz(0, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
+PolyExtStep::Add(629, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
 PolyExtStep::Sub(312, 631), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(285, 632), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(286, 396), // zirgen/components/ram.cpp:169
@@ -962,7 +962,7 @@ PolyExtStep::AndEqz(294, 638), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 125), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(639, 350), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(295, 640), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(631, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:106
+PolyExtStep::Add(631, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
 PolyExtStep::Sub(338, 641), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(296, 642), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(297, 409), // zirgen/components/ram.cpp:169
@@ -983,7 +983,7 @@ PolyExtStep::AndEqz(305, 648), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 129), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(649, 376), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(306, 650), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(631, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:106
+PolyExtStep::Add(631, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
 PolyExtStep::Sub(364, 651), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(307, 652), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(308, 425), // zirgen/components/ram.cpp:169
@@ -1004,7 +1004,7 @@ PolyExtStep::AndEqz(316, 658), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 133), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(659, 422), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(317, 660), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(631, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:106
+PolyExtStep::Add(631, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
 PolyExtStep::Sub(441, 661), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(318, 662), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(319, 444), // zirgen/components/ram.cpp:169
@@ -1025,25 +1025,25 @@ PolyExtStep::AndEqz(327, 668), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 137), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(669, 439), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(328, 670), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(284, 197, 329), // zirgen/circuit/rv32im/v1/edsl/body.cpp:99
-PolyExtStep::AndCond(232, 307, 330), // zirgen/circuit/rv32im/v1/edsl/body.cpp:80
-PolyExtStep::AndEqz(233, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:113
+PolyExtStep::AndCond(284, 197, 329), // zirgen/circuit/rv32im/v1/edsl/body.cpp:112
+PolyExtStep::AndCond(232, 307, 330), // zirgen/circuit/rv32im/v1/edsl/body.cpp:93
+PolyExtStep::AndEqz(233, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:126
 PolyExtStep::Sub(385, 386), // components/onehot.h:40
 PolyExtStep::AndEqz(332, 671), // components/onehot.h:40
-PolyExtStep::Get(583), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:118)
-PolyExtStep::Sub(0, 672), // zirgen/circuit/rv32im/v1/edsl/body.cpp:118
+PolyExtStep::Get(583), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:131)
+PolyExtStep::Sub(0, 672), // zirgen/circuit/rv32im/v1/edsl/body.cpp:131
 PolyExtStep::Sub(531, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(674, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(675, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(676, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(677, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(678, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(679, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(680, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(679, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(680, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 681), // components/bits.h:68
 PolyExtStep::AndEqz(0, 682), // components/bits.h:68
-PolyExtStep::AndEqz(334, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(335, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(334, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(335, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(336, 395), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(337, 396), // zirgen/components/ram.cpp:169
 PolyExtStep::AndEqz(338, 316), // zirgen/components/ram.cpp:170
@@ -1136,9 +1136,9 @@ PolyExtStep::Mul(439, 673), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 87), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(729, 728), // zirgen/components/u32.cpp:40
 PolyExtStep::AndEqz(379, 730), // zirgen/components/u32.cpp:40
-PolyExtStep::Mul(508, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:36
+PolyExtStep::Mul(508, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
 PolyExtStep::Add(102, 516), // zirgen/components/u32.cpp:95
-PolyExtStep::Add(505, 731), // zirgen/circuit/rv32im/v1/edsl/body.cpp:36
+PolyExtStep::Add(505, 731), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
 PolyExtStep::Mul(732, 673), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 68), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(735, 734), // zirgen/components/u32.cpp:40
@@ -1155,10 +1155,10 @@ PolyExtStep::Mul(733, 673), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 71), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(744, 743), // zirgen/components/u32.cpp:40
 PolyExtStep::AndEqz(383, 745), // zirgen/components/u32.cpp:40
-PolyExtStep::AndCond(333, 85, 384), // zirgen/circuit/rv32im/v1/edsl/body.cpp:120
+PolyExtStep::AndCond(333, 85, 384), // zirgen/circuit/rv32im/v1/edsl/body.cpp:133
 PolyExtStep::AndEqz(0, 541), // components/bits.h:68
-PolyExtStep::AndEqz(386, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(387, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(386, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(387, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(388, 458), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(389, 396), // zirgen/components/ram.cpp:169
 PolyExtStep::AndEqz(390, 316), // zirgen/components/ram.cpp:170
@@ -1235,15 +1235,15 @@ PolyExtStep::AndEqz(430, 775), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 103), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(776, 728), // zirgen/components/u32.cpp:40
 PolyExtStep::AndEqz(431, 777), // zirgen/components/u32.cpp:40
-PolyExtStep::AndCond(385, 197, 432), // zirgen/circuit/rv32im/v1/edsl/body.cpp:131
-PolyExtStep::AndCond(331, 329, 433), // zirgen/circuit/rv32im/v1/edsl/body.cpp:111
-PolyExtStep::Get(374), // zirgen/circuit/rv32im/v1/edsl/body.cpp:141
-PolyExtStep::Sub(778, 34), // zirgen/circuit/rv32im/v1/edsl/body.cpp:141
-PolyExtStep::AndEqz(434, 779), // zirgen/circuit/rv32im/v1/edsl/body.cpp:141
+PolyExtStep::AndCond(385, 197, 432), // zirgen/circuit/rv32im/v1/edsl/body.cpp:144
+PolyExtStep::AndCond(331, 329, 433), // zirgen/circuit/rv32im/v1/edsl/body.cpp:124
+PolyExtStep::Get(374), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
+PolyExtStep::Sub(778, 34), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
+PolyExtStep::AndEqz(434, 779), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
 PolyExtStep::AndCond(136, 381, 435), // components/mux.h:49
 PolyExtStep::Get(51), // Top/Code/OneHot/hot[5](Reg)(components/mux.h:49)
-PolyExtStep::Get(376), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[0](Reg)(components/mux.h:49)
-PolyExtStep::Get(375), // Top/mux(Mux)/body(BodyStep)/Reg(zirgen/circuit/rv32im/v1/edsl/compute.cpp:113)
+PolyExtStep::Get(376), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[0](Reg)(components/mux.h:49)
+PolyExtStep::Get(375), // Top/mux(Mux)/body(BodyStep)/next_major(Reg)(zirgen/circuit/rv32im/v1/edsl/compute.cpp:113)
 PolyExtStep::Sub(782, 34), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:113
 PolyExtStep::AndEqz(233, 783), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:113
 PolyExtStep::Mul(531, 21), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:116
@@ -1256,10 +1256,10 @@ PolyExtStep::AndEqz(440, 328), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(441, 397), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(442, 398), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(443, 399), // zirgen/components/u32.cpp:34
-PolyExtStep::Get(577), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(299), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(607), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(298), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(577), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(299), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(607), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(298), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(382, 38), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:53
 PolyExtStep::Mul(788, 34), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:57
 PolyExtStep::Mul(787, 18), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:57
@@ -1272,9 +1272,9 @@ PolyExtStep::Mul(798, 3), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:30
 PolyExtStep::Add(799, 789), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:30
 PolyExtStep::Sub(350, 800), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:30
 PolyExtStep::AndEqz(444, 801), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:30
-PolyExtStep::Get(301), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(303), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(302), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(301), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(303), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(302), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(386, 32), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:31
 PolyExtStep::Mul(802, 3), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:31
 PolyExtStep::Mul(803, 18), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:31
@@ -1285,11 +1285,11 @@ PolyExtStep::Add(810, 807), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:31
 PolyExtStep::Add(811, 804), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:31
 PolyExtStep::Sub(348, 812), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:31
 PolyExtStep::AndEqz(445, 813), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:31
-PolyExtStep::Get(613), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(619), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(318), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(308), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(313), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(613), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(619), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(318), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(308), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(313), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(814, 35), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
 PolyExtStep::Mul(815, 18), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:49
 PolyExtStep::Mul(816, 18), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
@@ -1300,8 +1300,8 @@ PolyExtStep::Add(824, 821), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
 PolyExtStep::Add(825, 818), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
 PolyExtStep::Sub(346, 826), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
 PolyExtStep::AndEqz(446, 827), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:32
-PolyExtStep::Get(625), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(631), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(625), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(631), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/Decoder/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(828, 35), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:33
 PolyExtStep::Add(830, 829), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:33
 PolyExtStep::Sub(318, 831), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:33
@@ -1334,23 +1334,23 @@ PolyExtStep::AndEqz(458, 380), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(459, 426), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(460, 427), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(461, 428), // zirgen/components/u32.cpp:34
-PolyExtStep::Get(694), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(701), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(708), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(715), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(722), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(729), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
+PolyExtStep::Get(694), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(701), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(708), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(715), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(722), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
+PolyExtStep::Get(729), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Mul(851, 519), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(851, 522), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(852, 847), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(852, 848), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(852, 849), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(852, 850), // zirgen/components/u32.cpp:111
-PolyExtStep::Mul(521, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:36
+PolyExtStep::Mul(521, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
 PolyExtStep::Sub(0, 851), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:143
 PolyExtStep::Sub(0, 852), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:145
 PolyExtStep::Sub(518, 18), // zirgen/components/u32.cpp:103
-PolyExtStep::Add(520, 859), // zirgen/circuit/rv32im/v1/edsl/body.cpp:36
+PolyExtStep::Add(520, 859), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
 PolyExtStep::Mul(860, 344), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(860, 372), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(860, 374), // zirgen/components/u32.cpp:111
@@ -1369,13 +1369,13 @@ PolyExtStep::Add(868, 855), // zirgen/components/u32.cpp:95
 PolyExtStep::Add(869, 856), // zirgen/components/u32.cpp:95
 PolyExtStep::Add(870, 857), // zirgen/components/u32.cpp:95
 PolyExtStep::Add(871, 858), // zirgen/components/u32.cpp:95
-PolyExtStep::Get(764), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(764), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(882, 35), // zirgen/components/u32.cpp:129
 PolyExtStep::Mul(162, 37), // zirgen/components/u32.cpp:129
 PolyExtStep::Add(883, 884), // zirgen/components/u32.cpp:129
 PolyExtStep::Sub(877, 885), // zirgen/components/u32.cpp:129
 PolyExtStep::AndEqz(462, 886), // zirgen/components/u32.cpp:129
-PolyExtStep::Get(771), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(771), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(887, 35), // zirgen/components/u32.cpp:129
 PolyExtStep::Mul(171, 37), // zirgen/components/u32.cpp:129
 PolyExtStep::Add(888, 889), // zirgen/components/u32.cpp:129
@@ -1393,13 +1393,13 @@ PolyExtStep::AndEqz(466, 897), // zirgen/components/u32.cpp:34
 PolyExtStep::Get(799), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(898, 881), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(467, 899), // zirgen/components/u32.cpp:34
-PolyExtStep::Get(736), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(743), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(750), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(806), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(813), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(820), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(827), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(736), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
+PolyExtStep::Get(743), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
+PolyExtStep::Get(750), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg(compiler/edsl/component.h:154)
+PolyExtStep::Get(806), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(813), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(820), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(827), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(900, 874), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(900, 875), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(900, 876), // zirgen/components/u32.cpp:111
@@ -1443,7 +1443,7 @@ PolyExtStep::Mul(944, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Get(328), // components/bits.h:68
 PolyExtStep::Sub(946, 945), // components/bits.h:68
 PolyExtStep::AndEqz(469, 947), // components/bits.h:68
-PolyExtStep::Get(834), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(834), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(948, 35), // zirgen/components/u32.cpp:129
 PolyExtStep::Mul(176, 37), // zirgen/components/u32.cpp:129
 PolyExtStep::Add(949, 950), // zirgen/components/u32.cpp:129
@@ -1469,11 +1469,11 @@ PolyExtStep::Sub(967, 966), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:71
 PolyExtStep::AndEqz(472, 968), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:71
 PolyExtStep::Mul(173, 6), // zirgen/components/u32.cpp:143
 PolyExtStep::Add(172, 969), // zirgen/components/u32.cpp:143
-PolyExtStep::Get(855), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(855), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::AndEqz(0, 970), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(473, 971, 474), // zirgen/components/iszero.cpp:16
 PolyExtStep::Sub(0, 971), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(862), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(862), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(970, 973), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(974, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 975), // zirgen/components/iszero.cpp:18
@@ -1482,11 +1482,11 @@ PolyExtStep::Mul(175, 6), // zirgen/components/u32.cpp:144
 PolyExtStep::Add(174, 976), // zirgen/components/u32.cpp:144
 PolyExtStep::Mul(972, 19), // zirgen/components/u32.cpp:144
 PolyExtStep::Add(977, 978), // zirgen/components/u32.cpp:144
-PolyExtStep::Get(869), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(869), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::AndEqz(0, 979), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(477, 980, 478), // zirgen/components/iszero.cpp:16
 PolyExtStep::Sub(0, 980), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(876), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(876), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(979, 982), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(983, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 984), // zirgen/components/iszero.cpp:18
@@ -1496,16 +1496,16 @@ PolyExtStep::Mul(816, 32), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:45
 PolyExtStep::Mul(818, 3), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:45
 PolyExtStep::Add(986, 987), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:45
 PolyExtStep::Add(988, 828), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:45
-PolyExtStep::Get(883), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(883), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::AndEqz(0, 989), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(481, 990, 482), // zirgen/components/iszero.cpp:16
 PolyExtStep::Sub(0, 990), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(890), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Reg(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(890), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/IsZero/Reg(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(989, 992), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(993, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 994), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndCond(483, 991, 484), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(638), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[0](Reg)(circuit/rv32im/v1/platform/rv32im.inl:38)
+PolyExtStep::Get(638), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[0](Reg)(circuit/rv32im/v1/platform/rv32im.inl:38)
 PolyExtStep::Sub(829, 43), // circuit/rv32im/v1/platform/rv32im.inl:38
 PolyExtStep::AndEqz(0, 996), // circuit/rv32im/v1/platform/rv32im.inl:38
 PolyExtStep::AndEqz(486, 822), // circuit/rv32im/v1/platform/rv32im.inl:38
@@ -1524,19 +1524,19 @@ PolyExtStep::AndEqz(496, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:25
 PolyExtStep::Get(757), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::Sub(999, 34), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(497, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(532, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(532, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1001, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1002, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1003, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1004, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1005, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1006, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1007, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1008, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1007, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1008, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1009), // components/bits.h:68
 PolyExtStep::AndEqz(498, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(499, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(500, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(499, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(500, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::Sub(778, 999), // circuit/rv32im/v1/platform/rv32im.inl:38
 PolyExtStep::AndEqz(501, 1011), // circuit/rv32im/v1/platform/rv32im.inl:38
 PolyExtStep::Add(834, 989), // circuit/rv32im/v1/platform/rv32im.inl:38
@@ -1568,7 +1568,7 @@ PolyExtStep::AndEqz(519, 437), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(520, 439), // zirgen/components/u32.cpp:28
 PolyExtStep::AndCond(514, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:38
 PolyExtStep::AndCond(485, 995, 522), // circuit/rv32im/v1/platform/rv32im.inl:38
-PolyExtStep::Get(645), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)(circuit/rv32im/v1/platform/rv32im.inl:39)
+PolyExtStep::Get(645), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)(circuit/rv32im/v1/platform/rv32im.inl:39)
 PolyExtStep::Sub(798, 36), // circuit/rv32im/v1/platform/rv32im.inl:39
 PolyExtStep::AndEqz(487, 1021), // circuit/rv32im/v1/platform/rv32im.inl:39
 PolyExtStep::AndEqz(524, 847), // zirgen/components/u32.cpp:34
@@ -1583,13 +1583,13 @@ PolyExtStep::AndEqz(531, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(532, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(533, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(534, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(535, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(536, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(535, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(536, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(537, 1011), // circuit/rv32im/v1/platform/rv32im.inl:39
 PolyExtStep::AndCond(538, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:39
 PolyExtStep::AndCond(539, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:39
 PolyExtStep::AndCond(523, 1020, 540), // circuit/rv32im/v1/platform/rv32im.inl:39
-PolyExtStep::Get(652), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)(circuit/rv32im/v1/platform/rv32im.inl:40)
+PolyExtStep::Get(652), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)(circuit/rv32im/v1/platform/rv32im.inl:40)
 PolyExtStep::Sub(822, 18), // circuit/rv32im/v1/platform/rv32im.inl:40
 PolyExtStep::AndEqz(486, 1024), // circuit/rv32im/v1/platform/rv32im.inl:40
 PolyExtStep::AndEqz(542, 798), // circuit/rv32im/v1/platform/rv32im.inl:40
@@ -1606,13 +1606,13 @@ PolyExtStep::AndEqz(551, 1025), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:45
 PolyExtStep::Sub(999, 30), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(552, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(553, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(554, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(555, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(554, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(555, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(556, 1011), // circuit/rv32im/v1/platform/rv32im.inl:40
 PolyExtStep::AndCond(557, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:40
 PolyExtStep::AndCond(558, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:40
 PolyExtStep::AndCond(541, 1023, 559), // circuit/rv32im/v1/platform/rv32im.inl:40
-PolyExtStep::Get(659), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)(circuit/rv32im/v1/platform/rv32im.inl:41)
+PolyExtStep::Get(659), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)(circuit/rv32im/v1/platform/rv32im.inl:41)
 PolyExtStep::Sub(822, 30), // circuit/rv32im/v1/platform/rv32im.inl:41
 PolyExtStep::AndEqz(486, 1028), // circuit/rv32im/v1/platform/rv32im.inl:41
 PolyExtStep::AndEqz(561, 798), // circuit/rv32im/v1/platform/rv32im.inl:41
@@ -1628,13 +1628,13 @@ PolyExtStep::Sub(902, 7), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:40
 PolyExtStep::AndEqz(570, 1029), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:40
 PolyExtStep::AndEqz(571, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(572, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(573, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(574, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(573, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(574, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(575, 1011), // circuit/rv32im/v1/platform/rv32im.inl:41
 PolyExtStep::AndCond(576, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:41
 PolyExtStep::AndCond(577, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:41
 PolyExtStep::AndCond(560, 1027, 578), // circuit/rv32im/v1/platform/rv32im.inl:41
-PolyExtStep::Get(666), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)(circuit/rv32im/v1/platform/rv32im.inl:42)
+PolyExtStep::Get(666), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)(circuit/rv32im/v1/platform/rv32im.inl:42)
 PolyExtStep::Sub(822, 31), // circuit/rv32im/v1/platform/rv32im.inl:42
 PolyExtStep::AndEqz(486, 1031), // circuit/rv32im/v1/platform/rv32im.inl:42
 PolyExtStep::AndEqz(580, 798), // circuit/rv32im/v1/platform/rv32im.inl:42
@@ -1650,13 +1650,13 @@ PolyExtStep::Sub(902, 0), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:35
 PolyExtStep::AndEqz(589, 1032), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:35
 PolyExtStep::AndEqz(590, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(591, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(592, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(593, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(592, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(593, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(594, 1011), // circuit/rv32im/v1/platform/rv32im.inl:42
 PolyExtStep::AndCond(595, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:42
 PolyExtStep::AndCond(596, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:42
 PolyExtStep::AndCond(579, 1030, 597), // circuit/rv32im/v1/platform/rv32im.inl:42
-PolyExtStep::Get(673), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)(circuit/rv32im/v1/platform/rv32im.inl:43)
+PolyExtStep::Get(673), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)(circuit/rv32im/v1/platform/rv32im.inl:43)
 PolyExtStep::Sub(822, 3), // circuit/rv32im/v1/platform/rv32im.inl:43
 PolyExtStep::AndEqz(486, 1034), // circuit/rv32im/v1/platform/rv32im.inl:43
 PolyExtStep::AndEqz(599, 798), // circuit/rv32im/v1/platform/rv32im.inl:43
@@ -1671,8 +1671,8 @@ PolyExtStep::AndEqz(607, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(608, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(609, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(610, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(611, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(612, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(611, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(612, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(613, 1011), // circuit/rv32im/v1/platform/rv32im.inl:43
 PolyExtStep::Sub(433, 967), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(0, 1035), // zirgen/components/u32.cpp:34
@@ -1689,7 +1689,7 @@ PolyExtStep::AndEqz(624, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(614, 991, 625), // circuit/rv32im/v1/platform/rv32im.inl:43
 PolyExtStep::AndCond(626, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:43
 PolyExtStep::AndCond(598, 1033, 627), // circuit/rv32im/v1/platform/rv32im.inl:43
-PolyExtStep::Get(680), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)(circuit/rv32im/v1/platform/rv32im.inl:44)
+PolyExtStep::Get(680), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)(circuit/rv32im/v1/platform/rv32im.inl:44)
 PolyExtStep::Sub(822, 20), // circuit/rv32im/v1/platform/rv32im.inl:44
 PolyExtStep::AndEqz(486, 1037), // circuit/rv32im/v1/platform/rv32im.inl:44
 PolyExtStep::AndEqz(629, 798), // circuit/rv32im/v1/platform/rv32im.inl:44
@@ -1704,8 +1704,8 @@ PolyExtStep::AndEqz(637, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(638, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(639, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(640, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(641, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(642, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(641, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(642, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(643, 1011), // circuit/rv32im/v1/platform/rv32im.inl:44
 PolyExtStep::Sub(433, 985), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(0, 1038), // zirgen/components/u32.cpp:34
@@ -1722,7 +1722,7 @@ PolyExtStep::AndEqz(654, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(644, 991, 655), // circuit/rv32im/v1/platform/rv32im.inl:44
 PolyExtStep::AndCond(656, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:44
 PolyExtStep::AndCond(628, 1036, 657), // circuit/rv32im/v1/platform/rv32im.inl:44
-PolyExtStep::Get(687), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)(circuit/rv32im/v1/platform/rv32im.inl:45)
+PolyExtStep::Get(687), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)(circuit/rv32im/v1/platform/rv32im.inl:45)
 PolyExtStep::Sub(829, 44), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndEqz(0, 1040), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndEqz(659, 822), // circuit/rv32im/v1/platform/rv32im.inl:45
@@ -1751,17 +1751,17 @@ PolyExtStep::AndEqz(667, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:24
 PolyExtStep::AndEqz(668, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:25
 PolyExtStep::AndEqz(669, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(670, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(671, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(672, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(671, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(672, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(673, 1011), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndCond(674, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndCond(675, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndCond(658, 1039, 676), // circuit/rv32im/v1/platform/rv32im.inl:45
-PolyExtStep::Mul(490, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
-PolyExtStep::Mul(1055, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
-PolyExtStep::AndEqz(677, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::Mul(490, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::Mul(1055, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(677, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(0, 781, 678), // components/mux.h:49
-PolyExtStep::Get(377), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)(components/mux.h:49)
+PolyExtStep::Get(377), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[1](Reg)(components/mux.h:49)
 PolyExtStep::Mul(850, 42), // zirgen/components/u32.cpp:71
 PolyExtStep::Mul(980, 532), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:174
 PolyExtStep::Mul(848, 6), // zirgen/components/u32.cpp:68
@@ -1792,8 +1792,8 @@ PolyExtStep::AndEqz(687, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:44
 PolyExtStep::AndEqz(688, 1025), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:45
 PolyExtStep::AndEqz(689, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(690, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(691, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(692, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(691, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(692, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(693, 1011), // circuit/rv32im/v1/platform/rv32im.inl:46
 PolyExtStep::AndCond(694, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:46
 PolyExtStep::AndCond(695, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:46
@@ -1810,8 +1810,8 @@ PolyExtStep::AndEqz(705, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:39
 PolyExtStep::AndEqz(706, 1029), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:40
 PolyExtStep::AndEqz(707, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(708, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(709, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(710, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(709, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(710, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(711, 1011), // circuit/rv32im/v1/platform/rv32im.inl:47
 PolyExtStep::AndCond(712, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:47
 PolyExtStep::AndCond(713, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:47
@@ -1828,8 +1828,8 @@ PolyExtStep::AndEqz(723, 901), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:34
 PolyExtStep::AndEqz(724, 1032), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:35
 PolyExtStep::AndEqz(725, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(726, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(727, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(728, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(727, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(728, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(729, 1011), // circuit/rv32im/v1/platform/rv32im.inl:48
 PolyExtStep::AndCond(730, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:48
 PolyExtStep::AndCond(731, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:48
@@ -1846,8 +1846,8 @@ PolyExtStep::AndEqz(741, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(742, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(743, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(744, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(745, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(746, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(745, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(746, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(747, 1011), // circuit/rv32im/v1/platform/rv32im.inl:49
 PolyExtStep::AndCond(748, 991, 625), // circuit/rv32im/v1/platform/rv32im.inl:49
 PolyExtStep::AndCond(749, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:49
@@ -1864,8 +1864,8 @@ PolyExtStep::AndEqz(759, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(760, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(761, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(762, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(763, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(764, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(763, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(764, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(765, 1011), // circuit/rv32im/v1/platform/rv32im.inl:50
 PolyExtStep::AndCond(766, 991, 655), // circuit/rv32im/v1/platform/rv32im.inl:50
 PolyExtStep::AndCond(767, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:50
@@ -1892,19 +1892,19 @@ PolyExtStep::AndEqz(777, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:28
 PolyExtStep::AndEqz(778, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(779, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(780, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1074, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1074, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1086, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1087, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1088, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1089, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1090, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1091, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1092, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1093, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1092, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1093, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1094), // components/bits.h:68
 PolyExtStep::AndEqz(781, 1095), // components/bits.h:68
-PolyExtStep::AndEqz(782, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(783, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(782, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(783, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(784, 1011), // circuit/rv32im/v1/platform/rv32im.inl:51
 PolyExtStep::AndCond(785, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:51
 PolyExtStep::Add(990, 0), // circuit/rv32im/v1/platform/rv32im.inl:51
@@ -1922,19 +1922,19 @@ PolyExtStep::AndEqz(795, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:28
 PolyExtStep::AndEqz(796, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(797, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(798, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1075, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1075, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1098, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1099, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1100, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1101, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1102, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1103, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1104, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1105, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1104, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1105, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1106), // components/bits.h:68
 PolyExtStep::AndEqz(799, 1107), // components/bits.h:68
-PolyExtStep::AndEqz(800, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(801, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(800, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(801, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(802, 1011), // circuit/rv32im/v1/platform/rv32im.inl:52
 PolyExtStep::AndCond(803, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:52
 PolyExtStep::AndCond(804, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:52
@@ -1950,26 +1950,26 @@ PolyExtStep::AndEqz(813, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:28
 PolyExtStep::AndEqz(814, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(815, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(816, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1073, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1073, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1108, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1109, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1110, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1111, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1112, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1113, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1114, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1115, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1114, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1115, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1116), // components/bits.h:68
 PolyExtStep::AndEqz(817, 1117), // components/bits.h:68
-PolyExtStep::AndEqz(818, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(819, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(818, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(819, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(820, 1011), // circuit/rv32im/v1/platform/rv32im.inl:53
 PolyExtStep::AndCond(821, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:53
 PolyExtStep::AndCond(822, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:53
 PolyExtStep::AndCond(806, 1039, 823), // circuit/rv32im/v1/platform/rv32im.inl:53
-PolyExtStep::AndEqz(824, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(824, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(679, 1057, 825), // components/mux.h:49
-PolyExtStep::Get(379), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)(components/mux.h:49)
+PolyExtStep::Get(379), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[2](Reg)(components/mux.h:49)
 PolyExtStep::Mul(967, 532), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:176
 PolyExtStep::Mul(174, 19), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:171
 PolyExtStep::Mul(175, 17), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:172
@@ -1996,19 +1996,19 @@ PolyExtStep::AndEqz(833, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:28
 PolyExtStep::AndEqz(834, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(835, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(836, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1130, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1130, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1134, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1135, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1136, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1137, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1138, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1139, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1140, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1141, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1140, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1141, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1142), // components/bits.h:68
 PolyExtStep::AndEqz(837, 1143), // components/bits.h:68
-PolyExtStep::AndEqz(838, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(839, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(838, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(839, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(840, 1011), // circuit/rv32im/v1/platform/rv32im.inl:54
 PolyExtStep::AndCond(841, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:54
 PolyExtStep::AndCond(842, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:54
@@ -2024,19 +2024,19 @@ PolyExtStep::AndEqz(851, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:28
 PolyExtStep::AndEqz(852, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(853, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(854, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1131, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1131, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1144, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1145, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1146, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1147, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1148, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1149, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1150, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1151, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1150, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1151, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1152), // components/bits.h:68
 PolyExtStep::AndEqz(855, 1153), // components/bits.h:68
-PolyExtStep::AndEqz(856, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(857, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(856, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(857, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(858, 1011), // circuit/rv32im/v1/platform/rv32im.inl:55
 PolyExtStep::AndCond(859, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:55
 PolyExtStep::AndCond(860, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:55
@@ -2052,19 +2052,19 @@ PolyExtStep::AndEqz(869, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:28
 PolyExtStep::AndEqz(870, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(871, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(872, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1132, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1132, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1154, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1155, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1156, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1157, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1158, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1159, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1160, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1161, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1160, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1161, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1162), // components/bits.h:68
 PolyExtStep::AndEqz(873, 1163), // components/bits.h:68
-PolyExtStep::AndEqz(874, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(875, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(874, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(875, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(876, 1011), // circuit/rv32im/v1/platform/rv32im.inl:56
 PolyExtStep::AndCond(877, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:56
 PolyExtStep::AndCond(878, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:56
@@ -2091,19 +2091,19 @@ PolyExtStep::AndEqz(887, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:23
 PolyExtStep::AndEqz(888, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:24
 PolyExtStep::AndEqz(889, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:25
 PolyExtStep::AndEqz(890, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1069, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1069, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1175, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1176, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1177, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1178, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1179, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1180, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1181, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1182, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1181, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1182, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1183), // components/bits.h:68
 PolyExtStep::AndEqz(891, 1184), // components/bits.h:68
-PolyExtStep::AndEqz(892, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(893, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(892, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(893, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(894, 1011), // circuit/rv32im/v1/platform/rv32im.inl:57
 PolyExtStep::Sub(433, 518), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(0, 1185), // zirgen/components/u32.cpp:34
@@ -2136,19 +2136,19 @@ PolyExtStep::AndEqz(917, 997), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:23
 PolyExtStep::AndEqz(918, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:24
 PolyExtStep::AndEqz(919, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:25
 PolyExtStep::AndEqz(920, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
-PolyExtStep::Add(1129, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(1129, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(1190, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1191, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1192, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1193, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1194, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1195, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1196, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(1197, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(1196, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(1197, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 1198), // components/bits.h:68
 PolyExtStep::AndEqz(921, 1199), // components/bits.h:68
-PolyExtStep::AndEqz(922, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(923, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(922, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(923, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(924, 1011), // circuit/rv32im/v1/platform/rv32im.inl:58
 PolyExtStep::AndCond(925, 991, 906), // circuit/rv32im/v1/platform/rv32im.inl:58
 PolyExtStep::AndCond(926, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:58
@@ -2169,8 +2169,8 @@ PolyExtStep::AndEqz(936, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:49
 PolyExtStep::AndEqz(937, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:50
 PolyExtStep::AndEqz(938, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(939, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(940, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(941, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(940, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(941, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(942, 1011), // circuit/rv32im/v1/platform/rv32im.inl:59
 PolyExtStep::AndCond(943, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:59
 PolyExtStep::AndCond(944, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:59
@@ -2189,15 +2189,15 @@ PolyExtStep::AndEqz(954, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:24
 PolyExtStep::AndEqz(955, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:25
 PolyExtStep::AndEqz(956, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(957, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(958, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(959, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(958, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(959, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(960, 1011), // circuit/rv32im/v1/platform/rv32im.inl:60
 PolyExtStep::AndCond(961, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:60
 PolyExtStep::AndCond(962, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:60
 PolyExtStep::AndCond(946, 1036, 963), // circuit/rv32im/v1/platform/rv32im.inl:60
-PolyExtStep::AndEqz(964, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(964, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(826, 1118, 965), // components/mux.h:49
-PolyExtStep::Get(381), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)(components/mux.h:49)
+PolyExtStep::Get(381), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[3](Reg)(components/mux.h:49)
 PolyExtStep::Mul(847, 38), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:53
 PolyExtStep::Mul(802, 34), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:57
 PolyExtStep::Mul(1036, 18), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:57
@@ -2291,7 +2291,7 @@ PolyExtStep::Add(976, 179), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:75
 PolyExtStep::Sub(1270, 1271), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:75
 PolyExtStep::AndEqz(991, 1272), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:75
 PolyExtStep::Add(376, 887), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:77
-PolyExtStep::Get(333), // Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(333), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/mem_io(MemIOCycle)/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(176, 6), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:77
 PolyExtStep::Mul(1274, 18), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:77
 PolyExtStep::Add(1273, 175), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:77
@@ -2324,8 +2324,8 @@ PolyExtStep::AndEqz(999, 447), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1000, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1001, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1002, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1003, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1004, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1003, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1004, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1005, 779), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:99
 PolyExtStep::Sub(967, 0), // circuit/rv32im/v1/platform/rv32im.inl:76
 PolyExtStep::AndEqz(0, 1296), // circuit/rv32im/v1/platform/rv32im.inl:76
@@ -2598,9 +2598,9 @@ PolyExtStep::AndEqz(1165, 1348), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1166, 1349), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1167, 1350), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(1148, 906, 1168), // circuit/rv32im/v1/platform/rv32im.inl:83
-PolyExtStep::AndEqz(1169, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1169, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(966, 1206, 1170), // components/mux.h:49
-PolyExtStep::Get(383), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)(components/mux.h:49)
+PolyExtStep::Get(383), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[4](Reg)(components/mux.h:49)
 PolyExtStep::Add(1020, 1023), // circuit/rv32im/v1/platform/rv32im.inl:103
 PolyExtStep::Add(1405, 1027), // circuit/rv32im/v1/platform/rv32im.inl:104
 PolyExtStep::Add(1030, 1033), // circuit/rv32im/v1/platform/rv32im.inl:106
@@ -2742,8 +2742,8 @@ PolyExtStep::Sub(1531, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 1532), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndCond(1181, 1530, 1182), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(1183, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1184, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1185, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1184, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1185, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1186, 779), // zirgen/circuit/rv32im/v1/edsl/multiply.cpp:83
 PolyExtStep::Mul(1406, 1530), // zirgen/circuit/rv32im/v1/edsl/multiply.cpp:84
 PolyExtStep::Sub(433, 178), // zirgen/components/u32.cpp:34
@@ -2792,9 +2792,9 @@ PolyExtStep::AndCond(1219, 1030, 1220), // circuit/rv32im/v1/platform/rv32im.inl
 PolyExtStep::AndEqz(659, 1097), // circuit/rv32im/v1/platform/rv32im.inl:106
 PolyExtStep::AndEqz(1222, 798), // circuit/rv32im/v1/platform/rv32im.inl:106
 PolyExtStep::AndCond(1221, 1033, 1223), // circuit/rv32im/v1/platform/rv32im.inl:106
-PolyExtStep::AndEqz(1224, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1224, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1171, 1404, 1225), // components/mux.h:49
-PolyExtStep::Get(385), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)(components/mux.h:49)
+PolyExtStep::Get(385), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[5](Reg)(components/mux.h:49)
 PolyExtStep::Add(995, 1023), // circuit/rv32im/v1/platform/rv32im.inl:126
 PolyExtStep::Add(1023, 1027), // circuit/rv32im/v1/platform/rv32im.inl:127
 PolyExtStep::Add(1544, 1033), // circuit/rv32im/v1/platform/rv32im.inl:129
@@ -2887,8 +2887,8 @@ PolyExtStep::AndEqz(1270, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(1260, 1583, 1271), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:103
 PolyExtStep::AndCond(1272, 892, 521), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:108
 PolyExtStep::AndEqz(1273, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1274, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1275, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1274, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1275, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::Sub(778, 31), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:112
 PolyExtStep::AndEqz(1276, 1588), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:112
 PolyExtStep::AndEqz(542, 1542), // circuit/rv32im/v1/platform/rv32im.inl:124
@@ -2909,43 +2909,43 @@ PolyExtStep::AndEqz(1291, 798), // circuit/rv32im/v1/platform/rv32im.inl:130
 PolyExtStep::AndCond(1290, 1036, 1292), // circuit/rv32im/v1/platform/rv32im.inl:130
 PolyExtStep::AndEqz(1291, 1021), // circuit/rv32im/v1/platform/rv32im.inl:131
 PolyExtStep::AndCond(1293, 1039, 1294), // circuit/rv32im/v1/platform/rv32im.inl:131
-PolyExtStep::AndEqz(1295, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1295, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1226, 1543, 1296), // components/mux.h:49
-PolyExtStep::Get(387), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)(components/mux.h:49)
+PolyExtStep::Get(387), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[6](Reg)(components/mux.h:49)
 PolyExtStep::Sub(782, 30), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:208
 PolyExtStep::AndEqz(233, 1590), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:208
-PolyExtStep::Get(432), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(779), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(807), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(436), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(786), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(814), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(440), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(793), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(821), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(444), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(800), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(828), // Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(495), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(497), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(499), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(500), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(501), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(502), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(503), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(504), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(505), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(511), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(517), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(523), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(529), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(535), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(541), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(547), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(553), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(559), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(565), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(571), // Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(432), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(779), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(807), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(436), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(786), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(814), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(440), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(793), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(821), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(444), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(800), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(828), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(495), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(497), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(499), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(500), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(501), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(502), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(503), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(504), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(505), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(511), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(517), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(523), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(529), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(535), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(541), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(547), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(553), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(559), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(565), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(571), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/verify_and(VerifyAndCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(312, 1321), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:230
 PolyExtStep::Mul(314, 1323), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:230
 PolyExtStep::Mul(316, 1325), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:230
@@ -3167,15 +3167,15 @@ PolyExtStep::AndEqz(1308, 1829), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:23
 PolyExtStep::Sub(1602, 1818), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:238
 PolyExtStep::AndEqz(1309, 1830), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:238
 PolyExtStep::AndEqz(1310, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1311, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1312, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1311, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1312, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1313, 779), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:241
-PolyExtStep::AndEqz(1314, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1314, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1297, 1589, 1315), // components/mux.h:49
-PolyExtStep::Get(389), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)(components/mux.h:49)
+PolyExtStep::Get(389), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[7](Reg)(components/mux.h:49)
 PolyExtStep::Sub(782, 31), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:132
 PolyExtStep::AndEqz(233, 1832), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:132
-PolyExtStep::Get(765), // Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(765), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/divide(DivideCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(109), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
 PolyExtStep::Get(145), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
 PolyExtStep::Get(181), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
@@ -3185,7 +3185,7 @@ PolyExtStep::Get(190), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesP
 PolyExtStep::Get(127), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
 PolyExtStep::Get(163), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
 PolyExtStep::Get(199), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
-PolyExtStep::Get(772), // Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(772), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/divide(DivideCycle)/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(136), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
 PolyExtStep::Get(172), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
 PolyExtStep::Get(208), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
@@ -3486,12 +3486,12 @@ PolyExtStep::Sub(1845, 4), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:172
 PolyExtStep::AndEqz(1361, 2096), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:172
 PolyExtStep::AndCond(1354, 338, 1362), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:170
 PolyExtStep::AndEqz(1363, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1364, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1365, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1364, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1365, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1366, 779), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:175
-PolyExtStep::AndEqz(1367, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1367, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1316, 1831, 1368), // components/mux.h:49
-PolyExtStep::Get(391), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)(components/mux.h:49)
+PolyExtStep::Get(391), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[8](Reg)(components/mux.h:49)
 PolyExtStep::Sub(0, 516), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:180
 PolyExtStep::Mul(2098, 852), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:180
 PolyExtStep::AndEqz(0, 2099), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:180
@@ -3561,8 +3561,8 @@ PolyExtStep::AndEqz(1405, 426), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1406, 427), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1407, 428), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1408, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1409, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1410, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1409, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1410, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1411, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 28), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:27
 PolyExtStep::AndEqz(1412, 2127), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:27
@@ -3709,8 +3709,8 @@ PolyExtStep::AndEqz(1470, 447), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1471, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1472, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1473, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1474, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1475, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1474, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1475, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1476, 517), // components/bits.h:27
 PolyExtStep::AndEqz(1477, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:54
 PolyExtStep::AndCond(1414, 1039, 1478), // components/mux.h:49
@@ -3734,8 +3734,8 @@ PolyExtStep::Sub(2214, 174), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2217, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::AndEqz(1488, 2218), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:101
 PolyExtStep::AndEqz(1489, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1490, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1491, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1490, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1491, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1492, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 26), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:107
 PolyExtStep::AndEqz(1493, 2219), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:107
@@ -3749,8 +3749,8 @@ PolyExtStep::AndEqz(1499, 1334), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1500, 1335), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1501, 1336), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1502, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1503, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1504, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1503, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1504, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1505, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 33), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:124
 PolyExtStep::AndEqz(1506, 2221), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:124
@@ -3764,8 +3764,8 @@ PolyExtStep::AndEqz(1512, 426), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1513, 427), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1514, 428), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1515, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1516, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1517, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1516, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1517, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1518, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 27), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:137
 PolyExtStep::AndEqz(1519, 2223), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:137
@@ -3785,19 +3785,19 @@ PolyExtStep::Mul(422, 17), // components/u32.h:27
 PolyExtStep::Add(370, 2225), // components/u32.h:24
 PolyExtStep::Add(2228, 2226), // components/u32.h:24
 PolyExtStep::Add(2229, 2227), // components/u32.h:24
-PolyExtStep::Add(2230, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(2230, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(2231, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2232, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(2233, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2234, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(2235, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2236, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(2237, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(2238, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(2237, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(2238, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 2239), // components/bits.h:68
 PolyExtStep::AndEqz(1529, 2240), // components/bits.h:68
-PolyExtStep::AndEqz(1530, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1531, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1530, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1531, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::Sub(490, 0), // components/bits.h:27
 PolyExtStep::AndEqz(1532, 2241), // components/bits.h:27
 PolyExtStep::AndEqz(1533, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:149
@@ -3830,25 +3830,25 @@ PolyExtStep::AndEqz(1550, 446), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1551, 447), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1552, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1553, 449), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(2123, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:15
+PolyExtStep::Add(2123, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(2251, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2252, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(2253, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2254, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(2255, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2256, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(2257, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
-PolyExtStep::Mul(2258, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:19
+PolyExtStep::Sub(2257, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Mul(2258, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
 PolyExtStep::Sub(508, 2259), // components/bits.h:68
 PolyExtStep::AndEqz(1554, 2260), // components/bits.h:68
-PolyExtStep::AndEqz(1555, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1556, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1555, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1556, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1557, 490), // components/bits.h:27
 PolyExtStep::AndEqz(1558, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:166
 PolyExtStep::AndCond(1535, 851, 1559), // components/mux.h:49
-PolyExtStep::AndEqz(1560, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1560, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1369, 2097, 1561), // components/mux.h:49
-PolyExtStep::Get(393), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)(components/mux.h:49)
+PolyExtStep::Get(393), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[9](Reg)(components/mux.h:49)
 PolyExtStep::Sub(782, 33), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:174
 PolyExtStep::AndEqz(233, 2262), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:174
 PolyExtStep::Add(549, 553), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:177
@@ -3858,10 +3858,10 @@ PolyExtStep::AndEqz(1564, 2264), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:179
 PolyExtStep::AndCond(1563, 2263, 1565), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:177
 PolyExtStep::Sub(0, 549), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:181
 PolyExtStep::Sub(2265, 553), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:181
-PolyExtStep::Get(492), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(492), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1323, 2267), // components/bits.h:27
 PolyExtStep::AndEqz(0, 2268), // components/bits.h:27
-PolyExtStep::Get(480), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:184)
+PolyExtStep::Get(480), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:184)
 PolyExtStep::Sub(2269, 0), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:184
 PolyExtStep::Sub(439, 2270), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:184
 PolyExtStep::AndEqz(1567, 2271), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:184
@@ -3876,9 +3876,9 @@ PolyExtStep::AndCond(1571, 2272, 1572), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(778, 23), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:188
 PolyExtStep::AndEqz(0, 2275), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:188
 PolyExtStep::AndCond(1573, 1327, 1574), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:188
-PolyExtStep::Get(395), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(397), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)(compiler/edsl/edsl.h:118)
-PolyExtStep::Get(399), // Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(395), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[10](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(397), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[11](Reg)(compiler/edsl/edsl.h:118)
+PolyExtStep::Get(399), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[12](Reg)(compiler/edsl/edsl.h:118)
 PolyExtStep::Mul(1118, 3), // components/onehot.h:46
 PolyExtStep::Mul(1206, 20), // components/onehot.h:46
 PolyExtStep::Mul(1404, 18), // components/onehot.h:46
@@ -3911,8 +3911,8 @@ PolyExtStep::Sub(778, 2306), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:189
 PolyExtStep::AndEqz(0, 2307), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:189
 PolyExtStep::AndCond(1575, 2272, 1576), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:189
 PolyExtStep::AndEqz(1577, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1578, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1579, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1578, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1579, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::Sub(312, 64), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(0, 2308), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(1581, 396), // zirgen/components/ram.cpp:169
@@ -3929,10 +3929,10 @@ PolyExtStep::AndEqz(1590, 354), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1591, 410), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1592, 411), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1593, 412), // zirgen/components/u32.cpp:34
-PolyExtStep::Get(451), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(455), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(459), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(463), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(451), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(455), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(459), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(463), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(2311, 6), // components/u32.h:25
 PolyExtStep::Mul(2312, 19), // components/u32.h:26
 PolyExtStep::Mul(2313, 17), // components/u32.h:27
@@ -3942,9 +3942,9 @@ PolyExtStep::Add(2318, 2316), // components/u32.h:24
 PolyExtStep::Mul(2319, 21), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:198
 PolyExtStep::Sub(445, 2320), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:198
 PolyExtStep::AndEqz(1594, 2321), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:198
-PolyExtStep::Get(471), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(474), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(477), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(471), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(474), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(477), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(2323, 6), // components/u32.h:25
 PolyExtStep::Mul(2324, 19), // components/u32.h:26
 PolyExtStep::Mul(2269, 17), // components/u32.h:27
@@ -3970,9 +3970,9 @@ PolyExtStep::Add(2343, 2342), // components/u32.h:24
 PolyExtStep::Mul(2344, 21), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:201
 PolyExtStep::Sub(437, 2345), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:201
 PolyExtStep::AndEqz(1597, 2346), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:201
-PolyExtStep::Get(488), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(490), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(494), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(488), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(490), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(494), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(2348, 6), // components/u32.h:25
 PolyExtStep::Mul(2267, 19), // components/u32.h:26
 PolyExtStep::Mul(2349, 17), // components/u32.h:27
@@ -4001,10 +4001,10 @@ PolyExtStep::AndEqz(1614, 374), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1615, 376), // zirgen/components/u32.cpp:28
 PolyExtStep::Sub(445, 586), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:216
 PolyExtStep::AndEqz(1616, 2358), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:216
-PolyExtStep::Get(410), // Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:217)
+PolyExtStep::Get(410), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/page_fault(PageFaultCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:217)
 PolyExtStep::Sub(433, 2359), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:217
 PolyExtStep::AndEqz(1617, 2360), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:217
-PolyExtStep::Get(418), // Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:218)
+PolyExtStep::Get(418), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/page_fault(PageFaultCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:218)
 PolyExtStep::Mul(2361, 66), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:14
 PolyExtStep::Mul(2362, 21), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:14
 PolyExtStep::Sub(435, 2363), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:218
@@ -4012,14 +4012,14 @@ PolyExtStep::AndEqz(1618, 2364), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:218
 PolyExtStep::Add(2363, 32), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:219
 PolyExtStep::Sub(437, 2365), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:219
 PolyExtStep::AndEqz(1619, 2366), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:219
-PolyExtStep::Get(422), // Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:220)
+PolyExtStep::Get(422), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/page_fault(PageFaultCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:220)
 PolyExtStep::Sub(1331, 2367), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:220
 PolyExtStep::AndEqz(1620, 2368), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:220
 PolyExtStep::Sub(1603, 588), // components/bits.h:27
 PolyExtStep::AndEqz(1621, 2369), // components/bits.h:27
 PolyExtStep::AndEqz(1622, 1604), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:222
 PolyExtStep::AndCond(1602, 553, 1623), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:212
-PolyExtStep::Get(469), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:231)
+PolyExtStep::Get(469), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:231)
 PolyExtStep::Sub(445, 2370), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:231
 PolyExtStep::AndEqz(0, 2371), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:231
 PolyExtStep::Sub(433, 2322), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:232
@@ -4028,13 +4028,13 @@ PolyExtStep::Sub(435, 2323), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:233
 PolyExtStep::AndEqz(1626, 2373), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:233
 PolyExtStep::Sub(437, 2324), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:234
 PolyExtStep::AndEqz(1627, 2374), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:234
-PolyExtStep::Get(486), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:235)
+PolyExtStep::Get(486), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:235)
 PolyExtStep::Sub(1331, 2375), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:235
 PolyExtStep::AndEqz(1628, 2376), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:235
-PolyExtStep::Get(496), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(496), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1603, 2377), // components/bits.h:27
 PolyExtStep::AndEqz(1629, 2378), // components/bits.h:27
-PolyExtStep::Get(498), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:237)
+PolyExtStep::Get(498), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Reg(zirgen/circuit/rv32im/v1/edsl/sha.cpp:237)
 PolyExtStep::Sub(1604, 2379), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:237
 PolyExtStep::AndEqz(1630, 2380), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:237
 PolyExtStep::Add(433, 439), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:240
@@ -4064,7 +4064,7 @@ PolyExtStep::Mul(1331, 1321), // zirgen/components/iszero.cpp:18
 PolyExtStep::Sub(2386, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 2387), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndCond(1649, 2385, 1650), // zirgen/components/iszero.cpp:18
-PolyExtStep::Get(348), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(348), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(132, 66), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:109
 PolyExtStep::Mul(141, 68), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:109
 PolyExtStep::Mul(142, 69), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:109
@@ -4253,10 +4253,10 @@ PolyExtStep::Sub(0, 2568), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:124
 PolyExtStep::Mul(2568, 2569), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:124
 PolyExtStep::AndEqz(1655, 2570), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:124
 PolyExtStep::Add(2533, 2566), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:125
-PolyExtStep::Get(904), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(911), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(917), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(923), // Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(904), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(911), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(917), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(923), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(906, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:109
 PolyExtStep::Mul(948, 18), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:109
 PolyExtStep::Mul(961, 32), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:109
@@ -4294,7 +4294,7 @@ PolyExtStep::Mul(2608, 21), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:127
 PolyExtStep::Sub(0, 2609), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::Mul(2609, 2610), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::AndEqz(1656, 2611), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
-PolyExtStep::AndEqz(1657, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1657, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1562, 2261, 1658), // components/mux.h:49
 PolyExtStep::Sub(782, 23), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:263
 PolyExtStep::AndEqz(233, 2612), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:263
@@ -4304,7 +4304,7 @@ PolyExtStep::AndEqz(1564, 2614), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:268
 PolyExtStep::AndCond(1660, 2613, 1661), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:266
 PolyExtStep::Sub(0, 550), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:270
 PolyExtStep::Sub(2615, 552), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:270
-PolyExtStep::Get(483), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(483), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/IsZero/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1323, 0), // components/bits.h:27
 PolyExtStep::AndEqz(0, 2618), // components/bits.h:27
 PolyExtStep::AndEqz(1663, 2614), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:274
@@ -4322,8 +4322,8 @@ PolyExtStep::AndCond(1670, 1323, 1671), // zirgen/circuit/rv32im/v1/edsl/sha.cpp
 PolyExtStep::AndCond(1669, 1327, 1672), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:285
 PolyExtStep::AndCond(1673, 2272, 1576), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:289
 PolyExtStep::AndEqz(1674, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1675, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1676, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1675, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1676, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1677, 2371), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:292
 PolyExtStep::AndEqz(1678, 2372), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:293
 PolyExtStep::AndEqz(1679, 2373), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:294
@@ -4384,251 +4384,251 @@ PolyExtStep::Sub(2636, 2450), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:111
 PolyExtStep::Mul(2637, 72), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:111
 PolyExtStep::Sub(804, 2638), // components/bits.h:68
 PolyExtStep::AndEqz(1718, 2639), // components/bits.h:68
-PolyExtStep::Get(506), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(512), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(518), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(524), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(530), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(536), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(542), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(548), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(554), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(560), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(566), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(572), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(578), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(584), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(590), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(596), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(608), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(614), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(620), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(626), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(632), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(639), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(646), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(653), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(660), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(667), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(674), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(681), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(688), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(695), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(702), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(709), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(716), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(723), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(730), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(737), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(744), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(751), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(758), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(835), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(842), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(849), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(856), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(863), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(870), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(877), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(884), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(891), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(898), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(905), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(912), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(918), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(924), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(710), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(717), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(724), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(731), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(738), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(745), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(752), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(759), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(766), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(773), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(780), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(787), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(794), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(801), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(808), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(815), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(822), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(829), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(836), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(843), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(850), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(857), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(864), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(871), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(878), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(885), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(892), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(899), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(906), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(913), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(919), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(925), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(507), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(513), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(519), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(525), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(531), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(537), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(543), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(549), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(555), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(561), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(567), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(573), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(579), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(585), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(591), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(597), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(603), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(609), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(615), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(621), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(627), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(633), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(640), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(647), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(654), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(661), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(668), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(675), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(682), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(689), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(696), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(703), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(711), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(718), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(725), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(732), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(739), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(746), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(753), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(760), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(767), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(774), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(781), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(788), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(795), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(802), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(809), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(816), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(823), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(830), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(837), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(844), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(851), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(858), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(865), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(872), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(879), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(886), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(893), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(900), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(907), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(914), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(920), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(926), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(508), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(514), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(520), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(526), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(532), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(538), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(544), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(550), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(556), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(562), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(568), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(574), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(580), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(586), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(592), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(598), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(604), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(610), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(616), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(622), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(628), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(634), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(641), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(648), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(655), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(662), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(669), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(676), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(683), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(690), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(697), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(704), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(509), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(515), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(521), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(527), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(533), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(539), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(545), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(551), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(557), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(563), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(569), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(575), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(581), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(587), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(593), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(599), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(605), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(611), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(617), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(623), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(629), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(635), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(642), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(649), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(656), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(663), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(670), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(677), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(684), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(691), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(698), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(705), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(712), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(719), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(726), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(733), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(740), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(747), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(754), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(761), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(768), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(775), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(782), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(789), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(796), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(803), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(810), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(817), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(824), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(831), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(838), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(845), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(852), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(859), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(866), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(873), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(880), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(887), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(894), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(901), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(908), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(915), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(921), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(927), // Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(506), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(512), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(518), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(524), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(530), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(536), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(542), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(548), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(554), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(560), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(566), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(572), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(578), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(584), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(590), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(596), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(608), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(614), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(620), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(626), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(632), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(639), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(646), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(653), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(660), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(667), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(674), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(681), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(688), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(695), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(702), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(709), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(716), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(723), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(730), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(737), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(744), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(751), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(758), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(835), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(842), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(849), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(856), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(863), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(870), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(877), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(884), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(891), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(898), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(905), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(912), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(918), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(924), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(710), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(717), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(724), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(731), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(738), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(745), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(752), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(759), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(766), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(773), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(780), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(787), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(794), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(801), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(808), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(815), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(822), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(829), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(836), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(843), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(850), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(857), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(864), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(871), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(878), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(885), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(892), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(899), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(906), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(913), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(919), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(925), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(507), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(513), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(519), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(525), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(531), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(537), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(543), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(549), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(555), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(561), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(567), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(573), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(579), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(585), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(591), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(597), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(603), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(609), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(615), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(621), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(627), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(633), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(640), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(647), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(654), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(661), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(668), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(675), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(682), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(689), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(696), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(703), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(711), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(718), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(725), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(732), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(739), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(746), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(753), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(760), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(767), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(774), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(781), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(788), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(795), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(802), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(809), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(816), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(823), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(830), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(837), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(844), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(851), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(858), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(865), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(872), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(879), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(886), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(893), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(900), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(907), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(914), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(920), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(926), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(508), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(514), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(520), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(526), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(532), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(538), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(544), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(550), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(556), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(562), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(568), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(574), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(580), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(586), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(592), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(598), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(604), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(610), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(616), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(622), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(628), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(634), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(641), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(648), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(655), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(662), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(669), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(676), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(683), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(690), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(697), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(704), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(509), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(515), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(521), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(527), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(533), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(539), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(545), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(551), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(557), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(563), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(569), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(575), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(581), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(587), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(593), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(599), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(605), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(611), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(617), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(623), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(629), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(635), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(642), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(649), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(656), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(663), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(670), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(677), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(684), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(691), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(698), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(705), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(712), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(719), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(726), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(733), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(740), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(747), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(754), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(761), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(768), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(775), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(782), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(789), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(796), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(803), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(810), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(817), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(824), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(831), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(838), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(845), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(852), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(859), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(866), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(873), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(880), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(887), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(894), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(901), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(908), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(915), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(921), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(927), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(2640, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:47
 PolyExtStep::Mul(2640, 2725), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:55
 PolyExtStep::Mul(2641, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:47
@@ -6032,7 +6032,7 @@ PolyExtStep::Mul(4276, 21), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:127
 PolyExtStep::Sub(0, 4277), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::Mul(4277, 4278), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::AndEqz(1726, 4279), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
-PolyExtStep::AndEqz(1727, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1727, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1659, 2276, 1728), // components/mux.h:49
 PolyExtStep::Sub(782, 24), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:341
 PolyExtStep::AndEqz(233, 4280), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:341
@@ -6066,8 +6066,8 @@ PolyExtStep::AndEqz(1750, 2380), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:377
 PolyExtStep::AndCond(1751, 1319, 1648), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(1752, 2385, 1650), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(1753, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1754, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1755, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1754, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1755, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::Sub(76, 439), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:387
 PolyExtStep::Sub(338, 4287), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(0, 4288), // zirgen/components/ram.cpp:168
@@ -6078,9 +6078,9 @@ PolyExtStep::AndEqz(1760, 410), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1761, 411), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1762, 412), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(1756, 2620, 1763), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:386
-PolyExtStep::Get(306), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(311), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(316), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(306), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(311), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(316), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(81), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(86), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(91), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
@@ -6100,13 +6100,13 @@ PolyExtStep::Get(223), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesP
 PolyExtStep::Get(232), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(241), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(250), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(321), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(326), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(331), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(336), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(341), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(346), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(351), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(321), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(326), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(331), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(336), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(341), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(346), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(351), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(106), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(115), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(124), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
@@ -6132,25 +6132,25 @@ PolyExtStep::Get(224), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesP
 PolyExtStep::Get(233), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(242), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(251), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(307), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(312), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(317), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(322), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(327), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(332), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(337), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(342), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(347), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(352), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(304), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(309), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(314), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(319), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(324), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(329), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(334), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(339), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(344), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(307), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(312), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(317), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(322), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(327), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(332), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(337), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(342), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(347), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(352), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(304), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(309), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(314), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(319), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(324), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(329), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(334), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(339), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(344), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(137), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(146), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(155), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
@@ -6164,7 +6164,7 @@ PolyExtStep::Get(218), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesP
 PolyExtStep::Get(227), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(236), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(245), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(349), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(349), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(79), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(84), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(89), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
@@ -6196,16 +6196,16 @@ PolyExtStep::Get(222), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesP
 PolyExtStep::Get(231), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(240), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
 PolyExtStep::Get(249), // Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(compiler/edsl/component.h:154)
-PolyExtStep::Get(305), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(310), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(315), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(320), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(325), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(330), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(335), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(340), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(345), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(350), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(305), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(310), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(315), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(320), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(325), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(330), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(335), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(340), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(345), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(350), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(4289, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:47
 PolyExtStep::Mul(4290, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:47
 PolyExtStep::Mul(4291, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:47
@@ -6878,38 +6878,38 @@ PolyExtStep::Mul(5078, 72), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:111
 PolyExtStep::Sub(804, 5079), // components/bits.h:68
 PolyExtStep::AndEqz(1770, 5080), // components/bits.h:68
 PolyExtStep::AndCond(1769, 2620, 1771), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:395
-PolyExtStep::Get(510), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(516), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(522), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(528), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(534), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(540), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(546), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(552), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(558), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(564), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(570), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(576), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(582), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(588), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(594), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(600), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(606), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(612), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(618), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(624), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(630), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(637), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(644), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(651), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(658), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(665), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(672), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(679), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(686), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(693), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(700), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(707), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(510), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(516), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(522), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(528), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(534), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(540), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(546), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(552), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(558), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(564), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(570), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(576), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(582), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(588), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(594), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(600), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(606), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(612), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(618), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(624), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(630), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(637), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(644), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(651), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(658), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(665), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(672), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(679), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(686), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(693), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(700), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(707), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(5082, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:74
 PolyExtStep::Mul(5083, 18), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:74
 PolyExtStep::Mul(5084, 32), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:74
@@ -6987,38 +6987,38 @@ PolyExtStep::Mul(5184, 21), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:127
 PolyExtStep::Sub(0, 5185), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::Mul(5185, 5186), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::AndEqz(1773, 5187), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
-PolyExtStep::Get(714), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(721), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(728), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(735), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(742), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(749), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(756), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(763), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(770), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(777), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(784), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(791), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(798), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(805), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(812), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(819), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(826), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(833), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(840), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(847), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(854), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(861), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(868), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(875), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(882), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(889), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(896), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(903), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(910), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(916), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(922), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(928), // Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(714), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(721), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(728), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(735), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(742), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(749), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(756), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(763), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(770), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(777), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(784), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(791), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(798), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(805), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(812), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(819), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(826), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(833), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(840), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(847), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(854), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(861), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(868), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(875), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(882), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(889), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(896), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(903), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(910), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(916), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(922), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(928), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_main(ShaWrap)/ShaCycle/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(5189, 3), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:74
 PolyExtStep::Mul(5190, 18), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:74
 PolyExtStep::Mul(5191, 32), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:74
@@ -7256,11 +7256,11 @@ PolyExtStep::AndCond(1836, 1325, 1844), // zirgen/circuit/rv32im/v1/edsl/sha.cpp
 PolyExtStep::Sub(0, 1325), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:447
 PolyExtStep::AndEqz(1838, 2621), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:450
 PolyExtStep::AndCond(1845, 5383, 1846), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:447
-PolyExtStep::AndEqz(1847, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1847, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1729, 2277, 1848), // components/mux.h:49
 PolyExtStep::AndEqz(233, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1850, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1851, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1850, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1851, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::Sub(346, 77), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:49
 PolyExtStep::AndEqz(0, 5384), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(1852, 338, 1853), // zirgen/components/iszero.cpp:16
@@ -7313,11 +7313,11 @@ PolyExtStep::Sub(1895, 5414), // components/bits.h:68
 PolyExtStep::AndEqz(1869, 5415), // components/bits.h:68
 PolyExtStep::AndEqz(1870, 2127), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:83
 PolyExtStep::AndCond(1868, 318, 1871), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:80
-PolyExtStep::AndEqz(1872, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1872, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1849, 2278, 1873), // components/mux.h:49
 PolyExtStep::Sub(782, 26), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:216
 PolyExtStep::AndEqz(233, 5416), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:216
-PolyExtStep::Get(300), // Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/2(ECallSoftware)/Twit/twit(Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(300), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/Mux/2(ECallSoftware)/Twit/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Add(5417, 0), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:227
 PolyExtStep::Add(2320, 5418), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:227
 PolyExtStep::Sub(5419, 18), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:227
@@ -7374,8 +7374,8 @@ PolyExtStep::AndEqz(1904, 435), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1905, 437), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1906, 439), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1907, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1908, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(1909, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(1908, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(1909, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(1910, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:272
 PolyExtStep::AndCond(1889, 382, 1911), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:251
 PolyExtStep::Sub(0, 382), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:274
@@ -7417,7 +7417,7 @@ PolyExtStep::Sub(441, 5453), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:300
 PolyExtStep::AndEqz(1934, 5454), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:300
 PolyExtStep::AndCond(1933, 5452, 1935), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:291
 PolyExtStep::AndCond(1936, 1, 521), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:302
-PolyExtStep::AndEqz(1937, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(1937, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1874, 320, 1938), // components/mux.h:49
 PolyExtStep::Sub(782, 27), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:179
 PolyExtStep::AndEqz(233, 5455), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:179
@@ -7484,10 +7484,10 @@ PolyExtStep::AndCond(1949, 672, 1977), // zirgen/circuit/rv32im/v1/edsl/bigint.c
 PolyExtStep::Sub(787, 2331), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::AndEqz(0, 5478), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::AndCond(0, 382, 1979), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:235
-PolyExtStep::Get(434), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(438), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(442), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(446), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(434), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(438), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(442), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(446), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(5480, 6), // components/u32.h:25
 PolyExtStep::Mul(5481, 19), // components/u32.h:26
 PolyExtStep::Mul(5482, 17), // components/u32.h:27
@@ -7498,10 +7498,10 @@ PolyExtStep::Mul(5488, 21), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::Sub(787, 5489), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::AndEqz(0, 5490), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::AndCond(1980, 383, 1981), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:235
-PolyExtStep::Get(453), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(457), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(461), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(465), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(453), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(457), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(461), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(465), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(5492, 6), // components/u32.h:25
 PolyExtStep::Mul(5493, 19), // components/u32.h:26
 PolyExtStep::Mul(5494, 17), // components/u32.h:27
@@ -7512,10 +7512,10 @@ PolyExtStep::Mul(5500, 21), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::Sub(787, 5501), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::AndEqz(0, 5502), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:239
 PolyExtStep::AndCond(1982, 386, 1983), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:235
-PolyExtStep::Get(416), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(420), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(424), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(427), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(416), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(420), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(424), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(427), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Mul(5504, 6), // components/u32.h:25
 PolyExtStep::Mul(5505, 19), // components/u32.h:26
 PolyExtStep::Mul(5506, 17), // components/u32.h:27
@@ -7572,7 +7572,7 @@ PolyExtStep::AndCond(1989, 5517, 2017), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(829, 162), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5526), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2018, 382, 2019), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(415), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(415), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(829, 5527), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5528), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2020, 386, 2021), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7583,7 +7583,7 @@ PolyExtStep::AndCond(2022, 5529, 2023), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(995, 171), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5531), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2024, 382, 2025), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(419), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(419), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(995, 5532), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5533), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2026, 386, 2027), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7593,7 +7593,7 @@ PolyExtStep::AndCond(2028, 5529, 2029), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(1020, 172), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5535), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2030, 382, 2031), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(423), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(423), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1020, 5536), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5537), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2032, 386, 2033), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7603,7 +7603,7 @@ PolyExtStep::AndCond(2034, 5529, 2035), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(1023, 173), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5539), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2036, 382, 2037), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(426), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(426), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1023, 5540), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5541), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2038, 386, 2039), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7613,7 +7613,7 @@ PolyExtStep::AndCond(2040, 5529, 2041), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(1027, 174), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5543), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2042, 382, 2043), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(433), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(433), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1027, 5544), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5545), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2044, 386, 2045), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7623,7 +7623,7 @@ PolyExtStep::AndCond(2046, 5529, 2047), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(1030, 175), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5547), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2048, 382, 2049), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(437), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(437), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1030, 5548), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5549), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2050, 386, 2051), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7633,7 +7633,7 @@ PolyExtStep::AndCond(2052, 5529, 2053), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(1033, 176), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5551), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2054, 382, 2055), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(441), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(441), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1033, 5552), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5553), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2056, 386, 2057), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7643,7 +7643,7 @@ PolyExtStep::AndCond(2058, 5529, 2059), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(1036, 177), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5555), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2060, 382, 2061), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(445), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(445), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1036, 5556), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5557), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2062, 386, 2063), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7653,7 +7653,7 @@ PolyExtStep::AndCond(2064, 5529, 2065), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(1039, 178), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5559), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2066, 382, 2067), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(452), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(452), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(1039, 5560), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5561), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2068, 386, 2069), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7663,7 +7663,7 @@ PolyExtStep::AndCond(2070, 5529, 2071), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(847, 179), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5563), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2072, 382, 2073), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(456), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(456), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(847, 5564), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5565), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2074, 386, 2075), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7673,7 +7673,7 @@ PolyExtStep::AndCond(2076, 5529, 2077), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(848, 180), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5567), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2078, 382, 2079), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(460), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(460), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(848, 5568), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5569), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2080, 386, 2081), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7683,7 +7683,7 @@ PolyExtStep::AndCond(2082, 5529, 2083), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(849, 181), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5571), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2084, 382, 2085), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(464), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(464), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(849, 5572), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5573), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2086, 386, 2087), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7693,7 +7693,7 @@ PolyExtStep::AndCond(2088, 5529, 2089), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(850, 182), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5575), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2090, 382, 2091), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(472), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(472), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(850, 5576), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5577), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2092, 386, 2093), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7703,7 +7703,7 @@ PolyExtStep::AndCond(2094, 5529, 2095), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(851, 183), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5579), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2096, 382, 2097), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(475), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(475), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(851, 5580), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5581), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2098, 386, 2099), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7713,7 +7713,7 @@ PolyExtStep::AndCond(2100, 5529, 2101), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(852, 184), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5583), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2102, 382, 2103), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(478), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(478), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(852, 5584), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5585), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2104, 386, 2105), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -7723,7 +7723,7 @@ PolyExtStep::AndCond(2106, 5529, 2107), // zirgen/circuit/rv32im/v1/edsl/bigint.
 PolyExtStep::Sub(900, 185), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndEqz(0, 5587), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
 PolyExtStep::AndCond(2108, 382, 2109), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:374
-PolyExtStep::Get(481), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(481), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[3](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(900, 5588), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndEqz(0, 5589), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:377
 PolyExtStep::AndCond(2110, 386, 2111), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:376
@@ -8037,42 +8037,42 @@ PolyExtStep::Mul(5862, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(5863, 185), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5860, 5864), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2145, 5865), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(860), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(860), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5866, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(829, 5862), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5868, 5867), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2146, 5869), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(867), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(867), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5870, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(995, 5866), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5872, 5871), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2147, 5873), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(874), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(874), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5874, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(1020, 5870), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5876, 5875), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2148, 5877), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(881), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(881), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5878, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(1023, 5874), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5880, 5879), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2149, 5881), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(888), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(888), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5882, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(1027, 5878), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5884, 5883), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2150, 5885), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(895), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(895), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5886, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(1030, 5882), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5888, 5887), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2151, 5889), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(902), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(902), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5890, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(1033, 5886), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5892, 5891), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::AndEqz(2152, 5893), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
-PolyExtStep::Get(909), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
+PolyExtStep::Get(909), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:416)
 PolyExtStep::Mul(5894, 6), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Add(1036, 5890), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
 PolyExtStep::Sub(5896, 5895), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:429
@@ -8229,49 +8229,49 @@ PolyExtStep::Sub(0, 828), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:454
 PolyExtStep::AndEqz(388, 2223), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:456
 PolyExtStep::AndCond(2223, 5977, 2224), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:454
 PolyExtStep::AndEqz(0, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(2226, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(2227, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
+PolyExtStep::AndEqz(2226, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(2227, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
 PolyExtStep::AndEqz(2228, 779), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:460
 PolyExtStep::AndCond(2225, 828, 2229), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:458
-PolyExtStep::AndEqz(2230, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(2230, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(1939, 322, 2231), // components/mux.h:49
-PolyExtStep::Sub(782, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:151
-PolyExtStep::AndEqz(233, 5978), // zirgen/circuit/rv32im/v1/edsl/body.cpp:151
-PolyExtStep::Sub(312, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
-PolyExtStep::AndEqz(0, 5979), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
-PolyExtStep::Sub(314, 2359), // zirgen/circuit/rv32im/v1/edsl/body.cpp:155
-PolyExtStep::AndEqz(2234, 5980), // zirgen/circuit/rv32im/v1/edsl/body.cpp:155
-PolyExtStep::Sub(316, 588), // zirgen/circuit/rv32im/v1/edsl/body.cpp:156
-PolyExtStep::AndEqz(2235, 5981), // zirgen/circuit/rv32im/v1/edsl/body.cpp:156
-PolyExtStep::AndCond(2233, 556, 2236), // zirgen/circuit/rv32im/v1/edsl/body.cpp:153
-PolyExtStep::AndEqz(0, 3197), // zirgen/circuit/rv32im/v1/edsl/body.cpp:163
-PolyExtStep::Sub(316, 2675), // zirgen/circuit/rv32im/v1/edsl/body.cpp:167
-PolyExtStep::AndEqz(2238, 5982), // zirgen/circuit/rv32im/v1/edsl/body.cpp:167
-PolyExtStep::Sub(312, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:168
-PolyExtStep::AndEqz(2239, 5983), // zirgen/circuit/rv32im/v1/edsl/body.cpp:168
-PolyExtStep::Sub(314, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:169
-PolyExtStep::AndEqz(2240, 5984), // zirgen/circuit/rv32im/v1/edsl/body.cpp:169
-PolyExtStep::GetGlobal(0, 104), // zirgen/circuit/rv32im/v1/edsl/body.cpp:171
-PolyExtStep::Sub(5985, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:171
-PolyExtStep::AndEqz(2241, 5986), // zirgen/circuit/rv32im/v1/edsl/body.cpp:171
-PolyExtStep::GetGlobal(0, 105), // zirgen/circuit/rv32im/v1/edsl/body.cpp:172
-PolyExtStep::Sub(5987, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:172
-PolyExtStep::AndEqz(2242, 5988), // zirgen/circuit/rv32im/v1/edsl/body.cpp:172
-PolyExtStep::AndCond(2237, 549, 2243), // zirgen/circuit/rv32im/v1/edsl/body.cpp:160
-PolyExtStep::Sub(312, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
-PolyExtStep::AndEqz(0, 5989), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
-PolyExtStep::AndEqz(2245, 314), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
-PolyExtStep::Sub(316, 80), // zirgen/circuit/rv32im/v1/edsl/body.cpp:182
-PolyExtStep::AndEqz(2246, 5990), // zirgen/circuit/rv32im/v1/edsl/body.cpp:182
-PolyExtStep::Sub(5985, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
-PolyExtStep::AndEqz(2247, 5991), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
-PolyExtStep::AndEqz(2248, 5987), // zirgen/circuit/rv32im/v1/edsl/body.cpp:185
-PolyExtStep::AndCond(2244, 553, 2249), // zirgen/circuit/rv32im/v1/edsl/body.cpp:179
+PolyExtStep::Sub(782, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:164
+PolyExtStep::AndEqz(233, 5978), // zirgen/circuit/rv32im/v1/edsl/body.cpp:164
+PolyExtStep::Sub(312, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:167
+PolyExtStep::AndEqz(0, 5979), // zirgen/circuit/rv32im/v1/edsl/body.cpp:167
+PolyExtStep::Sub(314, 2359), // zirgen/circuit/rv32im/v1/edsl/body.cpp:168
+PolyExtStep::AndEqz(2234, 5980), // zirgen/circuit/rv32im/v1/edsl/body.cpp:168
+PolyExtStep::Sub(316, 588), // zirgen/circuit/rv32im/v1/edsl/body.cpp:169
+PolyExtStep::AndEqz(2235, 5981), // zirgen/circuit/rv32im/v1/edsl/body.cpp:169
+PolyExtStep::AndCond(2233, 556, 2236), // zirgen/circuit/rv32im/v1/edsl/body.cpp:166
+PolyExtStep::AndEqz(0, 3197), // zirgen/circuit/rv32im/v1/edsl/body.cpp:176
+PolyExtStep::Sub(316, 2675), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
+PolyExtStep::AndEqz(2238, 5982), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
+PolyExtStep::Sub(312, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
+PolyExtStep::AndEqz(2239, 5983), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
+PolyExtStep::Sub(314, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:182
+PolyExtStep::AndEqz(2240, 5984), // zirgen/circuit/rv32im/v1/edsl/body.cpp:182
+PolyExtStep::GetGlobal(0, 104), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
+PolyExtStep::Sub(5985, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
+PolyExtStep::AndEqz(2241, 5986), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
+PolyExtStep::GetGlobal(0, 105), // zirgen/circuit/rv32im/v1/edsl/body.cpp:185
+PolyExtStep::Sub(5987, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:185
+PolyExtStep::AndEqz(2242, 5988), // zirgen/circuit/rv32im/v1/edsl/body.cpp:185
+PolyExtStep::AndCond(2237, 549, 2243), // zirgen/circuit/rv32im/v1/edsl/body.cpp:173
+PolyExtStep::Sub(312, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:195
+PolyExtStep::AndEqz(0, 5989), // zirgen/circuit/rv32im/v1/edsl/body.cpp:195
+PolyExtStep::AndEqz(2245, 314), // zirgen/circuit/rv32im/v1/edsl/body.cpp:196
+PolyExtStep::Sub(316, 80), // zirgen/circuit/rv32im/v1/edsl/body.cpp:197
+PolyExtStep::AndEqz(2246, 5990), // zirgen/circuit/rv32im/v1/edsl/body.cpp:197
+PolyExtStep::Sub(5985, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:199
+PolyExtStep::AndEqz(2247, 5991), // zirgen/circuit/rv32im/v1/edsl/body.cpp:199
+PolyExtStep::AndEqz(2248, 5987), // zirgen/circuit/rv32im/v1/edsl/body.cpp:200
+PolyExtStep::AndCond(2244, 553, 2249), // zirgen/circuit/rv32im/v1/edsl/body.cpp:194
 PolyExtStep::AndEqz(2250, 541), // components/bits.h:68
-PolyExtStep::AndEqz(2251, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:23
-PolyExtStep::AndEqz(2252, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
-PolyExtStep::AndEqz(2253, 2127), // zirgen/circuit/rv32im/v1/edsl/body.cpp:192
-PolyExtStep::AndEqz(2254, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::AndEqz(2251, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
+PolyExtStep::AndEqz(2252, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(2253, 2127), // zirgen/circuit/rv32im/v1/edsl/body.cpp:209
+PolyExtStep::AndEqz(2254, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
 PolyExtStep::AndCond(2232, 324, 2255), // components/mux.h:49
 PolyExtStep::AndCond(436, 780, 2256), // components/mux.h:49
 PolyExtStep::Get(52), // Top/Code/OneHot/hot[6](Reg)(components/mux.h:49)
@@ -13884,10 +13884,10 @@ PolyExtStep::Sub(10640, 10908), // components/plonk.h:289
 PolyExtStep::AndEqz(2940, 10915), // components/plonk.h:289
 PolyExtStep::Sub(10641, 10909), // components/plonk.h:289
 PolyExtStep::AndEqz(2941, 10916), // components/plonk.h:289
-PolyExtStep::Get(40), // Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[0](Reg)(components/plonk.h:288)
-PolyExtStep::Get(41), // Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[1](Reg)(components/plonk.h:288)
-PolyExtStep::Get(42), // Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[2](Reg)(components/plonk.h:288)
-PolyExtStep::Get(43), // Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[3](Reg)(components/plonk.h:288)
+PolyExtStep::Get(40), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/mem_io(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[0](Reg)(components/plonk.h:288)
+PolyExtStep::Get(41), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/mem_io(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[1](Reg)(components/plonk.h:288)
+PolyExtStep::Get(42), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/mem_io(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[2](Reg)(components/plonk.h:288)
+PolyExtStep::Get(43), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/mem_io(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[3](Reg)(components/plonk.h:288)
 PolyExtStep::Mul(10917, 10874), // components/plonk.h:289
 PolyExtStep::Mul(10917, 10875), // components/plonk.h:289
 PolyExtStep::Mul(10917, 10877), // components/plonk.h:289
@@ -14897,73 +14897,73 @@ PolyExtStep::AndEqz(3332, 11535), // components/onehot.h:31
 PolyExtStep::AndEqz(3333, 11283), // components/bits.h:24
 PolyExtStep::AndEqz(3334, 11284), // components/bits.h:24
 PolyExtStep::AndEqz(3335, 11285), // components/bits.h:24
-PolyExtStep::GetGlobal(1, 36), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[0](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
-PolyExtStep::GetGlobal(1, 37), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[1](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
-PolyExtStep::GetGlobal(1, 38), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[2](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
-PolyExtStep::GetGlobal(1, 39), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[3](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
-PolyExtStep::Get(635), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(642), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(649), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(656), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(663), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(670), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(677), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(684), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(691), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(698), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(705), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(712), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(719), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(726), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(733), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(740), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(747), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(754), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(761), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(768), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(775), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(782), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(789), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(796), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(803), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(810), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(817), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(824), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(831), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(838), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(845), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(636), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(643), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(650), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(657), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(664), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(671), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(678), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(685), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(692), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(699), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(706), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(713), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(720), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(727), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(734), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(741), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(748), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(755), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(762), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(769), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(776), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(783), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(790), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(797), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(804), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(811), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(818), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(825), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(832), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(839), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(846), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
-PolyExtStep::Get(853), // Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::GetGlobal(1, 36), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/FpExtReg/elem[0](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
+PolyExtStep::GetGlobal(1, 37), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/FpExtReg/elem[1](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
+PolyExtStep::GetGlobal(1, 38), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/FpExtReg/elem[2](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
+PolyExtStep::GetGlobal(1, 39), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/FpExtReg/elem[3](Reg)(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:479)
+PolyExtStep::Get(635), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(642), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(649), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(656), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(663), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(670), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(677), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(684), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(691), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(698), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(705), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(712), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(719), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(726), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(733), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(740), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(747), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(754), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(761), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(768), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(775), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(782), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(789), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(796), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(803), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(810), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(817), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(824), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(831), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(838), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(845), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(636), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(643), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(650), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(657), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(664), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(671), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(678), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(685), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(692), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(699), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(706), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(713), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(720), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(727), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(734), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(741), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(748), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(755), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(762), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(769), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(776), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(783), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(790), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(797), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(804), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(811), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(818), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(825), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(832), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(839), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(846), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
+PolyExtStep::Get(853), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/big_int(BigIntCycle)/Reg(zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493)
 PolyExtStep::Mul(11540, 828), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493
 PolyExtStep::Mul(11541, 828), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493
 PolyExtStep::Mul(11542, 828), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:493
