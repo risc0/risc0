@@ -40,8 +40,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_read, sys_read_words,
-        sys_write,
+        bigint, sys_bigint, sys_execute_zkr, sys_exit, sys_fork, sys_log, sys_pipe, sys_read,
+        sys_read_words, sys_write,
     },
     PAGE_SIZE,
 };
@@ -378,6 +378,50 @@ fn main() {
             if pid == 0 {
                 env::commit_slice(b"should panic");
             }
+        }
+        MultiTestSpec::RunUnconstrained {
+            unconstrained,
+            cycles,
+        } => {
+            // Calculate cycles left to the target cycle count, since
+            // we've used a bunch paging in the program and reading
+            // input.
+            let cycles_left: u32 = (cycles - env::cycle_count()).try_into().unwrap();
+            env::log("Starting running unconstrained");
+
+            // Runs a busy loop to advance the current cycle counter to `cycles`.
+            let busy_loop = || {
+                // Unfortunately we can't use env::cycle_count like
+                // MultiTestSpec::BusyLoop does, since it's always
+                // zero when running unconstrained.
+
+                const CYCLES_PER_LOOP: u32 = 2; // Determined empirically
+
+                for _ in 0..cycles_left / CYCLES_PER_LOOP {
+                    unsafe { asm!("") }
+                }
+            };
+            if unconstrained {
+                // test; run in unconstrained mode
+                env::run_unconstrained(busy_loop);
+                env::log("Done running unconstrained");
+            } else {
+                // control; run in regular constrained proven mode
+                busy_loop();
+                env::log("Done running control");
+            }
+        }
+        MultiTestSpec::SysExecuteZkr {
+            control_id,
+            input,
+            claim_digest,
+            control_root,
+        } => {
+            unsafe {
+                sys_execute_zkr(control_id.as_ref(), input.as_ptr(), input.len());
+            }
+            env::verify_assumption(claim_digest, control_root)
+                .expect("env::verify_integrity returned error");
         }
     }
 }
