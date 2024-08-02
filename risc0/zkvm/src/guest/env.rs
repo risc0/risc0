@@ -68,15 +68,14 @@
 //! [proof composition]:https://www.risczero.com/blog/proof-composition
 //! [guest-optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
-use core::{cell::OnceCell, convert::Infallible, fmt};
-
+use alloc::alloc::{alloc, Layout};
 use bytemuck::Pod;
+use core::{cell::OnceCell, convert::Infallible, fmt};
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_alloc_words, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log,
-        sys_pause, sys_read, sys_read_words, sys_verify_integrity, sys_write, syscall_2,
-        SyscallName,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
+        sys_read, sys_read_words, sys_verify_integrity, sys_write, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -103,7 +102,8 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 /// information leakage through the post-state digest.
 static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
-pub(crate) fn init() {
+/// Initialize globals before program main
+pub fn init() {
     unsafe {
         HASHER.set(Sha256::new()).unwrap();
         syscall::sys_rand(
@@ -113,7 +113,8 @@ pub(crate) fn init() {
     }
 }
 
-pub(crate) fn finalize(halt: bool, user_exit: u8) {
+/// Finalize execution
+pub fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
@@ -322,10 +323,15 @@ pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infa
 /// receives the return data.
 ///
 /// On the host side, implement SliceIo to provide a handler for this call.
+///
+/// NOTE: This method never frees up the buffer memory storing the host's response.
 pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
     let syscall::Return(nbytes, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
     let nwords = align_up(nbytes as usize, WORD_SIZE) / WORD_SIZE;
-    let from_host_buf = unsafe { core::slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
+    let from_host_buf = unsafe {
+        let layout = Layout::from_size_align(nwords * WORD_SIZE, 4).unwrap();
+        core::slice::from_raw_parts_mut(alloc(layout) as *mut u32, nwords)
+    };
     syscall(syscall_name, &[], from_host_buf);
     &bytemuck::cast_slice(from_host_buf)[..nbytes as usize / core::mem::size_of::<U>()]
 }
