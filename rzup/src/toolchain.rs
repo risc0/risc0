@@ -322,7 +322,7 @@ impl Toolchain {
                 }
 
                 verbose_msg!(format!(
-                    "Creating symnlink for toolchain at {}",
+                    "Creating symlink for toolchain at {}",
                     cpp_link.display()
                 ));
 

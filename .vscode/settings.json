@@ -74,8 +74,7 @@
     "examples/Cargo.toml",
     "risc0/zkvm/methods/guest/Cargo.toml",
     "risc0/zkvm/methods/std/Cargo.toml",
-    "tools/crates-validator/Cargo.toml",
-    "rzup/Cargo.toml"
+    "tools/crates-validator/Cargo.toml"
   ],
   "cSpell.words": [
     "Groth",
