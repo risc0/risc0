@@ -383,13 +383,17 @@ fn main() {
             unconstrained,
             cycles,
         } => {
-            // Calculate cycles left to target after paging in program and input:
+            // Calculate cycles left to the target cycle count, since
+            // we've used a bunch paging in the program and reading
+            // input.
             let cycles_left: u32 = (cycles - env::cycle_count()).try_into().unwrap();
             env::log("Starting running unconstrained");
 
-            let f = || {
-                // Unfortunately we can't use env::cycle_count since
-                // it's always zero when running unconstrained.
+            // Runs a busy loop to advance the current cycle counter to `cycles`.
+            let busy_loop = || {
+                // Unfortunately we can't use env::cycle_count like
+                // MultiTestSpec::BusyLoop does, since it's always
+                // zero when running unconstrained.
 
                 const CYCLES_PER_LOOP: u32 = 2; // Determined empirically
 
@@ -398,12 +402,12 @@ fn main() {
                 }
             };
             if unconstrained {
-                // test
-                env::run_unconstrained(f);
+                // test; run in unconstrained mode
+                env::run_unconstrained(busy_loop);
                 env::log("Done running unconstrained");
             } else {
-                // control
-                f();
+                // control; run in regular constrained proven mode
+                busy_loop();
                 env::log("Done running control");
             }
         }

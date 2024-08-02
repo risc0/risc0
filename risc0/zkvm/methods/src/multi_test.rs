@@ -101,6 +101,7 @@ pub enum MultiTestSpec {
     RunUnconstrained {
         // True to actually call run_unconstrained, false to run the busy loop directly as a control.
         unconstrained: bool,
+        // Number of guest cycles to use, including startup.
         cycles: u64,
     },
     SysExecuteZkr {
