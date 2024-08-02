@@ -115,9 +115,13 @@ pub mod heap {
         critical_section::set_impl!(MyCriticalSection);
 
         unsafe impl critical_section::Impl for MyCriticalSection {
-            unsafe fn acquire() -> RawRestoreState {}
+            unsafe fn acquire() -> RawRestoreState {
+                // this is a no-op. we're in a single-threaded, nonpreemptive context
+            }
 
-            unsafe fn release(_token: RawRestoreState) {}
+            unsafe fn release(_token: RawRestoreState) {
+                // this is a no-op. we're in a single-threaded, nonpreemptive context
+            }
         }
 
         #[global_allocator]

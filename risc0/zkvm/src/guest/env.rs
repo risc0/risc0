@@ -103,7 +103,7 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
 /// Initialize globals before program main
-pub fn init() {
+pub(crate) fn init() {
     unsafe {
         HASHER.set(Sha256::new()).unwrap();
         syscall::sys_rand(
@@ -114,7 +114,7 @@ pub fn init() {
 }
 
 /// Finalize execution
-pub fn finalize(halt: bool, user_exit: u8) {
+pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
