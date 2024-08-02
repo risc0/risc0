@@ -35,9 +35,14 @@ struct RamHeader {
   RamPlonkVerifier verifier;
   MixReg4LayoutArray7LayoutArray mix;
 };
+struct PcReg {
+  DataReg twits;
+  DataReg bytes;
+};
 struct BodyStep {
   Global global;
   RamHeader header;
+  PcReg pc;
 };
 struct Mux {
   BodyStep body;
@@ -105,7 +110,8 @@ __device__ constexpr Top kLayout =
                                                          {20, 21, 22, 23},
                                                          {24, 25, 26, 27},
                                                          {28, 29, 30, 31},
-                                                         {32, 33, 34, 35}}}},
+                                                         {32, 33, 34, 35}}},
+                             .pc = PcReg{.twits = 70, .bytes = 6}},
             .ramFini = RamHeader{.accum = {24, 25, 26, 27},
                                  .element = RamPlonkElement{.addr = 89,
                                                             .cycle = 90,

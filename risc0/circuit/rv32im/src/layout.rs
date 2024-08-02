@@ -25,4 +25,4 @@ layout_buffer!(out, BabyBearElem);
 layout_buffer!(mix, BabyBearElem);
 layout_buffer!(accum, BabyBearElem);
 
-include! {"layout.rs.inc"}
+include! {"layout.inc.rs"}

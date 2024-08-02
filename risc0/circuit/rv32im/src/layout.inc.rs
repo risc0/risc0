@@ -100,9 +100,25 @@ impl risc0_zkp::layout::Component for RamHeader {
         Ok(())
     }
 }
+pub struct PcReg {
+    pub twits: &'static DataReg,
+    pub bytes: &'static DataReg,
+}
+impl risc0_zkp::layout::Component for PcReg {
+    fn ty_name(&self) -> &'static str {
+        "PcReg"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("twits", self.twits)?;
+        v.visit_component("bytes", self.bytes)?;
+        Ok(())
+    }
+}
 pub struct BodyStep {
     pub global: &'static Global,
     pub header: &'static RamHeader,
+    pub pc: &'static PcReg,
 }
 impl risc0_zkp::layout::Component for BodyStep {
     fn ty_name(&self) -> &'static str {
@@ -112,6 +128,7 @@ impl risc0_zkp::layout::Component for BodyStep {
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("global", self.global)?;
         v.visit_component("header", self.header)?;
+        v.visit_component("pc", self.pc)?;
         Ok(())
     }
 }
@@ -447,6 +464,10 @@ pub const LAYOUT: &Top = &Top {
                         &MixReg { offset: 35 },
                     ],
                 ],
+            },
+            pc: &PcReg {
+                twits: &DataReg { offset: 70 },
+                bytes: &DataReg { offset: 6 },
             },
         },
         ram_fini: &RamHeader {

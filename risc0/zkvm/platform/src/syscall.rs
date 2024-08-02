@@ -24,6 +24,8 @@ pub mod ecall {
     pub const SOFTWARE: u32 = 2;
     pub const SHA: u32 = 3;
     pub const BIGINT: u32 = 4;
+    pub const USER: u32 = 5;
+    pub const MACHINE: u32 = 5;
 }
 
 pub mod halt {

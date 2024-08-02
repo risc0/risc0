@@ -68,5 +68,4 @@ prove = [
   "risc0-circuit-rv32im-sys",
   "std",
 ]
-seq = ["prove"]
 std = ["risc0-zkp/std", "serde/std"]
