@@ -2352,7 +2352,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x487 = x484 + x486;
       // loc("./zirgen/components/onehot.h":40:8)
       if (x487 != 0) throw std::runtime_error("eqz failed at: ./zirgen/components/onehot.h:40");
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":71:5)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":69:5)
       {
         auto& reg = args[2][176 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x98);
@@ -2716,7 +2716,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           reg = x519;
         }
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":79:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":77:17)
       auto x520 = x99 - x482;
       if (x520 != 0) {
         // loc("Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
@@ -3079,7 +3079,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       {
         // loc("Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x553 = args[1][32];
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":87:21)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":84:28)
         auto x554 = Fp(x553.asUInt32() & x99.asUInt32());
         // loc("./zirgen/components/bits.h":27:23)
         {
@@ -3111,7 +3111,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x564 = x563 + x561;
       // loc("./zirgen/components/u32.h":24:12)
       auto x565 = x564 + x562;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":89:13)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":85:13)
       auto x566 = x565 - x559;
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":24:23)
       auto x567 = x566 + x81;
@@ -3167,7 +3167,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x579 = x578 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x580 = Fp(x579.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -3179,9 +3179,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x581 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x581 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x582 = x579 - x581;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x583 = x582 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -3192,26 +3192,26 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x584 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x584 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x585 = x99 - x584;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x586 = x584 * x585;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x586);
         reg = x586;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x587 = x96 - x584;
       // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x588 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x588 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x589 = x588 * x587;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x589 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":91:19)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x589 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":87:19)
       auto x590 = x569 * x78;
       {
         // loc("zirgen/components/bytes.cpp":96:21)
@@ -3289,23 +3289,23 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
       auto x601 = args[2][8 * steps + ((cycle - 1) & mask)];
       assert(x601 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":38:10)
       auto x602 = x598 * x93;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":42:10)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
       auto x603 = x599 * x82;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":43:10)
-      auto x604 = x600 * x77;
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":41:10)
+      auto x604 = x600 * x77;
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
       auto x605 = x601 * x80;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
       auto x606 = x597 + x602;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
       auto x607 = x606 + x605;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
       auto x608 = x607 + x603;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
       auto x609 = x608 + x604;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
       auto x610 = x609 - x81;
       // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":24:23)
       auto x611 = x610 + x81;
@@ -3361,7 +3361,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x623 = x622 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x624 = Fp(x623.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -3373,9 +3373,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x625 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x625 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x626 = x623 - x625;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x627 = x626 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -3386,25 +3386,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x628 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x628 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x629 = x99 - x628;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x630 = x628 * x629;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x630);
         reg = x630;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x631 = x96 - x628;
       // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x632 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x632 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x633 = x632 * x631;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x633 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x633 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       if (x482 != 0) {
         // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x634 = args[2][102 * steps + ((cycle - 1) & mask)];
@@ -3507,20 +3507,20 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         auto x675 = x674 + x661;
         // loc("./zirgen/components/onehot.h":46:13)
         auto x676 = x675 + x662;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":101:42)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":97:42)
         auto x677 = x676 - x71;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":101:42)
-        if (x677 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:101");
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":103:61))
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":97:42)
+        if (x677 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:97");
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":99:61))
         auto x678 = args[2][117 * steps + ((cycle - 1) & mask)];
         assert(x678 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":103:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":99:7)
         {
           auto& reg = args[2][176 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x678);
           reg = x678;
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":105:53))
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":101:53))
         auto x679 = args[2][119 * steps + ((cycle - 1) & mask)];
         assert(x679 != Fp::invalid());
         {
@@ -3612,7 +3612,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         args[1][108] = x686;
         // loc("zirgen/components/u32.cpp":34:5)
         args[1][109] = x687;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:55)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":104:55)
         auto x688 = x679 + x99;
         {
           auto [x689, x690, x691, x692] = extern_ramRead(ctx, cycle, "", {x688, x98});
@@ -3703,7 +3703,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         args[1][112] = x695;
         // loc("zirgen/components/u32.cpp":34:5)
         args[1][113] = x696;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:55)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":104:55)
         auto x697 = x679 + x96;
         {
           auto [x698, x699, x700, x701] = extern_ramRead(ctx, cycle, "", {x697, x98});
@@ -3794,7 +3794,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         args[1][116] = x704;
         // loc("zirgen/components/u32.cpp":34:5)
         args[1][117] = x705;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:55)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":104:55)
         auto x706 = x679 + x79;
         {
           auto [x707, x708, x709, x710] = extern_ramRead(ctx, cycle, "", {x706, x98});
@@ -3886,22 +3886,22 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/u32.cpp":34:5)
         args[1][121] = x714;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":112:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:17)
       auto x715 = x99 - x482;
       if (x715 != 0) {
-        // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:50))
+        // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":111:50))
         auto x716 = args[2][176 * steps + ((cycle - 1) & mask)];
         assert(x716 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":114:53))
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":110:53))
         auto x717 = args[2][119 * steps + ((cycle - 2) & mask)];
         assert(x717 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":111:7)
         {
           auto& reg = args[2][176 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x716);
           reg = x716;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
         auto x718 = x717 + x81;
         {
           auto [x719, x720, x721, x722] = extern_ramRead(ctx, cycle, "", {x718, x98});
@@ -3992,7 +3992,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         args[1][124] = x725;
         // loc("zirgen/components/u32.cpp":34:5)
         args[1][125] = x726;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
         auto x727 = x718 + x99;
         {
           auto [x728, x729, x730, x731] = extern_ramRead(ctx, cycle, "", {x727, x98});
@@ -4083,7 +4083,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         args[1][128] = x734;
         // loc("zirgen/components/u32.cpp":34:5)
         args[1][129] = x735;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
         auto x736 = x718 + x96;
         {
           auto [x737, x738, x739, x740] = extern_ramRead(ctx, cycle, "", {x736, x98});
@@ -4174,7 +4174,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         args[1][132] = x743;
         // loc("zirgen/components/u32.cpp":34:5)
         args[1][133] = x744;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
         auto x745 = x718 + x79;
         {
           auto [x746, x747, x748, x749] = extern_ramRead(ctx, cycle, "", {x745, x98});
@@ -4277,16 +4277,16 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         assert(reg == Fp::invalid() || reg == x754);
         reg = x754;
       }
-      // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":126:48))
+      // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":122:48))
       auto x755 = args[2][176 * steps + ((cycle - 1) & mask)];
       assert(x755 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":126:5)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":122:5)
       {
         auto& reg = args[2][176 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x755);
         reg = x755;
       }
-      // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":127:19))
+      // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":123:19))
       auto x756 = args[2][176 * steps + ((cycle - 0) & mask)];
       assert(x756 != Fp::invalid());
       {
@@ -4341,10 +4341,10 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           reg = x98;
         }
       }
-      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":131:31))
+      // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":127:31))
       auto x767 = args[2][173 * steps + ((cycle - 0) & mask)];
       assert(x767 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":131:27)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":127:27)
       auto x768 = x99 - x767;
       if (x482 != 0) {
         // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
@@ -4362,23 +4362,23 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
         auto x773 = args[2][8 * steps + ((cycle - 1) & mask)];
         assert(x773 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":38:10)
         auto x774 = x770 * x93;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":42:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
         auto x775 = x771 * x82;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":43:10)
-        auto x776 = x772 * x77;
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":41:10)
+        auto x776 = x772 * x77;
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
         auto x777 = x773 * x80;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x778 = x769 + x774;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x779 = x778 + x777;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x780 = x779 + x775;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x781 = x780 + x776;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x782 = x781 - x81;
         {
           // loc("zirgen/components/bytes.cpp":96:21)
@@ -4432,7 +4432,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x794 = x793 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x795 = Fp(x794.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -4444,9 +4444,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x796 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x796 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x797 = x794 - x796;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x798 = x797 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -4457,25 +4457,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x799 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x799 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x800 = x99 - x799;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x801 = x799 * x800;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x801);
           reg = x801;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x802 = x96 - x799;
         // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x803 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x803 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x804 = x803 * x802;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x804 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x804 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         {
           auto [x805, x806, x807, x808] = extern_ramRead(ctx, cycle, "", {x90, x98});
           // loc("zirgen/components/u32.cpp":88:5)
@@ -4864,11 +4864,11 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         auto x852 = x848 * x768;
         // loc("zirgen/components/u32.cpp":40:5)
         args[1][87] = x852;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:52)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:52)
         auto x853 = x799 * x81;
         // loc("zirgen/components/u32.cpp":95:20)
         auto x854 = x784 + x754;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:41)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:41)
         auto x855 = x796 + x853;
         // loc("zirgen/components/u32.cpp":40:19)
         auto x856 = x854 * x768;
@@ -4887,7 +4887,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/u32.cpp":40:5)
         args[1][71] = x859;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":144:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":140:17)
       auto x860 = x99 - x482;
       if (x860 != 0) {
         // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
@@ -4905,23 +4905,23 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
         auto x865 = args[2][8 * steps + ((cycle - 1) & mask)];
         assert(x865 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":38:10)
         auto x866 = x862 * x93;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":42:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
         auto x867 = x863 * x82;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":43:10)
-        auto x868 = x864 * x77;
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":41:10)
+        auto x868 = x864 * x77;
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
         auto x869 = x865 * x80;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x870 = x861 + x866;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x871 = x870 + x869;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x872 = x871 + x867;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x873 = x872 + x868;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
         auto x874 = x873 - x81;
         // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":24:23)
         auto x875 = x874 + x81;
@@ -4977,7 +4977,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x887 = x886 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x888 = Fp(x887.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -4989,9 +4989,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x889 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x889 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x890 = x887 - x889;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x891 = x890 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -5002,25 +5002,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x892 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x892 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x893 = x99 - x892;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x894 = x892 * x893;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x894);
           reg = x894;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x895 = x96 - x892;
         // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x896 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x896 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x897 = x896 * x895;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x897 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x897 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         {
           auto [x898, x899, x900, x901] = extern_ramRead(ctx, cycle, "", {x86, x98});
           // loc("zirgen/components/u32.cpp":88:5)
@@ -5411,7 +5411,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         args[1][103] = x945;
       }
     }
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":154:3)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":150:3)
     {
       auto& reg = args[2][100 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x65);
@@ -5432,23 +5432,23 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
     auto x950 = args[2][8 * steps + ((cycle - 0) & mask)];
     assert(x950 != Fp::invalid());
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":38:10)
     auto x951 = x947 * x93;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":42:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
     auto x952 = x948 * x82;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":43:10)
-    auto x953 = x949 * x77;
     // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":41:10)
+    auto x953 = x949 * x77;
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
     auto x954 = x950 * x80;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x955 = x946 + x951;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x956 = x955 + x954;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x957 = x956 + x952;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x958 = x957 + x953;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x959 = x958 - x81;
     extern_log(ctx, cycle, "%u: Reset: PC = %10x", {x483, x959});
   }
@@ -5474,31 +5474,31 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
     // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
     auto x966 = args[2][8 * steps + ((cycle - 1) & mask)];
     assert(x966 != Fp::invalid());
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":38:10)
     auto x967 = x963 * x93;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":42:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
     auto x968 = x964 * x82;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":43:10)
-    auto x969 = x965 * x77;
     // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":41:10)
+    auto x969 = x965 * x77;
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
     auto x970 = x966 * x80;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x971 = x962 + x967;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x972 = x971 + x970;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x973 = x972 + x968;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x974 = x973 + x969;
-    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+    // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
     auto x975 = x974 - x81;
     {
-      // loc("Top/mux(Mux)/body(BodyStep)/next_major(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":241:45))
+      // loc("Top/mux(Mux)/body(BodyStep)/next_major(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":233:45))
       auto x976 = args[2][100 * steps + ((cycle - 1) & mask)];
       assert(x976 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":242:24)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":234:24)
       auto x977 = x976 - x65;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":242:24)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":234:24)
       auto x978 = (x977 == 0) ? Fp(1) : Fp(0);
       if (x978 != 0) {
         extern_log(ctx, cycle, "%u: BODY pc: %10x", {x961, x975});
@@ -5770,14 +5770,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("./zirgen/components/onehot.h":40:8)
         if (x1054 != 0) throw std::runtime_error("eqz failed at: ./zirgen/components/onehot.h:40");
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":249:20)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":241:20)
       auto x1055 = x99 - x978;
       if (x1055 != 0) {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":250:47)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":242:47)
         auto x1056 = x976 - x71;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":250:47)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":242:47)
         auto x1057 = (x1056 == 0) ? Fp(1) : Fp(0);
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":250:47)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":242:47)
         auto x1058 = x99 - x1057;
         if (x1058 != 0) {
           extern_log(ctx, cycle, "%u: BODY pc: %10x, major = %u", {x961, x975, x976});
@@ -7336,7 +7336,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x1318 = x1313 * x1310;
       // loc("zirgen/components/u32.cpp":111:20)
       auto x1319 = x1313 * x1311;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:52)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:52)
       auto x1320 = x965 * x81;
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":143:17)
       auto x1321 = x99 - x1312;
@@ -7344,7 +7344,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x1322 = x99 - x1313;
       // loc("zirgen/components/u32.cpp":103:20)
       auto x1323 = x962 - x81;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:41)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:41)
       auto x1324 = x964 + x1320;
       // loc("zirgen/components/u32.cpp":111:20)
       auto x1325 = x1321 * x1293;
@@ -8026,7 +8026,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1492 = x1491 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1493 = Fp(x1492.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -8038,9 +8038,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1494 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1494 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1495 = x1492 - x1494;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1496 = x1495 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -8051,25 +8051,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1497 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1497 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1498 = x99 - x1497;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1499 = x1497 * x1498;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1499);
           reg = x1499;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1500 = x96 - x1497;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1501 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1501 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1502 = x1501 * x1500;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1502 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1502 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1503 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1503 != Fp::invalid());
@@ -8338,7 +8338,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1524 = x1523 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1525 = Fp(x1524.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -8350,9 +8350,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1526 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1526 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1527 = x1524 - x1526;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1528 = x1527 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -8363,25 +8363,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1529 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1529 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1530 = x99 - x1529;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1531 = x1529 * x1530;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1531);
           reg = x1531;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1532 = x96 - x1529;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1533 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1533 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1534 = x1533 * x1532;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1534 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1534 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1535 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1535 != Fp::invalid());
@@ -8650,7 +8650,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1556 = x1555 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1557 = Fp(x1556.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -8662,9 +8662,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1558 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1558 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1559 = x1556 - x1558;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1560 = x1559 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -8675,25 +8675,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1561 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1561 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1562 = x99 - x1561;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1563 = x1561 * x1562;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1563);
           reg = x1563;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1564 = x96 - x1561;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1565 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1565 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1566 = x1565 * x1564;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1566 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1566 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1567 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1567 != Fp::invalid());
@@ -8962,7 +8962,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1588 = x1587 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1589 = Fp(x1588.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -8974,9 +8974,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1590 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1590 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1591 = x1588 - x1590;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1592 = x1591 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -8987,25 +8987,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1593 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1593 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1594 = x99 - x1593;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1595 = x1593 * x1594;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1595);
           reg = x1595;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1596 = x96 - x1593;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1597 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1597 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1598 = x1597 * x1596;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1598 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1598 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1599 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1599 != Fp::invalid());
@@ -9274,7 +9274,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1620 = x1619 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1621 = Fp(x1620.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -9286,9 +9286,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1622 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1622 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1623 = x1620 - x1622;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1624 = x1623 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -9299,25 +9299,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1625 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1625 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1626 = x99 - x1625;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1627 = x1625 * x1626;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1627);
           reg = x1627;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1628 = x96 - x1625;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1629 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1629 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1630 = x1629 * x1628;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1630 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1630 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1631 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1631 != Fp::invalid());
@@ -9586,7 +9586,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1652 = x1651 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1653 = Fp(x1652.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -9598,9 +9598,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1654 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1654 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1655 = x1652 - x1654;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1656 = x1655 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -9611,25 +9611,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1657 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1657 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1658 = x99 - x1657;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1659 = x1657 * x1658;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1659);
           reg = x1659;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1660 = x96 - x1657;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1661 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1661 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1662 = x1661 * x1660;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1662 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1662 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1663 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1663 != Fp::invalid());
@@ -9898,7 +9898,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1684 = x1683 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1685 = Fp(x1684.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -9910,9 +9910,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1686 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1686 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1687 = x1684 - x1686;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1688 = x1687 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -9923,25 +9923,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1689 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1689 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1690 = x99 - x1689;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1691 = x1689 * x1690;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1691);
           reg = x1691;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1692 = x96 - x1689;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1693 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1693 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1694 = x1693 * x1692;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1694 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1694 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1695 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1695 != Fp::invalid());
@@ -10224,7 +10224,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x1724 = x1723 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x1725 = Fp(x1724.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -10236,9 +10236,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1726 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x1726 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x1727 = x1724 - x1726;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x1728 = x1727 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -10249,25 +10249,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1729 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x1729 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x1730 = x99 - x1729;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x1731 = x1729 * x1730;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1731);
           reg = x1731;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x1732 = x96 - x1729;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x1733 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x1733 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x1734 = x1733 * x1732;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x1734 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x1734 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x1735 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x1735 != Fp::invalid());
@@ -10414,14 +10414,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x1742 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x1742 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x1743 = x1741 * x1742;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:26)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:26)
       auto x1744 = x99 - x1742;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x1745 = x1743 * x1744;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x1745 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x1745 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[1](Reg)"("./zirgen/components/mux.h":49:25))
     auto x1746 = args[2][102 * steps + ((cycle - 0) & mask)];
@@ -11886,7 +11886,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x2018 = x2013 * x2010;
       // loc("zirgen/components/u32.cpp":111:20)
       auto x2019 = x2013 * x2011;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:52)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:52)
       auto x2020 = x965 * x81;
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":143:17)
       auto x2021 = x99 - x2012;
@@ -11894,7 +11894,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x2022 = x99 - x2013;
       // loc("zirgen/components/u32.cpp":103:20)
       auto x2023 = x962 - x81;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:41)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:41)
       auto x2024 = x964 + x2020;
       // loc("zirgen/components/u32.cpp":111:20)
       auto x2025 = x2021 * x1993;
@@ -12630,7 +12630,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2220 = x2219 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2221 = Fp(x2220.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -12642,9 +12642,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2222 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2222 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2223 = x2220 - x2222;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2224 = x2223 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -12655,25 +12655,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2225 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2225 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2226 = x99 - x2225;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2227 = x2225 * x2226;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2227);
           reg = x2227;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2228 = x96 - x2225;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2229 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2229 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2230 = x2229 * x2228;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2230 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2230 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2231 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2231 != Fp::invalid());
@@ -12958,7 +12958,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2261 = x2260 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2262 = Fp(x2261.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -12970,9 +12970,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2263 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2263 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2264 = x2261 - x2263;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2265 = x2264 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -12983,25 +12983,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2266 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2266 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2267 = x99 - x2266;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2268 = x2266 * x2267;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2268);
           reg = x2268;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2269 = x96 - x2266;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2270 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2270 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2271 = x2270 * x2269;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2271 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2271 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2272 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2272 != Fp::invalid());
@@ -13286,7 +13286,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2302 = x2301 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2303 = Fp(x2302.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -13298,9 +13298,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2304 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2304 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2305 = x2302 - x2304;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2306 = x2305 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -13311,25 +13311,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2307 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2307 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2308 = x99 - x2307;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2309 = x2307 * x2308;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2309);
           reg = x2309;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2310 = x96 - x2307;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2311 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2311 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2312 = x2311 * x2310;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2312 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2312 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2313 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2313 != Fp::invalid());
@@ -13614,7 +13614,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2343 = x2342 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2344 = Fp(x2343.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -13626,9 +13626,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2345 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2345 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2346 = x2343 - x2345;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2347 = x2346 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -13639,25 +13639,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2348 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2348 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2349 = x99 - x2348;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2350 = x2348 * x2349;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2350);
           reg = x2350;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2351 = x96 - x2348;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2352 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2352 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2353 = x2352 * x2351;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2353 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2353 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2354 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2354 != Fp::invalid());
@@ -13942,7 +13942,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2384 = x2383 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2385 = Fp(x2384.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -13954,9 +13954,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2386 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2386 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2387 = x2384 - x2386;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2388 = x2387 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -13967,25 +13967,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2389 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2389 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2390 = x99 - x2389;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2391 = x2389 * x2390;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2391);
           reg = x2391;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2392 = x96 - x2389;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2393 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2393 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2394 = x2393 * x2392;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2394 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2394 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2395 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2395 != Fp::invalid());
@@ -14274,7 +14274,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2427 = x2426 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2428 = Fp(x2427.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -14286,9 +14286,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2429 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2429 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2430 = x2427 - x2429;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2431 = x2430 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -14299,25 +14299,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2432 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2432 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2433 = x99 - x2432;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2434 = x2432 * x2433;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2434);
           reg = x2434;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2435 = x96 - x2432;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2436 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2436 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2437 = x2436 * x2435;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2437 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2437 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2438 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2438 != Fp::invalid());
@@ -14610,7 +14610,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2472 = x2471 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2473 = Fp(x2472.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -14622,9 +14622,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2474 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2474 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2475 = x2472 - x2474;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2476 = x2475 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -14635,25 +14635,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2477 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2477 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2478 = x99 - x2477;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2479 = x2477 * x2478;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2479);
           reg = x2479;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2480 = x96 - x2477;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2481 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2481 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2482 = x2481 * x2480;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2482 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2482 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2483 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2483 != Fp::invalid());
@@ -14946,7 +14946,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2517 = x2516 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2518 = Fp(x2517.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -14958,9 +14958,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2519 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2519 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2520 = x2517 - x2519;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2521 = x2520 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -14971,25 +14971,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2522 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2522 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2523 = x99 - x2522;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x2524 = x2522 * x2523;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2524);
           reg = x2524;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x2525 = x96 - x2522;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x2526 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x2526 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x2527 = x2526 * x2525;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x2527 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x2527 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute1(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2528 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x2528 != Fp::invalid());
@@ -15138,14 +15138,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x2536 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x2536 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x2537 = x2535 * x2536;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:26)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:26)
       auto x2538 = x99 - x2536;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x2539 = x2537 * x2538;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x2539 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x2539 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[2](Reg)"("./zirgen/components/mux.h":49:25))
     auto x2540 = args[2][103 * steps + ((cycle - 0) & mask)];
@@ -16489,7 +16489,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x2783 = x2778 * x2775;
       // loc("zirgen/components/u32.cpp":111:20)
       auto x2784 = x2778 * x2776;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:52)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:52)
       auto x2785 = x965 * x81;
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":143:17)
       auto x2786 = x99 - x2777;
@@ -16497,7 +16497,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       auto x2787 = x99 - x2778;
       // loc("zirgen/components/u32.cpp":103:20)
       auto x2788 = x962 - x81;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:41)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:41)
       auto x2789 = x964 + x2785;
       // loc("zirgen/components/u32.cpp":111:20)
       auto x2790 = x2786 * x2758;
@@ -17249,7 +17249,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x2993 = x2992 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x2994 = Fp(x2993.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -17261,9 +17261,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2995 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x2995 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x2996 = x2993 - x2995;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x2997 = x2996 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -17274,25 +17274,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x2998 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x2998 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x2999 = x99 - x2998;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x3000 = x2998 * x2999;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x3000);
           reg = x3000;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x3001 = x96 - x2998;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3002 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x3002 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x3003 = x3002 * x3001;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x3003 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x3003 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute2(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3004 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3004 != Fp::invalid());
@@ -17585,7 +17585,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x3038 = x3037 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x3039 = Fp(x3038.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -17597,9 +17597,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3040 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x3040 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x3041 = x3038 - x3040;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x3042 = x3041 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -17610,25 +17610,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3043 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x3043 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x3044 = x99 - x3043;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x3045 = x3043 * x3044;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x3045);
           reg = x3045;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x3046 = x96 - x3043;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3047 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x3047 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x3048 = x3047 * x3046;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x3048 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x3048 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute2(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3049 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3049 != Fp::invalid());
@@ -17921,7 +17921,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x3083 = x3082 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x3084 = Fp(x3083.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -17933,9 +17933,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3085 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x3085 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x3086 = x3083 - x3085;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x3087 = x3086 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -17946,25 +17946,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3088 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x3088 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x3089 = x99 - x3088;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x3090 = x3088 * x3089;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x3090);
           reg = x3090;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x3091 = x96 - x3088;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3092 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x3092 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x3093 = x3092 * x3091;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x3093 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x3093 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute2(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3094 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3094 != Fp::invalid());
@@ -18257,7 +18257,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x3129 = x3128 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x3130 = Fp(x3129.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -18269,9 +18269,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3131 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x3131 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x3132 = x3129 - x3131;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x3133 = x3132 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -18282,25 +18282,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3134 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x3134 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x3135 = x99 - x3134;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x3136 = x3134 * x3135;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x3136);
           reg = x3136;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x3137 = x96 - x3134;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3138 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x3138 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x3139 = x3138 * x3137;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x3139 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x3139 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute2(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3140 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3140 != Fp::invalid());
@@ -18583,7 +18583,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x3169 = x3168 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x3170 = Fp(x3169.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -18595,9 +18595,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3171 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x3171 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x3172 = x3169 - x3171;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x3173 = x3172 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -18608,25 +18608,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3174 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x3174 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x3175 = x99 - x3174;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x3176 = x3174 * x3175;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x3176);
           reg = x3176;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x3177 = x96 - x3174;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3178 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x3178 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x3179 = x3178 * x3177;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x3179 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x3179 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute2(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3180 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3180 != Fp::invalid());
@@ -18889,7 +18889,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x3200 = x3199 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x3201 = Fp(x3200.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -18901,9 +18901,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3202 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x3202 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x3203 = x3200 - x3202;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x3204 = x3203 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -18914,25 +18914,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3205 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x3205 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x3206 = x99 - x3205;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x3207 = x3205 * x3206;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x3207);
           reg = x3207;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x3208 = x96 - x3205;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3209 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x3209 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x3210 = x3209 * x3208;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x3210 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x3210 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute2(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3211 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3211 != Fp::invalid());
@@ -19195,7 +19195,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x3231 = x3230 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x3232 = Fp(x3231.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -19207,9 +19207,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3233 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x3233 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x3234 = x3231 - x3233;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x3235 = x3234 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -19220,25 +19220,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3236 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x3236 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x3237 = x99 - x3236;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x3238 = x3236 * x3237;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x3238);
           reg = x3238;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x3239 = x96 - x3236;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x3240 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x3240 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x3241 = x3240 * x3239;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x3241 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x3241 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/compute2(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3242 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3242 != Fp::invalid());
@@ -19385,14 +19385,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x3249 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x3249 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x3250 = x3248 * x3249;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:26)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:26)
       auto x3251 = x99 - x3249;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x3252 = x3250 * x3251;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x3252 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x3252 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[3](Reg)"("./zirgen/components/mux.h":49:25))
     auto x3253 = args[2][104 * steps + ((cycle - 0) & mask)];
@@ -21059,7 +21059,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x3649 = x3648 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x3650 = Fp(x3649.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -21071,9 +21071,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x3651 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x3651 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x3652 = x3649 - x3651;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x3653 = x3652 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -21084,25 +21084,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x3654 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x3654 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x3655 = x99 - x3654;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x3656 = x3654 * x3655;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x3656);
         reg = x3656;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x3657 = x96 - x3654;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x3658 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x3658 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x3659 = x3658 * x3657;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x3659 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x3659 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":99:3)
       {
         auto& reg = args[2][100 * steps + cycle];
@@ -23415,12 +23415,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
           reg = x4010;
         }
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x4017 = x3617 * x3654;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x4018 = x4017 * x3655;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x4018 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x4018 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[4](Reg)"("./zirgen/components/mux.h":49:25))
     auto x4019 = args[2][105 * steps + ((cycle - 0) & mask)];
@@ -24989,7 +24989,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x4435 = x4434 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x4436 = Fp(x4435.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -25001,9 +25001,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4437 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x4437 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x4438 = x4435 - x4437;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x4439 = x4438 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -25014,25 +25014,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4440 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x4440 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x4441 = x99 - x4440;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x4442 = x4440 * x4441;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x4442);
         reg = x4442;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x4443 = x96 - x4440;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4444 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x4444 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x4445 = x4444 * x4443;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x4445 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x4445 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       // loc("zirgen/circuit/rv32im/v1/edsl/multiply.cpp":83:3)
       {
         auto& reg = args[2][100 * steps + cycle];
@@ -25343,12 +25343,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4475 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x4475 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x4476 = x4475 * x4440;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x4477 = x4476 * x4441;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x4477 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x4477 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[5](Reg)"("./zirgen/components/mux.h":49:25))
     auto x4478 = args[2][106 * steps + ((cycle - 0) & mask)];
@@ -26865,7 +26865,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x4813 = x4812 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x4814 = Fp(x4813.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -26877,9 +26877,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4815 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x4815 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x4816 = x4813 - x4815;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x4817 = x4816 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -26890,25 +26890,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4818 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x4818 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x4819 = x99 - x4818;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x4820 = x4818 * x4819;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x4820);
         reg = x4820;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x4821 = x96 - x4818;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x4822 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x4822 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x4823 = x4822 * x4821;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x4823 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x4823 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":112:3)
       {
         auto& reg = args[2][100 * steps + cycle];
@@ -27029,12 +27029,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x4847 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x4847 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x4848 = x4847 * x4818;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x4849 = x4848 * x4819;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x4849 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x4849 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[6](Reg)"("./zirgen/components/mux.h":49:25))
     auto x4850 = args[2][107 * steps + ((cycle - 0) & mask)];
@@ -28415,7 +28415,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x5274 = x5273 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x5275 = Fp(x5274.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -28427,9 +28427,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x5276 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x5276 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x5277 = x5274 - x5276;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x5278 = x5277 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -28440,25 +28440,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x5279 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x5279 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x5280 = x99 - x5279;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x5281 = x5279 * x5280;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x5281);
         reg = x5281;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x5282 = x96 - x5279;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5283 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x5283 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x5284 = x5283 * x5282;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x5284 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x5284 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":241:3)
       {
         auto& reg = args[2][100 * steps + cycle];
@@ -28468,12 +28468,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x5285 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x5285 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x5286 = x5285 * x5279;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x5287 = x5286 * x5280;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x5287 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x5287 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[7](Reg)"("./zirgen/components/mux.h":49:25))
     auto x5288 = args[2][108 * steps + ((cycle - 0) & mask)];
@@ -29673,7 +29673,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x5633 = x5632 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x5634 = Fp(x5633.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -29685,9 +29685,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x5635 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x5635 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x5636 = x5633 - x5635;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x5637 = x5636 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -29698,25 +29698,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x5638 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x5638 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x5639 = x99 - x5638;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x5640 = x5638 * x5639;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x5640);
         reg = x5640;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x5641 = x96 - x5638;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x5642 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x5642 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x5643 = x5642 * x5641;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x5643 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x5643 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":175:3)
       {
         auto& reg = args[2][100 * steps + cycle];
@@ -29726,12 +29726,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x5644 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x5644 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x5645 = x5644 * x5638;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x5646 = x5645 * x5639;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x5646 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x5646 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[8](Reg)"("./zirgen/components/mux.h":49:25))
     auto x5647 = args[2][109 * steps + ((cycle - 0) & mask)];
@@ -30439,7 +30439,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x5779 = x5778 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x5780 = Fp(x5779.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -30451,9 +30451,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x5781 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x5781 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x5782 = x5779 - x5781;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x5783 = x5782 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -30464,25 +30464,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x5784 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x5784 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x5785 = x99 - x5784;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x5786 = x5784 * x5785;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x5786);
           reg = x5786;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x5787 = x96 - x5784;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5788 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x5788 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x5789 = x5788 * x5787;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x5789 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x5789 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("./zirgen/components/bits.h":27:23)
         {
           auto& reg = args[2][99 * steps + cycle];
@@ -31238,7 +31238,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x5920 = x5919 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x5921 = Fp(x5920.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -31250,9 +31250,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x5922 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x5922 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x5923 = x5920 - x5922;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x5924 = x5923 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -31263,25 +31263,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x5925 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x5925 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x5926 = x99 - x5925;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x5927 = x5925 * x5926;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x5927);
           reg = x5927;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x5928 = x96 - x5925;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x5929 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x5929 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x5930 = x5929 * x5928;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x5930 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x5930 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("./zirgen/components/bits.h":27:23)
         {
           auto& reg = args[2][99 * steps + cycle];
@@ -31645,7 +31645,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x5995 = x5994 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x5996 = Fp(x5995.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -31657,9 +31657,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x5997 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x5997 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x5998 = x5995 - x5997;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x5999 = x5998 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -31670,25 +31670,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6000 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x6000 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x6001 = x99 - x6000;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x6002 = x6000 * x6001;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x6002);
           reg = x6002;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x6003 = x96 - x6000;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6004 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x6004 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x6005 = x6004 * x6003;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x6005 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x6005 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("./zirgen/components/bits.h":27:23)
         {
           auto& reg = args[2][99 * steps + cycle];
@@ -32006,7 +32006,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x6044 = x6043 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x6045 = Fp(x6044.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -32018,9 +32018,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6046 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x6046 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x6047 = x6044 - x6046;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x6048 = x6047 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -32031,25 +32031,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6049 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x6049 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x6050 = x99 - x6049;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x6051 = x6049 * x6050;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x6051);
           reg = x6051;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x6052 = x96 - x6049;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6053 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x6053 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x6054 = x6053 * x6052;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x6054 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x6054 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("./zirgen/components/bits.h":27:23)
         {
           auto& reg = args[2][99 * steps + cycle];
@@ -32202,7 +32202,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x6076 = x6075 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x6077 = Fp(x6076.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -32214,9 +32214,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6078 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x6078 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x6079 = x6076 - x6078;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x6080 = x6079 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -32227,25 +32227,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6081 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x6081 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x6082 = x99 - x6081;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x6083 = x6081 * x6082;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x6083);
           reg = x6083;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x6084 = x96 - x6081;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6085 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x6085 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x6086 = x6085 * x6084;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x6086 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x6086 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("./zirgen/components/bits.h":27:23)
         {
           auto& reg = args[2][99 * steps + cycle];
@@ -32412,7 +32412,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x6114 = x6113 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x6115 = Fp(x6114.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -32424,9 +32424,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6116 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x6116 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x6117 = x6114 - x6116;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x6118 = x6117 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -32437,25 +32437,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6119 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x6119 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x6120 = x99 - x6119;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x6121 = x6119 * x6120;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x6121);
           reg = x6121;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x6122 = x96 - x6119;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6123 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x6123 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x6124 = x6123 * x6122;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x6124 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x6124 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("./zirgen/components/bits.h":27:23)
         {
           auto& reg = args[2][99 * steps + cycle];
@@ -32478,9 +32478,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       if (x6125 != 0) {
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":156:7)
         if (x5650 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/ecall.cpp:156");
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:52)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:52)
         auto x6126 = x965 * x81;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:41)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:41)
         auto x6127 = x964 + x6126;
         // loc("zirgen/components/u32.cpp":34:5)
         {
@@ -32716,7 +32716,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x6161 = x6160 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x6162 = Fp(x6161.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -32728,9 +32728,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6163 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x6163 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x6164 = x6161 - x6163;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x6165 = x6164 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -32741,25 +32741,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x6166 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x6166 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x6167 = x99 - x6166;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x6168 = x6166 * x6167;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x6168);
           reg = x6168;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x6169 = x96 - x6166;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x6170 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x6170 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x6171 = x6170 * x6169;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x6171 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x6171 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("./zirgen/components/bits.h":27:23)
         {
           auto& reg = args[2][99 * steps + cycle];
@@ -32782,14 +32782,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x6173 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x6173 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x6174 = x6172 * x6173;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:26)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:26)
       auto x6175 = x99 - x6173;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x6176 = x6174 * x6175;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x6176 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x6176 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[9](Reg)"("./zirgen/components/mux.h":49:25))
     auto x6177 = args[2][110 * steps + ((cycle - 0) & mask)];
@@ -33044,7 +33044,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x6243 = x6242 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x6244 = Fp(x6243.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -33056,9 +33056,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x6245 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x6245 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x6246 = x6243 - x6245;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x6247 = x6246 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -33069,25 +33069,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x6248 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x6248 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x6249 = x99 - x6248;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x6250 = x6248 * x6249;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x6250);
         reg = x6250;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x6251 = x96 - x6248;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x6252 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x6252 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x6253 = x6252 * x6251;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x6253 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x6253 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_init(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x6254 = args[2][150 * steps + ((cycle - 0) & mask)];
       assert(x6254 != Fp::invalid());
@@ -35604,12 +35604,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x6863 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x6863 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x6864 = x6863 * x6248;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x6865 = x6864 * x6249;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x6865 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x6865 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[10](Reg)"("./zirgen/components/mux.h":49:25))
     auto x6866 = args[2][111 * steps + ((cycle - 0) & mask)];
@@ -35897,7 +35897,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x6935 = x6934 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x6936 = Fp(x6935.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -35909,9 +35909,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x6937 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x6937 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x6938 = x6935 - x6937;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x6939 = x6938 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -35922,25 +35922,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x6940 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x6940 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x6941 = x99 - x6940;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x6942 = x6940 * x6941;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x6942);
         reg = x6942;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x6943 = x96 - x6940;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x6944 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x6944 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x6945 = x6944 * x6943;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x6945 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x6945 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/sha_load(ShaWrap)/ShaCycle/Reg"("zirgen/circuit/rv32im/v1/edsl/sha.cpp":292:40))
       auto x6946 = args[2][140 * steps + ((cycle - 1) & mask)];
       assert(x6946 != Fp::invalid());
@@ -41742,12 +41742,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x9153 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x9153 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x9154 = x9153 * x6940;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x9155 = x9154 * x6941;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x9155 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x9155 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[11](Reg)"("./zirgen/components/mux.h":49:25))
     auto x9156 = args[2][112 * steps + ((cycle - 0) & mask)];
@@ -42063,7 +42063,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x9205 = x9204 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x9206 = Fp(x9205.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -42075,9 +42075,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x9207 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x9207 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x9208 = x9205 - x9207;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x9209 = x9208 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -42088,25 +42088,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x9210 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x9210 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x9211 = x99 - x9210;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x9212 = x9210 * x9211;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x9212);
         reg = x9212;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x9213 = x96 - x9210;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x9214 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x9214 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x9215 = x9214 * x9213;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x9215 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x9215 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       extern_log(ctx, cycle, "SHA_MAIN: major = %u, minor = %u, count = %u, repeat = %u", {x75, x9179, x9171, x9185});
       if (x9180 != 0) {
         // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":387:24)
@@ -53416,12 +53416,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x13506 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x13506 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x13507 = x13506 * x9210;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x13508 = x13507 * x9211;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x13508 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x13508 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[12](Reg)"("./zirgen/components/mux.h":49:25))
     auto x13509 = args[2][113 * steps + ((cycle - 0) & mask)];
@@ -53490,7 +53490,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x13523 = x13522 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x13524 = Fp(x13523.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -53502,9 +53502,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x13525 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x13525 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x13526 = x13523 - x13525;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x13527 = x13526 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -53515,25 +53515,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x13528 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x13528 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x13529 = x99 - x13528;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x13530 = x13528 * x13529;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x13530);
         reg = x13530;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x13531 = x96 - x13528;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x13532 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x13532 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x13533 = x13532 * x13531;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x13533 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x13533 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
       extern_log(ctx, cycle, "  PageFault: PC = %10x", {x975});
       {
         auto [x13534, x13535, x13536] = extern_pageInfo(ctx, cycle, "", {x975});
@@ -53832,12 +53832,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x13584 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x13584 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x13585 = x13584 * x13528;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x13586 = x13585 * x13529;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x13586 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x13586 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[13](Reg)"("./zirgen/components/mux.h":49:25))
     auto x13587 = args[2][114 * steps + ((cycle - 0) & mask)];
@@ -54518,7 +54518,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x13713 = x13712 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x13714 = Fp(x13713.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -54530,9 +54530,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x13715 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x13715 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x13716 = x13713 - x13715;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x13717 = x13716 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -54543,25 +54543,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x13718 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x13718 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x13719 = x99 - x13718;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x13720 = x13718 * x13719;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x13720);
           reg = x13720;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x13721 = x96 - x13718;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13722 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x13722 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x13723 = x13722 * x13721;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x13723 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x13723 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":272:5)
         {
           auto& reg = args[2][100 * steps + cycle];
@@ -54626,7 +54626,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x13737 = x13736 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x13738 = Fp(x13737.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -54638,9 +54638,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x13739 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x13739 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x13740 = x13737 - x13739;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x13741 = x13740 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -54651,25 +54651,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x13742 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x13742 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x13743 = x99 - x13742;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x13744 = x13742 * x13743;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x13744);
           reg = x13744;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x13745 = x96 - x13742;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x13746 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x13746 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x13747 = x13746 * x13745;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x13747 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x13747 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":276:5)
         {
           auto& reg = args[2][100 * steps + cycle];
@@ -55319,14 +55319,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x13818 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x13818 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x13819 = x13817 * x13818;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:26)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:26)
       auto x13820 = x99 - x13818;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x13821 = x13819 * x13820;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x13821 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x13821 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[14](Reg)"("./zirgen/components/mux.h":49:25))
     auto x13822 = args[2][115 * steps + ((cycle - 0) & mask)];
@@ -72118,7 +72118,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x19930 = x19929 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x19931 = Fp(x19930.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -72130,9 +72130,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x19932 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x19932 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x19933 = x19930 - x19932;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x19934 = x19933 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -72143,25 +72143,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x19935 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x19935 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x19936 = x99 - x19935;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x19937 = x19935 * x19936;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19937);
           reg = x19937;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x19938 = x96 - x19935;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x19939 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x19939 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x19940 = x19939 * x19938;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x19940 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x19940 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":456:5)
         {
           auto& reg = args[2][100 * steps + cycle];
@@ -72226,7 +72226,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("zirgen/components/bytes.cpp":97:10)
         auto x19954 = x19953 * x94;
         {
-          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+          // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
           auto x19955 = Fp(x19954.asUInt32() & x79.asUInt32());
           // loc("./zirgen/components/bits.h":68:23)
           {
@@ -72238,9 +72238,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x19956 = args[2][70 * steps + ((cycle - 0) & mask)];
         assert(x19956 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
         auto x19957 = x19954 - x19956;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
         auto x19958 = x19957 * x78;
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -72251,25 +72251,25 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x19959 = args[2][71 * steps + ((cycle - 0) & mask)];
         assert(x19959 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
         auto x19960 = x99 - x19959;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
         auto x19961 = x19959 * x19960;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
         {
           auto& reg = args[2][98 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19961);
           reg = x19961;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
         auto x19962 = x96 - x19959;
         // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
         auto x19963 = args[2][98 * steps + ((cycle - 0) & mask)];
         assert(x19963 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
         auto x19964 = x19963 * x19962;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-        if (x19964 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+        if (x19964 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
         // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":460:5)
         {
           auto& reg = args[2][100 * steps + cycle];
@@ -72283,14 +72283,14 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x19966 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x19966 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x19967 = x19965 * x19966;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:26)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:26)
       auto x19968 = x99 - x19966;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x19969 = x19967 * x19968;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x19969 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x19969 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
     // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[15](Reg)"("./zirgen/components/mux.h":49:25))
     auto x19970 = args[2][116 * steps + ((cycle - 0) & mask)];
@@ -72305,57 +72305,57 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         assert(reg == Fp::invalid() || reg == x19971);
         reg = x19971;
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/next_major(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:37))
+      // loc("Top/mux(Mux)/body(BodyStep)/next_major(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":160:37))
       auto x19972 = args[2][100 * steps + ((cycle - 1) & mask)];
       assert(x19972 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:37)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":160:37)
       auto x19973 = x19972 - x71;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:37)
-      if (x19973 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:164");
-      // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[15](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":165:63))
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":160:37)
+      if (x19973 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:160");
+      // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[15](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":161:63))
       auto x19974 = args[2][116 * steps + ((cycle - 1) & mask)];
       assert(x19974 != Fp::invalid());
       if (x19974 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":167:48))
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":163:48))
         auto x19975 = args[2][117 * steps + ((cycle - 1) & mask)];
         assert(x19975 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":167:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":163:5)
         {
           auto& reg = args[2][117 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19975);
           reg = x19975;
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/user_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":168:50))
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/user_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:50))
         auto x19976 = args[2][118 * steps + ((cycle - 1) & mask)];
         assert(x19976 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":168:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:5)
         {
           auto& reg = args[2][118 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19976);
           reg = x19976;
         }
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":169:44))
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":165:44))
         auto x19977 = args[2][119 * steps + ((cycle - 1) & mask)];
         assert(x19977 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":169:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":165:5)
         {
           auto& reg = args[2][119 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19977);
           reg = x19977;
         }
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[8](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":172:69))
+      // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[8](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":168:69))
       auto x19978 = args[2][109 * steps + ((cycle - 1) & mask)];
       assert(x19978 != Fp::invalid());
       if (x19978 != 0) {
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":175:75))
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":171:75))
         auto x19979 = args[2][188 * steps + ((cycle - 1) & mask)];
         assert(x19979 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":176:8)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":172:8)
         auto x19980 = x99 - x19979;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":176:8)
-        if (x19980 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:176");
-        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/Mux/0(ECallHalt)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:55))
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":172:8)
+        if (x19980 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:172");
+        // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/Mux/0(ECallHalt)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":176:55))
         auto x19981 = args[2][196 * steps + ((cycle - 1) & mask)];
         assert(x19981 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
@@ -72364,59 +72364,59 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
         // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/ecall(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/data(U32Reg)/byte[1](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x19983 = args[2][135 * steps + ((cycle - 1) & mask)];
         assert(x19983 != Fp::invalid());
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":176:5)
         {
           auto& reg = args[2][119 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19981);
           reg = x19981;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":181:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":177:5)
         {
           auto& reg = args[2][117 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19982);
           reg = x19982;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":182:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":178:5)
         {
           auto& reg = args[2][118 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x19983);
           reg = x19983;
         }
         extern_log(ctx, cycle, "isFromEcall, set sysExitCode: %u", {x19982});
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":184:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:5)
         args[1][104] = x19982;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":185:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":181:5)
         args[1][105] = x19983;
         {
           extern_halt(ctx, cycle, "", {x19982, x975});
         }
       }
-      // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[12](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":193:77))
+      // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[12](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":187:77))
       auto x19984 = args[2][113 * steps + ((cycle - 1) & mask)];
       assert(x19984 != Fp::invalid());
       if (x19984 != 0) {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":195:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":189:5)
         {
           auto& reg = args[2][117 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x96);
           reg = x96;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":196:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":190:5)
         {
           auto& reg = args[2][118 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x98);
           reg = x98;
         }
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":197:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":191:5)
         {
           auto& reg = args[2][119 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x0);
           reg = x0;
         }
         extern_log(ctx, cycle, "isFromPageFault, set sysExitCode: %u", {x96});
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":199:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":193:5)
         args[1][104] = x96;
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":200:5)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":194:5)
         args[1][105] = x98;
         {
           extern_halt(ctx, cycle, "", {x96, x975});
@@ -72476,7 +72476,7 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("zirgen/components/bytes.cpp":97:10)
       auto x19997 = x19996 * x94;
       {
-        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:19)
+        // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":27:26)
         auto x19998 = Fp(x19997.asUInt32() & x79.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -72488,9 +72488,9 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x19999 = args[2][70 * steps + ((cycle - 0) & mask)];
       assert(x19999 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
       auto x20000 = x19997 - x19999;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
       auto x20001 = x20000 * x78;
       // loc("./zirgen/components/bits.h":68:23)
       {
@@ -72501,26 +72501,26 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/twits[1](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x20002 = args[2][71 * steps + ((cycle - 0) & mask)];
       assert(x20002 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
       auto x20003 = x99 - x20002;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
       auto x20004 = x20002 * x20003;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
       {
         auto& reg = args[2][98 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x20004);
         reg = x20004;
       }
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
       auto x20005 = x96 - x20002;
       // loc("Top/mux(Mux)/body(BodyStep)/pc(PCReg)/Reg"("./zirgen/compiler/edsl/edsl.h":118:61))
       auto x20006 = args[2][98 * steps + ((cycle - 0) & mask)];
       assert(x20006 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
       auto x20007 = x20006 * x20005;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
-      if (x20007 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:35");
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":209:3)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
+      if (x20007 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:33");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":201:3)
       {
         auto& reg = args[2][100 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x71);
@@ -72529,12 +72529,12 @@ Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args) {
       // loc("Top/mux(Mux)/body(BodyStep)/user_mode(Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x20008 = args[2][99 * steps + ((cycle - 0) & mask)];
       assert(x20008 != Fp::invalid());
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x20009 = x20008 * x20002;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
       auto x20010 = x20009 * x20003;
-      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
-      if (x20010 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:52");
+      // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
+      if (x20010 != 0) throw std::runtime_error("eqz failed at: zirgen/circuit/rv32im/v1/edsl/body.cpp:50");
     }
   }
   // loc("Top/Code/OneHot/hot[6](Reg)"("./zirgen/components/mux.h":49:25))

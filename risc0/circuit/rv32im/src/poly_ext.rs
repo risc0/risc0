@@ -548,8 +548,8 @@ PolyExtStep::Get(595), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[2](Reg)(compi
 PolyExtStep::Mul(383, 3), // components/onehot.h:46
 PolyExtStep::Add(382, 384), // components/onehot.h:46
 PolyExtStep::AndEqz(0, 385), // components/onehot.h:40
-PolyExtStep::Get(601), // zirgen/circuit/rv32im/v1/edsl/body.cpp:71
-PolyExtStep::AndEqz(137, 386), // zirgen/circuit/rv32im/v1/edsl/body.cpp:71
+PolyExtStep::Get(601), // zirgen/circuit/rv32im/v1/edsl/body.cpp:69
+PolyExtStep::AndEqz(137, 386), // zirgen/circuit/rv32im/v1/edsl/body.cpp:69
 PolyExtStep::GetGlobal(0, 36), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[0](U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 37), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[0](U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 38), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[0](U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
@@ -657,7 +657,7 @@ PolyExtStep::Sub(437, 437), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(180, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(439, 439), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(181, 449), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(138, 85, 182), // zirgen/circuit/rv32im/v1/edsl/body.cpp:73
+PolyExtStep::AndCond(138, 85, 182), // zirgen/circuit/rv32im/v1/edsl/body.cpp:71
 PolyExtStep::GetGlobal(0, 52), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 53), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 54), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
@@ -738,7 +738,7 @@ PolyExtStep::AndEqz(223, 446), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(224, 447), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(225, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(226, 449), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(183, 197, 227), // zirgen/circuit/rv32im/v1/edsl/body.cpp:79
+PolyExtStep::AndCond(183, 197, 227), // zirgen/circuit/rv32im/v1/edsl/body.cpp:77
 PolyExtStep::GetGlobal(0, 32), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[0](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 33), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[1](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::GetGlobal(0, 34), // Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[2](Reg)(compiler/edsl/component.h:154)
@@ -750,7 +750,7 @@ PolyExtStep::Mul(489, 17), // components/u32.h:27
 PolyExtStep::Add(486, 491), // components/u32.h:24
 PolyExtStep::Add(494, 492), // components/u32.h:24
 PolyExtStep::Add(495, 493), // components/u32.h:24
-PolyExtStep::Sub(496, 490), // zirgen/circuit/rv32im/v1/edsl/body.cpp:89
+PolyExtStep::Sub(496, 490), // zirgen/circuit/rv32im/v1/edsl/body.cpp:85
 PolyExtStep::Add(497, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(498, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(499, 5), // zirgen/components/bytes.cpp:97
@@ -759,20 +759,20 @@ PolyExtStep::Mul(501, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(502, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(503, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Get(291), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Sub(504, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(506, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(504, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(506, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Get(293), // components/bits.h:68
 PolyExtStep::Sub(508, 507), // components/bits.h:68
 PolyExtStep::AndEqz(228, 509), // components/bits.h:68
-PolyExtStep::Sub(0, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::Mul(508, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::Get(371), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::Sub(512, 511), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(229, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::Sub(3, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
-PolyExtStep::Mul(512, 514), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
-PolyExtStep::AndEqz(230, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
-PolyExtStep::AndCond(0, 303, 231), // zirgen/circuit/rv32im/v1/edsl/body.cpp:69
+PolyExtStep::Sub(0, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::Mul(508, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::Get(371), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::Sub(512, 511), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(229, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::Sub(3, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
+PolyExtStep::Mul(512, 514), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
+PolyExtStep::AndEqz(230, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
+PolyExtStep::AndCond(0, 303, 231), // zirgen/circuit/rv32im/v1/edsl/body.cpp:67
 PolyExtStep::Get(373), // Top/mux(Mux)/reset(ResetStep)/Bit/bit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(490, 516), // components/bits.h:27
 PolyExtStep::AndEqz(0, 517), // components/bits.h:27
@@ -782,15 +782,15 @@ PolyExtStep::Get(72), // Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/Bytes
 PolyExtStep::Get(292), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(294), // Top/mux(Mux)/reset(ResetStep)/PCReg/twits[1](Twit)/twit(Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Get(74), // Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg(zirgen/components/bytes.cpp:92)
-PolyExtStep::Mul(519, 6), // zirgen/circuit/rv32im/v1/edsl/body.cpp:40
-PolyExtStep::Mul(520, 17), // zirgen/circuit/rv32im/v1/edsl/body.cpp:42
-PolyExtStep::Mul(521, 22), // zirgen/circuit/rv32im/v1/edsl/body.cpp:43
-PolyExtStep::Mul(522, 19), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
-PolyExtStep::Add(518, 523), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
-PolyExtStep::Add(527, 526), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
-PolyExtStep::Add(528, 524), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
-PolyExtStep::Add(529, 525), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
-PolyExtStep::Sub(530, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
+PolyExtStep::Mul(519, 6), // zirgen/circuit/rv32im/v1/edsl/body.cpp:38
+PolyExtStep::Mul(520, 17), // zirgen/circuit/rv32im/v1/edsl/body.cpp:40
+PolyExtStep::Mul(521, 22), // zirgen/circuit/rv32im/v1/edsl/body.cpp:41
+PolyExtStep::Mul(522, 19), // zirgen/circuit/rv32im/v1/edsl/body.cpp:39
+PolyExtStep::Add(518, 523), // zirgen/circuit/rv32im/v1/edsl/body.cpp:37
+PolyExtStep::Add(527, 526), // zirgen/circuit/rv32im/v1/edsl/body.cpp:37
+PolyExtStep::Add(528, 524), // zirgen/circuit/rv32im/v1/edsl/body.cpp:37
+PolyExtStep::Add(529, 525), // zirgen/circuit/rv32im/v1/edsl/body.cpp:37
+PolyExtStep::Sub(530, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:37
 PolyExtStep::Add(531, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:24
 PolyExtStep::Sub(532, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(533, 5), // zirgen/components/bytes.cpp:97
@@ -798,12 +798,12 @@ PolyExtStep::Sub(534, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(535, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(536, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(537, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(538, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(539, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(538, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(539, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 540), // components/bits.h:68
 PolyExtStep::AndEqz(234, 541), // components/bits.h:68
-PolyExtStep::AndEqz(235, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(236, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(235, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(236, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::Get(378), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[1](Reg)(compiler/edsl/edsl.h:118)
 PolyExtStep::Get(380), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[2](Reg)(compiler/edsl/edsl.h:118)
 PolyExtStep::Get(382), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[3](Reg)(compiler/edsl/edsl.h:118)
@@ -847,12 +847,12 @@ PolyExtStep::Add(580, 567), // components/onehot.h:46
 PolyExtStep::Add(581, 568), // components/onehot.h:46
 PolyExtStep::Add(582, 569), // components/onehot.h:46
 PolyExtStep::Add(583, 570), // components/onehot.h:46
-PolyExtStep::Sub(584, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:101
-PolyExtStep::AndEqz(0, 585), // zirgen/circuit/rv32im/v1/edsl/body.cpp:101
-PolyExtStep::Get(408), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:103)
-PolyExtStep::Sub(386, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:103
-PolyExtStep::AndEqz(238, 587), // zirgen/circuit/rv32im/v1/edsl/body.cpp:103
-PolyExtStep::Get(412), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:105)
+PolyExtStep::Sub(584, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:97
+PolyExtStep::AndEqz(0, 585), // zirgen/circuit/rv32im/v1/edsl/body.cpp:97
+PolyExtStep::Get(408), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:99)
+PolyExtStep::Sub(386, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:99
+PolyExtStep::AndEqz(238, 587), // zirgen/circuit/rv32im/v1/edsl/body.cpp:99
+PolyExtStep::Get(412), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:101)
 PolyExtStep::Sub(312, 588), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(239, 589), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(240, 396), // zirgen/components/ram.cpp:169
@@ -873,7 +873,7 @@ PolyExtStep::AndEqz(248, 595), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 109), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(596, 350), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(249, 597), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(588, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:108
+PolyExtStep::Add(588, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:104
 PolyExtStep::Sub(338, 598), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(250, 599), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(251, 409), // zirgen/components/ram.cpp:169
@@ -894,7 +894,7 @@ PolyExtStep::AndEqz(259, 605), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 113), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(606, 376), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(260, 607), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(588, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:108
+PolyExtStep::Add(588, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:104
 PolyExtStep::Sub(364, 608), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(261, 609), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(262, 425), // zirgen/components/ram.cpp:169
@@ -915,7 +915,7 @@ PolyExtStep::AndEqz(270, 615), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 117), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(616, 422), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(271, 617), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(588, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:108
+PolyExtStep::Add(588, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:104
 PolyExtStep::Sub(441, 618), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(272, 619), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(273, 444), // zirgen/components/ram.cpp:169
@@ -936,12 +936,12 @@ PolyExtStep::AndEqz(281, 625), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 121), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(626, 439), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(282, 627), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(237, 85, 283), // zirgen/circuit/rv32im/v1/edsl/body.cpp:99
-PolyExtStep::Get(602), // Top/mux(Mux)/reset(ResetStep)/Reg(zirgen/circuit/rv32im/v1/edsl/body.cpp:115)
-PolyExtStep::Get(413), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:114)
-PolyExtStep::Sub(386, 628), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
-PolyExtStep::AndEqz(0, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
-PolyExtStep::Add(629, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
+PolyExtStep::AndCond(237, 85, 283), // zirgen/circuit/rv32im/v1/edsl/body.cpp:95
+PolyExtStep::Get(602), // Top/mux(Mux)/reset(ResetStep)/Reg(zirgen/circuit/rv32im/v1/edsl/body.cpp:111)
+PolyExtStep::Get(413), // Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:110)
+PolyExtStep::Sub(386, 628), // zirgen/circuit/rv32im/v1/edsl/body.cpp:111
+PolyExtStep::AndEqz(0, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:111
+PolyExtStep::Add(629, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
 PolyExtStep::Sub(312, 631), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(285, 632), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(286, 396), // zirgen/components/ram.cpp:169
@@ -962,7 +962,7 @@ PolyExtStep::AndEqz(294, 638), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 125), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(639, 350), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(295, 640), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(631, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
+PolyExtStep::Add(631, 0), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
 PolyExtStep::Sub(338, 641), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(296, 642), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(297, 409), // zirgen/components/ram.cpp:169
@@ -983,7 +983,7 @@ PolyExtStep::AndEqz(305, 648), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 129), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(649, 376), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(306, 650), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(631, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
+PolyExtStep::Add(631, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
 PolyExtStep::Sub(364, 651), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(307, 652), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(308, 425), // zirgen/components/ram.cpp:169
@@ -1004,7 +1004,7 @@ PolyExtStep::AndEqz(316, 658), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 133), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(659, 422), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(317, 660), // zirgen/components/u32.cpp:34
-PolyExtStep::Add(631, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:119
+PolyExtStep::Add(631, 20), // zirgen/circuit/rv32im/v1/edsl/body.cpp:115
 PolyExtStep::Sub(441, 661), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(318, 662), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(319, 444), // zirgen/components/ram.cpp:169
@@ -1025,25 +1025,25 @@ PolyExtStep::AndEqz(327, 668), // zirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 137), // zirgen/components/u32.cpp:34
 PolyExtStep::Sub(669, 439), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(328, 670), // zirgen/components/u32.cpp:34
-PolyExtStep::AndCond(284, 197, 329), // zirgen/circuit/rv32im/v1/edsl/body.cpp:112
-PolyExtStep::AndCond(232, 307, 330), // zirgen/circuit/rv32im/v1/edsl/body.cpp:93
-PolyExtStep::AndEqz(233, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:126
+PolyExtStep::AndCond(284, 197, 329), // zirgen/circuit/rv32im/v1/edsl/body.cpp:108
+PolyExtStep::AndCond(232, 307, 330), // zirgen/circuit/rv32im/v1/edsl/body.cpp:89
+PolyExtStep::AndEqz(233, 630), // zirgen/circuit/rv32im/v1/edsl/body.cpp:122
 PolyExtStep::Sub(385, 386), // components/onehot.h:40
 PolyExtStep::AndEqz(332, 671), // components/onehot.h:40
-PolyExtStep::Get(583), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:131)
-PolyExtStep::Sub(0, 672), // zirgen/circuit/rv32im/v1/edsl/body.cpp:131
+PolyExtStep::Get(583), // Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)(zirgen/circuit/rv32im/v1/edsl/body.cpp:127)
+PolyExtStep::Sub(0, 672), // zirgen/circuit/rv32im/v1/edsl/body.cpp:127
 PolyExtStep::Sub(531, 102), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(674, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(675, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(676, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(677, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(678, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(679, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(680, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(679, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(680, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 681), // components/bits.h:68
 PolyExtStep::AndEqz(0, 682), // components/bits.h:68
-PolyExtStep::AndEqz(334, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(335, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(334, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(335, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(336, 395), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(337, 396), // zirgen/components/ram.cpp:169
 PolyExtStep::AndEqz(338, 316), // zirgen/components/ram.cpp:170
@@ -1136,9 +1136,9 @@ PolyExtStep::Mul(439, 673), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 87), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(729, 728), // zirgen/components/u32.cpp:40
 PolyExtStep::AndEqz(379, 730), // zirgen/components/u32.cpp:40
-PolyExtStep::Mul(508, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
+PolyExtStep::Mul(508, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:45
 PolyExtStep::Add(102, 516), // zirgen/components/u32.cpp:95
-PolyExtStep::Add(505, 731), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
+PolyExtStep::Add(505, 731), // zirgen/circuit/rv32im/v1/edsl/body.cpp:45
 PolyExtStep::Mul(732, 673), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 68), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(735, 734), // zirgen/components/u32.cpp:40
@@ -1155,10 +1155,10 @@ PolyExtStep::Mul(733, 673), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 71), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(744, 743), // zirgen/components/u32.cpp:40
 PolyExtStep::AndEqz(383, 745), // zirgen/components/u32.cpp:40
-PolyExtStep::AndCond(333, 85, 384), // zirgen/circuit/rv32im/v1/edsl/body.cpp:133
+PolyExtStep::AndCond(333, 85, 384), // zirgen/circuit/rv32im/v1/edsl/body.cpp:129
 PolyExtStep::AndEqz(0, 541), // components/bits.h:68
-PolyExtStep::AndEqz(386, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(387, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(386, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(387, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(388, 458), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(389, 396), // zirgen/components/ram.cpp:169
 PolyExtStep::AndEqz(390, 316), // zirgen/components/ram.cpp:170
@@ -1235,11 +1235,11 @@ PolyExtStep::AndEqz(430, 775), // zirgen/components/u32.cpp:40
 PolyExtStep::GetGlobal(0, 103), // zirgen/components/u32.cpp:40
 PolyExtStep::Sub(776, 728), // zirgen/components/u32.cpp:40
 PolyExtStep::AndEqz(431, 777), // zirgen/components/u32.cpp:40
-PolyExtStep::AndCond(385, 197, 432), // zirgen/circuit/rv32im/v1/edsl/body.cpp:144
-PolyExtStep::AndCond(331, 329, 433), // zirgen/circuit/rv32im/v1/edsl/body.cpp:124
-PolyExtStep::Get(374), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
-PolyExtStep::Sub(778, 34), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
-PolyExtStep::AndEqz(434, 779), // zirgen/circuit/rv32im/v1/edsl/body.cpp:154
+PolyExtStep::AndCond(385, 197, 432), // zirgen/circuit/rv32im/v1/edsl/body.cpp:140
+PolyExtStep::AndCond(331, 329, 433), // zirgen/circuit/rv32im/v1/edsl/body.cpp:120
+PolyExtStep::Get(374), // zirgen/circuit/rv32im/v1/edsl/body.cpp:150
+PolyExtStep::Sub(778, 34), // zirgen/circuit/rv32im/v1/edsl/body.cpp:150
+PolyExtStep::AndEqz(434, 779), // zirgen/circuit/rv32im/v1/edsl/body.cpp:150
 PolyExtStep::AndCond(136, 381, 435), // components/mux.h:49
 PolyExtStep::Get(51), // Top/Code/OneHot/hot[5](Reg)(components/mux.h:49)
 PolyExtStep::Get(376), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[0](Reg)(components/mux.h:49)
@@ -1346,11 +1346,11 @@ PolyExtStep::Mul(852, 847), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(852, 848), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(852, 849), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(852, 850), // zirgen/components/u32.cpp:111
-PolyExtStep::Mul(521, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
+PolyExtStep::Mul(521, 18), // zirgen/circuit/rv32im/v1/edsl/body.cpp:45
 PolyExtStep::Sub(0, 851), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:143
 PolyExtStep::Sub(0, 852), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:145
 PolyExtStep::Sub(518, 18), // zirgen/components/u32.cpp:103
-PolyExtStep::Add(520, 859), // zirgen/circuit/rv32im/v1/edsl/body.cpp:47
+PolyExtStep::Add(520, 859), // zirgen/circuit/rv32im/v1/edsl/body.cpp:45
 PolyExtStep::Mul(860, 344), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(860, 372), // zirgen/components/u32.cpp:111
 PolyExtStep::Mul(860, 374), // zirgen/components/u32.cpp:111
@@ -1531,12 +1531,12 @@ PolyExtStep::Sub(1003, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1004, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1005, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1006, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1007, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1008, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1007, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1008, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1009), // components/bits.h:68
 PolyExtStep::AndEqz(498, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(499, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(500, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(499, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(500, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::Sub(778, 999), // circuit/rv32im/v1/platform/rv32im.inl:38
 PolyExtStep::AndEqz(501, 1011), // circuit/rv32im/v1/platform/rv32im.inl:38
 PolyExtStep::Add(834, 989), // circuit/rv32im/v1/platform/rv32im.inl:38
@@ -1583,8 +1583,8 @@ PolyExtStep::AndEqz(531, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(532, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(533, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(534, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(535, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(536, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(535, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(536, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(537, 1011), // circuit/rv32im/v1/platform/rv32im.inl:39
 PolyExtStep::AndCond(538, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:39
 PolyExtStep::AndCond(539, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:39
@@ -1606,8 +1606,8 @@ PolyExtStep::AndEqz(551, 1025), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:45
 PolyExtStep::Sub(999, 30), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(552, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(553, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(554, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(555, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(554, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(555, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(556, 1011), // circuit/rv32im/v1/platform/rv32im.inl:40
 PolyExtStep::AndCond(557, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:40
 PolyExtStep::AndCond(558, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:40
@@ -1628,8 +1628,8 @@ PolyExtStep::Sub(902, 7), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:40
 PolyExtStep::AndEqz(570, 1029), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:40
 PolyExtStep::AndEqz(571, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(572, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(573, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(574, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(573, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(574, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(575, 1011), // circuit/rv32im/v1/platform/rv32im.inl:41
 PolyExtStep::AndCond(576, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:41
 PolyExtStep::AndCond(577, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:41
@@ -1650,8 +1650,8 @@ PolyExtStep::Sub(902, 0), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:35
 PolyExtStep::AndEqz(589, 1032), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:35
 PolyExtStep::AndEqz(590, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(591, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(592, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(593, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(592, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(593, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(594, 1011), // circuit/rv32im/v1/platform/rv32im.inl:42
 PolyExtStep::AndCond(595, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:42
 PolyExtStep::AndCond(596, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:42
@@ -1671,8 +1671,8 @@ PolyExtStep::AndEqz(607, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(608, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(609, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(610, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(611, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(612, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(611, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(612, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(613, 1011), // circuit/rv32im/v1/platform/rv32im.inl:43
 PolyExtStep::Sub(433, 967), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(0, 1035), // zirgen/components/u32.cpp:34
@@ -1704,8 +1704,8 @@ PolyExtStep::AndEqz(637, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(638, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(639, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(640, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(641, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(642, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(641, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(642, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(643, 1011), // circuit/rv32im/v1/platform/rv32im.inl:44
 PolyExtStep::Sub(433, 985), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(0, 1038), // zirgen/components/u32.cpp:34
@@ -1751,15 +1751,15 @@ PolyExtStep::AndEqz(667, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:24
 PolyExtStep::AndEqz(668, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:25
 PolyExtStep::AndEqz(669, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(670, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(671, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(672, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(671, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(672, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(673, 1011), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndCond(674, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndCond(675, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:45
 PolyExtStep::AndCond(658, 1039, 676), // circuit/rv32im/v1/platform/rv32im.inl:45
-PolyExtStep::Mul(490, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
-PolyExtStep::Mul(1055, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
-PolyExtStep::AndEqz(677, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::Mul(490, 508), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
+PolyExtStep::Mul(1055, 510), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
+PolyExtStep::AndEqz(677, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(0, 781, 678), // components/mux.h:49
 PolyExtStep::Get(377), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[1](Reg)(components/mux.h:49)
 PolyExtStep::Mul(850, 42), // zirgen/components/u32.cpp:71
@@ -1792,8 +1792,8 @@ PolyExtStep::AndEqz(687, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:44
 PolyExtStep::AndEqz(688, 1025), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:45
 PolyExtStep::AndEqz(689, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(690, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(691, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(692, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(691, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(692, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(693, 1011), // circuit/rv32im/v1/platform/rv32im.inl:46
 PolyExtStep::AndCond(694, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:46
 PolyExtStep::AndCond(695, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:46
@@ -1810,8 +1810,8 @@ PolyExtStep::AndEqz(705, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:39
 PolyExtStep::AndEqz(706, 1029), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:40
 PolyExtStep::AndEqz(707, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(708, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(709, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(710, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(709, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(710, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(711, 1011), // circuit/rv32im/v1/platform/rv32im.inl:47
 PolyExtStep::AndCond(712, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:47
 PolyExtStep::AndCond(713, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:47
@@ -1828,8 +1828,8 @@ PolyExtStep::AndEqz(723, 901), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:34
 PolyExtStep::AndEqz(724, 1032), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:35
 PolyExtStep::AndEqz(725, 1026), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(726, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(727, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(728, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(727, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(728, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(729, 1011), // circuit/rv32im/v1/platform/rv32im.inl:48
 PolyExtStep::AndCond(730, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:48
 PolyExtStep::AndCond(731, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:48
@@ -1846,8 +1846,8 @@ PolyExtStep::AndEqz(741, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(742, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(743, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(744, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(745, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(746, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(745, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(746, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(747, 1011), // circuit/rv32im/v1/platform/rv32im.inl:49
 PolyExtStep::AndCond(748, 991, 625), // circuit/rv32im/v1/platform/rv32im.inl:49
 PolyExtStep::AndCond(749, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:49
@@ -1864,8 +1864,8 @@ PolyExtStep::AndEqz(759, 1022), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:29
 PolyExtStep::AndEqz(760, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:30
 PolyExtStep::AndEqz(761, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(762, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(763, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(764, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(763, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(764, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(765, 1011), // circuit/rv32im/v1/platform/rv32im.inl:50
 PolyExtStep::AndCond(766, 991, 655), // circuit/rv32im/v1/platform/rv32im.inl:50
 PolyExtStep::AndCond(767, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:50
@@ -1899,12 +1899,12 @@ PolyExtStep::Sub(1088, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1089, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1090, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1091, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1092, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1093, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1092, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1093, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1094), // components/bits.h:68
 PolyExtStep::AndEqz(781, 1095), // components/bits.h:68
-PolyExtStep::AndEqz(782, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(783, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(782, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(783, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(784, 1011), // circuit/rv32im/v1/platform/rv32im.inl:51
 PolyExtStep::AndCond(785, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:51
 PolyExtStep::Add(990, 0), // circuit/rv32im/v1/platform/rv32im.inl:51
@@ -1929,12 +1929,12 @@ PolyExtStep::Sub(1100, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1101, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1102, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1103, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1104, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1105, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1104, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1105, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1106), // components/bits.h:68
 PolyExtStep::AndEqz(799, 1107), // components/bits.h:68
-PolyExtStep::AndEqz(800, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(801, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(800, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(801, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(802, 1011), // circuit/rv32im/v1/platform/rv32im.inl:52
 PolyExtStep::AndCond(803, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:52
 PolyExtStep::AndCond(804, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:52
@@ -1957,17 +1957,17 @@ PolyExtStep::Sub(1110, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1111, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1112, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1113, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1114, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1115, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1114, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1115, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1116), // components/bits.h:68
 PolyExtStep::AndEqz(817, 1117), // components/bits.h:68
-PolyExtStep::AndEqz(818, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(819, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(818, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(819, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(820, 1011), // circuit/rv32im/v1/platform/rv32im.inl:53
 PolyExtStep::AndCond(821, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:53
 PolyExtStep::AndCond(822, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:53
 PolyExtStep::AndCond(806, 1039, 823), // circuit/rv32im/v1/platform/rv32im.inl:53
-PolyExtStep::AndEqz(824, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(824, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(679, 1057, 825), // components/mux.h:49
 PolyExtStep::Get(379), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[2](Reg)(components/mux.h:49)
 PolyExtStep::Mul(967, 532), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:176
@@ -2003,12 +2003,12 @@ PolyExtStep::Sub(1136, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1137, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1138, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1139, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1140, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1141, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1140, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1141, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1142), // components/bits.h:68
 PolyExtStep::AndEqz(837, 1143), // components/bits.h:68
-PolyExtStep::AndEqz(838, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(839, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(838, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(839, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(840, 1011), // circuit/rv32im/v1/platform/rv32im.inl:54
 PolyExtStep::AndCond(841, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:54
 PolyExtStep::AndCond(842, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:54
@@ -2031,12 +2031,12 @@ PolyExtStep::Sub(1146, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1147, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1148, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1149, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1150, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1151, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1150, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1151, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1152), // components/bits.h:68
 PolyExtStep::AndEqz(855, 1153), // components/bits.h:68
-PolyExtStep::AndEqz(856, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(857, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(856, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(857, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(858, 1011), // circuit/rv32im/v1/platform/rv32im.inl:55
 PolyExtStep::AndCond(859, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:55
 PolyExtStep::AndCond(860, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:55
@@ -2059,12 +2059,12 @@ PolyExtStep::Sub(1156, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1157, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1158, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1159, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1160, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1161, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1160, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1161, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1162), // components/bits.h:68
 PolyExtStep::AndEqz(873, 1163), // components/bits.h:68
-PolyExtStep::AndEqz(874, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(875, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(874, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(875, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(876, 1011), // circuit/rv32im/v1/platform/rv32im.inl:56
 PolyExtStep::AndCond(877, 1, 513), // circuit/rv32im/v1/platform/rv32im.inl:56
 PolyExtStep::AndCond(878, 1096, 521), // circuit/rv32im/v1/platform/rv32im.inl:56
@@ -2098,12 +2098,12 @@ PolyExtStep::Sub(1177, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1178, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1179, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1180, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1181, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1182, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1181, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1182, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1183), // components/bits.h:68
 PolyExtStep::AndEqz(891, 1184), // components/bits.h:68
-PolyExtStep::AndEqz(892, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(893, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(892, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(893, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(894, 1011), // circuit/rv32im/v1/platform/rv32im.inl:57
 PolyExtStep::Sub(433, 518), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(0, 1185), // zirgen/components/u32.cpp:34
@@ -2143,12 +2143,12 @@ PolyExtStep::Sub(1192, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1193, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1194, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(1195, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(1196, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(1197, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(1196, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(1197, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 1198), // components/bits.h:68
 PolyExtStep::AndEqz(921, 1199), // components/bits.h:68
-PolyExtStep::AndEqz(922, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(923, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(922, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(923, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(924, 1011), // circuit/rv32im/v1/platform/rv32im.inl:58
 PolyExtStep::AndCond(925, 991, 906), // circuit/rv32im/v1/platform/rv32im.inl:58
 PolyExtStep::AndCond(926, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:58
@@ -2169,8 +2169,8 @@ PolyExtStep::AndEqz(936, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:49
 PolyExtStep::AndEqz(937, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:50
 PolyExtStep::AndEqz(938, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(939, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(940, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(941, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(940, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(941, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(942, 1011), // circuit/rv32im/v1/platform/rv32im.inl:59
 PolyExtStep::AndCond(943, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:59
 PolyExtStep::AndCond(944, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:59
@@ -2189,13 +2189,13 @@ PolyExtStep::AndEqz(954, 998), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:24
 PolyExtStep::AndEqz(955, 902), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:25
 PolyExtStep::AndEqz(956, 1000), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:53
 PolyExtStep::AndEqz(957, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(958, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(959, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(958, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(959, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(960, 1011), // circuit/rv32im/v1/platform/rv32im.inl:60
 PolyExtStep::AndCond(961, 991, 513), // circuit/rv32im/v1/platform/rv32im.inl:60
 PolyExtStep::AndCond(962, 990, 521), // circuit/rv32im/v1/platform/rv32im.inl:60
 PolyExtStep::AndCond(946, 1036, 963), // circuit/rv32im/v1/platform/rv32im.inl:60
-PolyExtStep::AndEqz(964, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(964, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(826, 1118, 965), // components/mux.h:49
 PolyExtStep::Get(381), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[3](Reg)(components/mux.h:49)
 PolyExtStep::Mul(847, 38), // zirgen/circuit/rv32im/v1/edsl/decode.cpp:53
@@ -2324,8 +2324,8 @@ PolyExtStep::AndEqz(999, 447), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1000, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1001, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1002, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1003, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1004, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1003, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1004, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1005, 779), // zirgen/circuit/rv32im/v1/edsl/memio.cpp:99
 PolyExtStep::Sub(967, 0), // circuit/rv32im/v1/platform/rv32im.inl:76
 PolyExtStep::AndEqz(0, 1296), // circuit/rv32im/v1/platform/rv32im.inl:76
@@ -2598,7 +2598,7 @@ PolyExtStep::AndEqz(1165, 1348), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1166, 1349), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1167, 1350), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(1148, 906, 1168), // circuit/rv32im/v1/platform/rv32im.inl:83
-PolyExtStep::AndEqz(1169, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1169, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(966, 1206, 1170), // components/mux.h:49
 PolyExtStep::Get(383), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[4](Reg)(components/mux.h:49)
 PolyExtStep::Add(1020, 1023), // circuit/rv32im/v1/platform/rv32im.inl:103
@@ -2742,8 +2742,8 @@ PolyExtStep::Sub(1531, 0), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 1532), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndCond(1181, 1530, 1182), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(1183, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1184, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1185, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1184, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1185, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1186, 779), // zirgen/circuit/rv32im/v1/edsl/multiply.cpp:83
 PolyExtStep::Mul(1406, 1530), // zirgen/circuit/rv32im/v1/edsl/multiply.cpp:84
 PolyExtStep::Sub(433, 178), // zirgen/components/u32.cpp:34
@@ -2792,7 +2792,7 @@ PolyExtStep::AndCond(1219, 1030, 1220), // circuit/rv32im/v1/platform/rv32im.inl
 PolyExtStep::AndEqz(659, 1097), // circuit/rv32im/v1/platform/rv32im.inl:106
 PolyExtStep::AndEqz(1222, 798), // circuit/rv32im/v1/platform/rv32im.inl:106
 PolyExtStep::AndCond(1221, 1033, 1223), // circuit/rv32im/v1/platform/rv32im.inl:106
-PolyExtStep::AndEqz(1224, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1224, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1171, 1404, 1225), // components/mux.h:49
 PolyExtStep::Get(385), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[5](Reg)(components/mux.h:49)
 PolyExtStep::Add(995, 1023), // circuit/rv32im/v1/platform/rv32im.inl:126
@@ -2887,8 +2887,8 @@ PolyExtStep::AndEqz(1270, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndCond(1260, 1583, 1271), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:103
 PolyExtStep::AndCond(1272, 892, 521), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:108
 PolyExtStep::AndEqz(1273, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1274, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1275, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1274, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1275, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::Sub(778, 31), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:112
 PolyExtStep::AndEqz(1276, 1588), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:112
 PolyExtStep::AndEqz(542, 1542), // circuit/rv32im/v1/platform/rv32im.inl:124
@@ -2909,7 +2909,7 @@ PolyExtStep::AndEqz(1291, 798), // circuit/rv32im/v1/platform/rv32im.inl:130
 PolyExtStep::AndCond(1290, 1036, 1292), // circuit/rv32im/v1/platform/rv32im.inl:130
 PolyExtStep::AndEqz(1291, 1021), // circuit/rv32im/v1/platform/rv32im.inl:131
 PolyExtStep::AndCond(1293, 1039, 1294), // circuit/rv32im/v1/platform/rv32im.inl:131
-PolyExtStep::AndEqz(1295, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1295, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1226, 1543, 1296), // components/mux.h:49
 PolyExtStep::Get(387), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[6](Reg)(components/mux.h:49)
 PolyExtStep::Sub(782, 30), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:208
@@ -3167,10 +3167,10 @@ PolyExtStep::AndEqz(1308, 1829), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:23
 PolyExtStep::Sub(1602, 1818), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:238
 PolyExtStep::AndEqz(1309, 1830), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:238
 PolyExtStep::AndEqz(1310, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1311, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1312, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1311, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1312, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1313, 779), // zirgen/circuit/rv32im/v1/edsl/compute.cpp:241
-PolyExtStep::AndEqz(1314, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1314, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1297, 1589, 1315), // components/mux.h:49
 PolyExtStep::Get(389), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[7](Reg)(components/mux.h:49)
 PolyExtStep::Sub(782, 31), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:132
@@ -3486,10 +3486,10 @@ PolyExtStep::Sub(1845, 4), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:172
 PolyExtStep::AndEqz(1361, 2096), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:172
 PolyExtStep::AndCond(1354, 338, 1362), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:170
 PolyExtStep::AndEqz(1363, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1364, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1365, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1364, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1365, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1366, 779), // zirgen/circuit/rv32im/v1/edsl/divide.cpp:175
-PolyExtStep::AndEqz(1367, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1367, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1316, 1831, 1368), // components/mux.h:49
 PolyExtStep::Get(391), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[8](Reg)(components/mux.h:49)
 PolyExtStep::Sub(0, 516), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:180
@@ -3561,8 +3561,8 @@ PolyExtStep::AndEqz(1405, 426), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1406, 427), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1407, 428), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1408, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1409, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1410, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1409, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1410, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1411, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 28), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:27
 PolyExtStep::AndEqz(1412, 2127), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:27
@@ -3709,8 +3709,8 @@ PolyExtStep::AndEqz(1470, 447), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1471, 448), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1472, 449), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1473, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1474, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1475, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1474, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1475, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1476, 517), // components/bits.h:27
 PolyExtStep::AndEqz(1477, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:54
 PolyExtStep::AndCond(1414, 1039, 1478), // components/mux.h:49
@@ -3734,8 +3734,8 @@ PolyExtStep::Sub(2214, 174), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2217, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::AndEqz(1488, 2218), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:101
 PolyExtStep::AndEqz(1489, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1490, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1491, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1490, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1491, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1492, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 26), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:107
 PolyExtStep::AndEqz(1493, 2219), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:107
@@ -3749,8 +3749,8 @@ PolyExtStep::AndEqz(1499, 1334), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1500, 1335), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1501, 1336), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1502, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1503, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1504, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1503, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1504, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1505, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 33), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:124
 PolyExtStep::AndEqz(1506, 2221), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:124
@@ -3764,8 +3764,8 @@ PolyExtStep::AndEqz(1512, 426), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1513, 427), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1514, 428), // zirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1515, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1516, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1517, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1516, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1517, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1518, 517), // components/bits.h:27
 PolyExtStep::Sub(778, 27), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:137
 PolyExtStep::AndEqz(1519, 2223), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:137
@@ -3792,12 +3792,12 @@ PolyExtStep::Sub(2233, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2234, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(2235, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2236, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(2237, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(2238, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(2237, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(2238, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 2239), // components/bits.h:68
 PolyExtStep::AndEqz(1529, 2240), // components/bits.h:68
-PolyExtStep::AndEqz(1530, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1531, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1530, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1531, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::Sub(490, 0), // components/bits.h:27
 PolyExtStep::AndEqz(1532, 2241), // components/bits.h:27
 PolyExtStep::AndEqz(1533, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:149
@@ -3837,16 +3837,16 @@ PolyExtStep::Sub(2253, 111), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2254, 5), // zirgen/components/bytes.cpp:97
 PolyExtStep::Sub(2255, 112), // zirgen/components/bytes.cpp:97
 PolyExtStep::Mul(2256, 5), // zirgen/components/bytes.cpp:97
-PolyExtStep::Sub(2257, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
-PolyExtStep::Mul(2258, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:30
+PolyExtStep::Sub(2257, 505), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
+PolyExtStep::Mul(2258, 21), // zirgen/circuit/rv32im/v1/edsl/body.cpp:28
 PolyExtStep::Sub(508, 2259), // components/bits.h:68
 PolyExtStep::AndEqz(1554, 2260), // components/bits.h:68
-PolyExtStep::AndEqz(1555, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1556, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1555, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1556, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1557, 490), // components/bits.h:27
 PolyExtStep::AndEqz(1558, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:166
 PolyExtStep::AndCond(1535, 851, 1559), // components/mux.h:49
-PolyExtStep::AndEqz(1560, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1560, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1369, 2097, 1561), // components/mux.h:49
 PolyExtStep::Get(393), // Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[9](Reg)(components/mux.h:49)
 PolyExtStep::Sub(782, 33), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:174
@@ -3911,8 +3911,8 @@ PolyExtStep::Sub(778, 2306), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:189
 PolyExtStep::AndEqz(0, 2307), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:189
 PolyExtStep::AndCond(1575, 2272, 1576), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:189
 PolyExtStep::AndEqz(1577, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1578, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1579, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1578, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1579, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::Sub(312, 64), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(0, 2308), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(1581, 396), // zirgen/components/ram.cpp:169
@@ -4294,7 +4294,7 @@ PolyExtStep::Mul(2608, 21), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:127
 PolyExtStep::Sub(0, 2609), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::Mul(2609, 2610), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::AndEqz(1656, 2611), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
-PolyExtStep::AndEqz(1657, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1657, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1562, 2261, 1658), // components/mux.h:49
 PolyExtStep::Sub(782, 23), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:263
 PolyExtStep::AndEqz(233, 2612), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:263
@@ -4322,8 +4322,8 @@ PolyExtStep::AndCond(1670, 1323, 1671), // zirgen/circuit/rv32im/v1/edsl/sha.cpp
 PolyExtStep::AndCond(1669, 1327, 1672), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:285
 PolyExtStep::AndCond(1673, 2272, 1576), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:289
 PolyExtStep::AndEqz(1674, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1675, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1676, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1675, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1676, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1677, 2371), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:292
 PolyExtStep::AndEqz(1678, 2372), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:293
 PolyExtStep::AndEqz(1679, 2373), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:294
@@ -6032,7 +6032,7 @@ PolyExtStep::Mul(4276, 21), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:127
 PolyExtStep::Sub(0, 4277), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::Mul(4277, 4278), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
 PolyExtStep::AndEqz(1726, 4279), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:128
-PolyExtStep::AndEqz(1727, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1727, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1659, 2276, 1728), // components/mux.h:49
 PolyExtStep::Sub(782, 24), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:341
 PolyExtStep::AndEqz(233, 4280), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:341
@@ -6066,8 +6066,8 @@ PolyExtStep::AndEqz(1750, 2380), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:377
 PolyExtStep::AndCond(1751, 1319, 1648), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(1752, 2385, 1650), // zirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(1753, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1754, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1755, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1754, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1755, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::Sub(76, 439), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:387
 PolyExtStep::Sub(338, 4287), // zirgen/components/ram.cpp:168
 PolyExtStep::AndEqz(0, 4288), // zirgen/components/ram.cpp:168
@@ -7256,11 +7256,11 @@ PolyExtStep::AndCond(1836, 1325, 1844), // zirgen/circuit/rv32im/v1/edsl/sha.cpp
 PolyExtStep::Sub(0, 1325), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:447
 PolyExtStep::AndEqz(1838, 2621), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:450
 PolyExtStep::AndCond(1845, 5383, 1846), // zirgen/circuit/rv32im/v1/edsl/sha.cpp:447
-PolyExtStep::AndEqz(1847, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1847, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1729, 2277, 1848), // components/mux.h:49
 PolyExtStep::AndEqz(233, 541), // components/bits.h:68
-PolyExtStep::AndEqz(1850, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1851, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1850, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1851, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::Sub(346, 77), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:49
 PolyExtStep::AndEqz(0, 5384), // zirgen/components/iszero.cpp:16
 PolyExtStep::AndCond(1852, 338, 1853), // zirgen/components/iszero.cpp:16
@@ -7313,7 +7313,7 @@ PolyExtStep::Sub(1895, 5414), // components/bits.h:68
 PolyExtStep::AndEqz(1869, 5415), // components/bits.h:68
 PolyExtStep::AndEqz(1870, 2127), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:83
 PolyExtStep::AndCond(1868, 318, 1871), // zirgen/circuit/rv32im/v1/edsl/page_fault.cpp:80
-PolyExtStep::AndEqz(1872, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1872, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1849, 2278, 1873), // components/mux.h:49
 PolyExtStep::Sub(782, 26), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:216
 PolyExtStep::AndEqz(233, 5416), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:216
@@ -7374,8 +7374,8 @@ PolyExtStep::AndEqz(1904, 435), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1905, 437), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1906, 439), // zirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1907, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(1908, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(1909, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(1908, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(1909, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(1910, 779), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:272
 PolyExtStep::AndCond(1889, 382, 1911), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:251
 PolyExtStep::Sub(0, 382), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:274
@@ -7417,7 +7417,7 @@ PolyExtStep::Sub(441, 5453), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:300
 PolyExtStep::AndEqz(1934, 5454), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:300
 PolyExtStep::AndCond(1933, 5452, 1935), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:291
 PolyExtStep::AndCond(1936, 1, 521), // zirgen/circuit/rv32im/v1/edsl/ecall.cpp:302
-PolyExtStep::AndEqz(1937, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(1937, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1874, 320, 1938), // components/mux.h:49
 PolyExtStep::Sub(782, 27), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:179
 PolyExtStep::AndEqz(233, 5455), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:179
@@ -8229,49 +8229,49 @@ PolyExtStep::Sub(0, 828), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:454
 PolyExtStep::AndEqz(388, 2223), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:456
 PolyExtStep::AndCond(2223, 5977, 2224), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:454
 PolyExtStep::AndEqz(0, 1010), // components/bits.h:68
-PolyExtStep::AndEqz(2226, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(2227, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
+PolyExtStep::AndEqz(2226, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(2227, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
 PolyExtStep::AndEqz(2228, 779), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:460
 PolyExtStep::AndCond(2225, 828, 2229), // zirgen/circuit/rv32im/v1/edsl/bigint.cpp:458
-PolyExtStep::AndEqz(2230, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(2230, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(1939, 322, 2231), // components/mux.h:49
-PolyExtStep::Sub(782, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:164
-PolyExtStep::AndEqz(233, 5978), // zirgen/circuit/rv32im/v1/edsl/body.cpp:164
-PolyExtStep::Sub(312, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:167
-PolyExtStep::AndEqz(0, 5979), // zirgen/circuit/rv32im/v1/edsl/body.cpp:167
-PolyExtStep::Sub(314, 2359), // zirgen/circuit/rv32im/v1/edsl/body.cpp:168
-PolyExtStep::AndEqz(2234, 5980), // zirgen/circuit/rv32im/v1/edsl/body.cpp:168
-PolyExtStep::Sub(316, 588), // zirgen/circuit/rv32im/v1/edsl/body.cpp:169
-PolyExtStep::AndEqz(2235, 5981), // zirgen/circuit/rv32im/v1/edsl/body.cpp:169
-PolyExtStep::AndCond(2233, 556, 2236), // zirgen/circuit/rv32im/v1/edsl/body.cpp:166
-PolyExtStep::AndEqz(0, 3197), // zirgen/circuit/rv32im/v1/edsl/body.cpp:176
-PolyExtStep::Sub(316, 2675), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
-PolyExtStep::AndEqz(2238, 5982), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
-PolyExtStep::Sub(312, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
-PolyExtStep::AndEqz(2239, 5983), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
-PolyExtStep::Sub(314, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:182
-PolyExtStep::AndEqz(2240, 5984), // zirgen/circuit/rv32im/v1/edsl/body.cpp:182
-PolyExtStep::GetGlobal(0, 104), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
-PolyExtStep::Sub(5985, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
-PolyExtStep::AndEqz(2241, 5986), // zirgen/circuit/rv32im/v1/edsl/body.cpp:184
-PolyExtStep::GetGlobal(0, 105), // zirgen/circuit/rv32im/v1/edsl/body.cpp:185
-PolyExtStep::Sub(5987, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:185
-PolyExtStep::AndEqz(2242, 5988), // zirgen/circuit/rv32im/v1/edsl/body.cpp:185
-PolyExtStep::AndCond(2237, 549, 2243), // zirgen/circuit/rv32im/v1/edsl/body.cpp:173
-PolyExtStep::Sub(312, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:195
-PolyExtStep::AndEqz(0, 5989), // zirgen/circuit/rv32im/v1/edsl/body.cpp:195
-PolyExtStep::AndEqz(2245, 314), // zirgen/circuit/rv32im/v1/edsl/body.cpp:196
-PolyExtStep::Sub(316, 80), // zirgen/circuit/rv32im/v1/edsl/body.cpp:197
-PolyExtStep::AndEqz(2246, 5990), // zirgen/circuit/rv32im/v1/edsl/body.cpp:197
-PolyExtStep::Sub(5985, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:199
-PolyExtStep::AndEqz(2247, 5991), // zirgen/circuit/rv32im/v1/edsl/body.cpp:199
-PolyExtStep::AndEqz(2248, 5987), // zirgen/circuit/rv32im/v1/edsl/body.cpp:200
-PolyExtStep::AndCond(2244, 553, 2249), // zirgen/circuit/rv32im/v1/edsl/body.cpp:194
+PolyExtStep::Sub(782, 28), // zirgen/circuit/rv32im/v1/edsl/body.cpp:160
+PolyExtStep::AndEqz(233, 5978), // zirgen/circuit/rv32im/v1/edsl/body.cpp:160
+PolyExtStep::Sub(312, 586), // zirgen/circuit/rv32im/v1/edsl/body.cpp:163
+PolyExtStep::AndEqz(0, 5979), // zirgen/circuit/rv32im/v1/edsl/body.cpp:163
+PolyExtStep::Sub(314, 2359), // zirgen/circuit/rv32im/v1/edsl/body.cpp:164
+PolyExtStep::AndEqz(2234, 5980), // zirgen/circuit/rv32im/v1/edsl/body.cpp:164
+PolyExtStep::Sub(316, 588), // zirgen/circuit/rv32im/v1/edsl/body.cpp:165
+PolyExtStep::AndEqz(2235, 5981), // zirgen/circuit/rv32im/v1/edsl/body.cpp:165
+PolyExtStep::AndCond(2233, 556, 2236), // zirgen/circuit/rv32im/v1/edsl/body.cpp:162
+PolyExtStep::AndEqz(0, 3197), // zirgen/circuit/rv32im/v1/edsl/body.cpp:172
+PolyExtStep::Sub(316, 2675), // zirgen/circuit/rv32im/v1/edsl/body.cpp:176
+PolyExtStep::AndEqz(2238, 5982), // zirgen/circuit/rv32im/v1/edsl/body.cpp:176
+PolyExtStep::Sub(312, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:177
+PolyExtStep::AndEqz(2239, 5983), // zirgen/circuit/rv32im/v1/edsl/body.cpp:177
+PolyExtStep::Sub(314, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:178
+PolyExtStep::AndEqz(2240, 5984), // zirgen/circuit/rv32im/v1/edsl/body.cpp:178
+PolyExtStep::GetGlobal(0, 104), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
+PolyExtStep::Sub(5985, 2310), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
+PolyExtStep::AndEqz(2241, 5986), // zirgen/circuit/rv32im/v1/edsl/body.cpp:180
+PolyExtStep::GetGlobal(0, 105), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
+PolyExtStep::Sub(5987, 2311), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
+PolyExtStep::AndEqz(2242, 5988), // zirgen/circuit/rv32im/v1/edsl/body.cpp:181
+PolyExtStep::AndCond(2237, 549, 2243), // zirgen/circuit/rv32im/v1/edsl/body.cpp:169
+PolyExtStep::Sub(312, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:189
+PolyExtStep::AndEqz(0, 5989), // zirgen/circuit/rv32im/v1/edsl/body.cpp:189
+PolyExtStep::AndEqz(2245, 314), // zirgen/circuit/rv32im/v1/edsl/body.cpp:190
+PolyExtStep::Sub(316, 80), // zirgen/circuit/rv32im/v1/edsl/body.cpp:191
+PolyExtStep::AndEqz(2246, 5990), // zirgen/circuit/rv32im/v1/edsl/body.cpp:191
+PolyExtStep::Sub(5985, 3), // zirgen/circuit/rv32im/v1/edsl/body.cpp:193
+PolyExtStep::AndEqz(2247, 5991), // zirgen/circuit/rv32im/v1/edsl/body.cpp:193
+PolyExtStep::AndEqz(2248, 5987), // zirgen/circuit/rv32im/v1/edsl/body.cpp:194
+PolyExtStep::AndCond(2244, 553, 2249), // zirgen/circuit/rv32im/v1/edsl/body.cpp:188
 PolyExtStep::AndEqz(2250, 541), // components/bits.h:68
-PolyExtStep::AndEqz(2251, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:34
-PolyExtStep::AndEqz(2252, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:35
-PolyExtStep::AndEqz(2253, 2127), // zirgen/circuit/rv32im/v1/edsl/body.cpp:209
-PolyExtStep::AndEqz(2254, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:52
+PolyExtStep::AndEqz(2251, 513), // zirgen/circuit/rv32im/v1/edsl/body.cpp:32
+PolyExtStep::AndEqz(2252, 515), // zirgen/circuit/rv32im/v1/edsl/body.cpp:33
+PolyExtStep::AndEqz(2253, 2127), // zirgen/circuit/rv32im/v1/edsl/body.cpp:201
+PolyExtStep::AndEqz(2254, 1056), // zirgen/circuit/rv32im/v1/edsl/body.cpp:50
 PolyExtStep::AndCond(2232, 324, 2255), // components/mux.h:49
 PolyExtStep::AndCond(436, 780, 2256), // components/mux.h:49
 PolyExtStep::Get(52), // Top/Code/OneHot/hot[6](Reg)(components/mux.h:49)

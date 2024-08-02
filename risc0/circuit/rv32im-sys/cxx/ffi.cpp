@@ -56,7 +56,7 @@ using DataReg = size_t;
 using MixReg = size_t;
 using AccumReg = size_t;
 
-#include "layout.inc.cpp"
+#include "layout.cpp.inc"
 
 } // namespace
 

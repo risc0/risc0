@@ -1074,9 +1074,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x522 = x519 + x521;
   // loc("./zirgen/components/onehot.h":40:8)
   FpExt x523 = x84 + x522 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":71:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":69:5)
   auto x524 = args[2][176 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":71:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":69:5)
   FpExt x525 = x523 + x524 * poly_mix[1];
   // loc("Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[0](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x526 = args[1][36];
@@ -1292,7 +1292,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x631 = x614 - x614;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x632 = x630 + x631 * poly_mix[43];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":73:13)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":71:13)
   FpExt x633 = x525 + x86 * x632 * poly_mix[2];
   // loc("Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/image_id(GlobalDigest)/word[4](U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x634 = args[1][52];
@@ -1454,7 +1454,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x712 = x711 + x629 * poly_mix[42];
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x713 = x712 + x631 * poly_mix[43];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":79:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":77:17)
   FpExt x714 = x633 + x253 * x713 * poly_mix[46];
   // loc("Top/mux(Mux)/reset(ResetStep)/Global/pre(SystemState)/pc(U32Reg)/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x715 = args[1][32];
@@ -1478,7 +1478,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x724 = x723 + x721;
   // loc("./zirgen/components/u32.h":24:12)
   auto x725 = x724 + x722;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":89:13)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":85:13)
   auto x726 = x725 - x719;
   // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":24:23)
   auto x727 = x726 + x18;
@@ -1496,9 +1496,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x733 = x732 * x5;
   // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/twits[0](Twit)/twit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x734 = args[2][70 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x735 = x733 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x736 = x735 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x737 = args[2][71 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1506,23 +1506,23 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x738 = x737 - x736;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x739 = x714 + x738 * poly_mix[90];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:23)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:23)
   auto x740 = x0 - x737;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:15)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:15)
   auto x741 = x737 * x740;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   auto x742 = args[2][98 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   auto x743 = x742 - x741;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x744 = x739 + x743 * poly_mix[91];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:17)
   auto x745 = x3 - x737;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   auto x746 = x742 * x745;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x747 = x744 + x746 * poly_mix[92];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":69:12)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":67:12)
   FpExt x748 = x84 + x400 * x747 * poly_mix[0];
   // loc("Top/mux(Mux)/reset(ResetStep)/Bit/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x749 = args[2][99 * steps + ((cycle - kInvRate * 1) & mask)];
@@ -1542,23 +1542,23 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x756 = args[2][71 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("zirgen/components/bytes.cpp":92:10))
   auto x757 = args[2][8 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":38:10)
   auto x758 = x754 * x6;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":42:10)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":40:10)
   auto x759 = x755 * x17;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":43:10)
-  auto x760 = x756 * x22;
   // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":41:10)
+  auto x760 = x756 * x22;
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
   auto x761 = x757 * x19;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
   auto x762 = x753 + x758;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
   auto x763 = x762 + x761;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
   auto x764 = x763 + x759;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
   auto x765 = x764 + x760;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":39:10)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":37:10)
   auto x766 = x765 - x18;
   // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":24:23)
   auto x767 = x766 + x18;
@@ -1574,17 +1574,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x772 = x771 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x773 = x772 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x774 = x773 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x775 = x774 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x776 = x737 - x775;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x777 = x752 + x776 * poly_mix[2];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x778 = x777 + x743 * poly_mix[3];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x779 = x778 + x746 * poly_mix[4];
   // loc("Top/mux(Mux)/body(BodyStep)/major_select(OneHot)/hot[1](Reg)"("./zirgen/compiler/edsl/edsl.h":118:61))
   auto x780 = args[2][102 * steps + ((cycle - kInvRate * 1) & mask)];
@@ -1672,17 +1672,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x821 = x820 + x807;
   // loc("./zirgen/components/onehot.h":46:13)
   auto x822 = x821 + x808;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":101:42)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":97:42)
   auto x823 = x822 - x28;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":101:42)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":97:42)
   FpExt x824 = x84 + x823 * poly_mix[0];
-  // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":103:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/sys_exit_code(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":99:61))
   auto x825 = args[2][117 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":103:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":99:7)
   auto x826 = x524 - x825;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":103:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":99:7)
   FpExt x827 = x824 + x826 * poly_mix[1];
-  // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":105:53))
+  // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":101:53))
   auto x828 = args[2][119 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("zirgen/components/ram.cpp":168:3)
   auto x829 = x411 - x828;
@@ -1724,7 +1724,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x847 = x846 - x468;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x848 = x845 + x847 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:55)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":104:55)
   auto x849 = x828 + x0;
   // loc("zirgen/components/ram.cpp":168:3)
   auto x850 = x450 - x849;
@@ -1766,7 +1766,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x868 = x867 - x507;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x869 = x866 + x868 * poly_mix[23];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:55)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":104:55)
   auto x870 = x828 + x3;
   // loc("zirgen/components/ram.cpp":168:3)
   auto x871 = x489 - x870;
@@ -1808,7 +1808,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x889 = x888 - x586;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x890 = x887 + x889 * poly_mix[34];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:55)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":104:55)
   auto x891 = x828 + x20;
   // loc("zirgen/components/ram.cpp":168:3)
   auto x892 = x617 - x891;
@@ -1850,17 +1850,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x910 = x909 - x614;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x911 = x908 + x910 * poly_mix[45];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":99:13)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":95:13)
   FpExt x912 = x779 + x86 * x911 * poly_mix[5];
-  // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:50))
+  // loc("Top/mux(Mux)/reset(ResetStep)/Reg"("zirgen/circuit/rv32im/v1/edsl/body.cpp":111:50))
   auto x913 = args[2][176 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":114:53))
+  // loc("Top/mux(Mux)/body(BodyStep)/major_mux(Mux)/halt(HaltCycle)/write_addr(Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":110:53))
   auto x914 = args[2][119 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":111:7)
   auto x915 = x524 - x913;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":111:7)
   FpExt x916 = x84 + x915 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
   auto x917 = x914 + x18;
   // loc("zirgen/components/ram.cpp":168:3)
   auto x918 = x411 - x917;
@@ -1902,7 +1902,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x936 = x935 - x468;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x937 = x934 + x936 * poly_mix[11];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
   auto x938 = x917 + x0;
   // loc("zirgen/components/ram.cpp":168:3)
   auto x939 = x450 - x938;
@@ -1944,7 +1944,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x957 = x956 - x507;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x958 = x955 + x957 * poly_mix[22];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
   auto x959 = x917 + x3;
   // loc("zirgen/components/ram.cpp":168:3)
   auto x960 = x489 - x959;
@@ -1986,7 +1986,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x978 = x977 - x586;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x979 = x976 + x978 * poly_mix[33];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":119:45)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":115:45)
   auto x980 = x917 + x20;
   // loc("zirgen/components/ram.cpp":168:3)
   auto x981 = x617 - x980;
@@ -2028,19 +2028,19 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x999 = x998 - x614;
   // loc("zirgen/components/u32.cpp":34:5)
   FpExt x1000 = x997 + x999 * poly_mix[44];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":112:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":108:17)
   FpExt x1001 = x912 + x253 * x1000 * poly_mix[51];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":93:14)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":89:14)
   FpExt x1002 = x748 + x405 * x1001 * poly_mix[93];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":126:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":122:5)
   FpExt x1003 = x751 + x915 * poly_mix[1];
   // loc("./zirgen/components/onehot.h":40:8)
   auto x1004 = x522 - x524;
   // loc("./zirgen/components/onehot.h":40:8)
   FpExt x1005 = x1003 + x1004 * poly_mix[2];
-  // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":131:31))
+  // loc("Top/mux(Mux)/reset(ResetStep)/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/body.cpp":127:31))
   auto x1006 = args[2][173 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":131:27)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":127:27)
   auto x1007 = x0 - x1006;
   // loc("zirgen/components/bytes.cpp":97:11)
   auto x1008 = x766 - x110;
@@ -2054,17 +2054,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1012 = x1011 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x1013 = x1012 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x1014 = x1013 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x1015 = x1014 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x1016 = x737 - x1015;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1017 = x84 + x1016 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1018 = x1017 + x743 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1019 = x1018 + x746 * poly_mix[2];
   // loc("zirgen/components/ram.cpp":168:3)
   FpExt x1020 = x1019 + x538 * poly_mix[3];
@@ -2250,11 +2250,11 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1110 = x1109 - x1108;
   // loc("zirgen/components/u32.cpp":40:5)
   FpExt x1111 = x1107 + x1110 * poly_mix[46];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:52)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:52)
   auto x1112 = x737 * x18;
   // loc("zirgen/components/u32.cpp":95:20)
   auto x1113 = x110 + x749;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:41)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:41)
   auto x1114 = x734 + x1112;
   // loc("zirgen/components/u32.cpp":40:19)
   auto x1115 = x1113 * x1007;
@@ -2288,13 +2288,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1129 = x1128 - x1127;
   // loc("zirgen/components/u32.cpp":40:5)
   FpExt x1130 = x1126 + x1129 * poly_mix[50];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":133:13)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":129:13)
   FpExt x1131 = x1005 + x86 * x1130 * poly_mix[3];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1132 = x84 + x776 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1133 = x1132 + x743 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1134 = x1133 + x746 * poly_mix[2];
   // loc("zirgen/components/ram.cpp":168:3)
   FpExt x1135 = x1134 + x646 * poly_mix[3];
@@ -2448,15 +2448,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1209 = x1208 - x1108;
   // loc("zirgen/components/u32.cpp":40:5)
   FpExt x1210 = x1207 + x1209 * poly_mix[46];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":144:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":140:17)
   FpExt x1211 = x1131 + x253 * x1210 * poly_mix[54];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":124:12)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":120:12)
   FpExt x1212 = x1002 + x439 * x1211 * poly_mix[134];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":154:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":150:3)
   auto x1213 = args[2][100 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":154:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":150:3)
   auto x1214 = x1213 - x34;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":154:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":150:3)
   FpExt x1215 = x1212 + x1214 * poly_mix[155];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x1216 = x517 + x518 * x1215 * poly_mix[121];
@@ -2670,7 +2670,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1320 = x1315 * x1312;
   // loc("zirgen/components/u32.cpp":111:20)
   auto x1321 = x1315 * x1313;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:52)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:52)
   auto x1322 = x756 * x18;
   // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":143:17)
   auto x1323 = x0 - x1314;
@@ -2678,7 +2678,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1324 = x0 - x1315;
   // loc("zirgen/components/u32.cpp":103:20)
   auto x1325 = x753 - x18;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":47:41)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":45:41)
   auto x1326 = x755 + x1322;
   // loc("zirgen/components/u32.cpp":111:20)
   auto x1327 = x1323 * x459;
@@ -3040,17 +3040,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1505 = x1504 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x1506 = x1505 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x1507 = x1506 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x1508 = x1507 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x1509 = x737 - x1508;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1510 = x1499 + x1509 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1511 = x1510 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1512 = x1511 + x746 * poly_mix[15];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":38:68)
   auto x1513 = x1213 - x1497;
@@ -3144,9 +3144,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1557 = x1556 + x1498 * poly_mix[12];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1558 = x1557 + x1509 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1559 = x1558 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1560 = x1559 + x746 * poly_mix[15];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":39:68)
   FpExt x1561 = x1560 + x1513 * poly_mix[16];
@@ -3190,9 +3190,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1580 = x1578 + x1579 * poly_mix[12];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1581 = x1580 + x1509 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1582 = x1581 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1583 = x1582 + x746 * poly_mix[15];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":40:69)
   FpExt x1584 = x1583 + x1513 * poly_mix[16];
@@ -3234,9 +3234,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1602 = x1601 + x1579 * poly_mix[12];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1603 = x1602 + x1509 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1604 = x1603 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1605 = x1604 + x746 * poly_mix[15];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":41:69)
   FpExt x1606 = x1605 + x1513 * poly_mix[16];
@@ -3278,9 +3278,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1624 = x1623 + x1579 * poly_mix[12];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1625 = x1624 + x1509 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1626 = x1625 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1627 = x1626 + x746 * poly_mix[15];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":42:69)
   FpExt x1628 = x1627 + x1513 * poly_mix[16];
@@ -3320,9 +3320,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1645 = x1644 + x1498 * poly_mix[12];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1646 = x1645 + x1509 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1647 = x1646 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1648 = x1647 + x746 * poly_mix[15];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":43:68)
   FpExt x1649 = x1648 + x1513 * poly_mix[16];
@@ -3386,9 +3386,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1678 = x1677 + x1498 * poly_mix[12];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1679 = x1678 + x1509 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1680 = x1679 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1681 = x1680 + x746 * poly_mix[15];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":44:68)
   FpExt x1682 = x1681 + x1513 * poly_mix[16];
@@ -3480,9 +3480,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1725 = x1724 + x1498 * poly_mix[11];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1726 = x1725 + x1509 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1727 = x1726 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1728 = x1727 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":45:68)
   FpExt x1729 = x1728 + x1513 * poly_mix[15];
@@ -3492,11 +3492,11 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1731 = x1730 + x1472 * x1541 * poly_mix[27];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":45:68)
   FpExt x1732 = x1697 + x1698 * x1731 * poly_mix[154];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   auto x1733 = x719 * x737;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   auto x1734 = x1733 * x740;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x1735 = x1732 + x1734 * poly_mix[162];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x1736 = x84 + x1218 * x1735 * poly_mix[0];
@@ -3562,9 +3562,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1766 = x1765 + x1579 * poly_mix[11];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1767 = x1766 + x1509 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1768 = x1767 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1769 = x1768 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":46:69)
   FpExt x1770 = x1769 + x1513 * poly_mix[15];
@@ -3598,9 +3598,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1784 = x1783 + x1579 * poly_mix[11];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1785 = x1784 + x1509 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1786 = x1785 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1787 = x1786 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":47:69)
   FpExt x1788 = x1787 + x1513 * poly_mix[15];
@@ -3634,9 +3634,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1802 = x1801 + x1579 * poly_mix[11];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1803 = x1802 + x1509 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1804 = x1803 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1805 = x1804 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":48:69)
   FpExt x1806 = x1805 + x1513 * poly_mix[15];
@@ -3670,9 +3670,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1820 = x1819 + x1498 * poly_mix[11];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1821 = x1820 + x1509 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1822 = x1821 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1823 = x1822 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":49:68)
   FpExt x1824 = x1823 + x1513 * poly_mix[15];
@@ -3706,9 +3706,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1838 = x1837 + x1498 * poly_mix[11];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1839 = x1838 + x1509 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1840 = x1839 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1841 = x1840 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":50:68)
   FpExt x1842 = x1841 + x1513 * poly_mix[15];
@@ -3776,17 +3776,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1873 = x1872 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x1874 = x1873 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x1875 = x1874 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x1876 = x1875 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x1877 = x737 - x1876;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1878 = x1867 + x1877 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1879 = x1878 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1880 = x1879 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":51:68)
   FpExt x1881 = x1880 + x1513 * poly_mix[15];
@@ -3836,17 +3836,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1903 = x1902 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x1904 = x1903 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x1905 = x1904 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x1906 = x1905 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x1907 = x737 - x1906;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1908 = x1897 + x1907 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1909 = x1908 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1910 = x1909 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":52:68)
   FpExt x1911 = x1910 + x1513 * poly_mix[15];
@@ -3892,17 +3892,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1931 = x1930 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x1932 = x1931 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x1933 = x1932 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x1934 = x1933 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x1935 = x737 - x1934;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1936 = x1925 + x1935 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1937 = x1936 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1938 = x1937 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":53:68)
   FpExt x1939 = x1938 + x1513 * poly_mix[15];
@@ -3912,7 +3912,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x1941 = x1940 + x1883 * x1541 * poly_mix[27];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":53:68)
   FpExt x1942 = x1914 + x1698 * x1941 * poly_mix[153];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x1943 = x1942 + x1734 * poly_mix[160];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x1944 = x1736 + x1737 * x1943 * poly_mix[163];
@@ -3984,17 +3984,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x1977 = x1976 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x1978 = x1977 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x1979 = x1978 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x1980 = x1979 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x1981 = x737 - x1980;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x1982 = x1971 + x1981 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x1983 = x1982 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x1984 = x1983 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":54:68)
   FpExt x1985 = x1984 + x1513 * poly_mix[15];
@@ -4040,17 +4040,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x2005 = x2004 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x2006 = x2005 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x2007 = x2006 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x2008 = x2007 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x2009 = x737 - x2008;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2010 = x1999 + x2009 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2011 = x2010 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2012 = x2011 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":55:68)
   FpExt x2013 = x2012 + x1513 * poly_mix[15];
@@ -4096,17 +4096,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x2033 = x2032 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x2034 = x2033 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x2035 = x2034 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x2036 = x2035 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x2037 = x737 - x2036;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2038 = x2027 + x2037 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2039 = x2038 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2040 = x2039 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":56:68)
   FpExt x2041 = x2040 + x1513 * poly_mix[15];
@@ -4174,17 +4174,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x2072 = x2071 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x2073 = x2072 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x2074 = x2073 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x2075 = x2074 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x2076 = x737 - x2075;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2077 = x2066 + x2076 * poly_mix[11];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2078 = x2077 + x743 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2079 = x2078 + x746 * poly_mix[13];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":57:68)
   FpExt x2080 = x2079 + x1513 * poly_mix[14];
@@ -4264,17 +4264,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x2117 = x2116 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x2118 = x2117 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x2119 = x2118 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x2120 = x2119 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x2121 = x737 - x2120;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2122 = x2111 + x2121 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2123 = x2122 + x743 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2124 = x2123 + x746 * poly_mix[14];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":58:68)
   FpExt x2125 = x2124 + x1513 * poly_mix[15];
@@ -4316,9 +4316,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2143 = x2142 + x1498 * poly_mix[10];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2144 = x2143 + x1509 * poly_mix[11];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2145 = x2144 + x743 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2146 = x2145 + x746 * poly_mix[13];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":59:68)
   FpExt x2147 = x2146 + x1513 * poly_mix[14];
@@ -4356,9 +4356,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2163 = x2162 + x1498 * poly_mix[10];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2164 = x2163 + x1509 * poly_mix[11];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2165 = x2164 + x743 * poly_mix[12];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2166 = x2165 + x746 * poly_mix[13];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":60:68)
   FpExt x2167 = x2166 + x1513 * poly_mix[14];
@@ -4368,7 +4368,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2169 = x2168 + x1472 * x1541 * poly_mix[26];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":60:68)
   FpExt x2170 = x2150 + x1665 * x2169 * poly_mix[146];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x2171 = x2170 + x1734 * poly_mix[152];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x2172 = x1944 + x1945 * x2171 * poly_mix[175];
@@ -4626,9 +4626,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2298 = x2297 + x631 * poly_mix[42];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2299 = x2298 + x1509 * poly_mix[43];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2300 = x2299 + x743 * poly_mix[44];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2301 = x2300 + x746 * poly_mix[45];
   // loc("zirgen/circuit/rv32im/v1/edsl/memio.cpp":99:3)
   FpExt x2302 = x2301 + x1214 * poly_mix[46];
@@ -5174,7 +5174,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2572 = x2571 + x2396 * poly_mix[21];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":83:46)
   FpExt x2573 = x2544 + x1375 * x2572 * poly_mix[148];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x2574 = x2573 + x1734 * poly_mix[151];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x2575 = x2172 + x2173 * x2574 * poly_mix[178];
@@ -5462,9 +5462,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2716 = x2711 + x2712 * x2715 * poly_mix[37];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2717 = x2716 + x1509 * poly_mix[38];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2718 = x2717 + x743 * poly_mix[39];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2719 = x2718 + x746 * poly_mix[40];
   // loc("zirgen/circuit/rv32im/v1/edsl/multiply.cpp":83:3)
   FpExt x2720 = x2719 + x1214 * poly_mix[41];
@@ -5562,7 +5562,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2766 = x2765 + x1243 * poly_mix[2];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":106:49)
   FpExt x2767 = x2764 + x1632 * x2766 * poly_mix[86];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x2768 = x2767 + x1734 * poly_mix[89];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x2769 = x2575 + x2576 * x2768 * poly_mix[179];
@@ -5752,9 +5752,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2861 = x2860 + x1357 * x1541 * poly_mix[58];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x2862 = x2861 + x1509 * poly_mix[65];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x2863 = x2862 + x743 * poly_mix[66];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x2864 = x2863 + x746 * poly_mix[67];
   // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":112:3)
   auto x2865 = x1213 - x31;
@@ -5796,7 +5796,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x2883 = x2880 + x1545 * poly_mix[2];
   // loc("./zirgen/circuit/rv32im/v1/platform/rv32im.inl":131:49)
   FpExt x2884 = x2882 + x1698 * x2883 * poly_mix[90];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x2885 = x2884 + x1734 * poly_mix[93];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x2886 = x2769 + x2770 * x2885 * poly_mix[180];
@@ -6312,13 +6312,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3141 = x3139 + x3140 * poly_mix[13];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3142 = x3141 + x776 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3143 = x3142 + x743 * poly_mix[15];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3144 = x3143 + x746 * poly_mix[16];
   // loc("zirgen/circuit/rv32im/v1/edsl/compute.cpp":241:3)
   FpExt x3145 = x3144 + x1214 * poly_mix[17];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x3146 = x3145 + x1734 * poly_mix[18];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x3147 = x2886 + x2887 * x3146 * poly_mix[181];
@@ -6950,13 +6950,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3460 = x3443 + x450 * x3459 * poly_mix[34];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3461 = x3460 + x776 * poly_mix[42];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3462 = x3461 + x743 * poly_mix[43];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3463 = x3462 + x746 * poly_mix[44];
   // loc("zirgen/circuit/rv32im/v1/edsl/divide.cpp":175:3)
   FpExt x3464 = x3463 + x1214 * poly_mix[45];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x3465 = x3464 + x1734 * poly_mix[46];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x3466 = x3147 + x3148 * x3465 * poly_mix[182];
@@ -7100,9 +7100,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3535 = x3534 + x599 * poly_mix[14];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3536 = x3535 + x1509 * poly_mix[15];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3537 = x3536 + x743 * poly_mix[16];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3538 = x3537 + x746 * poly_mix[17];
   // loc("./zirgen/components/bits.h":27:23)
   FpExt x3539 = x3538 + x750 * poly_mix[18];
@@ -7396,9 +7396,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3683 = x3682 + x631 * poly_mix[50];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3684 = x3683 + x1509 * poly_mix[51];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3685 = x3684 + x743 * poly_mix[52];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3686 = x3685 + x746 * poly_mix[53];
   // loc("./zirgen/components/bits.h":27:23)
   FpExt x3687 = x3686 + x750 * poly_mix[54];
@@ -7446,9 +7446,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3708 = x3705 + x3707 * poly_mix[16];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3709 = x3708 + x776 * poly_mix[17];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3710 = x3709 + x743 * poly_mix[18];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3711 = x3710 + x746 * poly_mix[19];
   // loc("./zirgen/components/bits.h":27:23)
   FpExt x3712 = x3711 + x750 * poly_mix[20];
@@ -7476,9 +7476,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3723 = x3722 + x2367 * poly_mix[20];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3724 = x3723 + x1509 * poly_mix[21];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3725 = x3724 + x743 * poly_mix[22];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3726 = x3725 + x746 * poly_mix[23];
   // loc("./zirgen/components/bits.h":27:23)
   FpExt x3727 = x3726 + x750 * poly_mix[24];
@@ -7506,9 +7506,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3738 = x3737 + x599 * poly_mix[6];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3739 = x3738 + x776 * poly_mix[7];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3740 = x3739 + x743 * poly_mix[8];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3741 = x3740 + x746 * poly_mix[9];
   // loc("./zirgen/components/bits.h":27:23)
   FpExt x3742 = x3741 + x750 * poly_mix[10];
@@ -7562,17 +7562,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x3766 = x3765 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x3767 = x3766 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x3768 = x3767 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x3769 = x3768 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x3770 = x737 - x3769;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3771 = x3754 + x3770 * poly_mix[8];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3772 = x3771 + x743 * poly_mix[9];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3773 = x3772 + x746 * poly_mix[10];
   // loc("./zirgen/components/bits.h":27:23)
   auto x3774 = x719 - x0;
@@ -7652,17 +7652,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x3811 = x3810 - x123;
   // loc("zirgen/components/bytes.cpp":97:10)
   auto x3812 = x3811 * x5;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:18)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:18)
   auto x3813 = x3812 - x734;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":30:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":28:17)
   auto x3814 = x3813 * x21;
   // loc("./zirgen/components/bits.h":68:23)
   auto x3815 = x737 - x3814;
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3816 = x3805 + x3815 * poly_mix[19];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3817 = x3816 + x743 * poly_mix[20];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3818 = x3817 + x746 * poly_mix[21];
   // loc("./zirgen/components/bits.h":27:23)
   FpExt x3819 = x3818 + x719 * poly_mix[22];
@@ -7670,7 +7670,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3820 = x3819 + x1214 * poly_mix[23];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x3821 = x3777 + x1314 * x3820 * poly_mix[128];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x3822 = x3821 + x1734 * poly_mix[135];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x3823 = x3466 + x3467 * x3822 * poly_mix[183];
@@ -7800,9 +7800,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x3885 = x3851 + x3844 * x3884 * poly_mix[9];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x3886 = x3885 + x776 * poly_mix[10];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x3887 = x3886 + x743 * poly_mix[11];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x3888 = x3887 + x746 * poly_mix[12];
   // loc("zirgen/components/ram.cpp":168:3)
   auto x3889 = x411 - x64;
@@ -8566,7 +8566,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x4268 = x4266 * x4267;
   // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":128:7)
   FpExt x4269 = x4227 + x4268 * poly_mix[84];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x4270 = x4269 + x1734 * poly_mix[85];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x4271 = x3823 + x3824 * x4270 * poly_mix[184];
@@ -8622,9 +8622,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x4296 = x4295 + x3844 * x3884 * poly_mix[12];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x4297 = x4296 + x776 * poly_mix[13];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x4298 = x4297 + x743 * poly_mix[14];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x4299 = x4298 + x746 * poly_mix[15];
   // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":292:3)
   FpExt x4300 = x4299 + x3996 * poly_mix[16];
@@ -12042,7 +12042,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   auto x6006 = x6004 * x6005;
   // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":128:7)
   FpExt x6007 = x5999 + x6006 * poly_mix[63];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x6008 = x6007 + x1734 * poly_mix[64];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x6009 = x4271 + x3852 * x6008 * poly_mix[185];
@@ -12110,9 +12110,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x6040 = x6039 + x4035 * x4038 * poly_mix[21];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x6041 = x6040 + x776 * poly_mix[22];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x6042 = x6041 + x743 * poly_mix[23];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x6043 = x6042 + x746 * poly_mix[24];
   // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":387:24)
   auto x6044 = x76 - x614;
@@ -14490,15 +14490,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x7230 = x7217 + x4292 * poly_mix[2];
   // loc("zirgen/circuit/rv32im/v1/edsl/sha.cpp":447:27)
   FpExt x7231 = x7228 + x7229 * x7230 * poly_mix[108];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x7232 = x7231 + x1734 * poly_mix[111];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x7233 = x6009 + x3853 * x7232 * poly_mix[186];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x7234 = x751 + x776 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x7235 = x7234 + x743 * poly_mix[2];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x7236 = x7235 + x746 * poly_mix[3];
   // loc("zirgen/circuit/rv32im/v1/edsl/page_fault.cpp":49:20)
   auto x7237 = x462 - x77;
@@ -14604,7 +14604,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x7287 = x7286 + x3540 * poly_mix[2];
   // loc("zirgen/circuit/rv32im/v1/edsl/page_fault.cpp":80:12)
   FpExt x7288 = x7274 + x420 * x7287 * poly_mix[15];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x7289 = x7288 + x1734 * poly_mix[18];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x7290 = x7233 + x3854 * x7289 * poly_mix[187];
@@ -14726,9 +14726,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x7348 = x7347 + x614 * poly_mix[17];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x7349 = x7348 + x1509 * poly_mix[18];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x7350 = x7349 + x743 * poly_mix[19];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x7351 = x7350 + x746 * poly_mix[20];
   // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":272:5)
   FpExt x7352 = x7351 + x1214 * poly_mix[21];
@@ -14812,7 +14812,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x7391 = x7385 + x7386 * x7390 * poly_mix[64];
   // loc("zirgen/circuit/rv32im/v1/edsl/ecall.cpp":302:18)
   FpExt x7392 = x7391 + x1 * x1541 * poly_mix[66];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x7393 = x7392 + x1734 * poly_mix[73];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x7394 = x7290 + x423 * x7393 * poly_mix[188];
@@ -16436,91 +16436,91 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   FpExt x8203 = x8200 + x8201 * x8202 * poly_mix[142];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x8204 = x84 + x1509 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x8205 = x8204 + x743 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x8206 = x8205 + x746 * poly_mix[2];
   // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":460:5)
   FpExt x8207 = x8206 + x1214 * poly_mix[3];
   // loc("zirgen/circuit/rv32im/v1/edsl/bigint.cpp":458:14)
   FpExt x8208 = x8203 + x1276 * x8207 * poly_mix[143];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x8209 = x8208 + x1734 * poly_mix[144];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x8210 = x7394 + x426 * x8209 * poly_mix[189];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:37)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":160:37)
   auto x8211 = x1219 - x28;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:37)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":160:37)
   FpExt x8212 = x751 + x8211 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":167:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":163:5)
   auto x8213 = x411 - x825;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":167:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":163:5)
   FpExt x8214 = x84 + x8213 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":168:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:5)
   auto x8215 = x414 - x3977;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":168:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":164:5)
   FpExt x8216 = x8214 + x8215 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":169:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":165:5)
   auto x8217 = x417 - x828;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":169:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":165:5)
   FpExt x8218 = x8216 + x8217 * poly_mix[2];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":166:12)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":162:12)
   FpExt x8219 = x8212 + x794 * x8218 * poly_mix[2];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":176:8)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":172:8)
   FpExt x8220 = x84 + x4917 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":176:5)
   auto x8221 = x417 - x4395;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":176:5)
   FpExt x8222 = x8220 + x8221 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":181:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":177:5)
   auto x8223 = x411 - x3905;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":181:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":177:5)
   FpExt x8224 = x8222 + x8223 * poly_mix[2];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":182:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":178:5)
   auto x8225 = x414 - x3906;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":182:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":178:5)
   FpExt x8226 = x8224 + x8225 * poly_mix[3];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":184:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:5)
   auto x8227 = args[1][104];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":184:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:5)
   auto x8228 = x8227 - x3905;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":184:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":180:5)
   FpExt x8229 = x8226 + x8228 * poly_mix[4];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":185:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":181:5)
   auto x8230 = args[1][105];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":185:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":181:5)
   auto x8231 = x8230 - x3906;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":185:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":181:5)
   FpExt x8232 = x8229 + x8231 * poly_mix[5];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":173:17)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":169:17)
   FpExt x8233 = x8219 + x787 * x8232 * poly_mix[5];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":195:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":189:5)
   auto x8234 = x411 - x3;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":195:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":189:5)
   FpExt x8235 = x84 + x8234 * poly_mix[0];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":196:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":190:5)
   FpExt x8236 = x8235 + x414 * poly_mix[1];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":197:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":191:5)
   auto x8237 = x417 - x80;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":197:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":191:5)
   FpExt x8238 = x8236 + x8237 * poly_mix[2];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":199:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":193:5)
   auto x8239 = x8227 - x3;
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":199:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":193:5)
   FpExt x8240 = x8238 + x8239 * poly_mix[3];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":200:5)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":194:5)
   FpExt x8241 = x8240 + x8230 * poly_mix[4];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":194:21)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":188:21)
   FpExt x8242 = x8233 + x791 * x8241 * poly_mix[11];
   // loc("./zirgen/components/bits.h":68:23)
   FpExt x8243 = x8242 + x776 * poly_mix[16];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":34:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":32:3)
   FpExt x8244 = x8243 + x743 * poly_mix[17];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":35:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":33:7)
   FpExt x8245 = x8244 + x746 * poly_mix[18];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":209:3)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":201:3)
   FpExt x8246 = x8245 + x3540 * poly_mix[19];
-  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":52:7)
+  // loc("zirgen/circuit/rv32im/v1/edsl/body.cpp":50:7)
   FpExt x8247 = x8246 + x1734 * poly_mix[20];
   // loc("./zirgen/components/mux.h":49:25)
   FpExt x8248 = x8210 + x429 * x8247 * poly_mix[190];
