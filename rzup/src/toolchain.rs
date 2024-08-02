@@ -279,14 +279,7 @@ impl Toolchain {
                     dir.display()
                 ));
 
-                // TODO: Check if necessary
-                #[cfg(not(target_os = "windows"))]
-                let rustc_exe = "rustc";
-
-                #[cfg(target_os = "windows")]
-                let rustc_exe = "rustc.exe";
-
-                let rustc_path = dir.join("bin").join(rustc_exe);
+                let rustc_path = dir.join("bin").join("rustc");
                 if !rustc_path.is_file() {
                     bail!(
                         "Invalid toolchain directory: rustc executable not found at {}",
@@ -318,29 +311,22 @@ impl Toolchain {
                 let rzup_home = rzup_home()?;
                 let cpp_link = rzup_home.join(CPP_TOOLCHAIN_NAME);
 
-                if let Ok(s) = fs::symlink_metadata(&cpp_link) {
-                    info_msg!(format!("path: {}  meta: {:?}", cpp_link.display(), s));
+                if let Ok(meta) = fs::symlink_metadata(&cpp_link) {
+                    verbose_msg!(format!("Removing cpp link: {}", cpp_link.display()));
+                    if meta.is_dir() {
+                        fs::remove_dir_all(&cpp_link)
+                            .context("Failed to remove existing cpp link (directory)")?;
+                    } else {
+                        fs::remove_file(&cpp_link).context("Failed to remove existing cpp link")?;
+                    }
                 }
-
-                if fs::symlink_metadata(&cpp_link).is_ok() && fs::read_link(&cpp_link)? == dir {
-                    info_msg!(format!("cpp symlink already exists"));
-                    return Ok(());
-                }
-
-                verbose_msg!(format!("Removing symlink {}", cpp_link.display()));
-                fs::remove_file(&cpp_link).context("Failed to remove existing cpp symlink")?;
 
                 verbose_msg!(format!(
                     "Creating symnlink for toolchain at {}",
                     cpp_link.display()
                 ));
-                #[cfg(target_family = "unix")]
-                std::os::unix::fs::symlink(dir, &cpp_link)
-                    .context("Failed to create symlink for cpp")?;
 
-                // TODO: Check if necessary
-                #[cfg(target_family = "windows")]
-                std::os::windows::fs::symlink_file(dir, &cpp_link)
+                std::os::unix::fs::symlink(dir, &cpp_link)
                     .context("Failed to create symlink for cpp")?;
 
                 info_msg!(format!(
