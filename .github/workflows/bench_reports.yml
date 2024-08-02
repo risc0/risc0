@@ -22,7 +22,8 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: r0.1.79.0
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0
+  RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 jobs:
   bench:
@@ -58,7 +59,8 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
 
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
 
       - name: Save commit hash to a file
         run: |

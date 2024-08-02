@@ -17,7 +17,8 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: r0.1.79.0
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0
+  RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
   run:
@@ -229,7 +230,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: build workspace
         run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
       - name: test workspace
@@ -293,7 +295,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: build
         run: cargo test --locked -F $FEATURE --no-run
@@ -348,7 +351,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - run: sccache --show-stats
 
@@ -437,7 +441,8 @@ jobs:
         with:
           key: ${{ matrix.os }}-default
       - run: cargo install --force --path risc0/cargo-risczero
-      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: |
           cargo risczero new \
             --path $(pwd) \
@@ -487,7 +492,8 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo install --force --path risc0/cargo-risczero
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release
@@ -532,7 +538,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
@@ -554,7 +561,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-groth16 -F prove --release
       - run: cargo test -p risc0-zkvm -F docker -F prove -- docker

@@ -22,8 +22,6 @@ pub enum Target {
     Aarch64AppleDarwin,
     X86_64UnknownLinuxGnu,
     X86_64AppleDarwin,
-    // TODO: Check if necessary
-    X86_64PCWindowsMsvc,
 }
 
 impl Target {
@@ -32,7 +30,6 @@ impl Target {
             Target::Aarch64AppleDarwin => "aarch64-apple-darwin",
             Target::X86_64UnknownLinuxGnu => "x86_64-unknown-linux-gnu",
             Target::X86_64AppleDarwin => "x86_64-apple-darwin",
-            Target::X86_64PCWindowsMsvc => "x86_64-pc-windows-msvc",
         }
     }
 
@@ -48,11 +45,8 @@ impl Target {
             } else if #[cfg(all(target_arch = "aarch64", target_os = "macos"))] {
                 verbose_msg!(format!("Detected target: {}", Target::Aarch64AppleDarwin.to_str()));
                 Some(Target::Aarch64AppleDarwin)
-            } else if #[cfg(all(target_arch = "x86_64", target_os = "windows"))] {
-                verbose_msg!(format!("Detected target: {}", Target::X86_64PCWindowsMsvc.to_str()));
-                Some(Target::X86_64PCWindowsMsvc)
             } else {
-                verbose_msg!("Could not detect host target")
+                verbose_msg!("Unsupported host target")
                 None
             }
         }
@@ -67,7 +61,6 @@ impl FromStr for Target {
             "aarch64-apple-darwin" => Ok(Target::Aarch64AppleDarwin),
             "x86_64-unknown-linux-gnu" => Ok(Target::X86_64UnknownLinuxGnu),
             "x86_64-apple-darwin" => Ok(Target::X86_64AppleDarwin),
-            "x86_64-pc-windows-msvc" => Ok(Target::X86_64PCWindowsMsvc),
             _ => Err(RzupError::Other(format!("Invalid target: {}", input))),
         }
     }
