@@ -26,7 +26,7 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
 };
 
-use crate::{errors::RzupError, extension::Extension, toolchain::Toolchain, verbose_msg};
+use crate::{cargo_risczero::CargoRisczero, errors::RzupError, toolchain::Toolchain, verbose_msg};
 
 pub mod command;
 pub mod notify;
@@ -295,13 +295,12 @@ pub struct UpdateInfo {
 
 /// Gets update information for the active cargo-risczero extension.
 async fn check_cargo_risczero_updates() -> Result<UpdateInfo, RzupError> {
-    let latest_cargo_risczero_version_info = Extension::CargoRiscZero.release_info(None).await?;
+    let latest_cargo_risczero_version_info = CargoRisczero::release_info(None).await?;
     let latest_cargo_risczero_version_tag = latest_cargo_risczero_version_info.tag_name;
     let installed_cargo_risczero_version = find_cargo_risczero_version()?;
     let installed_cargo_risczero_tag = format!("v{}", installed_cargo_risczero_version);
-    let installed_cargo_risczero_release_info = Extension::CargoRiscZero
-        .release_info(Some(&installed_cargo_risczero_tag))
-        .await?;
+    let installed_cargo_risczero_release_info =
+        CargoRisczero::release_info(Some(&installed_cargo_risczero_tag)).await?;
 
     Ok(UpdateInfo {
         name: "cargo-risczero".to_string(),

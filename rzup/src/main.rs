@@ -16,7 +16,7 @@ use anyhow::Result;
 
 use clap::{CommandFactory, Parser, Subcommand};
 
-use rzup::{cli, extension, toolchain, utils};
+use rzup::{cli, toolchain, utils};
 
 use std::fs::{self, OpenOptions};
 
@@ -76,8 +76,8 @@ enum RzupSubcmd {
     Update {
         /// Toolchain to update (i.e. rust or cpp)
         toolchain: Option<toolchain::Toolchain>,
-        /// Extension to update (i.e. cargo-risczero)
-        extension: Option<extension::Extension>,
+        /// Update cargo-risczero
+        cargo_risczero: bool,
         /// Force the update, ignoring existing installations and downloads
         #[arg(short, long)]
         force: bool,
@@ -98,10 +98,10 @@ enum RzupSubcmd {
         #[command(subcommand)]
         subcmd: cli::toolchain::ToolchainSubcmd,
     },
-    /// Modify or query the installed extensions
-    Extension {
+    /// Modify or query the installed cargo-risczero utility
+    CargoRisczero {
         #[command(subcommand)]
-        subcmd: cli::extension::ExtensionSubcmd,
+        subcmd: cli::cargo_risczero::CargoRisczeroSubcmd,
     },
     /// Modify the rzup installation
     Self_ {
@@ -162,12 +162,12 @@ async fn run() -> Result<()> {
         }
         RzupSubcmd::Update {
             toolchain,
-            extension,
+            cargo_risczero,
             force,
         } => {
             cli::update::handler(cli::update::UpdateOpts {
                 toolchain,
-                extension,
+                cargo_risczero,
                 force,
             })
             .await
@@ -175,7 +175,7 @@ async fn run() -> Result<()> {
         RzupSubcmd::Check => cli::check::handler().await,
         RzupSubcmd::Default { toolchain, name } => cli::default::handler(toolchain, name),
         RzupSubcmd::Toolchain { subcmd } => cli::toolchain::handler(subcmd).await,
-        RzupSubcmd::Extension { subcmd } => cli::extension::handler(subcmd).await,
+        RzupSubcmd::CargoRisczero { subcmd } => cli::cargo_risczero::handler(subcmd).await,
         RzupSubcmd::Self_ { subcmd } => cli::self_::handler(subcmd).await,
     }
 }

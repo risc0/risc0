@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod cargo_risczero;
 pub mod check;
 pub mod default;
-pub mod extension;
 pub mod help;
 pub mod install;
 pub mod self_;

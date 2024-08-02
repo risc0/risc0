@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use crate::{cli, extension::Extension, utils::find_installed_extensions};
+use crate::{cargo_risczero::CargoRisczero, cli, utils::find_installed_extensions};
 use anyhow::Result;
 use clap::Subcommand;
 use regex::Regex;
@@ -23,16 +23,14 @@ use regex::Regex;
 #[command(
     arg_required_else_help = true,
     subcommand_required = true,
-    after_help = cli::help::EXTENSION_HELP
+    after_help = cli::help::CARGO_RISCZERO_HELP
 )]
-pub enum ExtensionSubcmd {
+pub enum CargoRisczeroSubcmd {
     /// List all installed extensions
     List,
-    /// Install an extension (i.e cargo-risczero v1.0.1)
+    /// Install cargo-risczero (i.e cargo-risczero v1.0.1)
     #[command(aliases = ["add"])]
     Install {
-        /// The extension to install (e.g., cargo-risczero)
-        extension: Extension,
         /// The version of the extension to install (e.g., v1.0.1)
         version: Option<String>,
         /// Force installation, removing existing directories
@@ -41,47 +39,36 @@ pub enum ExtensionSubcmd {
     },
     /// Use an installed extension version
     Use {
-        /// The extension to use (e.g., cargo-risczero)
-        extension: Extension,
-        /// The version of the extension to use (e.g., v1.0.1)
+        /// The version of cargo-risczero to use (e.g., v1.0.1)
         version: String,
     },
     /// Uninstall an installed extension
-    Uninstall {
-        /// The extension to uninstall (e.g., cargo-risczero)
-        extension: Extension,
-    },
+    Uninstall,
 }
 
-pub async fn handler(subcmd: ExtensionSubcmd) -> Result<()> {
+pub async fn handler(subcmd: CargoRisczeroSubcmd) -> Result<()> {
     match subcmd {
-        ExtensionSubcmd::Install {
-            extension,
-            version,
-            force,
-        } => extension.install(version.as_deref(), force).await,
-        ExtensionSubcmd::List => {
+        CargoRisczeroSubcmd::Install { version, force } => {
+            CargoRisczero::install(version.as_deref(), force).await
+        }
+        CargoRisczeroSubcmd::List => {
             let extensions = find_installed_extensions()?;
             for extension in extensions {
                 eprintln!("{}", extension.file_name().unwrap().to_string_lossy());
             }
             Ok(())
         }
-        ExtensionSubcmd::Use { extension, version } => {
-            let extension_path = parse_extenstion_version(extension, version)?;
-            extension.link(&extension_path)
+        CargoRisczeroSubcmd::Use { version } => {
+            let extension_path = parse_version(version)?;
+            CargoRisczero::link(&extension_path)
         }
-        ExtensionSubcmd::Uninstall { extension } => extension.unlink(),
+        CargoRisczeroSubcmd::Uninstall => CargoRisczero::unlink(),
     }
 }
 
-fn parse_extenstion_version(extension: Extension, version: String) -> Result<PathBuf> {
+fn parse_version(version: String) -> Result<PathBuf> {
     let extensions = find_installed_extensions()?;
-    let version_pattern = match extension {
-        Extension::CargoRiscZero => {
-            format!(r"^(v)?{}(?:-.+)?$", regex::escape(&version))
-        }
-    };
+    let version_pattern = format!(r"^(v)?{}(?:-.+)?$", regex::escape(&version));
 
     let re = Regex::new(&version_pattern)?;
 
@@ -94,7 +81,7 @@ fn parse_extenstion_version(extension: Extension, version: String) -> Result<Pat
     }
     Err(anyhow::anyhow!(format!(
         "No matching {} found for version {}. \n\nFor more information, try '--help'.",
-        extension.to_str(),
+        CargoRisczero::to_str(),
         version
     )))
 }

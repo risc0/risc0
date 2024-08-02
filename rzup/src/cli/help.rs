@@ -46,9 +46,9 @@ pub static DEFAULT_HELP: &str = r"Discussion:
     `default` uses Rustup and symlinks to set the toolchain to known toolchain
     paths.";
 
-pub static EXTENSION_HELP: &str = r"Discussion:
-    The `extension` command manages RISC Zero extensions such as `cargo-risczero`.
-    You can list, install, use, and uninstall extensions.";
+pub static CARGO_RISCZERO_HELP: &str = r"Discussion:
+    The `cargo-risczero` command manages the `cargo-risczero` utility.
+    You can list, install, use, and uninstall `cargo-risczero`.";
 
 pub static CHECK_HELP: &str = r"Discussion:
     The `check` command checks if there are any updates available for the active
