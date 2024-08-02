@@ -39,7 +39,10 @@ platform:
 	 
 .PHONY: guest
 guest: gcc platform
-	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/fib.s -o ./guest/out/fib -T ./guest/riscv32im-risc0-zkvm-elf.ld -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -nostdlib -static
+    # Compile fib program
+	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/fib/main.s -o ./guest/out/fib -T ./guest/fib/riscv32im-risc0-zkvm-elf.ld -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -nostdlib -static
+    # Compile minimal program
+	${ROOT_DIR}riscv32im-${MACHINE}/bin/riscv32-unknown-elf-gcc -nostartfiles ./guest/minimal/main.s -o ./guest/out/minimal -T ./guest/minimal/riscv32im-risc0-zkvm-elf.ld -L${ROOT_DIR}guest/out/platform/riscv32im-risc0-zkvm-elf/release -lzkvm_platform -nostdlib -static
 
 .PHONY: execute
 execute: guest

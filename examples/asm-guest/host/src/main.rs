@@ -12,34 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{compute_image_id, default_prover, ExecutorEnv};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 use std::fs;
 
 fn main() -> anyhow::Result<()> {
-    // Load built gcc program and compute it's image ID.
-    // TODO have the image ID be calculated at compile time, to avoid potential vulnerabilities
-    let consensus_elf = fs::read("./guest/out/fib")?;
-    let consensus_id = compute_image_id(&consensus_elf)?;
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
+    let prover = default_prover();
+
+    // Load built gcc program and compute it's image ID.
+    // TODO have the image ID be calculated at compile time, to avoid potential vulnerabilities
+    let fib_elf = fs::read("./guest/out/fib")?;
+
     let env = ExecutorEnv::builder()
         .write_slice(&8u32.to_le_bytes())
         .build()?;
-    let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, &consensus_elf)?.receipt;
+    let receipt = prover.prove(env, &fib_elf)?.receipt;
 
     // Deserializing as by default this will just expect LE bytes
     let value: u32 = receipt.journal.decode()?;
-    println!("value: {}", value);
+    assert_eq!(value, 21);
 
-    // The receipt was verified at the end of proving, but the below code is an
-    // example of how someone else could verify this receipt.
-    receipt.verify(consensus_id)?;
+    // Run minimal program
+    let minimal_elf = fs::read("./guest/out/minimal")?;
+
+    let env = ExecutorEnv::builder().build()?;
+
+    let receipt = prover.prove(env, &minimal_elf)?;
+
+    assert_eq!(receipt.stats.user_cycles, 2);
 
     Ok(())
 }
