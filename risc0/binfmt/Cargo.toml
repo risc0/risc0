@@ -39,6 +39,6 @@ std = [
   "serde/std",
   "tracing/log",
   "tracing/std",
-  "borsh/std",
+  "borsh?/std",
 ]
 borsh = ["dep:borsh"]

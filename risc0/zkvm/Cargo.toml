@@ -166,6 +166,6 @@ std = [
   "risc0-zkp/std",
   "serde/std",
   "sha2/std",
-  "borsh/std",
+  "borsh?/std",
 ]
 borsh = ["dep:borsh"]

@@ -71,5 +71,5 @@ prove = [
   "risc0-sys",
   "std",
 ]
-std = ["anyhow/std", "borsh/std"]
+std = ["anyhow/std", "borsh?/std"]
 borsh = ["dep:borsh"]
