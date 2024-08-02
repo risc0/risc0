@@ -123,6 +123,7 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 dual = []
+metal = []
 default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
