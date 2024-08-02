@@ -84,7 +84,7 @@ impl CargoRisczero {
     async fn download(
         target: Target,
         tag: Option<&str>,
-        extensions_root_dir: &Path,
+        root_dir: &Path,
         force: bool,
     ) -> Result<PathBuf> {
         let client = http_client()?;
@@ -100,31 +100,32 @@ impl CargoRisczero {
             );
         };
 
-        let extension_dir =
-            extensions_root_dir.join(format!("{}-{}", release_info.tag_name, Self::to_str()));
+        let cargo_risczero_dir = root_dir
+            .join(Self::to_str())
+            .join(&release_info.tag_name[1..]); // TODO replace this hack with semver parsing
 
         // Remove directory if it exists and force is set
-        if extension_dir.is_dir() && force {
+        if cargo_risczero_dir.is_dir() && force {
             info_msg!(format!(
                 "Extension path {} already exists - deleting existing files!",
-                extension_dir.display()
+                cargo_risczero_dir.display()
             ));
 
-            verbose_msg!(format!("deleting {}", extension_dir.display()));
+            verbose_msg!(format!("deleting {}", cargo_risczero_dir.display()));
 
-            fs::remove_dir_all(&extension_dir)?;
+            fs::remove_dir_all(&cargo_risczero_dir)?;
         }
 
         // Skip download if directory already exists and force is not set
-        if extension_dir.is_dir() && !force {
+        if cargo_risczero_dir.is_dir() && !force {
             info_msg!(format!(
                 "Extension path {} already exists - skipping download.",
-                extension_dir.display()
+                cargo_risczero_dir.display()
             ));
-            return Ok(extension_dir);
+            return Ok(cargo_risczero_dir);
         }
 
-        info_msg!(format!("Downloading {} extension...", Self::to_str()));
+        info_msg!(format!("Downloading {} utility...", Self::to_str()));
 
         verbose_msg!(format!(
             "Requesting extension download from {}",
@@ -156,19 +157,32 @@ impl CargoRisczero {
 
         let tarball = fs::File::open(temp_file_path)?;
 
-        info_msg!(format!("Extracting {} extension...", Self::to_str()));
+        info_msg!(format!("Extracting {}...", Self::to_str()));
 
         let decoder = GzDecoder::new(BufReader::new(tarball));
         let mut archive = Archive::new(decoder);
-
+        let temp_extract_dir = tempdir()?;
         verbose_msg!(format!(
             "Unpacking {} to {}",
             Self::to_str(),
-            &extension_dir.display()
+            temp_extract_dir.path().display(),
         ));
 
-        archive.unpack(&extension_dir)?;
-        let binary_path = extension_dir.join("cargo-risczero");
+        archive.unpack(&temp_extract_dir)?;
+        let binary_path = cargo_risczero_dir.join(Self::to_str());
+
+        fs::create_dir_all(&cargo_risczero_dir)?;
+        fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open(&binary_path)?;
+        verbose_msg!(format!(
+            "copying {} to {}",
+            temp_extract_dir.path().join(Self::to_str()).display(),
+            binary_path.display(),
+        ));
+        fs::copy(temp_extract_dir.path().join(Self::to_str()), &binary_path)?;
+
 
         verbose_msg!("Setting extension permissons to 0o755");
 
@@ -176,7 +190,7 @@ impl CargoRisczero {
         perms.set_mode(0o755);
         fs::set_permissions(&binary_path, perms)?;
 
-        Ok(extension_dir)
+        Ok(cargo_risczero_dir)
     }
 
     pub fn link(dir: &Path) -> Result<()> {
@@ -187,10 +201,7 @@ impl CargoRisczero {
         Self::unlink()?;
 
         let cargo_risczero_path = dir.join("cargo-risczero");
-        let r0vm_path = dir.join("r0vm");
-
         let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
-        let r0vm_link = cargo_bin_dir.join("r0vm");
 
         verbose_msg!(format!(
             "Creating symlinks from {} to {}",
@@ -201,10 +212,8 @@ impl CargoRisczero {
         // Create new symlinks
         std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
             .context("Failed to create symlink for cargo-risczero")?;
-        std::os::unix::fs::symlink(r0vm_path, r0vm_link)
-            .context("Failed to create symlink for r0vm")?;
         info_msg!(format!(
-            "Symlinks for cargo-risczero and r0vm created successfully at {}",
+            "Symlinks for cargo-risczero created successfully at {}",
             cargo_bin_dir.display()
         ));
         Ok(())
@@ -216,7 +225,6 @@ impl CargoRisczero {
             .join(".cargo/bin");
 
         let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
-        let r0vm_link = cargo_bin_dir.join("r0vm");
 
         // Remove existing symlinks if they exist
         if fs::symlink_metadata(&cargo_risczero_link).is_ok() {
@@ -228,11 +236,6 @@ impl CargoRisczero {
             fs::remove_file(&cargo_risczero_link)
                 .context("Failed to remove existing cargo-risczero symlink")?;
             info_msg!("Symlinks for cargo-risczero removed successfully");
-        }
-        if fs::symlink_metadata(&r0vm_link).is_ok() {
-            verbose_msg!(format!("Removing r0vm symlink at {}", r0vm_link.display()));
-            fs::remove_file(&r0vm_link).context("Failed to remove existing r0vm symlink")?;
-            info_msg!("Symlinks for r0vm removed successfully");
         }
         Ok(())
     }
@@ -246,9 +249,7 @@ impl CargoRisczero {
         let lockfile_path = root_dir.join("ext-lock");
         let _lock = flock(&lockfile_path)?;
 
-        let extensions_root_dir = root_dir.join("extensions");
-
-        let cargo_risczero_path = Self::download(target, tag, &extensions_root_dir, force).await?;
+        let cargo_risczero_path = Self::download(target, tag, &root_dir, force).await?;
         Self::link(&cargo_risczero_path)?;
         Ok(())
     }
