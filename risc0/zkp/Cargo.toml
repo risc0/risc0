@@ -57,6 +57,7 @@ features = ["prove", "std"]
 circuit_debug = []
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
 default = []
+metal = []
 metal_prefix_products = []
 prove = [
   "dep:ff",
