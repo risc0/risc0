@@ -23,7 +23,7 @@ RZUP_URL="${RZUP_URL:-https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/}"
 
 QUIET=no
 
-RZUP_BIN_DIR="${HOME}/risc0/rzup/bin"
+RZUP_BIN_DIR="${HOME}/.risc0/bin"
 
 usage() {
   cat <<EOF
