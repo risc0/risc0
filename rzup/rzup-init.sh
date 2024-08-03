@@ -79,7 +79,7 @@ main() {
   _arch="$RETVAL"
   assert_nz "$_arch" "arch"
 
-  _url="${RZUP_BINARY_UPDATE_ROOT}/rzup-${_arch}"
+  _url="${RZUP_BINARY_UPDATE_ROOT}/${_arch}/rzup"
   _dir="$(ensure mktemp -d)"
   _file="${_dir}/rzup"
 
@@ -147,8 +147,13 @@ get_architecture() {
   *) err "Unsupported CPU type: $_cputype" ;;
   esac
 
-  _arch="${_cputype}-${_ostype}"
-  RETVAL="$_arch"
+  case "$_cputype $_ostype" in
+  "x86_64 linux") _triple=x86_64-unknown-linux-gnu ;;
+  "arm64 darwin" ) _triple=aarch64-apple-darwin ;;
+   *) err "Unsupported CPU arch pairing: $_cputype $_ostype" ;;
+  esac
+
+  RETVAL="$_triple"
 }
 
 detect_shell() {
