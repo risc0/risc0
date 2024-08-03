@@ -19,7 +19,7 @@ set -euo pipefail
 RZUP_URL="${RZUP_URL:-https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/}"
 
 # Set the environment variable TEST_MODE to enable downloading from the test bucket
-[[ -z "${TEST_MODE}" ]] && TEST_PATH="" || TEST_PATH="test/"
+[[ -z "${STAGING_MODE}" ]] && STAGE_PATH="" || STAGE_PATH="stage/"
 
 QUIET=no
 
@@ -65,7 +65,7 @@ main() {
   _arch="$RETVAL"
   assert_nz "$_arch" "arch"
 
-  _url="${RZUP_URL}/${_arch}/${TEST_PATH}rzup"
+  _url="${RZUP_URL}${TEST_PATH}${_arch}/rzup"
   _dir="$(ensure mktemp -d)"
   _file="${_dir}/rzup"
 
