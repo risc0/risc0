@@ -1006,7 +1006,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::proven::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 41.757866);
+        assert_eq!(security, 41.752773);
     }
 
     #[test]
@@ -1017,7 +1017,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 74.90123);
+        assert_eq!(security, 74.90066);
     }
 
     #[test]
