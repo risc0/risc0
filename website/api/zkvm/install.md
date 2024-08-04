@@ -44,7 +44,7 @@ For users who prefer manual installation, follow these steps:
    >
    > The version used must match the `risc0-zkvm` version from your guest and host.
 
-2. For x86-64 macOS, you must run `cargo risczero build-toolchain` instead of `cargo risczero install`.
+2. For x86-64 macOS or other OS, you must run `cargo risczero build-toolchain --version v2024-04-22.0` instead of `cargo risczero install`.
 
 ## Update
 
