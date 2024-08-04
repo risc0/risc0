@@ -1083,6 +1083,7 @@ dependencies = [
  "semver",
  "serde",
  "sha2",
+ "stability",
  "tracing",
 ]
 
@@ -1171,6 +1172,16 @@ name = "smallvec"
 version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
+
+[[package]]
+name = "stability"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d904e7009df136af5297832a3ace3370cd14ff1546a232f4f185036c2736fcac"
+dependencies = [
+ "quote",
+ "syn 2.0.66",
+]
 
 [[package]]
 name = "subtle"

@@ -4259,6 +4259,7 @@ dependencies = [
  "semver",
  "serde",
  "sha2",
+ "stability",
  "tempfile",
  "tracing",
  "typetag",
@@ -5019,6 +5020,16 @@ checksum = "a075ecc826f50c645a1e6bb2f94560ded74ec7584a6061e72470802a2eee350c"
 dependencies = [
  "cc",
  "which 4.4.2",
+]
+
+[[package]]
+name = "stability"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d904e7009df136af5297832a3ace3370cd14ff1546a232f4f185036c2736fcac"
+dependencies = [
+ "quote 1.0.36",
+ "syn 2.0.66",
 ]
 
 [[package]]

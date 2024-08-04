@@ -36,8 +36,7 @@ fn run_guest_framed(msg: &str, spec: BenchmarkSpec, payload: &[u8]) {
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()
-        .write_slice(&[payload.len() as u32])
-        .write_slice(payload)
+        .write_frame(payload)
         .build()
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();

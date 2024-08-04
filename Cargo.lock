@@ -4109,6 +4109,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "sha2",
+ "stability",
  "tabled",
  "tar",
  "tempfile",
@@ -4607,6 +4608,16 @@ checksum = "a075ecc826f50c645a1e6bb2f94560ded74ec7584a6061e72470802a2eee350c"
 dependencies = [
  "cc",
  "which 4.4.2",
+]
+
+[[package]]
+name = "stability"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d904e7009df136af5297832a3ace3370cd14ff1546a232f4f185036c2736fcac"
+dependencies = [
+ "quote",
+ "syn 2.0.72",
 ]
 
 [[package]]

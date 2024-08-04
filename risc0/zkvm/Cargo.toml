@@ -50,6 +50,7 @@ serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
 ] }
+stability = "0.2"
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -164,3 +165,4 @@ std = [
   "serde/std",
   "sha2/std",
 ]
+unstable = []
