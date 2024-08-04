@@ -68,27 +68,36 @@
 //! [proof composition]:https://www.risczero.com/blog/proof-composition
 //! [guest-optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
-use core::{cell::OnceCell, convert::Infallible, fmt};
+mod read;
+mod verify;
+mod write;
+
+use alloc::vec;
+use core::cell::OnceCell;
 
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
         self, sys_alloc_words, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log,
-        sys_pause, sys_read, sys_read_words, sys_verify_integrity, sys_write, syscall_2,
-        SyscallName,
+        sys_pause, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
         Digest, Digestible,
     },
-    Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumptions, MaybePruned, Output,
+};
+
+pub use self::{
+    read::{FdReader, Read},
+    verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
+    write::{FdWriter, Write},
 };
 
 static mut HASHER: OnceCell<Sha256> = OnceCell::new();
@@ -159,160 +168,6 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
             to_host.len() as u32,
         )
     }
-}
-
-/// Verify there exists a receipt for an execution with `image_id` and `journal`.
-///
-/// Calling this function in the guest is logically equivalent to verifying a receipt with the same
-/// image ID and journal. Any party verifying the receipt produced by this execution can then be
-/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
-/// potentially distinct guests can be combined into one. This feature is know as [composition].
-///
-/// In order to be valid, the [crate::Receipt] must have [ExitCode::Halted(0)][crate::ExitCode] or
-/// [ExitCode::Paused(0)][crate::ExitCode], an empty assumptions list, and an all-zeroes input
-/// hash. It may have any post [crate::SystemState].
-///
-/// # Example
-///
-/// ```rust,ignore
-/// use risc0_zkvm::guest::env;
-///
-/// # let HELLO_WORLD_ID = Digest::ZERO;
-/// env::verify(HELLO_WORLD_ID, b"hello world".as_slice()).unwrap();
-/// ```
-///
-/// [composition]: https://dev.risczero.com/terminology#composition
-pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), Infallible> {
-    let journal_digest: Digest = bytemuck::cast_slice::<_, u8>(journal).digest();
-    let assumption_claim = ReceiptClaim::ok(image_id, MaybePruned::Pruned(journal_digest));
-
-    let claim_digest = assumption_claim.digest();
-
-    unsafe {
-        // Use the zero digest as the control root, which indicates that the assumption is a zkVM
-        // assumption to be verified with the same control root as the current execution.
-        sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
-        ASSUMPTIONS_DIGEST.add(
-            Assumption {
-                claim: claim_digest,
-                control_root: Digest::ZERO,
-            }
-            .into(),
-        );
-    }
-
-    Ok(())
-}
-
-/// Verify that there exists a valid receipt with the specified [crate::ReceiptClaim].
-///
-/// Calling this function in the guest is logically equivalent to verifying a receipt with the same
-/// [crate::ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
-/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
-/// potentially distinct guests can be combined into one. This feature is know as [composition].
-///
-/// In order for a receipt to be valid, it must have a verifying cryptographic seal and
-/// additionally have no assumptions. Note that executions with no output (e.g. those ending in
-/// [ExitCode::SystemSplit][crate::ExitCode]) will not have any encoded assumptions even if [verify] or
-/// [verify_integrity] is called and these receipts will be rejected by this function.
-///
-/// [composition]: https://dev.risczero.com/terminology#composition
-pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
-    // Check that the assumptions list is empty.
-    let assumptions_empty = claim
-        .output
-        .as_value()?
-        .as_ref()
-        .map_or(true, |output| output.assumptions.is_empty());
-
-    if !assumptions_empty {
-        return Err(VerifyIntegrityError::NonEmptyAssumptionsList);
-    }
-
-    let claim_digest = claim.digest();
-
-    unsafe {
-        // Use the zero digest as the control root, which indicates that the assumption is a zkVM
-        // assumption to be verified with the same control root as the current execution.
-        sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
-        ASSUMPTIONS_DIGEST.add(
-            Assumption {
-                claim: claim_digest,
-                control_root: Digest::ZERO,
-            }
-            .into(),
-        );
-    }
-
-    Ok(())
-}
-
-/// Error encountered during a call to [verify_integrity].
-///
-/// Note that an error is only returned for "provable" errors. In particular, if the host fails to
-/// find a receipt matching the requested claim digest, this is not a provable error. In this
-/// case, [verify_integrity] will not return.
-#[derive(Debug)]
-#[non_exhaustive]
-pub enum VerifyIntegrityError {
-    /// Provided [crate::ReceiptClaim] struct contained a non-empty assumptions list.
-    ///
-    /// This is a semantic error as only unconditional receipts can be verified
-    /// inside the guest. If there is a conditional receipt to verify, it's
-    /// assumptions must first be verified to make the receipt
-    /// unconditional.
-    NonEmptyAssumptionsList,
-
-    /// Metadata output was pruned and not equal to the zero hash. It is
-    /// impossible to determine whether the assumptions list is empty.
-    PrunedValueError(PrunedValueError),
-}
-
-impl From<PrunedValueError> for VerifyIntegrityError {
-    fn from(err: PrunedValueError) -> Self {
-        Self::PrunedValueError(err)
-    }
-}
-
-impl fmt::Display for VerifyIntegrityError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            VerifyIntegrityError::NonEmptyAssumptionsList => {
-                write!(f, "assumptions list is not empty")
-            }
-            VerifyIntegrityError::PrunedValueError(err) => {
-                write!(f, "claim output is pruned and non-zero: {}", err.0)
-            }
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for VerifyIntegrityError {}
-
-/// Verify that there exists a valid receipt with the specified claim digest and control root.
-///
-/// This function is a generalization of [verify] and [verify_integrity] to allow verification of
-/// any claim, including claims that are not claims of zkVM execution. It can be used to verify a
-/// receipt for accelerators, such as a specialized RSA verifier. The given control root is used as
-/// a commitment to the set of recursion programs allowed to resolve the resulting assumption.
-///
-/// Do not use this method if you are looking to verify a zkVM receipt. Use [verify] or
-/// [verify_integrity] instead. This method does not check anything about the claim. In the case of
-/// zkVM execution, it is important to check that e.g. there are no assumptions on the claim.
-pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
-    unsafe {
-        sys_verify_integrity(claim.as_ref(), control_root.as_ref());
-        ASSUMPTIONS_DIGEST.add(
-            Assumption {
-                claim,
-                control_root,
-            }
-            .into(),
-        );
-    }
-
-    Ok(())
 }
 
 /// Exchanges slices of plain old data with the host.
@@ -543,186 +398,6 @@ pub fn stdin() -> FdReader {
     FdReader::new(fileno::STDIN)
 }
 
-/// Reads and deserializes objects
-pub trait Read {
-    /// Read data from the host.
-    fn read<T: DeserializeOwned>(&mut self) -> T;
-
-    /// Read raw data from the host.
-    fn read_slice<T: Pod>(&mut self, buf: &mut [T]);
-}
-
-impl<R: Read + ?Sized> Read for &mut R {
-    fn read<T: DeserializeOwned>(&mut self) -> T {
-        (**self).read()
-    }
-
-    fn read_slice<T: Pod>(&mut self, buf: &mut [T]) {
-        (**self).read_slice(buf)
-    }
-}
-
-/// Provides a FdReader which can read from any file descriptor
-pub struct FdReader {
-    fd: u32,
-}
-
-impl FdReader {
-    /// Creates a new FdReader reading from the given file descriptor.
-    pub fn new(fd: u32) -> FdReader {
-        FdReader { fd }
-    }
-
-    #[must_use = "read_bytes can potentially do a short read; this case should be handled."]
-    fn read_bytes(&mut self, buf: &mut [u8]) -> usize {
-        unsafe { sys_read(self.fd, buf.as_mut_ptr(), buf.len()) }
-    }
-
-    // Like read_bytes, but fills the buffer completely or until EOF occurs.
-    #[must_use = "read_bytes_all can potentially return EOF; this case should be handled."]
-    fn read_bytes_all(&mut self, mut buf: &mut [u8]) -> usize {
-        let mut tot_read = 0;
-        while !buf.is_empty() {
-            let nread = self.read_bytes(buf);
-            if nread == 0 {
-                break;
-            }
-            tot_read += nread;
-            (_, buf) = buf.split_at_mut(nread);
-        }
-
-        tot_read
-    }
-}
-
-impl Read for FdReader {
-    fn read<T: DeserializeOwned>(&mut self) -> T {
-        T::deserialize(&mut Deserializer::new(self)).unwrap()
-    }
-
-    fn read_slice<T: Pod>(&mut self, buf: &mut [T]) {
-        if let Ok(words) = bytemuck::try_cast_slice_mut(buf) {
-            // Reading words performs significantly better if we're word aligned.
-            self.read_words(words).unwrap();
-        } else {
-            let bytes = bytemuck::cast_slice_mut(buf);
-            if self.read_bytes_all(bytes) != bytes.len() {
-                panic!("{:?}", crate::serde::Error::DeserializeUnexpectedEnd);
-            }
-        }
-    }
-}
-
-impl WordRead for FdReader {
-    fn read_words(&mut self, words: &mut [u32]) -> crate::serde::Result<()> {
-        let nread_bytes = unsafe { sys_read_words(self.fd, words.as_mut_ptr(), words.len()) };
-        if nread_bytes == words.len() * WORD_SIZE {
-            Ok(())
-        } else {
-            Err(crate::serde::Error::DeserializeUnexpectedEnd)
-        }
-    }
-
-    fn read_padded_bytes(&mut self, bytes: &mut [u8]) -> crate::serde::Result<()> {
-        if self.read_bytes_all(bytes) != bytes.len() {
-            return Err(crate::serde::Error::DeserializeUnexpectedEnd);
-        }
-
-        let unaligned = bytes.len() % WORD_SIZE;
-        if unaligned != 0 {
-            let pad_bytes = WORD_SIZE - unaligned;
-            let mut padding = [0u8; WORD_SIZE];
-            if self.read_bytes_all(&mut padding[..pad_bytes]) != pad_bytes {
-                return Err(crate::serde::Error::DeserializeUnexpectedEnd);
-            }
-        }
-        Ok(())
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::io::Read for FdReader {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        Ok(self.read_bytes(buf))
-    }
-}
-
-/// Serializes and writes objects.
-pub trait Write {
-    /// Write a serialized object.
-    fn write<T: Serialize>(&mut self, val: T);
-
-    /// Write raw data.
-    fn write_slice<T: Pod>(&mut self, buf: &[T]);
-}
-
-impl<W: Write + ?Sized> Write for &mut W {
-    fn write<T: Serialize>(&mut self, val: T) {
-        (**self).write(val)
-    }
-
-    fn write_slice<T: Pod>(&mut self, buf: &[T]) {
-        (**self).write_slice(buf)
-    }
-}
-
-/// Provides a FdWriter which can write to any file descriptor.
-pub struct FdWriter<F: Fn(&[u8])> {
-    fd: u32,
-    hook: F,
-}
-
-impl<F: Fn(&[u8])> FdWriter<F> {
-    /// Creates a new FdWriter writing to the given file descriptor.
-    pub fn new(fd: u32, hook: F) -> Self {
-        FdWriter { fd, hook }
-    }
-
-    fn write_bytes(&mut self, bytes: &[u8]) {
-        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
-        (self.hook)(bytes);
-    }
-}
-
-impl<F: Fn(&[u8])> Write for FdWriter<F> {
-    fn write<T: Serialize>(&mut self, val: T) {
-        val.serialize(&mut Serializer::new(self)).unwrap();
-    }
-
-    fn write_slice<T: Pod>(&mut self, buf: &[T]) {
-        self.write_bytes(bytemuck::cast_slice(buf));
-    }
-}
-
-impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
-    fn write_words(&mut self, words: &[u32]) -> crate::serde::Result<()> {
-        self.write_bytes(bytemuck::cast_slice(words));
-        Ok(())
-    }
-
-    fn write_padded_bytes(&mut self, bytes: &[u8]) -> crate::serde::Result<()> {
-        self.write_bytes(bytes);
-        let unaligned = bytes.len() % WORD_SIZE;
-        if unaligned != 0 {
-            let pad_bytes = WORD_SIZE - unaligned;
-            self.write_bytes(&[0u8; WORD_SIZE][..pad_bytes]);
-        }
-        Ok(())
-    }
-}
-
-#[cfg(feature = "std")]
-impl<F: Fn(&[u8])> std::io::Write for FdWriter<F> {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.write_bytes(buf);
-        Ok(buf.len())
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        Ok(())
-    }
-}
-
 /// Read the input digest from the input commitment.
 pub fn input_digest() -> Digest {
     Digest::new([
@@ -747,4 +422,27 @@ pub fn run_unconstrained(f: impl FnOnce()) {
         f();
         sys_exit(0)
     }
+}
+
+/// TODO
+pub fn read_frame() -> alloc::vec::Vec<u8> {
+    let mut len: u32 = 0;
+    read_slice(core::slice::from_mut(&mut len));
+    let mut bytes = vec![0u8; len as usize];
+    read_slice(&mut bytes);
+    bytes
+}
+
+/// TODO
+pub fn read_framed<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
+    crate::serde::from_slice(&read_frame())
+}
+
+/// TODO
+#[cfg(feature = "std")]
+pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
+    let mut len: u32 = 0;
+    read_slice(core::slice::from_mut(&mut len));
+    let reader = std::io::BufReader::with_capacity(len as usize, stdin());
+    T::deserialize(&mut crate::serde::Deserializer::new(reader))
 }
