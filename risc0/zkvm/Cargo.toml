@@ -25,10 +25,6 @@ name = "fib"
 required-features = ["prove"]
 
 [[example]]
-name = "loop"
-required-features = ["prove"]
-
-[[example]]
 name = "recursion"
 required-features = ["prove"]
 
