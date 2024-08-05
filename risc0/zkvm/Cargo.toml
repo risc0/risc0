@@ -30,7 +30,7 @@ required-features = ["prove"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-borsh = { version = "1.5.0", default-features = false, features = ["derive"] }
+borsh = { version = "1.5", default-features = false, features = ["derive"] }
 bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
@@ -123,8 +123,6 @@ cuda = [
   "risc0-circuit-rv32im/cuda",
   "risc0-zkp/cuda",
 ]
-dual = []
-metal = []
 default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
@@ -134,9 +132,11 @@ disable-dev-mode = []
 # While this is acceptable for most tests, the tests counting cycles and
 # segments will fail intermittently. It does not effect non-test code.
 docker = []
+dual = []
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
 getrandom = ["risc0-zkvm-platform/getrandom"]
+metal = []
 prove = [
   "client",
   "dep:addr2line",
