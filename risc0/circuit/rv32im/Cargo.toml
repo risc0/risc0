@@ -52,6 +52,7 @@ cuda = [
   "std",
 ]
 default = ["prove"]
+metal = []
 prove = [
   "dep:bytemuck",
   "dep:cfg-if",
@@ -68,5 +69,4 @@ prove = [
   "risc0-circuit-rv32im-sys",
   "std",
 ]
-seq = ["prove"]
 std = ["risc0-zkp/std", "serde/std"]
