@@ -34,6 +34,9 @@ required-features = ["prove"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+borsh = { version = "1.5.0", default-features = false, features = [
+  "derive",
+], optional = true }
 bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
@@ -106,6 +109,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 features = ["client", "prove", "getrandom", "std"]
 
 [features]
+borsh = ["dep:borsh", "risc0-binfmt/borsh", "risc0-zkp/borsh"]
 client = [
   "dep:bincode",
   "dep:bonsai-sdk",
