@@ -98,6 +98,23 @@ pub enum MultiTestSpec {
     SysFork,
     SysForkFork,
     SysForkJournalPanic,
+    RunUnconstrained {
+        // True to actually call run_unconstrained, false to run the busy loop directly as a control.
+        unconstrained: bool,
+        // Number of guest cycles to use, including startup.
+        cycles: u64,
+    },
+    SysExecuteZkr {
+        // Control id of ZKR to execute
+        control_id: Digest,
+        // Input to provide to ZKR execution
+        input: Vec<u32>,
+        // Claim digest and control root to provide to
+        // verify_assumption to make sure that the proof from the ZKR
+        // gets added to our assumptions.
+        claim_digest: Digest,
+        control_root: Digest,
+    },
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

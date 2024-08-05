@@ -29,6 +29,8 @@ pub const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 use alloc::vec::Vec;
 
 use anyhow::{ensure, Result};
+#[cfg(feature = "borsh")]
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
 use serde::{Deserialize, Serialize};
@@ -49,6 +51,7 @@ pub struct MerkleGroup {
 /// in the committed set.
 #[non_exhaustive]
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 pub struct MerkleProof {
     /// Index of the leaf for which inclusion is being proven.
     pub index: u32,

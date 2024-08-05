@@ -3531,6 +3531,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "prover"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "risc0-zkvm",
+ "risc0-zkvm-methods",
+ "workerpool",
+]
+
+[[package]]
 name = "ptr_meta"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4197,6 +4207,17 @@ dependencies = [
  "tempfile",
  "tracing",
  "typetag",
+]
+
+[[package]]
+name = "risc0-zkvm-methods"
+version = "1.1.0-alpha.1"
+dependencies = [
+ "risc0-build",
+ "risc0-zkvm",
+ "risc0-zkvm-platform",
+ "serde",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -6177,6 +6198,16 @@ name = "wordle-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+]
+
+[[package]]
+name = "workerpool"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27acc04c753780224f8f6c565db754da04d687b93150c258a4ddb3c4682543d3"
+dependencies = [
+ "num_cpus",
+ "parking_lot",
 ]
 
 [[package]]

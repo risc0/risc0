@@ -30,7 +30,17 @@ fn main() {
 
 fn build_cpu_kernels() {
     KernelBuild::new(KernelType::Cpp)
-        .files(glob::glob("cxx/*.cpp").unwrap().map(|x| x.unwrap()))
+        .files([
+            "cxx/bigint.cpp",
+            "cxx/extern.cpp",
+            "cxx/ffi.cpp",
+            "cxx/poly_fp.cpp",
+            "cxx/step_compute_accum.cpp",
+            "cxx/step_exec.cpp",
+            "cxx/step_verify_accum.cpp",
+            "cxx/step_verify_bytes.cpp",
+            "cxx/step_verify_mem.cpp",
+        ])
         .deps(glob::glob("cxx/*.h").unwrap().map(|x| x.unwrap()))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("circuit");
@@ -54,7 +64,7 @@ fn build_cuda_kernels() {
             "kernels/cuda/extern.h",
             "kernels/cuda/extern.cuh",
             "kernels/cuda/kernels.h",
-            "kernels/cuda/layout.cu.inc",
+            "kernels/cuda/layout.inc.cu",
         ])
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
