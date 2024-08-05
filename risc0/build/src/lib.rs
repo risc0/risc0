@@ -486,17 +486,23 @@ fn build_guest_package<P>(
     // send directly to the tty, if available.  This way we get
     // progress messages from the inner cargo so the user doesn't
     // think it's just hanging.
-    let tty_file = env::var("RISC0_GUEST_LOGFILE").unwrap_or_else(|_| "/dev/tty".to_string());
+    let tty_file = env::var("RISC0_GUEST_LOGFILE")
+        .map(|log_file| (log_file, false))
+        .unwrap_or_else(|_| ("/dev/tty".to_string(), true));
 
     let mut tty = fs::OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
         .truncate(false)
-        .open(tty_file)
+        .open(tty_file.0)
         .ok();
 
     if let Some(tty) = &mut tty {
+        if tty_file.1 {
+            writeln!(tty).unwrap();
+        }
+
         writeln!(
             tty,
             "{}: Starting build for riscv32im-risc0-zkvm-elf",
