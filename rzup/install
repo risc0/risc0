@@ -19,7 +19,7 @@ set -euo pipefail
 RZUP_URL="${RZUP_URL:-https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/}"
 
 # Override the download path with the ENV_PATH environment variable (i.e. stage)
-[[ -z "${STAGING_MODE}" ]] && STAGE_PATH="" || STAGE_PATH="stage/"
+ENV_PATH=${ENV_PATH:-prod}
 
 QUIET=no
 
