@@ -39,21 +39,48 @@ use serde::Deserialize;
 
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
+/// This const represents a filename that is used in the use to indicate to in
+/// order to indicate to the client and the risc0-build crate that the new rust
+/// implementation of rzup is in use. The rust implementation of rzup will place
+/// a file with this name under `$RISC0_HOME`.
+pub const RUST_RZUP_INDICATOR: &str = ".rzup";
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
 pub fn risc0_data() -> Result<PathBuf> {
-    if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
-        Ok(dir.into())
-    } else if dirs::home_dir().is_some_and(|dir| dir.join(".rzup").exists()) {
-        Ok(dirs::home_dir().unwrap().join(".rzup"))
-    } else if let Some(root) = dirs::data_dir() {
-        Ok(root.join("cargo-risczero"))
+    risc0_data_new().or_else(|_| risc0_data_compat())
+}
+
+// use the new location from rzup install.
+fn risc0_data_new() -> Result<PathBuf> {
+    let dir = if let Ok(dir) = std::env::var("RISC0_HOME") {
+        dir.into()
     } else if let Some(home) = dirs::home_dir() {
-        Ok(home.join(".cargo-risczero"))
+        home.join(".risc0")
     } else {
-        anyhow::bail!("Could not determine cargo-risczero data dir. Set RISC0_DATA_DIR env var.");
+        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
+    };
+
+    if !dir.join(RUST_RZUP_INDICATOR).exists() {
+        anyhow::bail!("Could not determine risc0 home dir. Set RISC0_HOME env var.");
     }
+
+    Ok(dir)
+}
+
+// check for backwards compatible cargo risczero install.
+fn risc0_data_compat() -> Result<PathBuf> {
+    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+        dir.into()
+    } else if let Some(root) = dirs::data_dir() {
+        root.join("cargo-risczero")
+    } else if let Some(home) = dirs::home_dir() {
+        home.join(".cargo-risczero")
+    } else {
+        anyhow::bail!("Could not determine risc0 data dir. Set RISC0_DATA_DIR env var.");
+    };
+
+    Ok(dir)
 }
 
 #[derive(Debug, Deserialize)]
@@ -459,17 +486,23 @@ fn build_guest_package<P>(
     // send directly to the tty, if available.  This way we get
     // progress messages from the inner cargo so the user doesn't
     // think it's just hanging.
-    let tty_file = env::var("RISC0_GUEST_LOGFILE").unwrap_or_else(|_| "/dev/tty".to_string());
+    let tty_file = env::var("RISC0_GUEST_LOGFILE")
+        .map(|log_file| (log_file, false))
+        .unwrap_or_else(|_| ("/dev/tty".to_string(), true));
 
     let mut tty = fs::OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
         .truncate(false)
-        .open(tty_file)
+        .open(tty_file.0)
         .ok();
 
     if let Some(tty) = &mut tty {
+        if tty_file.1 {
+            writeln!(tty).unwrap();
+        }
+
         writeln!(
             tty,
             "{}: Starting build for riscv32im-risc0-zkvm-elf",

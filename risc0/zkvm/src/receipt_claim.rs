@@ -23,6 +23,8 @@ use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, ensure};
+#[cfg(feature = "borsh")]
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
     ExitCode, InvalidExitCodeError,
@@ -46,6 +48,7 @@ use crate::{
 /// partial openings of the underlying fields from a hash commitment to the full structure. Also
 /// see [MaybePruned].
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReceiptClaim {
     /// The [SystemState] just before execution has begun.
@@ -215,11 +218,26 @@ impl Digestible for Unknown {
     }
 }
 
+#[cfg(feature = "borsh")]
+impl BorshSerialize for Unknown {
+    fn serialize<W>(&self, _: &mut W) -> core::result::Result<(), borsh::io::Error> {
+        unreachable!("unreachable")
+    }
+}
+
+#[cfg(feature = "borsh")]
+impl BorshDeserialize for Unknown {
+    fn deserialize_reader<R>(_: &mut R) -> core::result::Result<Self, borsh::io::Error> {
+        unreachable!("unreachable")
+    }
+}
+
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
 ///
 /// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
 /// is accessible. It may become inhabited in a future release.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Input {
     // Private field to ensure this type cannot be constructed.
@@ -237,6 +255,7 @@ impl Digestible for Input {
 
 /// Output field in the [ReceiptClaim], committing to a claimed journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Output {
     /// The journal committed to by the guest execution.
@@ -272,6 +291,7 @@ impl Digestible for Output {
 ///
 /// [assumption]: https://dev.risczero.com/terminology#assumption
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 pub struct Assumption {
     /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
     /// be the digest of the claim for a different circuit such as an accelerator.
@@ -301,6 +321,7 @@ impl Digestible for Assumption {
 
 /// A list of assumptions, each a [Digest] or populated value of an [Assumption].
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Assumptions(pub Vec<MaybePruned<Assumption>>);
 
@@ -429,6 +450,7 @@ impl From<Vec<Assumption>> for MaybePruned<Assumptions> {
 /// proof. When a subtree is pruned, the digest commits to the value of all contained fields.
 /// [ReceiptClaim] is the motivating example of this type of Merkle-ized struct.
 #[derive(Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 pub enum MaybePruned<T>
 where
     T: Clone + Serialize,
@@ -570,6 +592,7 @@ impl std::error::Error for PrunedValueError {}
 ///
 /// Viewing the two structs as Merkle trees, in which subtrees may be pruned, the result of this
 /// operation is a tree with a set of nodes equal to the union of the set of nodes for each input.
+#[cfg(feature = "prove")]
 pub(crate) trait Merge: Digestible + Sized {
     /// Merge two structs to produce an output with a union of the fields populated in the inputs.
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError>;
@@ -583,9 +606,11 @@ pub(crate) trait Merge: Digestible + Sized {
 }
 
 /// Error returned when a merge it attempted with two values with unequal digests.
+#[cfg(feature = "prove")]
 #[derive(Debug, Clone)]
 pub(crate) struct MergeInequalityError(pub Digest, pub Digest);
 
+#[cfg(feature = "prove")]
 impl fmt::Display for MergeInequalityError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -597,16 +622,21 @@ impl fmt::Display for MergeInequalityError {
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", feature = "prove"))]
 impl std::error::Error for MergeInequalityError {}
 
 /// Private marker trait providing an implementation of merge to values which implement PartialEq and clone and do not contain Merge fields.
+#[cfg(feature = "prove")]
 trait MergeLeaf: Digestible + PartialEq + Clone + Sized {}
 
+#[cfg(feature = "prove")]
 impl MergeLeaf for SystemState {}
+#[cfg(feature = "prove")]
 impl MergeLeaf for Assumption {}
+#[cfg(feature = "prove")]
 impl MergeLeaf for Vec<u8> {}
 
+#[cfg(feature = "prove")]
 impl<T: MergeLeaf> Merge for T {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         if self != other {
@@ -620,6 +650,7 @@ impl<T: MergeLeaf> Merge for T {
     }
 }
 
+#[cfg(feature = "prove")]
 impl<T> Merge for MaybePruned<T>
 where
     T: Merge + Serialize + Clone,
@@ -656,6 +687,7 @@ where
     }
 }
 
+#[cfg(feature = "prove")]
 impl<T: Merge> Merge for Option<T> {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         match (self, other) {
@@ -669,6 +701,7 @@ impl<T: Merge> Merge for Option<T> {
     }
 }
 
+#[cfg(feature = "prove")]
 impl Merge for Assumptions {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         if self.0.len() != other.0.len() {
@@ -687,12 +720,14 @@ impl Merge for Assumptions {
     }
 }
 
+#[cfg(feature = "prove")]
 impl Merge for Input {
     fn merge(&self, _other: &Self) -> Result<Self, MergeInequalityError> {
         match self.x { /* unreachable  */ }
     }
 }
 
+#[cfg(feature = "prove")]
 impl Merge for Output {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         Ok(Self {
@@ -702,6 +737,7 @@ impl Merge for Output {
     }
 }
 
+#[cfg(feature = "prove")]
 impl Merge for ReceiptClaim {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         if self.exit_code != other.exit_code {
@@ -720,6 +756,7 @@ impl Merge for ReceiptClaim {
     }
 }
 
+#[cfg(feature = "prove")]
 #[cfg(test)]
 mod tests {
     use hex::FromHex;

@@ -17,7 +17,8 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0
+  RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
   run:
@@ -182,14 +183,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: default
           - os: Linux
             feature: cuda
           - os: macOS
-            feature: metal
+            feature: default
     env:
       FEATURE: ${{ matrix.feature }}
     steps:
@@ -209,15 +209,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: default
+            device: cpu
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
           - os: macOS
-            feature: metal
+            feature: default
             device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
@@ -231,11 +231,14 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: build workspace
         run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
       - name: test workspace
         run: cargo test -F $FEATURE -F prove --workspace --timings --exclude doc-test
+      - name: test borsh
+        run: cargo test -F $FEATURE -F prove -F borsh -p risc0-zkvm --lib -- borsh
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
@@ -248,16 +251,16 @@ jobs:
       - name: test risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
-        if: matrix.device == 'cpu'
-      - run: cargo run -F $FEATURE -- fibonacci
+      - name: run fibonacci benchmark
+        run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
-      - run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
-      - run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
+      - name: run datasheet generator
+        run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
+      - name: check benches
+        run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
       - run: cargo check -p risc0-core
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
@@ -270,15 +273,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: default
+            device: cpu
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
           - os: macOS
-            feature: metal
+            feature: default
             device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
@@ -295,13 +298,17 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: build
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
-      - name: test
-        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE
+      - name: test in dev mode
+        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE --workspace --exclude prover
+        working-directory: examples
+      - name: test prover example
+        run: cargo test --locked -F $FEATURE -p prover
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
@@ -347,7 +354,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - run: sccache --show-stats
 
@@ -436,7 +444,8 @@ jobs:
         with:
           key: ${{ matrix.os }}-default
       - run: cargo install --force --path risc0/cargo-risczero
-      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: |
           cargo risczero new \
             --path $(pwd) \
@@ -446,6 +455,15 @@ jobs:
         shell: bash
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+      - run: |
+          cargo risczero new \
+            --path $(pwd) \
+            --dest ${{ runner.temp }} \
+            --guest-name test_method \
+            --no-std \
+            template-test-no-std
+        shell: bash
+      - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
       - run: sccache --show-stats
 
   crates-validator:
@@ -477,7 +495,8 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo install --force --path risc0/cargo-risczero
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release
@@ -487,7 +506,7 @@ jobs:
       - name: Generate the profile
         run: |
           target/release/gen-profiles \
-          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yaml \
+          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
           -o ${{ runner.temp }}/crate-validation/profiles.yaml \
           -c $TOP_N_CRATES
         working-directory: tools/crates-validator/
@@ -522,7 +541,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
@@ -544,7 +564,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-groth16 -F prove --release
       - run: cargo test -p risc0-zkvm -F docker -F prove -- docker

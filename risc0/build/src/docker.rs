@@ -145,7 +145,7 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:v2024-04-22.0")
+        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -244,13 +244,13 @@ mod test {
     // If the code of the package or any of its dependencies change,
     // it may be required to recompute the expected image_ids.
     // For that, run:
-    // `cargo risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml`
+    // `cargo run --bin cargo-risczero -- risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml`
     #[test]
     fn test_reproducible_methods_guest() {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
-            "risc0_zkvm_methods_guest/multi_test",
-            "b45761ac6ceb6a603484435bdeb2463a3ec2c2957fa09a9ca12411e265e8c1dc",
+            "risc0_zkvm_methods_guest/hello_commit",
+            "06921f365c4e7c321d2c89eeab51cfbcd371b6052d58f303d8199338268e5f7c",
         );
     }
 }

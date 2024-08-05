@@ -9,7 +9,7 @@
 /examples/                             @risc0/devrel @risc0/demos @risc0/platform
 /rzup/                                 @risc0/platform @hmrtn
 /web/                                  @risc0/platform @nahoc
-/website/                              @risc0/devrel @pdg744
+/website/                              @risc0/platform @risc0/devrel @pdg744
 
 # These are sensitive files
 /groth16_proof/groth16/                @flaub @nategraf @tzerrell

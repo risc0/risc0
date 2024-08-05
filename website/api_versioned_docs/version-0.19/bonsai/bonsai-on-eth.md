@@ -34,7 +34,7 @@ At a high level, here's how it works:
 [`IRiscZeroVerifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
 [guest program]: /terminology#guest-program
 [receipt]: /terminology#receipt
-[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 
 ### Getting Started
 
@@ -57,11 +57,9 @@ Using the off-chain API allows for including data not available to smart contrac
 When inputs to your [guest program] and large (e.g. more than a few kilobytes) sending requests on-chain can be cost-prohibitive, while sending large inputs (e.g. up to tens of megabytes) via the REST API has no additional cost.
 
 The [Bonsai Relay SDK] provides a Rust interface for interacting with the Bonsai Relay.
-An example for sending a callback request via the REST API can be found in the [relay directory of the Bonsai Foundry Template].
 
 [REST]: https://en.wikipedia.org/wiki/REST
 [Bonsai Relay SDK]: https://docs.rs/crate/bonsai-ethereum-relay/latest
-[relay directory of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/release-0.19/relay/examples/offchain_request.rs
 
 ### On-chain Requests
 
@@ -70,10 +68,6 @@ The Bonsai Relay also accepts requests on-chain using the [`BonsaiRelay` contrac
 On-chain requests can be useful for reducing the amount of code you need to maintain.
 When submitting requests off-chain, some client or indexer needs to be written to assemble the inputs and make the request to the Bonsai Relay.
 With on-chain requests, the application smart contract can directly issue requests, and so no client or indexer needs to be written or maintained.
-
-An example of sending a request on-chain can be found in the [starter contract of the Bonsai Foundry Template].
-
-[starter contract of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/release-0.19/contracts/BonsaiStarter.sol#L60-L68
 
 ## Verifier Contract
 

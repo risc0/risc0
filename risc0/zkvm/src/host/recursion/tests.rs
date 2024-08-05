@@ -35,12 +35,7 @@ use crate::{
 };
 use risc0_circuit_recursion::prove::{poseidon254_hal_pair, poseidon2_hal_pair};
 
-// Failure on older mac minis in the lab with Intel UHD 630 graphics:
-// (signal: 11, SIGSEGV: invalid memory reference)
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
+#[test]
 fn test_recursion_poseidon254() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -74,12 +69,7 @@ fn test_recursion_poseidon254() {
     assert_eq!(output_digest, expected_claim);
 }
 
-// Failure on older mac minis in the lab with Intel UHD 630 graphics:
-// (signal: 11, SIGSEGV: invalid memory reference)
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
+#[test]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -147,10 +137,7 @@ fn test_recursion_poseidon2() {
         .unwrap();
 }
 
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
+#[test]
 #[should_panic(expected = "assertion failed: elem.is_reduced()")]
 fn test_poseidon_sanitized_inputs() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
@@ -164,10 +151,7 @@ fn test_poseidon_sanitized_inputs() {
     let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
 }
 
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
+#[test]
 #[should_panic(expected = "assertion failed: elem.is_reduced()")]
 fn test_poseidon2_sanitized_inputs() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
@@ -222,10 +206,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     (session, segment_receipts)
 }
 
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
+#[test]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
     let (session, segments) = generate_busy_loop_segments("poseidon2");
@@ -260,10 +241,7 @@ fn test_recursion_lift_join_identity_e2e() {
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
+#[test]
 fn test_recursion_identity_sha256() {
     let default_prover = get_prover_server(&ProverOpts::succinct()).unwrap();
 
@@ -328,10 +306,7 @@ fn test_recursion_identity_sha256() {
         .unwrap();
 }
 
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
+#[test]
 fn test_recursion_lift_resolve_e2e() {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
@@ -430,6 +405,6 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("c43de805675563551857de3ee487c5167a26141467196700f43eb51f9c0ef505")
+        digest!("9a3767040e4cf554112afa68bc043274a8636a06565e1d5e2b7fa90fda941218")
     );
 }

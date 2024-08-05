@@ -15,7 +15,7 @@
 use std::rc::Rc;
 
 use cust::{memory::GpuBuffer as _, prelude::*};
-use risc0_sys::CppError;
+use risc0_sys::{cuda::SpparkError, CppError};
 use risc0_zkp::{
     core::log2_ceil,
     field::{
@@ -24,8 +24,8 @@ use risc0_zkp::{
     },
     hal::{
         cuda::{
-            prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon,
-            CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
+            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashPoseidon2,
+            CudaHashSha256, DeviceExtElem,
         },
         Buffer, CircuitHal, Hal,
     },
@@ -35,6 +35,13 @@ use risc0_zkp::{
 use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
+
+#[repr(C)]
+enum AccumOpType {
+    #[allow(dead_code)]
+    Add,
+    Multiply,
+}
 
 pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
@@ -129,7 +136,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let count = steps - ZK_CYCLES;
 
         let wom = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
-        let mut wom = UnifiedBuffer::from_slice(&wom).unwrap();
+        let wom = DeviceBuffer::from_slice(&wom).unwrap();
 
         tracing::info_span!("step_compute_accum").in_scope(|| {
             extern "C" {
@@ -157,7 +164,24 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         });
 
         tracing::info_span!("prefix_products").in_scope(|| {
-            prefix_products(&mut wom);
+            extern "C" {
+                fn sppark_calc_prefix_operation(
+                    d_elems: DevicePointer<DeviceExtElem>,
+                    count: u32,
+                    op: AccumOpType,
+                ) -> SpparkError;
+            }
+
+            let err = unsafe {
+                sppark_calc_prefix_operation(
+                    wom.as_device_ptr(),
+                    steps as u32,
+                    AccumOpType::Multiply,
+                )
+            };
+            if err.code != 0 {
+                panic!("Failure during sppark_calc_prefix_operation: {err}");
+            }
         });
 
         tracing::info_span!("step_verify_accum").in_scope(|| {

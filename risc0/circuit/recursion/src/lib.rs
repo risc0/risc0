@@ -38,7 +38,7 @@ pub mod cpu;
 pub mod cuda;
 mod info;
 pub mod layout;
-#[cfg(feature = "metal")]
+#[cfg(all(feature = "prove", any(target_os = "macos", target_os = "ios")))]
 pub mod metal;
 mod poly_ext;
 #[cfg(feature = "prove")]

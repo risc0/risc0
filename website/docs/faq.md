@@ -4,15 +4,13 @@
 
 ## Contents
 
-- [FAQ](#faq)
-  - [Contents](#contents)
-  - [ZK Basics](#zk-basics)
-  - [Building on the zkVM](#building-on-the-zkvm)
-    - [Code Troubleshooting](#code-troubleshooting)
-    - [zkVM Application Design](#zkvm-application-design)
-    - [Features, Performance, and Limitations](#features-performance-and-limitations)
-  - [The RISC Zero Circuits](#the-risc-zero-circuits)
-  - [Security](#security)
+- [ZK Basics](#zk-basics)
+- [Building on the zkVM](#building-on-the-zkvm)
+  - [Code Troubleshooting](#code-troubleshooting)
+  - [zkVM Application Design](#zkvm-application-design)
+  - [Features, Performance, and Limitations](#features-performance-and-limitations)
+- [The RISC Zero Circuits](#the-risc-zero-circuits)
+- [Security](#security)
 
 ---
 

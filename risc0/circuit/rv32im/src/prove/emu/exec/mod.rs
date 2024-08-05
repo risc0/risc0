@@ -80,6 +80,8 @@ pub trait SyscallContext {
     fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8>;
 
     /// Loads bytes from the given region of memory.
+    ///
+    /// A region may span multiple pages.
     fn peek_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
         for i in 0..size {
@@ -88,8 +90,17 @@ pub trait SyscallContext {
         Ok(region)
     }
 
+    /// Load a page from memory at the specified page index.
+    ///
+    /// This is used by sys_fork in order to build a copy-on-write page cache to
+    /// inherit pages from the parent process.
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
+
     /// Returns the current cycle count.
     fn get_cycle(&self) -> u64;
+
+    /// Returns the current program counter.
+    fn get_pc(&self) -> u32;
 }
 
 pub struct ExecutorResult {
@@ -378,10 +389,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn ecall_software(&mut self) -> Result<bool> {
         tracing::debug!("[{}] ecall_software", self.insn_cycles);
         let into_guest_ptr = ByteAddr(self.load_register(REG_A0)?);
-        if !is_guest_memory(into_guest_ptr.0) && !into_guest_ptr.is_null() {
+        let into_guest_len = self.load_register(REG_A1)? as usize;
+        if into_guest_len > 0 && !is_guest_memory(into_guest_ptr.0) {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
-        let into_guest_len = self.load_register(REG_A1)? as usize;
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.peek_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
@@ -410,7 +421,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
-        if !into_guest_ptr.is_null() {
+        if into_guest_len > 0 && !into_guest_ptr.is_null() {
             Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
             self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?
         }
@@ -431,8 +442,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         tracing::debug!("[{}] ecall_sha", self.insn_cycles);
         let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
-        let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
-        let mut block2_ptr = self.load_guest_addr_from_register(REG_A3)?;
         let count = self.load_register(REG_A4)?;
 
         let state_in: [u8; DIGEST_BYTES] = self.load_array_from_guest(state_in_ptr)?;
@@ -441,25 +450,30 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             *word = word.to_be();
         }
 
-        // tracing::debug!("ecall_sha: start state: {state:08x?}");
-        let mut block = [0u32; BLOCK_WORDS];
+        if count > 0 {
+            let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
+            let mut block2_ptr = self.load_guest_addr_from_register(REG_A3)?;
 
-        for _ in 0..count {
-            let (digest1, digest2) = block.split_at_mut(DIGEST_WORDS);
-            for (i, word) in digest1.iter_mut().enumerate() {
-                *word = self.load_u32_from_guest(block1_ptr + (i * WORD_SIZE))?;
-            }
-            for (i, word) in digest2.iter_mut().enumerate() {
-                *word = self.load_u32_from_guest(block2_ptr + (i * WORD_SIZE))?;
-            }
-            // tracing::debug!("Compressing block {block:02x?}");
-            sha2::compress256(
-                &mut state,
-                &[*GenericArray::from_slice(bytemuck::cast_slice(&block))],
-            );
+            // tracing::debug!("ecall_sha: start state: {state:08x?}");
+            let mut block = [0u32; BLOCK_WORDS];
 
-            block1_ptr += BLOCK_BYTES;
-            block2_ptr += BLOCK_BYTES;
+            for _ in 0..count {
+                let (digest1, digest2) = block.split_at_mut(DIGEST_WORDS);
+                for (i, word) in digest1.iter_mut().enumerate() {
+                    *word = self.load_u32_from_guest(block1_ptr + (i * WORD_SIZE))?;
+                }
+                for (i, word) in digest2.iter_mut().enumerate() {
+                    *word = self.load_u32_from_guest(block2_ptr + (i * WORD_SIZE))?;
+                }
+                // tracing::debug!("Compressing block {block:02x?}");
+                sha2::compress256(
+                    &mut state,
+                    &[*GenericArray::from_slice(bytemuck::cast_slice(&block))],
+                );
+
+                block1_ptr += BLOCK_BYTES;
+                block2_ptr += BLOCK_BYTES;
+            }
         }
 
         // tracing::debug!("ecall_sha: final state: {state:08x?}");
@@ -733,6 +747,18 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
         let bytes = word.to_le_bytes();
         let byte_offset = addr.0 as usize % WORD_SIZE;
         Ok(bytes[byte_offset])
+    }
+
+    fn peek_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        let addr = self.pager.image.info.get_page_addr(page_idx);
+        if !is_guest_memory(addr) {
+            bail!("{page_idx} is an invalid guest page_idx");
+        }
+        Ok(self.pager.peek_page(page_idx))
+    }
+
+    fn get_pc(&self) -> u32 {
+        EmuContext::get_pc(self).0
     }
 }
 
