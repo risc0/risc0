@@ -18,7 +18,7 @@ set -euo pipefail
 # NOTE: Temporary release URL
 RZUP_URL="${RZUP_URL:-https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/}"
 
-# Set the environment variable TEST_MODE to enable downloading from the test bucket
+# Override the download path with the ENV_PATH environment variable (i.e. stage)
 [[ -z "${STAGING_MODE}" ]] && STAGE_PATH="" || STAGE_PATH="stage/"
 
 QUIET=no
