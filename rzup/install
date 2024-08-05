@@ -133,8 +133,8 @@ get_architecture() {
   esac
 
   case "$_cputype $_ostype" in
-  "x86_64 linux") _arch=Linux-X64-cpu ;;
-  "arm64 darwin" ) _arch=macOS-ARM64-cpu ;;
+  "x86_64 linux") _arch=Linux-X64 ;;
+  "arm64 darwin" ) _arch=macOS-ARM64 ;;
    *) err "Unsupported CPU arch pairing: $_cputype $_ostype" ;;
   esac
 
