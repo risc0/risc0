@@ -23,44 +23,52 @@ fn main() {
         build_cuda_kernels();
     }
 
-    if env::var("CARGO_FEATURE_METAL").is_ok() {
+    if env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios") {
         build_metal_kernels();
     }
 }
 
 fn build_cpu_kernels() {
     KernelBuild::new(KernelType::Cpp)
-        .files(glob::glob("cxx/*.cpp").unwrap().map(|x| x.unwrap()))
+        .files([
+            "cxx/bigint.cpp",
+            "cxx/extern.cpp",
+            "cxx/ffi.cpp",
+            "cxx/poly_fp.cpp",
+            "cxx/step_compute_accum.cpp",
+            "cxx/step_exec.cpp",
+            "cxx/step_verify_accum.cpp",
+            "cxx/step_verify_bytes.cpp",
+            "cxx/step_verify_mem.cpp",
+        ])
         .deps(glob::glob("cxx/*.h").unwrap().map(|x| x.unwrap()))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("circuit");
 }
 
 fn build_cuda_kernels() {
-    KernelBuild::new(KernelType::CudaLink)
+    KernelBuild::new(KernelType::Cuda)
         .files([
+            "kernels/cuda/eval_check.cu",
             "kernels/cuda/ffi.cu",
+            "kernels/cuda/ffi_supra.cu",
             "kernels/cuda/step_compute_accum.cu",
             "kernels/cuda/step_exec.cu",
             "kernels/cuda/step_verify_accum.cu",
             "kernels/cuda/step_verify_bytes.cu",
             "kernels/cuda/step_verify_mem.cu",
         ])
-        // Note: we default to -O1 because -O3 can take upwards of 5 hours (or more)
-        // to compile on the current CUDA toolchain. Using -O1 only shows a ~10%
-        // decrease in performance but a compile time in the minutes.
-        // Use RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing.
-        .file_opt("kernels/cuda/eval_check.cu", 1)
         .deps([
             "kernels/cuda/bigint.cu",
             "kernels/cuda/context.h",
-            "kernels/cuda/cuda.h",
             "kernels/cuda/extern.h",
             "kernels/cuda/extern.cuh",
             "kernels/cuda/kernels.h",
+            "kernels/cuda/layout.inc.cu",
         ])
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
+        .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_rv32im_cuda");
 }
 

@@ -17,7 +17,8 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0
+  RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
   run:
@@ -30,9 +31,11 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      browser: ${{ steps.filter.outputs.browser }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
+      crates-validation: ${{ steps.filter.outputs.crates-validation }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
@@ -52,6 +55,11 @@ jobs:
               - Cargo.toml
               - rust-toolchain.toml
               - Cargo.lock
+            browser:
+              - *base
+              - examples/browser-verify/**
+              - risc0/**
+              - xtask/**
             check-external:
               - *base
               - external/**
@@ -63,6 +71,10 @@ jobs:
               - *base
               - risc0/**
               - templates/**
+            crates-validation:
+              - *base
+              - risc0/**
+              - tools/crates-validator/**
             crates-validator:
               - *base
               - tools/crates-validator/**
@@ -87,21 +99,21 @@ jobs:
               - *base
               - risc0/**
             web:
-              - *base
-              - examples/browser-verify/**
-              - risc0/**
-              - xtask/**
+              - web/**
 
   # see: https://github.com/orgs/community/discussions/26822
   main-status-check:
     if: always()
     needs:
+      - browser
       - check
       - check-external
       - check-template
       - clippy
       - crates-validator
+      - crates-validation
       - doc
+      - docs-rs
       - examples
       - docker
       - test
@@ -144,10 +156,15 @@ jobs:
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
-      - run: cargo rdme -c
+      - name: cargo rdme in bonsai/sdk
+        run: cargo rdme -c
         working-directory: bonsai/sdk
-      - run: cargo rdme -c
+      - name: cargo rdme in risc0/zkvm
+        run: cargo rdme -c
         working-directory: risc0/zkvm
+      - name: cargo rdme in risc0/groth16
+        run: cargo rdme -c
+        working-directory: risc0/groth16
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -165,14 +182,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: default
           - os: Linux
             feature: cuda
           - os: macOS
-            feature: metal
+            feature: default
     env:
       FEATURE: ${{ matrix.feature }}
     steps:
@@ -192,15 +208,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: default
+            device: cpu
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
           - os: macOS
-            feature: metal
+            feature: default
             device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
@@ -214,7 +230,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - name: build workspace
         run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
       - name: test workspace
@@ -226,19 +243,21 @@ jobs:
           retention-days: 5
       - name: build risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
+      - name: build risc0-zkvm tests without the prove feature
+        run: cargo test -p risc0-zkvm -F $FEATURE --no-run
       - name: test risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
-        if: matrix.device == 'cpu'
-      - run: cargo run -F $FEATURE -- fibonacci
+      - name: run fibonacci benchmark
+        run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
-      - run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
-      - run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
+      - name: run datasheet generator
+        run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
+      - name: check benches
+        run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
       - run: cargo check -p risc0-core
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
@@ -251,15 +270,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
         include:
+          - os: Linux
+            feature: default
+            device: cpu
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
           - os: macOS
-            feature: metal
+            feature: default
             device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
@@ -276,13 +295,17 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: build
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
-      - name: test
-        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE
+      - name: test in dev mode
+        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE --workspace --exclude prover
+        working-directory: examples
+      - name: test prover example
+        run: cargo test --locked -F $FEATURE -p prover
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
@@ -328,8 +351,32 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+      - run: sccache --show-stats
+
+  # Run as a separate job because we need to install a different set of tools.
+  # In particular, it uses nightly Rust and _does not_ install cargo risczero.
+  docs-rs:
+    if: needs.changes.outputs.doc == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
+    env:
+      RUSTDOCFLAGS: "--cfg docsrs -D warnings"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+        with:
+          # Building with docs.rs config requires the nightly toolchain.
+          toolchain: nightly
+      - uses: ./.github/actions/sccache
+        with:
+          key: macOS-nightly
+      - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo +nightly doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +nightly doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +nightly doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
@@ -394,11 +441,10 @@ jobs:
         with:
           key: ${{ matrix.os }}-default
       - run: cargo install --force --path risc0/cargo-risczero
-      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: |
           cargo risczero new \
-            --template templates/rust-starter \
-            --templ-subdir="" \
             --path $(pwd) \
             --dest ${{ runner.temp }} \
             --guest-name test_method \
@@ -406,6 +452,15 @@ jobs:
         shell: bash
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+      - run: |
+          cargo risczero new \
+            --path $(pwd) \
+            --dest ${{ runner.temp }} \
+            --guest-name test_method \
+            --no-std \
+            template-test-no-std
+        shell: bash
+      - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
       - run: sccache --show-stats
 
   crates-validator:
@@ -424,8 +479,50 @@ jobs:
         working-directory: tools/crates-validator
       - run: sccache --show-stats
 
-  web:
-    if: needs.changes.outputs.web == 'true'
+  crates-validation:
+    if: needs.changes.outputs.crates-validation == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      RUST_BACKTRACE: full
+      RUST_LOG: info
+      TOP_N_CRATES: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - run: cargo install --force --path risc0/cargo-risczero
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo build --release
+        working-directory: tools/crates-validator/
+      - name: Create working directory
+        run: mkdir -p ${{ runner.temp }}/crate-validation/
+      - name: Generate the profile
+        run: |
+          target/release/gen-profiles \
+          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
+          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -c $TOP_N_CRATES
+        working-directory: tools/crates-validator/
+      - name: Validate profiles
+        run: |
+          target/release/main \
+          -p ${{ github.workspace }} \
+          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+        shell: bash
+        working-directory: tools/crates-validator/
+      - name: Delete input profile
+        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
+      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
+        if: always()
+      - run: sccache --show-stats
+
+  browser:
+    if: needs.changes.outputs.browser == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
     env:
@@ -441,7 +538,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
@@ -463,10 +561,27 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-build -F docker
-      - run: cargo test -p risc0-groth16 -F docker --release
+      - run: cargo test -p risc0-groth16 -F prove --release
       - run: cargo test -p risc0-zkvm -F docker -F prove -- docker
         env:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
+
+  web:
+    if: needs.changes.outputs.web == 'true'
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+        working-directory: web
+      - run: bun run ci
+        working-directory: web
+      - run: bun run typecheck
+        working-directory: web
+      - run: bun run test
+        working-directory: web

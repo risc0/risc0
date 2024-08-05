@@ -28,7 +28,7 @@ EXTENSIONS = [
 ]
 
 SKIP_DIRS = [
-    str(Path.cwd()) + "/templates/rust-starter",
+    str(Path.cwd()) + "/risc0/cargo-risczero/templates/rust-starter",
     str(Path.cwd()) + "/risc0/sys/cxx/vendor",
     str(Path.cwd()) + "/risc0/zkvm/src/host/protos",
     str(Path.cwd()) + "/risc0/zkvm/src/host/server/exec",
@@ -75,7 +75,7 @@ def main():
     root = repo_root()
     ret = 0
     for path in tracked_files():
-        if path.suffix in EXTENSIONS:
+        if path.suffix in EXTENSIONS and ".inc" not in path.suffixes:
             skip = False
             for path_start in SKIP_DIRS:
                 if str(path).startswith(path_start):

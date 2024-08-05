@@ -18,7 +18,7 @@ pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
 pub mod dual;
-#[cfg(feature = "metal")]
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 pub mod metal;
 
 use std::{
@@ -225,7 +225,7 @@ mod testutil {
     };
 
     const COUNTS: [usize; 7] = [1, 9, 12, 1001, 1024, 1025, 1024 * 1024];
-    const DATA_SIZE: usize = 223;
+    const DATA_SIZE: usize = 224;
 
     fn generate_elem<H: Hal, R: RngCore>(hal: &H, rng: &mut R, size: usize) -> H::Buffer<H::Elem> {
         let values: Vec<H::Elem> = (0..size).map(|_| H::Elem::random(rng)).collect();

@@ -168,7 +168,7 @@ it can acted on (e.g. used as input to an `add`). It must also be written back
 to memory to store the result. Memory loads and stores (i.e. reads and writes)
 usually take one cycle.
 
-Memory access, both load and store takes exactly one cycle, expect in the case
+Memory access, both load and store takes exactly one cycle, except in the case
 of page-in and page-out operations ([discussed below](#paging)).
 
 Note that relative to a physical CPU, this is extremely fast (in terms of
@@ -196,7 +196,7 @@ Merkle inclusion proof for the page against the image ID. These hashing
 operations required take a number of cycles.
 
 **A page-in operation takes between 1094 and 5130 cycles; 1130 cycles on
-average.**[^2]
+average.**
 
 The very first page-in takes longer, 5130 cycles, because it needs to traverse
 up the page table (i.e. Merkle tree) all the way to the root, which is equal to
@@ -324,7 +324,7 @@ RISC Zero’s riscv32im implementation includes a number of special purpose
 operations, including two “accelerators” for cryptographic functions: SHA-256
 and [256-bit modular multiplication][bigint]. By implementing these operations
 directly in the “hardware” of the zkVM, programs that use these accelerators
-execute faster and can be proven with significantly less resources [^3].
+execute faster and can be proven with significantly less resources [^2].
 
 For more information about cryptography acceleration, [cryptography
 acceleration][acceleration].
@@ -401,7 +401,7 @@ machine, and the `cuda` feature enabled.
 
 ### RV32IM Operations with Cycle Counts
 
-Table from [https://mark.theis.site/riscv/][RISC-V operations], with RISC Zero
+Table from [https://marks.page/riscv/][RISC-V operations], with RISC Zero
 cycle counts added.
 
 | Assembly            | Name                               | Pseudocode                                     | RISC Zero Cycles                                |
@@ -486,10 +486,6 @@ below.
 <!-- prettier-ignore-end -->
 
 [^2]:
-    An implementation of cycle-accounting for paging operations is implemented
-    in the [Executor].
-
-[^3]:
     This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
@@ -513,7 +509,6 @@ below.
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
 [example-ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [example-waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
-[Executor]: https://github.com/risc0/risc0/blob/main/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [hibernates]: https://en.wikipedia.org/wiki/Hibernation_(computing)
@@ -530,7 +525,7 @@ below.
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
-[RISC-V operations]: https://mark.theis.site/riscv/
+[RISC-V operations]: https://marks.page/riscv/
 [RISC-V architecture]: /reference-docs/about-risc-v
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions

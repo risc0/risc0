@@ -20,20 +20,21 @@ use cust::{
     prelude::*,
     DeviceCopy,
 };
-use risc0_circuit_rv32im_sys::ffi::{Error, RawPreflightTrace};
+use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, Elem, RootsOfUnity,
 };
+use risc0_sys::{cuda::SpparkError, CppError};
 use risc0_zkp::{
     core::log2_ceil,
     field::ExtElem as _,
     hal::{
         cuda::{
-            prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHalPoseidon2, CudaHalSha256,
-            CudaHash, CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
+            BufferImpl as CudaBuffer, CudaHal, CudaHalPoseidon2, CudaHalSha256, CudaHash,
+            CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
         },
-        Buffer, CircuitHal,
+        Buffer, CircuitHal, Hal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -46,12 +47,18 @@ use crate::{
 
 use super::CircuitWitnessGenerator;
 
+#[repr(C)]
+enum AccumOpType {
+    #[allow(dead_code)]
+    Add,
+    Multiply,
+}
+
 pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
-    #[tracing::instrument(name = "CudaCircuitHal::new", skip_all)]
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         Self { hal }
     }
@@ -73,7 +80,7 @@ extern "C" {
         ctrl: DevicePointer<u8>,
         io: DevicePointer<u8>,
         data: DevicePointer<u8>,
-    ) -> Error;
+    ) -> CppError;
 
     fn risc0_circuit_rv32im_cuda_step_compute_accum(
         ctx: DevicePointer<AccumContext>,
@@ -84,7 +91,7 @@ extern "C" {
         data: DevicePointer<u8>,
         mix: DevicePointer<u8>,
         accum: DevicePointer<u8>,
-    ) -> Error;
+    ) -> CppError;
 
     fn risc0_circuit_rv32im_cuda_step_verify_accum(
         ctx: DevicePointer<AccumContext>,
@@ -95,7 +102,7 @@ extern "C" {
         data: DevicePointer<u8>,
         mix: DevicePointer<u8>,
         accum: DevicePointer<u8>,
-    ) -> Error;
+    ) -> CppError;
 
     fn risc0_circuit_rv32im_cuda_eval_check(
         check: DevicePointer<u8>,
@@ -108,7 +115,7 @@ extern "C" {
         po2: u32,
         domain: u32,
         poly_mix_pows: *const u32,
-    ) -> Error;
+    ) -> CppError;
 }
 
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
@@ -139,7 +146,6 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
 }
 
 impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
-    #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
         check: &CudaBuffer<BabyBearElem>,
@@ -199,7 +205,6 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         nvtx::range_pop!();
     }
 
-    #[tracing::instrument(skip_all)]
     fn accumulate(
         &self,
         ctrl: &CudaBuffer<BabyBearElem>,
@@ -214,10 +219,10 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let count = steps - ZK_CYCLES;
 
         let ram = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
-        let mut ram = UnifiedBuffer::from_slice(&ram).unwrap();
+        let ram = DeviceBuffer::from_slice(&ram).unwrap();
 
         let bytes = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
-        let mut bytes = UnifiedBuffer::from_slice(&bytes).unwrap();
+        let bytes = DeviceBuffer::from_slice(&bytes).unwrap();
 
         let ctx = AccumContext {
             ram: ram.as_device_ptr(),
@@ -242,8 +247,35 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         });
 
         tracing::info_span!("prefix_products").in_scope(|| {
-            prefix_products(&mut ram);
-            prefix_products(&mut bytes);
+            extern "C" {
+                fn sppark_calc_prefix_operation(
+                    d_elems: DevicePointer<DeviceExtElem>,
+                    count: u32,
+                    op: AccumOpType,
+                ) -> SpparkError;
+            }
+
+            let err = unsafe {
+                sppark_calc_prefix_operation(
+                    ram.as_device_ptr(),
+                    steps as u32,
+                    AccumOpType::Multiply,
+                )
+            };
+            if err.code != 0 {
+                panic!("Failure during sppark_calc_prefix_operation(ram): {err}");
+            }
+
+            let err = unsafe {
+                sppark_calc_prefix_operation(
+                    bytes.as_device_ptr(),
+                    steps as u32,
+                    AccumOpType::Multiply,
+                )
+            };
+            if err.code != 0 {
+                panic!("Failure during sppark_calc_prefix_operation(bytes): {err}");
+            }
         });
 
         tracing::info_span!("step_verify_accum").in_scope(|| {
@@ -263,20 +295,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         });
 
         tracing::info_span!("zeroize").in_scope(|| {
-            let kernel = self.hal.module.get_function("eltwise_zeroize_fp").unwrap();
-
-            let params = self.hal.compute_simple_params(accum.size());
-            unsafe {
-                let stream = &self.hal.stream;
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(accum.as_device_ptr())).unwrap();
-            }
-
-            let params = self.hal.compute_simple_params(io.size());
-            unsafe {
-                let stream = &self.hal.stream;
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(io.as_device_ptr())).unwrap();
-            }
-            self.hal.stream.synchronize().unwrap();
+            self.hal.eltwise_zeroize_elem(accum);
+            self.hal.eltwise_zeroize_elem(io);
         });
 
         nvtx::range_pop!();

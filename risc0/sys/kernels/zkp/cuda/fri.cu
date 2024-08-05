@@ -26,7 +26,7 @@ __device__ inline constexpr size_t log2Ceil(size_t in) {
   return r;
 }
 
-extern "C" __global__ void fri_fold(Fp* out, const Fp* in, const FpExt& mix, const uint32_t count) {
+__global__ void fri_fold(Fp* out, const Fp* in, const FpExt* mix, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     FpExt tot;
@@ -39,7 +39,7 @@ extern "C" __global__ void fri_fold(Fp* out, const Fp* in, const FpExt& mix, con
                    in[2 * count * kFriFold + rev_idx],
                    in[3 * count * kFriFold + rev_idx]);
       tot += curMix * factor;
-      curMix *= mix;
+      curMix *= *mix;
     }
     for (size_t i = 0; i < 4; i++) {
       out[count * i + idx] = tot.elems[i];

@@ -14,7 +14,8 @@
 
 //! Interface between the circuit and prover/verifier
 
-use alloc::vec::Vec;
+use alloc::{str::from_utf8, vec::Vec};
+use core::fmt;
 
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
@@ -128,7 +129,9 @@ pub trait TapsProvider {
     }
 }
 
-/// A protocol info string for the proof system and circuits. Used to seed the Fiat-Shamir transcript and provide domain separation between different protocol and circuit versions.
+/// A protocol info string for the proof system and circuits.
+/// Used to seed the Fiat-Shamir transcript and provide domain separation between different
+/// protocol and circuit versions.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProtocolInfo(pub [u8; 16]);
 
@@ -142,6 +145,15 @@ impl ProtocolInfo {
             *elem = E::from_u64(self.0[i] as u64);
         }
         elems
+    }
+}
+
+impl fmt::Display for ProtocolInfo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match from_utf8(&self.0) {
+            Ok(s) => write!(f, "{}", s),
+            Err(_) => write!(f, "0x{}", hex::encode(self.0)),
+        }
     }
 }
 

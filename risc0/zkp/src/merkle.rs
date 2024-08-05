@@ -24,8 +24,11 @@ use crate::core::to_po2;
 pub struct MerkleTreeParams {
     pub row_size: usize,
     pub col_size: usize,
+    #[cfg(test)]
     pub queries: usize,
+    #[cfg(feature = "prove")]
     pub layers: usize,
+    #[cfg(test)]
     pub top_layer: usize,
     pub top_size: usize,
 }
@@ -53,8 +56,11 @@ impl MerkleTreeParams {
         MerkleTreeParams {
             row_size,
             col_size,
+            #[cfg(test)]
             queries,
+            #[cfg(feature = "prove")]
             layers,
+            #[cfg(test)]
             top_layer,
             top_size,
         }

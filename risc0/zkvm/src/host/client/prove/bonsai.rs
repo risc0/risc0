@@ -15,11 +15,11 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
-use bonsai_sdk::alpha::Client;
+use bonsai_sdk::blocking::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, is_dev_mode, sha::Digestible, CompactReceipt, ExecutorEnv, InnerReceipt,
+    compute_image_id, is_dev_mode, sha::Digestible, ExecutorEnv, Groth16Receipt, InnerReceipt,
     ProveInfo, ProverOpts, Receipt, ReceiptKind, VerifierContext,
 };
 
@@ -66,8 +66,10 @@ impl Prover for BonsaiProver {
         let mut receipts_ids: Vec<String> = vec![];
         for assumption in &env.assumptions.borrow().cached {
             let serialized_receipt = match assumption {
-                crate::Assumption::Proven(receipt) => bincode::serialize(receipt)?,
-                crate::Assumption::Unresolved(_) => bail!("Only proven receipts can be uploaded."), //TODO: improve the message
+                crate::AssumptionReceipt::Proven(receipt) => bincode::serialize(receipt)?,
+                crate::AssumptionReceipt::Unresolved(_) => {
+                    bail!("only proven assumptions can be uploaded to Bonsai.")
+                }
             };
             let receipt_id = client.upload_receipt(serialized_receipt)?;
             receipts_ids.push(receipt_id);
@@ -76,7 +78,7 @@ impl Prover for BonsaiProver {
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
-        let session = client.create_session(image_id_hex, input_id, receipts_ids)?;
+        let session = client.create_session(image_id_hex, input_id, receipts_ids, false)?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
         let succinct_prove_info = loop {
@@ -108,12 +110,6 @@ impl Prover for BonsaiProver {
 
                 if opts.prove_guest_errors {
                     receipt.verify_integrity_with_context(ctx)?;
-                    ensure!(
-                        receipt.claim()?.pre.digest() == image_id,
-                        "received unexpected image ID: expected {}, found {}",
-                        hex::encode(image_id),
-                        hex::encode(receipt.claim()?.pre.digest())
-                    );
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;
                 }
@@ -140,8 +136,8 @@ impl Prover for BonsaiProver {
             ReceiptKind::Composite | ReceiptKind::Succinct => {
                 return Ok(succinct_prove_info);
             }
-            // If they requested a compact receipts, we need to continue.
-            ReceiptKind::Compact => {}
+            // If they requested a groth16 receipts, we need to continue.
+            ReceiptKind::Groth16 => {}
         }
 
         // Request that Bonsai compress further, to Groth16.
@@ -174,27 +170,28 @@ impl Prover for BonsaiProver {
             }
         };
 
-        // Assemble the compact receipt, and verify it.
+        // Assemble the groth16 receipt, and verify it.
         // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
         // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
         // this error condition and report a better message. Constructing the receipt here will all
         // the verifier parameters for this version of risc0-zkvm, which may be different than
         // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
         // matches the verifying key used here.
-        let compact_receipt = Receipt::new(
-            InnerReceipt::Compact(CompactReceipt {
+        let groth16_receipt = Receipt::new(
+            InnerReceipt::Groth16(Groth16Receipt {
                 seal: snark_receipt.snark.to_vec(),
                 claim: succinct_prove_info.receipt.claim()?,
+                verifier_parameters: ctx.groth16_verifier_parameters.digest(),
             }),
             succinct_prove_info.receipt.journal.bytes,
         );
-        compact_receipt
+        groth16_receipt
             .verify_integrity_with_context(ctx)
-            .context("failed to verify CompactReceipt returned by Bonsai")?;
+            .context("failed to verify Groth16Receipt returned by Bonsai")?;
 
-        // Return the compact receipt, with the stats collected earlier.
+        // Return the groth16 receipt, with the stats collected earlier.
         Ok(ProveInfo {
-            receipt: compact_receipt,
+            receipt: groth16_receipt,
             stats: succinct_prove_info.stats,
         })
     }
@@ -205,8 +202,8 @@ impl Prover for BonsaiProver {
             (InnerReceipt::Composite(_), ReceiptKind::Composite)
             | (InnerReceipt::Succinct(_), ReceiptKind::Composite | ReceiptKind::Succinct)
             | (
-                InnerReceipt::Compact(_),
-                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Compact,
+                InnerReceipt::Groth16(_),
+                ReceiptKind::Composite | ReceiptKind::Succinct | ReceiptKind::Groth16,
             ) => Ok(receipt.clone()),
             // Compression is always a no-op in dev mode
             (InnerReceipt::Fake { .. }, _) => {
@@ -221,11 +218,11 @@ impl Prover for BonsaiProver {
             (_, ReceiptKind::Succinct) => {
                 bail!("BonsaiProver does not support compression on existing receipts");
             }
-            (_, ReceiptKind::Compact) => {
-                // Caller is requesting a CompactReceipt. Provide a hint on how to get one.
+            (_, ReceiptKind::Groth16) => {
+                // Caller is requesting a Groth16Receipt. Provide a hint on how to get one.
                 bail!([
                     "BonsaiProver does not support compression on existing receipts",
-                    "Set receipt_kind on ProverOpts in initial prove request to get a CompactReceipt."
+                    "Set receipt_kind on ProverOpts in initial prove request to get a Groth16Receipt."
                 ].join(""));
             }
         }

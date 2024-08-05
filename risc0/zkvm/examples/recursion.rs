@@ -13,8 +13,9 @@
 // limitations under the License.
 
 use risc0_zkvm::{
-    recursion::{poseidon2_hal_pair, Prover, ProverOpts},
+    recursion::{poseidon2_hal_pair, Prover},
     sha::Digest,
+    ProverOpts,
 };
 use tracing_subscriber::{prelude::*, EnvFilter};
 

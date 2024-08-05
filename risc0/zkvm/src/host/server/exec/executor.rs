@@ -28,8 +28,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::client::env::SegmentPath, Assumption, Assumptions, ExecutorEnv, FileSegmentRef, Output,
-    Segment, SegmentRef, Session,
+    host::client::env::SegmentPath, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment,
+    SegmentRef, Session,
 };
 
 use super::{
@@ -95,7 +95,7 @@ impl<'a> ExecutorImpl<'a> {
         image: MemoryImage,
         profiler: Option<Rc<RefCell<Profiler>>>,
     ) -> Result<Self> {
-        let syscall_table = SyscallTable::new(&env);
+        let syscall_table = SyscallTable::from_env(&env);
         Ok(Self {
             env,
             image,
@@ -162,13 +162,8 @@ impl<'a> ExecutorImpl<'a> {
                                         .borrow()
                                         .accessed
                                         .iter()
-                                        .map(|a| {
-                                            Ok(match a {
-                                                Assumption::Proven(r) => r.claim()?.into(),
-                                                Assumption::Unresolved(r) => r.clone(),
-                                            })
-                                        })
-                                        .collect::<Result<Vec<_>>>()?,
+                                        .map(|(a, _)| a.clone().into())
+                                        .collect::<Vec<_>>(),
                                 )
                                 .into(),
                             })
@@ -234,11 +229,16 @@ impl<'a> ExecutorImpl<'a> {
     }
 }
 
-struct ContextAdapter<'a> {
-    ctx: &'a mut dyn NewSyscallContext,
+struct ContextAdapter<'a, 'b> {
+    ctx: &'b mut dyn NewSyscallContext,
+    syscall_table: SyscallTable<'a>,
 }
 
-impl<'a> SyscallContext for ContextAdapter<'a> {
+impl<'a, 'b> SyscallContext<'a> for ContextAdapter<'a, 'b> {
+    fn get_pc(&self) -> u32 {
+        self.ctx.get_pc()
+    }
+
     fn get_cycle(&self) -> u64 {
         self.ctx.get_cycle()
     }
@@ -247,8 +247,20 @@ impl<'a> SyscallContext for ContextAdapter<'a> {
         self.ctx.peek_register(idx).unwrap()
     }
 
-    fn load_u8(&mut self, addr: u32) -> Result<u8> {
-        self.ctx.peek_u8(ByteAddr(addr))
+    fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>> {
+        self.ctx.peek_page(page_idx)
+    }
+
+    fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
+        self.ctx.peek_u8(addr)
+    }
+
+    fn load_u32(&mut self, addr: ByteAddr) -> Result<u32> {
+        self.ctx.peek_u32(addr)
+    }
+
+    fn syscall_table(&self) -> &SyscallTable<'a> {
+        &self.syscall_table
     }
 }
 
@@ -259,7 +271,10 @@ impl<'a> NewSyscall for ExecutorImpl<'a> {
         ctx: &mut dyn NewSyscallContext,
         into_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let mut ctx = ContextAdapter { ctx };
+        let mut ctx = ContextAdapter {
+            ctx,
+            syscall_table: self.syscall_table.clone(),
+        };
         self.syscall_table
             .get_syscall(syscall)
             .context(format!("Unknown syscall: {syscall:?}"))?

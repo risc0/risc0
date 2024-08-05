@@ -251,7 +251,7 @@ Remember, the [`write`][source-env::write] method is used to send data to the
 host's [`stdout`][stdout] file descriptor.
 
 Still in the [`submit`][example-voting-machine-host-submit] function, note how
-the _private_ output from the guest is used, and how it's relevant the
+the _private_ output from the guest is used, and how it's relevant to the
 distinction between _public_ and _private_ data in this case.
 In the example presented, the `VotingMachineState` struct is changed during the
 guest's execution. But we don't want to commit (make public) the state of the

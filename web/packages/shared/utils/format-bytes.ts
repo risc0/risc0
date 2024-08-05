@@ -1,4 +1,4 @@
-import { isNil } from "lodash-es";
+import { isNil } from "./is-nil";
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
 
@@ -6,6 +6,10 @@ const UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
 export function formatBytes(bytes: number) {
   if (isNil(bytes)) {
     return;
+  }
+
+  if (bytes === 0) {
+    return "N/A";
   }
 
   let unitIndex = 0;

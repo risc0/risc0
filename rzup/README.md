@@ -6,7 +6,7 @@ Install, update, or revert to a specific RISC Zero version.
 
 <!-- TODO: Replace this friendly redirect URL once set up -->
 ```sh
-curl -L https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/install | bash
+curl -L https://risczero.com/install | bash
 ```
 
 ## Usage

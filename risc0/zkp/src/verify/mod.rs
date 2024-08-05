@@ -27,7 +27,7 @@ use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
     adapter::{
-        CircuitCoreDef, PROOF_SYSTEM_INFO, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
+        CircuitCoreDef, ProtocolInfo, PROOF_SYSTEM_INFO, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
         REGISTER_GROUP_DATA,
     },
     core::{digest::Digest, hash::HashSuite, log2_ceil},
@@ -38,15 +38,39 @@ use crate::{
 #[derive(PartialEq)]
 #[non_exhaustive]
 pub enum VerificationError {
-    VerifierParametersMismatch { expected: Digest, received: Digest },
     ReceiptFormatError,
-    ControlVerificationError { control_id: Digest },
+    ControlVerificationError {
+        control_id: Digest,
+    },
     ImageVerificationError,
-    MerkleQueryOutOfRange { idx: usize, rows: usize },
+    MerkleQueryOutOfRange {
+        idx: usize,
+        rows: usize,
+    },
     InvalidProof,
     JournalDigestMismatch,
+    ClaimDigestMismatch {
+        expected: Digest,
+        received: Digest,
+    },
     UnexpectedExitCode,
     InvalidHashSuite,
+    VerifierParametersMissing,
+    VerifierParametersMismatch {
+        expected: Digest,
+        received: Digest,
+    },
+    ProofSystemInfoMismatch {
+        expected: ProtocolInfo,
+        received: ProtocolInfo,
+    },
+    CircuitInfoMismatch {
+        expected: ProtocolInfo,
+        received: ProtocolInfo,
+    },
+    UnresolvedAssumption {
+        digest: Digest,
+    },
 }
 
 impl fmt::Debug for VerificationError {
@@ -58,9 +82,6 @@ impl fmt::Debug for VerificationError {
 impl fmt::Display for VerificationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            VerificationError::VerifierParametersMismatch { expected, received } => {
-                write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
-            }
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
             VerificationError::ControlVerificationError { control_id } => {
                 write!(f, "control_id mismatch: {control_id}")
@@ -74,8 +95,26 @@ impl fmt::Display for VerificationError {
             VerificationError::JournalDigestMismatch => {
                 write!(f, "journal digest mismatch detected")
             }
+            VerificationError::ClaimDigestMismatch { expected, received } => {
+                write!(f, "claim digest does not match the expected digest {received}; expected {expected}")
+            }
             VerificationError::UnexpectedExitCode => write!(f, "unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "invalid hash suite"),
+            VerificationError::VerifierParametersMissing => {
+                write!(f, "verifier parameters were not found in verifier context for the given receipt type")
+            }
+            VerificationError::VerifierParametersMismatch { expected, received } => {
+                write!(f, "receipt was produced for a version of the verifier with parameters digest {received}; expected {expected}")
+            }
+            VerificationError::ProofSystemInfoMismatch { expected, received } => {
+                write!(f, "receipt was produced for a version of the verifier with proof system info {received}; expected {expected}")
+            }
+            VerificationError::CircuitInfoMismatch { expected, received } => {
+                write!(f, "receipt was produced for a version of the verifier with circuit info {received}; expected {expected}")
+            }
+            VerificationError::UnresolvedAssumption { digest } => {
+                write!(f, "receipt contains an unresolved assumption: {digest}")
+            }
         }
     }
 }
@@ -356,7 +395,7 @@ where
             return Err(VerificationError::InvalidProof);
         }
 
-        // Set the mix mix value, pseudorandom value used for FRI batching
+        // Set the mix value, pseudorandom value used for FRI batching
         let mix = iop.random_ext_elem();
         // tracing::debug!("mix = {mix:?}");
 
@@ -420,7 +459,7 @@ where
     /// Read the globals (i.e. outputs) from the IOP, and mix them into the Fiat-Shamir state.
     ///
     /// NOTE: The globals are the only values known to the verifier, and constitute the public
-    /// statement of of the prover. In many scenarios, they are the first values sent to the
+    /// statement of the prover. In many scenarios, they are the first values sent to the
     /// verifier by the prover, and therefore should be committed at the start of verification.
     fn execute(&mut self, iop: &mut ReadIOP<'a, F>) {
         let slice = iop.read_field_elem_slice(C::OUTPUT_SIZE + 1);

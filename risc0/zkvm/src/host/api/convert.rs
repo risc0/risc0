@@ -12,21 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::PathBuf;
+use std::{fmt::Debug, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
 use risc0_binfmt::SystemState;
 use risc0_zkp::core::digest::Digest;
+use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     receipt::{
-        segment::decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, ReceiptMetadata,
-        SegmentReceipt, SuccinctReceipt,
+        merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
+        FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt,
+        SuccinctReceipt,
     },
-    Assumptions, CompactReceipt, ExitCode, Input, Journal, MaybePruned, Output, ProveInfo,
-    ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    receipt_claim::Unknown,
+    Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
+    ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
 mod ver {
@@ -35,7 +38,7 @@ mod ver {
     pub const RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const SEGMENT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
     pub const SUCCINCT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
-    pub const COMPACT_RECEIPT: CompatVersion = CompatVersion { value: 1 };
+    pub const GROTH16_RECEIPT: CompatVersion = CompatVersion { value: 1 };
 }
 
 impl TryFrom<AssetRequest> for pb::api::AssetRequest {
@@ -66,10 +69,13 @@ impl TryFrom<Asset> for pb::api::Asset {
     }
 }
 
-impl TryFrom<SuccinctReceipt> for Asset {
+impl<Claim> TryFrom<SuccinctReceipt<Claim>> for Asset
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+{
     type Error = anyhow::Error;
 
-    fn try_from(succinct_receipt: SuccinctReceipt) -> Result<Self> {
+    fn try_from(succinct_receipt: SuccinctReceipt<Claim>) -> Result<Self> {
         Ok(Asset::Inline(bincode::serialize(&succinct_receipt)?.into()))
     }
 }
@@ -79,6 +85,14 @@ impl TryFrom<SegmentReceipt> for Asset {
 
     fn try_from(segment_receipt: SegmentReceipt) -> Result<Self> {
         Ok(Asset::Inline(bincode::serialize(&segment_receipt)?.into()))
+    }
+}
+
+impl TryFrom<Receipt> for Asset {
+    type Error = anyhow::Error;
+
+    fn try_from(receipt: Receipt) -> Result<Self> {
+        Ok(Asset::Inline(bincode::serialize(&receipt)?.into()))
     }
 }
 
@@ -195,18 +209,25 @@ impl From<pb::api::GenericError> for anyhow::Error {
     }
 }
 
-impl From<pb::api::ProverOpts> for ProverOpts {
-    fn from(opts: pb::api::ProverOpts) -> Self {
-        Self {
+impl TryFrom<pb::api::ProverOpts> for ProverOpts {
+    type Error = anyhow::Error;
+
+    fn try_from(opts: pb::api::ProverOpts) -> Result<Self> {
+        Ok(Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: match opts.receipt_kind {
                 0 => ReceiptKind::Composite,
                 1 => ReceiptKind::Succinct,
-                2 => ReceiptKind::Compact,
+                2 => ReceiptKind::Groth16,
                 value => panic!("Unknown receipt kind number: {value}"),
             },
-        }
+            control_ids: opts
+                .control_ids
+                .into_iter()
+                .map(TryInto::try_into)
+                .collect::<Result<_>>()?,
+        })
     }
 }
 
@@ -216,6 +237,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: opts.receipt_kind as i32,
+            control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -345,6 +367,7 @@ impl From<SegmentReceipt> for pb::core::SegmentReceipt {
             index: value.index,
             hashfn: value.hashfn,
             claim: Some(value.claim.into()),
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
@@ -377,22 +400,37 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal,
             index: value.index,
             hashfn: value.hashfn,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }
 
-impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
-    fn from(value: SuccinctReceipt) -> Self {
+impl<Claim> From<SuccinctReceipt<Claim>> for pb::core::SuccinctReceipt
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    MaybePruned<Claim>: Into<pb::core::MaybePruned>,
+{
+    fn from(value: SuccinctReceipt<Claim>) -> Self {
         Self {
             version: Some(ver::SUCCINCT_RECEIPT),
             seal: value.get_seal_bytes(),
             control_id: Some(value.control_id.into()),
+            control_inclusion_proof: Some(value.control_inclusion_proof.into()),
             claim: Some(value.claim.into()),
+            hashfn: value.hashfn,
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
 
-impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
+impl<Claim> TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+{
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::SuccinctReceipt) -> Result<Self> {
@@ -411,33 +449,79 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
         Ok(Self {
             seal,
             control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
+            control_inclusion_proof: value
+                .control_inclusion_proof
+                .ok_or(malformed_err())?
+                .try_into()?,
             claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            hashfn: value.hashfn,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }
 
-impl From<CompactReceipt> for pb::core::Groth16Receipt {
-    fn from(value: CompactReceipt) -> Self {
+impl From<MerkleProof> for pb::core::MerkleProof {
+    fn from(value: MerkleProof) -> Self {
         Self {
-            version: Some(ver::COMPACT_RECEIPT),
-            seal: value.seal,
-            claim: Some(value.claim.into()),
+            index: value.index,
+            digests: value.digests.into_iter().map(Into::into).collect(),
         }
     }
 }
 
-impl TryFrom<pb::core::Groth16Receipt> for CompactReceipt {
+impl TryFrom<pb::core::MerkleProof> for MerkleProof {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::MerkleProof) -> Result<Self> {
+        Ok(Self {
+            index: value.index,
+            digests: value
+                .digests
+                .into_iter()
+                .map(TryInto::try_into)
+                .collect::<Result<_>>()?,
+        })
+    }
+}
+
+impl<Claim> From<Groth16Receipt<Claim>> for pb::core::Groth16Receipt
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    MaybePruned<Claim>: Into<pb::core::MaybePruned>,
+{
+    fn from(value: Groth16Receipt<Claim>) -> Self {
+        Self {
+            version: Some(ver::GROTH16_RECEIPT),
+            seal: value.seal,
+            claim: Some(value.claim.into()),
+            verifier_parameters: Some(value.verifier_parameters.into()),
+        }
+    }
+}
+
+impl<Claim> TryFrom<pb::core::Groth16Receipt> for Groth16Receipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+{
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::Groth16Receipt) -> Result<Self> {
         let version = value.version.ok_or(malformed_err())?.value;
-        if version > ver::COMPACT_RECEIPT.value {
-            bail!("Incompatible CompactReceipt version: {version}");
+        if version > ver::GROTH16_RECEIPT.value {
+            bail!("Incompatible Groth16Receipt version: {version}");
         }
 
         Ok(Self {
             seal: value.seal,
             claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }
@@ -452,12 +536,12 @@ impl From<InnerReceipt> for pb::core::InnerReceipt {
                 InnerReceipt::Succinct(inner) => {
                     pb::core::inner_receipt::Kind::Succinct(inner.into())
                 }
-                InnerReceipt::Fake { claim } => {
+                InnerReceipt::Fake(inner) => {
                     pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {
-                        claim: Some(claim.into()),
+                        claim: Some(inner.claim.into()),
                     })
                 }
-                InnerReceipt::Compact(inner) => {
+                InnerReceipt::Groth16(inner) => {
                     pb::core::inner_receipt::Kind::Groth16(inner.into())
                 }
             }),
@@ -471,11 +555,75 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
     fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
-            pb::core::inner_receipt::Kind::Groth16(inner) => Self::Compact(inner.try_into()?),
+            pb::core::inner_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
-            pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake {
-                claim: inner.claim.ok_or(malformed_err())?.try_into()?,
-            },
+            pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake(inner.try_into()?),
+        })
+    }
+}
+
+// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
+// In Rust, they are distinct types because Rust needs to size everything on the
+// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
+// have different sizes. Protobuf handles this without issue.
+impl From<InnerAssumptionReceipt> for pb::core::InnerReceipt {
+    fn from(value: InnerAssumptionReceipt) -> Self {
+        Self {
+            kind: Some(match value {
+                InnerAssumptionReceipt::Composite(inner) => {
+                    pb::core::inner_receipt::Kind::Composite(inner.into())
+                }
+                InnerAssumptionReceipt::Succinct(inner) => {
+                    pb::core::inner_receipt::Kind::Succinct(inner.into())
+                }
+                InnerAssumptionReceipt::Fake(inner) => {
+                    pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {
+                        claim: Some(inner.claim.into()),
+                    })
+                }
+                InnerAssumptionReceipt::Groth16(inner) => {
+                    pb::core::inner_receipt::Kind::Groth16(inner.into())
+                }
+            }),
+        }
+    }
+}
+
+impl TryFrom<pb::core::InnerReceipt> for InnerAssumptionReceipt {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
+            pb::core::inner_receipt::Kind::Groth16(inner) => Self::Groth16(inner.try_into()?),
+            pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
+            pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake(inner.try_into()?),
+        })
+    }
+}
+
+impl<Claim> From<FakeReceipt<Claim>> for pb::core::FakeReceipt
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    MaybePruned<Claim>: Into<pb::core::MaybePruned>,
+{
+    fn from(value: FakeReceipt<Claim>) -> Self {
+        Self {
+            claim: Some(value.claim.into()),
+        }
+    }
+}
+
+impl<Claim> TryFrom<pb::core::FakeReceipt> for FakeReceipt<Claim>
+where
+    Claim: risc0_binfmt::Digestible + Debug + Clone + Serialize,
+    MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+{
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::FakeReceipt) -> Result<Self> {
+        Ok(Self {
+            claim: value.claim.ok_or(malformed_err())?.try_into()?,
         })
     }
 }
@@ -483,9 +631,13 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
 impl From<CompositeReceipt> for pb::core::CompositeReceipt {
     fn from(value: CompositeReceipt) -> Self {
         Self {
-            segments: value.segments.into_iter().map(|s| s.into()).collect(),
-            assumptions: value.assumptions.into_iter().map(|a| a.into()).collect(),
-            journal_digest: value.journal_digest.map(|d| d.into()),
+            segments: value.segments.into_iter().map(Into::into).collect(),
+            assumption_receipts: value
+                .assumption_receipts
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+            verifier_parameters: Some(value.verifier_parameters.into()),
         }
     }
 }
@@ -500,17 +652,20 @@ impl TryFrom<pb::core::CompositeReceipt> for CompositeReceipt {
                 .into_iter()
                 .map(|s| s.try_into())
                 .collect::<Result<Vec<_>>>()?,
-            assumptions: value
-                .assumptions
+            assumption_receipts: value
+                .assumption_receipts
                 .into_iter()
                 .map(|a| a.try_into())
                 .collect::<Result<Vec<_>>>()?,
-            journal_digest: value.journal_digest.map(|d| d.try_into()).transpose()?,
+            verifier_parameters: value
+                .verifier_parameters
+                .ok_or(malformed_err())?
+                .try_into()?,
         })
     }
 }
 
-impl From<Digest> for pb::core::Digest {
+impl From<Digest> for pb::base::Digest {
     fn from(value: Digest) -> Self {
         Self {
             words: value.as_words().to_vec(),
@@ -518,10 +673,10 @@ impl From<Digest> for pb::core::Digest {
     }
 }
 
-impl TryFrom<pb::core::Digest> for Digest {
+impl TryFrom<pb::base::Digest> for Digest {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::Digest) -> Result<Self> {
+    fn try_from(value: pb::base::Digest) -> Result<Self> {
         value
             .words
             .try_into()
@@ -671,6 +826,35 @@ impl TryFrom<pb::core::Output> for Output {
     }
 }
 
+impl Name for pb::core::Assumption {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "Assumption";
+}
+
+impl AssociatedMessage for Assumption {
+    type Message = pb::core::Assumption;
+}
+
+impl From<Assumption> for pb::core::Assumption {
+    fn from(value: Assumption) -> Self {
+        Self {
+            claim: Some(value.claim.into()),
+            control_root: Some(value.control_root.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::Assumption> for Assumption {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::Assumption) -> Result<Self> {
+        Ok(Self {
+            claim: value.claim.ok_or(malformed_err())?.try_into()?,
+            control_root: value.control_root.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
 impl Name for pb::core::Assumptions {
     const PACKAGE: &'static str = "risc0.protos.core";
     const NAME: &'static str = "Assumptions";
@@ -763,6 +947,30 @@ impl TryFrom<pb::core::MaybePruned> for MaybePruned<Vec<u8>> {
             pb::core::maybe_pruned::Kind::Value(inner) => {
                 Self::Value(<Vec<u8> as Message>::decode(inner.as_slice())?)
             }
+            pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
+        })
+    }
+}
+
+impl From<MaybePruned<Unknown>> for pb::core::MaybePruned {
+    fn from(value: MaybePruned<Unknown>) -> Self {
+        Self {
+            kind: Some(match value {
+                MaybePruned::Value(inner) => {
+                    match inner { /* unreachable */ }
+                }
+                MaybePruned::Pruned(digest) => pb::core::maybe_pruned::Kind::Pruned(digest.into()),
+            }),
+        }
+    }
+}
+
+impl TryFrom<pb::core::MaybePruned> for MaybePruned<Unknown> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::core::maybe_pruned::Kind::Value(_) => Err(malformed_err())?,
             pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
         })
     }

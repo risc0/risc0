@@ -139,8 +139,6 @@ pub mod ether_trace {
         M: Middleware,
     {
         pub fn new(client: Arc<M>, block_number: Option<u64>) -> Option<Self> {
-            let client = client;
-
             let mut out = Self {
                 client,
                 handle: Handle::current(),
@@ -255,58 +253,33 @@ pub struct EvmResult {
 
 #[cfg(test)]
 mod tests {
-    use std::{str::FromStr, sync::Arc};
+    use ethers_core::types::{Transaction, U256 as EthersU256, U64};
+    use revm::{
+        primitives::{Env, U256},
+        EVM,
+    };
 
-    use ether_trace::{Http, Provider};
-    use ethers_core::types::U256 as EthersU256;
-    use ethers_providers::Middleware;
-
-    use super::*;
+    use crate::{ether_trace, ZkDb};
 
     fn from_ethers_u256(x: EthersU256) -> U256 {
         U256::from_limbs(x.0)
     }
 
-    #[tokio::test]
-    async fn trace_tx() {
-        let rpc_url = "https://eth-mainnet.public.blastapi.io";
-
-        let tx_hash =
-            H256::from_str("0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7")
-                .unwrap();
-
-        let client = Provider::<Http>::try_from(rpc_url).unwrap();
-        let client = Arc::new(client);
-
-        let tx = client.get_transaction(tx_hash).await.unwrap().unwrap();
+    #[test]
+    fn trace_tx() {
+        let tx: Transaction = serde_json::from_str(include_str!("../testdata/tx.json")).unwrap();
         let block_numb = tx.block_number.unwrap() - 1;
-        assert_eq!(block_numb, ethers_core::types::U64::from(16424130 - 1));
+        assert_eq!(block_numb, U64::from(16424130 - 1));
 
-        let mut env = Env::default();
-        env.block.number = from_ethers_u256(block_numb.as_u64().into());
-        env.tx = ether_trace::txenv_from_tx(tx);
-
-        let trace_db = ether_trace::TraceTx::new(client, Some(block_numb.as_u64())).unwrap();
-
-        // Run the TX with tracing:
-        let mut evm = EVM::new();
-        evm.database(trace_db);
-        evm.env = env.clone();
-
-        // Trick to allow block_on() blocking in async -> sync -> async
-        let (res, trace_db) = tokio::task::spawn_blocking(move || (evm.transact(), evm.take_db()))
-            .await
-            .unwrap();
-        let res = res.unwrap();
-
-        // assert_eq!(res.exit_reason, Return::Return);
-        assert_eq!(res.result.gas_used(), 29316);
-
-        let zkdb = trace_db.create_zkdb();
+        let zkdb: ZkDb = serde_json::from_str(include_str!("../testdata/zkdb.json")).unwrap();
         assert_eq!(zkdb.basic.elms.len(), 3);
         assert_eq!(zkdb.code_hash.elms.len(), 0);
         assert_eq!(zkdb.storage.elms.len(), 2);
         assert_eq!(zkdb.block.elms.len(), 0);
+
+        let mut env = Env::default();
+        env.block.number = from_ethers_u256(block_numb.as_u64().into());
+        env.tx = ether_trace::txenv_from_tx(tx);
 
         let mut evm = EVM::new();
         evm.database(zkdb);

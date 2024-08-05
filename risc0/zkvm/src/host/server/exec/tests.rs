@@ -23,7 +23,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST},
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
     BLST_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
@@ -119,7 +119,7 @@ fn system_split() {
         .unwrap();
     let mut image = BTreeMap::new();
     let mut pc = entry;
-    for _ in 0..1000 {
+    for _ in 0..100 {
         image.insert(pc, 0x1234b137); // lui x2, 0x1234b000
         pc += WORD_SIZE as u32;
     }
@@ -190,6 +190,24 @@ fn host_syscall() {
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
+}
+
+#[test]
+fn host_syscall_words() {
+    let _expected: Vec<u32> = vec![0x01020304];
+    let input = MultiTestSpec::SyscallWords;
+    let _actual: Mutex<Vec<Bytes>> = Vec::new().into();
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .io_callback(SYS_MULTI_TEST_WORDS, |buf| Ok(buf))
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 // Make sure panics in the callback get propagated correctly.
@@ -597,30 +615,6 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_verify_pause_codes() {
-        for code in [0u8, 1, 2, 255] {
-            tracing::debug!("sys_verify_halt_codes: code = {code}");
-            let pause_session = exec_pause(code);
-
-            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
-
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .add_assumption(pause_session.claim().unwrap())
-                .build()
-                .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
-
-            if code == 0 {
-                assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
-            } else {
-                assert!(session.is_err());
-            }
-        }
-    }
-
-    #[test]
     fn sys_verify_integrity() {
         let hello_commit_session = exec_hello_commit();
 
@@ -707,8 +701,8 @@ mod sys_verify {
 
         // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
-        let pruned_claim =
-            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.claim().unwrap().digest());
+        let mut pruned_claim: ReceiptClaim = hello_commit_session.claim().unwrap();
+        pruned_claim.output = MaybePruned::Pruned(pruned_claim.output.digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&pruned_claim).unwrap(),
         };
@@ -722,10 +716,16 @@ mod sys_verify {
             .unwrap();
 
         // Result of execution should be a guest panic resulting from the pruned input.
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        let err = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
-            .is_err());
+            .map(|_| ())
+            .unwrap_err();
+
+        tracing::debug!("err: {err}");
+        assert!(err
+            .to_string()
+            .contains("env::verify_integrity returned error"));
     }
 }
 
@@ -1130,6 +1130,23 @@ fn too_many_sha() {
 #[should_panic(expected = "is an invalid guest address")]
 fn out_of_bounds_ecall() {
     run_test(MultiTestSpec::OutOfBoundsEcall);
+}
+
+#[test]
+fn sys_fork() {
+    run_test(MultiTestSpec::SysFork);
+}
+
+#[test]
+#[should_panic(expected = "Unknown syscall")]
+fn sys_fork_fork_panic() {
+    run_test(MultiTestSpec::SysForkFork);
+}
+
+#[test]
+#[should_panic(expected = "Bad write file descriptor 3")]
+fn sys_fork_journal_panic() {
+    run_test(MultiTestSpec::SysForkJournalPanic);
 }
 
 #[cfg(feature = "docker")]

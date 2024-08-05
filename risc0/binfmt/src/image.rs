@@ -16,7 +16,7 @@ extern crate alloc;
 
 use alloc::{collections::BTreeMap, vec, vec::Vec};
 
-use anyhow::{ensure, Result};
+use anyhow::{anyhow, ensure, Result};
 use risc0_zkp::core::{
     digest::Digest,
     hash::sha::{Impl, Sha256, BLOCK_BYTES, SHA256_INIT},
@@ -24,6 +24,7 @@ use risc0_zkp::core::{
 use risc0_zkvm_platform::{
     memory::{GUEST_MAX_MEM, MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,
+    PAGE_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
@@ -36,7 +37,7 @@ use crate::{elf::Program, Digestible, SystemState};
 /// proper, this includes some metadata about the page table.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MemoryImage {
-    /// Sparse memory memory image as a map from page index to page.
+    /// Sparse memory image as a map from page index to page.
     pub pages: BTreeMap<u32, Vec<u8>>,
 
     /// Metadata about the structure of the page table
@@ -47,22 +48,32 @@ pub struct MemoryImage {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-struct PersistentPageTableInfo {
-    page_size: u32,
-    page_table_addr: u32,
-}
+struct PersistentPageTableInfo;
 
+/// Structure representing the page table for zkVM memory.
+///
+/// The notion of pages is borrowed from common operating system memory management, and the zkVM
+/// organizes memory into a series of memory pages similarly. In the zkVM, the "page table" is
+/// backed by a Merkle tree that verifies memory that is loaded into memory, or stored between
+/// segments.
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(try_from = "PersistentPageTableInfo", into = "PersistentPageTableInfo")]
 pub struct PageTableInfo {
+    /// Size of each page, in bytes.
     pub page_size: u32,
     page_size_po2: u32,
+    /// Starting address for the page table in the memory space.
     pub page_table_addr: u32,
     _page_table_size: u32,
+    /// Address of the root page, which is the top layer of the Merkle tree.
     pub root_addr: u32,
+    /// Page index of the root page.
     pub root_idx: u32,
     root_page_addr: u32,
+    /// Total number of pages covered by this page table.
     pub num_pages: u32,
+    /// Number of entries in the root page. The root page may not be full, if the memory space is
+    /// smaller than what the full number of entries could cover.
     pub num_root_entries: u32,
     _layers: Vec<u32>,
     /// Hash of an uninitialized page containing all zeros.
@@ -72,17 +83,14 @@ pub struct PageTableInfo {
 impl TryFrom<PersistentPageTableInfo> for PageTableInfo {
     type Error = anyhow::Error;
 
-    fn try_from(value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
-        PageTableInfo::new(value.page_table_addr, value.page_size)
+    fn try_from(_value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
+        Ok(PageTableInfo::default())
     }
 }
 
 impl From<PageTableInfo> for PersistentPageTableInfo {
-    fn from(value: PageTableInfo) -> Self {
-        Self {
-            page_size: value.page_size,
-            page_table_addr: value.page_table_addr,
-        }
+    fn from(_value: PageTableInfo) -> Self {
+        Self
     }
 }
 
@@ -105,7 +113,14 @@ const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
 
+impl Default for PageTableInfo {
+    fn default() -> Self {
+        Self::new(PAGE_TABLE.start() as u32, PAGE_SIZE as u32).unwrap()
+    }
+}
+
 impl PageTableInfo {
+    /// Crate a new page table info struct with the given address and page size.
     pub fn new(page_table_addr: u32, page_size: u32) -> Result<Self> {
         let max_mem = page_table_addr;
         ensure!(max_mem >= page_size, "Max memory must be at least one page");
@@ -119,7 +134,9 @@ impl PageTableInfo {
         let mut remain = max_mem;
         while remain >= page_size {
             let num_pages = remain / page_size;
-            remain = num_pages * DIGEST_BYTES as u32;
+            remain = num_pages
+                .checked_mul(DIGEST_BYTES as u32)
+                .ok_or(anyhow!("Invalid page_size specified"))?;
             layers.push(remain);
             page_table_size += remain;
         }
@@ -150,14 +167,17 @@ impl PageTableInfo {
         })
     }
 
+    /// Calculate the page address given its index.
     pub fn get_page_addr(&self, page_idx: u32) -> u32 {
         page_idx * self.page_size
     }
 
+    /// Calculate the index given its address.
     pub fn get_page_index(&self, addr: u32) -> u32 {
         addr >> self.page_size_po2
     }
 
+    /// Calculate the index of the page that contains the hash of this page.
     pub fn get_page_entry_addr(&self, page_idx: u32) -> u32 {
         self.page_table_addr + page_idx * DIGEST_BYTES as u32
     }

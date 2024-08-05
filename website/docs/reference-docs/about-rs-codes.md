@@ -8,7 +8,7 @@ Implementation and documentation for Reed-Solomon encoding is in the `risc0-zkp-
 
 ## Basic Function
 
-A RISC Zero [receipt] demonstrates the validity of the associated [execution trace](../proof-system/what_is_a_trace.md) by encoding the execution instructions and the trace data into polynomials and then making various assertions about those polynomials.
+A RISC Zero [receipt] demonstrates the validity of the associated [execution trace](../proof-system/what-is-a-trace.md) by encoding the execution instructions and the trace data into polynomials and then making various assertions about those polynomials.
 We refer to this process as _arithmetization of the trace_, and RISC Zero's arithmetization is based on Reed Solomon encoding.
 
 ## Background

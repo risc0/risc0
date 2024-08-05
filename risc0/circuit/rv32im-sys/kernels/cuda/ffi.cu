@@ -31,20 +31,20 @@ constexpr size_t kStepModeSeqParallel = 0;
 constexpr size_t kStepModeSeqForward = 1;
 constexpr size_t kStepModeSeqReverse = 2;
 
+namespace {
+
+using CodeReg = size_t;
+using OutReg = size_t;
+using DataReg = size_t;
+using MixReg = size_t;
+using AccumReg = size_t;
+
+#include "layout.cu.inc"
+
+} // namespace
+
 // constexpr size_t kVerifyMemBodyKind = 1;
 constexpr size_t kVerifyMemHaltKind = 2;
-
-LaunchConfig getSimpleConfig(uint32_t count) {
-  int device;
-  CUDA_OK(cudaGetDevice(&device));
-
-  int maxThreads;
-  CUDA_OK(cudaDeviceGetAttribute(&maxThreads, cudaDevAttrMaxThreadsPerBlock, device));
-
-  int block = maxThreads / 4;
-  int grid = (count + block - 1) / block;
-  return LaunchConfig{grid, block, 0};
-}
 
 struct HostContext {
   MachineContext* ctx;
@@ -271,14 +271,17 @@ __global__ void inject_backs_ram(MachineContext* ctx, uint32_t steps, uint32_t c
     assert(idx != 0);
 
     const RamArgumentRow& back1 = ctx->ramRows[idx - 1];
-    data[89 * steps + cycle - 1] = back1.addr;              // a->addr
-    data[90 * steps + cycle - 1] = back1.getMemCycle();     // a->cycle
-    data[91 * steps + cycle - 1] = back1.getMemOp();        // a->memOp
-    data[92 * steps + cycle - 1] = back1.word & 0xff;       // a->data[0]
-    data[93 * steps + cycle - 1] = back1.word >> 8 & 0xff;  // a->data[1]
-    data[94 * steps + cycle - 1] = back1.word >> 16 & 0xff; // a->data[2]
-    data[95 * steps + cycle - 1] = back1.word >> 24 & 0xff; // a->data[3]
-    data[97 * steps + cycle - 1] = back1.dirty;             // prevVerifier->dirty
+    constexpr auto header = kLayout.mux.body.header;
+    constexpr auto a = header.element;
+    constexpr auto v = header.verifier;
+    data[a.addr * steps + cycle - 1] = back1.addr;                 // a->addr
+    data[a.cycle * steps + cycle - 1] = back1.getMemCycle();       // a->cycle
+    data[a.memOp * steps + cycle - 1] = back1.getMemOp();          // a->memOp
+    data[a.data[0] * steps + cycle - 1] = back1.word & 0xff;       // a->data[0]
+    data[a.data[1] * steps + cycle - 1] = back1.word >> 8 & 0xff;  // a->data[1]
+    data[a.data[2] * steps + cycle - 1] = back1.word >> 16 & 0xff; // a->data[2]
+    data[a.data[3] * steps + cycle - 1] = back1.word >> 24 & 0xff; // a->data[3]
+    data[v.dirty * steps + cycle - 1] = back1.dirty;               // prevVerifier->dirty
     if (kind == kVerifyMemHaltKind) {
       const RamArgumentRow& back2 = ctx->ramRows[idx - 2];
       uint32_t isNewAddr = back2.addr != back1.addr;
@@ -295,11 +298,11 @@ __global__ void inject_backs_ram(MachineContext* ctx, uint32_t steps, uint32_t c
         cmp = cmp >> 8;
       }
       uint32_t extra = cmp;
-      data[96 * steps + cycle - 1] = isNewAddr; // isNewAddr
-      data[3 * steps + cycle - 1] = diff[0];    // diff[0]
-      data[4 * steps + cycle - 1] = diff[1];    // diff[1]
-      data[5 * steps + cycle - 1] = diff[2];    // diff[2]
-      data[69 * steps + cycle - 1] = extra;     // extra
+      data[v.isNewAddr * steps + cycle - 1] = isNewAddr; // isNewAddr
+      data[v.diff[0] * steps + cycle - 1] = diff[0];     // diff[0]
+      data[v.diff[1] * steps + cycle - 1] = diff[1];     // diff[1]
+      data[v.diff[2] * steps + cycle - 1] = diff[2];     // diff[2]
+      data[v.extra * steps + cycle - 1] = extra;         // extra
     }
   }
 }
@@ -489,31 +492,6 @@ const char* risc0_circuit_rv32im_cuda_step_verify_accum(AccumContext* ctx,
     auto cfg = getSimpleConfig(count);
     par_step_verify_accum<<<cfg.grid, cfg.block, 0, stream>>>(
         ctx, steps, count, ctrl, io, data, mix, accum);
-    CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::runtime_error& err) {
-    return strdup(err.what());
-  }
-  return nullptr;
-}
-
-const char* risc0_circuit_rv32im_cuda_eval_check(Fp* check,
-                                                 const Fp* ctrl,
-                                                 const Fp* data,
-                                                 const Fp* accum,
-                                                 const Fp* mix,
-                                                 const Fp* out,
-                                                 const Fp& rou,
-                                                 uint32_t po2,
-                                                 uint32_t domain,
-                                                 const FpExt* poly_mix_pows) {
-  try {
-    CUDA_OK(cudaDeviceSynchronize());
-
-    CudaStream stream;
-    auto cfg = getSimpleConfig(domain);
-    cudaMemcpyToSymbol(poly_mix, poly_mix_pows, sizeof(poly_mix));
-    eval_check<<<cfg.grid, cfg.block, 0, stream>>>(
-        check, ctrl, data, accum, mix, out, rou, po2, domain);
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::runtime_error& err) {
     return strdup(err.what());

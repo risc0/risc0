@@ -7,16 +7,13 @@ export const VERSIONS = [
     value: "main", // value is the branch name on github
   },
   {
-    label: "release-0.21",
+    label: "1.0",
+    value: "release-1.0", // value is the branch name on github
+  },
+  {
+    label: "0.21",
     value: "release-0.21", // value is the branch name on github
-    latest: true,
   },
 ];
 
-const latestVersionsCount = VERSIONS.filter((version) => version.latest).length;
-
-if (latestVersionsCount !== 1) {
-  throw new Error("Exactly one version should be marked as the latest");
-}
-
-export const latestVersion = VERSIONS.find((version) => version.latest)?.value; // e.g. "release-0.21"
+export const latestVersion = "release-1.0";

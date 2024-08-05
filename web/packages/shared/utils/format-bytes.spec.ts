@@ -10,7 +10,7 @@ describe('formatBytes', () => {
 
   it('should return bytes correctly', () => {
     expect(formatBytes(1)).toBe('1.00 B');
-    expect(formatBytes(0)).toBe('0.00 B');
+    expect(formatBytes(0)).toBe('N/A');
   });
 
   it('should return kilobytes correctly', () => {

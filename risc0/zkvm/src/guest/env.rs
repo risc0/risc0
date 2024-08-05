@@ -68,14 +68,15 @@
 //! [proof composition]:https://www.risczero.com/blog/proof-composition
 //! [guest-optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
-use core::{cell::OnceCell, fmt, mem::MaybeUninit};
+use core::{cell::OnceCell, convert::Infallible, fmt};
 
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_alloc_words, sys_cycle_count, sys_halt, sys_input, sys_log, sys_pause, sys_read,
-        sys_read_words, sys_verify, sys_verify_integrity, sys_write, syscall_2, SyscallName,
+        self, sys_alloc_words, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log,
+        sys_pause, sys_read, sys_read_words, sys_verify_integrity, sys_write, syscall_2,
+        SyscallName,
     },
     WORD_SIZE,
 };
@@ -85,10 +86,9 @@ use crate::{
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
-        Digest, Digestible, DIGEST_WORDS,
+        Digest, Digestible,
     },
-    Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
-    ReceiptClaim,
+    Assumption, Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 
 static mut HASHER: OnceCell<Sha256> = OnceCell::new();
@@ -168,9 +168,9 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
 /// potentially distinct guests can be combined into one. This feature is know as [composition].
 ///
-/// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
-/// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
-/// post [crate::SystemState].
+/// In order to be valid, the [crate::Receipt] must have [ExitCode::Halted(0)][crate::ExitCode] or
+/// [ExitCode::Paused(0)][crate::ExitCode], an empty assumptions list, and an all-zeroes input
+/// hash. It may have any post [crate::SystemState].
 ///
 /// # Example
 ///
@@ -182,91 +182,29 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// ```
 ///
 /// [composition]: https://dev.risczero.com/terminology#composition
-pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), VerifyError> {
-    let image_id: Digest = image_id.into();
+pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), Infallible> {
     let journal_digest: Digest = bytemuck::cast_slice::<_, u8>(journal).digest();
-    let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
+    let assumption_claim = ReceiptClaim::ok(image_id, MaybePruned::Pruned(journal_digest));
+
+    let claim_digest = assumption_claim.digest();
 
     unsafe {
-        sys_verify(
-            image_id.as_ref(),
-            journal_digest.as_ref(),
-            from_host_buf.as_mut_ptr(),
-        )
-    };
-
-    // Split the host buffer into the Digest and system exit code portions. This is statically
-    // known to succeed, but the array APIs that would allow compile-time checked splitting are
-    // unstable.
-    let (post_state_digest, sys_exit_code): (Digest, u32) = {
-        let buf = unsafe { from_host_buf.assume_init() };
-        let (digest_buf, code_buf) = buf.split_at(DIGEST_WORDS);
-        (digest_buf.try_into().unwrap(), code_buf[0])
-    };
-
-    // Require that the exit code is either Halted(0) or Paused(0).
-    let exit_code = ExitCode::from_pair(sys_exit_code, 0)?;
-    if !exit_code.is_ok() {
-        return Err(VerifyError::BadExitCodeResponse(InvalidExitCodeError(
-            sys_exit_code,
-            0,
-        )));
-    };
-
-    // Construct the ReceiptClaim for this assumption. Use the host provided
-    // post_state_digest and fix all fields that are required to have a certain
-    // value. This assumption will only be resolvable if there exists a receipt
-    // matching this claim.
-    let assumption_claim = ReceiptClaim {
-        pre: MaybePruned::Pruned(image_id),
-        post: MaybePruned::Pruned(post_state_digest),
-        exit_code,
-        input: None.into(),
-        output: Some(Output {
-            journal: MaybePruned::Pruned(journal_digest),
-            assumptions: MaybePruned::Pruned(Digest::ZERO),
-        })
-        .into(),
-    };
-    unsafe { ASSUMPTIONS_DIGEST.add(assumption_claim.into()) };
+        // Use the zero digest as the control root, which indicates that the assumption is a zkVM
+        // assumption to be verified with the same control root as the current execution.
+        sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        ASSUMPTIONS_DIGEST.add(
+            Assumption {
+                claim: claim_digest,
+                control_root: Digest::ZERO,
+            }
+            .into(),
+        );
+    }
 
     Ok(())
 }
 
-/// Error encountered during a call to [verify].
-///
-/// Note that an error is only returned for "provable" errors. In particular, if
-/// the host fails to find a receipt matching the requested image_id and
-/// journal, this is not a provable error. In this case, the [verify] call
-/// will not return.
-#[derive(Debug)]
-#[non_exhaustive]
-pub enum VerifyError {
-    /// Error returned when the host responds to `sys_verify` with an invalid exit code.
-    BadExitCodeResponse(InvalidExitCodeError),
-}
-
-impl From<InvalidExitCodeError> for VerifyError {
-    fn from(err: InvalidExitCodeError) -> Self {
-        Self::BadExitCodeResponse(err)
-    }
-}
-
-impl fmt::Display for VerifyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::BadExitCodeResponse(err) => {
-                write!(f, "bad response from host to sys_verify: {}", err)
-            }
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for VerifyError {}
-
-/// Verify that there exists a valid receipt with the specified
-/// [crate::ReceiptClaim].
+/// Verify that there exists a valid receipt with the specified [crate::ReceiptClaim].
 ///
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
 /// [crate::ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
@@ -275,18 +213,17 @@ impl std::error::Error for VerifyError {}
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
-/// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
-/// [verify_integrity] is called.
+/// [ExitCode::SystemSplit][crate::ExitCode]) will not have any encoded assumptions even if [verify] or
+/// [verify_integrity] is called and these receipts will be rejected by this function.
 ///
 /// [composition]: https://dev.risczero.com/terminology#composition
 pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
-    let assumptions_empty = claim.output.is_none()
-        || claim
-            .output
-            .as_value()?
-            .as_ref()
-            .map_or(true, |output| output.assumptions.is_empty());
+    let assumptions_empty = claim
+        .output
+        .as_value()?
+        .as_ref()
+        .map_or(true, |output| output.assumptions.is_empty());
 
     if !assumptions_empty {
         return Err(VerifyIntegrityError::NonEmptyAssumptionsList);
@@ -295,8 +232,16 @@ pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError
     let claim_digest = claim.digest();
 
     unsafe {
-        sys_verify_integrity(claim_digest.as_ref());
-        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(claim_digest));
+        // Use the zero digest as the control root, which indicates that the assumption is a zkVM
+        // assumption to be verified with the same control root as the current execution.
+        sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        ASSUMPTIONS_DIGEST.add(
+            Assumption {
+                claim: claim_digest,
+                control_root: Digest::ZERO,
+            }
+            .into(),
+        );
     }
 
     Ok(())
@@ -345,6 +290,31 @@ impl fmt::Display for VerifyIntegrityError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyIntegrityError {}
 
+/// Verify that there exists a valid receipt with the specified claim digest and control root.
+///
+/// This function is a generalization of [verify] and [verify_integrity] to allow verification of
+/// any claim, including claims that are not claims of zkVM execution. It can be used to verify a
+/// receipt for accelerators, such as a specialized RSA verifier. The given control root is used as
+/// a commitment to the set of recursion programs allowed to resolve the resulting assumption.
+///
+/// Do not use this method if you are looking to verify a zkVM receipt. Use [verify] or
+/// [verify_integrity] instead. This method does not check anything about the claim. In the case of
+/// zkVM execution, it is important to check that e.g. there are no assumptions on the claim.
+pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
+    unsafe {
+        sys_verify_integrity(claim.as_ref(), control_root.as_ref());
+        ASSUMPTIONS_DIGEST.add(
+            Assumption {
+                claim,
+                control_root,
+            }
+            .into(),
+        );
+    }
+
+    Ok(())
+}
+
 /// Exchanges slices of plain old data with the host.
 ///
 /// This makes two calls to the given syscall; the first gets the length of the
@@ -353,11 +323,11 @@ impl std::error::Error for VerifyIntegrityError {}
 ///
 /// On the host side, implement SliceIo to provide a handler for this call.
 pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
-    let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
-    let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
+    let syscall::Return(nbytes, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
+    let nwords = align_up(nbytes as usize, WORD_SIZE) / WORD_SIZE;
     let from_host_buf = unsafe { core::slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
     syscall(syscall_name, &[], from_host_buf);
-    &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
+    &bytemuck::cast_slice(from_host_buf)[..nbytes as usize / core::mem::size_of::<U>()]
 }
 
 /// Read private data from the STDIN of the zkVM and deserializes it.
@@ -765,4 +735,16 @@ pub fn input_digest() -> Digest {
         sys_input(6),
         sys_input(7),
     ])
+}
+
+/// EXPERIMENTAL: Run the given function without proving that it was executed
+/// correctly.  This does not provide any guarantees about the
+/// soundness of the execution, but can potentially be executed
+/// faster.
+pub fn run_unconstrained(f: impl FnOnce()) {
+    let pid = sys_fork();
+    if pid == 0 {
+        f();
+        sys_exit(0)
+    }
 }

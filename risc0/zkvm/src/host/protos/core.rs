@@ -33,8 +33,12 @@ pub struct Receipt {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ReceiptMetadata {
     #[prost(message, optional, tag = "1")]
-    pub verifier_parameters: ::core::option::Option<Digest>,
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
+/// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
+/// In Rust, they are distinct types because Rust needs to size everything on the
+/// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
+/// have different sizes. Protobuf handles this without issue.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InnerReceipt {
@@ -62,9 +66,9 @@ pub struct CompositeReceipt {
     #[prost(message, repeated, tag = "1")]
     pub segments: ::prost::alloc::vec::Vec<SegmentReceipt>,
     #[prost(message, repeated, tag = "2")]
-    pub assumptions: ::prost::alloc::vec::Vec<InnerReceipt>,
+    pub assumption_receipts: ::prost::alloc::vec::Vec<InnerReceipt>,
     #[prost(message, optional, tag = "3")]
-    pub journal_digest: ::core::option::Option<Digest>,
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -79,6 +83,8 @@ pub struct SegmentReceipt {
     pub hashfn: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "5")]
     pub claim: ::core::option::Option<ReceiptClaim>,
+    #[prost(message, optional, tag = "6")]
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -88,9 +94,24 @@ pub struct SuccinctReceipt {
     #[prost(bytes = "vec", tag = "2")]
     pub seal: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
-    pub control_id: ::core::option::Option<Digest>,
+    pub control_id: ::core::option::Option<super::base::Digest>,
+    /// MaybePruned<ReceiptClaim>
     #[prost(message, optional, tag = "4")]
-    pub claim: ::core::option::Option<ReceiptClaim>,
+    pub claim: ::core::option::Option<MaybePruned>,
+    #[prost(message, optional, tag = "5")]
+    pub control_inclusion_proof: ::core::option::Option<MerkleProof>,
+    #[prost(string, tag = "6")]
+    pub hashfn: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "7")]
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MerkleProof {
+    #[prost(uint32, tag = "1")]
+    pub index: u32,
+    #[prost(message, repeated, tag = "2")]
+    pub digests: ::prost::alloc::vec::Vec<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -99,8 +120,11 @@ pub struct Groth16Receipt {
     pub version: ::core::option::Option<super::base::CompatVersion>,
     #[prost(bytes = "vec", tag = "2")]
     pub seal: ::prost::alloc::vec::Vec<u8>,
+    /// MaybePruned<ReceiptClaim>
     #[prost(message, optional, tag = "3")]
-    pub claim: ::core::option::Option<ReceiptClaim>,
+    pub claim: ::core::option::Option<MaybePruned>,
+    #[prost(message, optional, tag = "4")]
+    pub verifier_parameters: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -135,7 +159,7 @@ pub mod maybe_pruned {
         #[prost(bytes, tag = "1")]
         Value(::prost::alloc::vec::Vec<u8>),
         #[prost(message, tag = "2")]
-        Pruned(super::Digest),
+        Pruned(super::super::base::Digest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -144,7 +168,7 @@ pub struct SystemState {
     #[prost(uint32, tag = "1")]
     pub pc: u32,
     #[prost(message, optional, tag = "2")]
-    pub merkle_root: ::core::option::Option<Digest>,
+    pub merkle_root: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -161,20 +185,23 @@ pub struct Output {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Assumption {
+    #[prost(message, optional, tag = "1")]
+    pub claim: ::core::option::Option<super::base::Digest>,
+    #[prost(message, optional, tag = "2")]
+    pub control_root: ::core::option::Option<super::base::Digest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Assumptions {
-    /// MaybePruned<ReceiptClaim>
+    /// MaybePruned<Assumption>
     #[prost(message, repeated, tag = "1")]
     pub inner: ::prost::alloc::vec::Vec<MaybePruned>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FakeReceipt {
+    /// MaybePruned<ReceiptClaim>
     #[prost(message, optional, tag = "1")]
-    pub claim: ::core::option::Option<ReceiptClaim>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Digest {
-    #[prost(uint32, repeated, tag = "1")]
-    pub words: ::prost::alloc::vec::Vec<u32>,
+    pub claim: ::core::option::Option<MaybePruned>,
 }

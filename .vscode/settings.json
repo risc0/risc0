@@ -8,7 +8,7 @@
   "emmet.includeLanguages": {
     "rust": "html"
   },
-  "[javascript][javascriptreact][typescript][typescriptreact][github-actions-workflow]": {
+  "[javascript][javascriptreact][typescript][typescriptreact][github-actions-workflow][json][css]": {
     "editor.defaultFormatter": "biomejs.biome",
     "editor.codeActionsOnSave": {
       "quickfix.biome": "explicit",
@@ -95,5 +95,6 @@
   },
   "rust-analyzer.check.extraArgs": [
     "--target-dir=target/analyzer"
-  ]
+  ],
+  "biome.lspBin": "web/node_modules/.bin/biome"
 }

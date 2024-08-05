@@ -4,9 +4,6 @@ slug: ./
 
 # zkVM Overview
 
-> WARNING: This software is still experimental, we do not recommend it for
-> production use.
-
 The RISC Zero zero-knowledge virtual machine [zkVM] (zkVM) lets you [prove]
 correct execution of arbitrary Rust code. By allowing users to build
 zero-knowledge applications that **leverage existing Rust packages**, the RISC
@@ -94,7 +91,7 @@ Check out our [Bonsai on Eth] page.
 [revm]: https://github.com/bluealloy/revm
 [segments]: /terminology#segment
 [session]: /terminology#session
-[use cases]: ../use-cases
+[use cases]: ../use-cases.md
 [verify]: /terminology#verify
 [waldo]: https://www.risczero.com/news/waldo
 [zeth]: https://risczero.com/news/zeth-release

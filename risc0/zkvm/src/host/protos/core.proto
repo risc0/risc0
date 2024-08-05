@@ -23,9 +23,13 @@ message Receipt {
 }
 
 message ReceiptMetadata {
-  Digest verifier_parameters = 1;
+  base.Digest verifier_parameters = 1;
 }
 
+// NOTE: InnerReceipt and InnerAssumptionReceipt are the same type in protobuf.
+// In Rust, they are distinct types because Rust needs to size everything on the
+// stack and e.g. SuccinctReceipt<ReceiptClaim> and SuccinctReceipt<Unknown>
+// have different sizes. Protobuf handles this without issue.
 message InnerReceipt {
   oneof kind {
     CompositeReceipt composite = 1;
@@ -37,8 +41,8 @@ message InnerReceipt {
 
 message CompositeReceipt {
   repeated SegmentReceipt segments = 1;
-  repeated InnerReceipt assumptions = 2;
-  Digest journal_digest = 3;
+  repeated InnerReceipt assumption_receipts = 2;
+  base.Digest verifier_parameters = 3;
 }
 
 message SegmentReceipt {
@@ -47,19 +51,29 @@ message SegmentReceipt {
   uint32 index = 3;
   string hashfn = 4;
   ReceiptClaim claim = 5;
+  base.Digest verifier_parameters = 6;
 }
 
 message SuccinctReceipt {
   base.CompatVersion version = 1;
   bytes seal = 2;
-  Digest control_id = 3;
-  ReceiptClaim claim = 4;
+  base.Digest control_id = 3;
+  MaybePruned claim = 4; // MaybePruned<ReceiptClaim>
+  MerkleProof control_inclusion_proof = 5;
+  string hashfn = 6;
+  base.Digest verifier_parameters = 7;
+}
+
+message MerkleProof {
+  uint32 index = 1;
+  repeated base.Digest digests = 2;
 }
 
 message Groth16Receipt {
   base.CompatVersion version = 1;
   bytes seal = 2;
-  ReceiptClaim claim = 3;
+  MaybePruned claim = 3; // MaybePruned<ReceiptClaim>
+  base.Digest verifier_parameters = 4;
 }
 
 message ReceiptClaim {
@@ -74,13 +88,13 @@ message MaybePruned {
   oneof kind {
     // Protobuf encoded bytes of the inner value.
     bytes value = 1;
-    Digest pruned = 2;
+    base.Digest pruned = 2;
   }
 }
 
 message SystemState {
   uint32 pc = 1;
-  Digest merkle_root = 2;
+  base.Digest merkle_root = 2;
 }
 
 message Input {}
@@ -90,14 +104,15 @@ message Output {
   MaybePruned assumptions = 2; // MaybePruned<Assumptions>
 }
 
+message Assumption {
+  base.Digest claim = 1;
+  base.Digest control_root = 2;
+}
+
 message Assumptions {
-  repeated MaybePruned inner = 1; // MaybePruned<ReceiptClaim>
+  repeated MaybePruned inner = 1; // MaybePruned<Assumption>
 }
 
 message FakeReceipt {
-  ReceiptClaim claim = 1;
-}
-
-message Digest {
-  repeated uint32 words = 1;
+  MaybePruned claim = 1; // MaybePruned<ReceiptClaim>
 }

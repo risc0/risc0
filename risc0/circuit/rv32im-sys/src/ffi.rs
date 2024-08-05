@@ -61,37 +61,6 @@ impl Default for RawError {
     }
 }
 
-#[repr(C)]
-pub struct Error {
-    msg: *const std::os::raw::c_char,
-}
-
-impl Drop for Error {
-    fn drop(&mut self) {
-        extern "C" {
-            fn free(str: *const std::os::raw::c_char);
-        }
-        unsafe { free(self.msg) };
-    }
-}
-
-impl Default for Error {
-    fn default() -> Self {
-        Self {
-            msg: std::ptr::null(),
-        }
-    }
-}
-
-impl Error {
-    pub fn unwrap(self) {
-        if !self.msg.is_null() {
-            let c_str = unsafe { std::ffi::CStr::from_ptr(self.msg) };
-            panic!("{}", c_str.to_str().unwrap_or("unknown error"));
-        }
-    }
-}
-
 extern "C" {
     pub fn risc0_circuit_string_ptr(str: *const RawString) -> *const c_char;
 

@@ -16,8 +16,9 @@ use anyhow::{bail, Result};
 
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
-    receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Segment, Session,
+    receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    receipt_claim::Unknown,
+    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
     VerifierContext,
 };
 
@@ -57,7 +58,9 @@ impl ProverServer for DevModeProver {
 
         let claim = session.claim()?;
         let receipt = Receipt::new(
-            InnerReceipt::Fake { claim },
+            InnerReceipt::Fake(FakeReceipt {
+                claim: claim.into(),
+            }),
             session.journal.clone().unwrap_or_default().bytes,
         );
 
@@ -83,31 +86,38 @@ impl ProverServer for DevModeProver {
         unimplemented!("This is unsupported for dev mode.")
     }
 
-    fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+    fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt<ReceiptClaim>> {
         unimplemented!("This is unsupported for dev mode.")
     }
 
-    fn join(&self, _a: &SuccinctReceipt, _b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn join(
+        &self,
+        _a: &SuccinctReceipt<ReceiptClaim>,
+        _b: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         unimplemented!("This is unsupported for dev mode.")
     }
 
     fn resolve(
         &self,
-        _conditional: &SuccinctReceipt,
-        _assumption: &SuccinctReceipt,
-    ) -> Result<SuccinctReceipt> {
+        _conditional: &SuccinctReceipt<ReceiptClaim>,
+        _assumption: &SuccinctReceipt<Unknown>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         unimplemented!("This is unsupported for dev mode.")
     }
 
-    fn identity_p254(&self, _a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    fn identity_p254(
+        &self,
+        _a: &SuccinctReceipt<ReceiptClaim>,
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         unimplemented!("This is unsupported for dev mode.")
     }
 
     fn compress(&self, _opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         Ok(Receipt::new(
-            InnerReceipt::Fake {
+            InnerReceipt::Fake(FakeReceipt {
                 claim: receipt.claim()?,
-            },
+            }),
             receipt.journal.bytes.clone(),
         ))
     }

@@ -25,8 +25,8 @@ use super::{
 use crate::{
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path},
-    receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts,
+    receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -55,7 +55,7 @@ impl Client {
 
     /// Construct a [Client] based on environment variables.
     pub fn from_env() -> Result<Self> {
-        Client::new_sub_process(get_r0vm_path())
+        Client::new_sub_process(get_r0vm_path()?)
     }
 
     /// Construct a [Client] using the specified [Connector] to establish a
@@ -183,7 +183,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -225,7 +225,7 @@ impl Client {
         left_receipt: Asset,
         right_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -270,7 +270,7 @@ impl Client {
         conditional_receipt: Asset,
         assumption_receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -315,7 +315,7 @@ impl Client {
         opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -339,6 +339,69 @@ impl Client {
                 receipt_pb.try_into()
             }
             pb::api::identity_p254_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Compress a [Receipt], proving the same computation using a smaller representation.
+    ///
+    /// Proving will, by default, produce a [CompositeReceipt](crate::CompositeReceipt), which
+    /// may contain an arbitrary number of receipts assembled into segments and assumptions.
+    /// Together, these receipts collectively prove a top-level
+    /// [ReceiptClaim](crate::ReceiptClaim). This function can be used to compress all of the constituent
+    /// receipts of a [CompositeReceipt](crate::CompositeReceipt) into a single
+    /// [SuccinctReceipt](crate::SuccinctReceipt) or [Groth16Receipt](crate::Groth16Receipt) that proves the same top-level claim.
+    ///
+    /// Compression from [Groth16Receipt](crate::CompositeReceipt) to
+    /// [SuccinctReceipt](crate::SuccinctReceipt) is accomplished by iterative application of the
+    /// recursion programs including lift, join, and resolve.
+    ///
+    /// Compression from [SuccinctReceipt](crate::SuccinctReceipt) to
+    /// [Groth16Receipt](crate::Groth16Receipt) is accomplished by running a Groth16 recursive
+    /// verifier, refered to as the "STARK-to-SNARK" operation.
+    ///
+    /// NOTE: Compression to [Groth16Receipt](crate::Groth16Receipt) is currently only supported on
+    /// x86 hosts, and requires Docker to be installed. See issue
+    /// [#1749](https://github.com/risc0/risc0/issues/1749) for more information.
+    ///
+    /// If the receipt is already at least as compressed as the requested compression level (e.g.
+    /// it is already succinct or Groth16 and a succinct receipt is required) this function is a
+    /// no-op. As a result, it is idempotent.
+    pub fn compress(
+        &self,
+        opts: &ProverOpts,
+        receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<Receipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Compress(
+                pb::api::CompressRequest {
+                    opts: Some(opts.clone().into()),
+                    receipt: Some(receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::CompressReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::compress_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::Receipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::compress_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -394,8 +457,8 @@ impl Client {
             env_vars: env.env_vars.clone(),
             args: env.args.clone(),
             slice_ios: env.slice_io.borrow().inner.keys().cloned().collect(),
-            read_fds: env.posix_io.borrow().read_fds.keys().cloned().collect(),
-            write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
+            read_fds: env.posix_io.borrow().read_fds(),
+            write_fds: env.posix_io.borrow().write_fds(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
             trace_events: (!env.trace.is_empty()).then_some(()),
@@ -411,20 +474,20 @@ impl Client {
                 .iter()
                 .map(|a| {
                     Ok(match a {
-                        Assumption::Proven(receipt) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Proven(
+                        AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Proven(
                                 Asset::Inline(
-                                    pb::core::Receipt::from(receipt.clone())
+                                    pb::core::InnerReceipt::from(inner.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )
                                 .try_into()?,
                             )),
                         },
-                        Assumption::Unresolved(claim) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Unresolved(
+                        AssumptionReceipt::Unresolved(assumption) => pb::api::AssumptionReceipt {
+                            kind: Some(pb::api::assumption_receipt::Kind::Unresolved(
                                 Asset::Inline(
-                                    pb::core::MaybePruned::from(claim.clone())
+                                    pb::core::Assumption::from(assumption.clone())
                                         .encode_to_vec()
                                         .into(),
                                 )
@@ -569,10 +632,7 @@ impl Client {
         tracing::debug!("on_posix_read: {fd}, {nread}");
         let mut from_host = vec![0; nread];
         let posix_io = env.posix_io.borrow();
-        let reader = posix_io
-            .read_fds
-            .get(&fd)
-            .ok_or(anyhow!("Bad read file descriptor: {fd}"))?;
+        let reader = posix_io.get_reader(fd)?;
         let nread = reader.borrow_mut().read(&mut from_host)?;
         let slice = from_host[..nread].to_vec();
         Ok(slice.into())
@@ -581,10 +641,7 @@ impl Client {
     fn on_posix_write(&self, env: &ExecutorEnv<'_>, fd: u32, from_guest: Bytes) -> Result<()> {
         tracing::debug!("on_posix_write: {fd}");
         let posix_io = env.posix_io.borrow();
-        let writer = posix_io
-            .write_fds
-            .get(&fd)
-            .ok_or(anyhow!("Bad write file descriptor: {fd}"))?;
+        let writer = posix_io.get_writer(fd)?;
         writer.borrow_mut().write_all(&from_guest)?;
         Ok(())
     }
@@ -620,16 +677,9 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
     }
 }
 
-fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
+pub(crate) fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
     if requested.pre.is_empty() {
-        let comparator = semver::Comparator {
-            op: semver::Op::Tilde,
-            major: requested.major,
-            minor: Some(requested.minor),
-            patch: Some(requested.patch),
-            pre: semver::Prerelease::EMPTY,
-        };
-        comparator.matches(server)
+        requested.major == server.major && requested.minor == server.minor
     } else {
         requested == server
     }
@@ -654,7 +704,7 @@ mod tests {
         assert!(test("0.18.0", "0.18.1"));
         assert!(test("0.18.1", "0.18.1"));
         assert!(test("0.18.1", "0.18.2"));
-        assert!(!test("0.18.1", "0.18.0"));
+        assert!(test("0.18.1", "0.18.0"));
         assert!(!test("0.18.0", "0.19.0"));
 
         assert!(test("1.0.0", "1.0.0"));
@@ -664,6 +714,7 @@ mod tests {
         assert!(!test("1.0.0", "0.18.0"));
         assert!(!test("1.0.0", "2.0.0"));
         assert!(!test("1.1.0", "1.0.0"));
+        assert!(test("1.0.3", "1.0.1"));
 
         assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
         assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));

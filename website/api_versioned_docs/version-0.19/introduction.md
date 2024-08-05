@@ -15,7 +15,7 @@ Welcome to the [RISC Zero] documentation! This site contains documentation for:
 - **[The RISC Zero Proof System]**:
   The cryptographic techniques underlying the zkVM.
 
-We also have reference documentation for our Rust code, which can be found at [https://docs.rs/risc0-zkvm/](https://docs.rs/risc0-zkvm) for the `risc0-zkvm` crate. For our other Rust crates, links to their reference docs can be found in [this list](https://github.com/risc0/risc0#rust-libraries).
+We also have reference documentation for our Rust code, which can be found at [https://docs.rs/risc0-zkvm/][docs.rs] for the `risc0-zkvm` crate. For our other Rust crates, links to their reference docs can be found in [this list](https://github.com/risc0/risc0#rust-libraries).
 
 ---
 
@@ -38,8 +38,8 @@ Key among these use cases are:
 To enable ZK builders to thrive, we're working on two core products: the [zkVM] and [Bonsai].
 
 [startup]: https://risczero.com/news/series-a
-[zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
-[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
+[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
+[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
 [RISC Zero]: https://risczero.com
 [zkVM]: ./zkvm/zkvm_overview.md
 
@@ -85,7 +85,7 @@ The zkVM has GPU acceleration for CUDA and Metal, and with [continuations] we've
 
 Given the ease of development and the performance, the zkVM is the clear choice for your ZK needs.
 
-[top 1000 Rust crates]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
+[top 1000 Rust crates]: https://reports.risczero.com/crates-validation
 [performance]: https://dev.risczero.com/zkvm/benchmarks
 [continuations]: https://risczero.com/news/continuations
 
@@ -101,3 +101,4 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 [Bonsai]: bonsai/bonsai-overview.md
 [The RISC Zero Proof System]: /proof-system
 [computational receipt]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/struct.Receipt.html
+[docs.rs]: https://docs.rs/risc0-zkvm/0.19/

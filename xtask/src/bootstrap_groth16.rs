@@ -16,13 +16,12 @@ use std::{fs, path::Path, process::Command};
 
 use clap::Parser;
 use regex::Regex;
+use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_IDENTITY_CONTROL_ID};
 use risc0_zkvm::{
-    get_prover_server, sha::Digestible, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts,
-    Receipt, VerifierContext, ALLOWED_CONTROL_ROOT,
+    get_prover_server, sha::Digestible, ExecutorEnv, ExecutorImpl,
+    Groth16ReceiptVerifierParameters, ProverOpts, Receipt, VerifierContext,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
-
-use crate::bootstrap::Bootstrap;
 
 #[derive(Debug, Parser)]
 pub struct BootstrapGroth16 {
@@ -56,7 +55,7 @@ const SOL_HEADER: &str = r#"// Copyright 2024 RISC Zero, Inc.
 
 "#;
 
-const SOLIDITY_VERIFIER_SOURCE: &str = "compact_proof/groth16/verifier.sol";
+const SOLIDITY_VERIFIER_SOURCE: &str = "groth16_proof/groth16/verifier.sol";
 const SOLIDITY_VERIFIER_TARGET: &str = "contracts/src/groth16/Groth16Verifier.sol";
 const SOLIDITY_CONTROL_ID_PATH: &str = "contracts/src/groth16/ControlID.sol";
 const SOLIDITY_TEST_RECEIPT_PATH: &str = "contracts/test/TestReceipt.sol";
@@ -127,9 +126,14 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
 "#;
     let control_root =
         format!(r#"bytes32 public constant CONTROL_ROOT = hex"{ALLOWED_CONTROL_ROOT}";"#);
-    let bn254_control_id = hex::encode(Bootstrap::generate_identity_bn254_control_id());
-    let bn254_control_id =
-        format!(r#"bytes32 public constant BN254_CONTROL_ID = hex"{bn254_control_id}";"#);
+    let mut bn254_control_id = BN254_IDENTITY_CONTROL_ID;
+    // NOTE: The solidity verifier interprets it as a uint256 and expects the oppisite byte order.
+    bn254_control_id.as_mut_bytes().reverse();
+    let bn254_control_id = format!(
+        r#"// NOTE: This has the opposite byte order to the value in the risc0 repository.{}bytes32 public constant BN254_CONTROL_ID = hex"{}";"#,
+        "\n",
+        hex::encode(bn254_control_id)
+    );
     let content = &format!("{SOL_HEADER}{LIB_HEADER}\n{control_root}\n{bn254_control_id}\n}}");
     let solidity_control_id_path = risc0_ethereum_path.join(SOLIDITY_CONTROL_ID_PATH);
     fs::write(&solidity_control_id_path, content).unwrap_or_else(|_| {
@@ -153,11 +157,10 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
  library TestReceipt {
 "#;
     let receipt = generate_receipt();
-    let image_id = receipt.claim().unwrap().pre.digest();
-    let verifier_parameters_digest = CompactReceipt::verifier_parameters().digest();
+    let image_id = receipt.claim().unwrap().as_value().unwrap().pre.digest();
+    let verifier_parameters_digest = Groth16ReceiptVerifierParameters::default().digest();
     let selector = hex::encode(&verifier_parameters_digest.as_bytes()[..4]);
-    let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
-    let post_digest = hex::encode(receipt.claim().unwrap().post.digest().as_bytes());
+    let seal = hex::encode(receipt.inner.groth16().unwrap().seal.clone());
     let image_id = hex::encode(image_id.as_bytes());
     let journal = hex::encode(receipt.journal.bytes);
 
@@ -166,13 +169,11 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     // full ABI encoding implementation here because its part of risc0-ethereum-contracts, which
     // would be a hassle to import.
     let seal = format!(r#"bytes public constant SEAL = hex"{selector}{seal}";"#);
-    let post_digest = format!(r#"bytes32 public constant POST_DIGEST = hex"{post_digest}";"#);
     let journal = format!(r#"bytes public constant JOURNAL = hex"{journal}";"#);
     let image_id = format!(r#"bytes32 public constant IMAGE_ID = hex"{image_id}";"#);
 
     let solidity_test_receipt_path = risc0_ethereum_path.join(SOLIDITY_TEST_RECEIPT_PATH);
-    let content =
-        &format!("{SOL_HEADER}{LIB_HEADER}\n{seal}\n{post_digest}\n{journal}\n{image_id}\n}}");
+    let content = &format!("{SOL_HEADER}{LIB_HEADER}\n{seal}\n{journal}\n{image_id}\n}}");
     fs::write(&solidity_test_receipt_path, content).unwrap();
 
     // Use forge fmt to format the file.
@@ -183,7 +184,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
         .unwrap();
 }
 
-// Return a Compact `Receipt` and the imageID used to generate the proof.
+// Return a Groth16 `Receipt` and the imageID used to generate the proof.
 // Requires running Docker on an x86 architecture.
 fn generate_receipt() -> Receipt {
     let env = ExecutorEnv::builder()
@@ -200,7 +201,7 @@ fn generate_receipt() -> Receipt {
     let session = exec.run().unwrap();
 
     tracing::info!("prove");
-    let prover = get_prover_server(&ProverOpts::compact()).unwrap();
+    let prover = get_prover_server(&ProverOpts::groth16()).unwrap();
 
     prover
         .prove_session(&VerifierContext::default(), &session)

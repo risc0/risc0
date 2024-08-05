@@ -23,11 +23,6 @@ use sha2::{Digest, Sha256};
 use tempfile::tempdir_in;
 use which::which;
 
-const CUDA_INCS: &[(&str, &str)] = &[
-    ("fp.h", include_str!("../kernels/cuda/fp.h")),
-    ("fpext.h", include_str!("../kernels/cuda/fpext.h")),
-];
-
 const METAL_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/metal/fp.h")),
     ("fpext.h", include_str!("../kernels/metal/fpext.h")),
@@ -37,7 +32,6 @@ const METAL_INCS: &[(&str, &str)] = &[
 pub enum KernelType {
     Cpp,
     Cuda,
-    CudaLink,
     Metal,
 }
 
@@ -145,7 +139,6 @@ impl KernelBuild {
         match &self.kernel_type {
             KernelType::Cpp => self.compile_cpp(output),
             KernelType::Cuda => self.compile_cuda(output),
-            KernelType::CudaLink => self.compile_cuda_link(output),
             KernelType::Metal => self.compile_metal(output),
         }
     }
@@ -166,7 +159,7 @@ impl KernelBuild {
             .compile(output);
     }
 
-    fn compile_cuda_link(&mut self, output: &str) {
+    fn compile_cuda(&mut self, output: &str) {
         fn enable_debug(output: &str) -> bool {
             if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
                 return debug.contains(output);
@@ -174,9 +167,10 @@ impl KernelBuild {
             false
         }
 
+        println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+        println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
 
         for inc_dir in self.inc_dirs.iter() {
             for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
@@ -205,6 +199,7 @@ impl KernelBuild {
                 let mut cmd = if let Ok(sccache) = sccache {
                     let mut cmd = Command::new(sccache);
                     cmd.arg("nvcc");
+                    cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
                     cmd
                 } else {
                     println!("cargo:warning=It is highly recommended to install sccache when building CUDA kernels.");
@@ -213,9 +208,7 @@ impl KernelBuild {
 
                 cmd.arg("-c");
 
-                if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
-                    cmd.args(nvcc_flags.split(' '));
-                } else {
+                if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
                     cmd.arg("-arch=native");
                 }
 
@@ -231,6 +224,10 @@ impl KernelBuild {
 
                 for inc_dir in self.inc_dirs.iter() {
                     cmd.arg("-I").arg(inc_dir);
+                }
+
+                for flag in self.flags.iter(){
+                    cmd.arg(flag);
                 }
 
                 cmd.arg(src);
@@ -273,70 +270,24 @@ impl KernelBuild {
         println!("cargo:{}={}", output, out_path.display());
     }
 
-    fn compile_cuda(&mut self, output: &str) {
-        println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
-        println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
-
-        let mut flags = vec![];
-        if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
-            for flag in nvcc_flags.split(' ') {
-                flags.push(flag.to_string());
-            }
-        } else {
-            flags.push("-arch=native".into());
-        }
-
-        fn enable_debug(output: &str) -> bool {
-            if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
-                return debug.contains(output);
-            }
-            false
-        }
-
-        if enable_debug(output) {
-            flags.push("-G".into());
-        } else {
-            // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
-            // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-            // decrease in performance but a compile time in the minutes. Use
-            // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
-            let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".into());
-            flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
-        }
-
-        self.cached_compile(
-            output,
-            "fatbin",
-            CUDA_INCS,
-            &flags,
-            |_out_dir, out_path, sys_inc_dir, flags| {
-                let mut cmd = Command::new("nvcc");
-                cmd.arg("--fatbin");
-                cmd.arg("-o").arg(out_path);
-                cmd.args(self.files.iter());
-                cmd.arg("-I").arg(sys_inc_dir);
-
-                for inc_dir in self.inc_dirs.iter() {
-                    cmd.arg("-I").arg(inc_dir);
-                }
-                cmd.args(flags);
-                let status = cmd
-                    .status()
-                    .expect("Failed to run 'nvcc', do you have the CUDA toolkit installed?");
-                if !status.success() {
-                    panic!("Failed to build CUDA kernel: {}", output);
-                }
-            },
-        );
-    }
-
     fn compile_metal(&mut self, output: &str) {
+        let target = env::var("TARGET").unwrap();
+        let sdk_name = if target.ends_with("ios") {
+            "iphoneos"
+        } else if target.ends_with("ios-sim") {
+            "iphonesimulator"
+        } else if target.ends_with("darwin") {
+            "macosx"
+        } else {
+            panic!("unsupported target: {target}")
+        };
+
         self.cached_compile(
             output,
             "metallib",
             METAL_INCS,
             &[],
+            &[sdk_name.to_string()],
             |out_dir, out_path, sys_inc_dir, _flags| {
                 let files: Vec<_> = self.files.iter().map(|x| x.as_path()).collect();
 
@@ -348,7 +299,7 @@ impl KernelBuild {
                             fs::create_dir_all(parent).unwrap();
                         }
                         let mut cmd = Command::new("xcrun");
-                        cmd.args(["--sdk", "macosx"]);
+                        cmd.args(["--sdk", sdk_name]);
                         cmd.arg("metal");
                         cmd.arg("-o").arg(&air_path);
                         cmd.arg("-c").arg(src);
@@ -367,7 +318,7 @@ impl KernelBuild {
                     .collect();
 
                 let result = Command::new("xcrun")
-                    .args(["--sdk", "macosx"])
+                    .args(["--sdk", sdk_name])
                     .arg("metallib")
                     .args(air_paths)
                     .arg("-o")
@@ -387,6 +338,7 @@ impl KernelBuild {
         extension: &str,
         assets: &[(&str, &str)],
         flags: &[String],
+        tags: &[String],
         inner: F,
     ) {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
@@ -402,6 +354,9 @@ impl KernelBuild {
         let mut hasher = Hasher::new();
         for flag in flags {
             hasher.add_flag(flag);
+        }
+        for tag in tags {
+            hasher.add_flag(tag);
         }
         for src in self.files.iter() {
             hasher.add_file(src);

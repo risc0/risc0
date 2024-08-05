@@ -77,6 +77,11 @@ export default {
         },
         {
           type: "doc",
+          label: "Proof Composition",
+          id: "zkvm/composition",
+        },
+        {
+          type: "doc",
           label: "Rust Resources",
           id: "zkvm/rust-resources",
         },
@@ -175,7 +180,17 @@ export default {
       items: [
         {
           type: "doc",
-          label: "Security Model",
+          label: "Recursion",
+          id: "recursion",
+        },
+        {
+          type: "doc",
+          label: "Secure Development Lifecycle",
+          id: "secure-sdlc",
+        },
+        {
+          type: "doc",
+          label: "Cryptographic Security",
           id: "security-model",
         },
         {

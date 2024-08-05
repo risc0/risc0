@@ -20,7 +20,7 @@ use crate::{
     Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
-/// A [Prover] implementation that selects a [crate::ProverServer] by calling
+/// A [Prover] implementation that selects a [ProverServer][crate::ProverServer] by calling
 /// [get_prover_server].
 pub struct LocalProver {
     name: String,

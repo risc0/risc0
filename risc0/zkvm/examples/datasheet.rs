@@ -72,7 +72,7 @@ enum Command {
     #[cfg(all(target_arch = "x86_64", feature = "docker"))]
     StarkToSnark,
     #[cfg(all(target_arch = "x86_64", feature = "docker"))]
-    Compact,
+    Groth16,
 }
 
 #[derive(Default)]
@@ -116,7 +116,7 @@ impl Datasheet {
             #[cfg(all(target_arch = "x86_64", feature = "docker"))]
             Command::StarkToSnark => self.stark2snark(),
             #[cfg(all(target_arch = "x86_64", feature = "docker"))]
-            Command::Compact => self.compact(),
+            Command::Groth16 => self.groth16(),
         }
     }
 
@@ -147,7 +147,7 @@ impl Datasheet {
 
     fn composite(&mut self) {
         for hashfn in ["sha-256", "poseidon2"] {
-            let opts = ProverOpts::default().with_hashfn(hashfn.into());
+            let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
             let prover = get_prover_server(&opts).unwrap();
 
             const ITERATIONS: &[u64] = &[
@@ -396,10 +396,10 @@ impl Datasheet {
     }
 
     #[cfg(all(target_arch = "x86_64", feature = "docker"))]
-    fn compact(&mut self) {
-        println!("compact");
+    fn groth16(&mut self) {
+        println!("groth16");
 
-        let opts = ProverOpts::compact();
+        let opts = ProverOpts::groth16();
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -416,10 +416,10 @@ impl Datasheet {
 
         let ram = tracker().lock().unwrap().peak;
         let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-        let seal = info.receipt.inner.compact().unwrap().seal.len();
+        let seal = info.receipt.inner.groth16().unwrap().seal.len();
 
         self.results.push(PerformanceData {
-            name: "compact".into(),
+            name: "groth16".into(),
             hashfn: opts.hashfn,
             cycles: info.stats.total_cycles,
             duration,

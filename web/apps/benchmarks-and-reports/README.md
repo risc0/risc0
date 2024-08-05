@@ -2,8 +2,11 @@
 
 ## Getting Started 🚀
 
-> [!IMPORTANT]
-> Create an `.env` file at the root of the project and fill its contents (see `.env.example`)
+We need to install `bun` with:
+
+```sh
+curl -fsSL https://bun.sh/install | bash
+```
 
 Then run:
 

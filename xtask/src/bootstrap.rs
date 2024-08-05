@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashSet, fmt::Write, process::Command};
+use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 
 use clap::Parser;
 use risc0_circuit_recursion::zkr::{get_all_zkrs, get_zkr};
@@ -20,7 +20,7 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite,
+            blake2b::Blake2bCpuHashSuite, hash_suite_from_name, poseidon2::Poseidon2HashSuite,
             poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
         },
     },
@@ -28,8 +28,8 @@ use risc0_zkp::{
     hal::cpu::CpuHal,
 };
 use risc0_zkvm::{
-    recursion::{Program, Prover as RecursionProver},
-    Loader,
+    recursion::{MerkleGroup, Program},
+    Loader, RECURSION_PO2,
 };
 
 #[derive(Parser)]
@@ -39,12 +39,34 @@ const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 
 impl Bootstrap {
+    // Format a list of control IDs, including a description as comments.
+    fn format_control_ids(ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>) -> String {
+        let mut out = String::new();
+        for elem in ids.into_iter() {
+            let (description, digest) = elem.borrow();
+            writeln!(out, r#"digest!("{digest}"), // {description}"#).unwrap();
+        }
+        out
+    }
+
+    // Format a list of control IDs, include the names as data in a tuple of (&str, Digest)
+    fn format_control_ids_with_name(
+        ids: impl IntoIterator<Item = impl Borrow<(String, Digest)>>,
+    ) -> String {
+        let mut out = String::new();
+        for elem in ids.into_iter() {
+            let (name, digest) = elem.borrow();
+            writeln!(out, r#"("{name}", digest!("{digest}")),"#).unwrap();
+        }
+        out
+    }
+
     pub fn run(&self) {
         let poseidon2_control_ids = Self::generate_rv32im_control_ids();
         Self::generate_recursion_control_ids(poseidon2_control_ids);
     }
 
-    fn generate_rv32im_control_ids() -> Vec<Digest> {
+    fn generate_rv32im_control_ids() -> Vec<(String, Digest)> {
         tracing::info!("computing control IDs with SHA-256");
         let control_id_sha256 = Loader::compute_control_id_table(&CpuHal::new(Sha256HashSuite::<
             BabyBear,
@@ -59,39 +81,9 @@ impl Bootstrap {
 
         let contents = format!(
             include_str!("templates/control_id_rv32im.rs"),
-            control_id_sha256[0],
-            control_id_sha256[1],
-            control_id_sha256[2],
-            control_id_sha256[3],
-            control_id_sha256[4],
-            control_id_sha256[5],
-            control_id_sha256[6],
-            control_id_sha256[7],
-            control_id_sha256[8],
-            control_id_sha256[9],
-            control_id_sha256[10],
-            control_id_poseidon2[0],
-            control_id_poseidon2[1],
-            control_id_poseidon2[2],
-            control_id_poseidon2[3],
-            control_id_poseidon2[4],
-            control_id_poseidon2[5],
-            control_id_poseidon2[6],
-            control_id_poseidon2[7],
-            control_id_poseidon2[8],
-            control_id_poseidon2[9],
-            control_id_poseidon2[10],
-            control_id_blake2b[0],
-            control_id_blake2b[1],
-            control_id_blake2b[2],
-            control_id_blake2b[3],
-            control_id_blake2b[4],
-            control_id_blake2b[5],
-            control_id_blake2b[6],
-            control_id_blake2b[7],
-            control_id_blake2b[8],
-            control_id_blake2b[9],
-            control_id_blake2b[10],
+            Self::format_control_ids(&control_id_sha256),
+            Self::format_control_ids(&control_id_poseidon2),
+            Self::format_control_ids(&control_id_blake2b),
         );
         tracing::debug!("contents of rv32im control_id.rs:\n{contents}");
 
@@ -107,8 +99,8 @@ impl Bootstrap {
         control_id_poseidon2
     }
 
-    fn generate_recursion_control_ids(mut allowed_control_ids: Vec<Digest>) {
-        // Recursion programs (ZKRs) that are too be included in the allowed set.
+    fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<(String, Digest)>) {
+        // Recursion programs (ZKRs) that are to be included in the allowed set.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators).
@@ -121,49 +113,45 @@ impl Bootstrap {
         tracing::info!("unzipping recursion programs (zkrs)");
         let zkrs = get_all_zkrs().unwrap();
 
-        let zkr_control_ids: Vec<(String, Digest)> = zkrs
-            .into_iter()
-            .map(|(name, encoded_program)| {
-                let program = Program::from_encoded(&encoded_program);
+        let poseidon2_control_ids =
+            Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
+        let sha256_control_ids = Self::generate_recursion_control_ids_with_hash(&zkrs, "sha-256");
 
-                tracing::info!("computing control ID for {name} with Poseidon2");
-                let control_id = program.compute_control_id(Poseidon2HashSuite::new_suite());
-
-                if allowed_zkr_names.contains(&name) {
-                    allowed_control_ids.push(control_id);
-                }
-
-                tracing::debug!("{name} control id: {control_id:?}");
-                (name, control_id)
-            })
+        let allowed_control_ids: Vec<(String, Digest)> = poseidon2_rv32im_control_ids
+            .iter()
+            .cloned()
+            .chain(
+                poseidon2_control_ids
+                    .iter()
+                    .filter(|(name, _digest)| allowed_zkr_names.contains(name))
+                    .map(|(name, digest)| (format!("recursion {name}"), digest.clone())),
+            )
             .collect();
 
-        let mut allowed_control_ids_str = String::new();
-        for digest in allowed_control_ids.iter() {
-            writeln!(&mut allowed_control_ids_str, r#""{digest}","#).unwrap();
-        }
-
-        // Calculuate a Merkle root for the allowed control IDs and add it to the file.
-        let merkle_group = RecursionProver::bootstrap_allowed_tree(allowed_control_ids);
+        // Calculate a Merkle root for the allowed control IDs and add it to the file.
+        let merkle_group = MerkleGroup::new(
+            allowed_control_ids
+                .iter()
+                .map(|(_name, digest)| digest.clone())
+                .collect(),
+        )
+        .unwrap();
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_control_root = merkle_group.calc_root(hashfn);
         tracing::info!("Computed allowed_control_root: {allowed_control_root}");
 
-        let mut zkr_control_ids_str = String::new();
-        for (name, digest) in zkr_control_ids.iter() {
-            writeln!(&mut zkr_control_ids_str, r#"("{name}", "{digest}"),"#).unwrap();
-        }
-
-        let bn254_control_id = Self::generate_identity_bn254_control_id();
-        tracing::info!("Computed bn254_control_id: {bn254_control_id}");
+        let bn254_identity_control_id = Self::generate_identity_bn254_control_id();
+        tracing::info!("Computed bn254_identity_control_id: {bn254_identity_control_id}");
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
-            allowed_control_ids_str,
+            Self::format_control_ids(&allowed_control_ids),
             allowed_control_root,
-            bn254_control_id,
-            zkr_control_ids.len(),
-            zkr_control_ids_str,
+            bn254_identity_control_id,
+            poseidon2_control_ids.len(),
+            Self::format_control_ids_with_name(&poseidon2_control_ids),
+            sha256_control_ids.len(),
+            Self::format_control_ids_with_name(&sha256_control_ids),
         );
 
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");
@@ -176,15 +164,28 @@ impl Bootstrap {
             .expect("failed to format {CONTROL_ID_PATH_RECURSION}");
     }
 
+    pub fn generate_recursion_control_ids_with_hash(
+        zkrs: &[(String, Vec<u32>)],
+        hashfn: &str,
+    ) -> Vec<(String, Digest)> {
+        let hash_suite = hash_suite_from_name(hashfn).unwrap();
+
+        zkrs.into_iter()
+            .map(|(name, encoded_program)| {
+                let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
+
+                tracing::info!("computing control ID for {name} with {hashfn}");
+                let control_id = program.compute_control_id(hash_suite.clone());
+
+                tracing::debug!("{name} control id: {control_id:?}");
+                (name.clone(), control_id)
+            })
+            .collect()
+    }
+
     pub fn generate_identity_bn254_control_id() -> Digest {
         let encoded_program = get_zkr("identity.zkr").unwrap();
-        let program = Program::from_encoded(&encoded_program);
-        let digest = program.compute_control_id(Poseidon254HashSuite::new_suite());
-
-        // NOTE: we need to byte-reverse the BN254_CONTROL_ID because
-        // (apparently) groth16 digests are represented as a single
-        // little-endian field element
-        let bytes: Vec<u8> = digest.as_bytes().iter().rev().cloned().collect();
-        Digest::try_from(bytes.as_slice()).unwrap()
+        let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
+        program.compute_control_id(Poseidon254HashSuite::new_suite())
     }
 }

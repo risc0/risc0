@@ -23,6 +23,10 @@ serde = { version = "1.0", default-features = false, features = [
 ] }
 tracing = { version = "0.1", default-features = false }
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true
+
 [features]
 default = ["std"]
 std = [

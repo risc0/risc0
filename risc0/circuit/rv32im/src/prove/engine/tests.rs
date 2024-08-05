@@ -79,7 +79,7 @@ fn fwd_rev_ab_test(program: Program) {
             use crate::prove::hal::cuda::CudaCircuitHalSha256;
             let hal = Rc::new(CudaHalSha256::new());
             let circuit_hal = CudaCircuitHalSha256::new(hal.clone());
-        } else if #[cfg(feature = "metal")] {
+        } else if #[cfg(any(target_os = "macos", target_os = "ios"))] {
             use risc0_zkp::hal::metal::MetalHalSha256;
             use crate::prove::hal::metal::MetalCircuitHal;
             let hal = Rc::new(MetalHalSha256::new());
@@ -160,6 +160,7 @@ fn system_split() {
     let hal = CpuHal::new(suite.clone());
 
     let segments = result.segments;
+    assert_eq!(segments.len(), 2);
     for segment in segments {
         let seal = prover.prove_segment(&segment).unwrap();
         let checker = ControlCheck::new(&hal, segment.po2);

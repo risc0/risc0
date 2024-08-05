@@ -1,13 +1,14 @@
 {
   "recommendations": [
-    "bazelbuild.vscode-bazel",
+    "biomejs.biome",
     "EditorConfig.EditorConfig",
-    "james-yu.latex-workshop",
     "kriegalex.vscode-cudacpp",
-    "rust-lang.rust-analyzer",
+    "llvm-vs-code-extensions.vscode-clangd",
     "ms-vscode.cpptools",
+    "rust-lang.rust-analyzer",
+    "serayuzgur.crates",
     "stkb.rewrap",
-    "twxs.cmake",
+    "tamasfe.even-better-toml",
     "valentjn.vscode-ltex"
   ]
 }

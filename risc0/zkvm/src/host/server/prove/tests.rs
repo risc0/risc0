@@ -24,8 +24,7 @@ use super::get_prover_server;
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, ReceiptKind, Session,
-    VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, Receipt, Session, VerifierContext,
 };
 
 fn prove_session_fast(session: &Session) -> Receipt {
@@ -42,11 +41,7 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
         .unwrap()
         .build()
         .unwrap();
-    let opts = ProverOpts {
-        hashfn: hashfn.to_string(),
-        prove_guest_errors: false,
-        receipt_kind: ReceiptKind::Composite,
-    };
+    let opts = ProverOpts::composite().with_hashfn(hashfn.to_string());
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
 
@@ -104,10 +99,10 @@ fn check_image_id() {
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
-    assert_eq!(
+    assert!(matches!(
         receipt.verify(image_id).unwrap_err(),
-        VerificationError::ImageVerificationError
-    );
+        VerificationError::ClaimDigestMismatch { .. }
+    ));
 }
 
 #[test]
@@ -207,7 +202,7 @@ fn memory_io() {
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.claim()?.exit_code)
+        Ok(receipt.claim()?.as_value()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -482,11 +477,13 @@ fn sys_input() {
 }
 
 #[cfg(feature = "docker")]
+#[cfg(target_arch = "x86_64")]
 mod docker {
     use crate::{
         get_prover_server,
         host::server::prove::{DevModeProver, ProverServer},
-        ExecutorEnv, ExecutorImpl, ExitCode, InnerReceipt, ProverOpts, Receipt, ReceiptKind,
+        ExecutorEnv, ExecutorImpl, ExitCode, FakeReceipt, InnerReceipt, ProverOpts, Receipt,
+        ReceiptKind,
     };
     use risc0_zkp::core::digest::Digest;
     use risc0_zkvm_methods::{
@@ -500,15 +497,15 @@ mod docker {
             .unwrap()
             .build()
             .unwrap();
-        let opts = ProverOpts::compact();
+        let opts = ProverOpts::groth16();
         get_prover_server(&opts)
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .receipt
             .inner
-            .compact()
-            .unwrap(); // ensure that we got a compact receipt.
+            .groth16()
+            .unwrap(); // ensure that we got a groth16 receipt.
     }
 
     fn test_compress(opts: ProverOpts, receipt: &Receipt) {
@@ -518,18 +515,18 @@ mod docker {
             ReceiptKind::Composite => match receipt.inner {
                 InnerReceipt::Composite(_)
                 | InnerReceipt::Succinct(_)
-                | InnerReceipt::Compact(_) => {}
+                | InnerReceipt::Groth16(_) => {}
                 InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
             },
             ReceiptKind::Succinct => match receipt.inner {
-                InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => {}
+                InnerReceipt::Succinct(_) | InnerReceipt::Groth16(_) => {}
                 InnerReceipt::Composite(_) => panic!("expected receipt to be succinct or smaller"),
                 InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
             },
-            ReceiptKind::Compact => match receipt.inner {
-                InnerReceipt::Compact(_) => {}
+            ReceiptKind::Groth16 => match receipt.inner {
+                InnerReceipt::Groth16(_) => {}
                 InnerReceipt::Succinct(_) | InnerReceipt::Composite(_) => {
-                    panic!("expected receipt to be compact or smaller")
+                    panic!("expected receipt to be groth16 or smaller")
                 }
                 InnerReceipt::Fake { .. } => panic!("unexpected fake receipt"),
             },
@@ -539,14 +536,14 @@ mod docker {
 
     fn test_fake_compress(receipt: &Receipt) {
         fn ensure_fake(receipt: Receipt) {
-            let InnerReceipt::Fake { claim: _ } = receipt.inner else {
+            let InnerReceipt::Fake(_) = receipt.inner else {
                 panic!("expected fake receipt");
             };
         }
         let fake = Receipt::new(
-            InnerReceipt::Fake {
+            InnerReceipt::Fake(FakeReceipt {
                 claim: receipt.claim().unwrap(),
-            },
+            }),
             receipt.clone().journal.bytes,
         );
 
@@ -555,7 +552,7 @@ mod docker {
         ensure_fake(receipt);
         let receipt = prover.compress(&ProverOpts::succinct(), &fake).unwrap();
         ensure_fake(receipt);
-        let receipt = prover.compress(&ProverOpts::compact(), &fake).unwrap();
+        let receipt = prover.compress(&ProverOpts::groth16(), &fake).unwrap();
         ensure_fake(receipt);
     }
 
@@ -595,12 +592,12 @@ mod docker {
             .compress(&ProverOpts::succinct(), &composite_receipt)
             .unwrap();
         exec_verify(&succinct_receipt);
-        let compact_receipt = get_prover_server(&ProverOpts::compact())
+        let groth16_receipt = get_prover_server(&ProverOpts::groth16())
             .unwrap()
-            .compress(&ProverOpts::compact(), &succinct_receipt)
+            .compress(&ProverOpts::groth16(), &succinct_receipt)
             .unwrap();
-        exec_verify(&compact_receipt);
-        compact_receipt.inner.compact().unwrap();
+        exec_verify(&groth16_receipt);
+        groth16_receipt.inner.groth16().unwrap();
     }
 
     #[test]
@@ -609,29 +606,29 @@ mod docker {
         let composite_receipt = &generate_receipt(ProverOpts::composite());
         self::test_compress(ProverOpts::composite(), composite_receipt);
         self::test_compress(ProverOpts::succinct(), composite_receipt);
-        self::test_compress(ProverOpts::compact(), composite_receipt);
+        self::test_compress(ProverOpts::groth16(), composite_receipt);
 
         // succinct receipts
         let succinct_receipt = &generate_receipt(ProverOpts::succinct());
         self::test_compress(ProverOpts::composite(), succinct_receipt);
         self::test_compress(ProverOpts::succinct(), succinct_receipt);
-        self::test_compress(ProverOpts::compact(), succinct_receipt);
+        self::test_compress(ProverOpts::groth16(), succinct_receipt);
 
-        // compact receipts
-        let compact_receipt = &generate_receipt(ProverOpts::compact());
-        self::test_compress(ProverOpts::composite(), compact_receipt);
-        self::test_compress(ProverOpts::succinct(), compact_receipt);
-        self::test_compress(ProverOpts::compact(), compact_receipt);
+        // groth16 receipts
+        let groth16_receipt = &generate_receipt(ProverOpts::groth16());
+        self::test_compress(ProverOpts::composite(), groth16_receipt);
+        self::test_compress(ProverOpts::succinct(), groth16_receipt);
+        self::test_compress(ProverOpts::groth16(), groth16_receipt);
 
         // fake receipts
-        self::test_fake_compress(compact_receipt);
+        self::test_fake_compress(groth16_receipt);
     }
 }
 
 mod sys_verify {
     use std::sync::OnceLock;
 
-    use crate::ReceiptKind;
+    use risc0_zkp::core::{digest::digest, hash::poseidon2::Poseidon2HashSuite};
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
@@ -639,8 +636,13 @@ mod sys_verify {
 
     use super::get_prover_server;
     use crate::{
-        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
-        Receipt,
+        receipt_claim::Unknown,
+        recursion::{prove::zkr, MerkleGroup},
+        register_zkr,
+        serde::to_vec,
+        sha::Digestible,
+        Assumption, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt,
+        SuccinctReceipt, RECURSION_PO2,
     };
 
     fn prove_hello_commit() -> Receipt {
@@ -652,11 +654,7 @@ mod sys_verify {
     }
 
     fn prove_halt(exit_code: u8) -> Receipt {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: true,
-            receipt_kind: ReceiptKind::Composite,
-        };
+        let opts = ProverOpts::fast().with_prove_guest_errors(true);
 
         let env = ExecutorEnvBuilder::default()
             .write(&MultiTestSpec::Halt(exit_code))
@@ -674,9 +672,31 @@ mod sys_verify {
             .verify_integrity_with_context(&Default::default())
             .unwrap();
         let halt_claim = halt_receipt.claim().unwrap();
-        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
+        assert_eq!(
+            halt_claim.as_value().unwrap().pre.digest(),
+            MULTI_TEST_ID.into()
+        );
+        assert_eq!(
+            halt_claim.as_value().unwrap().exit_code,
+            ExitCode::Halted(exit_code as u32)
+        );
+
         halt_receipt
+    }
+
+    // The test_recursion_circuit is a program for the recursion VM that does some very simple
+    // operations. It is used here to provide an "out-of-tree" recursion program receipt, in that
+    // this program is not in the standard tree of allowed recursion programs, but should be
+    // verifiable in the guest via composition with the provided control root.
+    fn prove_test_recursion_circuit() -> SuccinctReceipt<Unknown> {
+        // Random Poseidon2 "digest" to act as the "control root".
+        let suite = Poseidon2HashSuite::new_suite();
+        let (_, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+
+        let digest2 = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+        crate::recursion::test_recursion_circuit(&control_root, &digest2, RECURSION_PO2).unwrap()
     }
 
     fn hello_commit_receipt() -> &'static Receipt {
@@ -760,7 +780,8 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_receipt().claim().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_receipt().claim().unwrap().as_value().unwrap())
+                .unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -813,7 +834,7 @@ mod sys_verify {
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&halt_receipt.claim().unwrap()).unwrap(),
+            claim_words: to_vec(halt_receipt.claim().unwrap().as_value().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.
@@ -831,6 +852,138 @@ mod sys_verify {
             .verify(MULTI_TEST_ID)
             .unwrap();
     }
+
+    #[test]
+    fn sys_verify_assumption() {
+        let test_circuit_receipt = prove_test_recursion_circuit();
+        let test_circuit_assumption = Assumption {
+            claim: test_circuit_receipt.claim.digest(),
+            control_root: test_circuit_receipt.control_root().unwrap(),
+        };
+        let spec = &MultiTestSpec::SysVerifyAssumption {
+            assumption_words: to_vec(&test_circuit_assumption).unwrap(),
+        };
+
+        // Test that we can produce a verifying CompositeReceipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(test_circuit_receipt.clone())
+            .build()
+            .unwrap();
+        let receipt = get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a composite receipt.
+        receipt.inner.composite().unwrap();
+
+        // Test that we can produce a verifying SuccinctReceipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(test_circuit_receipt.clone())
+            .build()
+            .unwrap();
+        let receipt = get_prover_server(&ProverOpts::succinct())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a succinct receipt.
+        receipt.inner.succinct().unwrap();
+
+        // Test that proving without a provided assumption results in an execution
+        // failure.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .is_err());
+    }
+
+    #[test]
+    fn sys_execute_zkr() {
+        // Random Poseidon2 "digest" to act as the "control root".
+        let suite = Poseidon2HashSuite::new_suite();
+        let (program, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+        register_zkr(&control_id, move || Ok(program.clone()));
+        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+
+        let inner_claim_digest =
+            digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+        let claim_digest =
+            digest!("a558268a11892374b41d03857a40cdc5e87e351a3bfc17aa2054f47712a17bc3");
+
+        let mut input: Vec<u32> = Vec::new();
+        input.extend(control_root.as_words());
+        input.extend(inner_claim_digest.as_words());
+
+        let spec = &MultiTestSpec::SysExecuteZkr {
+            control_id,
+            input,
+            claim_digest,
+            control_root,
+        };
+
+        // Test that we can produce a verifying CompositeReceipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let receipt = get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a composite receipt.
+        receipt.inner.composite().unwrap();
+    }
+}
+
+const RUN_UNCONSTRAINED_PO2: u32 = 17;
+const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
+
+#[test]
+fn run_unconstrained() -> Result<()> {
+    for unconstrained in [false, true] {
+        let spec = MultiTestSpec::RunUnconstrained {
+            unconstrained,
+            cycles: RUN_UNCONSTRAINED_CYCLES,
+        };
+        let env = ExecutorEnv::builder()
+            .segment_limit_po2(RUN_UNCONSTRAINED_PO2)
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+        let receipt = prove_session_fast(&session);
+        let segments = &receipt.inner.composite().unwrap().segments;
+
+        if unconstrained {
+            // Test
+            assert_eq!(segments.len(), 1);
+        } else {
+            // Control
+            assert_eq!(
+                segments.len(),
+                2,
+                "Expecting 2 segments; adjust RUN_UNCONSTRAINED_CYCLES here, or CYCLES_PER_LOOP in multi_test?"
+            );
+        }
+    }
+    Ok(())
 }
 
 mod soundness {
@@ -853,7 +1006,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::proven::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 41.757866);
+        assert_eq!(security, 41.752773);
     }
 
     #[test]
@@ -864,7 +1017,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 74.90123);
+        assert_eq!(security, 74.90066);
     }
 
     #[test]

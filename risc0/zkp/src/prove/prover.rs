@@ -66,7 +66,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         &mut self.iop
     }
 
-    /// Sets the number of cycles to to 2^po2.  This must be called
+    /// Sets the number of cycles to 2^po2.  This must be called
     /// once after new() before any commit_group() calls.
     pub fn set_po2(&mut self, po2: usize) {
         assert_eq!(self.po2, usize::MAX);
@@ -165,7 +165,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         // sum_i d0_i*x^i, where d0_i = c_(i*4).
         //
         // Amazingly, since the coefficients are bit reversed, the coefficients of g0
-        // are all already next to each other and in bit-reversed for for g0, as are
+        // are all already next to each other and in bit-reversed for g0, as are
         // the coefficients of g1, etc. So really, we can just reinterpret 4 polys of
         // invRate*size to 16 polys of size, without actually doing anything.
 
@@ -260,7 +260,7 @@ impl<'a, H: Hal> Prover<'a, H> {
             .hash_ext_elem_slice(coeff_u.as_slice());
         self.iop.commit(&hash_u);
 
-        // Set the mix mix value, which is used for FRI batching.
+        // Set the mix value, which is used for FRI batching.
         let mix = self.iop.random_ext_elem();
         tracing::debug!("Mix = {mix:?}");
         nvtx::range_pop!();
@@ -389,11 +389,11 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         let proven_soundness_error =
             super::soundness::proven::<H>(self.taps, final_poly_coeffs.size());
-        tracing::info!("proven_soundness_error: {proven_soundness_error:?}");
+        tracing::debug!("proven_soundness_error: {proven_soundness_error:?}");
 
         let conjectured_security =
             super::soundness::toy_model_security::<H>(self.taps, final_poly_coeffs.size());
-        tracing::info!("conjectured_security: {conjectured_security:?}");
+        tracing::debug!("conjectured_security: {conjectured_security:?}");
 
         // Return final proof
         let proof = self.iop.proof;

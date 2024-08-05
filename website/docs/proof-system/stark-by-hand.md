@@ -19,7 +19,7 @@ The [proof system sequence diagram](proof-system-sequence-diagram.md) describes 
 
 ## Lesson 1: The Execution Trace
 
-> When any code executes in the RISC Zero virtual machine, each step of that execution is recorded in an [`Execution Trace`](./what_is_a_trace.md).
+> When any code executes in the RISC Zero virtual machine, each step of that execution is recorded in an [`Execution Trace`](./what-is-a-trace.md).
 
 We show a simplified example, computing 4 steps of a Fibonacci sequence modulo 97, using two user-specified inputs.
 
@@ -45,7 +45,7 @@ Each rule check is written as the polynomial over the data columns, for example 
 In our example $a$, $b$, and $c$ may be terms in the data columns enforcing the Fibonacci sequence rule, that $F(i) + F(i+1) = F(i + 2)$.
 
 Each rule is combined with a selector from the control columns to decide when to apply the rules.
-For example, we should check that the output of one step is equal to the input to the next, expect when we consider the first row where there is no prior step and instead it must be equal to the user input.
+For example, we should check that the output of one step is equal to the input to the next, except when we consider the first row where there is no prior step and instead it must be equal to the user input.
 This combination is via multiplication e.g. $(s)(a + b - c)$ ensures that _either_ $a + b = c$ or $s = 0$.
 
 Each rule checking column can be expressed as a multi-input, single-output polynomial, where the inputs are some combination of entries in the trace; we call these `rule-checking polynomials`.
@@ -340,10 +340,10 @@ The Prover sends a vector of 1024 evaluations, which the Verifier interpolates t
 > The queries serve as a random challenge, testing the legitimacy of the Prover's commitments.
 > Loosely speaking, with a blow-up factor of $4$, a single query will catch a cheating Prover $\frac{3}{4}$ of the time.
 > In other words, a single query provides $2$ bits of security.
-> The RISC Zero zkVM uses $50$ queries and a blow-up factor of 4, which amounts to 100 bits of security.
+> The RISC Zero zkVM uses $50$ queries and a blow-up factor of 4, which amounts to ~100 bits of security.
 >
-> Note that the paragraph above is a substantial simplification of the full security analysis; the precise security level is not exactly 100 bits.
-> For a more thorough security analysis, see our [ZKP Whitepaper](https://www.risczero.com/proof-system-in-detail.pdf) and the [Summary on the FRI Low-Degree Test](https://eprint.iacr.org/2022/1216).
+> Note that the paragraph above is a substantial simplification of the full security analysis.
+> For a more thorough security analysis, see our [cryptographic security model] page and our [security calculator].
 
 The Prover has committed to $f_0$ on powers of $28$, $f_1$ on powers of $28^2$, $f_2$ on powers of $28^4$, and $f_3$ on powers of $28^8$.
 
@@ -429,4 +429,6 @@ Whew! Congratulations and thank you for making it this far!
 
 Got questions, feedback, or corrections? Find us on [Twitter](https://twitter.com/risczero) and [Discord](https://discord.gg/risczero).
 
+[cryptographic security model]: /api/security-model
 [RISC-V]: https://en.wikipedia.org/wiki/RISC-V
+[security calculator]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkp/src/prove/soundness.rs

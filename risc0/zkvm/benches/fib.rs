@@ -39,7 +39,7 @@ fn execute(group: &mut BenchGroup) {
 }
 
 fn warmup(_group: &mut BenchGroup) {
-    #[cfg(any(feature = "cuda", feature = "metal"))]
+    #[cfg(any(feature = "cuda", any(target_os = "macos", target_os = "ios")))]
     {
         println!("warmup");
         let opts = ProverOpts::default();
@@ -162,7 +162,7 @@ fn total_succinct(group: &mut BenchGroup) {
                 let session = exec.run().unwrap();
                 let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
                 let composite_receipt = receipt.inner.composite().unwrap();
-                prover.compsite_to_succinct(composite_receipt)
+                prover.composite_to_succinct(composite_receipt)
             },
         );
     });

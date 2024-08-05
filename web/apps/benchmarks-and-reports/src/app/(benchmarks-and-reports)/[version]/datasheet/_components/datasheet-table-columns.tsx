@@ -3,6 +3,7 @@
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { TableColumnHeader } from "shared/client/table/table-column-header";
 import { formatBytes } from "shared/utils/format-bytes";
+import { formatCycles } from "shared/utils/format-cycles";
 import { formatDuration } from "shared/utils/format-duration";
 import { formatHz } from "shared/utils/format-hz";
 import type { DatasheetTableSchema } from "./datasheet-table-schema";
@@ -22,10 +23,9 @@ export const datasheetTableColumns = [
     accessorKey: "total_cycles",
     header: ({ column }) => <TableColumnHeader column={column} title="Cycles" />,
     cell: ({ row }) => (
-      <div
-        title={String(row.original.total_cycles ?? row.original.cycles)}
-        className="truncate font-mono"
-      >{`${Number.parseFloat(((row.original.total_cycles ?? row.original.cycles) / 1024).toFixed(2))}k`}</div>
+      <div title={String(row.original.total_cycles ?? row.original.cycles)} className="truncate font-mono">
+        {formatCycles(row.original.total_cycles ?? row.original.cycles) ?? "-"}
+      </div>
     ),
   },
   columnHelper.accessor("duration", {

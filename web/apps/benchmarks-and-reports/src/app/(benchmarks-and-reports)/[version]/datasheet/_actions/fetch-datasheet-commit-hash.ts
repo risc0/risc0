@@ -1,21 +1,21 @@
 import "server-only";
 
-import { unstable_noStore as noStore } from "next/cache";
-import env from "~/env";
+import { tryit } from "radash";
+import type { Version } from "~/types/version";
 
-export async function fetchDatasheetCommitHash({ version }: { version: string }) {
-  noStore();
-
-  const response = await fetch(
+export async function fetchDatasheetCommitHash({ version }: { version: Version }) {
+  const tryFetch = tryit(fetch);
+  const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/COMMIT_HASH.txt`,
     {
-      headers: {
-        Authorization: `token ${env.GITHUB_PAT}`,
-        Accept: "application/vnd.github.v3.raw",
-      },
+      next: { revalidate: 180, tags: ["fetch-datasheet-commit-hash"] }, // 3 minutes cache
     },
   );
-  const responseText = await response.text();
 
-  return responseText;
+  // error handling
+  if (error || !response.ok) {
+    throw error || new Error("Failed to fetch");
+  }
+
+  return await response.text();
 }

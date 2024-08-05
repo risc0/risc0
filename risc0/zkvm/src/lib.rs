@@ -15,6 +15,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 //! The RISC Zero zkVM is a RISC-V virtual machine that produces [zero-knowledge
 //! proofs] of code it executes. By using the zkVM, a cryptographic [receipt] is
@@ -46,7 +47,7 @@
 //! The following feature flags are supported.
 //!
 //! Note that in order to use `risc0-zkvm` in the guest, you must disable the
-//! "prove" feature by setting `default-features = false`.
+//! default features by setting `default-features = false`.
 //!
 //! | Feature          | Target(s)         | Implies    | Description                                                                                                                                                  |
 //! | ---------------- | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -79,11 +80,8 @@ mod receipt_claim;
 pub mod serde;
 pub mod sha;
 
-/// Re-exports for recursion
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
-pub mod recursion {
-    pub use super::host::recursion::*;
-}
+pub use host::recursion;
 
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
@@ -93,7 +91,7 @@ pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
-    Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
 };
 #[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
 pub use {
@@ -102,7 +100,7 @@ pub use {
         client::prove::local::LocalProver,
         recursion::RECURSION_PO2,
         server::{
-            exec::executor::ExecutorImpl,
+            exec::{compose::register_zkr, executor::ExecutorImpl},
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -135,20 +133,21 @@ pub use {
 pub use {
     self::host::{
         prove_info::{ProveInfo, SessionStats},
-        recursion::ALLOWED_CONTROL_ROOT,
+        recursion::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
     },
     risc0_binfmt::compute_image_id,
-    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
+    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS,
     risc0_groth16::Seal as Groth16Seal,
 };
 
 pub use receipt::{
-    Assumption, CompositeReceipt, CompositeReceiptVerifierParameters, InnerReceipt, Journal,
-    Receipt, SegmentReceipt, SegmentReceiptVerifierParameters, SuccinctReceipt,
-    SuccinctReceiptVerifierParameters, VerifierContext,
+    AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
+    InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
+    SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
+    VerifierContext,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
-pub use receipt::{CompactReceipt, CompactReceiptVerifierParameters};
+pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
 
 use semver::Version;
 

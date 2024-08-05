@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(feature = "zkvm")]
 mod bootstrap;
+#[cfg(feature = "zkvm")]
 mod bootstrap_groth16;
 mod bootstrap_poseidon;
 mod bootstrap_protos;
+#[cfg(feature = "zkvm")]
 mod gen_receipt;
 mod install;
 
 use clap::{Parser, Subcommand};
 use tracing_subscriber::{prelude::*, EnvFilter};
 
+#[cfg(feature = "zkvm")]
+use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
 use self::{
-    bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16,
-    bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos,
-    gen_receipt::GenReceipt, install::Install,
+    bootstrap_poseidon::BootstrapPoseidon, bootstrap_protos::BootstrapProtos, install::Install,
 };
 
 #[derive(Parser)]
@@ -36,10 +39,13 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    #[cfg(feature = "zkvm")]
     Bootstrap(Bootstrap),
+    #[cfg(feature = "zkvm")]
     BootstrapGroth16(BootstrapGroth16),
     BootstrapPoseidon(BootstrapPoseidon),
     BootstrapProtos(BootstrapProtos),
+    #[cfg(feature = "zkvm")]
     GenReceipt(GenReceipt),
     Install(Install),
 }
@@ -47,11 +53,14 @@ enum Commands {
 impl Commands {
     fn run(&self) {
         match self {
+            #[cfg(feature = "zkvm")]
             Commands::Bootstrap(cmd) => cmd.run(),
+            #[cfg(feature = "zkvm")]
             Commands::BootstrapGroth16(cmd) => cmd.run(),
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::BootstrapProtos(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
+            #[cfg(feature = "zkvm")]
             Commands::GenReceipt(cmd) => cmd.run(),
         }
     }

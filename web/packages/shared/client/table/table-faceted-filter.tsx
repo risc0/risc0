@@ -109,13 +109,14 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                     >
                       <CheckIcon className={cn("size-4")} />
                     </div>
+
                     {option.icon && <option.icon className="mr-2 size-4 text-muted-foreground" />}
+
                     <span>{joinWords(option.label)}</span>
-                    {facets?.get(option.value) && (
-                      <span className="ml-auto flex size-4 items-center justify-center font-mono text-xs">
-                        {facets.get(option.value)}
-                      </span>
-                    )}
+
+                    <span className="ml-auto flex size-4 items-center justify-end font-mono text-xs">
+                      {facets?.get(option.value) || 0}
+                    </span>
                   </CommandItem>
                 );
               })}

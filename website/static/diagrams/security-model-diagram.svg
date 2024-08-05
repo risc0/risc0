@@ -8,7 +8,7 @@
    version="1.1"
    id="svg1"
    inkscape:version="1.3 (0e150ed, 2023-07-21)"
-   sodipodi:docname="proof_flowchart.svg"
+   sodipodi:docname="security-model-diagram.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,14 +24,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="0.80206548"
-     inkscape:cx="589.10402"
-     inkscape:cy="213.19955"
-     inkscape:window-width="1544"
-     inkscape:window-height="975"
-     inkscape:window-x="124"
-     inkscape:window-y="38"
+     inkscape:cx="589.72741"
+     inkscape:cy="211.95277"
+     inkscape:window-width="1912"
+     inkscape:window-height="1051"
+     inkscape:window-x="1874"
+     inkscape:window-y="109"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g26"
      showgrid="false" />
   <defs
      id="defs1">
@@ -173,41 +173,7 @@
              style="font-size:4.23333px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none"
              x="81.545563"
              y="27.71253"
-             id="tspan2-9">Bonsai</tspan></text>
-      </g>
-    </g>
-    <g
-       id="g21"
-       transform="translate(22.366565,0.31821896)">
-      <rect
-         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.499999;stroke-dasharray:none;stroke-opacity:1"
-         id="rect11"
-         width="103.89447"
-         height="61.403393"
-         x="55.662582"
-         y="25.653156" />
-      <g
-         id="g11"
-         transform="translate(12.036758,-0.8397738)"
-         style="stroke:none">
-        <rect
-           style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
-           id="rect5-7"
-           width="24.073513"
-           height="17.355326"
-           x="68.669693"
-           y="19.533901" />
-        <text
-           xml:space="preserve"
-           style="font-size:4.23333px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none"
-           x="81.545563"
-           y="27.71253"
-           id="text1"><tspan
-             sodipodi:role="line"
-             style="font-size:4.23333px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none"
-             x="81.545563"
-             y="27.71253"
-             id="tspan2">ZKVM</tspan></text>
+             id="tspan2-9">ZKVM</tspan></text>
       </g>
     </g>
     <g
@@ -528,13 +494,18 @@
          xml:space="preserve"
          style="font-size:4.23333px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none"
          x="182.26453"
-         y="81.453362"
+         y="79.336693"
          id="text1-11-5-7-9-3-0-3-8"><tspan
            sodipodi:role="line"
            style="font-size:4.23333px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none"
            x="182.26453"
-           y="81.453362"
-           id="tspan24-0-5">stark2snark</tspan></text>
+           y="79.336693"
+           id="tspan24-0-5">stark2snark</tspan><tspan
+           sodipodi:role="line"
+           style="font-size:4.23333px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-dasharray:none"
+           x="182.26453"
+           y="84.628357"
+           id="tspan2">Prover</tspan></text>
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"

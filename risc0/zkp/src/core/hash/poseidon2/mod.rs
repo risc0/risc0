@@ -14,6 +14,8 @@
 
 //! An implementation of Poseidon2 targeting the Baby Bear.
 
+// Thank you to https://github.com/nhukc for the initial implementation of this code
+
 pub(crate) mod consts;
 mod rng;
 

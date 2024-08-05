@@ -47,6 +47,7 @@ pub enum MultiTestSpec {
     Syscall {
         count: u32,
     },
+    SyscallWords,
     DoRandom,
     SysInput(Digest),
     SysRead {
@@ -58,8 +59,12 @@ pub enum MultiTestSpec {
     },
     SysVerify(Vec<(Digest, Vec<u8>)>),
     SysVerifyIntegrity {
-        // Define this field as a serialized vector to avoid circular dependency issues.
+        // ReceiptClaim: Field is serialized to avoid circular dependency issues.
         claim_words: Vec<u32>,
+    },
+    SysVerifyAssumption {
+        // Assumption: Field is serialized to avoid circular dependency issues.
+        assumption_words: Vec<u32>,
     },
     Echo {
         bytes: Vec<u8>,
@@ -90,6 +95,27 @@ pub enum MultiTestSpec {
     TooManySha,
     AlignedAlloc,
     AllocZeroed,
+    SysFork,
+    SysForkFork,
+    SysForkJournalPanic,
+    RunUnconstrained {
+        // True to actually call run_unconstrained, false to run the busy loop directly as a control.
+        unconstrained: bool,
+        // Number of guest cycles to use, including startup.
+        cycles: u64,
+    },
+    SysExecuteZkr {
+        // Control id of ZKR to execute
+        control_id: Digest,
+        // Input to provide to ZKR execution
+        input: Vec<u32>,
+        // Claim digest and control root to provide to
+        // verify_assumption to make sure that the proof from the ZKR
+        // gets added to our assumptions.
+        claim_digest: Digest,
+        control_root: Digest,
+    },
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
+declare_syscall!(pub SYS_MULTI_TEST_WORDS);

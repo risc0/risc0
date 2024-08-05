@@ -21,6 +21,12 @@ pub struct CompatVersion {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Digest {
+    #[prost(uint32, repeated, tag = "1")]
+    pub words: ::prost::alloc::vec::Vec<u32>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExitCode {
     #[prost(oneof = "exit_code::Kind", tags = "1, 2, 3, 4")]
     pub kind: ::core::option::Option<exit_code::Kind>,

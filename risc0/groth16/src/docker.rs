@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! This module contains functions for running a Groth16 prover using Docker.
+//!
+//! Docker is used here as a way to provide [rapidsnark] and the required prover key in a single
+//! package. Proving with Groth16 is currently only supported using Docker.
+//!
+//! [rapidsnark]: https://github.com/iden3/rapidsnark
+
 use std::{
     env::consts::ARCH,
     path::Path,
@@ -23,7 +30,7 @@ use tempfile::tempdir;
 
 use crate::{to_json, ProofJson, Seal};
 
-/// Compact a given seal of an `identity_p254` receipt into a Groth16 `Seal`.
+/// Groth16 a given seal of an `identity_p254` receipt into a Groth16 `Seal`.
 /// Requires running Docker on an x86 architecture.
 pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     if !is_x86_architecture() {
@@ -51,7 +58,7 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .arg("--rm")
         .arg("-v")
         .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
-        .arg("risczero/risc0-groth16-prover:v2024-04-03.2")
+        .arg("risczero/risc0-groth16-prover:v2024-05-17.1")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()?;

@@ -14,6 +14,7 @@ message ServerRequest {
     JoinRequest join = 5;
     IdentityP254Request identity_p254 = 6;
     ResolveRequest resolve = 7;
+    CompressRequest compress = 8;
   }
 }
 
@@ -126,6 +127,23 @@ message IdentityP254Result {
   Asset receipt = 1;
 }
 
+message CompressRequest {
+  ProverOpts opts = 1;
+  Asset receipt = 2;
+  AssetRequest receipt_out = 3;
+}
+
+message CompressReply {
+  oneof kind {
+    CompressResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message CompressResult {
+  Asset receipt = 1;
+}
+
 message ExecutorEnv {
   Asset binary = 1;
   map<string, string> env_vars = 2;
@@ -138,14 +156,14 @@ message ExecutorEnv {
   // When present, trace events will be sent back to the client.
   google.protobuf.Empty trace_events = 9;
   string pprof_out = 10;
-  repeated Assumption assumptions = 11;
+  repeated AssumptionReceipt assumptions = 11;
   string segment_path = 12;
 }
 
-message Assumption {
+message AssumptionReceipt {
   oneof kind {
-    Asset proven = 1;     // Receipt
-    Asset unresolved = 2; // MaybePruned<ReceiptClaim>
+    Asset proven = 1;     // InnerReceipt
+    Asset unresolved = 2; // Assumption
   }
 }
 
@@ -153,12 +171,13 @@ message ProverOpts {
   string hashfn = 1;
   bool prove_guest_errors = 2;
   ReceiptKind receipt_kind = 3;
+  repeated base.Digest control_ids = 4;
 }
 
 enum ReceiptKind {
   COMPOSITE = 0;
   SUCCINCT = 1;
-  COMPACT = 2;
+  GROTH16 = 2;
 }
 
 message SessionInfo {
@@ -296,6 +315,7 @@ service Server {
   rpc lift(LiftRequest) returns (LiftReply);
   rpc join(JoinRequest) returns (JoinReply);
   rpc resolve(ResolveRequest) returns (ResolveReply);
+  rpc compress(CompressRequest) returns (CompressReply);
 }
 
 service ExecuteCallback {

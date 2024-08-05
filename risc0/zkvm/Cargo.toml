@@ -63,19 +63,21 @@ tracing = { version = "0.1", default-features = false, features = [
 addr2line = { version = "0.22", features = ["rustc-demangle"], optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
-bytes = { version = "1.4", features = ["serde"], optional = true }
+bytes = { version = "1.6", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
-lazy-regex = { version = "3.1", optional = true }
+lazy-regex = { version = "3.2", optional = true }
 nvtx = { version = "1.3", optional = true }
-prost = { version = "0.12", optional = true }
+prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
+risc0-build = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
 typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
+chrono = { version = "0.4", default-features = false, features = ["serde"] }
 clap = { version = "4.5", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 rand = "0.8"
@@ -92,17 +94,24 @@ hotbench = { workspace = true }
 human-repr = { version = "1.0", features = ["1024"] }
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
-serde_with = "3.8"
+serde_with = "3.9"
 tabled = "0.15"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]
+# NOTE: cuda and metal are excluded because their build scripts require external tools.
+features = ["client", "prove", "getrandom", "std"]
 
 [features]
 client = [
   "dep:bincode",
   "dep:bonsai-sdk",
   "dep:bytes",
+  "dep:lazy-regex",
+  "dep:risc0-build",
   "dep:prost",
   "dep:tempfile",
   "std",
@@ -114,12 +123,7 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 dual = []
-metal = [
-  "prove",
-  "risc0-circuit-recursion/metal",
-  "risc0-circuit-rv32im/metal",
-  "risc0-zkp/metal",
-]
+metal = []
 default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
@@ -127,8 +131,8 @@ disable-dev-mode = []
 # this flag measure cycles and segments. Without this flag, the rust build
 # system will generate binaries that not identical across all architectures.
 # While this is acceptable for most tests, the tests counting cycles and
-# segments will fail intermittently.
-docker = ["risc0-groth16/docker"]
+# segments will fail intermittently. It does not effect non-test code.
+docker = []
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
 getrandom = ["risc0-zkvm-platform/getrandom"]
@@ -152,7 +156,6 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
-seq = ["risc0-circuit-rv32im/seq"]
 std = [
   "anyhow/std",
   "hex/std",

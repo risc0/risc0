@@ -2,7 +2,7 @@
 
 ## How to update the ghpages
 
-On every PR merged to `main`, the benchmark results will be pushed to the https://github.com/risc0/ghpages/tree/dev branch. After reviewing the result, you should create a PR on the ghpages repo to publish on https://risc0.github.io/ghpages/dev/benchmarks/index.html.
+On every PR merged to `main`, the benchmark results will be pushed to the <https://github.com/risc0/ghpages/tree/dev> branch. After reviewing the result, you should create a PR on the ghpages repo to publish on <https://reports.risczero.com/>.
 
 All `ghpages` static files reside in the `ghpages` folder of the `risc0` repo. Any modifications to `ghpages` should be made via the `risc0` repo henceforth.
 
