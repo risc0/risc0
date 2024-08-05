@@ -14,6 +14,8 @@
 
 use core::fmt;
 
+#[cfg(feature = "borsh")]
+use borsh::{BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 
 /// Exit condition indicated by the zkVM at the end of the guest execution.
@@ -25,6 +27,7 @@ use serde::{Deserialize, Serialize};
 /// additional information (e.g. 0 to indicate success or 1 to indicate an
 /// error).
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest program. A halted program cannot be
