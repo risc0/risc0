@@ -4037,6 +4037,7 @@ name = "risc0-binfmt"
 version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
+ "borsh",
  "elf",
  "risc0-zkp",
  "risc0-zkvm-platform",
@@ -4204,6 +4205,7 @@ version = "1.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
+ "borsh",
  "bytemuck",
  "cfg-if",
  "cust",
@@ -4235,6 +4237,7 @@ dependencies = [
  "anyhow",
  "bincode",
  "bonsai-sdk",
+ "borsh",
  "bytemuck",
  "bytes",
  "cfg-if",
@@ -4269,6 +4272,7 @@ dependencies = [
 name = "risc0-zkvm-methods"
 version = "1.1.0-alpha.1"
 dependencies = [
+ "borsh",
  "ciborium",
  "postcard",
  "risc0-build",

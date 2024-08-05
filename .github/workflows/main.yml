@@ -236,8 +236,6 @@ jobs:
         run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
       - name: test workspace
         run: cargo test -F $FEATURE -F prove --workspace --timings --exclude doc-test
-      - name: test borsh
-        run: cargo test -F $FEATURE -F prove -F borsh -p risc0-zkvm --lib -- borsh
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}

@@ -49,6 +49,7 @@ pub enum BenchmarkSpec {
     BincodeFramed,
     #[cfg(feature = "std")]
     BincodeBuffered,
+    Borsh,
     Cbor,
     MessagePack,
     Postcard,
@@ -119,6 +120,11 @@ impl BenchmarkSpec {
                 env::read_slice(core::slice::from_mut(&mut len));
                 let reader = std::io::BufReader::with_capacity(len as usize, env::stdin());
                 let claims: Vec<ReceiptClaim> = bincode::deserialize_from(reader).unwrap();
+                memory_barrier(&claims);
+            }
+            BenchmarkSpec::Borsh => {
+                let bytes = env::read_frame();
+                let claims: Vec<ReceiptClaim> = borsh::from_slice(&bytes).unwrap();
                 memory_barrier(&claims);
             }
             BenchmarkSpec::Cbor => {

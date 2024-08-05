@@ -51,6 +51,7 @@ pub fn main() {
     memcpy();
     serde();
     bincode();
+    borsh();
     cbor();
     message_pack();
     postcard();
@@ -162,6 +163,13 @@ fn bincode() {
 
     run_guest_framed("bincode_framed", BenchmarkSpec::BincodeFramed, &encoded);
     run_guest_framed("bincode_buffered", BenchmarkSpec::BincodeBuffered, &encoded);
+}
+
+fn borsh() {
+    let claims = vec![ReceiptClaim::ok(BENCH_ID, vec![0; 1024]); 3];
+    let encoded = borsh::to_vec(&claims).unwrap();
+
+    run_guest_framed("borsh", BenchmarkSpec::Borsh, &encoded);
 }
 
 fn cbor() {
