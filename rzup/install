@@ -30,7 +30,7 @@ install
 
 The installer for rzup, from RISC Zero.
 
-Usage: rzup-init.sh [OPTIONS]
+Usage: install [OPTIONS]
 
 Options:
   -v, --verbose
