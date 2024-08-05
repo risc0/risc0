@@ -14,12 +14,9 @@
 
 #pragma once
 
-#include "fp.h"
-#include "fpext.h"
-
 #include <cstdio>
 
-extern __constant__ FpExt poly_mix[210];
+extern __constant__ FpExt poly_mix[219];
 
 __device__ bool is_exec_par_safe(void* ctx, uint32_t cycle);
 

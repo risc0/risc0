@@ -21,6 +21,16 @@
 
 #include "bigint.cu"
 
+inline __device__ void
+extern_isTrap(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
+  outs[0] = 0;
+}
+
+inline __device__ void
+extern_setUserMode(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
+  // no-op
+}
+
 inline __device__ void extern_halt(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs) {
   // no-op
 }

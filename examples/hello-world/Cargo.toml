@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 hello-world-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

@@ -30,6 +30,7 @@ impl Rzup {
     pub fn version() -> &'static str {
         env!("CARGO_PKG_VERSION")
     }
+
     pub async fn update() -> Result<()> {
         // Run the curl command to download and execute the rzup-init.sh script
         // NOTE: This requires curl - we should look into fallbacks

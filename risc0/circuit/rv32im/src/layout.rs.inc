@@ -100,9 +100,48 @@ impl risc0_zkp::layout::Component for RamHeader {
         Ok(())
     }
 }
+pub struct HaltCycle {
+    pub sys_exit_code: &'static DataReg,
+    pub user_exit_code: &'static DataReg,
+    pub write_addr: &'static DataReg,
+}
+impl risc0_zkp::layout::Component for HaltCycle {
+    fn ty_name(&self) -> &'static str {
+        "HaltCycle"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("sys_exit_code", self.sys_exit_code)?;
+        v.visit_component("user_exit_code", self.user_exit_code)?;
+        v.visit_component("write_addr", self.write_addr)?;
+        Ok(())
+    }
+}
+pub type DataReg16LayoutArray = [&'static DataReg; 16];
+pub type DataReg2LayoutArray = [&'static DataReg; 2];
+pub struct PcReg {
+    pub twits: &'static DataReg2LayoutArray,
+    pub bytes: &'static DataReg3LayoutArray,
+}
+impl risc0_zkp::layout::Component for PcReg {
+    fn ty_name(&self) -> &'static str {
+        "PcReg"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("twits", self.twits)?;
+        v.visit_component("bytes", self.bytes)?;
+        Ok(())
+    }
+}
 pub struct BodyStep {
+    pub next_major: &'static DataReg,
+    pub user_mode: &'static DataReg,
     pub global: &'static Global,
     pub header: &'static RamHeader,
+    pub major_mux: &'static HaltCycle,
+    pub major_select: &'static DataReg16LayoutArray,
+    pub pc: &'static PcReg,
 }
 impl risc0_zkp::layout::Component for BodyStep {
     fn ty_name(&self) -> &'static str {
@@ -110,8 +149,13 @@ impl risc0_zkp::layout::Component for BodyStep {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("next_major", self.next_major)?;
+        v.visit_component("user_mode", self.user_mode)?;
         v.visit_component("global", self.global)?;
         v.visit_component("header", self.header)?;
+        v.visit_component("major_mux", self.major_mux)?;
+        v.visit_component("major_select", self.major_select)?;
+        v.visit_component("pc", self.pc)?;
         Ok(())
     }
 }
@@ -155,6 +199,8 @@ pub const LAYOUT: &Top = &Top {
     halted: &DataReg { offset: 2 },
     mux: &Mux {
         body: &BodyStep {
+            next_major: &DataReg { offset: 100 },
+            user_mode: &DataReg { offset: 99 },
             global: &Global {
                 sys_exit_code: &OutReg { offset: 104 },
                 user_exit_code: &OutReg { offset: 105 },
@@ -446,6 +492,37 @@ pub const LAYOUT: &Top = &Top {
                         &MixReg { offset: 34 },
                         &MixReg { offset: 35 },
                     ],
+                ],
+            },
+            major_mux: &HaltCycle {
+                sys_exit_code: &DataReg { offset: 117 },
+                user_exit_code: &DataReg { offset: 118 },
+                write_addr: &DataReg { offset: 119 },
+            },
+            major_select: &[
+                &DataReg { offset: 101 },
+                &DataReg { offset: 102 },
+                &DataReg { offset: 103 },
+                &DataReg { offset: 104 },
+                &DataReg { offset: 105 },
+                &DataReg { offset: 106 },
+                &DataReg { offset: 107 },
+                &DataReg { offset: 108 },
+                &DataReg { offset: 109 },
+                &DataReg { offset: 110 },
+                &DataReg { offset: 111 },
+                &DataReg { offset: 112 },
+                &DataReg { offset: 113 },
+                &DataReg { offset: 114 },
+                &DataReg { offset: 115 },
+                &DataReg { offset: 116 },
+            ],
+            pc: &PcReg {
+                twits: &[&DataReg { offset: 70 }, &DataReg { offset: 71 }],
+                bytes: &[
+                    &DataReg { offset: 6 },
+                    &DataReg { offset: 7 },
+                    &DataReg { offset: 8 },
                 ],
             },
         },

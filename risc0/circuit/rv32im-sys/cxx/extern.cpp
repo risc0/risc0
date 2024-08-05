@@ -32,6 +32,14 @@ using namespace risc0::circuit::rv32im;
 
 namespace risc0::circuit::rv32im {
 
+Fp extern_isTrap(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args) {
+  return 0;
+}
+
+void extern_setUserMode(void* ctx, size_t cycle, const char* extra, std::array<Fp, 1> args) {
+  // no-op
+}
+
 void extern_halt(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> args) {
   // no-op
 }

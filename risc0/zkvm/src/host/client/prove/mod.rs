@@ -19,7 +19,8 @@ pub(crate) mod local;
 
 use std::{path::PathBuf, rc::Rc};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use risc0_build::risc0_data;
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
@@ -28,7 +29,8 @@ use risc0_zkp::core::digest::Digest;
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
 use crate::{
-    host::prove_info::ProveInfo, is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext,
+    get_version, host::prove_info::ProveInfo, is_dev_mode, ExecutorEnv, Receipt, SessionInfo,
+    VerifierContext,
 };
 
 /// A Prover can execute a given ELF binary and produce a
@@ -307,7 +309,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
-            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path())),
+            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported prover: {explicit}"),
@@ -326,7 +328,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path()))
+    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
 }
 
 /// Return a default [Executor] based on environment variables and feature
@@ -348,7 +350,7 @@ pub fn default_executor() -> Rc<dyn Executor> {
     let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
-            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path())),
+            "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
             "local" => Rc::new(self::local::LocalProver::new("local")),
             _ => unimplemented!("Unsupported executor: {explicit}"),
@@ -360,11 +362,40 @@ pub fn default_executor() -> Rc<dyn Executor> {
         return Rc::new(self::local::LocalProver::new("local"));
     }
 
-    Rc::new(ExternalProver::new("ipc", get_r0vm_path()))
+    Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap()))
 }
 
-pub(crate) fn get_r0vm_path() -> PathBuf {
-    std::env::var("RISC0_SERVER_PATH")
-        .unwrap_or("r0vm".to_string())
-        .into()
+fn try_r0vm_path(version: String) -> Option<PathBuf> {
+    let path = risc0_data().ok()?.join("r0vm").join(version).join("r0vm");
+    tracing::debug!("Checking for r0vm: {}", path.display());
+    if let Ok(path) = path.canonicalize() {
+        if path.is_file() {
+            return Some(path);
+        }
+    }
+    None
+}
+
+pub(crate) fn get_r0vm_path() -> Result<PathBuf> {
+    if let Ok(path) = std::env::var("RISC0_SERVER_PATH") {
+        let path = PathBuf::from(path);
+        if path.is_file() {
+            return Ok(path);
+        }
+    }
+
+    let version = get_version().map_err(|err| anyhow!(err))?;
+    tracing::debug!("version: {version}");
+
+    if let Some(path) = try_r0vm_path(version.to_string()) {
+        return Ok(path);
+    }
+
+    if version.pre.is_empty() {
+        if let Some(path) = try_r0vm_path(format!("{}.{}", version.major, version.minor)) {
+            return Ok(path);
+        }
+    }
+
+    Ok("r0vm".into())
 }

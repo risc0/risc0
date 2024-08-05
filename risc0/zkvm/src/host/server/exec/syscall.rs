@@ -14,16 +14,20 @@
 
 //! Handlers for two-way private I/O between host and guest.
 
-use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
+mod fork;
+mod pipe;
 
-use anyhow::{anyhow, bail, Context, Result};
+use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc};
+
+use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
+use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::{
     fileno,
     syscall::{
         nr::{
-            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
-            SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_EXECUTE_ZKR, SYS_FORK, SYS_GETENV, SYS_LOG,
+            SYS_PANIC, SYS_PIPE, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName,
@@ -32,18 +36,18 @@ use risc0_zkvm_platform::{
 };
 
 use crate::{
-    host::client::{
-        env::{AssumptionReceipts, ExecutorEnv},
-        posix_io::PosixIo,
-        slice_io::SliceIo,
+    host::{
+        client::{posix_io::PosixIo, slice_io::SliceIo},
+        server::exec::compose::SysCompose,
     },
-    receipt::AssumptionReceipt,
     sha::{Digest, DIGEST_BYTES},
-    Assumption,
+    ExecutorEnv,
 };
 
+use self::{fork::SysFork, pipe::SysPipe};
+
 /// A host-side implementation of a system call.
-pub trait Syscall {
+pub(crate) trait Syscall {
     /// Invokes the system call.
     fn syscall(
         &mut self,
@@ -54,7 +58,10 @@ pub trait Syscall {
 }
 
 /// Access to memory and machine state for syscalls.
-pub trait SyscallContext {
+pub(crate) trait SyscallContext<'a> {
+    /// Returns the current program counter.
+    fn get_pc(&self) -> u32;
+
     /// Returns the current cycle being executed.
     fn get_cycle(&self) -> u64;
 
@@ -62,42 +69,59 @@ pub trait SyscallContext {
     fn load_register(&mut self, idx: usize) -> u32;
 
     /// Loads an individual byte from memory.
-    fn load_u8(&mut self, addr: u32) -> Result<u8>;
+    fn load_u8(&mut self, addr: ByteAddr) -> Result<u8>;
 
-    /// Loads bytes from the given region of memory.
-    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
+    /// Loads an individual word from memory.
+    fn load_u32(&mut self, addr: ByteAddr) -> Result<u32>;
+
+    /// Loads bytes from the given region of memory. A region may span multiple pages.
+    fn load_region(&mut self, addr: ByteAddr, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
-        for addr in addr..addr + size {
-            region.push(self.load_u8(addr)?);
+        for i in 0..size {
+            region.push(self.load_u8(addr + i)?);
         }
         Ok(region)
     }
+
+    /// Load a page from memory at the specified page index.
+    fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
+
+    /// Access the syscall table.
+    fn syscall_table(&self) -> &SyscallTable<'a>;
 }
 
 #[derive(Clone)]
 pub(crate) struct SyscallTable<'a> {
     pub(crate) inner: HashMap<String, Rc<RefCell<dyn Syscall + 'a>>>,
+    pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
 }
 
 impl<'a> SyscallTable<'a> {
-    pub fn new(env: &ExecutorEnv<'a>) -> Self {
-        let mut this = Self {
+    pub fn new(posix_io: Rc<RefCell<PosixIo<'a>>>) -> Self {
+        Self {
             inner: HashMap::new(),
-        };
+            posix_io,
+        }
+    }
 
-        let sys_verify = SysVerify::new(env.assumptions.clone());
+    pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
+        let mut this = Self::new(env.posix_io.clone());
 
-        let posix_io = env.posix_io.clone();
-        this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
-            .with_syscall(SYS_LOG, posix_io.clone())
-            .with_syscall(SYS_PANIC, SysPanic)
-            .with_syscall(SYS_RANDOM, SysRandom)
+        let sys_compose = SysCompose::new(env.assumptions.clone());
+
+        this.with_syscall(SYS_ARGC, Args(env.args.clone()))
+            .with_syscall(SYS_ARGV, Args(env.args.clone()))
+            .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
+            .with_syscall(SYS_FORK, SysFork)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
-            .with_syscall(SYS_READ, posix_io.clone())
-            .with_syscall(SYS_WRITE, posix_io)
-            .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
-            .with_syscall(SYS_ARGC, Args(env.args.clone()))
-            .with_syscall(SYS_ARGV, Args(env.args.clone()));
+            .with_syscall(SYS_LOG, SysLog)
+            .with_syscall(SYS_PANIC, SysPanic)
+            .with_syscall(SYS_PIPE, SysPipe::default())
+            .with_syscall(SYS_RANDOM, SysRandom)
+            .with_syscall(SYS_READ, SysRead)
+            .with_syscall(SYS_VERIFY_INTEGRITY, sys_compose.clone())
+            .with_syscall(SYS_EXECUTE_ZKR, sys_compose.clone())
+            .with_syscall(SYS_WRITE, SysWrite);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
             this.inner
@@ -145,10 +169,10 @@ impl Syscall for SysGetenv {
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = from_utf8(&from_guest)?;
+        let msg = std::str::from_utf8(&from_guest)?;
 
         match self.0.get(msg) {
             None => Ok((u32::MAX, 0)),
@@ -170,10 +194,10 @@ impl Syscall for SysPanic {
         ctx: &mut dyn SyscallContext,
         _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = from_utf8(&from_guest)?;
+        let msg = std::str::from_utf8(&from_guest)?;
         bail!("Guest panicked: {msg}");
     }
 }
@@ -191,106 +215,6 @@ impl Syscall for SysRandom {
         getrandom::getrandom(rand_buf.as_mut_slice())?;
         bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
         Ok((0, 0))
-    }
-}
-
-#[derive(Clone)]
-pub(crate) struct SysVerify {
-    pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
-}
-
-impl SysVerify {
-    pub(crate) fn new(assumptions: Rc<RefCell<AssumptionReceipts>>) -> Self {
-        Self { assumptions }
-    }
-
-    fn sys_verify_integrity(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
-        let claim_digest: Digest = from_guest[..DIGEST_BYTES]
-            .try_into()
-            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
-        let control_root: Digest = from_guest[DIGEST_BYTES..]
-            .try_into()
-            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
-
-        tracing::debug!("SYS_VERIFY_INTEGRITY: ({}, {})", claim_digest, control_root);
-
-        // Iterate over the list looking for a matching assumption.
-        let mut assumption: Option<(Assumption, AssumptionReceipt)> = None;
-        for cached_assumption in self.assumptions.borrow().cached.iter() {
-            let cached_claim_digest = cached_assumption
-                .claim_digest()
-                .context("failed to access claim digest on cached assumption")?;
-            if cached_claim_digest != claim_digest {
-                tracing::debug!(
-                    "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} does not match"
-                );
-                continue;
-            }
-            // If the control root supplied by the guest is not zero, then they are requesting a
-            // specific set of recursion programs be used to resolve the assumption. Check that the
-            // given receipt can indeed resolve the assumption.
-            // NOTE: We currently only support using Succinct receipts here.
-            if control_root != Digest::ZERO {
-                let Some(cached_control_root) = (match cached_assumption {
-                    AssumptionReceipt::Proven(receipt) => receipt
-                        .succinct()
-                        .ok()
-                        .map(|r| r.control_root())
-                        .transpose()?,
-                    AssumptionReceipt::Unresolved(unresolved) => Some(unresolved.control_root),
-                }) else {
-                    // Elevate to warning because this really is likely an error.
-                    tracing::warn!(
-                        "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} is not a succinct receipt"
-                    );
-                    continue;
-                };
-                if cached_control_root != control_root {
-                    // Elevate to warning because this really is likely an error.
-                    tracing::warn!(
-                        "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} has control root {cached_control_root}; guest requested {control_root}"
-                    );
-                    continue;
-                }
-            }
-            assumption = Some((
-                Assumption {
-                    claim: claim_digest,
-                    control_root,
-                },
-                cached_assumption.clone(),
-            ));
-            break;
-        }
-
-        let Some(assumption) = assumption else {
-            return Err(anyhow!(
-                "sys_verify_integrity: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}"
-            ));
-        };
-
-        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
-        self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        Ok((0, 0))
-    }
-}
-
-impl Syscall for SysVerify {
-    fn syscall(
-        &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        let from_guest_ptr = ctx.load_register(REG_A3);
-        let from_guest_len = ctx.load_register(REG_A4);
-        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
-
-        if syscall == SYS_VERIFY_INTEGRITY.as_str() {
-            self.sys_verify_integrity(from_guest)
-        } else {
-            bail!("SysVerify received unrecognized syscall: {syscall}")
-        }
     }
 }
 
@@ -356,7 +280,7 @@ impl<'a> Syscall for SysSliceIo<'a> {
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         let mut stored_result = self.stored_result.borrow_mut();
-        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
         Ok(match stored_result.take() {
@@ -384,40 +308,11 @@ impl<'a> Syscall for SysSliceIo<'a> {
     }
 }
 
-impl<'a> Syscall for PosixIo<'a> {
+struct SysRead;
+impl Syscall for SysRead {
     fn syscall(
         &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        // TODO: Is there a way to use "match" here instead of if statements?
-        if syscall == SYS_READ.as_str() {
-            self.sys_read(ctx, to_guest)
-        } else if syscall == SYS_WRITE.as_str() {
-            self.sys_write(ctx)
-        } else if syscall == SYS_LOG.as_str() {
-            self.sys_log(ctx)
-        } else {
-            bail!("Unknown syscall {syscall}")
-        }
-    }
-}
-
-impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
-    fn syscall(
-        &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        self.borrow_mut().syscall(syscall, ctx, to_guest)
-    }
-}
-
-impl<'a> PosixIo<'a> {
-    fn sys_read(
-        &mut self,
+        _syscall: &str,
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
@@ -434,10 +329,7 @@ impl<'a> PosixIo<'a> {
             "Word-aligned read buffer must be fully filled"
         );
 
-        let reader = self
-            .read_fds
-            .get_mut(&fd)
-            .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
+        let reader = ctx.syscall_table().posix_io.borrow().get_reader(fd)?;
 
         // So that we don't have to deal with short reads, keep
         // reading until we get EOF or fill the buffer.
@@ -476,32 +368,45 @@ impl<'a> PosixIo<'a> {
             u32::from_le_bytes(to_guest_end),
         ))
     }
+}
 
-    fn sys_write(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
+struct SysWrite;
+impl Syscall for SysWrite {
+    fn syscall(
+        &mut self,
+        _syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
         let fd = ctx.load_register(REG_A3);
-        let buf_ptr = ctx.load_register(REG_A4);
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let buf_len = ctx.load_register(REG_A5);
         let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
-        let writer = self
-            .write_fds
-            .get_mut(&fd)
-            .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
+        let writer = ctx.syscall_table().posix_io.borrow().get_writer(fd)?;
 
         tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
     }
+}
 
-    fn sys_log(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
+struct SysLog;
+impl Syscall for SysLog {
+    fn syscall(
+        &mut self,
+        _syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        // write to stdout, but be sure to point it to where the file descriptor is pointing
-        let writer = self
-            .write_fds
-            .get_mut(&fileno::STDOUT)
-            .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
+        let writer = ctx
+            .syscall_table()
+            .posix_io
+            .borrow()
+            .get_writer(fileno::STDOUT)?;
 
         tracing::debug!("sys_log({buf_len} bytes)");
 
@@ -510,6 +415,35 @@ impl<'a> PosixIo<'a> {
             .borrow_mut()
             .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
         Ok((0, 0))
+    }
+}
+
+impl Syscall for SysCompose {
+    fn syscall(
+        &mut self,
+        syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        if syscall == SYS_VERIFY_INTEGRITY.as_str() {
+            let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
+            let from_guest_len = ctx.load_register(REG_A4);
+            let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+            self.sys_verify_integrity(from_guest)
+        } else if syscall == SYS_EXECUTE_ZKR.as_str() {
+            let control_id_ptr = ByteAddr(ctx.load_register(REG_A3));
+            let control_id: Digest = ctx
+                .load_region(control_id_ptr, DIGEST_BYTES as u32)?
+                .try_into()
+                .map_err(|vec| anyhow!("failed to convert to Digest: {vec:?}"))?;
+            let input_ptr = ByteAddr(ctx.load_register(REG_A4));
+            let input_len = ctx.load_register(REG_A5);
+            let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
+
+            self.sys_execute_zkr(&control_id, bytemuck::cast_slice(input.as_slice()))
+        } else {
+            bail!("SysCompose received unrecognized syscall: {syscall}")
+        }
     }
 }
 

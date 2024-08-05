@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
+use std::{env, path::Path};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -32,12 +29,16 @@ fn main() {
 }
 
 fn build_cpu_kernels() {
-    let srcs: Vec<PathBuf> = glob::glob("cxx/*.cpp")
-        .unwrap()
-        .map(|x| x.unwrap())
-        .collect();
     KernelBuild::new(KernelType::Cpp)
-        .files(&srcs)
+        .files([
+            "cxx/ffi.cpp",
+            "cxx/poly_fp.cpp",
+            "cxx/step_compute_accum.cpp",
+            "cxx/step_exec.cpp",
+            "cxx/step_verify_accum.cpp",
+            "cxx/step_verify_bytes.cpp",
+            "cxx/step_verify_mem.cpp",
+        ])
         .compile("circuit");
 }
 
@@ -46,6 +47,7 @@ fn build_cuda_kernels() {
         .files([
             "kernels/cuda/eval_check.cu",
             "kernels/cuda/ffi.cu",
+            "kernels/cuda/ffi_supra.cu",
             "kernels/cuda/step_compute_accum.cu",
             "kernels/cuda/step_verify_accum.cu",
         ])

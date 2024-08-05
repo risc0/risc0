@@ -340,10 +340,10 @@ The Prover sends a vector of 1024 evaluations, which the Verifier interpolates t
 > The queries serve as a random challenge, testing the legitimacy of the Prover's commitments.
 > Loosely speaking, with a blow-up factor of $4$, a single query will catch a cheating Prover $\frac{3}{4}$ of the time.
 > In other words, a single query provides $2$ bits of security.
-> The RISC Zero zkVM uses $50$ queries and a blow-up factor of 4, which amounts to 100 bits of security.
+> The RISC Zero zkVM uses $50$ queries and a blow-up factor of 4, which amounts to ~100 bits of security.
 >
-> Note that the paragraph above is a substantial simplification of the full security analysis; the precise security level is not exactly 100 bits.
-> For a more thorough security analysis, see our [ZKP Whitepaper](https://www.risczero.com/proof-system-in-detail.pdf) and the [Summary on the FRI Low-Degree Test](https://eprint.iacr.org/2022/1216).
+> Note that the paragraph above is a substantial simplification of the full security analysis.
+> For a more thorough security analysis, see our [cryptographic security model] page and our [security calculator].
 
 The Prover has committed to $f_0$ on powers of $28$, $f_1$ on powers of $28^2$, $f_2$ on powers of $28^4$, and $f_3$ on powers of $28^8$.
 
@@ -429,4 +429,6 @@ Whew! Congratulations and thank you for making it this far!
 
 Got questions, feedback, or corrections? Find us on [Twitter](https://twitter.com/risczero) and [Discord](https://discord.gg/risczero).
 
+[cryptographic security model]: /api/security-model
 [RISC-V]: https://en.wikipedia.org/wiki/RISC-V
+[security calculator]: https://github.com/risc0/risc0/blob/release-1.0/risc0/zkp/src/prove/soundness.rs

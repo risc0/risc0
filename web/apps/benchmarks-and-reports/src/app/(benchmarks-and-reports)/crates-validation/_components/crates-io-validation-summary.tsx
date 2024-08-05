@@ -26,7 +26,7 @@ export function CratesIoValidationSummary({ data }: { data: CratesIoValidationTa
                     : item.status === "BuildFail"
                       ? "border-red-400 bg-red-200 dark:border-red-500 dark:bg-red-300"
                       : "border-neutral-400 bg-neutral-200 dark:border-neutral-500 dark:bg-neutral-300",
-                  "block size-3 rounded-[2.5px] border dark:group-hover:border-white group-hover:border-2 group-hover:border-black",
+                  "block size-3 rounded-[2.5px] border group-hover:border-2 group-hover:border-black dark:group-hover:border-white",
                 )}
               />
             </a>
