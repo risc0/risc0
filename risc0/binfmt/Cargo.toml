@@ -31,6 +31,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 all-features = true
 
 [features]
+borsh = ["dep:borsh", "risc0-zkp/borsh"]
 default = ["std"]
 std = [
   "anyhow/std",
@@ -39,6 +40,4 @@ std = [
   "serde/std",
   "tracing/log",
   "tracing/std",
-  "borsh?/std",
 ]
-borsh = ["dep:borsh"]

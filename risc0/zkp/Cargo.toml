@@ -57,6 +57,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 features = ["prove", "std"]
 
 [features]
+borsh = ["dep:borsh"]
 circuit_debug = []
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
 default = []
@@ -72,5 +73,4 @@ prove = [
   "risc0-sys",
   "std",
 ]
-std = ["anyhow/std", "borsh?/std"]
-borsh = ["dep:borsh"]
+std = ["anyhow/std"]

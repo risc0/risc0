@@ -109,6 +109,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 features = ["client", "prove", "getrandom", "std"]
 
 [features]
+borsh = ["dep:borsh", "risc0-binfmt/borsh", "risc0-zkp/borsh"]
 client = [
   "dep:bincode",
   "dep:bonsai-sdk",
@@ -167,6 +168,4 @@ std = [
   "risc0-zkp/std",
   "serde/std",
   "sha2/std",
-  "borsh?/std",
 ]
-borsh = ["dep:borsh"]

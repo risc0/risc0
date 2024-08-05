@@ -798,4 +798,22 @@ mod tests {
             }
         );
     }
+
+    #[test]
+    #[cfg(feature = "borsh")]
+    fn borsh_serde() {
+        use crate::ReceiptClaim;
+        use risc0_zkvm_methods::MULTI_TEST_ID;
+
+        let claim = ReceiptClaim::ok(MULTI_TEST_ID, vec![]);
+        let receipt = Receipt::new(
+            InnerReceipt::Fake(FakeReceipt {
+                claim: MaybePruned::Value(claim),
+            }),
+            vec![],
+        );
+        let encoded = borsh::to_vec(&receipt).unwrap();
+        let decoded: Receipt = borsh::from_slice(&encoded).unwrap();
+        assert_eq!(receipt, decoded);
+    }
 }
