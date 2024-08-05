@@ -65,7 +65,7 @@ main() {
   _arch="$RETVAL"
   assert_nz "$_arch" "arch"
 
-  _url="${RZUP_URL}${TEST_PATH}${_arch}/rzup"
+  _url="${RZUP_URL}/${ENV_PATH}/${_arch}/rzup"
   _dir="$(ensure mktemp -d)"
   _file="${_dir}/rzup"
 
