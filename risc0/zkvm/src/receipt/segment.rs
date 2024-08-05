@@ -16,6 +16,8 @@ use alloc::{collections::BTreeSet, string::String, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
+#[cfg(feature = "borsh")]
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
 use risc0_circuit_rv32im::{
     control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
@@ -38,6 +40,7 @@ use crate::{sha, MaybePruned, ReceiptClaim};
 /// A SegmentReceipt attests that a Segment was executed in a manner
 /// consistent with the [ReceiptClaim] included in the receipt.
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct SegmentReceipt {

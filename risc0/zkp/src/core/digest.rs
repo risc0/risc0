@@ -18,6 +18,8 @@
 use alloc::{format, vec::Vec};
 use core::fmt::{Debug, Display, Formatter};
 
+#[cfg(feature = "borsh")]
+use borsh::{BorshDeserialize, BorshSerialize};
 use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
 use serde::{Deserialize, Serialize};
@@ -42,6 +44,7 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
 #[derive(
     Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash, Pod, Zeroable, Serialize, Deserialize,
 )]
+#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[repr(transparent)]
 pub struct Digest([u32; DIGEST_WORDS]);
 
