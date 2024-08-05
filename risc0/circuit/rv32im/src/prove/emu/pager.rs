@@ -70,12 +70,6 @@ pub struct PagedMemory {
     pending_actions: Vec<Action>,
 }
 
-impl WordAddr {
-    fn page_idx(&self) -> u32 {
-        self.0 / PAGE_WORDS as u32
-    }
-}
-
 impl PagedMemory {
     pub fn new(image: MemoryImage) -> Self {
         Self {
@@ -225,6 +219,15 @@ impl PagedMemory {
             }
         }
         faults
+    }
+
+    pub fn peek_page(&self, page_idx: u32) -> Vec<u8> {
+        let idx = self.page_table[page_idx as usize];
+        if idx == INVALID_IDX {
+            self.image.load_page(page_idx)
+        } else {
+            self.page_cache[idx as usize].0.clone()
+        }
     }
 
     fn load_page(&mut self, page_idx: u32) {

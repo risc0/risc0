@@ -68,7 +68,7 @@ bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.6", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
-lazy-regex = { version = "3.1", optional = true }
+lazy-regex = { version = "3.2", optional = true }
 nvtx = { version = "1.3", optional = true }
 prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
@@ -113,6 +113,7 @@ client = [
   "dep:bincode",
   "dep:bonsai-sdk",
   "dep:bytes",
+  "dep:lazy-regex",
   "dep:risc0-build",
   "dep:prost",
   "dep:tempfile",
@@ -125,6 +126,7 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 dual = []
+metal = []
 default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
@@ -157,7 +159,6 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
-seq = ["risc0-circuit-rv32im/seq"]
 std = [
   "anyhow/std",
   "hex/std",

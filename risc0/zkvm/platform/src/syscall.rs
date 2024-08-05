@@ -24,6 +24,8 @@ pub mod ecall {
     pub const SOFTWARE: u32 = 2;
     pub const SHA: u32 = 3;
     pub const BIGINT: u32 = 4;
+    pub const USER: u32 = 5;
+    pub const MACHINE: u32 = 5;
 }
 
 pub mod halt {
@@ -130,13 +132,17 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_EXIT);
+    declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
+    declare_syscall!(pub SYS_PIPE);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
+    declare_syscall!(pub SYS_EXECUTE_ZKR);
 }
 
 impl SyscallName {
@@ -784,4 +790,100 @@ pub unsafe extern "C" fn sys_verify_integrity(
 #[cfg(not(feature = "export-syscalls"))]
 extern "C" {
     pub fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
+}
+
+/// `sys_fork()` creates a new process by duplicating the calling process. The
+/// new process is referred to as the child process. The calling process is
+/// referred to as the parent process.
+///
+/// The child process and the parent process run in separate memory spaces. At
+/// the time of `sys_fork()` both memory spaces have the same content.
+///
+/// # Return Value
+///
+/// On success, the PID of the child process (1) is returned in the parent, and
+/// 0 is returned in the child. On failure, -1 is returned in the parent, no
+/// child process is created.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub extern "C" fn sys_fork() -> i32 {
+    let Return(a0, _) = unsafe { syscall_0(nr::SYS_FORK, null_mut(), 0) };
+    a0 as i32
+}
+
+/// `sys_pipe()` creates a pipe, a unidirectional data channel that can be used
+/// for interprocess communication. The pointer `pipefd` is used to return two
+/// file descriptors referring to the ends of the pipe. `pipefd[0]` refers to
+/// the read end of the pipe. `pipefd[1]` refers to the write end of the pipe.
+/// Data written to the write end of the pipe is buffered by the host until it
+/// is read from the read end of the pipe.
+///
+/// # Return Value
+///
+/// On success, zero is returned.  On error, -1 is returned, and `pipefd` is
+/// left unchanged.
+///
+/// # Safety
+///
+/// `pipefd` must be aligned, dereferenceable, and have capacity for 2 u32
+/// values.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_pipe(pipefd: *mut u32) -> i32 {
+    let Return(a0, _) = syscall_0(nr::SYS_PIPE, pipefd, 2);
+    a0 as i32
+}
+
+/// `sys_exit()` causes normal process termination.
+///
+/// Currently the `status` is unused and ignored.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub extern "C" fn sys_exit(status: i32) -> ! {
+    let Return(a0, _) = unsafe { syscall_0(nr::SYS_EXIT, null_mut(), 0) };
+    #[allow(clippy::empty_loop)]
+    loop {
+        // prevent dishonest provers from relying on the ability to prove the
+        // child process rather than the intended parent process.
+    }
+}
+
+/// Executes a `ZKR' in the recursion circuit, specified by control
+/// ID.  The control ID must be registered in the host's index of ZKRs.
+///
+/// This only triggers the execution of the ZKR; it does not add any
+/// assumptions.  In order to prove that the ZKR executed correctly,
+/// users must calculate the claim digest and add it to the list of
+/// assumptions.
+///
+/// # Safety
+///
+/// `control_id` must be aligned and dereferenceable.
+///
+/// `input` must be aligned and have `input_len` u32s dereferenceable
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_execute_zkr(
+    control_id: *const [u32; DIGEST_WORDS],
+    input: *const u32,
+    input_len: usize,
+) {
+    let Return(a0, _) = unsafe {
+        syscall_3(
+            nr::SYS_EXECUTE_ZKR,
+            null_mut(),
+            0,
+            control_id as u32,
+            input as u32,
+            input_len as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // Currently, this should always be the case. This check is
+    // included for forwards-compatibility.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_execute_zkr returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
 }

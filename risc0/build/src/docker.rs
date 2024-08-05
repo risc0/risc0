@@ -249,8 +249,8 @@ mod test {
     fn test_reproducible_methods_guest() {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
-            "risc0_zkvm_methods_guest/multi_test",
-            "945ac0f8230f4e5fa037bd7d61c52d7dac4f5ed00d5b8dffc83e07787d688c51",
+            "risc0_zkvm_methods_guest/hello_commit",
+            "06921f365c4e7c321d2c89eeab51cfbcd371b6052d58f303d8199338268e5f7c",
         );
     }
 }

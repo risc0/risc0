@@ -74,8 +74,9 @@ use bytemuck::Pod;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_alloc_words, sys_cycle_count, sys_halt, sys_input, sys_log, sys_pause, sys_read,
-        sys_read_words, sys_verify_integrity, sys_write, syscall_2, SyscallName,
+        self, sys_alloc_words, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log,
+        sys_pause, sys_read, sys_read_words, sys_verify_integrity, sys_write, syscall_2,
+        SyscallName,
     },
     WORD_SIZE,
 };
@@ -734,4 +735,16 @@ pub fn input_digest() -> Digest {
         sys_input(6),
         sys_input(7),
     ])
+}
+
+/// EXPERIMENTAL: Run the given function without proving that it was executed
+/// correctly.  This does not provide any guarantees about the
+/// soundness of the execution, but can potentially be executed
+/// faster.
+pub fn run_unconstrained(f: impl FnOnce()) {
+    let pid = sys_fork();
+    if pid == 0 {
+        f();
+        sys_exit(0)
+    }
 }
