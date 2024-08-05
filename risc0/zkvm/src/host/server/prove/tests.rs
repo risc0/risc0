@@ -638,6 +638,7 @@ mod sys_verify {
     use crate::{
         receipt_claim::Unknown,
         recursion::{prove::zkr, MerkleGroup},
+        register_zkr,
         serde::to_vec,
         sha::Digestible,
         Assumption, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt,
@@ -907,6 +908,82 @@ mod sys_verify {
             .prove(env, MULTI_TEST_ELF)
             .is_err());
     }
+
+    #[test]
+    fn sys_execute_zkr() {
+        // Random Poseidon2 "digest" to act as the "control root".
+        let suite = Poseidon2HashSuite::new_suite();
+        let (program, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+        register_zkr(&control_id, move || Ok(program.clone()));
+        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+
+        let inner_claim_digest =
+            digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+        let claim_digest =
+            digest!("a558268a11892374b41d03857a40cdc5e87e351a3bfc17aa2054f47712a17bc3");
+
+        let mut input: Vec<u32> = Vec::new();
+        input.extend(control_root.as_words());
+        input.extend(inner_claim_digest.as_words());
+
+        let spec = &MultiTestSpec::SysExecuteZkr {
+            control_id,
+            input,
+            claim_digest,
+            control_root,
+        };
+
+        // Test that we can produce a verifying CompositeReceipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let receipt = get_prover_server(&ProverOpts::fast())
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt;
+        receipt.verify(MULTI_TEST_ID).unwrap();
+        // Double-check that the result is a composite receipt.
+        receipt.inner.composite().unwrap();
+    }
+}
+
+const RUN_UNCONSTRAINED_PO2: u32 = 17;
+const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
+
+#[test]
+fn run_unconstrained() -> Result<()> {
+    for unconstrained in [false, true] {
+        let spec = MultiTestSpec::RunUnconstrained {
+            unconstrained,
+            cycles: RUN_UNCONSTRAINED_CYCLES,
+        };
+        let env = ExecutorEnv::builder()
+            .segment_limit_po2(RUN_UNCONSTRAINED_PO2)
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?.run()?;
+        let receipt = prove_session_fast(&session);
+        let segments = &receipt.inner.composite().unwrap().segments;
+
+        if unconstrained {
+            // Test
+            assert_eq!(segments.len(), 1);
+        } else {
+            // Control
+            assert_eq!(
+                segments.len(),
+                2,
+                "Expecting 2 segments; adjust RUN_UNCONSTRAINED_CYCLES here, or CYCLES_PER_LOOP in multi_test?"
+            );
+        }
+    }
+    Ok(())
 }
 
 mod soundness {
@@ -929,7 +1006,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::proven::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 41.757866);
+        assert_eq!(security, 41.752773);
     }
 
     #[test]
@@ -940,7 +1017,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 74.90123);
+        assert_eq!(security, 74.90066);
     }
 
     #[test]
