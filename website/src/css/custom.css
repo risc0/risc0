@@ -81,6 +81,10 @@
   background-color: var(--ifm-hover-overlay);
 }
 
+[data-theme="dark"] .navbar__logo {
+  filter: invert(1)
+}
+
 @media (max-width: 996px) {
   .navbar__items--right > div:has(.DocSearch-Button) {
     position: relative;

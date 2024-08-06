@@ -13,7 +13,7 @@ export default async function createConfigAsync() {
   return {
     title: "RISC Zero Developer Docs",
     tagline: "Hyper-Efficient General Purpose Zero-Knowledge Computing.",
-    favicon: "img/logo.png",
+    favicon: "img/favicon.ico",
 
     url: "https://dev.risczero.com",
     baseUrl: baseUrl,
@@ -137,12 +137,11 @@ export default async function createConfigAsync() {
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({
-        image: "img/logo.png",
+        image: "img/logo.svg",
         navbar: {
-          title: "RISC Zero",
           logo: {
-            alt: "RISC Zero Logo",
-            src: "img/logo.png",
+            alt: "RISC Zero",
+            src: "img/logo.svg",
             href: "https://risczero.com/",
           },
           items: [
