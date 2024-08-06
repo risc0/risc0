@@ -4,6 +4,11 @@
 export default {
   api: [
     {
+      type: "html",
+      value: '<h4 class="sidebar-heading">LEARN <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true
+    },
+    {
       type: "doc",
       label: "Introduction",
       id: "introduction",
@@ -12,11 +17,6 @@ export default {
       type: "doc",
       label: "What does RISC Zero enable?",
       id: "use-cases",
-    },
-    {
-      type: "doc",
-      label: "Getting Started",
-      id: "getting-started",
     },
     {
       type: "category",
@@ -51,9 +51,19 @@ export default {
       ],
     },
     {
+      type: "html",
+      value: '<h4 class="sidebar-heading">Build <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true
+    },
+    {
+      type: "doc",
+      label: "Getting Started",
+      id: "getting-started",
+    },
+    {
       type: "category",
       label: "Writing your zkVM Application",
-      collapsed: false,
+      collapsed: true,
       items: [
         {
           type: "doc",
@@ -172,6 +182,11 @@ export default {
           id: "blockchain-integration/contracts/verifier",
         },
       ],
+    },
+    {
+      type: "html",
+      value: '<h4 class="sidebar-heading">Miscellaneous <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true
     },
     {
       type: "category",
