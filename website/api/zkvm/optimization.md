@@ -421,9 +421,9 @@ cycle counts added.
 | LW rd,offset(rs1)   | Load Word                          | rd ← s32[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
 | LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
 | LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1)  | Store Byte                         | u8[rs1 + offset] ← rs2                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SH rs2,offset(rs1)  | Store Half                         | u16[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SW rs2,offset(rs1)  | Store Word                         | u32[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8[rs1 + offset] ← rs2                         | 1 if [dirty](#paging) 1094 to 5130 otherwise    |
+| SH rs2,offset(rs1)  | Store Half                         | u16[rs1 + offset] ← rs2                        | 1 if [dirty](#paging) 1094 to 5130 otherwise    |
+| SW rs2,offset(rs1)  | Store Word                         | u32[rs1 + offset] ← rs2                        | 1 if [dirty](#paging) 1094 to 5130 otherwise    |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
 | SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
 | SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
