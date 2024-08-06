@@ -15,7 +15,7 @@
 use anyhow::Result;
 use clap::Args;
 
-use crate::{cargo_risczero::CargoRisczero, toolchain::Toolchain};
+use crate::{r0vm::R0vm, toolchain::Toolchain};
 
 #[derive(Debug, Default, Args)]
 pub struct UpdateOpts {
@@ -24,8 +24,8 @@ pub struct UpdateOpts {
         num_args = 1..,
     )]
     pub toolchain: Option<Toolchain>,
-    #[arg(help = "Update cargo-risczero")]
-    pub cargo_risczero: bool,
+    #[arg(help = "Update r0vm")]
+    pub r0vm: bool,
     /// Force the update, ignoring existing installations and downloads
     #[arg(short, long)]
     pub force: bool,
@@ -33,17 +33,17 @@ pub struct UpdateOpts {
 
 pub async fn handler(opts: UpdateOpts) -> Result<()> {
     // Update all by default if no specific toolchain or extension is provided
-    if opts.toolchain.is_none() && !opts.cargo_risczero {
+    if opts.toolchain.is_none() && !opts.r0vm {
         Toolchain::Rust.install(None, opts.force).await?;
         Toolchain::Cpp.install(None, opts.force).await?;
-        CargoRisczero::install(None, opts.force).await?;
+        R0vm::install(None, opts.force).await?;
     } else {
         // Update specific toolchain or extension if provided
         if let Some(toolchain) = opts.toolchain {
             toolchain.install(None, opts.force).await?;
         }
-        if opts.cargo_risczero {
-            CargoRisczero::install(None, opts.force).await?;
+        if opts.r0vm {
+            R0vm::install(None, opts.force).await?;
         }
     }
     Ok(())

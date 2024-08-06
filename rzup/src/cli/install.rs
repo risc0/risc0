@@ -15,7 +15,7 @@
 use anyhow::{anyhow, Result};
 use clap::Args;
 
-use crate::{cargo_risczero::CargoRisczero, toolchain::Toolchain};
+use crate::{r0vm::R0vm, toolchain::Toolchain};
 
 #[derive(Debug, Args)]
 pub struct InstallOpts {
@@ -30,14 +30,14 @@ pub async fn handler(opts: InstallOpts) -> Result<()> {
         // Install all default
         Toolchain::Rust.install(None, opts.force).await?;
         Toolchain::Cpp.install(None, opts.force).await?;
-        CargoRisczero::install(None, opts.force).await?;
+        R0vm::install(None, opts.force).await?;
     } else {
         let name = opts.name.unwrap();
         let version = opts.version.as_deref();
         if let Ok(toolchain) = name.parse::<Toolchain>() {
             toolchain.install(version, opts.force).await?
-        } else if name.parse::<CargoRisczero>().is_ok() {
-            CargoRisczero::install(version, opts.force).await?
+        } else if name.parse::<R0vm>().is_ok() {
+            R0vm::install(version, opts.force).await?
         } else {
             return Err(anyhow!(
                 "invalid value '{}' for '<install>...' \n\nFor more information try '--help'.",

@@ -26,7 +26,7 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
 };
 
-use crate::{cargo_risczero::CargoRisczero, errors::RzupError, toolchain::Toolchain, verbose_msg};
+use crate::{r0vm::R0vm, errors::RzupError, toolchain::Toolchain, verbose_msg};
 
 pub mod command;
 pub mod notify;
@@ -134,7 +134,7 @@ pub fn find_installed_toolchains() -> Result<Vec<String>, RzupError> {
 }
 
 /// Finds and returns the version of the installed `cargo-risczero`.
-pub fn find_cargo_risczero_version() -> Result<String> {
+pub fn find_r0vm_version() -> Result<String> {
     let out = Command::new("cargo")
         .args(["risczero", "--version"])
         .capture_stdout()
@@ -294,21 +294,21 @@ pub struct UpdateInfo {
 }
 
 /// Gets update information for the active cargo-risczero extension.
-async fn check_cargo_risczero_updates() -> Result<UpdateInfo, RzupError> {
-    let latest_cargo_risczero_version_info = CargoRisczero::release_info(None).await?;
-    let latest_cargo_risczero_version_tag = latest_cargo_risczero_version_info.tag_name;
-    let installed_cargo_risczero_version = find_cargo_risczero_version()?;
-    let installed_cargo_risczero_tag = format!("v{}", installed_cargo_risczero_version);
-    let installed_cargo_risczero_release_info =
-        CargoRisczero::release_info(Some(&installed_cargo_risczero_tag)).await?;
+async fn check_r0vm_updates() -> Result<UpdateInfo, RzupError> {
+    let latest_r0vm_version_info = R0vm::release_info(None).await?;
+    let latest_r0vm_version_tag = latest_r0vm_version_info.tag_name;
+    let installed_r0vm_version = find_r0vm_version()?;
+    let installed_r0vm_tag = format!("v{}", installed_r0vm_version);
+    let installed_r0vm_release_info =
+        R0vm::release_info(Some(&installed_r0vm_tag)).await?;
 
     Ok(UpdateInfo {
         name: "cargo-risczero".to_string(),
-        current_version: installed_cargo_risczero_version.clone(),
-        current_published_at: installed_cargo_risczero_release_info.published_at.clone(),
-        latest_version: latest_cargo_risczero_version_tag.to_string(),
-        latest_published_at: latest_cargo_risczero_version_info.published_at.clone(),
-        up_to_date: installed_cargo_risczero_tag == latest_cargo_risczero_version_tag,
+        current_version: installed_r0vm_version.clone(),
+        current_published_at: installed_r0vm_release_info.published_at.clone(),
+        latest_version: latest_r0vm_version_tag.to_string(),
+        latest_published_at: latest_r0vm_version_info.published_at.clone(),
+        up_to_date: installed_r0vm_tag == latest_r0vm_version_tag,
     })
 }
 
@@ -374,7 +374,7 @@ pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>, RzupError> {
         ));
     }
 
-    updates.push(check_cargo_risczero_updates().await?);
+    updates.push(check_r0vm_updates().await?);
     updates.push(check_rust_toolchain_updates().await?);
     updates.push(check_cpp_toolchain_updates().await?);
 

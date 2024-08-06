@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod cargo_risczero;
+pub mod r0vm;
 pub mod cli;
 pub mod errors;
 pub mod repo;

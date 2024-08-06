@@ -19,7 +19,7 @@ use termcolor::StandardStream;
 use crate::{
     pretty_header, pretty_msg, pretty_msgln,
     utils::{
-        find_active_toolchain_name, find_cargo_risczero_version, find_installed_toolchains,
+        find_active_toolchain_name, find_r0vm_version, find_installed_toolchains,
         get_gcc_version, get_rustc_version, rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
     },
 };
@@ -60,7 +60,7 @@ fn show_all(entries: Vec<String>) -> Result<()> {
     pretty_msg!(&mut stdout, true, None, "rzup home: ");
     pretty_msgln!(&mut stdout, false, None, rzup_home()?.to_str().unwrap());
 
-    let cargo_risczero_version = find_cargo_risczero_version()?;
+    let cargo_risczero_version = find_r0vm_version()?;
 
     pretty_msg!(&mut stdout, true, None, "cargo-risczero: ");
     pretty_msgln!(&mut stdout, false, None, &cargo_risczero_version);

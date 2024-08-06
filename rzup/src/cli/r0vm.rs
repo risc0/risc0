@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use crate::{cargo_risczero::CargoRisczero, cli, utils::find_installed_extensions};
+use crate::{r0vm::R0vm, cli, utils::find_installed_extensions};
 use anyhow::Result;
 use clap::Subcommand;
 use regex::Regex;
@@ -23,9 +23,9 @@ use regex::Regex;
 #[command(
     arg_required_else_help = true,
     subcommand_required = true,
-    after_help = cli::help::CARGO_RISCZERO_HELP
+    after_help = cli::help::R0VM_HELP
 )]
-pub enum CargoRisczeroSubcmd {
+pub enum R0vmSubcmd {
     /// List all installed extensions
     List,
     /// Install cargo-risczero (i.e cargo-risczero v1.0.1)
@@ -46,23 +46,23 @@ pub enum CargoRisczeroSubcmd {
     Uninstall,
 }
 
-pub async fn handler(subcmd: CargoRisczeroSubcmd) -> Result<()> {
+pub async fn handler(subcmd: R0vmSubcmd) -> Result<()> {
     match subcmd {
-        CargoRisczeroSubcmd::Install { version, force } => {
-            CargoRisczero::install(version.as_deref(), force).await
+        R0vmSubcmd::Install { version, force } => {
+            R0vm::install(version.as_deref(), force).await
         }
-        CargoRisczeroSubcmd::List => {
+        R0vmSubcmd::List => {
             let extensions = find_installed_extensions()?;
             for extension in extensions {
                 eprintln!("{}", extension.file_name().unwrap().to_string_lossy());
             }
             Ok(())
         }
-        CargoRisczeroSubcmd::Use { version } => {
+        R0vmSubcmd::Use { version } => {
             let extension_path = parse_version(version)?;
-            CargoRisczero::link(&extension_path)
+            R0vm::link(&extension_path)
         }
-        CargoRisczeroSubcmd::Uninstall => CargoRisczero::unlink(),
+        R0vmSubcmd::Uninstall => R0vm::unlink(),
     }
 }
 
@@ -81,7 +81,7 @@ fn parse_version(version: String) -> Result<PathBuf> {
     }
     Err(anyhow::anyhow!(format!(
         "No matching {} found for version {}. \n\nFor more information, try '--help'.",
-        CargoRisczero::to_str(),
+        R0vm::to_str(),
         version
     )))
 }

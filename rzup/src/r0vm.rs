@@ -34,20 +34,20 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Copy, Default)]
-pub struct CargoRisczero {}
+pub struct R0vm {}
 
-impl FromStr for CargoRisczero {
+impl FromStr for R0vm {
     type Err = RzupError;
 
-    fn from_str(input: &str) -> Result<CargoRisczero, Self::Err> {
+    fn from_str(input: &str) -> Result<R0vm, Self::Err> {
         match input.to_lowercase().as_str() {
-            "cargo-risczero" => Ok(CargoRisczero {}),
+            "cargo-risczero" => Ok(R0vm {}),
             _ => Err(RzupError::InvalidToolchain),
         }
     }
 }
 
-impl CargoRisczero {
+impl R0vm {
     pub fn to_str() -> &'static str {
         "cargo-risczero"
     }

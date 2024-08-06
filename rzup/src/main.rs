@@ -77,7 +77,7 @@ enum RzupSubcmd {
         /// Toolchain to update (i.e. rust or cpp)
         toolchain: Option<toolchain::Toolchain>,
         /// Update cargo-risczero
-        cargo_risczero: bool,
+        r0vm: bool,
         /// Force the update, ignoring existing installations and downloads
         #[arg(short, long)]
         force: bool,
@@ -99,9 +99,9 @@ enum RzupSubcmd {
         subcmd: cli::toolchain::ToolchainSubcmd,
     },
     /// Modify or query the installed cargo-risczero utility
-    CargoRisczero {
+    R0vm {
         #[command(subcommand)]
-        subcmd: cli::cargo_risczero::CargoRisczeroSubcmd,
+        subcmd: cli::r0vm::R0vmSubcmd,
     },
     /// Modify the rzup installation
     Self_ {
@@ -162,12 +162,12 @@ async fn run() -> Result<()> {
         }
         RzupSubcmd::Update {
             toolchain,
-            cargo_risczero,
+            r0vm,
             force,
         } => {
             cli::update::handler(cli::update::UpdateOpts {
                 toolchain,
-                cargo_risczero,
+                r0vm,
                 force,
             })
             .await
@@ -175,7 +175,7 @@ async fn run() -> Result<()> {
         RzupSubcmd::Check => cli::check::handler().await,
         RzupSubcmd::Default { toolchain, name } => cli::default::handler(toolchain, name),
         RzupSubcmd::Toolchain { subcmd } => cli::toolchain::handler(subcmd).await,
-        RzupSubcmd::CargoRisczero { subcmd } => cli::cargo_risczero::handler(subcmd).await,
+        RzupSubcmd::R0vm { subcmd } => cli::r0vm::handler(subcmd).await,
         RzupSubcmd::Self_ { subcmd } => cli::self_::handler(subcmd).await,
     }
 }
