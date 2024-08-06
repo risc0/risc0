@@ -20,9 +20,10 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Context, Result};
 use flate2::bufread::GzDecoder;
 use tar::Archive;
+
+use anyhow::{anyhow, Context, Result};
 use tempfile::tempdir;
 
 use crate::{
@@ -41,7 +42,7 @@ impl FromStr for R0vm {
 
     fn from_str(input: &str) -> Result<R0vm, Self::Err> {
         match input.to_lowercase().as_str() {
-            "cargo-risczero" => Ok(R0vm {}),
+            "r0vm" => Ok(R0vm {}),
             _ => Err(RzupError::InvalidToolchain),
         }
     }
@@ -49,7 +50,7 @@ impl FromStr for R0vm {
 
 impl R0vm {
     pub fn to_str() -> &'static str {
-        "cargo-risczero"
+        "r0vm"
     }
 
     fn api_url(tag: Option<&str>) -> String {
@@ -91,47 +92,44 @@ impl R0vm {
 
         let temp_dir = tempdir()?;
 
-        let temp_file_path = temp_dir.path().join("tmp_cargo_risczero_extension.tgz");
+        let temp_file_path = temp_dir.path().join("tmp_r0vm_server.tgz");
 
         let release_info = Self::release_info(tag).await?;
-        let Some(asset) = release_info.assets.get(&target) else {
-            return Err(
-                RzupError::Other(format!("No asset found for target: {:?}", target)).into(),
-            );
-        };
+        let version = &release_info.tag_name[1..]; // TODO replace this hack with semver parsing
 
-        let cargo_risczero_dir = root_dir
-            .join(Self::to_str())
-            .join(&release_info.tag_name[1..]); // TODO replace this hack with semver parsing
+        let r0vm_dir = root_dir.join(Self::to_str()).join(&version);
 
         // Remove directory if it exists and force is set
-        if cargo_risczero_dir.is_dir() && force {
+        if r0vm_dir.is_dir() && force {
             info_msg!(format!(
                 "Extension path {} already exists - deleting existing files!",
-                cargo_risczero_dir.display()
+                r0vm_dir.display()
             ));
 
-            verbose_msg!(format!("deleting {}", cargo_risczero_dir.display()));
+            verbose_msg!(format!("deleting {}", r0vm_dir.display()));
 
-            fs::remove_dir_all(&cargo_risczero_dir)?;
+            fs::remove_dir_all(&r0vm_dir)?;
         }
 
         // Skip download if directory already exists and force is not set
-        if cargo_risczero_dir.is_dir() && !force {
+        if r0vm_dir.is_dir() && !force {
             info_msg!(format!(
                 "Extension path {} already exists - skipping download.",
-                cargo_risczero_dir.display()
+                r0vm_dir.display()
             ));
-            return Ok(cargo_risczero_dir);
+            return Ok(r0vm_dir);
         }
 
         info_msg!(format!("Downloading {} utility...", Self::to_str()));
+        let url = format!(
+            "https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/stage/r0vm/{}/{version}.tgz",
+            target.to_str()
+        );
 
-        verbose_msg!(format!(
-            "Requesting extension download from {}",
-            &asset.browser_download_url
-        ));
-        let response = client.get(&asset.browser_download_url).send().await?;
+        verbose_msg!(format!("Requesting extension download from {url}"));
+
+        let response = client.get(url).send().await?;
+
         if !response.status().is_success() {
             return Err(RzupError::Other(format!(
                 "Failed to download asset: {:?}",
@@ -169,9 +167,9 @@ impl R0vm {
         ));
 
         archive.unpack(&temp_extract_dir)?;
-        let binary_path = cargo_risczero_dir.join(Self::to_str());
+        let binary_path = r0vm_dir.join(Self::to_str());
 
-        fs::create_dir_all(&cargo_risczero_dir)?;
+        fs::create_dir_all(&r0vm_dir)?;
         fs::OpenOptions::new()
             .create(true)
             .write(true)
@@ -181,8 +179,13 @@ impl R0vm {
             temp_extract_dir.path().join(Self::to_str()).display(),
             binary_path.display(),
         ));
-        fs::copy(temp_extract_dir.path().join(Self::to_str()), &binary_path)?;
-
+        for entry in fs::read_dir(temp_extract_dir.path())? {
+            let entry = entry?;
+            let ty = entry.file_type()?;
+            if ty.is_file() {
+                fs::copy(entry.path(), &r0vm_dir.join(entry.file_name()))?;
+            }
+        }
 
         verbose_msg!("Setting extension permissons to 0o755");
 
@@ -190,7 +193,7 @@ impl R0vm {
         perms.set_mode(0o755);
         fs::set_permissions(&binary_path, perms)?;
 
-        Ok(cargo_risczero_dir)
+        Ok(r0vm_dir)
     }
 
     pub fn link(dir: &Path) -> Result<()> {
@@ -200,20 +203,20 @@ impl R0vm {
 
         Self::unlink()?;
 
-        let cargo_risczero_path = dir.join("cargo-risczero");
-        let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
+        let r0vm_path = dir.join("r0vm");
+        let r0vm_link = cargo_bin_dir.join("r0vm");
 
         verbose_msg!(format!(
             "Creating symlinks from {} to {}",
-            cargo_risczero_path.display(),
-            cargo_risczero_link.display()
+            r0vm_path.display(),
+            r0vm_link.display()
         ));
 
         // Create new symlinks
-        std::os::unix::fs::symlink(cargo_risczero_path, cargo_risczero_link)
-            .context("Failed to create symlink for cargo-risczero")?;
+        std::os::unix::fs::symlink(r0vm_path, r0vm_link)
+            .context("Failed to create symlink for r0vm")?;
         info_msg!(format!(
-            "Symlinks for cargo-risczero created successfully at {}",
+            "Symlinks for r0vm created successfully at {}",
             cargo_bin_dir.display()
         ));
         Ok(())
@@ -224,18 +227,14 @@ impl R0vm {
             .ok_or_else(|| anyhow!("Could not determine home directory"))?
             .join(".cargo/bin");
 
-        let cargo_risczero_link = cargo_bin_dir.join("cargo-risczero");
+        let r0vm_link = cargo_bin_dir.join("r0vm");
 
         // Remove existing symlinks if they exist
-        if fs::symlink_metadata(&cargo_risczero_link).is_ok() {
-            verbose_msg!(format!(
-                "Removing cargo-risczero symlink at {}",
-                cargo_risczero_link.display()
-            ));
+        if fs::symlink_metadata(&r0vm_link).is_ok() {
+            verbose_msg!(format!("Removing r0vm symlink at {}", r0vm_link.display()));
 
-            fs::remove_file(&cargo_risczero_link)
-                .context("Failed to remove existing cargo-risczero symlink")?;
-            info_msg!("Symlinks for cargo-risczero removed successfully");
+            fs::remove_file(&r0vm_link).context("Failed to remove existing r0vm symlink")?;
+            info_msg!("Symlinks for r0vm removed successfully");
         }
         Ok(())
     }
@@ -249,8 +248,8 @@ impl R0vm {
         let lockfile_path = root_dir.join("ext-lock");
         let _lock = flock(&lockfile_path)?;
 
-        let cargo_risczero_path = Self::download(target, tag, &root_dir, force).await?;
-        Self::link(&cargo_risczero_path)?;
+        let r0vm_path = Self::download(target, tag, &root_dir, force).await?;
+        Self::link(&r0vm_path)?;
         Ok(())
     }
 }

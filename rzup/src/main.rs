@@ -98,7 +98,7 @@ enum RzupSubcmd {
         #[command(subcommand)]
         subcmd: cli::toolchain::ToolchainSubcmd,
     },
-    /// Modify or query the installed cargo-risczero utility
+    /// Modify or query the installed r0vm server
     R0vm {
         #[command(subcommand)]
         subcmd: cli::r0vm::R0vmSubcmd,

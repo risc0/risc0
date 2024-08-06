@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use crate::{r0vm::R0vm, cli, utils::find_installed_extensions};
+use crate::{cli, r0vm::R0vm, utils::find_installed_extensions};
 use anyhow::Result;
 use clap::Subcommand;
 use regex::Regex;
@@ -48,9 +48,7 @@ pub enum R0vmSubcmd {
 
 pub async fn handler(subcmd: R0vmSubcmd) -> Result<()> {
     match subcmd {
-        R0vmSubcmd::Install { version, force } => {
-            R0vm::install(version.as_deref(), force).await
-        }
+        R0vmSubcmd::Install { version, force } => R0vm::install(version.as_deref(), force).await,
         R0vmSubcmd::List => {
             let extensions = find_installed_extensions()?;
             for extension in extensions {

@@ -19,8 +19,8 @@ use termcolor::StandardStream;
 use crate::{
     pretty_header, pretty_msg, pretty_msgln,
     utils::{
-        find_active_toolchain_name, find_r0vm_version, find_installed_toolchains,
-        get_gcc_version, get_rustc_version, rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
+        find_active_toolchain_name, find_installed_toolchains, find_r0vm_version, get_gcc_version,
+        get_rustc_version, rzup_home, CPP_TOOLCHAIN_NAME, RUSTUP_TOOLCHAIN_NAME,
     },
 };
 

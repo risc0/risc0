@@ -26,7 +26,7 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
 };
 
-use crate::{r0vm::R0vm, errors::RzupError, toolchain::Toolchain, verbose_msg};
+use crate::{errors::RzupError, r0vm::R0vm, toolchain::Toolchain, verbose_msg};
 
 pub mod command;
 pub mod notify;
@@ -299,8 +299,7 @@ async fn check_r0vm_updates() -> Result<UpdateInfo, RzupError> {
     let latest_r0vm_version_tag = latest_r0vm_version_info.tag_name;
     let installed_r0vm_version = find_r0vm_version()?;
     let installed_r0vm_tag = format!("v{}", installed_r0vm_version);
-    let installed_r0vm_release_info =
-        R0vm::release_info(Some(&installed_r0vm_tag)).await?;
+    let installed_r0vm_release_info = R0vm::release_info(Some(&installed_r0vm_tag)).await?;
 
     Ok(UpdateInfo {
         name: "cargo-risczero".to_string(),

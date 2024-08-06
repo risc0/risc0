@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod r0vm;
 pub mod check;
 pub mod default;
 pub mod help;
 pub mod install;
+pub mod r0vm;
 pub mod self_;
 pub mod show;
 pub mod toolchain;
