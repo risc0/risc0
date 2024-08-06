@@ -225,9 +225,9 @@ export default async function createConfigAsync() {
           respectPrefersColorScheme: false,
         },
         mermaid: {
-          theme: { light: 'default', dark: 'dark' },
+          theme: { light: "default", dark: "dark" },
           options: {
-            'fontFamily': "var(--ifm-heading-font-family)",
+            fontFamily: "var(--ifm-heading-font-family)",
             themeVariables: {
               fontSize: "12px",
               mainBkg: "rgba(255,255,255,0.9)",
@@ -235,8 +235,8 @@ export default async function createConfigAsync() {
               nodeBorder: "var(--ifm-color-emphasis-500)",
               clusterBorder: "var(--ifm-color-emphasis-300)",
               clusterBkg: "var(--ifm-color-emphasis-200)",
-            }
-          }
+            },
+          },
         },
         algolia: {
           appId: "TQC8F4X8Z5",
