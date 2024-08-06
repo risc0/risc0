@@ -142,7 +142,7 @@ export default async function createConfigAsync() {
           logo: {
             alt: "RISC Zero",
             src: "img/logo.svg",
-            href: "https://risczero.com/",
+            href: "https://risczero.com",
           },
           items: [
             {
@@ -170,6 +170,11 @@ export default async function createConfigAsync() {
               position: "right",
               docsPluginId: "api",
               class: "docsVersionDropdown",
+            },
+            {
+              href: "https://www.risczero.com/blog",
+              position: "right",
+              label: "Blog",
             },
             {
               href: "https://github.com/risc0",
