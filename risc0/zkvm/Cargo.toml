@@ -127,7 +127,6 @@ cuda = [
   "risc0-zkp/cuda",
 ]
 dual = []
-metal = []
 default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
@@ -140,6 +139,7 @@ docker = []
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
 getrandom = ["risc0-zkvm-platform/getrandom"]
+metal = ["prove"]
 prove = [
   "client",
   "dep:addr2line",

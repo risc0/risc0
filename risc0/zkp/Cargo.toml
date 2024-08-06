@@ -61,7 +61,7 @@ borsh = ["dep:borsh"]
 circuit_debug = []
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
 default = []
-metal = []
+metal = ["prove"]
 metal_prefix_products = []
 prove = [
   "dep:ff",
