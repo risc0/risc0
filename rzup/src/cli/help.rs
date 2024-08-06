@@ -57,7 +57,7 @@ pub static CHECK_HELP: &str = r"Discussion:
     updates are needed.
 
     For more information on your installed toolchains or extensions, consider running
-    `rzup toolchain list` or `rzup extension list`.";
+    `rzup toolchain list` or `rzup r0vm list`.";
 
 pub static TOOLCHAIN_HELP: &str = r"Discussion:
     The `toolchain` command allows you to manage RISC Zero toolchains. You can list

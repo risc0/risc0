@@ -299,7 +299,7 @@ async fn check_r0vm_updates() -> Result<UpdateInfo, RzupError> {
     let latest_version = R0vm::latest_version().await?;
     let installed_version = find_r0vm_version()?;
     let comp = semver::Comparator {
-        op: semver::Op::GreaterEq,
+        op: semver::Op::Less,
         major: installed_version.major,
         minor: Some(installed_version.minor),
         patch: Some(installed_version.patch),
@@ -366,7 +366,7 @@ async fn check_cpp_toolchain_updates() -> Result<UpdateInfo, RzupError> {
 pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>, RzupError> {
     let mut updates = Vec::new();
 
-    if !is_extensions_installed()? {
+    if !is_r0vm_installed()? {
         return Err(RzupError::Other(
             "No installed extensions detected. \n\nFor more information, try '--help'".to_string(),
         ));
@@ -386,12 +386,12 @@ pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>, RzupError> {
 }
 
 /// Checks if any extensions are installed.
-pub fn is_extensions_installed() -> Result<bool, RzupError> {
-    let extensions_dir = rzup_home()?.join("extensions");
-    if !extensions_dir.exists() {
+pub fn is_r0vm_installed() -> Result<bool, RzupError> {
+    let r0vm_dir = rzup_home()?.join("r0vm");
+    if !r0vm_dir.exists() {
         return Ok(false);
     }
-    let mut entries = fs::read_dir(&extensions_dir)?;
+    let mut entries = fs::read_dir(&r0vm_dir)?;
     if entries.next().is_none() {
         return Ok(false);
     }
