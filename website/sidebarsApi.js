@@ -5,8 +5,9 @@ export default {
   api: [
     {
       type: "html",
-      value: '<h4 class="sidebar-heading">LEARN <span class="sidebar-heading-divider"></span></h4>',
-      defaultStyle: true
+      value:
+        '<h4 class="sidebar-heading">LEARN <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true,
     },
     {
       type: "doc",
@@ -52,8 +53,9 @@ export default {
     },
     {
       type: "html",
-      value: '<h4 class="sidebar-heading">Build <span class="sidebar-heading-divider"></span></h4>',
-      defaultStyle: true
+      value:
+        '<h4 class="sidebar-heading">Build <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true,
     },
     {
       type: "doc",
@@ -185,8 +187,9 @@ export default {
     },
     {
       type: "html",
-      value: '<h4 class="sidebar-heading">Miscellaneous <span class="sidebar-heading-divider"></span></h4>',
-      defaultStyle: true
+      value:
+        '<h4 class="sidebar-heading">Miscellaneous <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true,
     },
     {
       type: "category",
