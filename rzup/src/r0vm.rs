@@ -21,6 +21,7 @@ use std::{
 };
 
 use flate2::bufread::GzDecoder;
+use semver::Version;
 use tar::Archive;
 
 use anyhow::{bail, Context, Result};
@@ -29,7 +30,6 @@ use tempfile::tempdir;
 use crate::{
     errors::RzupError,
     info_msg,
-    repo::GithubReleaseInfo,
     utils::{flock, http_client, rzup_home, target::Target},
     verbose_msg,
 };
@@ -53,38 +53,30 @@ impl R0vm {
         "r0vm"
     }
 
-    fn api_url(tag: Option<&str>) -> String {
-        let base_url = "https://api.github.com/repos/risc0/risc0/releases";
-        match tag {
-            Some(tag) => format!("{}/tags/{}", base_url, tag),
-            None => format!("{}/latest", base_url),
-        }
-    }
-
-    pub async fn release_info(tag: Option<&str>) -> Result<GithubReleaseInfo> {
+    pub async fn latest_version() -> Result<Version> {
         let client = http_client()?;
+        let url =
+            "https://risc0-artifacts.s3.us-west-2.amazonaws.com/rzup/stage/r0vm/latest-version.txt";
 
-        let url = Self::api_url(tag);
+        verbose_msg!(format!("Getting r0vm release info from {}", url));
 
-        verbose_msg!(format!("Getting extension release info from {}", &url));
+        let res = client.get(url).send().await?;
 
-        let res = client.get(&url).send().await?;
-
-        if res.status() == 403 {
-            return Err(RzupError::Other(
-                "Rate limited by GitHub API. Please set a GitHub token in the GITHUB_TOKEN environment variable."
-                    .into(),
-            ).into());
+        if !res.status().is_success() {
+            bail!(
+                "Error {}: Failed to get latest release info ",
+                res.status().as_str()
+            );
         }
+        let latest_version: Version =
+            Version::parse(std::str::from_utf8(&res.bytes().await?)?.trim_end())?;
 
-        let release_info: GithubReleaseInfo = res.json().await?;
-
-        Ok(release_info)
+        Ok(latest_version)
     }
 
     async fn download(
         target: &Target,
-        tag: Option<&str>,
+        version: Option<&semver::Version>,
         root_dir: &Path,
         force: bool,
     ) -> Result<PathBuf> {
@@ -94,10 +86,12 @@ impl R0vm {
 
         let temp_file_path = temp_dir.path().join("tmp_r0vm_server.tgz");
 
-        let release_info = Self::release_info(tag).await?;
-        let version = &release_info.tag_name[1..]; // TODO replace this hack with semver parsing
+        let version = match version {
+            None => Self::latest_version().await?,
+            Some(version) => version.clone(),
+        };
 
-        let r0vm_dir = root_dir.join(Self::to_str()).join(&version);
+        let r0vm_dir = root_dir.join(Self::to_str()).join(&version.to_string());
 
         // Remove directory if it exists and force is set
         if r0vm_dir.is_dir() && force {
@@ -173,7 +167,10 @@ impl R0vm {
             let ty = entry.file_type()?;
             if ty.is_file() {
                 let binary_path = r0vm_dir.join(entry.file_name());
-                verbose_msg!(format!("Setting {} permissons to 0o755", binary_path.display()));
+                verbose_msg!(format!(
+                    "Setting {} permissons to 0o755",
+                    binary_path.display()
+                ));
                 let mut perms = fs::metadata(&binary_path)?.permissions();
                 perms.set_mode(0o755);
                 fs::set_permissions(&binary_path, perms)?;
@@ -243,20 +240,22 @@ impl R0vm {
 
         info_msg!(format!(
             "Creating symlink between {} and {}",
-            r0vm_binary.display(), r0vm_link.display()
+            r0vm_binary.display(),
+            r0vm_link.display()
         ));
 
         std::os::unix::fs::symlink(&r0vm_binary, &r0vm_link)
             .context("Failed to create symlink for r0vm")?;
         info_msg!(format!(
             "Symlinks for {} created successfully at {}",
-            r0vm_binary.display(), r0vm_link.display()
+            r0vm_binary.display(),
+            r0vm_link.display()
         ));
 
         Ok(())
     }
 
-    pub async fn install(tag: Option<&str>, force: bool) -> Result<()> {
+    pub async fn install(version: Option<&semver::Version>, force: bool) -> Result<()> {
         let target = Target::host_target()
             .ok_or_else(|| RzupError::Other("Failed to determine the host target".to_string()))?;
 
@@ -265,7 +264,7 @@ impl R0vm {
         let lockfile_path = root_dir.join("ext-lock");
         let _lock = flock(&lockfile_path)?;
 
-        let r0vm_path = Self::download(&target, tag, &root_dir, force).await?;
+        let r0vm_path = Self::download(&target, version, &root_dir, force).await?;
         Self::link(&r0vm_path)?;
         Ok(())
     }

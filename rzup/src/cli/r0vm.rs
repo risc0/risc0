@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::PathBuf;
-
-use crate::{cli, r0vm::R0vm, utils::find_installed_extensions};
+use crate::{cli, r0vm::R0vm, utils, utils::find_installed_extensions};
 use anyhow::Result;
 use clap::Subcommand;
-use regex::Regex;
 
 #[derive(Debug, Subcommand)]
 #[command(
@@ -32,7 +29,7 @@ pub enum R0vmSubcmd {
     #[command(aliases = ["add"])]
     Install {
         /// The version of the extension to install (e.g., v1.0.1)
-        version: Option<String>,
+        version: Option<semver::Version>,
         /// Force installation, removing existing directories
         #[arg(short, long)]
         force: bool,
@@ -40,7 +37,7 @@ pub enum R0vmSubcmd {
     /// Use an installed extension version
     Use {
         /// The version of cargo-risczero to use (e.g., v1.0.1)
-        version: String,
+        version: semver::Version,
     },
     /// Uninstall an installed extension
     Uninstall,
@@ -48,7 +45,7 @@ pub enum R0vmSubcmd {
 
 pub async fn handler(subcmd: R0vmSubcmd) -> Result<()> {
     match subcmd {
-        R0vmSubcmd::Install { version, force } => R0vm::install(version.as_deref(), force).await,
+        R0vmSubcmd::Install { version, force } => R0vm::install(version.as_ref(), force).await,
         R0vmSubcmd::List => {
             let extensions = find_installed_extensions()?;
             for extension in extensions {
@@ -57,29 +54,9 @@ pub async fn handler(subcmd: R0vmSubcmd) -> Result<()> {
             Ok(())
         }
         R0vmSubcmd::Use { version } => {
-            let extension_path = parse_version(version)?;
-            R0vm::link(&extension_path)
+            let r0vm_path = utils::rzup_home()?.join("r0vm").join(version.to_string());
+            R0vm::link(&r0vm_path)
         }
         R0vmSubcmd::Uninstall => R0vm::unlink(),
     }
-}
-
-fn parse_version(version: String) -> Result<PathBuf> {
-    let extensions = find_installed_extensions()?;
-    let version_pattern = format!(r"^(v)?{}(?:-.+)?$", regex::escape(&version));
-
-    let re = Regex::new(&version_pattern)?;
-
-    for ext in extensions {
-        if let Some(dir_name) = ext.file_name().and_then(|name| name.to_str()) {
-            if re.is_match(dir_name) {
-                return Ok(ext);
-            }
-        }
-    }
-    Err(anyhow::anyhow!(format!(
-        "No matching {} found for version {}. \n\nFor more information, try '--help'.",
-        R0vm::to_str(),
-        version
-    )))
 }

@@ -37,7 +37,12 @@ pub async fn handler(opts: InstallOpts) -> Result<()> {
         if let Ok(toolchain) = name.parse::<Toolchain>() {
             toolchain.install(version, opts.force).await?
         } else if name.parse::<R0vm>().is_ok() {
-            R0vm::install(version, opts.force).await?
+            match version {
+                None => R0vm::install(None, opts.force).await?,
+                Some(version) => {
+                    R0vm::install(Some(&semver::Version::parse(version)?), opts.force).await?
+                }
+            }
         } else {
             return Err(anyhow!(
                 "invalid value '{}' for '<install>...' \n\nFor more information try '--help'.",

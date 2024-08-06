@@ -18,6 +18,7 @@ use fs2::FileExt;
 use lazy_static::lazy_static;
 use regex::Regex;
 use reqwest::{header::HeaderMap, Client};
+use semver::Version;
 use std::{
     env,
     fs::{self, File, OpenOptions},
@@ -133,17 +134,17 @@ pub fn find_installed_toolchains() -> Result<Vec<String>, RzupError> {
     Ok(string_entries)
 }
 
-/// Finds and returns the version of the installed `cargo-risczero`.
-pub fn find_r0vm_version() -> Result<String> {
-    let out = Command::new("cargo")
-        .args(["risczero", "--version"])
+/// Finds and returns the version of the installed `r0vm`.
+pub fn find_r0vm_version() -> Result<Version> {
+    let out = Command::new("r0vm")
+        .args(["--version"])
         .capture_stdout()
-        .with_context(|| "Failed to detect cargo-risczero installation")?
+        .with_context(|| "Failed to detect r0vm installation")?
         .split_whitespace()
         .last()
-        .context("Error parsing cargo-risczero version")?
+        .context("Error parsing r0vm version")?
         .to_string();
-    Ok(out)
+    Ok(Version::parse(&out)?)
 }
 
 /// Finds and returns the name of the active toolchain for a given alias.
@@ -295,19 +296,23 @@ pub struct UpdateInfo {
 
 /// Gets update information for the active cargo-risczero extension.
 async fn check_r0vm_updates() -> Result<UpdateInfo, RzupError> {
-    let latest_r0vm_version_info = R0vm::release_info(None).await?;
-    let latest_r0vm_version_tag = latest_r0vm_version_info.tag_name;
-    let installed_r0vm_version = find_r0vm_version()?;
-    let installed_r0vm_tag = format!("v{}", installed_r0vm_version);
-    let installed_r0vm_release_info = R0vm::release_info(Some(&installed_r0vm_tag)).await?;
+    let latest_version = R0vm::latest_version().await?;
+    let installed_version = find_r0vm_version()?;
+    let comp = semver::Comparator {
+        op: semver::Op::GreaterEq,
+        major: installed_version.major,
+        minor: Some(installed_version.minor),
+        patch: Some(installed_version.patch),
+        pre: installed_version.clone().pre,
+    };
 
     Ok(UpdateInfo {
-        name: "cargo-risczero".to_string(),
-        current_version: installed_r0vm_version.clone(),
-        current_published_at: installed_r0vm_release_info.published_at.clone(),
-        latest_version: latest_r0vm_version_tag.to_string(),
-        latest_published_at: latest_r0vm_version_info.published_at.clone(),
-        up_to_date: installed_r0vm_tag == latest_r0vm_version_tag,
+        name: "r0vm".to_string(),
+        current_version: installed_version.to_string(),
+        current_published_at: "".to_string(),
+        latest_version: latest_version.to_string(),
+        latest_published_at: "".to_string(),
+        up_to_date: comp.matches(&latest_version),
     })
 }
 
@@ -436,15 +441,15 @@ fn find_all_directories(dir: &Path) -> Result<Vec<PathBuf>, RzupError> {
 
 /// Finds and returns all installed extensions.
 pub fn find_installed_extensions() -> Result<Vec<PathBuf>, RzupError> {
-    let extensions_dir = rzup_home()?.join("extensions");
+    let r0vm_dir = rzup_home()?.join("r0vm");
 
-    if !extensions_dir.exists() {
+    if !r0vm_dir.exists() {
         return Err(RzupError::Other(
             "No extensions installed. \n\nFor more information, try '--help'.".to_string(),
         ));
     }
 
-    let extensions = find_all_directories(&extensions_dir)?;
+    let extensions = find_all_directories(&r0vm_dir)?;
 
     if extensions.is_empty() {
         return Err(RzupError::Other(
