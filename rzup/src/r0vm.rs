@@ -23,7 +23,7 @@ use std::{
 use flate2::bufread::GzDecoder;
 use tar::Archive;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{bail, Context, Result};
 use tempfile::tempdir;
 
 use crate::{
@@ -83,7 +83,7 @@ impl R0vm {
     }
 
     async fn download(
-        target: Target,
+        target: &Target,
         tag: Option<&str>,
         root_dir: &Path,
         force: bool,
@@ -159,52 +159,43 @@ impl R0vm {
 
         let decoder = GzDecoder::new(BufReader::new(tarball));
         let mut archive = Archive::new(decoder);
-        let temp_extract_dir = tempdir()?;
         verbose_msg!(format!(
             "Unpacking {} to {}",
             Self::to_str(),
-            temp_extract_dir.path().display(),
+            r0vm_dir.display(),
         ));
-
-        archive.unpack(&temp_extract_dir)?;
-        let binary_path = r0vm_dir.join(Self::to_str());
 
         fs::create_dir_all(&r0vm_dir)?;
-        fs::OpenOptions::new()
-            .create(true)
-            .write(true)
-            .open(&binary_path)?;
-        verbose_msg!(format!(
-            "copying {} to {}",
-            temp_extract_dir.path().join(Self::to_str()).display(),
-            binary_path.display(),
-        ));
-        for entry in fs::read_dir(temp_extract_dir.path())? {
+        archive.unpack(&r0vm_dir)?;
+
+        for entry in fs::read_dir(&r0vm_dir)? {
             let entry = entry?;
             let ty = entry.file_type()?;
             if ty.is_file() {
-                fs::copy(entry.path(), &r0vm_dir.join(entry.file_name()))?;
+                let binary_path = r0vm_dir.join(entry.file_name());
+                verbose_msg!(format!("Setting {} permissons to 0o755", binary_path.display()));
+                let mut perms = fs::metadata(&binary_path)?.permissions();
+                perms.set_mode(0o755);
+                fs::set_permissions(&binary_path, perms)?;
             }
         }
 
-        verbose_msg!("Setting extension permissons to 0o755");
-
-        let mut perms = fs::metadata(&binary_path)?.permissions();
-        perms.set_mode(0o755);
-        fs::set_permissions(&binary_path, perms)?;
+        Self::select_hardware(&r0vm_dir, &target)?;
 
         Ok(r0vm_dir)
     }
 
     pub fn link(dir: &Path) -> Result<()> {
-        let cargo_bin_dir = dirs::home_dir()
-            .ok_or_else(|| anyhow!("Could not determine home directory"))?
-            .join(".cargo/bin");
+        let bin_dir = rzup_home()?.join("bin");
 
         Self::unlink()?;
 
+        if !bin_dir.exists() {
+            fs::create_dir_all(&bin_dir)?;
+        }
+
         let r0vm_path = dir.join("r0vm");
-        let r0vm_link = cargo_bin_dir.join("r0vm");
+        let r0vm_link = bin_dir.join("r0vm");
 
         verbose_msg!(format!(
             "Creating symlinks from {} to {}",
@@ -217,17 +208,14 @@ impl R0vm {
             .context("Failed to create symlink for r0vm")?;
         info_msg!(format!(
             "Symlinks for r0vm created successfully at {}",
-            cargo_bin_dir.display()
+            bin_dir.display()
         ));
         Ok(())
     }
 
     pub fn unlink() -> Result<()> {
-        let cargo_bin_dir = dirs::home_dir()
-            .ok_or_else(|| anyhow!("Could not determine home directory"))?
-            .join(".cargo/bin");
-
-        let r0vm_link = cargo_bin_dir.join("r0vm");
+        let bin_dir = rzup_home()?.join("bin");
+        let r0vm_link = bin_dir.join("r0vm");
 
         // Remove existing symlinks if they exist
         if fs::symlink_metadata(&r0vm_link).is_ok() {
@@ -236,6 +224,35 @@ impl R0vm {
             fs::remove_file(&r0vm_link).context("Failed to remove existing r0vm symlink")?;
             info_msg!("Symlinks for r0vm removed successfully");
         }
+        Ok(())
+    }
+
+    fn select_hardware(dir: &Path, target: &Target) -> Result<()> {
+        // link either r0vm-gpu or r0vm-cpu depending on the target.
+        let r0vm_name = match target {
+            Target::Aarch64AppleDarwin => "r0vm-gpu",
+            // TODO: on linux, check if gpu drivers are installed
+            Target::X86_64UnknownLinuxGnu => "r0vm-cpu",
+            tgt => {
+                info_msg!(format!("unsupported target {}", tgt.to_str()));
+                bail!("unsupported target {}", tgt.to_str());
+            }
+        };
+        let r0vm_binary = dir.join(r0vm_name);
+        let r0vm_link = dir.join("r0vm");
+
+        info_msg!(format!(
+            "Creating symlink between {} and {}",
+            r0vm_binary.display(), r0vm_link.display()
+        ));
+
+        std::os::unix::fs::symlink(&r0vm_binary, &r0vm_link)
+            .context("Failed to create symlink for r0vm")?;
+        info_msg!(format!(
+            "Symlinks for {} created successfully at {}",
+            r0vm_binary.display(), r0vm_link.display()
+        ));
+
         Ok(())
     }
 
@@ -248,7 +265,7 @@ impl R0vm {
         let lockfile_path = root_dir.join("ext-lock");
         let _lock = flock(&lockfile_path)?;
 
-        let r0vm_path = Self::download(target, tag, &root_dir, force).await?;
+        let r0vm_path = Self::download(&target, tag, &root_dir, force).await?;
         Self::link(&r0vm_path)?;
         Ok(())
     }
