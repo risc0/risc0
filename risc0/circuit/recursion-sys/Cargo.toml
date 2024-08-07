@@ -20,3 +20,4 @@ risc0-build-kernel = { workspace = true }
 [features]
 default = []
 cuda = ["dep:sppark", "risc0-sys/cuda"]
+metal = []

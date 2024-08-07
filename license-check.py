@@ -75,7 +75,7 @@ def main():
     root = repo_root()
     ret = 0
     for path in tracked_files():
-        if path.suffix in EXTENSIONS:
+        if path.suffix in EXTENSIONS and ".inc" not in path.suffixes:
             skip = False
             for path_start in SKIP_DIRS:
                 if str(path).startswith(path_start):

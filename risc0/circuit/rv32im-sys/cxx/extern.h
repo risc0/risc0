@@ -29,6 +29,10 @@
 
 namespace risc0::circuit::rv32im {
 
+Fp extern_isTrap(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args);
+
+void extern_setUserMode(void* ctx, size_t cycle, const char* extra, std::array<Fp, 1> args);
+
 void extern_halt(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> args);
 
 void extern_trace(void* ctx, size_t cycle, const char* extra, std::array<Fp, 1> args);

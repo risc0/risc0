@@ -16,6 +16,10 @@
 
 #include "fp.h"
 
+__device__ void extern_isTrap(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs);
+
+__device__ void extern_setUserMode(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs);
+
 __device__ void extern_halt(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs);
 
 __device__ void extern_trace(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs);

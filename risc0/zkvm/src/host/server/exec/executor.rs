@@ -66,10 +66,10 @@ impl<'a> ExecutorImpl<'a> {
     /// # Example
     /// ```
     /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
-    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
+    /// use risc0_zkvm_methods::{BENCH_ELF, bench::BenchmarkSpec};
     ///
     /// let env = ExecutorEnv::builder()
-    ///     .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 1))
+    ///     .write(&BenchmarkSpec::SimpleLoop { iters: 1 })
     ///     .unwrap()
     ///     .build()
     ///     .unwrap();
