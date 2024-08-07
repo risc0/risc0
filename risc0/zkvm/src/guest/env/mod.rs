@@ -83,9 +83,8 @@ use core::cell::OnceCell;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log,
-        sys_pause, syscall_2,
-        SyscallName,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
+        syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
