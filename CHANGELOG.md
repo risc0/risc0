@@ -8,7 +8,7 @@
 
 ### 🛠 Fixes
 
-* Improve zero-knowledge property of the prover by increasing the amount of noise. We have used techniques described in this [paper](https://eprint.iacr.org/2024/1037.pdf) to strengthen the ZK property of the prover. This change results in a new set of control IDs. See the breaking changes section to learn more about this minor breaking change. https://github.com/risc0/risc0/pull/1970
+* Improve zero-knowledge property of the prover by increasing the amount of noise. We have used techniques described in this [paper](https://eprint.iacr.org/2024/1037.pdf) to strengthen the ZK property of the prover. See [these docs](https://dev.risczero.com/api/security-model#zero-knowledge-proving) for more information about zero knowledge and our proving system. This change results in a new set of control IDs. See the breaking changes section to learn more about this minor breaking change. https://github.com/risc0/risc0/pull/1970
 * Fix template generation for `--nostd` mode. https://github.com/risc0/risc0/pull/2030
 * Serializer: fix serialization of types such as `chronos::NaiveDate` that call into `collect_str`. https://github.com/risc0/risc0/pull/2035
 * Fix build output. The build output from host and guest compilations were intermingled. A fix has been made to clean up the output.  https://github.com/risc0/risc0/pull/1826
