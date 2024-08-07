@@ -81,13 +81,18 @@ impl Prover for BonsaiProver {
         let session = client.create_session(image_id_hex, input_id, receipts_ids, false)?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
+        // TODO(#1759): Improve upon this polling solution.
+        let polling_interval = if let Ok(ms) = std::env::var("BONSAI_POLL_INTERVAL_MS") {
+            Duration::from_millis(ms.parse().context("invalid bonsai poll interval")?)
+        } else {
+            Duration::from_secs(1)
+        };
         let succinct_prove_info = loop {
             // The session has already been started in the executor. Poll bonsai to check if
             // the proof request succeeded.
             let res = session.status(&client)?;
             if res.status == "RUNNING" {
-                // TODO(#1759): Improve upon this polling solution.
-                std::thread::sleep(Duration::from_secs(5));
+                std::thread::sleep(polling_interval);
                 continue;
             }
             if res.status == "SUCCEEDED" {
@@ -146,8 +151,7 @@ impl Prover for BonsaiProver {
             let res = snark_session.status(&client)?;
             match res.status.as_str() {
                 "RUNNING" => {
-                    // TODO(#1759): Improve upon this polling solution.
-                    std::thread::sleep(Duration::from_secs(5));
+                    std::thread::sleep(polling_interval);
                     continue;
                 }
                 "SUCCEEDED" => {
