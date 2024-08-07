@@ -4,11 +4,11 @@
 
 ### 🔥 Performance Improvements
 * CUDA performance improvements. https://github.com/risc0/risc0/pull/2054
-* Add recursion preflight support for checked bytes/bigint
+* Add recursion preflight support for checked bytes/bigint https://github.com/risc0/risc0/pull/1973
 
 ### 🛠 Fixes
 
-* Improve zero-knowledge property of the prover. We have used techniques described in this [paper](https://eprint.iacr.org/2024/1037.pdf) to strengthen the ZK property of the prover. This change results in a separate control ID. See the breaking changes section. https://github.com/risc0/risc0/pull/1970
+* Improve zero-knowledge property of the prover by increasing the amount of noise. We have used techniques described in this [paper](https://eprint.iacr.org/2024/1037.pdf) to strengthen the ZK property of the prover. This change results in a new set of control IDs. See the breaking changes section to learn more about this minor breaking change. https://github.com/risc0/risc0/pull/1970
 * Fix template generation for `--nostd` mode. https://github.com/risc0/risc0/pull/2030
 * Serializer: fix serialization of types such as `chronos::NaiveDate` that call into `collect_str`. https://github.com/risc0/risc0/pull/2035
 * Fix build output. The build output from host and guest compilations were intermingled. A fix has been made to clean up the output.  https://github.com/risc0/risc0/pull/1826
@@ -16,6 +16,7 @@
 
 ### ⚡️ Features
 
+* Add experimental support for `sys_fork`. This syscall allows the zkVM to execute unconstrained code. The RISC-V code executed within this system call will not be encoded as a part of the trace execution. This can be used to implement hints and advice. For example, the square root of two can be computed using sys_fork and the solution can be verified in the guest by checking that the square this solution is equal to two. https://github.com/risc0/risc0/pull/2084
 * Use `stability::unstable` to mark new experimental APIs. https://github.com/risc0/risc0/pull/2182
 * Add unstable `env::read_frame()` and `env::read_framed()` which improves cycle counts when reading the input from the guest. https://github.com/risc0/risc0/pull/2182
 * Re-vamped rzup. The rzup utility is used to install toolchains and extensions. The first implementation was a simple bash script. This has been replaced by a more robust rust implementation. https://github.com/risc0/risc0/pull/1961
@@ -23,7 +24,7 @@
 * Added an example that showcases how the `c-kzg` crate can be run in the zkVM. https://github.com/risc0/risc0/pull/2045
 * Added an example that uses C as the guest code. This demonstrates how a user can use C to write an entire guest program without rust. https://github.com/risc0/risc0/pull/1898
 * Added a simple prover service example. This is a demonstration of how the public API can be used to build a simple proving service. https://github.com/risc0/risc0/pull/2113
-* Added the ability to seralize Receipts using the borsh serialization crate. https://github.com/risc0/risc0/pull/2184
+* Added the ability to serialize Receipts using the borsh serialization crate. https://github.com/risc0/risc0/pull/2184
 
 ### 🚨 Breaking Changes
 
