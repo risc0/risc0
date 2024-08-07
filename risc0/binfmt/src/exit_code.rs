@@ -14,6 +14,7 @@
 
 use core::fmt;
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 
 /// Exit condition indicated by the zkVM at the end of the guest execution.
@@ -24,7 +25,9 @@ use serde::{Deserialize, Serialize};
 /// similar to exit codes used in Linux, chosen by the guest program to indicate
 /// additional information (e.g. 0 to indicate success or 1 to indicate an
 /// error).
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(
+    Clone, Copy, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize,
+)]
 pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest program. A halted program cannot be

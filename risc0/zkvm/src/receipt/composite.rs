@@ -16,6 +16,7 @@ use alloc::{vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
+use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_struct, Digestible, ExitCode};
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
@@ -37,7 +38,7 @@ use crate::{
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
 /// continuations, and zero or more [InnerAssumptionReceipt](crate::InnerAssumptionReceipt) structs
 /// proving any assumptions.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct CompositeReceipt {
@@ -273,7 +274,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("9ffcfbe8c2a15402fef2483f69eef60c8b2cd5591349db8c142ba0c97f169cfa")
+            digest!("9d30e0a248d01263aa8a61aff7f614a090c19f9e98c8832e2e9c1a43b12de1fd")
         );
     }
 }

@@ -35,9 +35,25 @@ struct RamHeader {
   RamPlonkVerifier verifier;
   MixReg4LayoutArray7LayoutArray mix;
 };
+struct HaltCycle {
+  DataReg sysExitCode;
+  DataReg userExitCode;
+  DataReg writeAddr;
+};
+using DataReg16LayoutArray = DataReg[16];
+using DataReg2LayoutArray = DataReg[2];
+struct PcReg {
+  DataReg2LayoutArray twits;
+  DataReg3LayoutArray bytes;
+};
 struct BodyStep {
+  DataReg nextMajor;
+  DataReg userMode;
   Global global;
   RamHeader header;
+  HaltCycle majorMux;
+  DataReg16LayoutArray majorSelect;
+  PcReg pc;
 };
 struct Mux {
   BodyStep body;
@@ -53,7 +69,9 @@ struct Top {
 __device__ constexpr Top kLayout =
     Top{.halted = 2,
         .mux = Mux{
-            .body = BodyStep{.global = Global{.sysExitCode = 104,
+            .body = BodyStep{.nextMajor = 100,
+                             .userMode = 99,
+                             .global = Global{.sysExitCode = 104,
                                               .userExitCode = 105,
                                               .input = {{0, 1, 2, 3},
                                                         {4, 5, 6, 7},
@@ -105,7 +123,28 @@ __device__ constexpr Top kLayout =
                                                          {20, 21, 22, 23},
                                                          {24, 25, 26, 27},
                                                          {28, 29, 30, 31},
-                                                         {32, 33, 34, 35}}}},
+                                                         {32, 33, 34, 35}}},
+                             .majorMux =
+                                 HaltCycle{
+                                     .sysExitCode = 117, .userExitCode = 118, .writeAddr = 119},
+                             .majorSelect =
+                                 {101,
+                                  102,
+                                  103,
+                                  104,
+                                  105,
+                                  106,
+                                  107,
+                                  108,
+                                  109,
+                                  110,
+                                  111,
+                                  112,
+                                  113,
+                                  114,
+                                  115,
+                                  116},
+                             .pc = PcReg{.twits = {70, 71}, .bytes = {6, 7, 8}}},
             .ramFini = RamHeader{.accum = {24, 25, 26, 27},
                                  .element = RamPlonkElement{.addr = 89,
                                                             .cycle = 90,

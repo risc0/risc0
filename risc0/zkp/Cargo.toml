@@ -14,6 +14,7 @@ harness = false
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
+borsh = { version = "1.5", default-features = false, features = ["derive"] }
 bytemuck = { version = "1.12", features = ["derive"] }
 cfg-if = "1.0"
 cust = { version = "0.3", optional = true }
@@ -57,6 +58,7 @@ features = ["prove", "std"]
 circuit_debug = []
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
 default = []
+metal = []
 metal_prefix_products = []
 prove = [
   "dep:ff",
@@ -65,7 +67,7 @@ prove = [
   "dep:parking_lot",
   "dep:rand",
   "dep:rayon",
-  "risc0-sys",
+  "dep:risc0-sys",
   "std",
 ]
 std = ["anyhow/std"]

@@ -19,3 +19,4 @@ sppark = { workspace = true, optional = true }
 [features]
 default = []
 cuda = ["dep:cust", "dep:sppark"]
+metal = []
