@@ -282,6 +282,20 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
+    /// Write a frame to the zkVM guest via stdin.
+    ///
+    /// A frame contains a length header along with the payload. Reading a frame
+    /// can be more efficient than deserializing a message on-demand. On-demand
+    /// deserialization can cause many syscalls, whereas a frame will only have
+    /// two.
+    #[stability::unstable]
+    pub fn write_frame(&mut self, payload: &[u8]) -> &mut Self {
+        let len = payload.len() as u32;
+        self.inner.input.extend_from_slice(&len.to_le_bytes());
+        self.inner.input.extend_from_slice(payload);
+        self
+    }
+
     /// Add a posix-style standard input.
     pub fn stdin(&mut self, reader: impl Read + 'a) -> &mut Self {
         self.read_fd(fileno::STDIN, BufReader::new(reader))
