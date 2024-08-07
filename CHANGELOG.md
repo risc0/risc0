@@ -3,7 +3,7 @@
 ## Next (upcoming release)
 
 ### 🔥 Performance Improvements
-* CUDA performance improvements. https://github.com/risc0/risc0/pull/2054
+* CUDA performance improvements. This results in about a 20-30% performance improvement. https://github.com/risc0/risc0/pull/2054
 * Add recursion preflight support for checked bytes/bigint https://github.com/risc0/risc0/pull/1973
 
 ### 🛠 Fixes
