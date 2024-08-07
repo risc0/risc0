@@ -39,10 +39,9 @@ For users who prefer manual installation, follow these steps:
    rzup install cpp
    ```
 
-  > At this time, there is only one release of the `cpp` toolchain so installing the default will suffice.
+> At this time, there is only one release of the `cpp` toolchain. Installing the default version will fall back to this release.
 
 2. For x86-64 macOS, you must run `rzup toolchain rust build`.
-
 
 ## Update
 
