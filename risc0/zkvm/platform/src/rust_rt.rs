@@ -20,12 +20,9 @@
 //! * It includes a panic handler.
 //! * It includes an allocator.
 
-use core::{
-    alloc::{GlobalAlloc, Layout},
-    panic::PanicInfo,
-};
+use core::panic::PanicInfo;
 
-use crate::syscall::{sys_alloc_aligned, sys_panic};
+use crate::syscall::sys_panic;
 
 extern crate alloc;
 
@@ -80,23 +77,54 @@ mod entrypoint {
     );
 }
 
-struct BumpPointerAlloc;
+pub mod heap {
+    #[cfg(not(feature = "heap-embedded-alloc"))]
+    pub mod bump_allocator {
+        use crate::syscall::sys_alloc_aligned;
+        use core::alloc::{GlobalAlloc, Layout};
 
-unsafe impl GlobalAlloc for BumpPointerAlloc {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        sys_alloc_aligned(layout.size(), layout.align())
+        pub struct BumpPointerAlloc;
+
+        unsafe impl GlobalAlloc for BumpPointerAlloc {
+            unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+                sys_alloc_aligned(layout.size(), layout.align())
+            }
+
+            unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
+                // this allocator never deallocates memory
+            }
+
+            unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+                // NOTE: This is safe to avoid zeroing allocated bytes, as the bump allocator does not
+                //       re-use memory and the zkVM memory is zero-initialized.
+                self.alloc(layout)
+            }
+        }
+
+        #[global_allocator]
+        pub static HEAP: BumpPointerAlloc = BumpPointerAlloc;
     }
 
-    unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
-        // this allocator never deallocates memory
-    }
+    #[cfg(feature = "heap-embedded-alloc")]
+    pub mod embedded_allocator {
+        use critical_section::RawRestoreState;
+        use embedded_alloc::Heap;
 
-    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        // NOTE: This is safe to avoid zeroing allocated bytes, as the bump allocator does not
-        //       re-use memory and the zkVM memory is zero-initialized.
-        self.alloc(layout)
+        struct MyCriticalSection;
+
+        critical_section::set_impl!(MyCriticalSection);
+
+        unsafe impl critical_section::Impl for MyCriticalSection {
+            unsafe fn acquire() -> RawRestoreState {
+                // this is a no-op. we're in a single-threaded, nonpreemptive context
+            }
+
+            unsafe fn release(_token: RawRestoreState) {
+                // this is a no-op. we're in a single-threaded, nonpreemptive context
+            }
+        }
+
+        #[global_allocator]
+        pub static HEAP: Heap = Heap::empty();
     }
 }
-
-#[global_allocator]
-static HEAP: BumpPointerAlloc = BumpPointerAlloc;
