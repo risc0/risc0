@@ -72,6 +72,7 @@ risc0-build = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
+tokio = { version = "1", optional = true }
 typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
@@ -138,10 +139,9 @@ dual = []
 getrandom = ["risc0-zkvm-platform/getrandom"]
 # The zkVM uses a bump-pointer heap allocator by default which does not free
 # memory. This will use a slower linked-list heap allocator to reclaim memory.
-heap-embedded-alloc = [
-  "risc0-zkvm-platform/heap-embedded-alloc"
-]
+heap-embedded-alloc = ["risc0-zkvm-platform/heap-embedded-alloc"]
 metal = []
+non_blocking = ["client", "bonsai-sdk/non_blocking", "dep:tokio"]
 prove = [
   "client",
   "dep:addr2line",

@@ -17,6 +17,10 @@ use std::time::Duration;
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use bonsai_sdk::blocking::Client;
 
+#[cfg(feature = "non_blocking")]
+use bonsai_sdk::non_blocking;
+use risc0_zkp::core::digest::Digest;
+
 use super::Prover;
 use crate::{
     compute_image_id, is_dev_mode, sha::Digestible, ExecutorEnv, Groth16Receipt, InnerReceipt,
@@ -38,7 +42,189 @@ impl BonsaiProver {
             name: name.to_string(),
         }
     }
+    /// Upload an ELF binary to Bonsai. This only needs to be one once per ELF.
+    #[cfg(feature = "non_blocking")]
+    pub async fn upload_elf(&self, elf: impl Into<Vec<u8>>) -> Result<UploadedElf> {
+        let client = non_blocking::Client::from_env(crate::VERSION)?;
+        let elf = elf.into();
+
+        let image_id = compute_image_id(&elf)?;
+        let image_id_hex = hex::encode(image_id);
+        client.upload_img(&image_id_hex, elf).await?;
+        Ok(UploadedElf(image_id))
+    }
+
+    // TODO likely just make these a builder pattern (API differences with sync)
+    /// Prove zkVM execution given inputs and an uploaded ELF on Bonsai with [ProverOpts]. To upload
+    /// an ELF binary, see [BonsaiProver::upload_elf].
+    #[cfg(feature = "non_blocking")]
+    pub async fn prove_with_opts_async(
+        &self,
+        env: ExecutorEnv<'_>,
+        deployed_elf: UploadedElf,
+        opts: &ProverOpts,
+    ) -> Result<ProveInfo> {
+        self.prove_with_ctx_async(env, &Default::default(), deployed_elf, opts)
+            .await
+    }
+
+    /// Prove zkVM execution given inputs and an uploaded ELF on Bonsai with [ProverOpts] and
+    /// [VerifierContext]. To upload an ELF binary, see [BonsaiProver::upload_elf].
+    #[cfg(feature = "non_blocking")]
+    pub async fn prove_with_ctx_async(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        deployed_elf: UploadedElf,
+        opts: &ProverOpts,
+    ) -> Result<ProveInfo> {
+        let client = non_blocking::Client::from_env(crate::VERSION)?;
+
+        let UploadedElf(image_id) = deployed_elf;
+        // upload input data
+        let input_id = client.upload_input(env.input).await?;
+
+        // TODO remove duplicate code
+        // upload receipts
+        let mut receipts_ids: Vec<String> = vec![];
+        for assumption in &env.assumptions.borrow().cached {
+            let serialized_receipt = match assumption {
+                crate::AssumptionReceipt::Proven(receipt) => bincode::serialize(receipt)?,
+                crate::AssumptionReceipt::Unresolved(_) => {
+                    bail!("only proven assumptions can be uploaded to Bonsai.")
+                }
+            };
+            // TODO: this can be parallelized.
+            let receipt_id = client.upload_receipt(serialized_receipt).await?;
+            receipts_ids.push(receipt_id);
+        }
+
+        // While this is the executor, we want to start a session on the bonsai prover.
+        // By doing so, we can return a session ID so that the prover can use it to
+        // retrieve the receipt.
+        let session = client
+            .create_session(hex::encode(image_id), input_id, receipts_ids, false)
+            .await?;
+        tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
+
+        let succinct_prove_info = loop {
+            // The session has already been started in the executor. Poll bonsai to check if
+            // the proof request succeeded.
+            let res = session.status(&client).await?;
+            if res.status == "RUNNING" {
+                // TODO(#1759): Improve upon this polling solution.
+                tokio::time::sleep(Duration::from_secs(5)).await;
+                continue;
+            }
+            if res.status == "SUCCEEDED" {
+                // Download the receipt, containing the output
+                let receipt_url = res
+                    .receipt_url
+                    .ok_or(anyhow!("API error, missing receipt on completed session"))?;
+
+                let stats = res
+                    .stats
+                    .context("Missing stats object on Bonsai status res")?;
+                tracing::debug!(
+                    "Bonsai usage: cycles: {} total_cycles: {}",
+                    stats.cycles,
+                    stats.total_cycles
+                );
+
+                let receipt_buf = client.download(&receipt_url).await?;
+                let receipt: Receipt = bincode::deserialize(&receipt_buf)?;
+
+                if opts.prove_guest_errors {
+                    receipt.verify_integrity_with_context(ctx)?;
+                } else {
+                    receipt.verify_with_context(ctx, image_id)?;
+                }
+                break ProveInfo {
+                    receipt,
+                    stats: crate::SessionStats {
+                        segments: stats.segments,
+                        total_cycles: stats.total_cycles,
+                        user_cycles: stats.cycles,
+                    },
+                };
+            } else {
+                bail!(
+                    "Bonsai prover workflow [{}] exited: {} err: {}",
+                    session.uuid,
+                    res.status,
+                    res.error_msg
+                        .unwrap_or("Bonsai workflow missing error_msg".into()),
+                );
+            }
+        };
+        match opts.receipt_kind {
+            // If the caller requested a composite or succinct receipt, we are done.
+            ReceiptKind::Composite | ReceiptKind::Succinct => {
+                return Ok(succinct_prove_info);
+            }
+            // If they requested a groth16 receipts, we need to continue.
+            ReceiptKind::Groth16 => {}
+        }
+
+        // Request that Bonsai compress further, to Groth16.
+        let snark_session = client.create_snark(session.uuid).await?;
+        let snark_receipt = loop {
+            let res = snark_session.status(&client).await?;
+            match res.status.as_str() {
+                "RUNNING" => {
+                    // TODO(#1759): Improve upon this polling solution.
+                    tokio::time::sleep(Duration::from_secs(5)).await;
+                    continue;
+                }
+                "SUCCEEDED" => {
+                    break res.output.with_context(|| {
+                        format!(
+                            "Bonsai prover workflow [{}] reported success, but provided no receipt",
+                            snark_session.uuid
+                        )
+                    })?;
+                }
+                _ => {
+                    bail!(
+                        "Bonsai prover workflow [{}] exited: {} err: {}",
+                        snark_session.uuid,
+                        res.status,
+                        res.error_msg
+                            .unwrap_or("Bonsai workflow missing error_msg".into()),
+                    );
+                }
+            }
+        };
+
+        // Assemble the groth16 receipt, and verify it.
+        // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
+        // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
+        // this error condition and report a better message. Constructing the receipt here will all
+        // the verifier parameters for this version of risc0-zkvm, which may be different than
+        // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
+        // matches the verifying key used here.
+        let groth16_receipt = Receipt::new(
+            InnerReceipt::Groth16(Groth16Receipt {
+                seal: snark_receipt.snark.to_vec(),
+                claim: succinct_prove_info.receipt.claim()?,
+                verifier_parameters: ctx.groth16_verifier_parameters.digest(),
+            }),
+            succinct_prove_info.receipt.journal.bytes,
+        );
+        groth16_receipt
+            .verify_integrity_with_context(ctx)
+            .context("failed to verify Groth16Receipt returned by Bonsai")?;
+
+        // Return the groth16 receipt, with the stats collected earlier.
+        Ok(ProveInfo {
+            receipt: groth16_receipt,
+            stats: succinct_prove_info.stats,
+        })
+    }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct UploadedElf(Digest);
 
 impl Prover for BonsaiProver {
     fn get_name(&self) -> String {
