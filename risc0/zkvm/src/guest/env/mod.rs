@@ -73,15 +73,18 @@ mod read;
 mod verify;
 mod write;
 
-use alloc::vec;
-use core::cell::OnceCell;
+use alloc::{
+    alloc::{alloc, Layout},
+    vec,
+};
 
 use bytemuck::Pod;
+use core::cell::OnceCell;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_alloc_words, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log,
-        sys_pause, syscall_2, SyscallName,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
+        syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -113,6 +116,7 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 /// information leakage through the post-state digest.
 static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
+/// Initialize globals before program main
 pub(crate) fn init() {
     unsafe {
         HASHER.set(Sha256::new()).unwrap();
@@ -123,6 +127,7 @@ pub(crate) fn init() {
     }
 }
 
+/// Finalize execution
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         let hasher = HASHER.take();
@@ -178,10 +183,15 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// receives the return data.
 ///
 /// On the host side, implement SliceIo to provide a handler for this call.
+///
+/// NOTE: This method never frees up the buffer memory storing the host's response.
 pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
     let syscall::Return(nbytes, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
     let nwords = align_up(nbytes as usize, WORD_SIZE) / WORD_SIZE;
-    let from_host_buf = unsafe { core::slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
+    let from_host_buf = unsafe {
+        let layout = Layout::from_size_align(nwords * WORD_SIZE, WORD_SIZE).unwrap();
+        core::slice::from_raw_parts_mut(alloc(layout) as *mut u32, nwords)
+    };
     syscall(syscall_name, &[], from_host_buf);
     &bytemuck::cast_slice(from_host_buf)[..nbytes as usize / core::mem::size_of::<U>()]
 }
