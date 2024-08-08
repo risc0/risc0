@@ -130,7 +130,7 @@ impl GuestBuilder for MinGuestListEntry {
         let upper = self.name.to_uppercase().replace('-', "_");
         let elf_path: &str = &self.path;
 
-        return format!(r##"pub const {upper}_PATH: &str = r#"{elf_path}"#;"##);
+        format!(r##"pub const {upper}_PATH: &str = r#"{elf_path}"#;"##)
     }
 
     #[cfg(feature = "guest-list")]
@@ -721,7 +721,7 @@ fn do_embed_methods<G: GuestBuilder>(
     }
 
     // If the user provided options for a package that wasn't built, abort.
-    for package in guest_pkg_to_options.keys() {
+    if let Some(package) = guest_pkg_to_options.keys().next() {
         panic!(
             "Error: guest options were provided for package '{}' but the package was not built.",
             package
