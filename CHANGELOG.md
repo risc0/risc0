@@ -16,11 +16,13 @@
 
 ### ⚡️ Features
 
-* Add experimental support for `sys_fork`. This syscall allows the zkVM to execute unconstrained code. The RISC-V code executed within this system call will not be encoded as a part of the trace execution. This can be used to implement hints and advice. For example, the square root of two can be computed using sys_fork and the solution can be verified in the guest by checking that the square this solution is equal to two. https://github.com/risc0/risc0/pull/2084
+* Add "light builds". A new faster way to build guest programs intended for development only. This will allow the user to build the guest without linking the emitted ELF bytes. https://github.com/risc0/risc0/pull/2166
+* Add an optional embedded allocator to the zkVM guest. By default, the zkvm uses an allocator that does not deallocate heap memory. The embedded allocator deallocates and is useful for situations where the guest runs out of memory. If used, this allocator will result in an increased amount of cycles due to the extra operations necessary to deallocate memory. https://github.com/risc0/risc0/pull/2174
+* Add experimental support for `sys_fork`. This syscall allows the zkVM to execute unconstrained code. The RISC-V code executed within this system call will not be encoded as a part of the trace execution. This can be used to implement hints and advice. For example, the square root of two can be computed using `sys_fork` and the solution can be verified in the guest by checking that the square of this solution is equal to two. https://github.com/risc0/risc0/pull/2084
 * Use `stability::unstable` to mark new experimental APIs. https://github.com/risc0/risc0/pull/2182
 * Add unstable `env::read_frame()` and `env::read_framed()` which improves cycle counts when reading the input from the guest. https://github.com/risc0/risc0/pull/2182
 * Re-vamped rzup. The rzup utility is used to install toolchains and extensions. The first implementation was a simple bash script. This has been replaced by a more robust rust implementation. https://github.com/risc0/risc0/pull/1961
-* Enable GPU proving by default on MacOS. Previously, we have allowed the user to prove on CPU or GPU. This improves user experience by shipping a GPU-enabled r0vm server by default. https://github.com/risc0/risc0/pull/2092
+* Enable GPU proving by default on macOS. Previously, we have allowed the user to prove on CPU or GPU. This improves user experience by shipping a GPU-enabled r0vm server by default. https://github.com/risc0/risc0/pull/2092
 * Added an example that showcases how the `c-kzg` crate can be run in the zkVM. https://github.com/risc0/risc0/pull/2045
 * Added an example that uses C as the guest code. This demonstrates how a user can use C to write an entire guest program without rust. https://github.com/risc0/risc0/pull/1898
 * Added a simple prover service example. This is a demonstration of how the public API can be used to build a simple proving service. https://github.com/risc0/risc0/pull/2113
