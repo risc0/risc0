@@ -18,7 +18,7 @@ pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
 pub mod dual;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))]
 pub mod metal;
 
 use std::{
