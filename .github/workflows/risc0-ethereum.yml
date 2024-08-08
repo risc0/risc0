@@ -128,7 +128,7 @@ jobs:
         working-directory: risc0
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-cafc2606a2187a42b236df4aa65f4e8cdfcea970
+          version: nightly-4351742481c98adaa9ca3e8642e619aa986b3cee
       # Apply local patch
       - name: Local patch on risc0-ethereum
         run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py  .
