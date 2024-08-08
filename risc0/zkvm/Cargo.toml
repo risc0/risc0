@@ -72,7 +72,7 @@ risc0-build = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
-tokio = { version = "1", optional = true }
+tokio = { version = "1", features = ["macros", "rt"], optional = true }
 typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
