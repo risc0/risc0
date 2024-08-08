@@ -136,6 +136,11 @@ dual = []
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
 getrandom = ["risc0-zkvm-platform/getrandom"]
+# The zkVM uses a bump-pointer heap allocator by default which does not free
+# memory. This will use a slower linked-list heap allocator to reclaim memory.
+heap-embedded-alloc = [
+  "risc0-zkvm-platform/heap-embedded-alloc"
+]
 metal = ["prove"]
 prove = [
   "client",

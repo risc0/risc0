@@ -95,6 +95,57 @@ impl Risc0Metadata {
     }
 }
 
+trait GuestBuilder: Sized {
+    fn build(name: &str, elf_path: &str) -> Result<Self>;
+    fn codegen_consts(&self) -> String;
+    #[cfg(feature = "guest-list")]
+    fn codegen_list_entry(&self) -> String;
+}
+
+/// Represents an item in the generated list of compiled guest binaries
+#[derive(Debug, Clone)]
+pub struct MinGuestListEntry {
+    /// The name of the guest binary
+    pub name: Cow<'static, str>,
+    /// The path to the ELF binary
+    pub path: Cow<'static, str>,
+}
+
+impl GuestBuilder for MinGuestListEntry {
+    fn build(name: &str, elf_path: &str) -> Result<Self> {
+        Ok(Self {
+            name: Cow::Owned(name.to_owned()),
+            path: Cow::Owned(elf_path.to_owned()),
+        })
+    }
+
+    fn codegen_consts(&self) -> String {
+        // Quick check for '#' to avoid injection of arbitrary Rust code into the
+        // method.rs file. This would not be a serious issue since it would only
+        // affect the user that set the path, but it's good to add a check.
+        if self.path.contains('#') {
+            panic!("method path cannot include #: {}", self.path);
+        }
+
+        let upper = self.name.to_uppercase().replace('-', "_");
+        let elf_path: &str = &self.path;
+
+        format!(r##"pub const {upper}_PATH: &str = r#"{elf_path}"#;"##)
+    }
+
+    #[cfg(feature = "guest-list")]
+    fn codegen_list_entry(&self) -> String {
+        let upper = self.name.to_uppercase().replace('-', "_");
+        format!(
+            r##"
+    MinGuestListEntry {{
+        name: std::borrow::Cow::Borrowed("{upper}"),
+        path: std::borrow::Cow::Borrowed({upper}_PATH),
+    }}"##
+        )
+    }
+}
+
 /// Represents an item in the generated list of compiled guest binaries
 #[derive(Debug, Clone)]
 pub struct GuestListEntry {
@@ -108,7 +159,7 @@ pub struct GuestListEntry {
     pub path: Cow<'static, str>,
 }
 
-impl GuestListEntry {
+impl GuestBuilder for GuestListEntry {
     /// Builds the [GuestListEntry] by reading the ELF from disk, and calculating the associated
     /// image ID.
     fn build(name: &str, elf_path: &str) -> Result<Self> {
@@ -227,13 +278,13 @@ fn is_debug() -> bool {
 }
 
 /// Returns all methods associated with the given guest crate.
-fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<GuestListEntry> {
+fn guest_methods<G: GuestBuilder>(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<G> {
     let profile = if is_debug() { "debug" } else { "release" };
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| {
-            GuestListEntry::build(
+            G::build(
                 &target.name,
                 target_dir
                     .as_ref()
@@ -250,15 +301,16 @@ fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<GuestListEn
 }
 
 /// Returns all methods associated with the given guest crate.
-fn guest_methods_docker<P>(pkg: &Package, target_dir: P) -> Vec<GuestListEntry>
+fn guest_methods_docker<P, G>(pkg: &Package, target_dir: P) -> Vec<G>
 where
     P: AsRef<Path>,
+    G: GuestBuilder,
 {
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| {
-            GuestListEntry::build(
+            G::build(
                 &target.name,
                 target_dir
                     .as_ref()
@@ -557,7 +609,7 @@ pub struct DockerOptions {
 
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
@@ -586,8 +638,31 @@ fn get_guest_dir() -> PathBuf {
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 pub fn embed_methods_with_options(
-    mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
+    guest_pkg_to_options: HashMap<&str, GuestOptions>,
 ) -> Vec<GuestListEntry> {
+    do_embed_methods(guest_pkg_to_options)
+}
+
+/// Build methods for RISC-V and embed minimal metadata - the `elf` name and path.
+/// To embed the full elf, use [embed_methods_with_options].
+///
+/// Use this option if you wish to import the guest `elf` into your prover at runtime
+/// rather than embedding it into the prover binary. This reduces build times for large
+/// binaries, but makes prover initialization fallible.
+///
+/// Specify custom options for the package by defining its [GuestOptions].
+pub fn embed_method_metadata_with_options(
+    guest_pkg_to_options: HashMap<&str, GuestOptions>,
+) -> Vec<MinGuestListEntry> {
+    do_embed_methods(guest_pkg_to_options)
+}
+
+/// Embeds methods built for RISC-V for use by host-side dependencies.
+/// Specify custom options for a guest package by defining its [GuestOptions].
+/// See [embed_methods].
+fn do_embed_methods<G: GuestBuilder>(
+    mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
+) -> Vec<G> {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = get_guest_dir();
@@ -618,7 +693,7 @@ pub fn embed_methods_with_options(
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
-        let methods = if let Some(docker_opts) = guest_opts.use_docker {
+        let methods: Vec<G> = if let Some(docker_opts) = guest_opts.use_docker {
             let src_dir = docker_opts
                 .root_dir
                 .unwrap_or_else(|| std::env::current_dir().unwrap());
@@ -645,11 +720,20 @@ pub fn embed_methods_with_options(
         }
     }
 
+    // If the user provided options for a package that wasn't built, abort.
+    if let Some(package) = guest_pkg_to_options.keys().next() {
+        panic!(
+            "Error: guest options were provided for package '{}' but the package was not built.",
+            package
+        );
+    }
+
     #[cfg(feature = "guest-list")]
     methods_file
         .write_all(
             format!(
-                "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];\n",
+                "\npub const GUEST_LIST: &[{}] = &[{}];\n",
+                std::any::type_name::<G>(),
                 guest_list_codegen.join(",")
             )
             .as_bytes(),
