@@ -163,7 +163,7 @@ pub struct GuestListEntry {
 fn r0vm_image_id(path: &str) -> Result<Digest> {
     use hex::FromHex;
     let output = Command::new("r0vm")
-        .args(&["--elf", path, "--id"])
+        .args(["--elf", path, "--id"])
         .output()?;
     if output.status.success() {
         let stdout = String::from_utf8(output.stdout)?;
