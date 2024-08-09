@@ -590,10 +590,10 @@ fn detect_toolchain(name: &str) {
     let stdout = String::from_utf8(result.stdout).unwrap();
     if !stdout.lines().any(|line| line.trim().starts_with(name)) {
         eprintln!("The 'risc0' toolchain could not be found.");
-        eprintln!("To install the risc0 toolchain, use cargo-risczero.");
+        eprintln!("To install the risc0 toolchain, use rzup.");
         eprintln!("For example:");
-        eprintln!("  cargo binstall cargo-risczero");
-        eprintln!("  cargo risczero install");
+        eprintln!("  curl -L https://risczero.com/install | bash");
+        eprintln!("  rzup install");
         std::process::exit(-1);
     }
 }
