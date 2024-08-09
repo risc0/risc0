@@ -52,7 +52,7 @@ cuda = [
   "std",
 ]
 default = ["prove"]
-metal = []
+metal = ["prove"]
 prove = [
   "dep:bytemuck",
   "dep:cfg-if",

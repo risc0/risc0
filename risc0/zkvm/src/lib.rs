@@ -176,3 +176,10 @@ pub fn is_dev_mode() -> bool {
 
     cfg!(not(feature = "disable-dev-mode")) && is_env_set
 }
+
+#[cfg(feature = "metal")]
+#[test]
+fn metal_implies_prove() {
+    // we should be able to access prove feature items when metal has been enabled
+    let _prover = get_prover_server(&ProverOpts::default());
+}
