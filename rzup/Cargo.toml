@@ -1,10 +1,14 @@
 [package]
 name = "rzup"
+description = "tool used to install, update, or choose a version of toolchains and utilities"
 version = "0.2.1"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
+
+[package.metadata.release]
+release = false
 
 [dependencies]
 anyhow = "1.0.86"
