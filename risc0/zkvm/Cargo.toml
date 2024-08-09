@@ -141,7 +141,7 @@ getrandom = ["risc0-zkvm-platform/getrandom"]
 heap-embedded-alloc = [
   "risc0-zkvm-platform/heap-embedded-alloc"
 ]
-metal = []
+metal = ["prove"]
 prove = [
   "client",
   "dep:addr2line",

@@ -61,7 +61,7 @@ cuda = [
   "std",
 ]
 default = ["prove", "test"]
-metal = []
+metal = ["prove"]
 prove = [
   "dep:cfg-if",
   "dep:downloader",
