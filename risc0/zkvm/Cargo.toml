@@ -96,7 +96,7 @@ human-repr = { version = "1.0", features = ["1024"] }
 risc0-zkvm-methods = { path = "methods", features = ["std"] }
 serde_json = "1.0"
 serde_with = "3.9"
-tabled = "0.15"
+tabled = "0.16"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
