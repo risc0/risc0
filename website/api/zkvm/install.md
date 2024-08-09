@@ -41,13 +41,13 @@ For users who prefer manual installation, follow these steps:
 
 > At this time, there is only one release of the `cpp` toolchain. Installing the default version will fall back to this release.
 
-2. For x86-64 macOS or arm64 linux, you must build `rzup` from source. Clone the repository by running `git clone https://github.com/risc0/risc0.git`. Go to the root of the repository and run `cargo install --path rzup`. Build and install the rust toolchain by running `rzup toolchain build rust`.
+2. For x86-64 macOS or arm64 linux, you must build `rzup` from source. Clone the repository by running `git clone https://github.com/risc0/risc0.git`. Go to the root of the repository and run `cargo install --path rzup`. Build and install the `cargo-risczero` by first checking out the branch `release-*` where `*` is `[major release number].[minor release number]` of your desired zkVM version. For example, if you would like to install version 1.1.0, run `git checkout origin/release-1.1` and run `cargo install --path risc0/cargo-risczero`. Build and install the rust toolchain by running `rzup toolchain build rust` this command may require utilities such as `cmake` and the `ninja` build system to be installed.
 
 ## Update
 
 To update your installation:
 
-1. Run `rzup` to update the RISC Zero toolchain to the latest [release tag] version.
+1. Run `rzup update` to update the RISC Zero toolchain to the latest [release tag] version.
 
 After you update your installation, be sure to update your project's RISC Zero crates. To do this, you must update all RISC Zero dependencies in your project's host and guest `Cargo.toml` files. In most projects, this is done by updating the host and guest `risc0-zkvm` crate and the `risc0-build` build dependency. They should be updated to use the version number displayed by `cargo risczero --version`.
 
