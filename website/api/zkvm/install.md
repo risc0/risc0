@@ -41,7 +41,7 @@ For users who prefer manual installation, follow these steps:
 
 > At this time, there is only one release of the `cpp` toolchain. Installing the default version will fall back to this release.
 
-2. For x86-64 macOS, you must run `rzup toolchain rust build`.
+2. For x86-64 macOS or arm64 linux, you must build `rzup` from source. Clone the repository by running `git clone https://github.com/risc0/risc0.git`. Go to the root of the repository and run `cargo install --path rzup`. Build and install the rust toolchain by running `rzup toolchain build rust`.
 
 ## Update
 
