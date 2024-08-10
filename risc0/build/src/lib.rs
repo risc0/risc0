@@ -383,7 +383,7 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
         cmd.env("CC", cc_path)
             .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
     }
-
+    dbg!(&encoded_rust_flags);
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags)
         .args(args);
@@ -392,7 +392,6 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
 pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
-    println!("{rustc_flags:?}");
     [
         // Append other rust flags
         rustc_flags,
