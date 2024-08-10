@@ -392,6 +392,7 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 
 /// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
 pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
+    println!("{rustc_flags:?}");
     [
         // Append other rust flags
         rustc_flags,
