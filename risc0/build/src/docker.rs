@@ -18,13 +18,10 @@ use anyhow::{bail, Context, Result};
 use cargo_metadata::MetadataCommand;
 use docker_generate::DockerFile;
 use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{
-    memory::{GUEST_MAX_MEM, TEXT_START},
-    PAGE_SIZE,
-};
+use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
-use crate::get_env_var;
+use crate::{encode_rust_flags, get_env_var, GuestOptions};
 
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
@@ -49,7 +46,7 @@ pub enum BuildStatus {
 pub fn docker_build(
     manifest_path: &Path,
     src_dir: &Path,
-    features: &[String],
+    guest_opts: &GuestOptions,
 ) -> Result<BuildStatus> {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
         eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
@@ -88,7 +85,7 @@ pub fn docker_build(
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
-        create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
+        create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), guest_opts)?;
         build(&src_dir, temp_path)?;
     }
     println!("ELFs ready at:");
@@ -111,13 +108,17 @@ fn create_dockerfile(
     manifest_path: &Path,
     temp_dir: &Path,
     pkg_name: &str,
-    features: &[String],
+    guest_opts: &GuestOptions,
 ) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
-    let rustflags = format!(
-        "-C passes=loweratomic -C link-arg=-Ttext=0x{TEXT_START:08X} -C link-arg=--fatal-warnings",
+    let encoded_rust_flags = encode_rust_flags(
+        &guest_opts
+            .rustc_flags
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<_>>(),
     );
-    let rustflags_env = &[("RUSTFLAGS", rustflags.as_str())];
+    let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
 
     let common_args = vec![
         "--locked",
@@ -128,8 +129,8 @@ fn create_dockerfile(
     ];
 
     let mut build_args = common_args.clone();
-    let features_str = features.join(",");
-    if !features.is_empty() {
+    let features_str = guest_opts.features.join(",");
+    if !guest_opts.features.is_empty() {
         build_args.push("--features");
         build_args.push(&features_str);
     }

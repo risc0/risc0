@@ -16,7 +16,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use clap::Parser;
-use risc0_build::BuildStatus;
+use risc0_build::{BuildStatus, GuestOptions};
 
 /// `cargo risczero build`
 ///
@@ -32,16 +32,27 @@ pub struct BuildGuest {
     /// Feature flags passed to cargo.
     #[arg(long, value_delimiter = ',')]
     pub features: Vec<String>,
+
+    #[arg(long, value_delimiter = ',')]
+    /// Extra flags passed to rustc.
+    pub rustc_flags: Vec<String>,
 }
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        build(&self.manifest_path, &self.features)?;
+        build(
+            &self.manifest_path,
+            &GuestOptions {
+                features: self.features.clone(),
+                rustc_flags: self.rustc_flags.clone(),
+                ..Default::default()
+            },
+        )?;
         Ok(())
     }
 }
 
-pub(crate) fn build(manifest_path: &Path, features: &[String]) -> Result<BuildStatus> {
+pub(crate) fn build(manifest_path: &Path, guest_options: &GuestOptions) -> Result<BuildStatus> {
     let src_dir = std::env::current_dir().unwrap();
-    risc0_build::docker_build(manifest_path, &src_dir, features)
+    risc0_build::docker_build(manifest_path, &src_dir, guest_options)
 }

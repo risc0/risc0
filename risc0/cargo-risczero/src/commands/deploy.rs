@@ -18,7 +18,7 @@ use anyhow::{Context, Result};
 use bonsai_sdk::blocking::Client;
 use cargo_metadata::MetadataCommand;
 use clap::Parser;
-use risc0_build::BuildStatus;
+use risc0_build::{BuildStatus, GuestOptions};
 
 use crate::commands::build_guest;
 use crate::utils;
@@ -38,6 +38,10 @@ pub struct DeployCommand {
     #[arg(long, value_delimiter = ',')]
     pub features: Vec<String>,
 
+    #[arg(long, value_delimiter = ',')]
+    /// Extra flags passed to rustc.
+    pub rustc_flags: Vec<String>,
+
     #[command(flatten)]
     client_envs: utils::ClientEnvs,
 }
@@ -53,7 +57,14 @@ impl DeployCommand {
 
     fn deploy(&self, client: Client) -> Result<()> {
         // Ensure we have an up to date artifact before deploying
-        if let BuildStatus::Skipped = build_guest::build(&self.manifest_path, &self.features)? {
+        if let BuildStatus::Skipped = build_guest::build(
+            &self.manifest_path,
+            &GuestOptions {
+                features: self.features.clone(),
+                rustc_flags: self.rustc_flags.clone(),
+                ..Default::default()
+            },
+        )? {
             eprintln!("Build skipped, nothing to deploy.");
             return Ok(());
         }
