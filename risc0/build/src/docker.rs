@@ -221,16 +221,16 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use std::path::Path;
-
     use super::{docker_build, TARGET_DIR};
+    use crate::GuestOptions;
+    use std::path::Path;
 
     const SRC_DIR: &str = "../..";
 
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        self::docker_build(manifest_path, src_dir, &[]).unwrap();
+        self::docker_build(manifest_path, src_dir, &GuestOptions::default()).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
