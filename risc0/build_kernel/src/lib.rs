@@ -123,10 +123,6 @@ impl KernelBuild {
     }
 
     pub fn compile(&mut self, output: &str) {
-        if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
-            return;
-        }
-
         for src in self.files.iter() {
             println!("cargo:rerun-if-changed={}", src.display());
         }
@@ -344,6 +340,17 @@ impl KernelBuild {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
         let out_path = out_dir.join(output).with_extension(extension);
         let sys_inc_dir = out_dir.join("_sys_");
+
+        if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() || env::var("RISC0_SKIP_BUILD").is_ok() {
+            fs::OpenOptions::new()
+                .create(true)
+                .truncate(true)
+                .write(true)
+                .open(&out_path)
+                .unwrap();
+            println!("cargo:{}={}", output, out_path.display());
+            return;
+        }
 
         let cache_dir = risc0_cache();
         if !cache_dir.is_dir() {

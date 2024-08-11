@@ -30,10 +30,10 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
 use risc0_binfmt::compute_image_id;
-use risc0_zkp::core::digest::DIGEST_WORDS;
+use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
@@ -44,6 +44,7 @@ pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 /// implementation of rzup is in use. The rust implementation of rzup will place
 /// a file with this name under `$RISC0_HOME`.
 pub const RUST_RZUP_INDICATOR: &str = ".rzup";
+
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 /// Get the path used by cargo-risczero that stores downloaded toolchains
@@ -151,20 +152,49 @@ impl GuestBuilder for MinGuestListEntry {
 pub struct GuestListEntry {
     /// The name of the guest binary
     pub name: Cow<'static, str>,
+
     /// The compiled ELF guest binary
     pub elf: Cow<'static, [u8]>,
+
     /// The image id of the guest
     pub image_id: [u32; DIGEST_WORDS],
+
     /// The path to the ELF binary
     pub path: Cow<'static, str>,
+}
+
+fn r0vm_image_id(path: &str) -> Result<Digest> {
+    use hex::FromHex;
+    let output = Command::new("r0vm")
+        .args(["--elf", path, "--id"])
+        .output()?;
+    if output.status.success() {
+        let stdout = String::from_utf8(output.stdout)?;
+        let digest = stdout.trim();
+        Ok(Digest::from_hex(digest)?)
+    } else {
+        let stderr = String::from_utf8(output.stderr)?;
+        Err(anyhow!("{stderr}"))
+    }
 }
 
 impl GuestBuilder for GuestListEntry {
     /// Builds the [GuestListEntry] by reading the ELF from disk, and calculating the associated
     /// image ID.
     fn build(name: &str, elf_path: &str) -> Result<Self> {
-        let elf = std::fs::read(elf_path)?;
-        let image_id = compute_image_id(&elf)?;
+        let (elf, image_id) = if !is_skip_build() {
+            let elf = std::fs::read(elf_path)?;
+            let image_id = match r0vm_image_id(elf_path) {
+                Ok(image_id) => image_id,
+                Err(err) => {
+                    tty_println(&format!("{err}"));
+                    compute_image_id(&elf)?
+                }
+            };
+            (elf, image_id)
+        } else {
+            (vec![], Digest::default())
+        };
 
         Ok(Self {
             name: Cow::Owned(name.to_owned()),
@@ -183,14 +213,20 @@ impl GuestBuilder for GuestListEntry {
         }
 
         let upper = self.name.to_uppercase().replace('-', "_");
-        let image_id: [u32; DIGEST_WORDS] = self.image_id;
-        let elf_path: &str = &self.path;
-        let elf_contents: &[u8] = &self.elf;
+        let image_id = self.image_id;
+        let elf_path = &self.path;
+
+        let elf_value = if is_skip_build() {
+            "&[]".to_string()
+        } else {
+            format!(r#"include_bytes!("{elf_path}")"#)
+        };
+
         format!(
             r##"
-pub const {upper}_ELF: &[u8] = &{elf_contents:?};
+pub const {upper}_ELF: &[u8] = {elf_value};
 pub const {upper}_ID: [u32; 8] = {image_id:?};
-pub const {upper}_PATH: &str = r#"{elf_path}"#;
+pub const {upper}_PATH: &str = "{elf_path}";
 "##
         )
     }
@@ -277,6 +313,15 @@ fn is_debug() -> bool {
     get_env_var("RISC0_BUILD_DEBUG") == "1"
 }
 
+fn is_skip_build() -> bool {
+    !get_env_var("RISC0_SKIP_BUILD").is_empty()
+}
+
+fn get_env_var(name: &str) -> String {
+    println!("cargo:rerun-if-env-changed={name}");
+    env::var(name).unwrap_or_default()
+}
+
 /// Returns all methods associated with the given guest crate.
 fn guest_methods<G: GuestBuilder>(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<G> {
     let profile = if is_debug() { "debug" } else { "release" };
@@ -325,11 +370,6 @@ where
             .unwrap()
         })
         .collect()
-}
-
-fn get_env_var(name: &str) -> String {
-    println!("cargo:rerun-if-env-changed={name}");
-    env::var(name).unwrap_or_default()
 }
 
 /// Build a [Command] with CARGO and RUSTUP_TOOLCHAIN environment variables
@@ -496,6 +536,28 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     }
 }
 
+// HACK: Attempt to bypass the parent cargo output capture and
+// send directly to the tty, if available.  This way we get
+// progress messages from the inner cargo so the user doesn't
+// think it's just hanging.
+fn tty_println(msg: &str) {
+    let tty_file = env::var("RISC0_GUEST_LOGFILE").unwrap_or_else(|_| "/dev/tty".to_string());
+
+    let mut tty = fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(tty_file)
+        .ok();
+
+    if let Some(tty) = &mut tty {
+        writeln!(tty, "{msg}").unwrap();
+    } else {
+        eprintln!("{msg}");
+    }
+}
+
 // Builds a package that targets the riscv guest into the specified target
 // directory.
 fn build_guest_package<P>(
@@ -506,7 +568,7 @@ fn build_guest_package<P>(
 ) where
     P: AsRef<Path>,
 {
-    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+    if is_skip_build() {
         return;
     }
 
@@ -548,40 +610,13 @@ fn build_guest_package<P>(
         .expect("cargo build failed");
     let stderr = child.stderr.take().unwrap();
 
-    // HACK: Attempt to bypass the parent cargo output capture and
-    // send directly to the tty, if available.  This way we get
-    // progress messages from the inner cargo so the user doesn't
-    // think it's just hanging.
-    let tty_file = env::var("RISC0_GUEST_LOGFILE")
-        .map(|log_file| (log_file, false))
-        .unwrap_or_else(|_| ("/dev/tty".to_string(), true));
-
-    let mut tty = fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .truncate(false)
-        .open(tty_file.0)
-        .ok();
-
-    if let Some(tty) = &mut tty {
-        if tty_file.1 {
-            writeln!(tty).unwrap();
-        }
-
-        writeln!(
-            tty,
-            "{}: Starting build for riscv32im-risc0-zkvm-elf",
-            pkg.name
-        )
-        .unwrap();
-    }
+    tty_println(&format!(
+        "{}: Starting build for riscv32im-risc0-zkvm-elf",
+        pkg.name
+    ));
 
     for line in BufReader::new(stderr).lines() {
-        match &mut tty {
-            Some(tty) => writeln!(tty, "{}: {}", pkg.name, line.unwrap()).unwrap(),
-            None => eprintln!("{}", line.unwrap()),
-        }
+        tty_println(&format!("{}: {}", pkg.name, line.unwrap()));
     }
 
     let res = child.wait().expect("Guest 'cargo build' failed");
