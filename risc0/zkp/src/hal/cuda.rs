@@ -429,16 +429,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         BufferImpl::new(name, size)
     }
 
-    fn alloc_elem_init(
-        &self,
-        name: &'static str,
-        size: usize,
-        value: Self::Elem,
-    ) -> Self::Buffer<Self::Elem> {
-        let src = vec![value; size];
-        self.copy_from_elem(name, &src)
-    }
-
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
         BufferImpl::copy_from(name, slice)
     }

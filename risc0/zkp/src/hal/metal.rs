@@ -562,16 +562,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
-    fn alloc_elem_init(
-        &self,
-        name: &'static str,
-        size: usize,
-        value: Self::Elem,
-    ) -> Self::Buffer<Self::Elem> {
-        let src = vec![value; size];
-        self.copy_from_elem(name, &src)
-    }
-
     fn copy_from_extelem(
         &self,
         name: &'static str,
@@ -924,6 +914,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         })
     }
 
+    #[tracing::instrument(skip_all)]
     fn scatter(
         &self,
         into: &Self::Buffer<Self::Elem>,

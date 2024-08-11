@@ -71,7 +71,13 @@ pub trait Hal {
         name: &'static str,
         size: usize,
         value: Self::Elem,
-    ) -> Self::Buffer<Self::Elem>;
+    ) -> Self::Buffer<Self::Elem> {
+        let buffer = self.alloc_elem(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(value);
+        });
+        buffer
+    }
 
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest>;
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem>;

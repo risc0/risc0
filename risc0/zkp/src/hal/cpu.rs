@@ -290,16 +290,6 @@ impl<F: Field> Hal for CpuHal<F> {
         CpuBuffer::new(name, size)
     }
 
-    fn alloc_elem_init(
-        &self,
-        name: &'static str,
-        size: usize,
-        value: Self::Elem,
-    ) -> Self::Buffer<Self::Elem> {
-        let src = vec![value; size];
-        self.copy_from_elem(name, &src)
-    }
-
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
         CpuBuffer::copy_from(name, slice)
     }
