@@ -150,6 +150,7 @@ pub trait Hal {
         input: &Self::Buffer<Self::Elem>,
     );
 
+    #[allow(clippy::too_many_arguments)]
     fn eltwise_copy_elem_slice(
         &self,
         into: &Self::Buffer<Self::Elem>,
