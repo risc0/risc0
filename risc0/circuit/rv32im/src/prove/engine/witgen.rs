@@ -64,37 +64,49 @@ where
         tracing::debug!("last_cycle: {last_cycle}");
 
         nvtx::range_push!("alloc(data)");
-        let mut data = vec![BabyBearElem::INVALID; steps * CIRCUIT.data_size()];
+        let data = tracing::info_span!("alloc(data)").in_scope(|| {
+            hal.alloc_elem_init("data", steps * CIRCUIT.data_size(), BabyBearElem::INVALID)
+        });
         nvtx::range_pop!();
 
         let machine = MachineContext::new(trace);
         if mode != StepMode::SeqForward {
             nvtx::range_push!("inject_exec_backs");
-            for cycle in 0..last_cycle {
-                machine.inject_exec_backs(steps, cycle, &mut data);
-            }
+            tracing::info_span!("inject_exec_backs").in_scope(|| {
+                let mut offsets = vec![];
+                let mut values = vec![];
+                let mut index = Vec::with_capacity(last_cycle + 1);
+                for cycle in 0..last_cycle {
+                    index.push(offsets.len() as u32);
+                    machine.inject_exec_backs(steps, cycle, &mut offsets, &mut values);
+                }
+                index.push(offsets.len() as u32);
+                hal.scatter(&data, &index, &offsets, &values);
+            });
             nvtx::range_pop!();
         }
 
         if mode == StepMode::Parallel {
             nvtx::range_push!("noise");
-            let mut rng = thread_rng();
-            for i in 0..ZK_CYCLES {
-                let cycle = steps - ZK_CYCLES + i;
-                // Set data to random for the ZK_CYCLES
-                for j in 0..CIRCUIT.data_size() {
-                    data[j * steps + cycle] = BabyBearElem::random(&mut rng);
-                }
-            }
+            tracing::info_span!("noise").in_scope(|| {
+                let mut rng = thread_rng();
+                let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.data_size()];
+                hal.eltwise_copy_elem_slice(
+                    &data,
+                    &noise,
+                    CIRCUIT.data_size(), // from_rows
+                    ZK_CYCLES,           // from_cols
+                    0,                   // from_offset
+                    ZK_CYCLES,           // from_stride
+                    steps - ZK_CYCLES,   // into_offset
+                    steps,               // into_stride
+                );
+            });
             nvtx::range_pop!();
         }
 
         nvtx::range_push!("copy(ctrl)");
         let ctrl = hal.copy_from_elem("ctrl", &loader.ctrl);
-        nvtx::range_pop!();
-
-        nvtx::range_push!("copy(data)");
-        let data = hal.copy_from_elem("data", &data);
         nvtx::range_pop!();
 
         nvtx::range_push!("copy(io)");

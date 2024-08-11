@@ -562,6 +562,16 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
+    fn alloc_elem_init(
+        &self,
+        name: &'static str,
+        size: usize,
+        value: Self::Elem,
+    ) -> Self::Buffer<Self::Elem> {
+        let src = vec![value; size];
+        self.copy_from_elem(name, &src)
+    }
+
     fn copy_from_extelem(
         &self,
         name: &'static str,
@@ -912,6 +922,43 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
                 *elem = elem.valid_or_zero();
             });
         })
+    }
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
+    ) {
+        into.view_mut(|into| {
+            for cycle in 0..index.len() - 1 {
+                for idx in index[cycle]..index[cycle + 1] {
+                    into[offsets[idx as usize] as usize] = values[idx as usize];
+                }
+            }
+        });
+    }
+
+    fn eltwise_copy_elem_slice(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        from: &[Self::Elem],
+        from_rows: usize,
+        from_cols: usize,
+        from_offset: usize,
+        from_stride: usize,
+        into_offset: usize,
+        into_stride: usize,
+    ) {
+        into.view_mut(|into| {
+            for row in 0..from_rows {
+                for col in 0..from_cols {
+                    into[into_offset + row * into_stride + col] =
+                        from[from_offset + row * from_stride + col];
+                }
+            }
+        });
     }
 }
 

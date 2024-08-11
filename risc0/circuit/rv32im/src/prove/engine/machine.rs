@@ -24,12 +24,6 @@ use crate::{
     },
 };
 
-struct Injector<'a> {
-    steps: usize,
-    cycle: usize,
-    data: &'a mut [BabyBearElem],
-}
-
 pub struct MachineContext {
     trace: PreflightTrace,
     pub raw_trace: Box<RawPreflightTrace>,
@@ -38,13 +32,40 @@ pub struct MachineContext {
     _raw_extras: Vec<u32>,
 }
 
+pub struct Injection {
+    pub idx: usize,
+    pub value: BabyBearElem,
+}
+
+struct Injector<'a> {
+    steps: usize,
+    cycle: usize,
+    offsets: &'a mut Vec<u32>,
+    values: &'a mut Vec<BabyBearElem>,
+}
+
 impl<'a> Injector<'a> {
-    fn new(steps: usize, cycle: usize, data: &'a mut [BabyBearElem]) -> Self {
-        Self { steps, cycle, data }
+    fn new(
+        steps: usize,
+        cycle: usize,
+        offsets: &'a mut Vec<u32>,
+        values: &'a mut Vec<BabyBearElem>,
+    ) -> Self {
+        Self {
+            steps,
+            cycle,
+            offsets,
+            values,
+        }
     }
 
     fn get_idx(&self, reg: &DataReg) -> usize {
         reg.offset * self.steps + self.cycle - 1
+    }
+
+    fn add(&mut self, reg: &DataReg, value: u32) {
+        self.offsets.push(self.get_idx(reg) as u32);
+        self.values.push(value.into());
     }
 
     fn set_pc(&mut self, pc: ByteAddr) {
@@ -53,32 +74,32 @@ impl<'a> Injector<'a> {
         let bot2 = bytes[3] & 0b11;
         let top2 = bytes[3] >> 2 & 0b11;
         let pc = LAYOUT.mux.body.pc;
-        self.data[self.get_idx(pc.bytes[0])] = (bytes[0] as u32).into();
-        self.data[self.get_idx(pc.bytes[1])] = (bytes[1] as u32).into();
-        self.data[self.get_idx(pc.bytes[2])] = (bytes[2] as u32).into();
-        self.data[self.get_idx(pc.twits[0])] = (bot2 as u32).into();
-        self.data[self.get_idx(pc.twits[1])] = (top2 as u32).into();
+        self.add(pc.bytes[0], bytes[0] as u32);
+        self.add(pc.bytes[1], bytes[1] as u32);
+        self.add(pc.bytes[2], bytes[2] as u32);
+        self.add(pc.twits[0], bot2 as u32);
+        self.add(pc.twits[1], top2 as u32);
     }
 
     fn set_user_mode(&mut self) {
         let user_mode = LAYOUT.mux.body.user_mode;
-        self.data[self.get_idx(user_mode)] = 0u32.into();
+        self.add(user_mode, 0);
     }
 
     fn set_next_major(&mut self, major: Major) {
         let next_major = LAYOUT.mux.body.next_major;
-        self.data[self.get_idx(next_major)] = major.as_u32().into();
+        self.add(next_major, major.as_u32());
     }
 
     fn set_halt(&mut self, sys_exit_code: u8, user_exit_code: u8, write_addr: WordAddr) {
         let major_select = LAYOUT.mux.body.major_select;
         let halt_cycle = LAYOUT.mux.body.major_mux;
-        self.data[self.get_idx(major_select[Major::ECall as usize])] = 0u32.into();
-        self.data[self.get_idx(major_select[Major::PageFault as usize])] = 0u32.into();
-        self.data[self.get_idx(major_select[Major::Halt as usize])] = 1u32.into();
-        self.data[self.get_idx(halt_cycle.sys_exit_code)] = (sys_exit_code as u32).into();
-        self.data[self.get_idx(halt_cycle.user_exit_code)] = (user_exit_code as u32).into();
-        self.data[self.get_idx(halt_cycle.write_addr)] = write_addr.0.into();
+        self.add(major_select[Major::ECall as usize], 0);
+        self.add(major_select[Major::PageFault as usize], 0);
+        self.add(major_select[Major::Halt as usize], 1);
+        self.add(halt_cycle.sys_exit_code, sys_exit_code as u32);
+        self.add(halt_cycle.user_exit_code, user_exit_code as u32);
+        self.add(halt_cycle.write_addr, write_addr.0);
     }
 }
 
@@ -181,10 +202,16 @@ impl MachineContext {
         self.get_cycle(cycle).back.is_some()
     }
 
-    pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: &mut [BabyBearElem]) {
+    pub fn inject_exec_backs<'a>(
+        &self,
+        steps: usize,
+        cycle: usize,
+        offsets: &'a mut Vec<u32>,
+        values: &'a mut Vec<BabyBearElem>,
+    ) {
         let cur_cycle = self.get_cycle(cycle);
         if let Some(back) = &cur_cycle.back {
-            let mut injector = Injector::new(steps, cycle, data);
+            let mut injector = Injector::new(steps, cycle, offsets, values);
             match back {
                 Back::Null => (),
                 Back::Body { pc } => {

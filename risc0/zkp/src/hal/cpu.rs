@@ -290,6 +290,16 @@ impl<F: Field> Hal for CpuHal<F> {
         CpuBuffer::new(name, size)
     }
 
+    fn alloc_elem_init(
+        &self,
+        name: &'static str,
+        size: usize,
+        value: Self::Elem,
+    ) -> Self::Buffer<Self::Elem> {
+        let src = vec![value; size];
+        self.copy_from_elem(name, &src)
+    }
+
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
         CpuBuffer::copy_from(name, slice)
     }
@@ -602,6 +612,41 @@ impl<F: Field> Hal for CpuHal<F> {
         let mut dst = dst.as_slice_mut();
         for gid in 0..size {
             dst[gid] = src[gid * stride + idx];
+        }
+    }
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
+    ) {
+        let mut into = into.as_slice_mut();
+        for cycle in 0..index.len() - 1 {
+            for idx in index[cycle]..index[cycle + 1] {
+                into[offsets[idx as usize] as usize] = values[idx as usize];
+            }
+        }
+    }
+
+    fn eltwise_copy_elem_slice(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        from: &[Self::Elem],
+        from_rows: usize,
+        from_cols: usize,
+        from_offset: usize,
+        from_stride: usize,
+        into_offset: usize,
+        into_stride: usize,
+    ) {
+        let mut into = into.as_slice_mut();
+        for row in 0..from_rows {
+            for col in 0..from_cols {
+                into[into_offset + row * into_stride + col] =
+                    from[from_offset + row * from_stride + col];
+            }
         }
     }
 

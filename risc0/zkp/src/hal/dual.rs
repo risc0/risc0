@@ -155,6 +155,17 @@ where
         BufferImpl::new(lhs, rhs)
     }
 
+    fn alloc_elem_init(
+        &self,
+        name: &'static str,
+        size: usize,
+        value: Self::Elem,
+    ) -> Self::Buffer<Self::Elem> {
+        let lhs = self.lhs.alloc_elem_init(name, size, value);
+        let rhs = self.rhs.alloc_elem_init(name, size, value);
+        BufferImpl::new(lhs, rhs)
+    }
+
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
         let lhs = self.lhs.copy_from_digest(name, slice);
         let rhs = self.rhs.copy_from_digest(name, slice);
@@ -356,6 +367,52 @@ where
                 }
             });
         })
+    }
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
+    ) {
+        self.lhs.scatter(&into.lhs, index, offsets, values);
+        self.rhs.scatter(&into.rhs, index, offsets, values);
+        into.assert_eq();
+    }
+
+    fn eltwise_copy_elem_slice(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        from: &[Self::Elem],
+        from_rows: usize,
+        from_cols: usize,
+        from_offset: usize,
+        from_stride: usize,
+        into_offset: usize,
+        into_stride: usize,
+    ) {
+        self.lhs.eltwise_copy_elem_slice(
+            &into.lhs,
+            from,
+            from_rows,
+            from_cols,
+            from_offset,
+            from_stride,
+            into_offset,
+            into_stride,
+        );
+        self.rhs.eltwise_copy_elem_slice(
+            &into.rhs,
+            from,
+            from_rows,
+            from_cols,
+            from_offset,
+            from_stride,
+            into_offset,
+            into_stride,
+        );
+        into.assert_eq();
     }
 }
 

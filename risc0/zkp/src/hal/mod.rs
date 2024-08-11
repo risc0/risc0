@@ -66,6 +66,13 @@ pub trait Hal {
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem>;
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32>;
 
+    fn alloc_elem_init(
+        &self,
+        name: &'static str,
+        size: usize,
+        value: Self::Elem,
+    ) -> Self::Buffer<Self::Elem>;
+
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest>;
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem>;
     fn copy_from_extelem(
@@ -74,6 +81,14 @@ pub trait Hal {
         slice: &[Self::ExtElem],
     ) -> Self::Buffer<Self::ExtElem>;
     fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32>;
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
+    );
 
     fn batch_expand_into_evaluate_ntt(
         &self,
@@ -127,6 +142,18 @@ pub trait Hal {
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
+    );
+
+    fn eltwise_copy_elem_slice(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        from: &[Self::Elem],
+        from_rows: usize,
+        from_cols: usize,
+        from_offset: usize,
+        from_stride: usize,
+        into_offset: usize,
+        into_stride: usize,
     );
 
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>);

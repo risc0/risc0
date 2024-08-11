@@ -68,14 +68,14 @@
     ]
   ],
   "rust-analyzer.showUnlinkedFileNotification": false,
-  "rust-analyzer.linkedProjects": [
-    "Cargo.toml",
-    "benchmarks/Cargo.toml",
-    "examples/Cargo.toml",
-    "risc0/zkvm/methods/guest/Cargo.toml",
-    "risc0/zkvm/methods/std/Cargo.toml",
-    "tools/crates-validator/Cargo.toml"
-  ],
+  // "rust-analyzer.linkedProjects": [
+  //   "Cargo.toml",
+  //   "benchmarks/Cargo.toml",
+  //   "examples/Cargo.toml",
+  //   "risc0/zkvm/methods/guest/Cargo.toml",
+  //   "risc0/zkvm/methods/std/Cargo.toml",
+  //   "tools/crates-validator/Cargo.toml"
+  // ],
   "cSpell.words": [
     "Groth",
     "Holesky",
