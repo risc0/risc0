@@ -253,6 +253,10 @@ impl RawBuffer {
             buf: unsafe { DeviceBuffer::uninitialized(size).unwrap() },
         }
     }
+
+    pub fn set_u32(&mut self, value: u32) {
+        self.buf.set_32(value).unwrap();
+    }
 }
 
 impl Drop for RawBuffer {
@@ -427,6 +431,20 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)
+    }
+
+    fn alloc_elem_init(
+        &self,
+        name: &'static str,
+        size: usize,
+        value: Self::Elem,
+    ) -> Self::Buffer<Self::Elem> {
+        let buffer = self.alloc_elem(name, size);
+        buffer
+            .buffer
+            .borrow_mut()
+            .set_u32(value.as_u32_montgomery());
+        buffer
     }
 
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
@@ -792,13 +810,31 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         offsets: &[u32],
         values: &[Self::Elem],
     ) {
-        into.view_mut(|into| {
-            for cycle in 0..index.len() - 1 {
-                for idx in index[cycle]..index[cycle + 1] {
-                    into[offsets[idx as usize] as usize] = values[idx as usize];
-                }
-            }
-        });
+        let count = index.len() - 1;
+        let index = self.copy_from_u32("index", index);
+        let offsets = self.copy_from_u32("offsets", offsets);
+        let values = self.copy_from_elem("values", values);
+
+        extern "C" {
+            fn risc0_zkp_cuda_scatter(
+                into: DevicePointer<u8>,
+                index: DevicePointer<u8>,
+                offsets: DevicePointer<u8>,
+                values: DevicePointer<u8>,
+                count: u32,
+            ) -> CppError;
+        }
+
+        unsafe {
+            risc0_zkp_cuda_scatter(
+                into.as_device_ptr(),
+                index.as_device_ptr(),
+                offsets.as_device_ptr(),
+                values.as_device_ptr(),
+                count as u32,
+            )
+            .unwrap();
+        }
     }
 
     fn eltwise_copy_elem_slice(
@@ -812,14 +848,34 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         into_offset: usize,
         into_stride: usize,
     ) {
-        into.view_mut(|into| {
-            for row in 0..from_rows {
-                for col in 0..from_cols {
-                    into[into_offset + row * into_stride + col] =
-                        from[from_offset + row * from_stride + col];
-                }
-            }
-        });
+        let from = self.copy_from_elem("from", from);
+
+        extern "C" {
+            fn risc0_zkp_cuda_eltwise_copy_fp_region(
+                into: DevicePointer<u8>,
+                from: DevicePointer<u8>,
+                from_rows: u32,
+                from_cols: u32,
+                from_offset: u32,
+                from_stride: u32,
+                into_offset: u32,
+                into_stride: u32,
+            ) -> CppError;
+        }
+
+        unsafe {
+            risc0_zkp_cuda_eltwise_copy_fp_region(
+                into.as_device_ptr(),
+                from.as_device_ptr(),
+                from_rows as u32,
+                from_cols as u32,
+                from_offset as u32,
+                from_stride as u32,
+                into_offset as u32,
+                into_stride as u32,
+            )
+            .unwrap();
+        }
     }
 
     fn fri_fold(
