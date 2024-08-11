@@ -273,7 +273,7 @@ mod testutil {
         let xs = hal.copy_from_extelem("xs", &vec![z_pow; eval_size]);
         let out = hal.alloc_extelem("out", eval_size);
 
-        hal.batch_evaluate_any(&coeffs, poly_count as usize, &which, &xs, &out);
+        hal.batch_evaluate_any(&coeffs, poly_count, &which, &xs, &out);
     }
 
     pub(crate) fn batch_expand_into_evaluate_ntt<H: Hal>(hal_gpu: H) {

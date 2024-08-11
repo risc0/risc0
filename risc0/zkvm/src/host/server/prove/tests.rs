@@ -273,8 +273,8 @@ fn session_events() {
     session.add_hook(logger);
     prove_session_fast(&session);
     assert_eq!(session.hooks.len(), 1);
-    assert_eq!(on_pre_prove_segment_flag.take(), true);
-    assert_eq!(on_post_prove_segment_flag.take(), true);
+    assert!(on_pre_prove_segment_flag.take());
+    assert!(on_post_prove_segment_flag.take());
 }
 
 // These tests come from:
@@ -701,7 +701,7 @@ mod sys_verify {
 
     fn hello_commit_receipt() -> &'static Receipt {
         static ONCE: OnceLock<Receipt> = OnceLock::new();
-        ONCE.get_or_init(|| prove_hello_commit())
+        ONCE.get_or_init(prove_hello_commit)
     }
 
     #[test]

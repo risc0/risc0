@@ -28,12 +28,12 @@ impl workerpool::Worker for Worker {
         std::panic::catch_unwind(|| {
             let receipt = match job.kind {
                 JobKind::Segment(segment) => self.prove_and_lift(segment),
-                JobKind::Join(left, right) => self.join(left, right),
-                JobKind::Receipt(receipt) => receipt,
+                JobKind::Join(pair) => self.join(pair.0, pair.1),
+                JobKind::Receipt(receipt) => *receipt,
             };
             Job {
                 task: job.task,
-                kind: JobKind::Receipt(receipt),
+                kind: JobKind::Receipt(Box::new(receipt)),
             }
         })
         .unwrap_or_else(|_| {

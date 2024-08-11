@@ -15,9 +15,6 @@
 #[cfg(not(target_os = "zkvm"))]
 use std::fmt;
 
-use csv;
-#[cfg(not(target_os = "zkvm"))]
-use hex;
 use rust_decimal::{Decimal, RoundingStrategy};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -73,19 +70,19 @@ impl fmt::Display for AllocationQueryResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.allocation {
             None => {
-                write!(f, "No allocation.\n").unwrap();
+                writeln!(f, "No allocation.").unwrap();
             }
             Some(allocation) => {
-                write!(
+                writeln!(
                     f,
-                    "Allocation for {}: {}\n",
+                    "Allocation for {}: {}",
                     allocation.name, allocation.amount,
                 )
                 .unwrap();
-                write!(f, "Total: {}\n", &self.total).unwrap();
+                writeln!(f, "Total: {}", &self.total).unwrap();
             }
         }
-        write!(f, "CSV hash: {}\n", hex::encode(&self.csv_hash))
+        writeln!(f, "CSV hash: {}", hex::encode(&self.csv_hash))
     }
 }
 
@@ -141,12 +138,9 @@ pub fn allocate_for(
     target: &str,
 ) -> Option<Allocation> {
     let allocations = allocate(amount, recipients);
-    for allocation in allocations {
-        if allocation.name == target {
-            return Some(allocation);
-        }
-    }
-    None
+    allocations
+        .into_iter()
+        .find(|allocation| allocation.name == target)
 }
 
 #[cfg(test)]

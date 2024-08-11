@@ -31,7 +31,7 @@ pub fn new_jobs() -> Vec<Job> {
     ]);
 
     vec![Job::new(
-        format!("sudoku"),
+        "sudoku".to_string(),
         risc0_benchmark_methods::SUDOKU_ELF,
         risc0_benchmark_methods::SUDOKU_ID.into(),
         to_vec(&input).unwrap(),

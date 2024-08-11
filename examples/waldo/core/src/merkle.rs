@@ -75,9 +75,9 @@ impl<Element> MerkleTree<Element>
 where
     Element: Hashable<ShaHasher> + Serialize,
 {
-    pub fn vector_oracle_callback<'a>(
-        &'a self,
-    ) -> impl Fn(risc0_zkvm::Bytes) -> risc0_zkvm::Result<risc0_zkvm::Bytes> + 'a {
+    pub fn vector_oracle_callback(
+        &self,
+    ) -> impl Fn(risc0_zkvm::Bytes) -> risc0_zkvm::Result<risc0_zkvm::Bytes> + '_ {
         |data| {
             // TODO: Using bincode here, but it would likely be better on the guest side to
             // use the risc0 serde crate. I should try to use one of
@@ -90,7 +90,7 @@ where
             let value = &self.elements()[index];
             let proof = self.prove(index);
 
-            assert!(proof.verify(&self.root(), &value));
+            assert!(proof.verify(&self.root(), value));
             Ok(bincode::serialize(&(value, proof)).unwrap().into())
         }
     }
@@ -212,12 +212,12 @@ where
 }
 
 // Into tuple representation provided to enable serde deserialization.
-impl<Element> Into<(Vec<Node>, Vec<bool>)> for Proof<Element>
+impl<Element> From<Proof<Element>> for (Vec<Node>, Vec<bool>)
 where
     Element: Hashable<ShaHasher>,
 {
-    fn into(self) -> (Vec<Node>, Vec<bool>) {
-        (self.inner.lemma().to_vec(), self.inner.path().to_vec())
+    fn from(val: Proof<Element>) -> Self {
+        (val.inner.lemma().to_vec(), val.inner.path().to_vec())
     }
 }
 
@@ -324,7 +324,7 @@ mod test {
         let tree = random_merkle_tree();
         for (index, item) in tree.elements().iter().enumerate() {
             let proof = tree.prove(index);
-            assert!(proof.verify(&tree.root(), &item));
+            assert!(proof.verify(&tree.root(), item));
         }
     }
 
@@ -337,7 +337,7 @@ mod test {
             let proof_bytes = bincode::serialize(&proof).unwrap();
             let proof_deserialized: Proof<u32> = bincode::deserialize(&proof_bytes).unwrap();
 
-            assert!(proof_deserialized.verify(&tree.root(), &item));
+            assert!(proof_deserialized.verify(&tree.root(), item));
         }
     }
 

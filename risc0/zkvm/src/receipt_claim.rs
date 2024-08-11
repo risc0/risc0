@@ -772,7 +772,7 @@ mod tests {
                     output: x.output.rand_prune(),
                 }
                 .into(),
-                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+                (Self::Pruned(x), _) => Self::Pruned(*x),
             }
         }
     }
@@ -786,7 +786,7 @@ mod tests {
                     merkle_root: x.merkle_root,
                 }
                 .into(),
-                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+                (Self::Pruned(x), _) => Self::Pruned(*x),
             }
         }
     }
@@ -802,7 +802,7 @@ mod tests {
                         assumptions: o.assumptions.rand_prune(),
                     })
                     .into(),
-                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+                (Self::Pruned(x), _) => Self::Pruned(*x),
             }
         }
     }
@@ -812,7 +812,7 @@ mod tests {
             match (self, rand::random::<bool>()) {
                 (Self::Value(x), true) => Self::Pruned(x.digest()),
                 (Self::Value(x), false) => x.clone().into(),
-                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+                (Self::Pruned(x), _) => Self::Pruned(*x),
             }
         }
     }
@@ -822,7 +822,7 @@ mod tests {
             match (self, rand::random::<bool>()) {
                 (Self::Value(x), true) => Self::Pruned(x.digest()),
                 (Self::Value(x), false) => x.clone().into(),
-                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+                (Self::Pruned(x), _) => Self::Pruned(*x),
             }
         }
     }

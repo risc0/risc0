@@ -68,7 +68,7 @@ fn fwd_rev_ab_test(program: Program) {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
+        &NullSyscall,
         None,
     )
     .unwrap();
@@ -125,7 +125,7 @@ fn basic() {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
+        &NullSyscall,
         None,
     )
     .unwrap();
@@ -133,7 +133,7 @@ fn basic() {
     let segment = segments.first().unwrap();
 
     let prover = segment_prover("sha-256").unwrap();
-    let seal = prover.prove_segment(&segment).unwrap();
+    let seal = prover.prove_segment(segment).unwrap();
 
     let suite = Sha256HashSuite::new_suite();
     let hal = CpuHal::new(suite.clone());
@@ -146,14 +146,7 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let result = execute(
-        image,
-        14,
-        DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
-        None,
-    )
-    .unwrap();
+    let result = execute(image, 14, DEFAULT_SESSION_LIMIT, &NullSyscall, None).unwrap();
 
     let prover = segment_prover("sha-256").unwrap();
     let suite = Sha256HashSuite::new_suite();

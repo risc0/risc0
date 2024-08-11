@@ -76,7 +76,7 @@ fn main() {
 /// resulting receipt is stored to disk.
 fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
     println!("Query: {}", recipient);
-    let recipients_csv = std::fs::read(&input).expect("Failed to read input file");
+    let recipients_csv = std::fs::read(input).expect("Failed to read input file");
 
     let query = AllocationQuery {
         amount: *amount,

@@ -341,7 +341,7 @@ impl KernelBuild {
         let out_path = out_dir.join(output).with_extension(extension);
         let sys_inc_dir = out_dir.join("_sys_");
 
-        if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() || env::var("RISC0_SKIP_BUILD").is_ok() {
+        if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
             fs::OpenOptions::new()
                 .create(true)
                 .truncate(true)

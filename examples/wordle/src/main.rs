@@ -150,14 +150,14 @@ mod tests {
         };
 
         let guess_word = TEST_GUESS_WRONG;
-        let receipt = server.check_round(&guess_word);
+        let receipt = server.check_round(guess_word);
         let score = player.check_receipt(receipt);
         assert!(
             !score.game_is_won(),
             "Incorrect guess should not win the game"
         );
         let guess_word = TEST_GUESS_RIGHT;
-        let receipt = server.check_round(&guess_word);
+        let receipt = server.check_round(guess_word);
         let score = player.check_receipt(receipt);
         assert!(score.game_is_won(), "Correct guess should win the game");
     }
@@ -174,7 +174,7 @@ mod tests {
         };
 
         let guess_word = "apple";
-        let receipt = server.check_round(&guess_word);
+        let receipt = server.check_round(guess_word);
         let score = player.check_receipt(receipt);
         score.print(guess_word);
 
