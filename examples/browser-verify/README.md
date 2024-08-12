@@ -14,9 +14,8 @@ cargo xtask gen-receipt
 Next, install the `cargo-risczero` tool and install the toolchain with:
 
 ```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
+curl -L https://risczero.com/install | bash
+rzup install
 ```
 
 ### Running a test of in-browser verification

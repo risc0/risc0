@@ -6,7 +6,7 @@ These instructions guide you through installing or updating RISC Zero tools to b
 
 The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] installed, start by [installing Rust and rustup][install-rust]. Please follow the recommended Rust installation instructions using [rustup], as RISC Zero specifically depends on the [rustup] tool.
 
-## Install
+## Installation for x86-64 Linux and arm64 macOS
 
 `rzup` is the RISC Zero toolchain installer. We recommend using `rzup` to manage the installation of RISC Zero.
 
@@ -16,35 +16,35 @@ The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] 
    ```
 2. Run `rzup` to install RISC Zero:
    ```sh
-   rzup
+   rzup install
    ```
 
 Running `rzup` will install the latest version of the RISC Zero toolchain.
 
-For a specific version, use `rzup --version <version>`, where the `<version>` is a [release tag].
+For a specific version, use `rzup install --version <version>`, where the `<version>` is a [release tag].
 
 See `rzup --help` for more options. You can find out more about `rzup` [here](https://github.com/risc0/risc0/tree/main/rzup).
 
-### Manual Installation
+### Manual Installation and installation for all other systems (e.g. x86-64 macOS, arm64 Linux)
 
-For users who prefer manual installation, follow these steps:
+For users who prefer manual installation or those who use systems such as x86-64 macOS, arm64 Linux, follow these steps:
 
-1. Install the [`cargo risczero`][cargo-risczero] tool and use its [`install` command][cargo-risczero] to install the Rust and C++ toolchains by running:
-   ```sh
-   cargo install cargo-binstall
-   cargo binstall cargo-risczero
-   cargo risczero install
-   ```
-   > Note: To install a specific version instead of using the latest stable version, use `cargo binstall cargo-risczero@<version>`, where the version is a [release tag].
-   >
-   > The version used must match the `risc0-zkvm` version from your guest and host.
-2. For x86-64 macOS, you must run `cargo risczero build-toolchain` instead of `cargo risczero install`.
+- Clone the repository with `git clone https://github.com/risc0/risc0.git`.
+- In the root of the repository, install `rzup` with `cargo install --path rzup`.
+- Build and install the rust toolchain with `rzup toolchain build rust`. This command may require utilities such as `cmake` and the `ninja` build system to be installed.
+- Build and install the `cargo-risczero` by first checking out the branch `release-*` where `*` is `[major release number].[minor release number]` of your desired zkVM version. For example, if you would like to install version 1.1.0, run `git checkout origin/release-1.1` and run `cargo install --path risc0/cargo-risczero`.
+
+For x86-64 linux and arm64 macOS, install the C++ toolchains by running:
+
+```sh
+rzup install cpp
+```
 
 ## Update
 
 To update your installation:
 
-1. Run `rzup` to update the RISC Zero toolchain to the latest [release tag] version.
+1. Run `rzup update` to update the RISC Zero toolchain to the latest [release tag] version.
 
 After you update your installation, be sure to update your project's RISC Zero crates. To do this, you must update all RISC Zero dependencies in your project's host and guest `Cargo.toml` files. In most projects, this is done by updating the host and guest `risc0-zkvm` crate and the `risc0-build` build dependency. They should be updated to use the version number displayed by `cargo risczero --version`.
 

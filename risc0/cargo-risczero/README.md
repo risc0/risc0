@@ -11,8 +11,8 @@ To install this Cargo subcommand, first you'll want to [install
 Rust][install-rust] and then you'll execute:
 
 ```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
+curl -L https://risczero.com/install | bash
+rzup install
 ```
 
 To install from local source, use:
@@ -39,7 +39,7 @@ The `install` command installs the latest RISC Zero toolchain. This toolchain is
 needed to compile guest programs into ELF binaries that the zkVM can execute.
 
 ```bash
-cargo risczero install
+rzup install
 ```
 
 You can verify it was installed correctly by running:

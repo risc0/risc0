@@ -31,20 +31,19 @@ When testing and running examples within this library, you can install `cargo-ri
 
 ```bash
 cargo install --force --path risc0/cargo-risczero
-cargo risczero install
 ```
 
 Otherwise, if using a stable version branch, you can install `cargo-risczero` through the standard flow:
 
 ```bash
 curl -L https://risczero.com/install | bash
-rzup
+rzup install
 ```
 
 Optionally, you can specify which version of `cargo-risczero` to install with:
 
 ```bash
-rzup --version $VERSION
+rzup install --version $VERSION
 ```
 
 > NOTE: It is only important that you install `cargo-risczero` with a matching version of the `zkvm` crate when interacting with the proof system as a separate, pre-built process ([`ExternalProver`](https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExternalProver.html)), which is currently the default. If you are using the `prove` feature on the `risc0-zkvm` crate for the host, this will compile the proving system into the host binary.
