@@ -21,6 +21,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
+use crate::config::GuestBuildOptions;
 use crate::{encode_rust_flags, get_env_var, GuestOptions};
 
 const DOCKER_IGNORE: &str = r#"
@@ -47,6 +48,14 @@ pub fn docker_build(
     manifest_path: &Path,
     src_dir: &Path,
     guest_opts: &GuestOptions,
+) -> Result<BuildStatus> {
+    build_guest_package_docker(manifest_path, src_dir, &guest_opts.clone().into())
+}
+
+pub(crate) fn build_guest_package_docker(
+    manifest_path: &Path,
+    src_dir: &Path,
+    guest_opts: &GuestBuildOptions,
 ) -> Result<BuildStatus> {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
         eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
@@ -108,7 +117,7 @@ fn create_dockerfile(
     manifest_path: &Path,
     temp_dir: &Path,
     pkg_name: &str,
-    guest_opts: &GuestOptions,
+    guest_opts: &GuestBuildOptions,
 ) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
     let encoded_rust_flags = encode_rust_flags(
@@ -221,8 +230,8 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use super::{docker_build, TARGET_DIR};
-    use crate::GuestOptions;
+    use super::TARGET_DIR;
+    use crate::config::{GuestBuildOptions, GuestOptions};
     use std::path::Path;
 
     const SRC_DIR: &str = "../..";
@@ -230,7 +239,7 @@ mod test {
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        self::docker_build(manifest_path, src_dir, &GuestOptions::default()).unwrap();
+        self::docker_build(manifest_path, src_dir, &GuestBuildOptions::default()).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {

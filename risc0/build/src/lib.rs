@@ -17,6 +17,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
+mod config;
 mod docker;
 
 use std::{
@@ -37,6 +38,10 @@ use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
+use crate::config::GuestBuildOptions;
+use crate::docker::build_guest_package_docker;
+use config::GuestMetadata;
+pub use config::{DockerOptions, GuestOptions};
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
 /// This const represents a filename that is used in the use to indicate to in
@@ -563,7 +568,7 @@ fn tty_println(msg: &str) {
 fn build_guest_package<P>(
     pkg: &Package,
     target_dir: P,
-    guest_opts: &GuestOptions,
+    guest_opts: &GuestBuildOptions,
     runtime_lib: Option<&str>,
 ) where
     P: AsRef<Path>,
@@ -647,29 +652,6 @@ fn detect_toolchain(name: &str) {
     }
 }
 
-/// Options for configuring a docker build environment.
-#[derive(Clone)]
-pub struct DockerOptions {
-    /// Specify the root directory for docker builds.
-    ///
-    /// The current working directory is used if `None` is specified.
-    pub root_dir: Option<PathBuf>,
-}
-
-/// Options defining how to embed a guest package in
-/// [`embed_methods_with_options`].
-#[derive(Default, Clone)]
-pub struct GuestOptions {
-    /// Features for cargo to build the guest with.
-    pub features: Vec<String>,
-
-    /// Use a docker environment for building.
-    pub use_docker: Option<DockerOptions>,
-
-    /// Configuration flags to build the guest with.
-    pub rustc_flags: Vec<String>,
-}
-
 fn get_guest_dir() -> PathBuf {
     // Determine the output directory, in the target folder, for the guest binary.
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
@@ -741,19 +723,26 @@ fn do_embed_methods<G: GuestBuilder>(
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        let guest_opts = guest_pkg_to_options
+        let guest_embed_opts = guest_pkg_to_options
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
+        let guest_build_opts = GuestBuildOptions::from(guest_embed_opts)
+            .with_metadata(GuestMetadata::from(&guest_pkg));
 
-        let methods: Vec<G> = if let Some(ref docker_opts) = guest_opts.use_docker {
+        let methods: Vec<G> = if let Some(ref docker_opts) = guest_build_opts.use_docker {
             let src_dir = docker_opts
                 .root_dir
                 .clone()
                 .unwrap_or_else(|| std::env::current_dir().unwrap());
-            docker_build(guest_pkg.manifest_path.as_std_path(), &src_dir, &guest_opts).unwrap();
+            build_guest_package_docker(
+                guest_pkg.manifest_path.as_std_path(),
+                &src_dir,
+                &guest_build_opts,
+            )
+            .unwrap();
             guest_methods_docker(&guest_pkg, &guest_dir)
         } else {
-            build_guest_package(&guest_pkg, &guest_dir, &guest_opts, None);
+            build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
             guest_methods(&guest_pkg, &guest_dir)
         };
 
