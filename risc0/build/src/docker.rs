@@ -231,7 +231,7 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 #[cfg(test)]
 mod test {
     use super::TARGET_DIR;
-    use crate::config::{GuestBuildOptions, GuestOptions};
+    use crate::config::GuestBuildOptions;
     use std::path::Path;
 
     const SRC_DIR: &str = "../..";
