@@ -38,10 +38,6 @@ pub struct DeployCommand {
     #[arg(long, value_delimiter = ',')]
     pub features: Vec<String>,
 
-    #[arg(long, value_delimiter = ',')]
-    /// Extra flags passed to rustc.
-    pub rustc_flags: Vec<String>,
-
     #[command(flatten)]
     client_envs: utils::ClientEnvs,
 }
@@ -61,7 +57,6 @@ impl DeployCommand {
             &self.manifest_path,
             &GuestOptions {
                 features: self.features.clone(),
-                rustc_flags: self.rustc_flags.clone(),
                 ..Default::default()
             },
         )? {

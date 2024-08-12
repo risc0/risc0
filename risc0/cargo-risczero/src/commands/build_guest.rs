@@ -33,10 +33,6 @@ pub struct BuildGuest {
     /// Feature flags passed to cargo.
     #[arg(long, value_delimiter = ',')]
     pub features: Vec<String>,
-
-    #[arg(long, value_delimiter = ',')]
-    /// Extra flags passed to rustc.
-    pub rustc_flags: Vec<String>,
 }
 
 impl BuildGuest {
@@ -45,7 +41,6 @@ impl BuildGuest {
             &self.manifest_path,
             &GuestOptions {
                 features: self.features.clone(),
-                rustc_flags: self.rustc_flags.clone(),
                 ..Default::default()
             },
         )?;
