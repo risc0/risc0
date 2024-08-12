@@ -79,6 +79,14 @@ pub trait Hal {
         buffer
     }
 
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        let buffer = self.alloc_extelem(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(Self::ExtElem::ZERO);
+        });
+        buffer
+    }
+
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest>;
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem>;
     fn copy_from_extelem(
@@ -87,14 +95,6 @@ pub trait Hal {
         slice: &[Self::ExtElem],
     ) -> Self::Buffer<Self::ExtElem>;
     fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32>;
-
-    fn scatter(
-        &self,
-        into: &Self::Buffer<Self::Elem>,
-        index: &[u32],
-        offsets: &[u32],
-        values: &[Self::Elem],
-    );
 
     fn batch_expand_into_evaluate_ntt(
         &self,
@@ -183,6 +183,14 @@ pub trait Hal {
         idx: usize,
         size: usize,
         stride: usize,
+    );
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
     );
 
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>);

@@ -32,11 +32,6 @@ pub struct MachineContext {
     _raw_extras: Vec<u32>,
 }
 
-pub struct Injection {
-    pub idx: usize,
-    pub value: BabyBearElem,
-}
-
 struct Injector<'a> {
     steps: usize,
     cycle: usize,

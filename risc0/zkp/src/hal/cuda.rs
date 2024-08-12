@@ -455,6 +455,12 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         BufferImpl::new(name, size)
     }
 
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        let buffer = self.alloc_extelem(name, size);
+        buffer.buffer.borrow_mut().set_u32(0);
+        buffer
+    }
+
     fn copy_from_extelem(
         &self,
         name: &'static str,

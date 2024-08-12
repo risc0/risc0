@@ -269,10 +269,9 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Begin by making a zeroed output buffer
         let combo_count = self.taps.combos_size();
         nvtx::range_push!("alloc(combos)");
-        let combos = vec![H::ExtElem::ZERO; self.cycles * (combo_count + 1)];
-        nvtx::range_pop!();
-        nvtx::range_push!("copy(combos)");
-        let combos = self.hal.copy_from_extelem("combos", combos.as_slice());
+        let combos = self
+            .hal
+            .alloc_extelem_zeroed("combos", self.cycles * (combo_count + 1));
         nvtx::range_pop!();
 
         tracing::info_span!("mix_poly_coeffs").in_scope(|| {
