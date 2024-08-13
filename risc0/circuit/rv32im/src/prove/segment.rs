@@ -14,6 +14,7 @@
 
 use derive_debug::Dbg;
 use risc0_binfmt::{ExitCode, MemoryImage, SystemState};
+use risc0_core::scope;
 use risc0_zkp::{
     adapter::CircuitInfo as _,
     core::digest::{Digest, DIGEST_WORDS},
@@ -48,6 +49,8 @@ pub struct Segment {
 
 impl Segment {
     pub fn prepare_globals(&self) -> Vec<Elem> {
+        scope!("prepare_globals");
+
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
 
         // initialize Input

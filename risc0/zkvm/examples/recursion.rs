@@ -17,13 +17,16 @@ use risc0_zkvm::{
     sha::Digest,
     ProverOpts,
 };
-use tracing_subscriber::{prelude::*, EnvFilter};
 
 fn main() {
-    tracing_subscriber::registry()
-        .with(EnvFilter::from_default_env())
-        .with(tracing_forest::ForestLayer::default())
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
+
+    puffin::set_scopes_on(true);
+    let server_addr = format!("0.0.0.0:{}", puffin_http::DEFAULT_PORT);
+    println!("Puffin server: {server_addr}");
+    let _puffin_server = puffin_http::Server::new(&server_addr).unwrap();
 
     let hal_pair = poseidon2_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
@@ -35,4 +38,6 @@ fn main() {
         .unwrap()
         .run_with_hal(hal, circuit_hal)
         .expect("Running prover failed");
+
+    puffin::GlobalProfiler::lock().new_frame();
 }

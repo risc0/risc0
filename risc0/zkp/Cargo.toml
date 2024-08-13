@@ -22,7 +22,6 @@ digest = { version = "0.10", features = ["oid"] }
 ff = { version = "0.13", features = ["derive", "bits"], optional = true }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 hex-literal = "0.4.1"
-nvtx = { version = "1.3", optional = true }
 paste = "1.0"
 rand_core = "0.6"
 risc0-core = { workspace = true }
@@ -63,11 +62,11 @@ metal_prefix_products = []
 prove = [
   "dep:ff",
   "dep:ndarray",
-  "dep:nvtx",
   "dep:parking_lot",
   "dep:rand",
   "dep:rayon",
   "dep:risc0-sys",
+  "risc0-core/perf",
   "std",
 ]
 std = ["anyhow/std"]

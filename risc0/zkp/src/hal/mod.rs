@@ -66,6 +66,27 @@ pub trait Hal {
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem>;
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32>;
 
+    fn alloc_elem_init(
+        &self,
+        name: &'static str,
+        size: usize,
+        value: Self::Elem,
+    ) -> Self::Buffer<Self::Elem> {
+        let buffer = self.alloc_elem(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(value);
+        });
+        buffer
+    }
+
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        let buffer = self.alloc_extelem(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(Self::ExtElem::ZERO);
+        });
+        buffer
+    }
+
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest>;
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem>;
     fn copy_from_extelem(
@@ -129,6 +150,19 @@ pub trait Hal {
         input: &Self::Buffer<Self::Elem>,
     );
 
+    #[allow(clippy::too_many_arguments)]
+    fn eltwise_copy_elem_slice(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        from: &[Self::Elem],
+        from_rows: usize,
+        from_cols: usize,
+        from_offset: usize,
+        from_stride: usize,
+        into_offset: usize,
+        into_stride: usize,
+    );
+
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>);
 
     fn fri_fold(
@@ -149,6 +183,14 @@ pub trait Hal {
         idx: usize,
         size: usize,
         stride: usize,
+    );
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
     );
 
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>);

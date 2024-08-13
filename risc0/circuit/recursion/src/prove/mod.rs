@@ -30,6 +30,7 @@ use crate::{
 };
 use anyhow::{bail, Result};
 use rand::thread_rng;
+use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
@@ -43,6 +44,7 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
+use self::exec::RecursionExecutor;
 pub use self::program::Program;
 
 /// A pair of [Hal] and [CircuitHal].
@@ -257,7 +259,6 @@ impl Prover {
 
     /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
     /// program and input.
-    #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         // NOTE: Code is repeated across match arms to satisfy generics.
         match self.hashfn.as_ref() {
@@ -282,68 +283,99 @@ impl Prover {
 
     /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
     /// program and input, using the specified HAL.
-    #[tracing::instrument(skip_all)]
     pub fn run_with_hal<H, C>(&mut self, hal: &H, circuit_hal: &C) -> Result<RecursionReceipt>
     where
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
         C: CircuitHal<H>,
     {
+        scope!("run_with_hal");
+
         let machine_ctx = self.preflight()?;
 
         let split_points = core::mem::take(&mut self.split_points);
 
-        let mut executor =
-            exec::RecursionExecutor::new(&CIRCUIT, &self.program, machine_ctx, split_points);
-        executor.run()?;
+        let mut executor = scope!("witgen", {
+            let mut executor =
+                RecursionExecutor::new(&CIRCUIT, &self.program, machine_ctx, split_points);
+            executor.run()?;
+            Result::<RecursionExecutor, anyhow::Error>::Ok(executor)
+        })?;
 
-        let mut adapter = ProveAdapter::new(&mut executor.executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
-        let hashfn = Rc::clone(&hal.get_hash_suite().hashfn);
+        let seal = scope!("prove", {
+            let mut adapter = ProveAdapter::new(&mut executor.executor);
+            let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+            let hashfn = Rc::clone(&hal.get_hash_suite().hashfn);
 
-        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
-        // about the proof system and circuit.
-        prover
-            .iop()
-            .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
-        prover
-            .iop()
-            .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
+            let (mix, io) = scope!("main", {
+                // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+                // about the proof system and circuit.
+                prover
+                    .iop()
+                    .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+                prover
+                    .iop()
+                    .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
 
-        adapter.execute(prover.iop(), hal);
+                adapter.execute(prover.iop(), hal);
 
-        prover.set_po2(adapter.po2() as usize);
+                prover.set_po2(adapter.po2() as usize);
 
-        let ctrl = hal.copy_from_elem("ctrl", &adapter.get_code().as_slice());
-        prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
+                let ctrl = hal.copy_from_elem("ctrl", &adapter.get_code().as_slice());
+                prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
 
-        let data = hal.copy_from_elem("data", &adapter.get_data().as_slice());
-        prover.commit_group(REGISTER_GROUP_DATA, &data);
+                let data = hal.copy_from_elem("data", &adapter.get_data().as_slice());
+                prover.commit_group(REGISTER_GROUP_DATA, &data);
 
-        // Make the mixing values
-        let mix: Vec<_> = (0..CircuitImpl::MIX_SIZE)
-            .map(|_| prover.iop().random_elem())
-            .collect();
-        let mix = hal.copy_from_elem("mix", mix.as_slice());
+                // Make the mixing values
+                let mix = scope!("alloc+copy(mix)", {
+                    let mix: Vec<_> = (0..CircuitImpl::MIX_SIZE)
+                        .map(|_| prover.iop().random_elem())
+                        .collect();
+                    hal.copy_from_elem("mix", mix.as_slice())
+                });
 
-        let steps = adapter.get_steps();
-        let mut accum = vec![BabyBearElem::INVALID; steps * CIRCUIT.accum_size()];
+                let steps = adapter.get_steps();
 
-        // Add random noise to end of accum
-        let mut rng = thread_rng();
-        for i in steps - ZK_CYCLES..steps {
-            for j in 0..CIRCUIT.accum_size() {
-                accum[j * steps + i] = BabyBearElem::random(&mut rng);
-            }
-        }
+                let accum = scope!(
+                    "alloc(accum)",
+                    hal.alloc_elem_init(
+                        "accum",
+                        steps * CIRCUIT.accum_size(),
+                        BabyBearElem::INVALID,
+                    )
+                );
 
-        let io = hal.copy_from_elem("io", &adapter.get_io().as_slice());
-        let accum = hal.copy_from_elem("accum", accum.as_slice());
+                // Add random noise to end of accum
+                scope!("noise(accum)", {
+                    let mut rng = thread_rng();
+                    let noise =
+                        vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.accum_size()];
+                    hal.eltwise_copy_elem_slice(
+                        &accum,
+                        &noise,
+                        CIRCUIT.accum_size(), // from_rows
+                        ZK_CYCLES,            // from_cols
+                        0,                    // from_offset
+                        ZK_CYCLES,            // from_stride
+                        steps - ZK_CYCLES,    // into_offset
+                        steps,                // into_stride
+                    );
+                });
 
-        circuit_hal.accumulate(&ctrl, &io, &data, &mix, &accum, steps);
+                let io = scope!(
+                    "copy(io)",
+                    hal.copy_from_elem("io", &adapter.get_io().as_slice())
+                );
 
-        prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
+                circuit_hal.accumulate(&ctrl, &io, &data, &mix, &accum, steps);
 
-        let seal = prover.finalize(&[&mix, &io], circuit_hal);
+                prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
+
+                (mix, io)
+            });
+
+            prover.finalize(&[&mix, &io], circuit_hal)
+        });
 
         Ok(RecursionReceipt {
             seal,
@@ -351,8 +383,9 @@ impl Prover {
         })
     }
 
-    #[tracing::instrument(skip_all)]
     fn preflight(&mut self) -> Result<exec::MachineContext> {
+        scope!("preflight");
+
         let mut machine = exec::MachineContext::new(take(&mut self.input));
         let mut preflight = preflight::Preflight::new(&mut machine);
         let size = (1 << self.program.po2) - ZK_CYCLES;
