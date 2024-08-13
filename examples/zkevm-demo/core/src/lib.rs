@@ -108,7 +108,7 @@ pub mod ether_trace {
             caller: tx.from.0.into(),
             gas_limit: tx.gas.as_u64(),
             gas_price: from_ethers_u256(tx.gas_price.unwrap()),
-            gas_priority_fee: tx.max_priority_fee_per_gas.map(|x| from_ethers_u256(x)),
+            gas_priority_fee: tx.max_priority_fee_per_gas.map(from_ethers_u256),
             transact_to: if let Some(to_addr) = tx.to {
                 TransactTo::Call(to_addr.0.into())
             } else {

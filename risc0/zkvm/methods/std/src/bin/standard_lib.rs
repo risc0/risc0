@@ -48,7 +48,7 @@ fn main() {
             let capacity: usize = risc0_zkvm::guest::env::read();
             let mut reader = BufReader::with_capacity(capacity, risc0_zkvm::guest::env::stdin());
             let buf = reader.fill_buf().unwrap();
-            risc0_zkvm::guest::env::commit_slice(&buf)
+            risc0_zkvm::guest::env::commit_slice(buf)
         }
         _ => {
             panic!("Unknown test mode {test_mode}");

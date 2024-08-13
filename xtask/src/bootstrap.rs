@@ -81,9 +81,9 @@ impl Bootstrap {
 
         let contents = format!(
             include_str!("templates/control_id_rv32im.rs"),
-            Self::format_control_ids(&control_id_sha256),
+            Self::format_control_ids(control_id_sha256),
             Self::format_control_ids(&control_id_poseidon2),
-            Self::format_control_ids(&control_id_blake2b),
+            Self::format_control_ids(control_id_blake2b),
         );
         tracing::debug!("contents of rv32im control_id.rs:\n{contents}");
 
@@ -124,7 +124,7 @@ impl Bootstrap {
                 poseidon2_control_ids
                     .iter()
                     .filter(|(name, _digest)| allowed_zkr_names.contains(name))
-                    .map(|(name, digest)| (format!("recursion {name}"), digest.clone())),
+                    .map(|(name, digest)| (format!("recursion {name}"), *digest)),
             )
             .collect();
 
@@ -132,7 +132,7 @@ impl Bootstrap {
         let merkle_group = MerkleGroup::new(
             allowed_control_ids
                 .iter()
-                .map(|(_name, digest)| digest.clone())
+                .map(|(_name, digest)| *digest)
                 .collect(),
         )
         .unwrap();
@@ -170,9 +170,9 @@ impl Bootstrap {
     ) -> Vec<(String, Digest)> {
         let hash_suite = hash_suite_from_name(hashfn).unwrap();
 
-        zkrs.into_iter()
+        zkrs.iter()
             .map(|(name, encoded_program)| {
-                let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
+                let program = Program::from_encoded(encoded_program, RECURSION_PO2);
 
                 tracing::info!("computing control ID for {name} with {hashfn}");
                 let control_id = program.compute_control_id(hash_suite.clone());

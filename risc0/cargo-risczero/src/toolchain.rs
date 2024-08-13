@@ -153,8 +153,7 @@ pub struct CppToolchain {
 
 impl CppToolchain {
     fn get_subdir(path: &Path) -> Result<PathBuf> {
-        let sub_dir: Vec<std::result::Result<std::fs::DirEntry, std::io::Error>> =
-            std::fs::read_dir(path)?.into_iter().collect();
+        let sub_dir: Vec<_> = std::fs::read_dir(path)?.collect();
         if sub_dir.len() != 1 {
             bail!(
                 "Expected {} to only have 1 subdirectory, found {}",

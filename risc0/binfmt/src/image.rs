@@ -300,7 +300,7 @@ impl MemoryImage {
             let entry_addr = self.info.get_page_entry_addr(page_idx);
             let mut entry = [0_u8; DIGEST_BYTES];
             self.load_region_in_page(entry_addr, &mut entry)?;
-            let actual = Digest::try_from(entry)?;
+            let actual: Digest = entry.into();
             tracing::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
             );
