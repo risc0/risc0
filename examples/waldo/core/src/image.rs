@@ -111,12 +111,11 @@ impl<const N: u32> ImageMerkleTree<N> {
         let chunks: Vec<ImageChunk> = {
             (0..image.height())
                 .step_by(usize::try_from(N).unwrap())
-                .map(|y| {
+                .flat_map(|y| {
                     (0..image.width())
                         .step_by(usize::try_from(N).unwrap())
                         .map(move |x| image.crop_imm(x, y, N, N).into_rgb8().into())
                 })
-                .flatten()
                 .collect()
         };
 
@@ -128,9 +127,9 @@ impl<const N: u32> ImageMerkleTree<N> {
     }
 
     #[cfg(not(target_os = "zkvm"))]
-    pub fn vector_oracle_callback<'a>(
-        &'a self,
-    ) -> impl Fn(risc0_zkvm::Bytes) -> risc0_zkvm::Result<risc0_zkvm::Bytes> + 'a {
+    pub fn vector_oracle_callback(
+        &self,
+    ) -> impl Fn(risc0_zkvm::Bytes) -> risc0_zkvm::Result<risc0_zkvm::Bytes> + '_ {
         self.0.vector_oracle_callback()
     }
 }

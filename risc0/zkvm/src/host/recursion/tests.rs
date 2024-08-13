@@ -278,7 +278,7 @@ fn test_recursion_identity_sha256() {
     let hashfn = opts.hash_suite().unwrap().hashfn;
     let sha256_control_tree = MerkleGroup::new(opts.control_ids.clone()).unwrap();
     let sha256_control_inclusion_proof = sha256_control_tree
-        .get_proof(&prover.control_id(), hashfn.as_ref())
+        .get_proof(prover.control_id(), hashfn.as_ref())
         .unwrap();
     let sha256_control_root = sha256_control_tree.calc_root(hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
@@ -349,7 +349,7 @@ fn test_recursion_lift_resolve_e2e() {
     tracing::info!("Done proving: env::verify");
 
     let succinct_receipt = prover
-        .composite_to_succinct(&composition_receipt.inner.composite().unwrap())
+        .composite_to_succinct(composition_receipt.inner.composite().unwrap())
         .unwrap();
 
     let receipt = Receipt::new(

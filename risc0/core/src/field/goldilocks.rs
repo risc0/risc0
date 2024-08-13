@@ -782,7 +782,7 @@ mod tests {
         // P < a * b < 2^64
         // We expect the result mod P, but there's no u64 overflow
         let fa = Elem::from(2u64 ^ 30);
-        let fb = Elem::from(2u64 ^ 34 - 1u64);
+        let fb = Elem::from(2u64 ^ (34 - 1u64));
         let a: u64 = fa.into();
         let b: u64 = fb.into();
         assert_eq!(

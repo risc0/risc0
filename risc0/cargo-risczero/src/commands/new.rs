@@ -32,7 +32,7 @@ const METHODS_LIB: &str = include_str!("../../templates/rust-starter/methods/src
 const GUEST_CARGO_TOML: &str =
     include_str!("../../templates/rust-starter/methods/guest/Cargo-toml");
 const GUEST_MAIN: &str = include_str!("../../templates/rust-starter/methods/guest/src/main.rs");
-static PROJECT_TEMPLATED_FILES: &'static [(&str, &str)] = &[
+static PROJECT_TEMPLATED_FILES: &[(&str, &str)] = &[
     ("host/src/main.rs", HOST_MAIN),
     ("host/Cargo.toml", HOST_CARGO_TOML),
     ("Cargo.toml", PROJECT_CARGO_TOML),
@@ -47,7 +47,7 @@ const RUST_TOOLCHAIN_TOML: &str = include_str!("../../templates/rust-starter/rus
 const README: &str = include_str!("../../templates/rust-starter/README.md");
 const GIT_IGNORE: &str = include_str!("../../templates/rust-starter/.gitignore");
 const LICENSE: &str = include_str!("../../templates/rust-starter/LICENSE");
-static PROJECT_NON_TEMPLATED_FILES: &'static [(&str, &str)] = &[
+static PROJECT_NON_TEMPLATED_FILES: &[(&str, &str)] = &[
     ("README.md", README),
     ("rust-toolchain.toml", RUST_TOOLCHAIN_TOML),
     (".gitignore", GIT_IGNORE),
@@ -155,7 +155,7 @@ impl NewCommand {
             anyhow!("guest name [{guest_name}] must be a rust valid rust identifier")
         })?;
 
-        let guest_name_const = guest_name.replace("-", "_").to_ascii_uppercase();
+        let guest_name_const = guest_name.replace('-', "_").to_ascii_uppercase();
         template_variables.push((
             Regex::new(r"\{\{ *guest_package_name *\}\}")?,
             format!("\"{guest_name}\""),
@@ -204,7 +204,7 @@ risc0_zkvm::guest::entry!(main);\n";
         for (filepath, content) in PROJECT_TEMPLATED_FILES {
             std::fs::write(
                 root.join(filepath),
-                &Self::gen_file(&content, template_variables.clone()),
+                &Self::gen_file(content, template_variables.clone()),
             )?;
         }
 

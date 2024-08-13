@@ -60,8 +60,19 @@ cargo xtask gen-receipt
 Before submitting a PR, ensure the following:
 
 1. Fork the `risc0` repository and create a new branch there to do your work.
-2. Format with `cargo fmt --all`.
-3. Lint with `python3 clippy.py`.
-4. Perform a license check with `python3 license-check.py`.
-5. Tests pass with `cargo test -F prove`.
-6. Open a PR against the `main` branch.
+1. Format with `cargo fmt --all`.
+1. Lint with:
+    ```
+    RISC0_SKIP_BUILD=1 cargo clippy
+    $(cd examples && RISC0_SKIP_BUILD=1 cargo clippy)
+    $(cd benchmarks && RISC0_SKIP_BUILD=1 cargo clippy)
+    ```
+1. Perform the license check with `python3 license-check.py`.
+1. Tests pass with:
+    ```
+    cargo test -F prove -F docker
+    $(cd examples && cargo test)
+    $(cd benchmarks && cargo test)
+    ```
+1. Commit any outdated `Cargo.lock` files.
+1. Open a PR against the `main` branch.
