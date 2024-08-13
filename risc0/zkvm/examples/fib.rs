@@ -19,7 +19,6 @@ use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
-use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
 struct Args {
@@ -31,12 +30,11 @@ struct Args {
     #[arg(short = 'f', long)]
     hashfn: Option<String>,
 
-    /// Enable tracing forest
-    #[arg(short, long, default_value_t = false)]
-    tree: bool,
-
     #[arg(short, long, default_value_t = false)]
     skip_prover: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    puffin: bool,
 }
 
 #[derive(Debug)]
@@ -49,15 +47,20 @@ struct Metrics {
 }
 
 fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     let args = Args::parse();
 
-    if args.tree {
-        tracing_subscriber::registry()
-            .with(tracing_subscriber::fmt::layer())
-            .with(EnvFilter::from_default_env())
-            .with(tracing_forest::ForestLayer::default())
-            .init();
-    }
+    let _puffin_server = if args.puffin {
+        puffin::set_scopes_on(true);
+        let server_addr = format!("0.0.0.0:{}", puffin_http::DEFAULT_PORT);
+        println!("Puffin server: {server_addr}");
+        Some(puffin_http::Server::new(&server_addr).unwrap())
+    } else {
+        None
+    };
 
     let mut opts = ProverOpts::default();
     if let Some(hashfn) = args.hashfn {
@@ -66,9 +69,12 @@ fn main() {
     let prover = get_prover_server(&opts).unwrap();
     let metrics = top(prover, args.iterations, args.skip_prover);
     println!("{metrics:?}");
+
+    if args.puffin {
+        puffin::GlobalProfiler::lock().new_frame();
+    }
 }
 
-#[tracing::instrument(skip_all)]
 fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder()
         .write_slice(&[iterations])

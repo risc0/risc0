@@ -38,6 +38,22 @@ __global__ void eltwise_copy_fp(Fp* out, const Fp* in, const uint32_t count) {
   }
 }
 
+__global__ void eltwise_copy_fp_region(Fp* into,
+                                       const Fp* from,
+                                       const uint32_t fromRows,
+                                       const uint32_t fromCols,
+                                       const uint32_t fromOffset,
+                                       const uint32_t fromStride,
+                                       const uint32_t intoOffset,
+                                       const uint32_t intoStride) {
+  uint row = blockIdx.x * blockDim.x + threadIdx.x;
+  if (row < fromRows) {
+    for (uint32_t col = 0; col < fromCols; col++) {
+      into[intoOffset + row * intoStride + col] = from[fromOffset + row * fromStride + col];
+    }
+  }
+}
+
 __global__ void
 eltwise_sum_fpext(Fp* out, const FpExt* in, const uint32_t to_add, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;

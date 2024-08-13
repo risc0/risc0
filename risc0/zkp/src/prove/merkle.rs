@@ -14,8 +14,7 @@
 
 use alloc::vec::Vec;
 
-#[allow(unused_imports)]
-use tracing::debug;
+use risc0_core::scope;
 
 use crate::{
     core::digest::Digest,
@@ -52,7 +51,6 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// matrix: `rows * cols`
     /// rows: `domain = steps * INV_RATE`, `steps` is always a power of 2.
     /// cols: `count = circuit_cols`
-    #[tracing::instrument(name = "MerkleTreeProver", skip_all)]
     pub fn new(
         hal: &H,
         matrix: &H::Buffer<H::Elem>,
@@ -67,7 +65,7 @@ impl<H: Hal> MerkleTreeProver<H> {
         // hash each column
         hal.hash_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, hash up the layer below
-        tracing::info_span!("hash_fold").in_scope(|| {
+        scope!("hash_fold", {
             for i in (0..params.layers).rev() {
                 let layer_size = 1 << i;
                 hal.hash_fold(&nodes, layer_size * 2, layer_size);
@@ -84,14 +82,13 @@ impl<H: Hal> MerkleTreeProver<H> {
 
     /// Write the 'top' of the merkle tree and commit to the root.
     pub fn commit(&self, iop: &mut WriteIOP<H::Field>) {
-        nvtx::range_push!("commit");
+        scope!("commit");
         let top_size = self.params.top_size;
         let slice = self.nodes.slice(top_size, top_size);
         slice.view(|view| {
             iop.write_pod_slice(view);
         });
         iop.commit(self.root());
-        nvtx::range_pop!();
     }
 
     /// Get the root digest of the tree.
