@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use risc0_circuit_rv32im_sys::ffi::{RawMemoryTransaction, RawPreflightCycle, RawPreflightTrace};
+use risc0_core::scope;
 use risc0_zkp::field::baby_bear::BabyBearElem;
 
 use crate::{
@@ -113,7 +114,7 @@ impl TopMux {
 
 impl MachineContext {
     pub fn new(trace: PreflightTrace) -> Self {
-        nvtx::range_push!("prepare_trace");
+        scope!("prepare_trace");
         let _raw_cycles: Vec<_> = trace
             .pre
             .cycles
@@ -182,7 +183,6 @@ impl MachineContext {
             num_extras: _raw_extras.len() as u32,
             is_trace,
         });
-        nvtx::range_pop!();
 
         Self {
             trace,

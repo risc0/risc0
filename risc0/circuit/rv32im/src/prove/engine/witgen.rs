@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use rand::thread_rng;
+use risc0_core::scope;
 use risc0_zkp::{
     adapter::TapsProvider,
     field::{
@@ -57,22 +58,21 @@ where
     ) -> Self {
         let steps = 1 << po2;
 
-        nvtx::range_push!("load");
-        let mut loader = Loader::new(steps, CIRCUIT.ctrl_size());
-        let last_cycle = loader.load();
-        nvtx::range_pop!();
+        let (loader, last_cycle) = scope!("load", {
+            let mut loader = Loader::new(steps, CIRCUIT.ctrl_size());
+            let last_cycle = loader.load();
+            (loader, last_cycle)
+        });
         tracing::debug!("last_cycle: {last_cycle}");
 
-        nvtx::range_push!("alloc(data)");
-        let data = tracing::info_span!("alloc(data)").in_scope(|| {
+        let data = scope!(
+            "alloc(data)",
             hal.alloc_elem_init("data", steps * CIRCUIT.data_size(), BabyBearElem::INVALID)
-        });
-        nvtx::range_pop!();
+        );
 
         let machine = MachineContext::new(trace);
         if mode != StepMode::SeqForward {
-            nvtx::range_push!("inject_exec_backs");
-            tracing::info_span!("inject_exec_backs").in_scope(|| {
+            scope!("inject_exec_backs", {
                 let mut offsets = vec![];
                 let mut values = vec![];
                 let mut index = Vec::with_capacity(last_cycle + 1);
@@ -83,12 +83,10 @@ where
                 index.push(offsets.len() as u32);
                 hal.scatter(&data, &index, &offsets, &values);
             });
-            nvtx::range_pop!();
         }
 
         if mode == StepMode::Parallel {
-            nvtx::range_push!("noise");
-            tracing::info_span!("noise").in_scope(|| {
+            scope!("noise(data)", {
                 let mut rng = thread_rng();
                 let noise = vec![BabyBearElem::random(&mut rng); ZK_CYCLES * CIRCUIT.data_size()];
                 hal.eltwise_copy_elem_slice(
@@ -102,16 +100,10 @@ where
                     steps,               // into_stride
                 );
             });
-            nvtx::range_pop!();
         }
 
-        nvtx::range_push!("copy(ctrl)");
-        let ctrl = hal.copy_from_elem("ctrl", &loader.ctrl);
-        nvtx::range_pop!();
-
-        nvtx::range_push!("copy(io)");
-        let io = hal.copy_from_elem("io", io);
-        nvtx::range_pop!();
+        let ctrl = scope!("copy(ctrl)", hal.copy_from_elem("ctrl", &loader.ctrl));
+        let io = scope!("copy(io)", hal.copy_from_elem("io", io));
 
         circuit_hal.generate_witness(
             mode,
@@ -124,10 +116,10 @@ where
         );
 
         // Zero out 'invalid' entries in data and output.
-        nvtx::range_push!("zeroize");
-        hal.eltwise_zeroize_elem(&data);
-        hal.eltwise_zeroize_elem(&io);
-        nvtx::range_pop!();
+        scope!("zeroize", {
+            hal.eltwise_zeroize_elem(&data);
+            hal.eltwise_zeroize_elem(&io);
+        });
 
         Self {
             steps,

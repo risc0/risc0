@@ -14,6 +14,7 @@
 
 use alloc::vec::Vec;
 
+use risc0_core::scope;
 #[allow(unused_imports)]
 use tracing::debug;
 
@@ -84,14 +85,13 @@ impl<H: Hal> MerkleTreeProver<H> {
 
     /// Write the 'top' of the merkle tree and commit to the root.
     pub fn commit(&self, iop: &mut WriteIOP<H::Field>) {
-        nvtx::range_push!("commit");
+        scope!("commit");
         let top_size = self.params.top_size;
         let slice = self.nodes.slice(top_size, top_size);
         slice.view(|view| {
             iop.write_pod_slice(view);
         });
         iop.commit(self.root());
-        nvtx::range_pop!();
     }
 
     /// Get the root digest of the tree.

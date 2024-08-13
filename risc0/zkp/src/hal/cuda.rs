@@ -20,9 +20,12 @@ use cust::{
     prelude::*,
 };
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
-use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    ExtElem, RootsOfUnity,
+use risc0_core::{
+    field::{
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+        ExtElem, RootsOfUnity,
+    },
+    scope,
 };
 use risc0_sys::{cuda::*, CppError};
 
@@ -299,13 +302,12 @@ impl<T> BufferImpl<T> {
     }
 
     pub fn copy_from(name: &'static str, slice: &[T]) -> Self {
-        // nvtx::range_push!("copy_from");
+        // scope!("copy_from");
         let bytes_len = std::mem::size_of_val(slice);
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = unchecked_cast(slice);
         buffer.buf.copy_from(bytes).unwrap();
-        // nvtx::range_pop!();
 
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
@@ -359,7 +361,7 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
-        nvtx::range_push!("view");
+        scope!("view");
         let item_size = std::mem::size_of::<T>();
         let buf = self.buffer.borrow_mut();
         let offset = self.offset * item_size;
@@ -369,17 +371,15 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         let host_buf = device_slice.as_host_vec().unwrap();
         let slice = unchecked_cast(&host_buf);
         f(slice);
-        nvtx::range_pop!();
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
-        nvtx::range_push!("view_mut");
+        scope!("view_mut");
         let mut buf = self.buffer.borrow_mut();
         let mut host_buf = buf.buf.as_host_vec().unwrap();
         let slice = unchecked_cast_mut(&mut host_buf);
         f(&mut slice[self.offset..]);
         buf.buf.copy_from(&host_buf).unwrap();
-        nvtx::range_pop!();
     }
 
     fn to_vec(&self) -> Vec<T> {
@@ -934,20 +934,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 io[i] *= io[i - 1];
             }
         });
-    }
-}
-
-// fn div_ceil(a: u32, b: u32) -> u32 {
-//     (a.checked_add(b).unwrap() - 1) / b
-// }
-
-pub fn prefix_products(io: &mut UnifiedBuffer<DeviceExtElem>) {
-    let len = io.len();
-    // println!("len: {len}");
-    let io = io.as_mut_slice();
-    for i in 1..len {
-        // println!("[{i}]: {:?}", io[i].0);
-        io[i].0 *= io[i - 1].0;
     }
 }
 

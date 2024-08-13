@@ -18,6 +18,7 @@ use crate::{CircuitImpl, Externs};
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
+use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStep, CircuitStepContext, CircuitStepHandler},
     field::{
@@ -278,6 +279,7 @@ impl<'a> RecursionExecutor<'a> {
         machine: MachineContext,
         split_points: Vec<usize>,
     ) -> Self {
+        scope!("RecursionExecutor::new");
         let io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
         let executor = Executor::new(circuit, machine, zkr.po2, &io);
         Self {
@@ -289,6 +291,8 @@ impl<'a> RecursionExecutor<'a> {
 
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<usize> {
+        scope!("execute");
+
         let used_cycles = self.zkr.code_rows();
         tracing::debug!(
             "Starting recursion code of length {}/{}",
