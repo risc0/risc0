@@ -56,9 +56,9 @@ The [guest code] checks that applying the move to the initial board state is leg
 [executes]: https://dev.risczero.com/terminology#execute
 [guest code]: methods/guest/src/main.rs
 [guest program]: https://dev.risczero.com/terminology#guest-program
+[host]: https://dev.risczero.com/terminology#host
 [host code]: methods/guest/src/main.rs
 [host program]: https://dev.risczero.com/terminology#host-program
-[host]: https://dev.risczero.com/terminology#host
 [journal]: https://dev.risczero.com/terminology#journal
 [proves the execution]: https://dev.risczero.com/terminology#prove
 [receipt]: https://dev.risczero.com/terminology#receipt

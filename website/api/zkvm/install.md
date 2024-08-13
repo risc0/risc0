@@ -11,13 +11,10 @@ The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] 
 `rzup` is the RISC Zero toolchain installer. We recommend using `rzup` to manage the installation of RISC Zero.
 
 1. Install `rzup` by running the following command:
-
    ```sh
    curl -L https://risczero.com/install | bash
    ```
-
 2. Run `rzup` to install RISC Zero:
-
    ```sh
    rzup install
    ```
@@ -51,8 +48,8 @@ To update your installation:
 
 After you update your installation, be sure to update your project's RISC Zero crates. To do this, you must update all RISC Zero dependencies in your project's host and guest `Cargo.toml` files. In most projects, this is done by updating the host and guest `risc0-zkvm` crate and the `risc0-build` build dependency. They should be updated to use the version number displayed by `cargo risczero --version`.
 
-[Rust]: https://www.rust-lang.org/
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[rustup]: https://rustup.rs/
 [release tag]: https://github.com/risc0/risc0/releases
+[Rust]: https://www.rust-lang.org/
+[rustup]: https://rustup.rs/

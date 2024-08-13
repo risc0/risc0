@@ -4,7 +4,7 @@ id: benchmarks
 
 # Performance Benchmarks
 
-## Pregenerated benchmarks
+## Pregenerated Benchmarks
 
 We have [a performance datasheet][datasheet] with runtime and memory performance information.
 This information is organized by both program size and hardware target, and includes both CPU and GPU targets.
