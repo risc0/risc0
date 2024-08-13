@@ -42,38 +42,30 @@ impl Drop for NvtxRange {
 #[macro_export]
 macro_rules! scope {
     ($name:expr) => {
+        // Keep range alive until caller's block scope ends.
         let _nvtx = $crate::perf::NvtxRange::new($name);
         $crate::perf::puffin::profile_scope!($name);
     };
 
-    ($name:expr, $body:block) => {{
-        let _nvtx = $crate::perf::NvtxRange::new($name);
-        $crate::perf::puffin::profile_scope!($name);
-        $body
-    }};
-
     ($name:expr, $body:expr) => {{
+        // Keep range alive while `$body` is evaluated.
         let _nvtx = $crate::perf::NvtxRange::new($name);
         $crate::perf::puffin::profile_scope!($name);
         $body
     }};
 }
 
-/// Opens a scope.
+/// Opens a scope with a formatted message.
 #[macro_export]
 macro_rules! scope_with {
     ($name:expr, $data:expr) => {
+        // Keep range alive until caller's block scope ends.
         let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
         $crate::perf::puffin::profile_scope!($name, $data);
     };
 
-    ($name:expr, $data:expr, $body:block) => {{
-        let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
-        $crate::perf::puffin::profile_scope!($name, $data);
-        $body
-    }};
-
     ($name:expr, $data:expr, $body:expr) => {{
+        // Keep range alive while `$body` is evaluated.
         let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
         $crate::perf::puffin::profile_scope!($name, $data);
         $body
