@@ -36,7 +36,7 @@ tracing = { version = "0.1", default-features = false, features = [
 metal = { workspace = true }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-ndarray = { version = "0.15", features = ["rayon"], optional = true }
+ndarray = { version = "0.16", features = ["rayon"], optional = true }
 parking_lot = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }

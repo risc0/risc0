@@ -17,6 +17,10 @@ use std::{fs, process::Command};
 use risc0_build::risc0_data;
 
 fn main() {
+    if std::env::var("RISC0_SKIP_BUILD").is_ok() {
+        return;
+    }
+
     let toolchain_path = risc0_data().unwrap();
     let gcc_path = toolchain_path
         .join("cpp")
