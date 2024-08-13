@@ -121,11 +121,12 @@ pub fn flock(path: &Path) -> Result<FileLock> {
         .context(format!("failed to create directory `{}`", parent.display()))?;
     let file = OpenOptions::new()
         .create(true)
+        .truncate(true)
         .read(true)
         .write(true)
         .open(path)?;
     file.lock_exclusive()?;
-    return Ok(FileLock(file));
+    Ok(FileLock(file))
 }
 
 #[derive(Debug)]

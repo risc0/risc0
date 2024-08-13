@@ -56,7 +56,7 @@ fn stdio_outputs_in_receipt() {
 
     let segments = &receipt.inner.composite().unwrap().segments;
     assert_eq!(segments.len(), 1);
-    assert!(segments[0].get_seal_bytes().len() > 0);
+    assert!(!segments[0].get_seal_bytes().is_empty());
 
     receipt.verify(STANDARD_LIB_ID).unwrap();
 }

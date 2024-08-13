@@ -19,7 +19,6 @@ fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-    ();
 
     let iterations: u32 = 1000;
 

@@ -259,7 +259,7 @@ mod tests {
         for _ in 0..23 {
             input.push(iop.random_elem());
         }
-        iop.mix(&*hasher.hash_elem_slice(&input));
+        iop.mix(&hasher.hash_elem_slice(&input));
         output.push(BabyBearElem::from(iop.random_elem()));
         tracing::info!("Output = {:?}", &output);
         assert!(output[0].as_u32() == 5);

@@ -18,6 +18,17 @@
   },
   "biome.rename": true,
   "biome.enabled": true,
+  "cSpell.words": [
+    "Groth",
+    "Holesky",
+    "Sepolia",
+    "Zeroable",
+    "bytemuck",
+    "canonicalize",
+    "posix",
+    "repr",
+    "risczero",
+  ],
   "files.eol": "\n",
   "git.ignoreLimitWarning": true,
   "files.associations": {
@@ -76,23 +87,13 @@
     "risc0/zkvm/methods/std/Cargo.toml",
     "tools/crates-validator/Cargo.toml"
   ],
-  "cSpell.words": [
-    "Groth",
-    "Holesky",
-    "Sepolia",
-    "Zeroable",
-    "bytemuck",
-    "canonicalize",
-    "posix",
-    "repr",
-    "risczero",
-  ],
   "clangd.checkUpdates": true,
   "rust-analyzer.server.extraEnv": {
     "RISC0_SKIP_BUILD": "1",
     "RISC0_SKIP_BUILD_KERNELS": "1",
     "CARGO_TARGET_DIR": "target/analyzer"
   },
+  "rust-analyzer.check.command": "clippy",
   "rust-analyzer.check.extraArgs": [
     "--target-dir=target/analyzer"
   ],

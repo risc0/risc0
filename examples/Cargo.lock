@@ -1294,44 +1294,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cycle-counter"
-version = "0.1.0"
-dependencies = [
- "bevy-methods",
- "chess-core",
- "chess-methods",
- "clap",
- "csv",
- "digital-signature-core",
- "digital-signature-methods",
- "ecdsa-methods",
- "hello-world-methods",
- "image",
- "json-methods",
- "k256",
- "password-checker-core",
- "password-checker-methods",
- "prorata-core",
- "prorata-methods",
- "rand",
- "rand_core",
- "risc0-zkvm",
- "rmp-serde",
- "rust_decimal",
- "serde",
- "sha-methods",
- "smartcore 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "smartcore-ml-methods",
- "tracing",
- "tracing-subscriber 0.3.18",
- "waldo-core",
- "waldo-methods",
- "wasm-methods",
- "wat",
- "wordle-methods",
-]
-
-[[package]]
 name = "data-encoding"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4951,21 +4913,6 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 [[package]]
 name = "smartcore"
 version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c42ca1fcd851ada8834d3dfcd088850dc8c703bde50c2baccd89181b74dc3ade"
-dependencies = [
- "approx",
- "cfg-if",
- "num",
- "num-traits",
- "rand",
- "serde",
- "typetag",
-]
-
-[[package]]
-name = "smartcore"
-version = "0.3.2"
 source = "git+https://github.com/risc0/smartcore.git?rev=4bd3cadd50ed988c45c239f5264c3e2c2af0a690#4bd3cadd50ed988c45c239f5264c3e2c2af0a690"
 dependencies = [
  "approx",
@@ -4983,7 +4930,7 @@ version = "0.1.0"
 dependencies = [
  "risc0-zkvm",
  "rmp-serde",
- "smartcore 0.3.2 (git+https://github.com/risc0/smartcore.git?rev=4bd3cadd50ed988c45c239f5264c3e2c2af0a690)",
+ "smartcore",
  "smartcore-ml-methods",
 ]
 

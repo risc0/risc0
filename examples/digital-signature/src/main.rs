@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn main() {
-        let signing_receipt = sign(&PASSPHRASE, &MESSAGE).unwrap();
+        let signing_receipt = sign(PASSPHRASE, MESSAGE).unwrap();
         let message_hash = signing_receipt.get_message().unwrap();
         let expected_message_hash = Sha256::digest(MESSAGE);
         assert_eq!(

@@ -191,6 +191,8 @@ jobs:
             feature: default
     env:
       FEATURE: ${{ matrix.feature }}
+      RISC0_SKIP_BUILD: 1
+      RISC0_SKIP_BUILD_KERNELS: 1
     steps:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
@@ -199,7 +201,12 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: python3 -u clippy.py -F $FEATURE
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo clippy -F $FEATURE
+      - run: cargo clippy -F $FEATURE
+        working-directory: benchmarks
+      - run: cargo clippy -F $FEATURE
+        working-directory: examples
 
   test:
     if: needs.changes.outputs.test == 'true'
