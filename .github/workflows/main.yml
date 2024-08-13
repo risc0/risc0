@@ -201,6 +201,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo clippy -F $FEATURE
       - run: cargo clippy -F $FEATURE
         working-directory: benchmarks
