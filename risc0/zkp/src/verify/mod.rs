@@ -491,7 +491,6 @@ where
 }
 
 /// Verify a seal is valid for the given circuit, and code checking function.
-#[must_use]
 pub fn verify<F, C, CheckCode>(
     circuit: &C,
     suite: &HashSuite<F>,
