@@ -16,6 +16,7 @@
 #include "fp.h"
 #include "fpext.h"
 #include "kernels.h"
+#include <cstdint>
 
 extern "C" {
 
@@ -29,6 +30,27 @@ const char* risc0_zkp_cuda_eltwise_mul_factor_fp(Fp* io, Fp factor, uint32_t cou
 
 const char* risc0_zkp_cuda_eltwise_copy_fp(Fp* out, const Fp* in, const uint32_t count) {
   return launchKernel(eltwise_copy_fp, count, 0, out, in, count);
+}
+
+const char* risc0_zkp_cuda_eltwise_copy_fp_region(Fp* into,
+                                                  const Fp* from,
+                                                  const uint32_t fromRows,
+                                                  const uint32_t fromCols,
+                                                  const uint32_t fromOffset,
+                                                  const uint32_t fromStride,
+                                                  const uint32_t intoOffset,
+                                                  const uint32_t intoStride) {
+  return launchKernel(eltwise_copy_fp_region,
+                      fromRows,
+                      0,
+                      into,
+                      from,
+                      fromRows,
+                      fromCols,
+                      fromOffset,
+                      fromStride,
+                      intoOffset,
+                      intoStride);
 }
 
 const char* risc0_zkp_cuda_eltwise_sum_fpext(Fp* out,
@@ -77,6 +99,14 @@ const char* risc0_zkp_cuda_batch_evaluate_any(FpExt* out,
 const char* risc0_zkp_cuda_gather_sample(
     Fp* dst, const Fp* src, const uint32_t idx, const uint32_t size, const uint32_t stride) {
   return launchKernel(gather_sample, size, 0, dst, src, idx, size, stride);
+}
+
+const char* risc0_zkp_cuda_scatter(Fp* into,
+                                   const uint32_t* index,
+                                   const uint32_t* offsets,
+                                   const Fp* values,
+                                   const uint32_t count) {
+  return launchKernel(scatter, count, 0, into, index, offsets, values, count);
 }
 
 const char*

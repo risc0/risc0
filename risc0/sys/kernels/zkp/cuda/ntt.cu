@@ -67,3 +67,16 @@ __global__ void gather_sample(
     dst[gid] = src[gid * stride + idx];
   }
 }
+
+__global__ void scatter(Fp* into,
+                        const uint32_t* index,
+                        const uint32_t* offsets,
+                        const Fp* values,
+                        const uint32_t count) {
+  uint gid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (gid < count) {
+    for (uint32_t idx = index[gid]; idx < index[gid + 1]; idx++) {
+      into[offsets[idx]] = values[idx];
+    }
+  }
+}

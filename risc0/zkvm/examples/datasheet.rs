@@ -21,17 +21,28 @@ use std::{
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
 use human_repr::{HumanCount, HumanDuration};
-use risc0_zkp::hal::tracker;
+use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
 };
-use risc0_zkvm_methods::{
-    bench::{BenchmarkSpec, SpecWithIters},
-    BENCH_ELF,
-};
+use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF};
 use serde::Serialize;
 use serde_with::{serde_as, DurationNanoSeconds};
 use tabled::{settings::Style, Table, Tabled};
+
+const ITERATIONS: &[(u32, u64)] = &[
+    (1, 1 << 16),           // 16, 64K
+    (4 * 1024, 1 << 17),    // 17, 128K
+    (32 * 1024, 1 << 18),   // 18, 256K
+    (64 * 1024, 1 << 19),   // 19, 512K
+    (128 * 1024, 1 << 20),  // 20, 1M
+    (256 * 1024, 1 << 21),  // 21, 2M
+    (512 * 1024, 1 << 22),  // 22, 4M
+    (1024 * 1024, 1 << 23), // 23, 8M
+    (2048 * 1024, 1 << 24), // 24, 16M
+];
+
+const MIN_PO2: usize = MAX_CYCLES_PO2 - ITERATIONS.len() + 1;
 
 #[serde_as]
 #[derive(Debug, Serialize, Tabled)]
@@ -59,6 +70,19 @@ struct Args {
     /// Output result to a JSON file.
     #[arg(long, short)]
     json: Option<PathBuf>,
+
+    /// Select max size for composite runs
+    #[arg(long, default_value_t = 20, value_parser = po2_in_range)]
+    max_po2: usize,
+}
+
+fn po2_in_range(s: &str) -> Result<usize, String> {
+    let po2: usize = s.parse().map_err(|_| format!("`{s}` must be an integer"))?;
+    if po2 >= MIN_PO2 && po2 <= MAX_CYCLES_PO2 {
+        Ok(po2)
+    } else {
+        Err(format!("po2 must be in range: {MIN_PO2}-{MAX_CYCLES_PO2}",))
+    }
 }
 
 #[derive(Eq, PartialEq, Subcommand, Sequence)]
@@ -84,11 +108,11 @@ impl Datasheet {
     pub fn run(&mut self, args: Args) {
         self.warmup();
 
-        if let Some(cmd) = args.command {
-            self.run_cmd(cmd);
+        if let Some(ref cmd) = args.command {
+            self.run_cmd(cmd, &args);
         } else {
             for cmd in enum_iterator::all::<Command>() {
-                self.run_cmd(cmd);
+                self.run_cmd(&cmd, &args);
             }
         }
 
@@ -105,10 +129,10 @@ impl Datasheet {
         }
     }
 
-    fn run_cmd(&mut self, cmd: Command) {
+    fn run_cmd(&mut self, cmd: &Command, args: &Args) {
         match cmd {
             Command::Execute => self.execute(),
-            Command::Composite => self.composite(),
+            Command::Composite => self.composite(args),
             Command::Lift => self.lift(),
             Command::Join => self.join(),
             Command::Succinct => self.succinct(),
@@ -122,7 +146,7 @@ impl Datasheet {
 
     fn execute(&mut self) {
         let env = ExecutorEnv::builder()
-            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 128 * 1024))
+            .write(&BenchmarkSpec::SimpleLoop { iters: 128 * 1024 })
             .unwrap()
             .build()
             .unwrap();
@@ -145,24 +169,17 @@ impl Datasheet {
         });
     }
 
-    fn composite(&mut self) {
+    fn composite(&mut self, args: &Args) {
         for hashfn in ["sha-256", "poseidon2"] {
             let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
             let prover = get_prover_server(&opts).unwrap();
 
-            const ITERATIONS: &[u64] = &[
-                1,         // 16, 64K
-                4 * 1024,  // 17, 128K
-                16 * 1024, // 18, 256K
-                32 * 1024, // 19, 512K
-                64 * 1024, // 20, 1M
-            ];
-
-            for iterations in ITERATIONS {
-                println!("rv32im: {iterations}");
+            for (iterations, expected) in ITERATIONS.iter().take(args.max_po2 - MIN_PO2 + 1) {
+                println!("rv32im/{hashfn}: {expected}");
 
                 let env = ExecutorEnv::builder()
-                    .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, *iterations))
+                    .segment_limit_po2(args.max_po2 as u32)
+                    .write(&BenchmarkSpec::SimpleLoop { iters: *iterations })
                     .unwrap()
                     .build()
                     .unwrap();
@@ -174,6 +191,7 @@ impl Datasheet {
                 let duration = start.elapsed();
 
                 let ram = tracker().lock().unwrap().peak;
+                assert_eq!(info.stats.total_cycles, *expected);
                 let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
                 let seal = info
                     .receipt
@@ -206,7 +224,7 @@ impl Datasheet {
         let ctx = VerifierContext::default();
 
         let env = ExecutorEnv::builder()
-            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 0))
+            .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
             .unwrap()
             .build()
             .unwrap();
@@ -246,7 +264,7 @@ impl Datasheet {
         let ctx = VerifierContext::default();
 
         let env = ExecutorEnv::builder()
-            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 4 * 1024))
+            .write(&BenchmarkSpec::SimpleLoop { iters: 4 * 1024 })
             .unwrap()
             .segment_limit_po2(16)
             .build()
@@ -289,7 +307,7 @@ impl Datasheet {
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
-            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 64 * 1024))
+            .write(&BenchmarkSpec::SimpleLoop { iters: 64 * 1024 })
             .unwrap()
             .build()
             .unwrap();
@@ -328,7 +346,7 @@ impl Datasheet {
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
-            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 0))
+            .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
             .unwrap()
             .build()
             .unwrap();
@@ -366,7 +384,7 @@ impl Datasheet {
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
-            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 0))
+            .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
             .unwrap()
             .build()
             .unwrap();
@@ -403,7 +421,7 @@ impl Datasheet {
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
-            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 64 * 1024))
+            .write(&BenchmarkSpec::SimpleLoop { iters: 64 * 1024 })
             .unwrap()
             .build()
             .unwrap();
@@ -438,7 +456,7 @@ impl Datasheet {
             let prover = get_prover_server(&opts).unwrap();
 
             let env = ExecutorEnv::builder()
-                .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 0))
+                .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
                 .unwrap()
                 .build()
                 .unwrap();

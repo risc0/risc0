@@ -15,8 +15,11 @@ edition = "2021"
 bytemuck = "1.12"
 getrandom = "0.2"
 risc0-zkp = { path = "../../../zkp", default-features = false }
-risc0-zkvm = { path = "../..", default-features = false, features = ["getrandom"] }
-risc0-zkvm-methods = { path = "..", default-features = false }
+risc0-zkvm = { path = "../..", default-features = false, features = [
+  "getrandom",
+  "std",
+] }
+risc0-zkvm-methods = { path = ".." }
 risc0-zkvm-platform = { path = "../../platform" }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }
 

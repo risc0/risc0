@@ -23,6 +23,7 @@ use risc0_circuit_rv32im::prove::emu::{
         DEFAULT_SEGMENT_LIMIT_PO2,
     },
 };
+use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
@@ -66,10 +67,10 @@ impl<'a> ExecutorImpl<'a> {
     /// # Example
     /// ```
     /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
-    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
+    /// use risc0_zkvm_methods::{BENCH_ELF, bench::BenchmarkSpec};
     ///
     /// let env = ExecutorEnv::builder()
-    ///     .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 1))
+    ///     .write(&BenchmarkSpec::SimpleLoop { iters: 1 })
     ///     .unwrap()
     ///     .build()
     ///     .unwrap();
@@ -121,7 +122,7 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        nvtx::range_push!("execute");
+        scope!("execute");
 
         let journal = Journal::default();
         self.env
@@ -219,12 +220,9 @@ impl<'a> ExecutorImpl<'a> {
             result.post_state,
         );
 
-        tracing::info_span!("executor").in_scope(|| {
-            tracing::info!("execution time: {elapsed:?}");
-            session.log();
-        });
+        tracing::info!("execution time: {elapsed:?}");
+        session.log();
 
-        nvtx::range_pop!();
         Ok(session)
     }
 }

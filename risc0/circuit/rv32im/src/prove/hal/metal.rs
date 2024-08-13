@@ -17,9 +17,12 @@ use std::{collections::HashMap, ffi::c_void, rc::Rc};
 use anyhow::{bail, Result};
 use metal::{ComputePipelineDescriptor, MTLResourceOptions, MTLResourceUsage};
 use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
-use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    map_pow, RootsOfUnity,
+use risc0_core::{
+    field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        map_pow, RootsOfUnity,
+    },
+    scope,
 };
 use risc0_sys::CppError;
 use risc0_zkp::{
@@ -78,6 +81,7 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
         io: &MetalBuffer<BabyBearElem>,
         data: &MetalBuffer<BabyBearElem>,
     ) {
+        scope!("cpu_witgen");
         tracing::debug!("witgen: {steps}, {count}");
 
         // TODO: call metal kernels for witgen.
@@ -117,7 +121,6 @@ struct AccumContext {
 }
 
 impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
-    #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
         check: &MetalBuffer<BabyBearElem>,
@@ -127,6 +130,8 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         po2: usize,
         steps: usize,
     ) {
+        scope!("eval_check");
+
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
@@ -167,7 +172,6 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         self.hal.dispatch(kernel, &args, domain as u64, None);
     }
 
-    #[tracing::instrument(skip_all)]
     fn accumulate(
         &self,
         ctrl: &MetalBuffer<BabyBearElem>,
@@ -177,6 +181,8 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         accum: &MetalBuffer<BabyBearElem>,
         steps: usize,
     ) {
+        scope!("accumulate");
+
         let count = steps - ZK_CYCLES;
 
         let ram = vec![BabyBearExtElem::ONE; steps];
@@ -213,7 +219,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             accum.as_arg(),
         ];
 
-        tracing::info_span!("step_compute_accum").in_scope(|| {
+        scope!("step_compute_accum", {
             let kernel = self.kernels.get("k_step_compute_accum").unwrap();
 
             self.hal
@@ -223,13 +229,13 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
                 });
         });
 
-        tracing::info_span!("prefix_products").in_scope(|| {
+        scope!("prefix_products", {
             use risc0_zkp::hal::Hal as _;
             self.hal.prefix_products(&ram);
             self.hal.prefix_products(&bytes);
         });
 
-        tracing::info_span!("step_verify_accum").in_scope(|| {
+        scope!("step_verify_accum", {
             let kernel = self.kernels.get("k_step_verify_accum").unwrap();
             self.hal
                 .dispatch_with_resources(kernel, &args, count as u64, None, |cmd_encoder| {
@@ -238,7 +244,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
                 });
         });
 
-        tracing::info_span!("zeroize").in_scope(|| {
+        scope!("zeroize", {
             self.hal
                 .dispatch_by_name("eltwise_zeroize_fp", &[accum.as_arg()], accum.size() as u64);
 

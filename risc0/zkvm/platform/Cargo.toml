@@ -11,12 +11,22 @@ repository = { workspace = true }
 # used as many places as possible to share the platform definitions.
 [target.'cfg(target_os = "zkvm")'.dependencies]
 bytemuck = { version = "1.13", optional = true }
+critical-section = { version = "1.1.2", optional = true }
+embedded-alloc = { version = "0.5.1", features = ["allocator_api"], optional = true }
 getrandom = { version = "0.2", features = ["custom"], optional = true }
 libm = { version = "0.2", optional = true }
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
-all-features = true
+features = [
+    "rust-runtime",
+    "panic-handler",
+    "entrypoint",
+    "export-syscalls",
+    "export-libm",
+    "export-getrandom",
+    "getrandom"
+]
 
 [features]
 default = []
@@ -30,3 +40,4 @@ export-libm = ["dep:libm"]
 export-getrandom = ["dep:getrandom", "dep:bytemuck"]
 # exports a `getrandom` implementation that uses sys_random
 getrandom = ["export-getrandom"]
+heap-embedded-alloc = ["dep:critical-section", "dep:embedded-alloc", "rust-runtime"]

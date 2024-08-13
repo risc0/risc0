@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use risc0_core::scope_with;
+
 use crate::{
     core::log2_ceil,
     hal::{Buffer, Hal},
@@ -57,7 +59,6 @@ pub struct PolyGroup<H: Hal> {
 }
 
 impl<H: Hal> PolyGroup<H> {
-    #[tracing::instrument(name = "PolyGroup", skip_all, fields(name))]
     pub fn new(
         hal: &H,
         coeffs: H::Buffer<H::Elem>,
@@ -65,14 +66,13 @@ impl<H: Hal> PolyGroup<H> {
         size: usize,
         name: &'static str,
     ) -> Self {
-        nvtx::range_push!("poly_group({name})");
+        scope_with!("poly_group({})", name);
         assert_eq!(coeffs.size(), count * size);
         let domain = size * INV_RATE;
         let evaluated = hal.alloc_elem("evaluated", count * domain);
         hal.batch_expand_into_evaluate_ntt(&evaluated, &coeffs, count, log2_ceil(INV_RATE));
         hal.batch_bit_reverse(&coeffs, count);
         let merkle = MerkleTreeProver::new(hal, &evaluated, domain, count, QUERIES);
-        nvtx::range_pop!();
         PolyGroup {
             coeffs,
             count,
