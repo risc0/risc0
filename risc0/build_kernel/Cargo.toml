@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-cc = { version = "1.0", features = ["parallel"] }
+cc = { version = "1.1", features = ["parallel"] }
 directories = "5.0"
 glob = "0.3"
 hex = "0.4"
