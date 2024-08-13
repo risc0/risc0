@@ -15,6 +15,7 @@
 use std::rc::Rc;
 
 use cust::{memory::GpuBuffer as _, prelude::*};
+use risc0_core::scope;
 use risc0_sys::{cuda::SpparkError, CppError};
 use risc0_zkp::{
     core::log2_ceil,
