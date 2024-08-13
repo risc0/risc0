@@ -65,23 +65,19 @@ where
     H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
     C: CircuitHal<H> + CircuitWitnessGenerator<H>,
 {
-    #[tracing::instrument(skip_all)]
     fn prove_segment(&self, segment: &Segment) -> Result<Seal> {
         scope!("prove_segment");
 
-        let trace = scope!("preflight", segment.preflight())?;
-        let io = scope!("prepare_globals", segment.prepare_globals());
+        let trace = segment.preflight()?;
+        let io = segment.prepare_globals();
 
-        let witgen = scope!(
-            "witgen",
-            WitnessGenerator::new(
-                self.hal.as_ref(),
-                self.circuit_hal.as_ref(),
-                segment.po2,
-                &io,
-                trace,
-                StepMode::Parallel,
-            )
+        let witgen = WitnessGenerator::new(
+            self.hal.as_ref(),
+            self.circuit_hal.as_ref(),
+            segment.po2,
+            &io,
+            trace,
+            StepMode::Parallel,
         );
         let steps = witgen.steps;
 

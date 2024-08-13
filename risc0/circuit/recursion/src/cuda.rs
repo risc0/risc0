@@ -138,7 +138,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let wom = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
         let wom = DeviceBuffer::from_slice(&wom).unwrap();
 
-        tracing::info_span!("step_compute_accum").in_scope(|| {
+        scope!("step_compute_accum", {
             extern "C" {
                 fn risc0_circuit_recursion_cuda_step_compute_accum(
                     ctrl: DevicePointer<u8>,
@@ -163,7 +163,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             }
         });
 
-        tracing::info_span!("prefix_products").in_scope(|| {
+        scope!("prefix_products", {
             extern "C" {
                 fn sppark_calc_prefix_operation(
                     d_elems: DevicePointer<DeviceExtElem>,
@@ -184,7 +184,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             }
         });
 
-        tracing::info_span!("step_verify_accum").in_scope(|| {
+        scope!("step_verify_accum", {
             extern "C" {
                 fn risc0_circuit_recursion_cuda_step_verify_accum(
                     ctrl: DevicePointer<u8>,
@@ -211,7 +211,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             }
         });
 
-        tracing::info_span!("zeroize").in_scope(|| {
+        scope!("zeroize", {
             self.hal.eltwise_zeroize_elem(accum);
             self.hal.eltwise_zeroize_elem(io);
         });

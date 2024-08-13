@@ -22,9 +22,12 @@ use metal::{
 };
 use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use rayon::prelude::*;
-use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem, RootsOfUnity,
+use risc0_core::{
+    field::{
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+        Elem, ExtElem, RootsOfUnity,
+    },
+    scope,
 };
 
 use super::{tracker, Buffer, Hal};
@@ -586,7 +589,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -600,7 +602,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.dispatch_by_name("multi_bit_reverse", args, row_size as u64 * count as u64);
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -608,8 +609,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         count: usize,
         expand_bits: usize,
     ) {
-        // batch_expand
-        {
+        scope!("batch_expand", {
             tracing::debug!(
                 "output: {}, input: {}, count: {count}",
                 output.size(),
@@ -630,10 +630,9 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
                 KernelArg::Integer(expand_bits as u32),
             ];
             self.dispatch_by_name("batch_expand", args, out_size as u64);
-        }
+        });
 
-        // batch_evaluate_ntt
-        {
+        scope!("batch_evaluate_ntt", {
             tracing::debug!(
                 "output: {}, count: {count}, expand_bits: {expand_bits}",
                 output.size()
@@ -657,11 +656,11 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
                 let params = compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
                 self.dispatch(kernel, args, count as u64, Some(params));
             }
-        }
+        });
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
+        scope!("batch_interpolate_ntt");
         tracing::debug!("io: {}, count: {count}", io.size());
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -688,7 +687,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.dispatch_by_name("eltwise_mul_factor_fp", args, io.size() as u64);
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_evaluate_any(
         &self,
         coeffs: &Self::Buffer<Self::Elem>,
@@ -697,6 +695,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         xs: &Self::Buffer<Self::ExtElem>,
         out: &Self::Buffer<Self::ExtElem>,
     ) {
+        scope!("batch_evaluate_any");
         let po2 = log2_ceil(coeffs.size() / poly_count);
         let count = 1 << po2;
         assert_eq!(poly_count * count, coeffs.size());
@@ -715,7 +714,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.dispatch(kernel, args, count as u64, Some(params));
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_add_elem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -729,7 +727,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.dispatch_by_name("eltwise_add_fp", args, count);
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_sum_extelem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -748,7 +745,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.dispatch_by_name("eltwise_sum_fpext", args, count as u64);
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_copy_elem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -760,7 +756,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.dispatch_by_name("eltwise_copy_fp", args, count);
     }
 
-    #[tracing::instrument(skip_all)]
     fn fri_fold(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -816,12 +811,10 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.hash.as_ref().unwrap().hash_fold(self, io, output_size);
     }
 
-    #[tracing::instrument(skip_all)]
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
         self.hash.as_ref().unwrap().hash_rows(self, output, matrix);
     }
 
-    #[tracing::instrument(skip_all)]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
@@ -914,7 +907,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         })
     }
 
-    #[tracing::instrument(skip_all)]
     fn scatter(
         &self,
         into: &Self::Buffer<Self::Elem>,

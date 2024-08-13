@@ -259,7 +259,6 @@ impl Prover {
 
     /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
     /// program and input.
-    #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         // NOTE: Code is repeated across match arms to satisfy generics.
         match self.hashfn.as_ref() {
@@ -284,7 +283,6 @@ impl Prover {
 
     /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
     /// program and input, using the specified HAL.
-    #[tracing::instrument(skip_all)]
     pub fn run_with_hal<H, C>(&mut self, hal: &H, circuit_hal: &C) -> Result<RecursionReceipt>
     where
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
@@ -385,7 +383,6 @@ impl Prover {
         })
     }
 
-    #[tracing::instrument(skip_all)]
     fn preflight(&mut self) -> Result<exec::MachineContext> {
         scope!("preflight");
 

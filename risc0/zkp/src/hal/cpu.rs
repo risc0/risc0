@@ -302,7 +302,6 @@ impl<F: Field> Hal for CpuHal<F> {
         CpuBuffer::copy_from(name, slice)
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -340,7 +339,6 @@ impl<F: Field> Hal for CpuHal<F> {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -351,7 +349,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -362,7 +359,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_evaluate_any(
         &self,
         coeffs: &Self::Buffer<Self::Elem>,
@@ -396,7 +392,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
@@ -459,7 +454,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_add_elem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -478,7 +472,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_sum_extelem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -506,7 +499,6 @@ impl<F: Field> Hal for CpuHal<F> {
         });
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_copy_elem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -529,7 +521,6 @@ impl<F: Field> Hal for CpuHal<F> {
         });
     }
 
-    #[tracing::instrument(skip_all)]
     fn fri_fold(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -561,7 +552,6 @@ impl<F: Field> Hal for CpuHal<F> {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();

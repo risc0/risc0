@@ -79,7 +79,6 @@ impl<'a, H: Hal> Prover<'a, H> {
 
     /// Commits a given buffer to the IOP; the values must not subsequently
     /// change.
-    #[tracing::instrument(skip_all)]
     pub fn commit_group(&mut self, tap_group_index: usize, witness: &H::Buffer<H::Elem>) {
         scope_with!("commit_group({})", witness.name());
         let group_size = self.taps.group_size(tap_group_index);
@@ -110,7 +109,6 @@ impl<'a, H: Hal> Prover<'a, H> {
     }
 
     /// Generates the proof and returns the seal.
-    #[tracing::instrument(skip_all)]
     pub fn finalize<C>(mut self, globals: &[&H::Buffer<H::Elem>], circuit_hal: &C) -> Vec<u32>
     where
         C: CircuitHal<H>,
@@ -221,8 +219,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         // Now, convert the values to coefficients via interpolation
         let mut coeff_u = vec![H::ExtElem::ZERO; eval_u.len()];
-        tracing::info_span!("poly_interpolate").in_scope(|| {
-            scope!("poly_interpolate");
+        scope!("poly_interpolate", {
             let mut pos = 0;
             for reg in self.taps.regs() {
                 poly_interpolate(

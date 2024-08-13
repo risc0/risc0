@@ -220,10 +220,8 @@ impl<'a> ExecutorImpl<'a> {
             result.post_state,
         );
 
-        tracing::info_span!("executor").in_scope(|| {
-            tracing::info!("execution time: {elapsed:?}");
-            session.log();
-        });
+        tracing::info!("execution time: {elapsed:?}");
+        session.log();
 
         Ok(session)
     }

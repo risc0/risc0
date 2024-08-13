@@ -2734,7 +2734,6 @@ dependencies = [
  "nvtx",
  "puffin",
  "rand_core",
- "tracing",
 ]
 
 [[package]]

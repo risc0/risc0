@@ -194,7 +194,6 @@ where
         BufferImpl::new(lhs, rhs)
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,

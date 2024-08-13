@@ -17,7 +17,6 @@
 use core::fmt::Display;
 
 pub use puffin;
-pub use tracing;
 
 #[doc(hidden)]
 pub struct NvtxRange;
@@ -45,25 +44,19 @@ macro_rules! scope {
     ($name:expr) => {
         let _nvtx = $crate::perf::NvtxRange::new($name);
         $crate::perf::puffin::profile_scope!($name);
-        let _span = $crate::perf::tracing::info_span!($name);
-        let _span_entered = _span.enter();
     };
 
-    ($name:expr, $body:block) => {
-        $crate::perf::tracing::info_span!($name).in_scope(|| {
-            let _nvtx = $crate::perf::NvtxRange::new($name);
-            $crate::perf::puffin::profile_scope!($name);
-            $body
-        })
-    };
+    ($name:expr, $body:block) => {{
+        let _nvtx = $crate::perf::NvtxRange::new($name);
+        $crate::perf::puffin::profile_scope!($name);
+        $body
+    }};
 
-    ($name:expr, $body:expr) => {
-        $crate::perf::tracing::info_span!($name).in_scope(|| {
-            let _nvtx = $crate::perf::NvtxRange::new($name);
-            $crate::perf::puffin::profile_scope!($name);
-            $body
-        })
-    };
+    ($name:expr, $body:expr) => {{
+        let _nvtx = $crate::perf::NvtxRange::new($name);
+        $crate::perf::puffin::profile_scope!($name);
+        $body
+    }};
 }
 
 /// Opens a scope.
@@ -72,23 +65,17 @@ macro_rules! scope_with {
     ($name:expr, $data:expr) => {
         let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
         $crate::perf::puffin::profile_scope!($name, $data);
-        let _span = $crate::perf::tracing::info_span!($name, tag = $data);
-        let _span_entered = _span.enter();
     };
 
-    ($name:expr, $data:expr, $body:block) => {
-        $crate::perf::tracing::info_span!($name, tag = $data).in_scope(|| {
-            let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
-            $crate::perf::puffin::profile_scope!($name, $data);
-            $body
-        })
-    };
+    ($name:expr, $data:expr, $body:block) => {{
+        let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
+        $crate::perf::puffin::profile_scope!($name, $data);
+        $body
+    }};
 
-    ($name:expr, $data:expr, $body:expr) => {
-        $crate::perf::tracing::info_span!($name, tag = $data).in_scope(|| {
-            let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
-            $crate::perf::puffin::profile_scope!($name, $data);
-            $body
-        })
-    };
+    ($name:expr, $data:expr, $body:expr) => {{
+        let _nvtx = $crate::perf::NvtxRange::new(::core::format_args!($name, $data));
+        $crate::perf::puffin::profile_scope!($name, $data);
+        $body
+    }};
 }

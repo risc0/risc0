@@ -56,6 +56,8 @@ where
         trace: PreflightTrace,
         mode: StepMode,
     ) -> Self {
+        scope!("witgen");
+
         let steps = 1 << po2;
 
         let (loader, last_cycle) = scope!("load", {
