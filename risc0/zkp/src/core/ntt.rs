@@ -362,15 +362,15 @@ mod tests {
         let mut goal = [BabyBearElem::ZERO; SIZE];
         // Compute polynomial at each ROU power (starting at 0, i.e. x = 1)
         let mut x = BabyBearElem::ONE;
-        for i in 0..SIZE {
+        for goal in goal.iter_mut() {
             // Compute the polynomial
             let mut tot = BabyBearElem::ZERO;
             let mut xn = BabyBearElem::ONE;
-            for j in 0..SIZE {
-                tot += buf[j] * xn;
+            for buf in buf.iter() {
+                tot += *buf * xn;
                 xn *= x;
             }
-            goal[i] = tot;
+            *goal = tot;
             x *= BabyBearElem::ROU_FWD[N];
         }
         // Now compute multiEvaluate in place
@@ -389,7 +389,7 @@ mod tests {
         let mut rng = thread_rng();
         let mut buf = [BabyBearElem::random(&mut rng); SIZE];
         // Copy it
-        let orig = buf.clone();
+        let orig = buf;
         // Now go backwards
         interpolate_ntt::<BabyBearElem, BabyBearElem>(&mut buf);
         // Make sure something changed
@@ -409,7 +409,7 @@ mod tests {
         let mut rng = thread_rng();
         let mut buf = [GoldilocksElem::random(&mut rng); SIZE];
         // Copy it
-        let orig = buf.clone();
+        let orig = buf;
         // Now go backwards
         interpolate_ntt::<GoldilocksElem, GoldilocksElem>(&mut buf);
         // Make sure something changed
@@ -441,15 +441,15 @@ mod tests {
         let mut goal = [BabyBearElem::ZERO; SIZE_OUT];
         // Compute polynomial at each ROU power (starting at 0, i.e. x = 1)
         let mut x = BabyBearElem::ONE;
-        for i in 0..SIZE_OUT {
+        for goal in goal.iter_mut() {
             // Compute the polynomial
             let mut tot = BabyBearElem::ZERO;
             let mut xn = BabyBearElem::ONE;
-            for j in 0..SIZE_IN {
-                tot += cmp[j] * xn;
+            for cmp in cmp.iter() {
+                tot += *cmp * xn;
                 xn *= x;
             }
-            goal[i] = tot;
+            *goal = tot;
             x *= BabyBearElem::ROU_FWD[N];
         }
         assert_eq!(goal, buf);

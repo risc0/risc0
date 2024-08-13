@@ -15,6 +15,7 @@
 use std::sync::Mutex;
 
 use rayon::prelude::*;
+use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitStep, CircuitStepContext, PolyFp},
     core::log2_ceil,
@@ -122,7 +123,7 @@ where
             ];
 
             let accumulator: Mutex<Accum<BabyBearExtElem>> = Mutex::new(Accum::new(steps));
-            tracing::info_span!("step_compute_accum").in_scope(|| {
+            scope!("step_compute_accum", {
                 (0..steps - ZK_CYCLES).into_par_iter().for_each_init(
                     || Handler::<BabyBear>::new(&accumulator),
                     |handler, cycle| {
@@ -136,10 +137,10 @@ where
                     },
                 );
             });
-            tracing::info_span!("calc_prefix_products").in_scope(|| {
+            scope!("calc_prefix_products", {
                 accumulator.lock().unwrap().calc_prefix_products();
             });
-            tracing::info_span!("step_verify_accum").in_scope(|| {
+            scope!("step_verify_accum", {
                 (0..steps - ZK_CYCLES).into_par_iter().for_each_init(
                     || Handler::<BabyBear>::new(&accumulator),
                     |handler, cycle| {

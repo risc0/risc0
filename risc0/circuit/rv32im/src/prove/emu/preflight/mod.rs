@@ -20,6 +20,7 @@ use std::collections::VecDeque;
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_debug::Dbg;
+use risc0_core::scope;
 use risc0_zkp::{
     core::{
         digest::{Digest, DIGEST_WORDS},
@@ -785,8 +786,9 @@ impl EmuContext for Preflight {
 }
 
 impl Segment {
-    #[tracing::instrument(skip_all)]
     pub fn preflight(&self) -> Result<PreflightTrace> {
+        scope!("preflight");
+
         tracing::debug!("preflight: {self:#?}");
         let mut preflight = Preflight::new(self);
         let mut emu = Emulator::new();

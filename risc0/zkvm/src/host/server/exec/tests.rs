@@ -200,7 +200,7 @@ fn host_syscall_words() {
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
-        .io_callback(SYS_MULTI_TEST_WORDS, |buf| Ok(buf))
+        .io_callback(SYS_MULTI_TEST_WORDS, Ok)
         .build()
         .unwrap();
     let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -300,12 +300,12 @@ fn env_stdio() {
 fn posix_style_read() {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
-    let buf: Vec<u8> = (b'a'..b'z')
-        .chain(b'0'..b'9')
+    let buf: Vec<u8> = (b'a'..=b'z')
+        .chain(b'0'..=b'9')
         .chain(b"!@#$%^&*()".iter().cloned())
         .collect();
     // Input to read bytes from.
-    let readbuf: Vec<u8> = (b'A'..b'Z').collect();
+    let readbuf: Vec<u8> = (b'A'..=b'Z').collect();
 
     let run = |pos_and_len: Vec<(u32, u32)>| {
         let mut expected = buf.to_vec();
@@ -816,7 +816,7 @@ fn args() {
     for args_arr in test_cases {
         let env = ExecutorEnv::builder()
             .env_var("TEST_MODE", "ARGS")
-            .args(&args_arr)
+            .args(args_arr)
             .build()
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
@@ -825,7 +825,7 @@ fn args() {
         assert_eq!(
             output,
             args_arr
-                .into_iter()
+                .iter()
                 .map(|s| s.to_string())
                 .collect::<Vec<String>>(),
         );

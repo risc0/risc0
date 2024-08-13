@@ -443,6 +443,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn test_struct() {
         #[derive(Serialize, PartialEq, Debug)]
         struct Test {
@@ -467,7 +468,7 @@ mod tests {
             5,
             -6_i32 as u32,
             6,
-            f32::to_bits(3.14f32),
+            f32::to_bits(3.14_f32),
             -7_i32 as u32,
             0xffffffff,
             7,
