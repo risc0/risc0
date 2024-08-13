@@ -73,16 +73,16 @@ The `Bonsai Relayer` and the `Bonsay Relay Contract` let your Ethereum dApps con
 
 We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort. To learn more, read our [litepaper].
 
-[litepaper]: /litepaper
-[Request access here]: https://bonsai.xyz/apply
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
-[Bonsai SDK]: https://crates.io/crates/bonsai-sdk
-[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
-[Bonsai Quick Start]: quickstart.md
 [Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.19/bonsai/examples/governance#readme
-[Zeth]: https://www.risczero.com/news/zeth-release
-[guest program]: /terminology#guest-program
-[receipt]: /terminology#receipt
-[journal]: /terminology#journal
 [Bonsai Pay]: https://www.risczero.com/news/bonsai-pay
+[Bonsai Quick Start]: quickstart.md
+[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
+[Bonsai SDK]: https://crates.io/crates/bonsai-sdk
+[Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.19/bonsai/examples/governance#readme
+[guest program]: /terminology#guest-program
+[journal]: /terminology#journal
+[litepaper]: /litepaper
+[receipt]: /terminology#receipt
+[Request access here]: https://bonsai.xyz/apply
+[Zeth]: https://www.risczero.com/news/zeth-release

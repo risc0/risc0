@@ -14,13 +14,11 @@ Then, run the example with:
 cargo run --release
 ```
 
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-
 ## Building
 
 To run tests and then build a copy of the pro rata command line utility:
 
-```
+```text
 > cargo test --package prorata-cli # about 7 minutes
 > cargo build --package prorata-cli --release  # about 7 minutes, can run in parallel with above
 > cargo run --package prorata-cli help  # verify binary was built
@@ -48,7 +46,7 @@ Northern Trust Corporation,6950
 
 The first step necessary for trusting an allocation is to know the cap table is correct. After an appropriate audit to make sure the cap table matches the records, an auditor then attests to its correctness. To convince an outside recipient of the authenticity of this attestation our auditors may use `gpg` to sign the statement saying the cap table referenced by hash has passed audit:
 
-```
+```text
 > date > statement.txt
 > echo "We, the auditors, have examined the records and capitalization of InGen Corp. In our opinion the records are adequate and the cap table referenced below is free of material misstatement." >> statement.txt
 > shasum -a 256 sample/ingen.csv >> statement.txt
@@ -72,9 +70,9 @@ Now we have a signed statement from the auditor that we may share with anyone to
 
 ### Computing an allocation
 
-Great news! InGen has agreed to be purchased by Masrani Global Corporation and is doing a $1B distribution as part of the sale. Let's calculate how much will go to John Hammond and create a verifiable statement to that effect.
+Great news! InGen has agreed to be purchased by Masrani Global Corporation and is doing a \$1B distribution as part of the sale. Let's calculate how much will go to John Hammond and create a verifiable statement to that effect.
 
-```
+```text
 > target/release/prorata-cli allocate --input sample/ingen.csv --output hammond.receipt --recipient 'John Hammond' --amount 1000000000
 ```
 
@@ -82,7 +80,7 @@ Great news! InGen has agreed to be purchased by Masrani Global Corporation and i
 
 John receives the notice.
 
-```
+```text
 > cargo run --package prorata-cli verify --input hammond.receipt
 Query: John Hammond
 Allocation for John Hammond: 187068000
@@ -91,7 +89,7 @@ CSV hash: 1042f70d38c9e980c14f449714952e04c8aab41967f2ffcafa02cda9ec9dce22
 
 And to check that the cap table is authentic:
 
-```
+```text
 > gpg --no-default-keyring  --keyring sample/auditor.gpg --verify < statement-signed.txt
 gpg: Signature made Wed 31 May 2023 05:47:43 PM UTC
 gpg:                using RSA key 254661BE36280E40C8593AED66C8763F4D1AC1BD
@@ -102,3 +100,5 @@ Primary key fingerprint: 2546 61BE 3628 0E40 C859  3AED 66C8 763F 4D1A C1BD
 ```
 
 Success.
+
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

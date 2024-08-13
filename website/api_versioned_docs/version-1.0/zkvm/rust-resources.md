@@ -36,4 +36,4 @@ in our [Crate Validation Report][crate-validation].
 [Rust]: https://www.rust-lang.org/
 [rust-book]: https://doc.rust-lang.org/book
 [rust-libraries]: https://github.com/risc0/risc0#rust-libraries
-[zkvm-overview]: ./zkvm_overview.md
+[zkvm-overview]: ./zkvm-overview.md

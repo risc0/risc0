@@ -8,10 +8,8 @@ Welcome to the [RISC Zero] documentation! This site contains documentation for:
 
 - **[Bonsai]**: A software development stack that allows on-chain and off-chain
   applications to request and receive proofs from our zkVM.
-
 - **[The RISC Zero zkVM][zkVM]**: A high-performance tool for proving correct
   execution of arbitrary code.
-
 - **[The RISC Zero Proof System][proof-system]**: The cryptographic techniques
   underlying the zkVM.
 
@@ -71,7 +69,7 @@ compiler, state continuations, and continuous improvements to the proving
 algorithm, Bonsai enables anyone to generate highly performant ZK proofs for a
 variety of applications.
 
-Read more on Bonsai [here][Bonsai].
+[Read more on Bonsai ][Bonsai].
 
 ## The RISC Zero zkVM
 
@@ -112,7 +110,7 @@ In addition to being far easier to build on, we're also delivering on
 Given the ease of development and the performance, the zkVM is the clear choice
 for your ZK needs.
 
-## Connect with us
+## Connect with Us
 
 If you want to report a bug or contribute to our code, you can do so on
 [GitHub][risc0-repo].
@@ -144,4 +142,4 @@ list][mailing-list] to get our latest announcements.
 [YouTube]: https://www.youtube.com/@risczero
 [zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [zkpoex]: https://risczero.com/news/zkpoex
-[zkVM]: ./zkvm/zkvm_overview.md
+[zkVM]: ./zkvm/zkvm-overview.md

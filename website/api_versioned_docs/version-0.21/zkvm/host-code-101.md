@@ -76,8 +76,7 @@ For more information on passing and verifying receipts, check out our page on
 Hopefully, this guide and the [zkVM Quick Start][quickstart] page will be
 sufficient for you to build your first [zkVM application][zkVM]!
 
-If you run into problems, don't be a stranger! You can file an issue on [these
-docs] or the [examples], and we're happy to answer questions on [Discord].
+If you run into problems, don't be a stranger! You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
@@ -89,16 +88,13 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [guest]: /terminology#guest
 [guest program]: /terminology#guest-program
 [host]: /terminology#host
-[journal]: /terminology#journal
-[JSON]: https://github.com/risc0/risc0/blob/release-0.21/examples/json/src/main.rs
-[method]: /terminology#method
 [prove]: /terminology#prove
 [Prover]: /terminology#prover
 [quickstart]: ./quickstart.md
 [receipt]: /terminology#receipt
-[Receipts]: ./receipts.md
 [receipt-verify]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/struct.Receipt.html#method.verify
+[Receipts]: ./receipts.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
 [tutorial]: ./tutorials/hello-world.md
-[verifies]: /terminology#verify
-[zkVM]: ./zkvm_overview.md
+[zkVM]: ./zkvm-overview.md

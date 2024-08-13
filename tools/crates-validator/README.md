@@ -4,7 +4,7 @@ This tool allows for spot or bulk testing of different crates.io crates within t
 
 ## Running
 
-### Build a profile
+### Build a Profile
 
 ```bash
 RUST_LOG=info cargo run --bin gen-profiles -- -r ~/src/risc0/ -d /tmp/db-dump.tar.gz -o /tmp/profile.json
@@ -12,7 +12,7 @@ RUST_LOG=info cargo run --bin gen-profiles -- -r ~/src/risc0/ -d /tmp/db-dump.ta
 RUST_LOG=info cargo run --bin gen-profiles -- -r ~/src/risc0/ -d /tmp/db-dump.tar.gz -o /tmp/profile.json -n lazy_static
 ```
 
-### Run the profile
+### Run the Profile
 
 ```bash
 RUST_LOG=info cargo run -- -p /tmp/profile.json

@@ -147,7 +147,7 @@ jobs:
           version: "1.4.3"
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
@@ -546,7 +546,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
@@ -588,7 +588,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - name: 🍞 Setup Bun
+        uses: risc0/setup-bun@v1.2.1
+        with:
+          bun-version: 1.1.21
       - run: bun install
         working-directory: web
       - run: bun run ci
