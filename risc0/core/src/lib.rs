@@ -26,3 +26,5 @@
 extern crate alloc;
 
 pub mod field;
+#[cfg(feature = "perf")]
+pub mod perf;

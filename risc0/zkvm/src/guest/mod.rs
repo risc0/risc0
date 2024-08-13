@@ -22,13 +22,11 @@
 //! ## Installation
 //!
 //! To build and run RISC Zero zkVM code, you will need to install the RISC Zero
-//! toolchain, which can be done using the
-//! [`cargo-risczero`](https://crates.io/crates/cargo-risczero) tool:
+//! toolchain, which can be done using the rzup utility:
 //!
 //! ```sh
-//! cargo install cargo-binstall
-//! cargo binstall cargo-risczero
-//! cargo risczero install
+//! curl -L https://risczero.com/install | bash
+//! rzup install
 //! ```
 //!
 //! ## Example
@@ -151,6 +149,18 @@ macro_rules! entry {
 #[no_mangle]
 unsafe extern "C" fn __start() -> ! {
     env::init();
+
+    #[cfg(feature = "heap-embedded-alloc")]
+    {
+        extern "C" {
+            static _end: u8;
+        }
+        let heap_pos: usize = unsafe { (&_end) as *const u8 as usize };
+        let heap_size: usize = risc0_zkvm_platform::memory::GUEST_MAX_MEM - heap_pos;
+        unsafe {
+            risc0_zkvm_platform::rust_rt::heap::embedded_allocator::HEAP.init(heap_pos, heap_size)
+        }
+    }
 
     {
         extern "C" {

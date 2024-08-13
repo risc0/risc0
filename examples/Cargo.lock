@@ -3616,6 +3616,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "puffin"
+version = "0.19.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa9dae7b05c02ec1a6bc9bcf20d8bc64a7dcbf57934107902a872014899b741f"
+dependencies = [
+ "anyhow",
+ "byteorder",
+ "cfg-if",
+ "itertools",
+ "once_cell",
+ "parking_lot",
+]
+
+[[package]]
 name = "qoi"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4053,6 +4067,7 @@ dependencies = [
  "cargo_metadata",
  "dirs",
  "docker-generate",
+ "hex",
  "risc0-binfmt",
  "risc0-zkp",
  "risc0-zkvm-platform",
@@ -4087,7 +4102,6 @@ dependencies = [
  "hex",
  "lazy-regex",
  "metal",
- "nvtx",
  "rand",
  "rayon",
  "risc0-circuit-recursion-sys",
@@ -4124,7 +4138,6 @@ dependencies = [
  "derive-debug",
  "lazy-regex",
  "metal",
- "nvtx",
  "rand",
  "rayon",
  "risc0-binfmt",
@@ -4154,6 +4167,8 @@ name = "risc0-core"
 version = "1.1.0-alpha.1"
 dependencies = [
  "bytemuck",
+ "nvtx",
+ "puffin",
  "rand_core",
 ]
 
@@ -4215,7 +4230,6 @@ dependencies = [
  "hex-literal",
  "metal",
  "ndarray",
- "nvtx",
  "parking_lot",
  "paste",
  "rand",
@@ -4245,7 +4259,6 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
- "nvtx",
  "prost",
  "rand",
  "rayon",

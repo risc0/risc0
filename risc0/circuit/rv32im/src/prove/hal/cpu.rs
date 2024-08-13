@@ -17,9 +17,12 @@ use std::rc::Rc;
 use anyhow::{bail, Result};
 use rayon::prelude::*;
 use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
-use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    map_pow, Elem, ExtElem, RootsOfUnity,
+use risc0_core::{
+    field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        map_pow, Elem, ExtElem, RootsOfUnity,
+    },
+    scope,
 };
 use risc0_sys::CppError;
 use risc0_zkp::{
@@ -64,6 +67,7 @@ impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
         io: &CpuBuffer<BabyBearElem>,
         data: &CpuBuffer<BabyBearElem>,
     ) {
+        scope!("cpu_witgen");
         tracing::debug!("witgen: {steps}, {count}");
         extern "C" {
             fn risc0_circuit_rv32im_cpu_witgen(
@@ -99,7 +103,6 @@ where
         Buffer<<H as Hal>::Elem> = CpuBuffer<BabyBearElem>,
     >,
 {
-    #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
         check: &CpuBuffer<BabyBearElem>,
@@ -153,7 +156,6 @@ where
         });
     }
 
-    #[tracing::instrument(skip_all)]
     fn accumulate(
         &self,
         ctrl: &CpuBuffer<BabyBearElem>,
@@ -174,17 +176,17 @@ where
 
             let accum_ctx = CIRCUIT.alloc_accum_ctx(steps);
 
-            tracing::info_span!("step_compute_accum").in_scope(|| {
+            scope!("step_compute_accum", {
                 (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
                     CIRCUIT
                         .par_step_compute_accum(steps, cycle, &accum_ctx, args)
                         .unwrap();
                 });
             });
-            tracing::info_span!("calc_prefix_products").in_scope(|| {
+            scope!("calc_prefix_products", {
                 CIRCUIT.calc_prefix_products(&accum_ctx).unwrap();
             });
-            tracing::info_span!("step_verify_accum").in_scope(|| {
+            scope!("step_verify_accum", {
                 (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
                     CIRCUIT
                         .par_step_verify_accum(steps, cycle, &accum_ctx, args)

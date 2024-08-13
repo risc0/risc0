@@ -15,6 +15,7 @@
 use std::{collections::HashMap, rc::Rc};
 
 use metal::ComputePipelineDescriptor;
+use risc0_core::scope;
 use risc0_zkp::{
     core::log2_ceil,
     field::{
@@ -57,7 +58,6 @@ impl<MH: MetalHash> MetalCircuitHal<MH> {
 }
 
 impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
-    #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
         check: &MetalBuffer<BabyBearElem>,
@@ -67,6 +67,8 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         po2: usize,
         steps: usize,
     ) {
+        scope!("eval_check");
+
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
