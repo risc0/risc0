@@ -762,7 +762,6 @@ impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     }
 }
 
-#[tracing::instrument(skip_all)]
 pub fn execute<S: Syscall>(
     image: MemoryImage,
     segment_limit_po2: usize,
