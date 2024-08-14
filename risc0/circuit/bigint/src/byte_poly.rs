@@ -48,9 +48,7 @@ impl Debug for BytePoly {
 
 impl BytePoly {
     pub fn with_coeffs(coeffs: usize) -> Self {
-        let mut out = Vec::new();
-        out.resize(coeffs, 0);
-        BytePoly(out)
+        BytePoly(vec![0; coeffs])
     }
 
     pub fn from_biguint(mut val: BigUint, coeffs: usize) -> Self {
@@ -105,7 +103,7 @@ impl BytePoly {
         let mut carry: i32 = 0;
         for i in 0..coeffs {
             carry = (self.0[i] + carry) / 256;
-            let carry_u = (carry as i32) + carry_offset as i32;
+            let carry_u = carry + carry_offset as i32;
             carry_polys[0][i] = carry_u & 0xFF;
             if carry_bytes > 1 {
                 carry_polys[1][i] = (carry_u >> 8) & 0xff;
@@ -152,8 +150,8 @@ impl BytePoly {
 
         for wit in witness.iter() {
             for chunk in wit.borrow().0.chunks(CHECKED_COEFFS_PER_POLY) {
-                for k in 0..CHECKED_COEFFS_PER_POLY {
-                    cur[k] = cur[k] * F::Elem::from_u64(1u64 << BITS_PER_COEFF)
+                for (k, elem) in cur.iter_mut().enumerate() {
+                    *elem = *elem * F::Elem::from_u64(1u64 << BITS_PER_COEFF)
                         + F::Elem::from_u64(*chunk.get(k).unwrap_or(&0) as u64);
                 }
                 group += 1;
@@ -192,7 +190,7 @@ impl BytePoly {
                 })
             })
             // Convert from [u8; 4] to u32
-            .map(|chunk| u32::from_le_bytes(chunk))
+            .map(u32::from_le_bytes)
             .collect()
     }
 }
@@ -232,7 +230,7 @@ impl<Rhs: Borrow<BytePoly>> ops::Add<Rhs> for &BytePoly {
         let size = max(self.0.len(), rhs.0.len());
         let mut out = Vec::with_capacity(size);
         for i in 0..size {
-            out.push(self.0.get(i).clone().unwrap_or(&0) + rhs.0.get(i).unwrap_or(&0));
+            out.push(self.0.get(i).unwrap_or(&0) + rhs.0.get(i).unwrap_or(&0));
         }
         BytePoly(out)
     }
@@ -257,8 +255,7 @@ impl<Rhs: Borrow<BytePoly>> ops::Mul<Rhs> for &BytePoly {
 
     fn mul(self, rhs: Rhs) -> Self::Output {
         let rhs = rhs.borrow();
-        let mut out = Vec::new();
-        out.resize(self.0.len() + rhs.0.len(), 0);
+        let mut out = vec![0; self.0.len() + rhs.0.len()];
         for (i, a) in self.0.iter().enumerate() {
             for (j, b) in rhs.0.iter().enumerate() {
                 out[i + j] += a * b;

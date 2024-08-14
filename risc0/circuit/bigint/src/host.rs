@@ -44,16 +44,14 @@ pub fn prove<S: Sha256>(
     prover.add_input(prog.control_root.as_words());
 
     let hash_suite = Poseidon2HashSuite::new_suite();
-    let mut rng = (&*hash_suite.rng).new_rng();
+    let mut rng = (*hash_suite.rng).new_rng();
 
     for claim in pad_claim_list(prog, claims)? {
         debug!("claim: {claim:?}");
-        let mut ctx = BigIntContext::default();
-        ctx.in_values = claim
-            .public_witness
-            .iter()
-            .map(|val| BigUint::from(val))
-            .collect();
+        let mut ctx = BigIntContext {
+            in_values: claim.public_witness.iter().map(BigUint::from).collect(),
+            ..Default::default()
+        };
 
         let claim_digest = claim.digest::<S>();
         trace!("claim_digest: {claim_digest:?}");
@@ -86,7 +84,7 @@ pub fn prove<S: Sha256>(
 
         let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
         let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
-        let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
+        let folded = (*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
         trace!("folded: {folded}");
 
         // Calculate the evaluation point Z
@@ -132,7 +130,7 @@ pub fn verify<S: Sha256>(
                     prog.control_id
                 );
                 Err(VerificationError::ControlVerificationError {
-                    control_id: receipt_control_id.clone(),
+                    control_id: *receipt_control_id,
                 })
             }
         },

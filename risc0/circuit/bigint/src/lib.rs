@@ -154,6 +154,7 @@ pub(crate) fn pad_claim_list<'a>(
 
 pub(crate) mod generated {
     #![allow(dead_code)]
+    #![allow(clippy::all)]
 
     use crate::codegen_prelude::*;
     include! {"bigint.rs.inc"}
