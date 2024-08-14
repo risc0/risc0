@@ -13,7 +13,7 @@ export default async function createConfigAsync() {
   return {
     title: "RISC Zero Developer Docs",
     tagline: "Hyper-Efficient General Purpose Zero-Knowledge Computing.",
-    favicon: "img/logo.png",
+    favicon: "img/favicon.ico",
 
     url: "https://dev.risczero.com",
     baseUrl: baseUrl,
@@ -119,13 +119,12 @@ export default async function createConfigAsync() {
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({
-        image: "img/logo.png",
+        image: "img/logo.svg",
         navbar: {
-          title: "RISC Zero",
           logo: {
-            alt: "RISC Zero Logo",
-            src: "img/logo.png",
-            href: "https://risczero.com/",
+            alt: "RISC Zero",
+            src: "img/logo.svg",
+            href: "https://risczero.com",
           },
           items: [
             {
@@ -153,6 +152,11 @@ export default async function createConfigAsync() {
               position: "right",
               docsPluginId: "api",
               class: "docsVersionDropdown",
+            },
+            {
+              href: "https://www.risczero.com/blog",
+              position: "right",
+              label: "Blog",
             },
             {
               href: "https://github.com/risc0",
@@ -201,6 +205,20 @@ export default async function createConfigAsync() {
         colorMode: {
           defaultMode: "dark",
           respectPrefersColorScheme: false,
+        },
+        mermaid: {
+          theme: { light: "default", dark: "dark" },
+          options: {
+            fontFamily: "var(--ifm-heading-font-family)",
+            themeVariables: {
+              fontSize: "12px",
+              mainBkg: "rgba(255,255,255,0.9)",
+              lineColor: "var(--ifm-color-emphasis-600)",
+              nodeBorder: "var(--ifm-color-emphasis-500)",
+              clusterBorder: "var(--ifm-color-emphasis-300)",
+              clusterBkg: "var(--ifm-color-emphasis-200)",
+            },
+          },
         },
         algolia: {
           appId: "TQC8F4X8Z5",
