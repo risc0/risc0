@@ -35,6 +35,8 @@ use risc0_binfmt::{tagged_list, Digestible};
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 
+pub mod rsa;
+
 // PO2 to use to execute bigint ZKRs.
 pub const BIGINT_PO2: usize = 18;
 
@@ -76,8 +78,6 @@ pub struct BigIntProgram<'a> {
     // Number of claims to be verified per invocation of the ZKR
     pub iters: usize,
 }
-
-pub mod rsa;
 
 #[derive(Debug, Clone)]
 pub struct BigIntClaim {

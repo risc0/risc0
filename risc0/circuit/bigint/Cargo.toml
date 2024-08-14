@@ -34,10 +34,6 @@ num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 risc0-circuit-bigint-test-methods = { path = "methods" }
 
-[build-dependencies]
-cc = { version = "1.0", features = ["parallel"] }
-glob = "0.3"
-
 [[bin]]
 name = "make_control_ids"
 required-features = ["make_control_ids"]

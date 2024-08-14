@@ -431,7 +431,6 @@ jobs:
           # TODO: remove risc0-circuit-bigint exclusion once it exists in main and we
           # can successfully compare semvers.
           cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
-            --exclude risc0-circuit-bigint \
             --exclude doc-test \
             --exclude fibonacci-methods \
             --exclude risc0-zkvm-receipts \
