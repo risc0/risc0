@@ -129,3 +129,14 @@ jobs:
             git commit -m "Add build artifacts"
             git push
           fi
+
+  alert_devops_if_failed:
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
+    needs: [bench, publish]
+    steps:
+      - name: DevOps Alert
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Benchmark Reports Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_TEST_URL }}
