@@ -1,6 +1,9 @@
 name: Benchmark Reports
 
 on:
+
+  pull_request:
+    branches: [main]
   schedule:
     - cron: '0 7 * * *' # Nightly (ish) Pacific
 
