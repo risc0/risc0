@@ -914,7 +914,7 @@ fn compute_launch_params(n_bits: u32, s_bits: u32, c_size: u32) -> (MTLSize, MTL
 mod tests {
     use test_log::test;
 
-    use super::{ MetalHalPoseidon2, MetalHalSha256};
+    use super::{MetalHalPoseidon2, MetalHalSha256};
     use crate::hal::testutil;
 
     #[test]
@@ -977,7 +977,6 @@ mod tests {
     fn hash_rows_sha256() {
         testutil::hash_rows(MetalHalSha256::new());
     }
-
 
     #[test]
     fn hash_fold_poseidon2() {
