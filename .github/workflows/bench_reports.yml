@@ -1,9 +1,6 @@
 name: Benchmark Reports
 
 on:
-
-  pull_request:
-    branches: [main]
   schedule:
     - cron: '0 7 * * *' # Nightly (ish) Pacific
 
@@ -100,7 +97,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: exit 1
       - name: Checkout gh-pages repository branch ${{ github.base_ref || github.ref_name }}
         uses: actions/checkout@v4
         with:
@@ -143,4 +139,4 @@ jobs:
         env:
           NEEDS: ${{ toJSON(needs) }}
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"Benchmark Reports Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_TEST_URL }}
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Benchmark Reports Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
