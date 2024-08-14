@@ -25,9 +25,9 @@ Bonsai combines three key ingredients to produce a unique network that will enab
 - A proving system that directly integrates into any smart contract or chain
 - A universal rollup that distributes any computations proven on Bonsai to every chain
 
-### Zero-Knowledge Proofs For Every Chain And Application
+### Zero-Knowledge Proofs for Every Chain And Application
 
-Bonsai allows for zero-knowledge proofs to be built into the entire web3 ecosystem by acting as an independent zero-knowledge proving network that chains and dApps can call from smart contracts or validators to generate zero-knowledge proofs. The proofs are then posted onto blockchains such as Ethereum, zero-knowledge L2s, app chains, and L1s. This enables verifiable off-chain compute; applications can rely on Bonsai for the majority of their smart contract logic and state change calculations without the use of a blockchain VM (EVM). The state changes and smart contract execution are fully verified by Bonsai’s ZK proofs which are posted on-chain. The resulting smart contract is more compact, functional, and gas efficient.
+Bonsai allows for zero-knowledge proofs to be built into the entire web3 ecosystem by acting as an independent zero-knowledge proving network that chains and dApps can call from smart contracts or validators to generate zero-knowledge proofs. The proofs are then posted onto blockchains such as Ethereum, zero-knowledge L2s, app chains, and L1s. This enables verifiable off-chain compute; applications can rely on Bonsai for the majority of their smart contract logic and state change calculations without the use of a blockchain VM (EVM). The state changes and smart contract execution are fully verified by Bonsai's ZK proofs which are posted on-chain. The resulting smart contract is more compact, functional, and gas efficient.
 
 ```solidity
 // Without Bonsai
@@ -48,7 +48,7 @@ contract simulation_normal {
 // With Bonsai
 contract simulation_bonsai {
  function some_really_hard_work() {
-   bonsai_proving_network.call(“some_really_hard_work”);
+   bonsai_proving_network.call("some_really_hard_work");
  }
 }
 ```
@@ -57,7 +57,7 @@ contract simulation_bonsai {
 
 Bonsai reduces any smart contract into a single ZK Bonsai network call and moves all the gas-heavy code execution off chain. Smart contracts are no longer bounded by the limitations of EVM and others; instead, they will have full support in Rust and any other programming language that the zkVM will support. This means that a Solidity contract on ETH will be able to write its main logic in Rust on Bonsai and take advantage of non-EVM primitives, Rust crates, and the breadth of functionality of off-chain code execution.
 
-This direct integration into smart contracts enables us to bring ZK to any Layer 1, Layer 2, app chain, and dApp. Ethereum L1 dApps can now utilize Bonsai’s ZK off-chain execution to reduce gas fees and increase TPS on the Ethereum base layer. The Uniswap swap function, for example, can calculate swap rates and pool fees off chain on Bonsai, greatly reducing the amount of gas required to conduct a swap on ETH L1.
+This direct integration into smart contracts enables us to bring ZK to any Layer 1, Layer 2, app chain, and dApp. Ethereum L1 dApps can now utilize Bonsai's ZK off-chain execution to reduce gas fees and increase TPS on the Ethereum base layer. The Uniswap swap function, for example, can calculate swap rates and pool fees off chain on Bonsai, greatly reducing the amount of gas required to conduct a swap on ETH L1.
 
 By integrating directly into the smart contract, we maintain full composability with the native chain of any ZK app built on Bonsai. Additionally, ZK dApps can now utilize native ETH, liquidity, NFTs, and Aave/Uniswap LPs. Bonsai effectively allows any application, blockchain, and app chain to easily integrate ZK proofs into their protocol without custom ZK circuit development.
 
@@ -75,27 +75,27 @@ Bonsai is a massively parallel, chain-agnostic, and general purpose network desi
 
 ### Major Components
 
-**Prover Network:** A network of node operators running our zkVM prover in order to execute and prove any requests sent from the Bonsai API. Bonsai’s infrastructure will ensure high Node availability as well as tracking incentives for Node operators. Over time this network will expand and decentralize enabling anyone to run provers.
+**Prover Network:** A network of node operators running our zkVM prover in order to execute and prove any requests sent from the Bonsai API. Bonsai's infrastructure will ensure high Node availability as well as tracking incentives for Node operators. Over time this network will expand and decentralize enabling anyone to run provers.
 
 **Request Pool:** A database of requests for proofs as well as metadata about those proofs (for instance, age and rollup-depth). This pool will also act as a sequencer and construct blocks for node operators. Many proofs will be split into multiple portions in order to enable time-efficient proving, the request pool manages the splitting and recombining of single function requests.
 
-**Rollup Engine:** The rollup engine takes proofs generated by the prover network and rolls them up into a singular root proof. It then publishes this root proof onto chains such as Ethereum and Solana which subsequently can verify the proof’s validity.
+**Rollup Engine:** The rollup engine takes proofs generated by the prover network and rolls them up into a singular root proof. It then publishes this root proof onto chains such as Ethereum and Solana which subsequently can verify the proof's validity.
 
 **Image Hub:** The image hub will allow developers to store functions and program images that can be executed by blockchain smart contracts through the Bonsai API. Program images in this case can vary in complexity from basic DeFi swap functions to complex light clients and even Geth. All execution of these images will be ZK provable through Bonsai and our zkVM. The image hub provides extremely powerful programming primitives to developers and will enable the creation of complex stateful workflows that span multiple blockchains. It will enable Bonsai to act as a shared execution layer between any chain and increase the functionality of smart contracts by many magnitudes.
 
-### Future components
+### Future Components
 
 **State Store:** The Bonsai State Store will enable developers to store state on Bonsai instead of needing to maintain state on the settlement layer (Layer 1 Ethereum etc). This will increase gas savings and reduce contract complexity for the application while enhancing the functionality of code executed on Bonsai. Variables within the state store are represented by Key/Value pairs which store the state on Bonsai for easy accessibility within Bonsai functions/program images.
 
-**Proving Marketplace:** As demand for Bonsai proofs exceeds the in-house supply we can provide, we will move towards developing a decentralized proving network. We can base the design of such a market around Bitcoin and Ethereum where anyone can generate proofs. The proof marketplace will match proof asks with bids allowing for permissionless participation in the proving network and increasing Bonsai’s overall efficiency and reliability.
+**Proving Marketplace:** As demand for Bonsai proofs exceeds the in-house supply we can provide, we will move towards developing a decentralized proving network. We can base the design of such a market around Bitcoin and Ethereum where anyone can generate proofs. The proof marketplace will match proof asks with bids allowing for permissionless participation in the proving network and increasing Bonsai's overall efficiency and reliability.
 
 ## Blockchain Use Cases
 
-### Scaling - Off-Chain Smart Contract Execution
+### Scaling ― Off-Chain Smart Contract Execution
 
 Bonsai allows smart contracts to execute an arbitrary amount of code off-chain and generates a proof attesting to the validity of the code execution and state change. This leads to large gains in the **scalability, functionality, and interoperability of blockchains.**
 
-**Scalability** - By simply moving code execution away from a blockchain VM, smart contracts will require orders of magnitude less gas as fewer lines of code need to be executed on chain. This will help reduce the gas costs of any smart contract and lead to significantly lower fees across DEXs, lending protocols, NFT marketplaces, and more. It is plausible that with Bonsai there will be an upper limit of gas fees per smart contract regardless of contract complexity. With Bonsai, smart contracts can converge roughly to the following:
+**Scalability** ― By simply moving code execution away from a blockchain VM, smart contracts will require orders of magnitude less gas as fewer lines of code need to be executed on chain. This will help reduce the gas costs of any smart contract and lead to significantly lower fees across DEXs, lending protocols, NFT marketplaces, and more. It is plausible that with Bonsai there will be an upper limit of gas fees per smart contract regardless of contract complexity. With Bonsai, smart contracts can converge roughly to the following:
 
 ```solidity
 contract simulation_bonsai {
@@ -104,7 +104,7 @@ contract simulation_bonsai {
     inputVals = Query chain for input values and data
 
     // Ask Bonsai to calculate state transitions
-    newState = bonsai_proving_network.call(“some_really_hard_work”, inputVals)
+    newState = bonsai_proving_network.call("some_really_hard_work", inputVals)
 
     // Update blockchain values
     state = newState
@@ -112,7 +112,7 @@ contract simulation_bonsai {
 }
 ```
 
-**Functionality** - Off-chain execution also allows functions to take advantage of Rust/C++/etc. libraries and crates. This is because off-chain execution is not bounded by the limitations of existing L1 execution layers. Instead, smart contract code on Bonsai can be executed like a traditional executable on the RISC Zero zkVM, which allows for more performant and complex smart contracts. This also enables libraries and crates that open up functionality within contracts, especially those built on traditional monolithic L1s .
+**Functionality** ― Off-chain execution also allows functions to take advantage of Rust/C++/etc. libraries and crates. This is because off-chain execution is not bounded by the limitations of existing L1 execution layers. Instead, smart contract code on Bonsai can be executed like a traditional executable on the RISC Zero zkVM, which allows for more performant and complex smart contracts. This also enables libraries and crates that open up functionality within contracts, especially those built on traditional monolithic L1s .
 
 **Example:** **Ethereum On Chain Order Book**
 

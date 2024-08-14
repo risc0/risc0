@@ -14,6 +14,14 @@ release = false
 methods = ["guest", "rand", "std", "cpp-crates"]
 
 [dependencies]
-risc0-zkvm = { workspace = true }
+bincode = { version = "1.3", optional = true }
+borsh = { version = "1.5", default-features = false }
+ciborium = { version = "0.2", default-features = false }
+postcard = "1.0"
+risc0-zkvm = { workspace = true, features = ["unstable"] }
 risc0-zkvm-platform = { workspace = true }
+rmp-serde = "1.3"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
+
+[features]
+std = ["dep:bincode", "risc0-zkvm/std"]

@@ -29,7 +29,6 @@ metal = { workspace = true }
 bytemuck = "1.12"
 cust = { version = "0.3", optional = true }
 lazy-regex = { version = "3.2", optional = true }
-nvtx = { version = "1.3", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
@@ -61,18 +60,18 @@ cuda = [
   "std",
 ]
 default = ["prove", "test"]
-metal = []
+metal = ["prove"]
 prove = [
   "dep:cfg-if",
   "dep:downloader",
   "dep:lazy-regex",
-  "dep:nvtx",
   "dep:rand",
   "dep:rayon",
   "dep:risc0-sys",
   "dep:serde",
   "dep:sha2",
   "dep:zip",
+  "risc0-core/perf",
   "risc0-zkp/prove",
   "risc0-circuit-recursion-sys",
   "std",

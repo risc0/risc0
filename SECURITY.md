@@ -1,26 +1,32 @@
 # RISC Zero Security Information
-This document provides links and contact information for RISC Zero. 
+
+This document provides links and contact information for RISC Zero.
 
 ## Review Audit Reports
+
 All security audit reports are available [here](https://github.com/risc0/rz-security/tree/main/audits).
 
 ## Security Advisory Monitoring
+
 Security advisories will be published using the GitHub Security Advisory feature on the RISC Zero repository [here](https://github.com/risc0/risc0/security).
 
 ## Vulnerability Reporting
+
 Vulnerability reports should be submitted against the RISC Zero Bug Bounty Program on the Hackenproof platform [here](https://hackenproof.com/risc-zero/risc-zero-zkvm).
 
-***Only report vulnerabilities that are present in the latest release.***
+_**Only report vulnerabilities that are present in the latest release.**_
 
 ## Email Contact
+
 To contact the RISC Zero security team by email please use the following email address:
-```
+
+```text
 security@risczero.com
 ```
 
 If the issue is sensitive, please encrypt your email using the provided GPG key:
 
-```
+```text
 ----BEGIN PGP PUBLIC KEY BLOCK-----
 mDMEZliTRxYJKwYBBAHaRw8BAQdAQgoOhjMWzZEPw+rXzQif8l3HVo64OaLv53rU
 CfRpc20KlJJU0MgWmVybyBTZWN1cml0eSA8c2VjdXJpdHlAcmlzY3plcm8uY29t
@@ -37,6 +43,7 @@ cagv5r4H
 ```
 
 ## Change Log
-| version | date | comment |
-|-------- |------|---------|
+
+| version  | date       | comment         |
+| -------- | ---------- | --------------- |
 | 20240530 | 2024-05-30 | Initial version |

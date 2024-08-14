@@ -12,50 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    guest::{env, memory_barrier, sha},
-    sha::Sha256,
-};
-use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
+use risc0_zkvm::guest::env;
+use risc0_zkvm_methods::bench::BenchmarkSpec;
 
 fn main() {
-    let SpecWithIters(spec, iters) = env::read();
-    match spec {
-        BenchmarkSpec::SimpleLoop => {
-            for i in 0..iters {
-                memory_barrier(&i);
-            }
-        }
-        BenchmarkSpec::HashBytes { buf } => {
-            for _ in 0..iters {
-                memory_barrier(&sha::Impl::hash_bytes(&buf));
-            }
-        }
-        BenchmarkSpec::Memcpy {
-            src,
-            src_align,
-            dst_align,
-        } => {
-            let src_len = src.len() - src_align;
-            let mut dst: Vec<u8> = Vec::new();
-            dst.resize(src_len + dst_align, 0);
-            let dst_slice: &mut [u8] = &mut dst[dst_align..];
-            let src_slice: &[u8] = &src[src_align..];
-
-            for _ in 0..iters {
-                dst_slice.copy_from_slice(src_slice);
-                memory_barrier(&dst_slice);
-            }
-        }
-        BenchmarkSpec::Memset { len } => {
-            let mut dst: Vec<u8> = Vec::new();
-            dst.resize(len, 0);
-            let dst_slice = &mut dst[..];
-
-            for i in 0..iters {
-                dst_slice.fill(i as u8);
-                memory_barrier(&dst_slice);
-            }
-        }
-    }
+    let spec: BenchmarkSpec = env::read();
+    spec.run();
 }

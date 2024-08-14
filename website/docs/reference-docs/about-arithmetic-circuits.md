@@ -36,7 +36,7 @@ In addition to the rv32im circuit, we have built:
 ## Additional Resources
 
 - Wikipedia page on [arithmetic circuit complexity](https://en.wikipedia.org/wiki/Arithmetic_circuit_complexity)
-- [From programs to arithmetic circuits](https://www.youtube.com/watch?v=0M0pAubEjz8&list=PLBJMt6zV1c7Gh9Utg-Vng2V6EYVidTFCC&index=4): YouTube video from David Wong
+- [From programs to arithmetic circuits](https://www.youtube.com/watch?v=0M0pAubEjz8\&list=PLBJMt6zV1c7Gh9Utg-Vng2V6EYVidTFCC\&index=4): YouTube video from David Wong
 
-[verified]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
+[verified]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify

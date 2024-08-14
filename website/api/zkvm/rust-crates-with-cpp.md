@@ -7,10 +7,9 @@ crates by providing a toolchain to build C++ code.
 
 ## How to Install the C++ toolchain
 
-The C++ toolchain is installed alongside the Rust toolchain. Installation
-instructions can be found [here][install].
+The C++ toolchain is installed alongside the Rust toolchain. [Here are the installation instructions][install].
 
-## How to Build and Run these crates
+## How to Build and Run These Crates
 
 RISC Zero has a GCC-based C++ toolchain to enable these crates to build and run
 on the RISC Zero zkVM. The toolchain can be installed by running `cargo risczero
@@ -36,7 +35,7 @@ must be configured to generate riscv32im instructions. This can be done by setti
 `CFLAGS_riscv32im_risc0_zkvm_elf="-target riscv32-unknown-elf -march=rv32im"`
 in the cargo build command for clang compilers.
 
-## Issues Building Rust Crates that Bind to C
+## Issues Building Rust Crates That Bind to C
 
 Not all C code is guaranteed to build or run on the RISC Zero zkVM out of the
 box. Be sure to consult the crate's features and configure them in a way that's
@@ -46,7 +45,7 @@ of the BLST crate allows it to build and run successfully. Troubleshooting these
 crates requires an understanding of the characteristics of [the RISC Zero
 zkVM][zkvm_spec]. If there is a crate that does not work, [file an issue here][risc0-gh-issues].
 
-## Notes on versioning
+## Notes on Versioning
 
 At this time, there is only one version of the C++ toolchain and it is intended
 to work with any guest rust toolchain. We will provide more information on

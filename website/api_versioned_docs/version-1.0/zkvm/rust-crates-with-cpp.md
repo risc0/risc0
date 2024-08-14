@@ -7,8 +7,7 @@ crates by providing a toolchain to build C++ code.
 
 ## How to Install the C++ toolchain
 
-The C++ toolchain is installed alongside the Rust toolchain. Installation
-instructions can be found [here][install].
+The C++ toolchain is installed alongside the Rust toolchain. [Here are the installation instructions][install].
 
 ## How to Build and Run these crates
 

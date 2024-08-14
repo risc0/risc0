@@ -12,6 +12,7 @@ anyhow = "1.0"
 cargo_metadata = "0.18"
 dirs = "5.0"
 docker-generate = "0.1"
+hex = "0.4"
 risc0-binfmt = { workspace = true }
 risc0-zkp = { workspace = true, features = ["std"] }
 risc0-zkvm-platform = { workspace = true }

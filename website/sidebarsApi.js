@@ -27,7 +27,7 @@ export default {
         {
           type: "doc",
           label: "Overview",
-          id: "zkvm/zkvm_overview",
+          id: "zkvm/zkvm-overview",
         },
         {
           type: "doc",

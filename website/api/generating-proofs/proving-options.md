@@ -1,11 +1,9 @@
 # Options for Proof Generation
 
 :::info
-
 The `stark2snark` prover currently _only_ works on x86 architecture, and so Apple Silicon is _currently unsupported_ (even via Docker).
 
 You can find out more info on the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
-
 :::
 
 ---
@@ -21,14 +19,12 @@ Users can choose between:
 We recommend option 1 during development, option 2 for applications involving private inputs, and option 3 for all other applications.
 
 :::tip
-
-[prove_with_opts] allows users to choose between [composite, succinct or groth16 receipts].
-
+[`prove_with_opts`] allows users to choose between [composite, succinct or groth16 receipts].
 :::
 
+[`prove_with_opts`]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[Bonsai]: https://bonsai.xyz
+[composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html
 [dev-mode]: ./dev-mode.md
 [Local Proving]: ./local-proving.md
 [Remote Proving]: ./remote-proving.md
-[Bonsai]: https://bonsai.xyz
-[prove_with_opts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
-[composite, succinct or groth16 receipts]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/enum.ReceiptKind.html

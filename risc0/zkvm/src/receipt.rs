@@ -24,7 +24,6 @@ use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-#[cfg(feature = "borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
@@ -112,8 +111,7 @@ pub use self::{
 /// The public outputs of the [Receipt] are contained in the [Receipt::journal].
 /// You can use [Journal::decode] to deserialize the journal as typed and
 /// structured data, or access the [Journal::bytes] directly.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Receipt {
     /// The polymorphic [InnerReceipt].
@@ -265,8 +263,9 @@ impl Receipt {
 /// Public outputs, including commitments to important inputs, are written to the journal during
 /// zkVM execution. Along with an image ID, it constitutes the statement proven by a given
 /// [Receipt]
-#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(
+    Clone, Debug, Default, Deserialize, Serialize, PartialEq, BorshSerialize, BorshDeserialize,
+)]
 pub struct Journal {
     /// The raw bytes of the journal.
     pub bytes: Vec<u8>,
@@ -299,8 +298,7 @@ impl AsRef<[u8]> for Journal {
 /// A lower level receipt, containing the cryptographic seal (i.e. zero-knowledge proof) and
 /// verification logic for a specific proof system and circuit. All inner receipt types are
 /// zero-knowledge proofs of execution for a RISC-V zkVM.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerReceipt {
@@ -390,8 +388,7 @@ impl InnerReceipt {
 /// This type solely exists to improve development experience, for further
 /// information about development-only mode see our [dev-mode
 /// documentation](https://dev.risczero.com/api/generating-proofs/dev-mode).
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct FakeReceipt<Claim>
@@ -441,8 +438,7 @@ where
 /// with interoperability. It is not cryptographically bound to the receipt, and should not be used
 /// for security-relevant decisions, such as choosing whether or not to accept a receipt based on
 /// it's stated version.
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct ReceiptMetadata {
     /// Information which can be used to decide whether a given verifier is compatible with this
@@ -563,8 +559,7 @@ impl From<ReceiptClaim> for AssumptionReceipt {
 /// An enumeration of receipt types similar to [InnerReceipt], but for use in [AssumptionReceipt].
 /// Instead of proving only RISC-V execution with [ReceiptClaim], this type can prove any claim
 /// implemented by one of its inner types.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerAssumptionReceipt {
@@ -800,7 +795,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "borsh")]
     fn borsh_serde() {
         use crate::ReceiptClaim;
         use risc0_zkvm_methods::MULTI_TEST_ID;

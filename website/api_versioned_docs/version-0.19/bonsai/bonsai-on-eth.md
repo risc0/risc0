@@ -9,8 +9,6 @@ There are two main ways to integrate your RISC Zero application with Ethereum:
 - Using the [Bonsai Relay](#bonsai-relay) to process proof requests and send verified results on-chain.
 - Using the Bonsai proving service and the [verifier contract](#verifier-contract) directly.
 
-[SNARK proofs]: https://www.risczero.com/news/on-chain-verification
-
 ## Bonsai Relay
 
 The Bonsai Relay is a service makes it simpler to integrate RISC Zero into your applications, leveraging the [zk coprocessor] model.
@@ -29,19 +27,10 @@ At a high level, here's how it works:
    2. Extracts the journal from the verified [receipt].
    3. Sends the journal and image ID in a callback to your application contract.
 
-[Groth16 SNARK]: https://www.risczero.com/news/on-chain-verification
-[`BonsaiRelay` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/BonsaiRelay.sol
-[`IRiscZeroVerifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
-[guest program]: /terminology#guest-program
-[receipt]: /terminology#receipt
-[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-
 ### Getting Started
 
 The [Bonsai Foundry Template] provides a template and instructions for developing your application with the Bonsai Relay.
 More details are provided below on how to send requests to the Bonsai Relay.
-
-[Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 
 #### Running the Bonsai Relay
 
@@ -57,9 +46,6 @@ Using the off-chain API allows for including data not available to smart contrac
 When inputs to your [guest program] and large (e.g. more than a few kilobytes) sending requests on-chain can be cost-prohibitive, while sending large inputs (e.g. up to tens of megabytes) via the REST API has no additional cost.
 
 The [Bonsai Relay SDK] provides a Rust interface for interacting with the Bonsai Relay.
-
-[REST]: https://en.wikipedia.org/wiki/REST
-[Bonsai Relay SDK]: https://docs.rs/crate/bonsai-ethereum-relay/latest
 
 ### On-chain Requests
 
@@ -86,7 +72,17 @@ While Bonsai is in alpha, you will deploy this contract as part of your applicat
 The [Bonsai SDK] provides support for sending requests to the Bonsai proving service.
 You may also want to check out our [Bonsai Quick Start](quickstart.md) page and/or the [Bonsai Overview](../bonsai).
 
-[Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
+[`BonsaiRelay` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/BonsaiRelay.sol
+[`IRiscZeroVerifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
 [`IRiscZeroVerifier` interface]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
 [`RiscZeroGroth16Verifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/groth16/RiscZeroGroth16Verifier.sol
+[Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
+[Bonsai Relay SDK]: https://docs.rs/crate/bonsai-ethereum-relay/latest
+[Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
 [described above]: #bonsai-relay
+[Groth16 SNARK]: https://www.risczero.com/news/on-chain-verification
+[guest program]: /terminology#guest-program
+[receipt]: /terminology#receipt
+[REST]: https://en.wikipedia.org/wiki/REST
+[SNARK proofs]: https://www.risczero.com/news/on-chain-verification
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability

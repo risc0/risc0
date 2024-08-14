@@ -1,11 +1,11 @@
 # Guest Optimization Guide
 
-RISC Zero’s zkVM is designed and built to act like a physical CPU. We did this
+RISC Zero's zkVM is designed and built to act like a physical CPU. We did this
 so you could use general purpose languages (e.g. Rust) and general purpose tools
 (e.g. Cargo, LLVM). **Generally, you can apply general purpose optimization
 techniques too!**
 
-In this guide, we’ll cover optimization of [zkVM guest programs]. We’ll discuss
+In this guide, we'll cover optimization of [zkVM guest programs]. We'll discuss
 when you can apply common techniques from other contexts, and when you need a
 new approach.
 
@@ -16,20 +16,20 @@ new approach.
 **The zkVM is essentially a CPU.**
 
 In particular, it is an implementation of the [RISC-V architecture]
-(specifically riscv32im), similar to how your laptop’s CPU may be an
+(specifically riscv32im), similar to how your laptop's CPU may be an
 implementation of an [x86] or [ARM] architecture. This biggest difference is
 that the zkVM is implemented with [arithmetic circuits], in software, instead of
 circuitry made from silicon and copper.
 
-### What is a “cycle”?
+### What is a "cycle"?
 
 Both in the zkVM and on physical CPUs, the cost of an operation is measured in
-“clock cycles”.
+"clock cycles".
 
 Intuitively, a "clock cycle" is the smallest unit of time in a CPU's operation,
 representing one tick of the CPU's internal clock and the time it takes to
-execute a basic CPU operation (e.g. adding two integers). We’ll refer to this as
-a “cycle”.
+execute a basic CPU operation (e.g. adding two integers). We'll refer to this as
+a "cycle".
 
 **Proving times for the zkVM are directly related to the number of cycles in an
 execution.**
@@ -39,19 +39,19 @@ execution.**
 **Start by applying general techniques and best practices for optimizing your
 code.**
 
-[The Rust Performance Book][perf-book] is great resource. It’s not very long, it
+[The Rust Performance Book][perf-book] is great resource. It's not very long, it
 covers a range of topics important to performance, and gives applicable advice
 for optimization. If you are new to optimization, or new to Rust, we recommend
 you read this guide.
 
-### Don’t assume, measure.
+### Don't assume, measure.
 
 Performance is complex, in the zkVM as on a physical CPU.
-Don’t assume you know what the bottlenecks are. Measure and experiment.
+Don't assume you know what the bottlenecks are. Measure and experiment.
 
 If you make a function 100x faster (or ∞x faster) but it only takes 1% of your
-execution time, you’ll see less than 1% improvement in performance. This is
-generally referred to as [Amdahl’s Law][amdhal], and practically it means you
+execution time, you'll see less than 1% improvement in performance. This is
+generally referred to as [Amdahl's Law][amdhal], and practically it means you
 shouldn't waste your time optimizing something that's not the taking a
 significant portion of execution time.
 
@@ -80,7 +80,7 @@ fn my_operation_to_measure() {
 }
 ```
 
-When you run your guest, you’ll see a printout of the cycle count each time that
+When you run your guest, you'll see a printout of the cycle count each time that
 function is called. You can then analyze this data easily with a tool like
 [`counts`].
 
@@ -117,7 +117,7 @@ go tool pprof -http 127.0.0.1:8000 ecdsa_verify.pb
 Open [http://127.0.0.1:8000/ui/flamegraph](http://127.0.0.1:8000/ui/flamegraph)
 in your web browser to see the flamegraph.
 
-Although it’s bundled with Go, the `pprof` tool can be used with profiles from
+Although it's bundled with Go, the `pprof` tool can be used with profiles from
 programs not written in Golang. `pprof` has extensive functionality, and the
 documentation linked below contains information about the different views
 provided, comparing profiles, and much more.
@@ -161,7 +161,7 @@ effect in the zkVM.
 See the [table in the appendix][appendix] for more information about cycle
 counts per operation.
 
-### Memory access costs one cycle, except when it doesn’t
+### Memory access costs one cycle, except when it doesn't
 
 [RISC-V operations] require data to be loaded from memory to [registers] before
 it can acted on (e.g. used as input to an `add`). It must also be written back
@@ -200,23 +200,23 @@ average.**[^2]
 
 The very first page-in takes longer, 5130 cycles, because it needs to traverse
 up the page table (i.e. Merkle tree) all the way to the root, which is equal to
-the image ID. Once a path is verified, it doesn’t need to be hashed again, so
+the image ID. Once a path is verified, it doesn't need to be hashed again, so
 most page-in operations only need to hash the leaf (i.e. data) page. If a
 program were to iterate over memory in sequence, it would cost on average 1130
 cycles per page, or 1.35 cycles per byte.
 
 In order to support continuation after the segment ends (i.e. the zkVM
-“hibernates”), it needs to **page-out** pages that were modified. Paging-out
+"hibernates"), it needs to **page-out** pages that were modified. Paging-out
 takes the same number of operations as paging-in, so for the first time any
 given page is written to in a segment, there is an page-out cost of 1094 to 5130
 cycles.
 
 If, after profiling your application, you learn page-in and page-out operations
-are a significant overhead, you can optimize your application by reducing it’s
+are a significant overhead, you can optimize your application by reducing it's
 memory usage and locality. This will be somewhat similar to optimizing for data
 locality and L1/2 cache usage. Using fewer pages, using the same page repeatedly
 instead of a random access pattern, and condensing the range of addresses
-accessed can all help reduce paging overhead. It’s best to experiment.
+accessed can all help reduce paging overhead. It's best to experiment.
 
 ### The zkVM does not have native floating point operations
 
@@ -306,7 +306,7 @@ let env = ExecutorEnv::builder()
 
 ### When you only need part of the input data, try Merklizing it
 
-Some programs only need part of the whole available data. [Where’s
+Some programs only need part of the whole available data. [Where's
 Waldo][example-waldo] is an example of this. The full input is an image, but
 only the part with Waldo in it is needed. Loading and hashing the whole image
 would be quite expensive, so instead the initial input for the guest is just the
@@ -315,15 +315,15 @@ chunk is indeed part of the image by verifying the Merkle inclusion proof.
 
 If you are writing a guest with a large input, and only part of it is needed for
 the computation, consider splitting it into some notion of a chunks and building
-it as a Merkle tree. You can use the [code for Where’s Waldo][waldo-merkle] as a
+it as a Merkle tree. You can use the [code for Where's Waldo][waldo-merkle] as a
 starting point.
 
 ### Cryptography in the guest can utilize accelerator circuits
 
-RISC Zero’s riscv32im implementation includes a number of special purpose
-operations, including two “accelerators” for cryptographic functions: SHA-256
+RISC Zero's riscv32im implementation includes a number of special purpose
+operations, including two "accelerators" for cryptographic functions: SHA-256
 and [256-bit modular multiplication][bigint]. By implementing these operations
-directly in the “hardware” of the zkVM, programs that use these accelerators
+directly in the "hardware" of the zkVM, programs that use these accelerators
 execute faster and can be proven with significantly less resources [^3].
 
 For more information about cryptography acceleration, [cryptography
@@ -361,7 +361,7 @@ Instruction throughput is much higher when the pipeline is kept full and
 independent execution units are utilized. CPUs implement out-of-order and
 speculative execution, among other techniques to achieve this.
 
-By comparison, RISC Zero’s riscv32im implementation is very simple. Instructions
+By comparison, RISC Zero's riscv32im implementation is very simple. Instructions
 will be read from the guest program and executed in the order chosen by the
 compiler.
 
@@ -416,14 +416,14 @@ cycle counts added.
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
 | BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| LB rd,offset(rs1)   | Load Byte                          | rd ← s8[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LH rd,offset(rs1)   | Load Half                          | rd ← s16[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LW rd,offset(rs1)   | Load Word                          | rd ← s32[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1)  | Store Byte                         | u8[rs1 + offset] ← rs2                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SH rs2,offset(rs1)  | Store Half                         | u16[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SW rs2,offset(rs1)  | Store Word                         | u32[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
 | SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
 | SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
@@ -455,22 +455,21 @@ cycle counts added.
 ### RISC Zero ECALL Operations
 
 RISC-V specifies a mechanism for environment calls (ecalls), which may be
-specified by the vendor. In RISC Zero’s zkVM, ecalls are specified for a number
+specified by the vendor. In RISC Zero's zkVM, ecalls are specified for a number
 of core operations. A short description and associated cycle counts are listed
 below.
 
 | Selector | Description                | Operations                                                                                                                       | Cycles                  |
 | -------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| HALT     | Halt execution             | Set system exit code to a0. Load 32-bytes output digest from \[a1\]. Set output digest global. Halt execution.                   | 1 + paging              |
-| SOFTWARE | Receive data from the host | Write host-provided data to the memory range [a0 .. a0 + a1 * 4]                                                                 | 1 + ⌈ a1 / 4 ⌉ + paging |
-| SHA-256  | SHA-256 hash               | Compute the Merkle–Damgård compression of the region [a2 .. a2 + a3 * 64] with initial state \[a1\]. Write the digest to \[a0\]. | 6 + 68 \* a2 + paging   |
-| BIGINT   | 256-bit modular operation  | if a1 = 0, \[a0\] ← \[a2\] ⋅ \[a3\] (mod \[a4\])                                                                                 | 10 + paging             |
+| HALT     | Halt execution             | Set system exit code to a0. Load 32-bytes output digest from \[a1]. Set output digest global. Halt execution.                    | 1 + paging              |
+| SOFTWARE | Receive data from the host | Write host-provided data to the memory range \[a0 .. a0 + a1 \* 4]                                                               | 1 + ⌈ a1 / 4 ⌉ + paging |
+| SHA-256  | SHA-256 hash               | Compute the Merkle–Damgård compression of the region \[a2 .. a2 + a3 \* 64] with initial state \[a1]. Write the digest to \[a0]. | 6 + 68 \* a2 + paging   |
+| BIGINT   | 256-bit modular operation  | if a1 = 0, \[a0] ← \[a2] ⋅ \[a3] (mod \[a4])                                                                                     | 10 + paging             |
 
 ---
 
-<!-- prettier-ignore-start -->
 [^1]:
-    Here “sampling” is in quotes because the profiler actually captures the call
+    Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
@@ -483,17 +482,18 @@ below.
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
-<!-- prettier-ignore-end -->
 
-[^2]:
-    An implementation of cycle-accounting for paging operations is implemented
+[^2]: An implementation of cycle-accounting for paging operations is implemented
     in the [Executor].
 
-[^3]:
-    This is similar to the cryptography support such as [AES-NI] or the [SHA
+[^3]: This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
+[`counts`]: https://github.com/nnethercote/counts/
+[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.cycle_count.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::read`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read.html
 [acceleration]: ./acceleration.md
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [algorithm]: https://briansmith.org/ecc-inversion-addition-chains-01
@@ -506,32 +506,28 @@ below.
 [CBOR]: https://cbor.io/
 [continuation segments]: https://www.risczero.com/news/continuations
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
-[`counts`]: https://github.com/nnethercote/counts/
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
-[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.cycle_count.html
-[`env::read`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read_slice.html
 [example-ecdsa]: https://github.com/risc0/risc0/tree/release-0.20/examples/ecdsa
 [example-waldo]: https://github.com/risc0/risc0/tree/release-0.20/examples/waldo
 [Executor]: https://github.com/risc0/risc0/blob/release-0.20/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
-[hibernates]: https://en.wikipedia.org/wiki/Hibernation_(computing)
+[hibernates]: https://en.wikipedia.org/wiki/Hibernation_%28computing%29
 [ilp]: https://en.wikipedia.org/wiki/Instruction-level_parallelism
 [image ID]: /terminology#image-id
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
 [op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
-[os-page]: https://en.wikipedia.org/wiki/Page_(computer_memory)
+[os-page]: https://en.wikipedia.org/wiki/Page_%28computer_memory%29
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [perf-book]: https://nnethercote.github.io/perf-book/
 [pprof]: https://github.com/google/pprof
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
-[RISC-V operations]: https://marks.page/riscv/
 [RISC-V architecture]: /reference-docs/about-risc-v
+[RISC-V operations]: https://marks.page/riscv/
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
 [snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90

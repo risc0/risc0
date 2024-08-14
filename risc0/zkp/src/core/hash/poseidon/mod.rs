@@ -253,8 +253,8 @@ mod tests {
     #[test]
     fn poseidon_test_vectors() {
         let mut buf = [Elem::new(0); CELLS];
-        for i in 0..CELLS_RATE {
-            buf[i] = Elem::new(i as u32);
+        for (i, item) in buf.iter_mut().enumerate().take(CELLS_RATE) {
+            *item = Elem::new(i as u32);
         }
         tracing::debug!("input: {:?}", buf);
         poseidon_mix(&mut buf);
