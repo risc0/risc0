@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0"
 bytemuck = "1.16.1"
-clap = { version = "4.1", features = ["derive"] }
+clap = { version = "4.1", features = ["derive"], optional = true }
 hex = "0.4"
 log = "0.4"
 num-bigint = { version = "0.4", default-features = false }
@@ -42,4 +42,4 @@ required-features = ["make_control_ids"]
 default = ["prove"]
 # Enables ZKR registration to actually generate proofs.
 prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
-make_control_ids = []
+make_control_ids = ["dep:clap"]
