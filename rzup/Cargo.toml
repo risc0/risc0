@@ -9,7 +9,7 @@ repository = { workspace = true }
 [dependencies]
 anyhow = "1.0.86"
 cfg-if = "1.0.0"
-clap = { version = "4.5.14", features = ["derive"] }
+clap = { version = "4.5.15", features = ["derive"] }
 dirs = "5.0.1"
 flate2 = "1.0.31"
 fs2 = "0.4.3"
