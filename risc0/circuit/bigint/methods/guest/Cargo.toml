@@ -8,5 +8,7 @@ edition = "2021"
 [dependencies]
 num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
 risc0-circuit-bigint = { path = "../..", default-features = false }
-risc0-zkvm = { path = "../../../../zkvm", default-features = false, features = ["std", "unstable"] }
-risc0-zkvm-platform = { path = "../../../../zkvm/platform" }
+risc0-zkvm = { path = "../../../../zkvm", default-features = false, features = [
+    "std",
+    "unstable",
+] }

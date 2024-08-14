@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{compute_image_id, default_prover, ExecutorEnv};
 use std::fs;
 
+use risc0_zkvm::{compute_image_id, default_prover, ExecutorEnv};
+
 fn main() -> anyhow::Result<()> {
-    // Load built gcc program and compute it's image ID.
-    // TODO have the image ID be calculated at compile time, to avoid potential vulnerabilities
-    let consensus_elf = fs::read("./guest/out/main")?;
-    let consensus_id = compute_image_id(&consensus_elf)?;
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
+
+    // Load built gcc program and compute it's image ID.
+    // TODO have the image ID be calculated at compile time, to avoid potential vulnerabilities
+    let consensus_elf = fs::read("./guest/out/main")?;
+    let consensus_id = compute_image_id(&consensus_elf)?;
 
     let env = ExecutorEnv::builder()
         .write_slice(&7u32.to_le_bytes())

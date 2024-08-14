@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{
-    byte_poly::BytePoly, claim_list_digest, pad_claim_list, BigIntClaim, BigIntContext,
-    BigIntProgram, CHECKED_COEFFS_PER_POLY,
-};
 use anyhow::Result;
 use num_bigint::BigUint;
 use risc0_zkp::{core::hash::poseidon2::Poseidon2HashSuite, field::Elem};
 use risc0_zkvm::{guest::env, guest::sha::Impl as Sha256};
 use risc0_zkvm_platform::syscall;
 use tracing::trace;
+
+use crate::{
+    byte_poly::BytePoly, claim_list_digest, pad_claim_list, BigIntClaim, BigIntContext,
+    BigIntProgram, CHECKED_COEFFS_PER_POLY,
+};
 
 pub fn prove(prog: &BigIntProgram, claims: &[BigIntClaim]) -> Result<()> {
     let claim_digest = claim_list_digest::<Sha256>(prog, claims)?;

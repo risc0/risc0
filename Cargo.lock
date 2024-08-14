@@ -1663,19 +1663,6 @@ dependencies = [
 
 [[package]]
 name = "env_logger"
-version = "0.10.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cd405aab171cb85d6735e5c8d9db038c17d3ca007a4d2c25f337935c3d90580"
-dependencies = [
- "humantime",
- "is-terminal",
- "log",
- "regex",
- "termcolor",
-]
-
-[[package]]
-name = "env_logger"
 version = "0.11.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13fa619b91fb2381732789fc5de83b45675e882f66623b7d8cb4f643017018d"
@@ -2375,12 +2362,6 @@ name = "human-repr"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f58b778a5761513caf593693f8951c97a5b610841e754788400f32102eefdff1"
-
-[[package]]
-name = "humantime"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "hyper"
@@ -4054,14 +4035,11 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-bigint"
-version = "0.1.0"
+version = "1.2.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
- "clap",
- "env_logger 0.10.2",
  "hex",
- "log",
  "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
@@ -4076,7 +4054,6 @@ dependencies = [
  "risc0-zkvm-platform",
  "test-log",
  "tracing",
- "tracing-subscriber 0.3.18",
  "zip",
 ]
 
@@ -4278,7 +4255,6 @@ dependencies = [
  "borsh",
  "bytemuck",
  "bytes",
- "cfg-if",
  "chrono",
  "ciborium",
  "clap",
@@ -4541,13 +4517,11 @@ dependencies = [
  "dirs",
  "flate2",
  "fs2",
- "fs_extra",
  "lazy_static",
  "regex",
  "reqwest 0.12.5",
  "risc0-build",
  "serde",
- "serde_json",
  "tar",
  "tempfile",
  "termcolor",
@@ -5041,7 +5015,7 @@ version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3dffced63c2b5c7be278154d76b479f9f9920ed34e7574201407f0b14e2bbb93"
 dependencies = [
- "env_logger 0.11.5",
+ "env_logger",
  "test-log-macros",
  "tracing-subscriber 0.3.18",
 ]

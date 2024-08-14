@@ -12,14 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{
-    byte_poly::BytePoly,
-    prove,
-    rsa::{RSA_256_X1, RSA_256_X2},
-    verify, BigIntContext, BIGINT_PO2,
-};
+use std::borrow::Borrow;
+
 use anyhow::Result;
-use core::borrow::Borrow;
 use num_bigint::BigUint;
 use num_traits::Num;
 use pretty_assertions::assert_eq;
@@ -33,6 +28,13 @@ use risc0_zkp::field::{
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use test_log::test;
 use tracing::trace;
+
+use crate::{
+    byte_poly::BytePoly,
+    prove,
+    rsa::{RSA_256_X1, RSA_256_X2},
+    verify, BigIntContext, BIGINT_PO2,
+};
 
 fn from_hex(s: &str) -> BigUint {
     BigUint::from_str_radix(s, 16).expect("Unable to parse hex value")
@@ -58,7 +60,7 @@ fn golden_z() -> BabyBearExtElem {
 }
 
 fn witness_test_data(data: &[&str]) -> Vec<BytePoly> {
-    data.into_iter().map(|d| BytePoly::from_hex(d)).collect()
+    data.iter().map(|d| BytePoly::from_hex(d)).collect()
 }
 
 fn golden_constant_witness() -> Vec<BytePoly> {
