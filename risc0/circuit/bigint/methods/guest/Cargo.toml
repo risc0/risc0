@@ -5,18 +5,8 @@ edition = "2021"
 
 [workspace]
 
-[workspace.dependencies.risc0-zkvm]
-git = "https://github.com/risc0/risc0.git"
-rev = "6d5b96d23e8f3ab25b220c0a62e41462e00cc5e9"
-default-features = false
-
-[workspace.dependencies.risc0-zkvm-platform]
-git = "https://github.com/risc0/risc0.git"
-rev = "6d5b96d23e8f3ab25b220c0a62e41462e00cc5e9"
-default-features = false
-
 [dependencies]
-risc0-circuit-bigint = { path = "../..", default-features = false }
-risc0-zkvm = { workspace = true, features = ["std"] }
-risc0-zkvm-platform = { workspace = true }
 num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
+risc0-circuit-bigint = { path = "../..", default-features = false }
+risc0-zkvm = { path = "../../../../zkvm", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm-platform = { path = "../../../../zkvm/platform" }

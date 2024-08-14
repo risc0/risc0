@@ -9,11 +9,11 @@ use crate::{
     verify, BigIntContext, BIGINT_PO2,
 };
 use anyhow::Result;
-use bigint_test_methods::{RSA_ELF, RSA_ID};
 use core::borrow::Borrow;
 use num_bigint::BigUint;
 use num_traits::Num;
 use pretty_assertions::assert_eq;
+use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_ID};
 use risc0_circuit_recursion::{prove::Prover, CHECKED_COEFFS_PER_POLY};
 use risc0_zkp::core::hash::{poseidon2::Poseidon2HashSuite, sha};
 use risc0_zkp::field::{

@@ -1,2 +1,0 @@
-# RISC0 gets built with RISC0_BUILD_LOCKED, so we need to include this
-!Cargo.lock

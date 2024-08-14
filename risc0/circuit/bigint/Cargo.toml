@@ -18,7 +18,7 @@ risc0-binfmt = { workspace = true }
 risc0-circuit-recursion = { workspace = true, default-features = false }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, features = ["default"] }
-risc0-zkvm = { workspace = true, features = ["std"], default-features = false }
+risc0-zkvm = { workspace = true, features = ["std", "unstable"], default-features = false }
 risc0-zkvm-platform = { workspace = true }
 test-log = { version = "0.2", features = ["trace"] }
 tracing = "0.1.40"
@@ -32,7 +32,7 @@ env_logger = "0.10"
 num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
-bigint-test-methods = { path = "methods" }
+risc0-circuit-bigint-test-methods = { path = "methods" }
 
 [build-dependencies]
 cc = { version = "1.0", features = ["parallel"] }
