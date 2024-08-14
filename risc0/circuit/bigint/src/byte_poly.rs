@@ -64,6 +64,7 @@ impl BytePoly {
             );
             val = quot;
         }
+        assert_eq!(val, BigUint::from(0usize));
         BytePoly(out)
     }
 
