@@ -427,15 +427,15 @@ jobs:
           crate: cargo-semver-checks
           version: "0.31.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
-        # There seems to be a bug in cargo-semver-checks that can't locate the platform crate...
-        # All other excluded crates aren't published and therefore do not need this check
         run: |
+          # TODO: remove risc0-circuit-bigint exclusion once it exists in main and we
+          # can successfully compare semvers.
           cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
-            --exclude risc0-zkvm-platform \
             --exclude doc-test \
             --exclude fibonacci-methods \
             --exclude risc0-zkvm-receipts \
-            --exclude risc0-zkvm-methods
+            --exclude risc0-zkvm-methods \
+            --exclude risc0-circuit-bigint-test-methods
       - run: sccache --show-stats
 
   check-template:
