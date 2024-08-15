@@ -21,7 +21,11 @@ use risc0_zkp::field::{
 };
 use test_log::test;
 
-use crate::{generated, test_harness::{from_hex, test_witgen, test_zkr, witness_test_data}, prove, BigIntClaim, BigIntContext, BytePoly, BIGINT_PO2};
+use crate::{
+    generated, prove,
+    test_harness::{from_hex, test_witgen, test_zkr, witness_test_data},
+    BigIntClaim, BigIntContext, BytePoly, BIGINT_PO2,
+};
 
 fn golden_constant_witness() -> Vec<BytePoly> {
     witness_test_data(&[])
