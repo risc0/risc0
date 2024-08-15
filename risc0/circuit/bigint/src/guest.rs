@@ -75,7 +75,7 @@ pub fn prove(prog: &BigIntProgram, claims: &[BigIntClaim]) -> Result<()> {
                 BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
             let private_digest =
                 BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
-            let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
+            let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
             trace!("folded: {folded}");
 
             rng.mix(&folded);
