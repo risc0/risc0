@@ -107,6 +107,14 @@ impl BigIntClaim {
     pub fn new(public_witness: Vec<BytePoly>) -> Self {
         BigIntClaim { public_witness }
     }
+
+    pub fn from_biguints(prog_info: &BigIntProgram, biguints: &[impl ToOwned<Owned=BigUint>]) -> Self {
+        assert_eq!(biguints.len(), prog_info.witness_info.len());
+        let public_witness : Vec<BytePoly> = biguints.into_iter().zip(prog_info.witness_info.iter())
+            .map(|(val, wit_info)| BytePoly::from_biguint(val.to_owned(), wit_info.coeffs()))
+            .collect();
+        BigIntClaim { public_witness }
+    }
 }
 
 impl Digestible for BigIntClaim {

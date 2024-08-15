@@ -36,20 +36,6 @@ fn golden_constant_witness() -> Vec<BytePoly> {
 
 // add (8 bit) Tests
 
-pub fn addition_test_claim(
-    prog_info: &BigIntProgram,
-    lhs: BigUint,
-    rhs: BigUint,
-    expected: BigUint,
-) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [lhs, rhs, expected]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
-
 fn addition_test_golden_values() -> Vec<BigUint> {
     Vec::from([
         from_hex("01"), // lhs:      ...
@@ -107,7 +93,7 @@ fn addition16_test_zkr() -> anyhow::Result<()> {
 fn addition_test_prove_and_verify() -> Result<()> {
     use generated::ADD_TEST_8;
     let [lhs, rhs, expected] = addition_test_golden_values().try_into().unwrap();
-    let claim = addition_test_claim(&ADD_TEST_8, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&ADD_TEST_8, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("add_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ADD_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&ADD_TEST_8, &[&claim], &receipt)?;
@@ -163,7 +149,7 @@ fn addition16_test_witgen() -> anyhow::Result<()> {
 fn addition16_test_prove_and_verify() -> Result<()> {
     use generated::ADD_TEST_16;
     let [lhs, rhs, expected] = addition16_test_golden_values().try_into().unwrap();
-    let claim = addition_test_claim(&ADD_TEST_16, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&ADD_TEST_16, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("add_test_16.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ADD_TEST_16, zkr)?;
     crate::verify::<sha::Impl>(&ADD_TEST_16, &[&claim], &receipt)?;
@@ -225,7 +211,7 @@ fn add128_test_zkr() -> anyhow::Result<()> {
 fn add128_test_prove_and_verify() -> Result<()> {
     use generated::ADD_TEST_128;
     let [lhs, rhs, expected] = add128_test_golden_values().try_into().unwrap();
-    let claim = addition_test_claim(&ADD_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&ADD_TEST_128, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("add_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ADD_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&ADD_TEST_128, &[&claim], &receipt)?;
@@ -289,7 +275,7 @@ fn add128_carry_test_zkr() -> anyhow::Result<()> {
 fn add128_carry_test_prove_and_verify() -> Result<()> {
     use generated::ADD_TEST_128;
     let [lhs, rhs, expected] = add128_carry_test_golden_values().try_into().unwrap();
-    let claim = addition_test_claim(&ADD_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&ADD_TEST_128, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("add_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ADD_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&ADD_TEST_128, &[&claim], &receipt)?;
@@ -351,7 +337,7 @@ fn add16cs_test_witgen() -> anyhow::Result<()> {
 fn add16cs_test_prove_and_verify() -> Result<()> {
     use generated::ADD_TEST_16;
     let [lhs, rhs, expected] = add16cs_test_golden_values().try_into().unwrap();
-    let claim = addition_test_claim(&ADD_TEST_16, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&ADD_TEST_16, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("add_test_16.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ADD_TEST_16, zkr)?;
     crate::verify::<sha::Impl>(&ADD_TEST_16, &[&claim], &receipt)?;
@@ -359,19 +345,6 @@ fn add16cs_test_prove_and_verify() -> Result<()> {
 }
 
 // add_const Tests
-
-pub fn add_const_test_claim(
-    prog_info: &BigIntProgram,
-    inp: BigUint,
-    expected: BigUint,
-) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [inp, expected]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
 
 fn add_const_test_golden_values() -> Vec<BigUint> {
     Vec::from([
@@ -428,7 +401,7 @@ fn add_const_test_zkr() -> anyhow::Result<()> {
 fn add_const_test_prove_and_verify() -> Result<()> {
     use generated::CONST_ADD_TEST_8;
     let [inp, expected] = add_const_test_golden_values().try_into().unwrap();
-    let claim = add_const_test_claim(&CONST_ADD_TEST_8, inp, expected);
+    let claim = BigIntClaim::from_biguints(&CONST_ADD_TEST_8, &[inp, expected]);
     let zkr = crate::zkr::get_zkr("const_add_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &CONST_ADD_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&CONST_ADD_TEST_8, &[&claim], &receipt)?;
@@ -436,20 +409,6 @@ fn add_const_test_prove_and_verify() -> Result<()> {
 }
 
 // const_mul Tests
-
-/// Construct a bigint claim of 0x5432 * 0xb7 == 0x3c2fbe with a const times a variable
-pub fn const_mul_test_claim(
-    prog_info: &BigIntProgram,
-    inp: BigUint,
-    expected: BigUint,
-) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [inp, expected]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
 
 fn const_mul_test_golden_values() -> Vec<BigUint> {
     Vec::from([
@@ -506,7 +465,7 @@ fn const_mul_test_zkr() -> anyhow::Result<()> {
 fn const_mul_test_prove_and_verify() -> Result<()> {
     use generated::CONST_MUL_TEST_8;
     let [inp, expected] = const_mul_test_golden_values().try_into().unwrap();
-    let claim = const_mul_test_claim(&CONST_MUL_TEST_8, inp, expected);
+    let claim = BigIntClaim::from_biguints(&CONST_MUL_TEST_8, &[inp, expected]);
     let zkr = crate::zkr::get_zkr("const_mul_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &CONST_MUL_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&CONST_MUL_TEST_8, &[&claim], &receipt)?;
@@ -516,19 +475,6 @@ fn const_mul_test_prove_and_verify() -> Result<()> {
 // const_add_alt Tests
 
 /// Construct a bigint claim of 0x5432 + 0xb7 == 0x54e9 with a const times a variable
-pub fn const_add_alt_test_claim(
-    prog_info: &BigIntProgram,
-    inp: BigUint,
-    expected: BigUint,
-) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [inp, expected]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
-
 fn const_add_alt_test_golden_values() -> Vec<BigUint> {
     Vec::from([
         from_hex("b7"),   // inp:      ...
@@ -584,7 +530,7 @@ fn const_add_alt_test_zkr() -> anyhow::Result<()> {
 fn const_add_alt_test_prove_and_verify() -> Result<()> {
     use generated::CONST_ADD_ALT_TEST_16;
     let [inp, expected] = const_add_alt_test_golden_values().try_into().unwrap();
-    let claim = const_add_alt_test_claim(&CONST_ADD_ALT_TEST_16, inp, expected);
+    let claim = BigIntClaim::from_biguints(&CONST_ADD_ALT_TEST_16, &[inp, expected]);
     let zkr = crate::zkr::get_zkr("const_add_alt_test_16.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &CONST_ADD_ALT_TEST_16, zkr)?;
     crate::verify::<sha::Impl>(&CONST_ADD_ALT_TEST_16, &[&claim], &receipt)?;
@@ -592,16 +538,6 @@ fn const_add_alt_test_prove_and_verify() -> Result<()> {
 }
 
 // const_one Tests
-
-/// Construct a bigint claim of 1 - 1 == 0 with a const one minus a variable one
-pub fn const_one_test_claim(prog_info: &BigIntProgram, inp: BigUint) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [inp]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
 
 fn const_one_test_golden_values() -> Vec<BigUint> {
     Vec::from([from_hex("01")])
@@ -655,7 +591,7 @@ fn const_one_test_zkr() -> anyhow::Result<()> {
 fn const_one_test_prove_and_verify() -> Result<()> {
     use generated::CONST_ONE_TEST_8;
     let [inp] = const_one_test_golden_values().try_into().unwrap();
-    let claim = const_one_test_claim(&CONST_ONE_TEST_8, inp);
+    let claim = BigIntClaim::from_biguints(&CONST_ONE_TEST_8, &[inp]);
     let zkr = crate::zkr::get_zkr("const_one_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &CONST_ONE_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&CONST_ONE_TEST_8, &[&claim], &receipt)?;
@@ -665,15 +601,6 @@ fn const_one_test_prove_and_verify() -> Result<()> {
 // const_twobyte Tests
 
 /// Construct a bigint claim of 0x1234 - 0x1234 == 0 with a const minus a variable
-pub fn const_twobyte_test_claim(prog_info: &BigIntProgram, inp: BigUint) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [inp]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
-
 fn const_twobyte_test_golden_values() -> Vec<BigUint> {
     Vec::from([from_hex("1234")])
 }
@@ -726,7 +653,7 @@ fn const_twobyte_test_zkr() -> anyhow::Result<()> {
 fn const_twobyte_test_prove_and_verify() -> Result<()> {
     use generated::CONST_TWOBYTE_TEST_16;
     let [inp] = const_twobyte_test_golden_values().try_into().unwrap();
-    let claim = const_twobyte_test_claim(&CONST_TWOBYTE_TEST_16, inp);
+    let claim = BigIntClaim::from_biguints(&CONST_TWOBYTE_TEST_16, &[inp]);
     let zkr = crate::zkr::get_zkr("const_twobyte_test_16.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &CONST_TWOBYTE_TEST_16, zkr)?;
     crate::verify::<sha::Impl>(&CONST_TWOBYTE_TEST_16, &[&claim], &receipt)?;
@@ -734,21 +661,6 @@ fn const_twobyte_test_prove_and_verify() -> Result<()> {
 }
 
 // sub Tests
-
-/// Construct a bigint claim of a Subtraction test Verification
-pub fn sub_test_claim(
-    prog_info: &BigIntProgram,
-    lhs: BigUint,
-    rhs: BigUint,
-    expected: BigUint,
-) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [lhs, rhs, expected]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
 
 fn sub8_test_golden_z() -> BabyBearExtElem {
     BabyBearExtElem::from_subelems(
@@ -805,7 +717,7 @@ fn sub8_test_zkr() -> anyhow::Result<()> {
 fn sub8_test_prove_and_verify() -> Result<()> {
     use generated::SUB_TEST_8;
     let [lhs, rhs, expected] = sub8_test_golden_values().try_into().unwrap();
-    let claim = sub_test_claim(&SUB_TEST_8, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&SUB_TEST_8, lhs, rhs, expected);
     let zkr = crate::zkr::get_zkr("sub_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &SUB_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&SUB_TEST_8, &[&claim], &receipt)?;
@@ -867,7 +779,7 @@ fn sub128_test_zkr() -> anyhow::Result<()> {
 fn sub128_test_prove_and_verify() -> Result<()> {
     use generated::SUB_TEST_128;
     let [lhs, rhs, expected] = sub128_test_golden_values().try_into().unwrap();
-    let claim = sub_test_claim(&SUB_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&SUB_TEST_128, lhs, rhs, expected);
     let zkr = crate::zkr::get_zkr("sub_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &SUB_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&SUB_TEST_128, &[&claim], &receipt)?;
@@ -875,21 +787,6 @@ fn sub128_test_prove_and_verify() -> Result<()> {
 }
 
 // mul Tests
-
-/// Construct a bigint claim of a Subtraction test Verification
-pub fn mul_test_claim(
-    prog_info: &BigIntProgram,
-    lhs: BigUint,
-    rhs: BigUint,
-    expected: BigUint,
-) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [lhs, rhs, expected]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
 
 fn mul8_test_golden_z() -> BabyBearExtElem {
     BabyBearExtElem::from_subelems(
@@ -946,7 +843,7 @@ fn mul8_test_zkr() -> anyhow::Result<()> {
 fn mul8_test_prove_and_verify() -> Result<()> {
     use generated::MUL_TEST_8;
     let [lhs, rhs, expected] = mul8_test_golden_values().try_into().unwrap();
-    let claim = mul_test_claim(&MUL_TEST_8, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&MUL_TEST_8, lhs, rhs, expected);
     let zkr = crate::zkr::get_zkr("mul_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &MUL_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&MUL_TEST_8, &[&claim], &receipt)?;
@@ -1016,7 +913,7 @@ fn mul128_test_zkr() -> anyhow::Result<()> {
 fn mul128_test_prove_and_verify() -> Result<()> {
     use generated::MUL_TEST_128;
     let [lhs, rhs, expected] = mul128_test_golden_values().try_into().unwrap();
-    let claim = mul_test_claim(&MUL_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&MUL_TEST_128, lhs, rhs, expected);
     let zkr = crate::zkr::get_zkr("mul_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &MUL_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&MUL_TEST_128, &[&claim], &receipt)?;
@@ -1024,21 +921,6 @@ fn mul128_test_prove_and_verify() -> Result<()> {
 }
 
 // reduce Tests
-
-/// Construct a bigint claim of a Subtraction test Verification
-pub fn reduce_test_claim(
-    prog_info: &BigIntProgram,
-    lhs: BigUint,
-    rhs: BigUint,
-    expected: BigUint,
-) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [lhs, rhs, expected]
-        .into_iter()
-        .zip(prog_info.witness_info.iter())
-        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-        .collect();
-    BigIntClaim::new(pub_witness)
-}
 
 fn reduce8_test_golden_z() -> BabyBearExtElem {
     BabyBearExtElem::from_subelems(
@@ -1154,7 +1036,7 @@ fn reduce128_test_zkr() -> anyhow::Result<()> {
 fn reduce8_test_prove_and_verify() -> Result<()> {
     use generated::REDUCE_TEST_8;
     let [lhs, rhs, expected] = reduce8_test_golden_values().try_into().unwrap();
-    let claim = reduce_test_claim(&REDUCE_TEST_8, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&REDUCE_TEST_8, lhs, rhs, expected);
     let zkr = crate::zkr::get_zkr("reduce_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &REDUCE_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&REDUCE_TEST_8, &[&claim], &receipt)?;
@@ -1165,7 +1047,7 @@ fn reduce8_test_prove_and_verify() -> Result<()> {
 fn reduce128_test_prove_and_verify() -> Result<()> {
     use generated::REDUCE_TEST_128;
     let [lhs, rhs, expected] = reduce128_test_golden_values().try_into().unwrap();
-    let claim = reduce_test_claim(&REDUCE_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&REDUCE_TEST_128, lhs, rhs, expected);
     let zkr = crate::zkr::get_zkr("reduce_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &REDUCE_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&REDUCE_TEST_128, &[&claim], &receipt)?;
