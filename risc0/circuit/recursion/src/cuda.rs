@@ -25,8 +25,8 @@ use risc0_zkp::{
     },
     hal::{
         cuda::{
-            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashPoseidon2,
-            CudaHashSha256, DeviceExtElem,
+            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashSha256,
+            DeviceExtElem,
         },
         Buffer, CircuitHal, Hal,
     },
@@ -220,7 +220,6 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 }
 
 pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
-pub type CudaCircuitHalPoseidon = CudaCircuitHal<CudaHashPoseidon>;
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
 #[cfg(test)]

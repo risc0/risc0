@@ -139,20 +139,6 @@ fn test_recursion_poseidon2() {
 
 #[test]
 #[should_panic(expected = "assertion failed: elem.is_reduced()")]
-fn test_poseidon_sanitized_inputs() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
-
-    let suite = PoseidonHashSuite::new_suite();
-
-    // Add two digests, one of which has an element >= the Baby Bear prime
-    // Then `hash_pair` should fail as its inputs aren't in reduced form
-    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
-    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
-    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
-}
-
-#[test]
-#[should_panic(expected = "assertion failed: elem.is_reduced()")]
 fn test_poseidon2_sanitized_inputs() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
