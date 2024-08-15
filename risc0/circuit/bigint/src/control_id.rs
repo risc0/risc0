@@ -32,6 +32,11 @@ pub const RSA_3072_X15_CONTROL_ID: Digest =
 pub const RSA_3072_X15_CONTROL_ROOT: Digest =
     digest!("a5568767aa62fd111843d721c213910cdad0f03386db8269301f0009efd86041");
 
+pub const NONDET_INV_TEST_8_CONTROL_ID: Digest =
+    digest!("e9f55b5747ac2f6ee223344fdeab331b0ff70d6d43f9cb482bc25029fa8ccd0c");
+pub const NONDET_INV_TEST_8_CONTROL_ROOT: Digest =
+    digest!("7af47807133d5a549f1aef300d883e33cf281f4c850f4161d3c62e3989f09b2c");
+
 pub const CONST_ADD_TEST_8_CONTROL_ID: Digest =
     digest!("6a8afb2846b4af55dd68cb5b58a059493fbe0b365a21322fcd39b5308ee40917");
 pub const CONST_ADD_TEST_8_CONTROL_ROOT: Digest =

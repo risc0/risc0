@@ -223,6 +223,18 @@ pub fn rsa_3072_x15(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &sub(&x53, &x2)?, 34, 1)?;
     return Ok(());
 }
+pub fn nondet_inv_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = bigint_const!(ctx, 1);
+    let x1: BytePoly = def(ctx, 1, 0, 1)?;
+    let x2: BytePoly = def(ctx, 1, 1, 1)?;
+    let x3: BytePoly = nondet_inv(ctx, &x1, &x2, 1)?;
+    let x4: BytePoly = mul(&x1, &x3)?;
+    let x5: BytePoly = nondet_quot(ctx, &x4, &x2, 3)?;
+    let x6: BytePoly = nondet_rem(ctx, &x4, &x2, 1)?;
+    eqz(ctx, &sub(&add(&mul(&x5, &x2)?, &x6)?, &x4)?, 24387, 2)?;
+    eqz(ctx, &sub(&x6, &x0)?, 34, 1)?;
+    return Ok(());
+}
 pub fn const_add_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly = bigint_const!(ctx, 71, 71);
     let x1: BytePoly = def(ctx, 1, 0, 1)?;
@@ -337,6 +349,9 @@ bigint_program_info! {rsa_3072_x15, /*iters=*/15,
 bigint_witness_info!(/*bits=*/3072, /*label=*/0, /*public=*/ true, /*min_bits=*/3071),
 bigint_witness_info!(/*bits=*/3072, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/3072, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {nondet_inv_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/7)}
 bigint_program_info! {const_add_test_8, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/17, /*label=*/1, /*public=*/ true, /*min_bits=*/0)}
@@ -386,4 +401,4 @@ bigint_program_info! {reduce_test_128, /*iters=*/1,
 bigint_witness_info!(/*bits=*/128, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/128, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/128, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128}
+bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, nondet_inv_test_8, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128}

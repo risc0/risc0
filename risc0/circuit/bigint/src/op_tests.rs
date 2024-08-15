@@ -1171,3 +1171,82 @@ fn reduce128_test_prove_and_verify() -> Result<()> {
     crate::verify::<sha::Impl>(&REDUCE_TEST_128, &[&claim], &receipt)?;
     Ok(())
 }
+
+// nondet_inv Tests
+
+/// Construct a bigint claim of a Nondet Inverse test verification
+pub fn nondet_inv_test_claim(
+    prog_info: &BigIntProgram,
+    inp: BigUint,
+    modulus: BigUint,
+    expected: BigUint,
+) -> BigIntClaim {
+    let pub_witness: Vec<BytePoly> = [inp, modulus, expected]
+        .into_iter()
+        .zip(prog_info.witness_info.iter())
+        .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
+        .collect();
+    BigIntClaim::new(pub_witness)
+}
+
+fn nondet_inv_test_golden_z() -> BabyBearExtElem {
+    BabyBearExtElem::from_subelems(
+        [794674656, 1642400821, 1273422345, 1065871844]
+            .into_iter()
+            .map(BabyBearElem::from_u64),
+    )
+}
+
+fn nondet_inv_test_golden_values() -> Vec<BigUint> {
+    Vec::from([
+        from_hex("21"), // inp:      ...
+        from_hex("2f"), // modulus:  ...
+        from_hex("0a"), // expected: ...
+    ])
+}
+
+fn nondet_inv_test_golden_constant_witness() -> Vec<BytePoly> {
+    witness_test_data(&["01"])
+}
+
+fn nondet_inv_test_golden_public_witness() -> Vec<BytePoly> {
+    witness_test_data(&["21", "2f"])
+}
+
+fn nondet_inv_test_golden_private_witness() -> Vec<BytePoly> {
+    witness_test_data(&["0a", "070000", "01", "43434343", "5f5f5f5f", "22"])
+}
+
+fn run_nondet_inv_test() -> Result<BigIntContext> {
+    let mut ctx = BigIntContext::default();
+    ctx.in_values = nondet_inv_test_golden_values().try_into().unwrap();
+    generated::nondet_inv_test_8(&mut ctx)?;
+    Ok(ctx)
+}
+
+#[test]
+fn nondet_inv8_test_witgen() -> anyhow::Result<()> {
+    test_witgen(
+        run_nondet_inv_test()?,
+        nondet_inv_test_golden_public_witness(),
+        nondet_inv_test_golden_private_witness(),
+        nondet_inv_test_golden_constant_witness(),
+        nondet_inv_test_golden_z(),
+    )
+}
+
+#[test]
+fn nondet_inv_test_zkr() -> anyhow::Result<()> {
+    test_zkr(run_nondet_inv_test()?, "nondet_inv_test_8.zkr")
+}
+
+#[test]
+fn nondet_inv_test_prove_and_verify() -> Result<()> {
+    use generated::NONDET_INV_TEST_8;
+    let [lhs, rhs, expected] = nondet_inv_test_golden_values().try_into().unwrap();
+    let claim = nondet_inv_test_claim(&NONDET_INV_TEST_8, lhs, rhs, expected);
+    let zkr = crate::zkr::get_zkr("nondet_inv_test_8.zkr", BIGINT_PO2)?;
+    let receipt = prove::<sha::Impl>(&[&claim], &NONDET_INV_TEST_8, zkr)?;
+    crate::verify::<sha::Impl>(&NONDET_INV_TEST_8, &[&claim], &receipt)?;
+    Ok(())
+}
