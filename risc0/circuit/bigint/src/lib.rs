@@ -32,8 +32,12 @@ pub use guest::*;
 pub(crate) mod control_id;
 
 #[cfg(test)]
+mod op_tests;
+#[cfg(test)]
 #[cfg(feature = "prove")]
 mod rsa_tests;
+#[cfg(test)]
+mod test_harness;
 
 pub(crate) mod generated {
     #![allow(dead_code)]
@@ -105,6 +109,19 @@ pub struct BigIntClaim {
 
 impl BigIntClaim {
     pub fn new(public_witness: Vec<BytePoly>) -> Self {
+        BigIntClaim { public_witness }
+    }
+
+    pub fn from_biguints(
+        prog_info: &BigIntProgram,
+        biguints: &[impl ToOwned<Owned = BigUint>],
+    ) -> Self {
+        assert_eq!(biguints.len(), prog_info.witness_info.len());
+        let public_witness: Vec<BytePoly> = biguints
+            .iter()
+            .zip(prog_info.witness_info.iter())
+            .map(|(val, wit_info)| BytePoly::from_biguint(val.to_owned(), wit_info.coeffs()))
+            .collect();
         BigIntClaim { public_witness }
     }
 }
