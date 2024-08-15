@@ -35,6 +35,7 @@ use risc0_binfmt::{tagged_list, Digestible};
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 
+pub mod ecdsa_verify;
 pub mod rsa;
 
 // PO2 to use to execute bigint ZKRs.
@@ -165,6 +166,8 @@ pub use generated::PROGRAMS;
 #[cfg(not(feature = "make_control_ids"))]
 pub(crate) mod control_id;
 
+#[cfg(test)]
+mod ecdsa_verify_tests;
 #[cfg(test)]
 mod op_tests;
 #[cfg(test)]

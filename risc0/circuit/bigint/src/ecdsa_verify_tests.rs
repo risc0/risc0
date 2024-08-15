@@ -1,0 +1,143 @@
+// Copyright (c) 2024 RISC Zero, Inc.
+//
+// All rights reserved.
+
+use crate::{
+    byte_poly::BytePoly, ecdsa_verify::ECDSA_VERIFY_8, prove, verify, BigIntContext, BIGINT_PO2,
+};
+use anyhow::Result;
+use num_bigint::BigUint;
+use num_traits::Num;
+use risc0_circuit_recursion::{prove::Prover, CHECKED_COEFFS_PER_POLY};
+use risc0_zkp::core::hash::{poseidon2::Poseidon2HashSuite, sha};
+use risc0_zkp::field::Elem;
+use test_log::test;
+use tracing::trace;
+
+fn from_hex(s: &str) -> BigUint {
+    BigUint::from_str_radix(s, 16).expect("Unable to parse hex value")
+}
+
+// TODO: This is not currently accurate -- I should actually do it
+// "golden" values are the values from running the C++ version:
+// bazelisk run //zirgen/Dialect/BigInt/IR/test:test -- --test
+
+// TODO: come up with fake witnesses
+
+fn golden_values() -> Vec<BigUint> {
+    // TODO: Better test values
+    Vec::from([
+        from_hex("1f"), // prime: 31
+        from_hex("00"), // a: 0
+        from_hex("03"), // b: 3
+        from_hex("01"), // base_pt_X: 1
+        from_hex("02"), // base_pt_Y: 2
+        from_hex("2b"), // base_pt_order: 43
+        from_hex("12"), // pub_key_X: 18
+        from_hex("0a"), // pub_key_Y: 10
+        from_hex("05"), // msg_hash: 5
+        from_hex("1b"), // r: 27
+        from_hex("06"), // s: 6
+        // TODO: looking for a workable Arbitrary point
+        from_hex("04"), // arbitrary_X: ?
+        from_hex("06"), // arbitrary_Y: ?
+    ])
+}
+
+fn run_bigint() -> Result<BigIntContext> {
+    let mut ctx = BigIntContext::default();
+    ctx.in_values = golden_values().try_into().unwrap();
+    crate::ecdsa_verify::generated::ecdsa_verify_8(&mut ctx)?;
+    Ok(ctx)
+}
+
+#[test]
+fn test_zkr() -> anyhow::Result<()> {
+    // TODO: Should we use the shared code?
+    let ctx = run_bigint()?;
+
+    let hash_suite = Poseidon2HashSuite::new_suite();
+
+    let mut all_coeffs: Vec<u32> = Vec::new();
+    for witness in ctx
+        .constant_witness
+        .iter()
+        .chain(ctx.public_witness.iter())
+        .chain(ctx.private_witness.iter())
+    {
+        for chunk in witness.chunks(CHECKED_COEFFS_PER_POLY) {
+            let mut bytes: Vec<u8> = chunk
+                .iter()
+                .map(|b| u8::try_from(*b).expect("Byte out of range in witness coeffs"))
+                .collect();
+            while bytes.len() < CHECKED_COEFFS_PER_POLY {
+                bytes.push(0);
+            }
+
+            for word in bytes.chunks(4) {
+                all_coeffs.push(u32::from_le_bytes(
+                    word.try_into().expect("Partial word present in witness?"),
+                ));
+            }
+        }
+    }
+
+    let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+    trace!("public_digest: {public_digest}");
+    let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+    trace!("private_digest: {private_digest}");
+    let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
+    trace!("folded: {folded}");
+
+    let mut rng = (&*hash_suite.rng).new_rng();
+    rng.mix(&folded);
+    let z = rng.random_ext_elem();
+
+    let program = crate::zkr::get_zkr("ecdsa_verify_8.zkr", /*po2=*/ 14)?;
+
+    let mut prover = Prover::new(program, "poseidon2");
+    prover.add_input(&[0u32; 8]); //control id
+    prover.add_input(&z.to_u32_words());
+    prover.add_input(&all_coeffs);
+    let receipt = prover.run()?;
+
+    trace!("rsa receipt: {receipt:?}");
+
+    risc0_zkp::verify::verify(
+        &risc0_circuit_recursion::CIRCUIT,
+        &hash_suite,
+        &receipt.seal,
+        |_, _| Ok(()),
+    )?;
+
+    Ok(())
+}
+
+// Runs the end-to-end test using the rsa prover implementation
+#[test]
+fn prove_and_verify_ecdsa_verify() -> Result<()> {
+    let [prime, a, b, base_pt_X, base_pt_Y, base_pt_order, pub_key_X, pub_key_Y, msg_hash, r, s, arbitrary_X, arbitrary_Y] =
+        golden_values().try_into().unwrap();
+    let claim = crate::ecdsa_verify::claim(
+        &ECDSA_VERIFY_8,
+        prime,
+        a,
+        b,
+        base_pt_X,
+        base_pt_Y,
+        base_pt_order,
+        pub_key_X,
+        pub_key_Y,
+        msg_hash,
+        r,
+        s,
+        arbitrary_X,
+        arbitrary_Y,
+    );
+    let zkr = crate::zkr::get_zkr("ecdsa_verify_8.zkr", BIGINT_PO2)?;
+    let receipt = prove::<sha::Impl>(&claim, &ECDSA_VERIFY_8, zkr)?;
+    // ecdsa_verify::<sha::Impl>(/*rsa_bits=*/ 8, BIGINT_PO2, &claim, &receipt)?; // TODO bitwidth
+    // verify::<sha::Impl>(&crate::rsa::RSA_256, &claim, &receipt)?;
+    verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_8, &claim, &receipt)?;
+    Ok(())
+}
