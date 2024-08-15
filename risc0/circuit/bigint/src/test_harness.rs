@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{BigIntContext, BytePoly};
 use num_bigint::BigUint;
 use num_traits::Num;
 use pretty_assertions::assert_eq;
@@ -22,6 +21,8 @@ use risc0_zkp::{
     field::{baby_bear::BabyBearExtElem, Elem},
 };
 use tracing::trace;
+
+use crate::{BigIntContext, BytePoly};
 
 pub(crate) fn test_witgen(
     ctx: BigIntContext,
