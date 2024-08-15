@@ -141,6 +141,17 @@ macro_rules! bigint_program_list {
     }
 }
 
+#[macro_export]
+macro_rules! bigint_const {
+    ($ctx:tt, $($coeff:expr),*) => {
+        {
+            let ret = BytePoly::from_coeffs(&[ $($coeff,)* ]);
+            $ctx.constant_witness.push(ret.clone());
+            ret
+        }
+    }
+}
+
 // #[macro_export] defines macros in the top level of the crate.
 // Re-import them here so they're in local scope.
-pub use crate::{bigint_program_info, bigint_program_list, bigint_witness_info};
+pub use crate::{bigint_const, bigint_program_info, bigint_program_list, bigint_witness_info};
