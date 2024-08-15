@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::test_harness::{from_hex, test_witgen, test_zkr, witness_test_data};
-use crate::{control_id, prove, BigIntClaim, BigIntContext, BigIntProgram, BytePoly, BIGINT_PO2};
+use crate::{control_id, prove, BigIntClaim, BigIntContext, BytePoly, BIGINT_PO2};
 use anyhow::Result;
 use num_bigint::BigUint;
 use risc0_zkp::core::hash::sha;
@@ -717,7 +717,7 @@ fn sub8_test_zkr() -> anyhow::Result<()> {
 fn sub8_test_prove_and_verify() -> Result<()> {
     use generated::SUB_TEST_8;
     let [lhs, rhs, expected] = sub8_test_golden_values().try_into().unwrap();
-    let claim = BigIntClaim::from_biguints(&SUB_TEST_8, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&SUB_TEST_8, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("sub_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &SUB_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&SUB_TEST_8, &[&claim], &receipt)?;
@@ -779,7 +779,7 @@ fn sub128_test_zkr() -> anyhow::Result<()> {
 fn sub128_test_prove_and_verify() -> Result<()> {
     use generated::SUB_TEST_128;
     let [lhs, rhs, expected] = sub128_test_golden_values().try_into().unwrap();
-    let claim = BigIntClaim::from_biguints(&SUB_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&SUB_TEST_128, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("sub_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &SUB_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&SUB_TEST_128, &[&claim], &receipt)?;
@@ -843,7 +843,7 @@ fn mul8_test_zkr() -> anyhow::Result<()> {
 fn mul8_test_prove_and_verify() -> Result<()> {
     use generated::MUL_TEST_8;
     let [lhs, rhs, expected] = mul8_test_golden_values().try_into().unwrap();
-    let claim = BigIntClaim::from_biguints(&MUL_TEST_8, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&MUL_TEST_8, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("mul_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &MUL_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&MUL_TEST_8, &[&claim], &receipt)?;
@@ -913,7 +913,7 @@ fn mul128_test_zkr() -> anyhow::Result<()> {
 fn mul128_test_prove_and_verify() -> Result<()> {
     use generated::MUL_TEST_128;
     let [lhs, rhs, expected] = mul128_test_golden_values().try_into().unwrap();
-    let claim = BigIntClaim::from_biguints(&MUL_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&MUL_TEST_128, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("mul_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &MUL_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&MUL_TEST_128, &[&claim], &receipt)?;
@@ -1036,7 +1036,7 @@ fn reduce128_test_zkr() -> anyhow::Result<()> {
 fn reduce8_test_prove_and_verify() -> Result<()> {
     use generated::REDUCE_TEST_8;
     let [lhs, rhs, expected] = reduce8_test_golden_values().try_into().unwrap();
-    let claim = BigIntClaim::from_biguints(&REDUCE_TEST_8, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&REDUCE_TEST_8, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("reduce_test_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &REDUCE_TEST_8, zkr)?;
     crate::verify::<sha::Impl>(&REDUCE_TEST_8, &[&claim], &receipt)?;
@@ -1047,7 +1047,7 @@ fn reduce8_test_prove_and_verify() -> Result<()> {
 fn reduce128_test_prove_and_verify() -> Result<()> {
     use generated::REDUCE_TEST_128;
     let [lhs, rhs, expected] = reduce128_test_golden_values().try_into().unwrap();
-    let claim = BigIntClaim::from_biguints(&REDUCE_TEST_128, lhs, rhs, expected);
+    let claim = BigIntClaim::from_biguints(&REDUCE_TEST_128, &[lhs, rhs, expected]);
     let zkr = crate::zkr::get_zkr("reduce_test_128.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &REDUCE_TEST_128, zkr)?;
     crate::verify::<sha::Impl>(&REDUCE_TEST_128, &[&claim], &receipt)?;

@@ -15,6 +15,7 @@
 use crate::{BigIntContext, BytePoly};
 use num_bigint::BigUint;
 use num_traits::Num;
+use pretty_assertions::assert_eq;
 use risc0_circuit_recursion::{prove::Prover, CHECKED_COEFFS_PER_POLY};
 use risc0_zkp::{
     core::hash::poseidon2::Poseidon2HashSuite,
@@ -92,7 +93,7 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> anyhow::Result<()>
 
     tracing::error!("chkpt A");
 
-    let program = crate::zkr::get_zkr(zkr_name, /*po2=*/ 12)?; // TODO: po2 size?
+    let program = crate::zkr::get_zkr_for_test(zkr_name)?;
     tracing::error!("chkpt B");
 
     tracing::error!("z is {z:?}");

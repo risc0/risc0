@@ -36,6 +36,32 @@ fn get_zkr_u32s(name: &str) -> Result<Vec<u32>> {
     Ok(Vec::from(bytemuck::cast_slice(bytes.as_slice())))
 }
 
+// Returns a recursion circuit with the smallest PO2 the given zkr
+// will fit in.  For non-test use, the PO2 should always be specified
+// so that the resultant control ID matches what is expected.
+#[cfg(test)]
+pub fn get_zkr_for_test(name: &str) -> Result<Program> {
+    let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
+
+    let u32s = get_zkr_u32s(name)?;
+    let rows = u32s.len() / code_size;
+    let po2 = risc0_zkp::core::log2_ceil(rows + risc0_zkp::ZK_CYCLES);
+    ensure!(u32s.len() % code_size == 0);
+    ensure!(u32s.len() / code_size < (1 << po2));
+    let steps = 1 << po2;
+    let pct = (rows as f64 * 100.) / ((1 << po2) as f64);
+
+    tracing::debug!(
+        "Using po2={po2} for test zkr {name}: Got {rows}/{steps} ({pct:.2}%) rows of program"
+    );
+
+    Ok(Program {
+        code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
+        code_size,
+        po2,
+    })
+}
+
 pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
 
@@ -46,7 +72,7 @@ pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     let steps = 1 << po2;
     let pct = (rows as f64 * 100.) / ((1 << po2) as f64);
 
-    tracing::debug!("Got {rows}/{steps} ({pct:.2}%) rows of program for {name} with po2={po2}",);
+    tracing::debug!("Got {rows}/{steps} ({pct:.2}%) rows of program for {name} with po2={po2}");
 
     Ok(Program {
         code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
