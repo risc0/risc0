@@ -95,6 +95,17 @@ impl BytePoly {
         Self::from_biguint(rem, coeffs)
     }
 
+    pub fn nondet_inv<Rhs: Borrow<BytePoly>>(&self, rhs: Rhs, coeffs: usize) -> BytePoly {
+        // Computes the inverse of LHS mod RHS via the `inv = lhs^{rhs - 2} % rhs` algorithm
+        // TODO: Is num_bigint's `modpow` algorithm efficient?
+        let lhs = BigUint::from(self);
+        let rhs = BigUint::from(rhs.borrow());
+        let exp = rhs.clone() - 2u8;
+        let result = lhs.modpow(&exp, &rhs);
+        trace!("inv({lhs}, [mod] {rhs}) = {result}");
+        Self::from_biguint(result, coeffs)
+    }
+
     // Returns BytePolys to be added to the private witness.
     pub fn eval_constraint(&self, carry_offset: usize, carry_bytes: usize) -> Vec<BytePoly> {
         let coeffs = self.0.len();
