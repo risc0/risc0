@@ -118,7 +118,7 @@ impl BigIntClaim {
     ) -> Self {
         assert_eq!(biguints.len(), prog_info.witness_info.len());
         let public_witness: Vec<BytePoly> = biguints
-            .into_iter()
+            .iter()
             .zip(prog_info.witness_info.iter())
             .map(|(val, wit_info)| BytePoly::from_biguint(val.to_owned(), wit_info.coeffs()))
             .collect();
