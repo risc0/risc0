@@ -223,6 +223,108 @@ pub fn rsa_3072_x15(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &sub(&x53, &x2)?, 34, 1)?;
     return Ok(());
 }
+pub fn const_add_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = bigint_const!(ctx, 71, 71);
+    let x1: BytePoly = def(ctx, 1, 0, 1)?;
+    let x2: BytePoly = def(ctx, 3, 1, 1)?;
+    eqz(ctx, &sub(&add(&x1, &x0)?, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn const_add_alt_test_16(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = bigint_const!(ctx, 50, 84);
+    let x1: BytePoly = def(ctx, 2, 0, 1)?;
+    let x2: BytePoly = def(ctx, 3, 1, 1)?;
+    eqz(ctx, &sub(&add(&x1, &x0)?, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn const_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = bigint_const!(ctx, 50, 84);
+    let x1: BytePoly = def(ctx, 1, 0, 1)?;
+    let x2: BytePoly = def(ctx, 3, 1, 1)?;
+    eqz(ctx, &sub(&mul(&x1, &x0)?, &x2)?, 16259, 2)?;
+    return Ok(());
+}
+pub fn add_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 1, 0, 1)?;
+    let x1: BytePoly = def(ctx, 1, 1, 1)?;
+    let x2: BytePoly = def(ctx, 2, 2, 1)?;
+    eqz(ctx, &sub(&add(&x0, &x1)?, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn add_test_16(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 2, 0, 1)?;
+    let x1: BytePoly = def(ctx, 2, 1, 1)?;
+    let x2: BytePoly = def(ctx, 3, 2, 1)?;
+    eqz(ctx, &sub(&add(&x0, &x1)?, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn add_test_128(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 16, 0, 1)?;
+    let x1: BytePoly = def(ctx, 16, 1, 1)?;
+    let x2: BytePoly = def(ctx, 17, 2, 1)?;
+    eqz(ctx, &sub(&add(&x0, &x1)?, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn const_one_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = bigint_const!(ctx, 1);
+    let x1: BytePoly = def(ctx, 1, 0, 1)?;
+    eqz(ctx, &sub(&x0, &x1)?, 34, 1)?;
+    return Ok(());
+}
+pub fn const_twobyte_test_16(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = bigint_const!(ctx, 52, 18);
+    let x1: BytePoly = def(ctx, 2, 0, 1)?;
+    eqz(ctx, &sub(&x0, &x1)?, 34, 1)?;
+    return Ok(());
+}
+pub fn sub_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 1, 0, 1)?;
+    let x1: BytePoly = def(ctx, 1, 1, 1)?;
+    let x2: BytePoly = def(ctx, 1, 2, 1)?;
+    eqz(ctx, &sub(&sub(&x0, &x1)?, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn sub_test_128(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 16, 0, 1)?;
+    let x1: BytePoly = def(ctx, 16, 1, 1)?;
+    let x2: BytePoly = def(ctx, 16, 2, 1)?;
+    eqz(ctx, &sub(&sub(&x0, &x1)?, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 1, 0, 1)?;
+    let x1: BytePoly = def(ctx, 1, 1, 1)?;
+    let x2: BytePoly = def(ctx, 2, 2, 1)?;
+    eqz(ctx, &sub(&mul(&x0, &x1)?, &x2)?, 8131, 2)?;
+    return Ok(());
+}
+pub fn mul_test_128(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 16, 0, 1)?;
+    let x1: BytePoly = def(ctx, 16, 1, 1)?;
+    let x2: BytePoly = def(ctx, 32, 2, 1)?;
+    eqz(ctx, &sub(&mul(&x0, &x1)?, &x2)?, 130053, 4)?;
+    return Ok(());
+}
+pub fn reduce_test_8(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 1, 0, 1)?;
+    let x1: BytePoly = def(ctx, 1, 1, 1)?;
+    let x2: BytePoly = def(ctx, 1, 2, 1)?;
+    let x3: BytePoly = nondet_quot(ctx, &x0, &x1, 1)?;
+    let x4: BytePoly = nondet_rem(ctx, &x0, &x1, 1)?;
+    eqz(ctx, &sub(&add(&mul(&x3, &x1)?, &x4)?, &x0)?, 8131, 2)?;
+    eqz(ctx, &sub(&x4, &x2)?, 34, 1)?;
+    return Ok(());
+}
+pub fn reduce_test_128(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly = def(ctx, 16, 0, 1)?;
+    let x1: BytePoly = def(ctx, 16, 1, 1)?;
+    let x2: BytePoly = def(ctx, 16, 2, 1)?;
+    let x3: BytePoly = nondet_quot(ctx, &x0, &x1, 16)?;
+    let x4: BytePoly = nondet_rem(ctx, &x0, &x1, 16)?;
+    eqz(ctx, &sub(&add(&mul(&x3, &x1)?, &x4)?, &x0)?, 130053, 4)?;
+    eqz(ctx, &sub(&x4, &x2)?, 34, 1)?;
+    return Ok(());
+}
 bigint_program_info! {rsa_256_x1, /*iters=*/1,
 bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/255),
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
@@ -235,4 +337,53 @@ bigint_program_info! {rsa_3072_x15, /*iters=*/15,
 bigint_witness_info!(/*bits=*/3072, /*label=*/0, /*public=*/ true, /*min_bits=*/3071),
 bigint_witness_info!(/*bits=*/3072, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/3072, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15}
+bigint_program_info! {const_add_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/17, /*label=*/1, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {const_add_alt_test_16, /*iters=*/1,
+bigint_witness_info!(/*bits=*/16, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/17, /*label=*/1, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {const_mul_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/24, /*label=*/1, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {add_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/9, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {add_test_16, /*iters=*/1,
+bigint_witness_info!(/*bits=*/16, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/16, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/17, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {add_test_128, /*iters=*/1,
+bigint_witness_info!(/*bits=*/128, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/128, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/129, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {const_one_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {const_twobyte_test_16, /*iters=*/1,
+bigint_witness_info!(/*bits=*/16, /*label=*/0, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {sub_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {sub_test_128, /*iters=*/1,
+bigint_witness_info!(/*bits=*/128, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/128, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/128, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {mul_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/16, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {mul_test_128, /*iters=*/1,
+bigint_witness_info!(/*bits=*/128, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/128, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {reduce_test_8, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {reduce_test_128, /*iters=*/1,
+bigint_witness_info!(/*bits=*/128, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/128, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/128, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128}

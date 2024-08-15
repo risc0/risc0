@@ -166,5 +166,9 @@ pub use generated::PROGRAMS;
 pub(crate) mod control_id;
 
 #[cfg(test)]
+mod op_tests;
+#[cfg(test)]
 #[cfg(feature = "prove")]
 mod rsa_tests;
+#[cfg(test)]
+mod test_harness;
