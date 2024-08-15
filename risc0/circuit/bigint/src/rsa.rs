@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{BigIntClaim, BigIntProgram, BytePoly};
 use num_bigint::BigUint;
+
+use crate::{BigIntClaim, BigIntProgram, BytePoly};
 
 // Re-export program info
 pub use crate::generated::{RSA_256_X1, RSA_256_X2, RSA_3072_X15};

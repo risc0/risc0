@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0"
 risc0-zkvm = { path = "../../../risc0/zkvm" }
-serde = "1.0"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]

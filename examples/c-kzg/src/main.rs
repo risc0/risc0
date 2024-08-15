@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 use c_kzg_methods::KZG_ELF;
 use hex_literal::hex;
 use risc0_zkvm::{default_executor, ExecutorEnv};
@@ -31,5 +32,6 @@ fn main() {
 
     // this takes several hundred million segments. Only run executor.
     let exec = default_executor();
+
     exec.execute(env, KZG_ELF).unwrap();
 }
