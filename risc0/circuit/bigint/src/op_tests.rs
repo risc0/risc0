@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::generated;
-use crate::test_harness::{from_hex, test_witgen, test_zkr, witness_test_data};
-use crate::{prove, BigIntClaim, BigIntContext, BytePoly, BIGINT_PO2};
 use anyhow::Result;
 use num_bigint::BigUint;
 use risc0_zkp::core::hash::sha;
@@ -23,6 +20,8 @@ use risc0_zkp::field::{
     Elem, ExtElem,
 };
 use test_log::test;
+
+use crate::{generated, test_harness::{from_hex, test_witgen, test_zkr, witness_test_data}, prove, BigIntClaim, BigIntContext, BytePoly, BIGINT_PO2};
 
 fn golden_constant_witness() -> Vec<BytePoly> {
     witness_test_data(&[])
