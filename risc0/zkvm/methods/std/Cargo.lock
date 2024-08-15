@@ -1103,7 +1103,6 @@ dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
- "cfg-if",
  "getrandom",
  "hex",
  "risc0-binfmt",
