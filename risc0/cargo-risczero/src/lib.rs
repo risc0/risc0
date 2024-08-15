@@ -29,8 +29,8 @@ use clap::{Parser, Subcommand};
 #[cfg(feature = "experimental")]
 use self::commands::build::BuildCommand;
 use self::commands::{
-    build_guest::BuildGuest, build_toolchain::BuildToolchain, deploy::DeployCommand,
-    install::Install, new::NewCommand, verify::VerifyCommand,
+    build_guest::BuildGuest, build_toolchain::BuildToolchain, datasheet::Datasheet,
+    deploy::DeployCommand, install::Install, new::NewCommand, verify::VerifyCommand,
 };
 
 #[derive(Parser)]
@@ -43,6 +43,7 @@ pub enum Cargo {
 
 #[derive(clap::Args)]
 #[command(author, version, about, long_about = None)]
+#[non_exhaustive]
 /// `cargo risczero`
 pub struct Risczero {
     #[clap(subcommand)]
@@ -51,6 +52,7 @@ pub struct Risczero {
 }
 
 #[derive(Subcommand)]
+#[non_exhaustive]
 /// Primary commands  of `cargo risczero`.
 pub enum RisczeroCmd {
     /// Build guest code.
@@ -59,6 +61,9 @@ pub enum RisczeroCmd {
     BuildToolchain(BuildToolchain),
     /// Install the riscv32im-risc0-zkvm-elf toolchain.
     Install(Install),
+    /// Perform a benchmark to evaluate zkVM performance for this machine's
+    /// hardware.
+    Datasheet(Datasheet),
     /// Creates a new risczero starter project.
     New(NewCommand),
     /// Uploads the guest code to Bonsai.

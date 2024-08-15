@@ -429,6 +429,7 @@ jobs:
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
         run: |
           cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
+            --exclude cargo-risczero \
             --exclude doc-test \
             --exclude fibonacci-methods \
             --exclude risc0-circuit-bigint \
