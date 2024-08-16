@@ -16,7 +16,7 @@ function CodeBadge({ children }: PropsWithChildren) {
   return (
     <Badge
       variant="secondary"
-      className="p-0 text-[10px] leading-tight font-mono text-purple-900 bg-neutral-100 dark:bg-neutral-700 dark:text-purple-50"
+      className="bg-neutral-100 p-0 font-mono text-[10px] text-purple-900 leading-tight dark:bg-neutral-700 dark:text-purple-50"
     >
       {children}
     </Badge>
@@ -58,7 +58,7 @@ export default function DatasheetLayout({
                   Show Example
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="max-w-screen-sm w-full text-sm">
+              <PopoverContent className="w-full max-w-screen-sm text-sm">
                 <p>To prove 6 million cycles (6 segments), the work required is:</p>
                 <br />
                 <ul>
