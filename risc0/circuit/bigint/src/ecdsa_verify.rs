@@ -1,19 +1,23 @@
-// Copyright (c) 2024 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
-// All rights reserved.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-use crate::{BigIntClaim, BigIntProgram, BytePoly};
 use num_bigint::BigUint;
 
-pub(crate) mod generated {
-    #![allow(dead_code)]
-
-    use crate::codegen_prelude::*;
-    include! {"bigint.rs.inc"}
-}
+use crate::{BigIntClaim, BigIntProgram};
 
 // Re-export program info
-pub use generated::ECDSA_VERIFY_8;
+pub use crate::generated::ECDSA_VERIFY_8;
 
 /// Construct a bigint claim of an ECDSA Verification  // TODO: From here
 pub fn claim(
@@ -32,7 +36,7 @@ pub fn claim(
     arbitrary_x: BigUint,
     arbitrary_y: BigUint,
 ) -> BigIntClaim {
-    let pub_witness: Vec<BytePoly> = [
+    BigIntClaim::from_biguints(prog_info, &[
         prime,
         a,
         b,
@@ -46,10 +50,5 @@ pub fn claim(
         s,
         arbitrary_x,
         arbitrary_y,
-    ]
-    .into_iter()
-    .zip(prog_info.witness_info.iter())
-    .map(|(val, wit_info)| BytePoly::from_biguint(val, wit_info.coeffs()))
-    .collect();
-    BigIntClaim::new(pub_witness)
+    ])
 }

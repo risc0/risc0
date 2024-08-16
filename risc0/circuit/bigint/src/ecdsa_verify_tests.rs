@@ -1,6 +1,16 @@
-// Copyright (c) 2024 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
-// All rights reserved.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 use crate::{
     byte_poly::BytePoly, ecdsa_verify::ECDSA_VERIFY_8, prove, verify, BigIntContext, BIGINT_PO2,
@@ -45,9 +55,11 @@ fn golden_values() -> Vec<BigUint> {
 }
 
 fn run_bigint() -> Result<BigIntContext> {
-    let mut ctx = BigIntContext::default();
-    ctx.in_values = golden_values().try_into().unwrap();
-    crate::ecdsa_verify::generated::ecdsa_verify_8(&mut ctx)?;
+    let mut ctx = BigIntContext {
+        in_values: golden_values(),
+        ..Default::default()
+    };
+    crate::generated::ecdsa_verify_8(&mut ctx)?;
     Ok(ctx)
 }
 
@@ -135,9 +147,9 @@ fn prove_and_verify_ecdsa_verify() -> Result<()> {
         arbitrary_Y,
     );
     let zkr = crate::zkr::get_zkr("ecdsa_verify_8.zkr", BIGINT_PO2)?;
-    let receipt = prove::<sha::Impl>(&claim, &ECDSA_VERIFY_8, zkr)?;
+    let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_8, zkr)?;
     // ecdsa_verify::<sha::Impl>(/*rsa_bits=*/ 8, BIGINT_PO2, &claim, &receipt)?; // TODO bitwidth
     // verify::<sha::Impl>(&crate::rsa::RSA_256, &claim, &receipt)?;
-    verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_8, &claim, &receipt)?;
+    verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_8, &[&claim], &receipt)?;
     Ok(())
 }

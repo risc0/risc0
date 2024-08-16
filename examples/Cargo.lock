@@ -738,7 +738,6 @@ dependencies = [
  "anyhow",
  "risc0-build",
  "risc0-zkvm",
- "serde",
  "tracing-subscriber 0.3.18",
 ]
 
@@ -746,12 +745,10 @@ dependencies = [
 name = "c-kzg"
 version = "0.1.0"
 dependencies = [
- "c-kzg 1.0.2",
  "c-kzg-core",
  "c-kzg-methods",
  "hex-literal",
  "risc0-zkvm",
- "serde",
 ]
 
 [[package]]
@@ -3607,7 +3604,6 @@ dependencies = [
 name = "prover"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "workerpool",
@@ -4273,7 +4269,6 @@ dependencies = [
  "borsh",
  "bytemuck",
  "bytes",
- "cfg-if",
  "elf",
  "getrandom",
  "hex",

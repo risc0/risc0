@@ -12,43 +12,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::BIGINT_PO2;
+use std::io::{Cursor, Read};
+
 use anyhow::{ensure, Context, Result};
-use risc0_circuit_recursion::prove::Program;
+use risc0_circuit_recursion::{prove::Program, CIRCUIT, REGISTER_GROUP_CODE};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::adapter::TapsProvider;
-use std::io::Read;
+use zip::ZipArchive;
+
+use crate::BIGINT_PO2;
 
 pub(crate) const ZKR_ZIP: &[u8] = include_bytes!("bigint_zkr.zip");
 
 fn get_zkr_u32s(name: &str) -> Result<Vec<u32>> {
-    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(ZKR_ZIP))?;
-    let mut f = zip
+    let mut zip = ZipArchive::new(Cursor::new(ZKR_ZIP))?;
+    let mut entry = zip
         .by_name(name)
         .with_context(|| format!("Failed to read {name}"))?;
 
-    let mut u8vec: Vec<u8> = Vec::new();
-    f.read_to_end(&mut u8vec)?;
+    let mut bytes = Vec::new();
+    entry.read_to_end(&mut bytes)?;
 
-    Ok(Vec::from(bytemuck::cast_slice(u8vec.as_slice())))
+    Ok(Vec::from(bytemuck::cast_slice(bytes.as_slice())))
+}
+
+// Returns a recursion circuit with the smallest PO2 the given zkr
+// will fit in.  For non-test use, the PO2 should always be specified
+// so that the resultant control ID matches what is expected.
+#[cfg(test)]
+pub fn get_zkr_for_test(name: &str) -> Result<Program> {
+    let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
+
+    let u32s = get_zkr_u32s(name)?;
+    let rows = u32s.len() / code_size;
+    let po2 = risc0_zkp::core::log2_ceil(rows + risc0_zkp::ZK_CYCLES);
+    ensure!(u32s.len() % code_size == 0);
+    ensure!(u32s.len() / code_size < (1 << po2));
+    let steps = 1 << po2;
+    let pct = (rows as f64 * 100.) / ((1 << po2) as f64);
+
+    tracing::debug!(
+        "Using po2={po2} for test zkr {name}: Got {rows}/{steps} ({pct:.2}%) rows of program"
+    );
+
+    Ok(Program {
+        code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
+        code_size,
+        po2,
+    })
 }
 
 pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
-    let code_size = risc0_circuit_recursion::CIRCUIT
-        .get_taps()
-        .group_size(risc0_circuit_recursion::REGISTER_GROUP_CODE);
+    let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
 
     let u32s = get_zkr_u32s(name)?;
     ensure!(u32s.len() % code_size == 0);
     ensure!(u32s.len() / code_size < (1 << po2));
     let rows = u32s.len() / code_size;
+    let steps = 1 << po2;
     let pct = (rows as f64 * 100.) / ((1 << po2) as f64);
-    tracing::debug!(
-        "Got {}/{} ({:.2}%) rows of program for {name} with po2={po2}",
-        rows,
-        1 << po2,
-        pct
-    );
+
+    tracing::debug!("Got {rows}/{steps} ({pct:.2}%) rows of program for {name} with po2={po2}");
 
     Ok(Program {
         code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
@@ -72,11 +96,12 @@ pub fn register_zkrs() {
 
 #[cfg(test)]
 mod tests {
-    use crate::{BigIntProgram, BIGINT_PO2};
     use anyhow::{Context, Result};
     use risc0_zkp::core::digest::Digest;
     use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
     use risc0_zkvm::recursion::MerkleGroup;
+
+    use crate::{BigIntProgram, BIGINT_PO2};
 
     fn compute_control_id(prog: &BigIntProgram) -> Result<Digest> {
         let program = crate::zkr::get_zkr(&format!("{}.zkr", prog.name), BIGINT_PO2)?;

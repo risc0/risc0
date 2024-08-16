@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use crate::byte_poly::BytePoly;
-pub use crate::BigIntContext;
-pub use crate::{BigIntProgram, WitnessInfo};
-pub use anyhow::Result;
 use tracing::trace;
+
+pub use crate::{byte_poly::BytePoly, BigIntContext, BigIntProgram, WitnessInfo};
+pub use anyhow::Result;
 
 pub fn def(
     ctx: &mut BigIntContext,

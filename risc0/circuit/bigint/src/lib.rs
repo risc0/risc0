@@ -14,6 +14,8 @@
 
 pub mod byte_poly;
 mod codegen_prelude;
+pub mod ecdsa_verify;
+pub mod rsa;
 #[cfg(feature = "prove")]
 pub mod zkr;
 
@@ -27,19 +29,42 @@ mod guest;
 #[cfg(target_os = "zkvm")]
 pub use guest::*;
 
+#[cfg(not(feature = "make_control_ids"))]
+pub(crate) mod control_id;
+
+#[cfg(test)]
+mod ecdsa_verify_tests;
+#[cfg(test)]
+mod op_tests;
+#[cfg(test)]
+#[cfg(feature = "prove")]
+mod rsa_tests;
+#[cfg(test)]
+mod test_harness;
+
+pub(crate) mod generated {
+    #![allow(dead_code)]
+    #![allow(clippy::all)]
+
+    use crate::codegen_prelude::*;
+    include! {"bigint.rs.inc"}
+}
+
+use std::borrow::Borrow;
+
 use anyhow::{ensure, Context, Result};
 use byte_poly::{BytePoly, BITS_PER_COEFF};
-use core::borrow::Borrow;
 use num_bigint::BigUint;
 use risc0_binfmt::{tagged_list, Digestible};
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 
-pub mod ecdsa_verify;
-pub mod rsa;
+pub use generated::PROGRAMS;
 
 // PO2 to use to execute bigint ZKRs.
 pub const BIGINT_PO2: usize = 18;
+
+const CLAIM_LIST_TAG: &str = "risc0.BigIntClaims";
 
 #[derive(Default, Debug)]
 pub struct BigIntContext {
@@ -89,6 +114,19 @@ impl BigIntClaim {
     pub fn new(public_witness: Vec<BytePoly>) -> Self {
         BigIntClaim { public_witness }
     }
+
+    pub fn from_biguints(
+        prog_info: &BigIntProgram,
+        biguints: &[impl ToOwned<Owned = BigUint>],
+    ) -> Self {
+        assert_eq!(biguints.len(), prog_info.witness_info.len());
+        let public_witness: Vec<BytePoly> = biguints
+            .iter()
+            .zip(prog_info.witness_info.iter())
+            .map(|(val, wit_info)| BytePoly::from_biguint(val.to_owned(), wit_info.coeffs()))
+            .collect();
+        BigIntClaim { public_witness }
+    }
 }
 
 impl Digestible for BigIntClaim {
@@ -103,8 +141,6 @@ impl Digestible for BigIntClaim {
         *S::hash_raw_data_slice(&u32s)
     }
 }
-
-const CLAIM_LIST_TAG: &str = "risc0.BigIntClaims";
 
 pub(crate) fn claim_list_digest<S: Sha256>(
     prog: &BigIntProgram,
@@ -152,26 +188,3 @@ pub(crate) fn pad_claim_list<'a>(
     );
     Ok(claim_refs)
 }
-
-pub(crate) mod generated {
-    #![allow(dead_code)]
-    #![allow(clippy::all)]
-
-    use crate::codegen_prelude::*;
-    include! {"bigint.rs.inc"}
-}
-
-pub use generated::PROGRAMS;
-
-#[cfg(not(feature = "make_control_ids"))]
-pub(crate) mod control_id;
-
-#[cfg(test)]
-mod ecdsa_verify_tests;
-#[cfg(test)]
-mod op_tests;
-#[cfg(test)]
-#[cfg(feature = "prove")]
-mod rsa_tests;
-#[cfg(test)]
-mod test_harness;
