@@ -27,7 +27,7 @@ use crate::{
 };
 
 macro_rules! bigint_tests {
-    ($($name:ident($gen:ident, $in:expr, $pub:expr, $priv:expr, $const:expr, $z:expr),)*) => {
+    ($($name:ident($zkr:ident, $in:expr, $pub:expr, $priv:expr, $const:expr, $z:expr),)*) => {
         $(
             paste::paste! {
                 fn [<$name _values>]() -> Vec<BigUint> {
@@ -36,7 +36,7 @@ macro_rules! bigint_tests {
 
                 fn [<$name _context>]() -> anyhow::Result<BigIntContext> {
                     let mut ctx = BigIntContext::from_values([<$name _values>]());
-                    $crate::generated::$gen(&mut ctx)?;
+                    $crate::generated::$zkr(&mut ctx)?;
                     Ok(ctx)
                 }
 
@@ -56,7 +56,7 @@ macro_rules! bigint_tests {
                 }
 
                 fn [<$name _filename>]() -> &'static str {
-                    concat!(stringify!($gen), ".zkr")
+                    concat!(stringify!($zkr), ".zkr")
                 }
 
                 #[test]
@@ -66,11 +66,11 @@ macro_rules! bigint_tests {
 
                 #[test]
                 fn [<$name _prove>]() -> Result<()> {
-                    use $crate::generated::[<$gen:snake:upper>];
-                    let claim = BigIntClaim::from_biguints(&[<$gen:snake:upper>], &[<$name _values>]());
+                    use $crate::generated::[<$zkr:snake:upper>];
+                    let claim = BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
                     let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2)?;
-                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$gen:snake:upper>], zkr)?;
-                    crate::verify::<sha::Impl>(&[<$gen:snake:upper>], &[&claim], &receipt)?;
+                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr)?;
+                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt)?;
                     Ok(())
                 }
             }
@@ -78,7 +78,7 @@ macro_rules! bigint_tests {
     }
 }
 
-// name: generated, program, zkr, in_values, public_witness, private_witness, constant_witness, golden_z
+// name(zkr, in_values, public_witness, private_witness, constant_witness, golden_z)
 bigint_tests! {
     add_8(
         add_test_8,
@@ -206,7 +206,11 @@ bigint_tests! {
     mul_128(
         mul_test_128,
         ["a9ff9e10", "1c1f1d23", "12ac9e9716ca6c30"],
-        ["109effa9000000000000000000000000", "231d1f1c000000000000000000000000", "306cca16979eac12000000000000000000000000000000000000000000000000"],
+        [
+            "109effa9000000000000000000000000",
+            "231d1f1c000000000000000000000000",
+            "306cca16979eac12000000000000000000000000000000000000000000000000"
+        ],
         [
             "071c3b4e48351705050505050505050505050505050505050505050505050505",
             "fcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfcfc",
