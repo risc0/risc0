@@ -227,12 +227,14 @@ pub fn nondet_inv_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly = bigint_const!(ctx, 1);
     let x1: BytePoly = def(ctx, 1, 0, 1)?;
     let x2: BytePoly = def(ctx, 1, 1, 1)?;
-    let x3: BytePoly = nondet_inv(ctx, &x1, &x2, 1)?;
-    let x4: BytePoly = mul(&x1, &x3)?;
-    let x5: BytePoly = nondet_quot(ctx, &x4, &x2, 3)?;
-    let x6: BytePoly = nondet_rem(ctx, &x4, &x2, 1)?;
-    eqz(ctx, &sub(&add(&mul(&x5, &x2)?, &x6)?, &x4)?, 24387, 2)?;
-    eqz(ctx, &sub(&x6, &x0)?, 34, 1)?;
+    let x3: BytePoly = def(ctx, 1, 2, 1)?;
+    let x4: BytePoly = nondet_inv(ctx, &x1, &x2, 1)?;
+    let x5: BytePoly = mul(&x1, &x4)?;
+    let x6: BytePoly = nondet_quot(ctx, &x5, &x2, 3)?;
+    let x7: BytePoly = nondet_rem(ctx, &x5, &x2, 1)?;
+    eqz(ctx, &sub(&add(&mul(&x6, &x2)?, &x7)?, &x5)?, 24387, 2)?;
+    eqz(ctx, &sub(&x7, &x0)?, 34, 1)?;
+    eqz(ctx, &sub(&x4, &x3)?, 34, 1)?;
     return Ok(());
 }
 pub fn const_add_test_8(ctx: &mut BigIntContext) -> Result<()> {
@@ -351,7 +353,8 @@ bigint_witness_info!(/*bits=*/3072, /*label=*/1, /*public=*/ true, /*min_bits=*/
 bigint_witness_info!(/*bits=*/3072, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
 bigint_program_info! {nondet_inv_test_8, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
-bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/7)}
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/7),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0)}
 bigint_program_info! {const_add_test_8, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/17, /*label=*/1, /*public=*/ true, /*min_bits=*/0)}
