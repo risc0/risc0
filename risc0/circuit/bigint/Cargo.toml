@@ -22,8 +22,8 @@ risc0-circuit-recursion = { workspace = true, default-features = false }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true, features = ["default"] }
 risc0-zkvm = { workspace = true, features = [
-    "std",
-    "unstable",
+  "std",
+  "unstable",
 ], default-features = false }
 risc0-zkvm-platform = { workspace = true }
 tracing = "0.1.40"
