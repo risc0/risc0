@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use crate::byte_poly::BytePoly;
-pub use crate::BigIntContext;
-pub use crate::{BigIntProgram, WitnessInfo};
-pub use anyhow::Result;
 use tracing::trace;
+
+pub use crate::{byte_poly::BytePoly, BigIntContext, BigIntProgram, WitnessInfo};
+pub use anyhow::Result;
 
 pub fn def(
     ctx: &mut BigIntContext,
@@ -142,6 +141,17 @@ macro_rules! bigint_program_list {
     }
 }
 
+#[macro_export]
+macro_rules! bigint_const {
+    ($ctx:tt, $($coeff:expr),*) => {
+        {
+            let ret = BytePoly::from_coeffs(&[ $($coeff,)* ]);
+            $ctx.constant_witness.push(ret.clone());
+            ret
+        }
+    }
+}
+
 // #[macro_export] defines macros in the top level of the crate.
 // Re-import them here so they're in local scope.
-pub use crate::{bigint_program_info, bigint_program_list, bigint_witness_info};
+pub use crate::{bigint_const, bigint_program_info, bigint_program_list, bigint_witness_info};

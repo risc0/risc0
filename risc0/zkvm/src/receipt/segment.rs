@@ -131,6 +131,11 @@ impl SegmentReceipt {
     pub fn get_seal_bytes(&self) -> Vec<u8> {
         self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
     }
+
+    /// Number of bytes used by the seal for this receipt.
+    pub fn seal_size(&self) -> usize {
+        core::mem::size_of_val(self.seal.as_slice())
+    }
 }
 
 /// Verifier parameters used to verify a [SegmentReceipt].

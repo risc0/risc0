@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{
-    byte_poly::BytePoly, claim_list_digest, pad_claim_list, BigIntClaim, BigIntContext,
-    BigIntProgram,
-};
+use std::{borrow::Borrow, collections::VecDeque};
+
 use anyhow::{bail, Result};
-use core::borrow::Borrow;
 use num_bigint::BigUint;
 use risc0_binfmt::{read_sha_halfs, Digestible};
 use risc0_circuit_recursion::{
@@ -32,8 +29,12 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
     verify::VerificationError,
 };
-use std::collections::VecDeque;
 use tracing::{debug, trace};
+
+use crate::{
+    byte_poly::BytePoly, claim_list_digest, pad_claim_list, BigIntClaim, BigIntContext,
+    BigIntProgram,
+};
 
 pub fn prove<S: Sha256>(
     claims: &[impl Borrow<BigIntClaim>],
@@ -84,7 +85,7 @@ pub fn prove<S: Sha256>(
 
         let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
         let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
-        let folded = (*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
+        let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
         trace!("folded: {folded}");
 
         // Calculate the evaluation point Z
