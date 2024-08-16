@@ -27,7 +27,7 @@ use crate::{
 };
 
 macro_rules! bigint_tests {
-    ($($name:ident($gen:ident, $prog:ident, $zkr:expr, $in:expr, $pub:expr, $priv:expr, $const:expr, $z:expr),)*) => {
+    ($($name:ident($gen:ident, $in:expr, $pub:expr, $priv:expr, $const:expr, $z:expr),)*) => {
         $(
             paste::paste! {
                 fn [<$name _values>]() -> Vec<BigUint> {
@@ -55,18 +55,22 @@ macro_rules! bigint_tests {
                     )
                 }
 
+                fn [<$name _filename>]() -> &'static str {
+                    concat!(stringify!($gen), ".zkr")
+                }
+
                 #[test]
                 fn [<$name _zkr>]() -> anyhow::Result<()> {
-                    test_zkr([<$name _context>]()?, $zkr)
+                    test_zkr([<$name _context>]()?, [<$name _filename>]())
                 }
 
                 #[test]
                 fn [<$name _prove>]() -> Result<()> {
-                    use $crate::generated::$prog;
-                    let claim = BigIntClaim::from_biguints(&$prog, &[<$name _values>]());
-                    let zkr = $crate::zkr::get_zkr($zkr, BIGINT_PO2)?;
-                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &$prog, zkr)?;
-                    crate::verify::<sha::Impl>(&$prog, &[&claim], &receipt)?;
+                    use $crate::generated::[<$gen:snake:upper>];
+                    let claim = BigIntClaim::from_biguints(&[<$gen:snake:upper>], &[<$name _values>]());
+                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2)?;
+                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$gen:snake:upper>], zkr)?;
+                    crate::verify::<sha::Impl>(&[<$gen:snake:upper>], &[&claim], &receipt)?;
                     Ok(())
                 }
             }
@@ -77,7 +81,7 @@ macro_rules! bigint_tests {
 // name: generated, program, zkr, in_values, public_witness, private_witness, constant_witness, golden_z
 bigint_tests! {
     add_8(
-        add_test_8, ADD_TEST_8, "add_test_8.zkr",
+        add_test_8,
         ["01", "01", "02"],
         ["01", "01", "0200"],
         ["2222"],
@@ -86,7 +90,7 @@ bigint_tests! {
     ),
 
     add_16(
-        add_test_16, ADD_TEST_16, "add_test_16.zkr",
+        add_test_16,
         ["4701", "a301", "ea02"],
         ["0147", "01a3", "02ea00"],
         ["222222"],
@@ -95,7 +99,7 @@ bigint_tests! {
     ),
 
     add_128(
-        add_test_128, ADD_TEST_128, "add_test_128.zkr",
+        add_test_128,
         ["330e091fd68889efcc15be1e6244d811", "748ac69a07f0e07a234ac687f6749ea8", "a798cfb9de796a69ef6084a658b976b9"],
         ["11d844621ebe15ccef8988d61f090e33", "a89e74f687c64a237ae0f0079ac68a74", "b976b958a68460ef696a79deb9cf98a700"],
         ["2223222322232222232323222222222222"],
@@ -105,7 +109,7 @@ bigint_tests! {
 
     // Add with a carry beyond the original size of the inputs
     add_128_carry(
-        add_test_128, ADD_TEST_128, "add_test_128.zkr",
+        add_test_128,
         ["a0000000000000000000000000000000", "a0000000000000000000000000000000", "0140000000000000000000000000000000"],
         ["000000000000000000000000000000a0", "000000000000000000000000000000a0", "0000000000000000000000000000004001"],
         ["2222222222222222222222222222222322"],
@@ -116,7 +120,7 @@ bigint_tests! {
     // add16 const style Test
     // Does a 16 bit add test with the same data as used in the const add test
     add_16_cs(
-        add_test_16, ADD_TEST_16, "add_test_16.zkr",
+        add_test_16,
         ["4747", "0033", "477a"],
         ["4747", "3300", "7a4700"],
         ["222222"],
@@ -125,7 +129,7 @@ bigint_tests! {
     ),
 
     const_add(
-        const_add_test_8, CONST_ADD_TEST_8, "const_add_test_8.zkr",
+        const_add_test_8,
         ["33", "477a"],
         ["33", "7a4700"],
         ["222222"],
@@ -135,7 +139,7 @@ bigint_tests! {
 
     // Construct a bigint claim of 0x5432 + 0xb7 == 0x54e9 with a const times a variable
     const_add_alt(
-        const_add_alt_test_16, CONST_ADD_ALT_TEST_16, "const_add_alt_test_16.zkr",
+        const_add_alt_test_16,
         ["b7", "54e9"],
         ["b700", "e95400"],
         ["222222"],
@@ -144,7 +148,7 @@ bigint_tests! {
     ),
 
     const_mul(
-        const_mul_test_8, CONST_MUL_TEST_8, "const_mul_test_8.zkr",
+        const_mul_test_8,
         ["b7", "3c2fbe"],
         ["b7", "be2f3c"],
         ["a6bf83", "3f3f3f"],
@@ -154,7 +158,7 @@ bigint_tests! {
 
     // Runs the tests for the constant 1
     const_one(
-        const_one_test_8, CONST_ONE_TEST_8, "const_one_test_8.zkr",
+        const_one_test_8,
         ["01"],
         ["01"],
         ["22"],
@@ -164,7 +168,7 @@ bigint_tests! {
 
     // Construct a bigint claim of 0x1234 - 0x1234 == 0 with a const minus a variable
     const_twobyte(
-        const_twobyte_test_16, CONST_TWOBYTE_TEST_16, "const_twobyte_test_16.zkr",
+        const_twobyte_test_16,
         ["1234"],
         ["3412"],
         ["2222"],
@@ -173,7 +177,7 @@ bigint_tests! {
     ),
 
     sub_8(
-        sub_test_8, SUB_TEST_8, "sub_test_8.zkr",
+        sub_test_8,
         ["ef", "47", "a8"],
         ["ef", "47", "a8"],
         ["22"],
@@ -182,7 +186,7 @@ bigint_tests! {
     ),
 
     sub_128(
-        sub_test_128, SUB_TEST_128, "sub_test_128.zkr",
+        sub_test_128,
         ["a798cfb9de796a69ef6084a658b976b9", "748ac69a07f0e07a234ac687f6749ea8", "330e091fd68889efcc15be1e6244d811"],
         ["b976b958a68460ef696a79deb9cf98a7", "a89e74f687c64a237ae0f0079ac68a74", "11d844621ebe15ccef8988d61f090e33"],
         ["22212221222122222121212222222222"],
@@ -191,7 +195,7 @@ bigint_tests! {
     ),
 
     mul_8(
-        mul_test_8, MUL_TEST_8, "mul_test_8.zkr",
+        mul_test_8,
         ["ef", "47", "4249"],
         ["ef", "47", "4942"],
         ["05c3", "201f"],
@@ -200,7 +204,7 @@ bigint_tests! {
     ),
 
     mul_128(
-        mul_test_128, MUL_TEST_128, "mul_test_128.zkr",
+        mul_test_128,
         ["a9ff9e10", "1c1f1d23", "12ac9e9716ca6c30"],
         ["109effa9000000000000000000000000", "231d1f1c000000000000000000000000", "306cca16979eac12000000000000000000000000000000000000000000000000"],
         [
@@ -214,7 +218,7 @@ bigint_tests! {
     ),
 
     reduce_8(
-        reduce_test_8, REDUCE_TEST_8, "reduce_test_8.zkr",
+        reduce_test_8,
         ["af", "11", "05"],
         ["af", "11", "05"],
         ["0a", "05", "c3c3", "1f1f", "22"],
@@ -223,7 +227,7 @@ bigint_tests! {
     ),
 
     reduce_128(
-        reduce_test_128, REDUCE_TEST_128, "reduce_test_128.zkr",
+        reduce_test_128,
         ["13311441233256657667877895590007", "11", "07"],
         [
             "07005995788767766556322341143113",
