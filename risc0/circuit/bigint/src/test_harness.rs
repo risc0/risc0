@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
 use num_bigint::BigUint;
 use num_traits::Num;
 use pretty_assertions::assert_eq;
@@ -24,13 +25,22 @@ use tracing::trace;
 
 use crate::{BigIntContext, BytePoly};
 
+impl BigIntContext {
+    pub(crate) fn from_values(in_values: Vec<BigUint>) -> Self {
+        Self {
+            in_values,
+            ..Default::default()
+        }
+    }
+}
+
 pub(crate) fn test_witgen(
     ctx: BigIntContext,
     pub_wit: Vec<BytePoly>,
     priv_wit: Vec<BytePoly>,
     const_wit: Vec<BytePoly>,
     gold_z: BabyBearExtElem,
-) -> anyhow::Result<()> {
+) -> Result<()> {
     assert_eq!(ctx.public_witness, pub_wit);
     assert_eq!(ctx.private_witness, priv_wit);
     assert_eq!(ctx.constant_witness, const_wit);
@@ -41,10 +51,10 @@ pub(crate) fn test_witgen(
     trace!("public_digest: {public_digest}");
     let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
     trace!("private_digest: {private_digest}");
-    let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
+    let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
     trace!("folded: {folded}");
 
-    let mut rng = (&*hash_suite.rng).new_rng();
+    let mut rng = hash_suite.rng.new_rng();
     rng.mix(&folded);
     let z = rng.random_ext_elem();
     assert_eq!(z, gold_z);
@@ -52,7 +62,7 @@ pub(crate) fn test_witgen(
     Ok(())
 }
 
-pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> anyhow::Result<()> {
+pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
     tracing::error!("Hello world!!!");
 
     let hash_suite = Poseidon2HashSuite::new_suite();
@@ -85,10 +95,10 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> anyhow::Result<()>
     tracing::error!("public_digest: {public_digest}");
     let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
     tracing::error!("private_digest: {private_digest}");
-    let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
+    let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
     tracing::error!("folded: {folded}");
 
-    let mut rng = (&*hash_suite.rng).new_rng();
+    let mut rng = hash_suite.rng.new_rng();
     rng.mix(&folded);
     let z = rng.random_ext_elem();
 
@@ -119,7 +129,7 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> anyhow::Result<()>
 }
 
 pub(crate) fn witness_test_data(data: &[&str]) -> Vec<BytePoly> {
-    data.into_iter().map(|d| BytePoly::from_hex(d)).collect()
+    data.iter().map(|d| BytePoly::from_hex(d)).collect()
 }
 
 pub(crate) fn from_hex(s: &str) -> BigUint {
