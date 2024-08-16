@@ -14,21 +14,22 @@
 
 // TODO: Document how BytePoly works.
 
-use core::{
+use std::{
     borrow::Borrow,
     cmp::max,
     fmt::{Debug, Display, Formatter},
     ops,
 };
+
 use hex::FromHex;
 use num_bigint::{BigInt, BigUint};
 use num_integer::Integer;
+use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
 use risc0_core::field::{Elem, Field};
 use risc0_zkp::{core::digest::Digest, core::hash::HashFn};
 use tracing::trace;
 
 pub const BITS_PER_COEFF: usize = 8;
-use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BytePoly(Vec<i32>);
@@ -152,13 +153,13 @@ impl BytePoly {
     }
 
     pub fn compute_digest<F: Field>(
-        hash: &(impl HashFn<F> + ?Sized),
+        hash: &dyn HashFn<F>,
         witness: &[impl Borrow<BytePoly>],
         group_count: usize,
     ) -> Digest {
         let mut group: usize = 0;
-        let mut cur: [F::Elem; CHECKED_COEFFS_PER_POLY] = [F::Elem::ZERO; CHECKED_COEFFS_PER_POLY];
-        let mut elems: Vec<F::Elem> = Vec::new();
+        let mut cur = [F::Elem::ZERO; CHECKED_COEFFS_PER_POLY];
+        let mut elems = Vec::new();
 
         for wit in witness.iter() {
             for chunk in wit.borrow().0.chunks(CHECKED_COEFFS_PER_POLY) {

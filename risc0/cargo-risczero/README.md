@@ -111,6 +111,30 @@ ImageID: c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38 - "tar
 ImageID: a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
 ```
 
+## datashet
+
+The `datasheet` command performs a benchmark to evaluate zkVM performance for
+the current machine's hardware, and then prints a table (along with optional
+`--json` output).
+
+See [our benchmarks](https://benchmarks.risczero.com/main/datasheet) for numbers
+you can expect to see from this.
+
+Schema:
+
+```ts
+type Datasheet = BenchmarkData[]
+
+type BenchmarkData = {
+    name: string,
+    hashfn: string,
+    throughput: number,
+    duration: number,
+    cycles: number,
+    seal: number,
+}
+```
+
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [risc-zero]: https://risczero.com
 [rust-starter]: https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates/rust-starter

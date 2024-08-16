@@ -12,31 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{
-    byte_poly::BytePoly,
-    prove,
-    rsa::{RSA_256_X1, RSA_256_X2},
-    verify, BigIntContext, BIGINT_PO2,
-};
+use std::borrow::Borrow;
+
 use anyhow::Result;
-use core::borrow::Borrow;
 use num_bigint::BigUint;
-use num_traits::Num;
-use pretty_assertions::assert_eq;
 use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_ID};
-use risc0_circuit_recursion::{prove::Prover, CHECKED_COEFFS_PER_POLY};
-use risc0_zkp::core::hash::{poseidon2::Poseidon2HashSuite, sha};
+use risc0_zkp::core::hash::sha;
 use risc0_zkp::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
 };
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use test_log::test;
-use tracing::trace;
 
-fn from_hex(s: &str) -> BigUint {
-    BigUint::from_str_radix(s, 16).expect("Unable to parse hex value")
-}
+use crate::{
+    byte_poly::BytePoly,
+    prove,
+    rsa::{/*RSA_256_X1,*/ RSA_256_X2},
+    test_harness::{from_hex, test_witgen, test_zkr, witness_test_data},
+    verify,
+    zkr::get_zkr,
+    BigIntContext, BIGINT_PO2,
+};
 
 // "golden" values are the values from running the C++ version:
 // bazelisk run //zirgen/Dialect/BigInt/IR/test:test -- --test
@@ -55,10 +52,6 @@ fn golden_z() -> BabyBearExtElem {
             .into_iter()
             .map(BabyBearElem::from_u64),
     )
-}
-
-fn witness_test_data(data: &[&str]) -> Vec<BytePoly> {
-    data.into_iter().map(|d| BytePoly::from_hex(d)).collect()
 }
 
 fn golden_constant_witness() -> Vec<BytePoly> {
@@ -184,110 +177,39 @@ fn golden_private_witness() -> Vec<BytePoly> {
 }
 
 fn run_bigint() -> Result<BigIntContext> {
-    let mut ctx = BigIntContext::default();
-    ctx.in_values = golden_values().try_into().unwrap();
+    let mut ctx = BigIntContext {
+        in_values: golden_values(),
+        ..Default::default()
+    };
     crate::generated::rsa_256_x1(&mut ctx)?;
     Ok(ctx)
 }
 
 #[test]
-fn test_witgen() -> anyhow::Result<()> {
-    let ctx = run_bigint()?;
-
-    assert_eq!(ctx.public_witness, golden_public_witness());
-    assert_eq!(ctx.private_witness, golden_private_witness());
-    assert_eq!(ctx.constant_witness, golden_constant_witness());
-
-    let hash_suite = Poseidon2HashSuite::new_suite();
-
-    let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
-    trace!("public_digest: {public_digest}");
-    let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
-    trace!("private_digest: {private_digest}");
-    let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
-    trace!("folded: {folded}");
-
-    let mut rng = (&*hash_suite.rng).new_rng();
-    rng.mix(&folded);
-    let z = rng.random_ext_elem();
-    assert_eq!(z, golden_z());
-
-    Ok(())
+fn test_rsa_witgen() -> anyhow::Result<()> {
+    test_witgen(
+        run_bigint()?,
+        golden_public_witness(),
+        golden_private_witness(),
+        golden_constant_witness(),
+        golden_z(),
+    )
 }
 
 #[test]
-fn test_zkr() -> anyhow::Result<()> {
-    let ctx = run_bigint()?;
-
-    let hash_suite = Poseidon2HashSuite::new_suite();
-
-    let mut all_coeffs: Vec<u32> = Vec::new();
-    for witness in ctx
-        .constant_witness
-        .iter()
-        .chain(ctx.public_witness.iter())
-        .chain(ctx.private_witness.iter())
-    {
-        for chunk in witness.chunks(CHECKED_COEFFS_PER_POLY) {
-            let mut bytes: Vec<u8> = chunk
-                .iter()
-                .map(|b| u8::try_from(*b).expect("Byte out of range in witness coeffs"))
-                .collect();
-            while bytes.len() < CHECKED_COEFFS_PER_POLY {
-                bytes.push(0);
-            }
-
-            for word in bytes.chunks(4) {
-                all_coeffs.push(u32::from_le_bytes(
-                    word.try_into().expect("Partial word present in witness?"),
-                ));
-            }
-        }
-    }
-
-    let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
-    trace!("public_digest: {public_digest}");
-    let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
-    trace!("private_digest: {private_digest}");
-    let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
-    trace!("folded: {folded}");
-
-    let mut rng = (&*hash_suite.rng).new_rng();
-    rng.mix(&folded);
-    let z = rng.random_ext_elem();
-
-    let program = crate::zkr::get_zkr("rsa_256_x1.zkr", /*po2=*/ 12)?;
-
-    let mut prover = Prover::new(program, "poseidon2");
-    prover.add_input(&[0u32; 8]); //control id
-    for _ in 0..RSA_256_X1.iters {
-        prover.add_input(&z.to_u32_words());
-        prover.add_input(&all_coeffs);
-    }
-    let receipt = prover.run()?;
-
-    trace!("rsa receipt: {receipt:?}");
-
-    risc0_zkp::verify::verify(
-        &risc0_circuit_recursion::CIRCUIT,
-        &hash_suite,
-        &receipt.seal,
-        |_, _| Ok(()),
-    )?;
-
-    Ok(())
+fn test_rsa_zkr() -> anyhow::Result<()> {
+    test_zkr(run_bigint()?, "rsa_256_x1.zkr")
 }
 
 // Runs the end-to-end test using the rsa prover implementation
 #[test]
-fn prove_and_verify_rsa() -> Result<()> {
+fn prove_and_verify_rsa() {
     let [n, s, m] = golden_values().try_into().unwrap();
     let claim = crate::rsa::claim(&RSA_256_X2, n, s, m);
 
-    let zkr = crate::zkr::get_zkr("rsa_256_x2.zkr", BIGINT_PO2)?;
-    let receipt = prove::<sha::Impl>(&[&claim], &RSA_256_X2, zkr)?;
-    verify::<sha::Impl>(&crate::rsa::RSA_256_X2, &[&claim], &receipt)?;
-    Ok(())
+    let zkr = get_zkr("rsa_256_x2.zkr", BIGINT_PO2).unwrap();
+    let receipt = prove::<sha::Impl>(&[&claim], &RSA_256_X2, zkr).unwrap();
+    verify::<sha::Impl>(&crate::rsa::RSA_256_X2, &[&claim], &receipt).unwrap();
 }
 
 fn run_guest_compose(claims: &[impl Borrow<[BigUint; 3]>]) -> Result<()> {
@@ -322,43 +244,39 @@ fn run_guest_compose(claims: &[impl Borrow<[BigUint; 3]>]) -> Result<()> {
 
 // Tries a single claim
 #[test]
-fn guest_compose_oneclaim() -> Result<()> {
+fn guest_compose_oneclaim() {
     let vals: [BigUint; 3] = golden_values().try_into().unwrap();
 
-    run_guest_compose(&[&vals])
+    run_guest_compose(&[&vals]).unwrap()
 }
 
-// Completely ills up a zkr's claim-verifying capacity
+// Completely fills up a zkr's claim-verifying capacity
 #[test]
-fn guest_compose_iters() -> Result<()> {
+fn guest_compose_iters() {
     let vals: [BigUint; 3] = golden_values().try_into().unwrap();
 
     let claims = vec![&vals; RSA_256_X2.iters];
-    run_guest_compose(&claims)
+    run_guest_compose(&claims).unwrap()
 }
 
 // Exceeds a zkr's claim-verifying capacity; should not work at all.
 #[test]
-fn guest_compose_exceed_iters() -> Result<()> {
+fn guest_compose_exceed_iters() {
     let vals: [BigUint; 3] = golden_values().try_into().unwrap();
 
     let claims = vec![&vals; RSA_256_X2.iters + 1];
     run_guest_compose(&claims).expect_err("Expected too many iterations error");
-
-    Ok(())
 }
 
 // Supplies no claims to the ZKR to verify; at least one is required.
 #[test]
-fn guest_compose_empty() -> Result<()> {
+fn guest_compose_empty() {
     run_guest_compose(&[] as &[&[BigUint; 3]]).expect_err("Expected empty claims error");
-
-    Ok(())
 }
 
 // Makes sure composition fails if any of the data changes
 #[test]
-fn guest_compose_corrupted() -> Result<()> {
+fn guest_compose_corrupted() {
     for idx in 0..3 {
         let mut vals: [BigUint; 3] = golden_values().try_into().unwrap();
         vals[idx] += 1usize;
@@ -366,5 +284,4 @@ fn guest_compose_corrupted() -> Result<()> {
             "Expected zkr verification failure when corrupting RSA value #{idx}"
         ));
     }
-    Ok(())
 }
