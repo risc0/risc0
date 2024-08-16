@@ -38,6 +38,7 @@ impl<T> ResTrack<T>
 where
     T: Clone,
 {
+    #[allow(dead_code)]
     #[cfg(not(target_os = "zkvm"))]
     pub fn reset(&mut self) {
         self.idx = 0;
@@ -49,6 +50,7 @@ where
         res
     }
 
+    #[allow(dead_code)]
     #[cfg(not(target_os = "zkvm"))]
     pub fn set(&mut self, elm: &T) {
         self.elms.push(elm.clone());
