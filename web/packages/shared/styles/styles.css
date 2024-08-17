@@ -51,7 +51,11 @@ html {
 }
 
 a {
-  @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+  @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring;
+}
+
+.link {
+  @apply hover:text-primary dark:no-underline underline;
 }
 
 /* Chartjs */
