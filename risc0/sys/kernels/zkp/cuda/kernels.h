@@ -25,6 +25,15 @@ __global__ void eltwise_mul_factor_fp(Fp* io, Fp factor, const uint32_t count);
 
 __global__ void eltwise_copy_fp(Fp* out, const Fp* in, const uint32_t count);
 
+__global__ void eltwise_copy_fp_region(Fp* into,
+                                       const Fp* from,
+                                       const uint32_t fromRows,
+                                       const uint32_t fromCols,
+                                       const uint32_t fromOffset,
+                                       const uint32_t fromStride,
+                                       const uint32_t intoOffset,
+                                       const uint32_t intoStride);
+
 __global__ void
 eltwise_sum_fpext(Fp* out, const FpExt* in, const uint32_t to_add, const uint32_t count);
 
@@ -49,6 +58,12 @@ __global__ void batch_evaluate_any(
 
 __global__ void gather_sample(
     Fp* dst, const Fp* src, const uint32_t idx, const uint32_t size, const uint32_t stride);
+
+__global__ void scatter(Fp* into,
+                        const uint32_t* index,
+                        const uint32_t* offsets,
+                        const Fp* values,
+                        const uint32_t count);
 
 __global__ void sha_rows(ShaDigest* out, const Fp* matrix, uint32_t count, uint32_t colSize);
 

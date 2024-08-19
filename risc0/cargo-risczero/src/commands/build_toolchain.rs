@@ -27,7 +27,7 @@ use crate::{
     utils::{ensure_binary, CommandExt},
 };
 
-const CONFIG_TOML: &'static str = include_str!("config.toml");
+const CONFIG_TOML: &str = include_str!("config.toml");
 
 /// `cargo risczero build-toolchain`
 #[derive(Parser)]
@@ -133,7 +133,7 @@ impl BuildToolchain {
                 "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUSTFLAGS",
                 "-Cpasses=loweratomic",
             )
-            .current_dir(&rust_dir)
+            .current_dir(rust_dir)
             .args(["x.py", "build"])
             .run_verbose()?;
 
@@ -144,7 +144,7 @@ impl BuildToolchain {
                 "-Cpasses=loweratomic",
             )
             .args(["x.py", "build", "--stage", "2"])
-            .current_dir(&rust_dir)
+            .current_dir(rust_dir)
             .run_verbose()?;
 
         eprintln!("Rust build complete!");

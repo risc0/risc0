@@ -19,7 +19,10 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use risc0_core::field::{baby_bear::BabyBearElem, Elem};
+use risc0_core::{
+    field::{baby_bear::BabyBearElem, Elem},
+    scope,
+};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::{
@@ -285,8 +288,9 @@ impl Loader {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     pub fn load(&mut self) -> usize {
+        scope!("load");
+
         self.pre_steps();
         self.body();
         self.post_steps();

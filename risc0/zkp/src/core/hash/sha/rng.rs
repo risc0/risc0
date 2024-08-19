@@ -122,7 +122,7 @@ mod tests {
             x.next_u32();
         }
         assert_eq!(x.next_u32(), 785921476);
-        x.inner_mix(&*Impl::hash_bytes(b"foo"));
+        x.inner_mix(&Impl::hash_bytes(b"foo"));
         assert_eq!(x.next_u32(), 4167871101);
     }
 }

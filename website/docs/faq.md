@@ -56,7 +56,7 @@ If you can't find your problem here you can open a <a href="https://github.com/r
 <details closed>
 <summary>
 Q:
-What do I do with the receipt once I’ve created it?
+What do I do with the receipt once I've created it?
 </summary>
 A:
 After Alice creates a <a href="https://dev.risczero.com/terminology#receipt">receipt</a>, she'll typically pass it to Bob who will want to <a href="https://dev.risczero.com/terminology#verify">verify</a> its authenticity.
@@ -183,11 +183,11 @@ In the future, we plan to lift these processing limitations using continuations 
 <details closed>
 <summary>
 Q:
-I’d like to speed up the processing done inside the zkVM. What are my options?
+I'd like to speed up the processing done inside the zkVM. What are my options?
 </summary>
 A:
-For cryptographic operations, it is possible to build ‘accelerator’ circuits such as our implementation of SHA256.
-Fast cryptography is sufficient to support many ‘DeFi’ applications.
+For cryptographic operations, it is possible to build 'accelerator' circuits such as our implementation of SHA256.
+Fast cryptography is sufficient to support many 'DeFi' applications.
 For many other applications, it is possible to perform most computation on the host (outside the zkVM) and then verify the results in the zkVM.
 </details>
 
@@ -253,12 +253,12 @@ These ImageIDs will stay consistent across all builds due to a containerized pro
 <a class="anchor" id="tampering-with-code"></a>
 <details closed>
 <summary>
-Q: If the guest zkVM lives on the host machine, can’t the host still tamper with the application?
+Q: If the guest zkVM lives on the host machine, can't the host still tamper with the application?
 </summary>
-A: Like other zk-STARKs, RISC Zero’s implementation makes it cryptographically infeasible to generate an invalid receipt:
+A: Like other zk-STARKs, RISC Zero's implementation makes it cryptographically infeasible to generate an invalid receipt:
 
-- If the binary is modified, then the receipt’s seal will not match the ImageID of the expected binary.
+- If the binary is modified, then the receipt's seal will not match the ImageID of the expected binary.
 - If the execution is modified, then the execution trace will be invalid.
-- If the output is modified, then the journal’s hash will not match the hash recorded in the receipt.
+- If the output is modified, then the journal's hash will not match the hash recorded in the receipt.
 
 </details>

@@ -16,16 +16,16 @@ The [RISC Zero Foundry Template][foundry-template] provides a minimal applicatio
 
 ### DAO Governance Example
 
-This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [~160 lines of Rust][signature-aggregation], a gas savings of 66% is achieved with significant room for optimizations.
+This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [\~160 lines of Rust][signature-aggregation], a gas savings of 66% is achieved with significant room for optimizations.
 
-[zkvm-examples]: /api/zkvm/examples
-[remote-proving]: ../generating-proofs/remote-proving
-[zeth-repo]: https://github.com/risc0/zeth
-[revm]: https://crates.io/crates/revm
-[zeth-article]: https://www.risczero.com/news/zeth-release
+[foundry-template]: https://github.com/risc0/risc0-foundry-template
 [governance-example]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
+[remote-proving]: ../generating-proofs/remote-proving.md
+[revm]: https://crates.io/crates/revm
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
-[foundry-template]: https://github.com/risc0/risc0-foundry-template
-[steel-repo]: https://crates.io/crates/risc0-steel
 [steel-blog]: https://www.risczero.com/blog/introducing-steel
+[steel-repo]: https://crates.io/crates/risc0-steel
+[zeth-article]: https://www.risczero.com/news/zeth-release
+[zeth-repo]: https://github.com/risc0/zeth
+[zkvm-examples]: /api/zkvm/examples

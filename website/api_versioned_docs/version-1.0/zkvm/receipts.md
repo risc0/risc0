@@ -2,7 +2,7 @@
 
 _A brief introduction to the RISC Zero [receipt]._
 
-## What is a receipt?
+## What Is a Receipt?
 
 A receipt gives the results of your program along with proof that they were
 produced honestly.
@@ -23,7 +23,7 @@ cryptographically attests to the validity of the receipt.
 
 <!-- End receipt definition. -->
 
-## How are receipts used?
+## How Are Receipts Used?
 
 Suppose Alice and Bob have agreed on some computation that needs to get done. In
 particular, they've agreed on some zkVM [guest program], and they each have
@@ -64,11 +64,10 @@ is:
 [Image ID]: /terminology#image-id
 [journal]: /terminology#journal
 [receipt]: /terminology#receipt
-[receipt.verify()]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Receipt.html#method.verify
 [receipt.journal]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Receipt.html#structfield.journal
+[receipt.verify()]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Receipt.html#method.verify
 [seal]: /terminology#seal
 [serde]: https://crates.io/crates/serde
 [validity proof]: /terminology#validity-proof
 [verify]: /terminology#verify
-[quickstart]: ./quickstart.md
-[zkvm]: ./zkvm_overview.md
+[zkvm]: ./zkvm-overview.md

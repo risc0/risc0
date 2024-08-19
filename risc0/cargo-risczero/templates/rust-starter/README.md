@@ -23,7 +23,7 @@ cargo run
 This is an empty template, and so there is no expected output (until you modify
 the code).
 
-### Executing the project locally in development mode
+### Executing the Project Locally in Development Mode
 
 During development, faster iteration upon code changes can be achieved by leveraging [dev-mode], we strongly suggest activating it during your early development phase. Furthermore, you might want to get insights into the execution statistics of your project, and this can be achieved by specifying the environment variable `RUST_LOG="[executor]=info"` before running your project.
 
@@ -33,7 +33,7 @@ Put together, the command to run your project in development mode while getting 
 RUST_LOG="[executor]=info" RISC0_DEV_MODE=1 cargo run
 ```
 
-### Running proofs remotely on Bonsai
+### Running Proofs Remotely on Bonsai
 
 _Note: The Bonsai proving service is still in early Alpha; an API key is
 required for access. [Click here to request access][bonsai access]._
@@ -46,7 +46,7 @@ environment variables:
 BONSAI_API_KEY="YOUR_API_KEY" BONSAI_API_URL="BONSAI_URL" cargo run
 ```
 
-## How to create a project based on this template
+## How to Create a Project Based on This Template
 
 Search this template for the string `TODO`, and make the necessary changes to
 implement the required feature described by the `TODO` comment. Some of these
@@ -104,8 +104,8 @@ We'd love to hear from you on [Discord][discord] or [Twitter][twitter].
 [risc0-build]: https://docs.rs/risc0-build
 [risc0-repo]: https://www.github.com/risc0/risc0
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
-[rustup]: https://rustup.rs
 [rust-toolchain]: rust-toolchain.toml
+[rustup]: https://rustup.rs
 [twitter]: https://twitter.com/risczero
-[zkvm-overview]: https://dev.risczero.com/zkvm
 [zkhack-iii]: https://www.youtube.com/watch?v=Yg_BGqj_6lg&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5
+[zkvm-overview]: https://dev.risczero.com/zkvm

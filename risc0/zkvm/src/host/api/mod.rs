@@ -352,6 +352,14 @@ pub struct SessionInfo {
     pub exit_code: ExitCode,
 }
 
+impl SessionInfo {
+    /// The total number of user cycles across all segments, without any
+    /// overhead for continuations or po2 padding.
+    pub fn cycles(&self) -> u64 {
+        self.segments.iter().map(|s| s.cycles as u64).sum()
+    }
+}
+
 /// Provides information about a segment of execution.
 #[derive(Clone, Debug)]
 pub struct SegmentInfo {

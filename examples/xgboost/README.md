@@ -60,6 +60,6 @@ project_name
         └── lib.rs
 ```
 
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [bonsai access]: https://bonsai.xyz/apply
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [Jupyter Website]: https://jupyter.org/install

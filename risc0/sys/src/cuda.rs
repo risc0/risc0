@@ -45,19 +45,6 @@ extern "C" {
         poly_count: u32,
     ) -> sppark::Error;
 
-    pub fn sppark_poseidon_fold(
-        d_out: DevicePointer<u8>,
-        d_in: DevicePointer<u8>,
-        num_hashes: usize,
-    ) -> sppark::Error;
-
-    pub fn sppark_poseidon_rows(
-        d_out: DevicePointer<u8>,
-        d_in: DevicePointer<u8>,
-        count: u32,
-        col_size: u32,
-    ) -> sppark::Error;
-
     pub fn sppark_poseidon2_fold(
         d_out: DevicePointer<u8>,
         d_in: DevicePointer<u8>,

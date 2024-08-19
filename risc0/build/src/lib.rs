@@ -717,7 +717,9 @@ fn do_embed_methods<G: GuestBuilder>(
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
 
-    detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
+    if !is_skip_build() {
+        detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
+    }
 
     let mut guest_list = vec![];
     for guest_pkg in guest_packages {

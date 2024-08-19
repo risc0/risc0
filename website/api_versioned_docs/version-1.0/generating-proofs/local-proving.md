@@ -1,11 +1,9 @@
 # Local Proving
 
 :::info
-
 The `stark2snark` prover currently _only_ works on x86 architecture, and so Apple Silicon is _currently unsupported_ (even via Docker).
 
 You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
-
 :::
 
 ---
@@ -24,6 +22,6 @@ The primary reason to consider using local proof generation for your application
 _With local proof generation, you can generate proofs about your private data, while your private data never leaves your machine._
 
 [Bonsai]: ./remote-proving.md
-[open-source]: https://risczero.com/news/open-source
-[zkVM]: ../zkvm/zkvm_overview.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
+[open-source]: https://risczero.com/news/open-source
+[zkVM]: ../zkvm/zkvm-overview.md

@@ -3,7 +3,6 @@
 #### Before You Start
 
 - Install [Node](https://nodejs.org/en) (≥ v20.x.x)
-
 - Install [bun](https://bun.sh/) (≥ v1.0.33)
 
 ```sh

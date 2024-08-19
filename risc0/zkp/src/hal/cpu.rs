@@ -302,7 +302,6 @@ impl<F: Field> Hal for CpuHal<F> {
         CpuBuffer::copy_from(name, slice)
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -340,7 +339,6 @@ impl<F: Field> Hal for CpuHal<F> {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -351,7 +349,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -362,7 +359,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_evaluate_any(
         &self,
         coeffs: &Self::Buffer<Self::Elem>,
@@ -396,7 +392,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
@@ -459,7 +454,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_add_elem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -478,7 +472,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_sum_extelem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -506,7 +499,6 @@ impl<F: Field> Hal for CpuHal<F> {
         });
     }
 
-    #[tracing::instrument(skip_all)]
     fn eltwise_copy_elem(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -529,7 +521,6 @@ impl<F: Field> Hal for CpuHal<F> {
         });
     }
 
-    #[tracing::instrument(skip_all)]
     fn fri_fold(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -561,7 +552,6 @@ impl<F: Field> Hal for CpuHal<F> {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
@@ -602,6 +592,41 @@ impl<F: Field> Hal for CpuHal<F> {
         let mut dst = dst.as_slice_mut();
         for gid in 0..size {
             dst[gid] = src[gid * stride + idx];
+        }
+    }
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
+    ) {
+        let mut into = into.as_slice_mut();
+        for cycle in 0..index.len() - 1 {
+            for idx in index[cycle]..index[cycle + 1] {
+                into[offsets[idx as usize] as usize] = values[idx as usize];
+            }
+        }
+    }
+
+    fn eltwise_copy_elem_slice(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        from: &[Self::Elem],
+        from_rows: usize,
+        from_cols: usize,
+        from_offset: usize,
+        from_stride: usize,
+        into_offset: usize,
+        into_stride: usize,
+    ) {
+        let mut into = into.as_slice_mut();
+        for row in 0..from_rows {
+            for col in 0..from_cols {
+                into[into_offset + row * into_stride + col] =
+                    from[from_offset + row * from_stride + col];
+            }
         }
     }
 

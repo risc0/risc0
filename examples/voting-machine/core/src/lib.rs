@@ -78,18 +78,15 @@ pub struct SubmitBallotResult {
 
 impl SubmitBallotParams {
     pub fn new(state: VotingMachineState, ballot: Ballot) -> Self {
-        SubmitBallotParams {
-            state: state,
-            ballot: ballot,
-        }
+        SubmitBallotParams { state, ballot }
     }
 
     pub fn process(&self) -> SubmitBallotResult {
         let mut state = self.state.clone();
         let vote_counted = state.vote(self.ballot.voter, self.ballot.vote_yes);
         SubmitBallotResult {
-            state: state,
-            vote_counted: vote_counted,
+            state,
+            vote_counted,
             vote_yes: self.ballot.vote_yes,
         }
     }
@@ -116,12 +113,12 @@ pub struct FreezeVotingMachineResult {
 
 impl FreezeVotingMachineParams {
     pub fn new(state: VotingMachineState) -> Self {
-        FreezeVotingMachineParams { state: state }
+        FreezeVotingMachineParams { state }
     }
 
     pub fn process(&self) -> FreezeVotingMachineResult {
         let mut state = self.state.clone();
         state.polls_open = false;
-        FreezeVotingMachineResult { state: state }
+        FreezeVotingMachineResult { state }
     }
 }
