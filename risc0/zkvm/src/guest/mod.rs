@@ -148,19 +148,10 @@ macro_rules! entry {
 #[cfg(target_os = "zkvm")]
 #[no_mangle]
 unsafe extern "C" fn __start() -> ! {
-    env::init();
-
     #[cfg(feature = "heap-embedded-alloc")]
-    {
-        extern "C" {
-            static _end: u8;
-        }
-        let heap_pos: usize = unsafe { (&_end) as *const u8 as usize };
-        let heap_size: usize = risc0_zkvm_platform::memory::GUEST_MAX_MEM - heap_pos;
-        unsafe {
-            risc0_zkvm_platform::rust_rt::heap::embedded_allocator::HEAP.init(heap_pos, heap_size)
-        }
-    }
+    risc0_zkvm_platform::rust_rt::heap::embedded_allocator::init();
+
+    env::init();
 
     {
         extern "C" {
