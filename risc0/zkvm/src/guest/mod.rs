@@ -149,7 +149,7 @@ macro_rules! entry {
 #[no_mangle]
 unsafe extern "C" fn __start() -> ! {
     #[cfg(feature = "heap-embedded-alloc")]
-    risc0_zkvm_platform::rust_rt::heap::embedded_allocator::init();
+    risc0_zkvm_platform::heap::embedded::init();
 
     env::init();
 

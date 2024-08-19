@@ -23,6 +23,8 @@ pub mod memory;
 pub mod syscall;
 #[cfg(all(feature = "export-getrandom", target_os = "zkvm"))]
 mod getrandom;
+#[cfg(all(feature = "rust-runtime", target_os = "zkvm"))]
+pub mod heap;
 #[cfg(all(feature = "export-libm", target_os = "zkvm"))]
 mod libm_extern;
 #[cfg(all(feature = "rust-runtime", target_os = "zkvm"))]

@@ -12,13 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::guest::env;
+#[cfg(not(feature = "heap-embedded-alloc"))]
+mod bump;
 
-fn main() {
-    let iterations: u32 = env::read();
-    for _ in 0..iterations {
-        env::log("alloc");
-        let tmp = vec![0; 10 * 1024 * 1024];
-        println!("{:#?}", tmp.as_ptr());
-    }
-}
+#[cfg(feature = "heap-embedded-alloc")]
+pub mod embedded;
