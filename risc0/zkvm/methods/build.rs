@@ -38,6 +38,7 @@ fn main() {
     };
 
     let map = HashMap::from([
+        ("risc0-zkvm-methods-cfg", GuestOptions::default()),
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
