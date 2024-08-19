@@ -45,7 +45,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_with = "3.9"
 syn = "2.0.74"
-tabled = "0.15"
+tabled = "0.16"
 tar = "0.4"
 tempfile = "3"
 text_io = "0.1.12"
