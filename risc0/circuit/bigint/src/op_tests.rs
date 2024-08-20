@@ -253,7 +253,7 @@ bigint_tests! {
 
     nondet_inv(
         nondet_inv_test_8,
-        ["21", "2f", "0a"],  // TODO: but... don't we need to test the answer is "0a"?
+        ["21", "2f", "0a"],
         [
             "21",
             "2f",
