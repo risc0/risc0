@@ -1,4 +1,4 @@
-# C guest program example
+# C Guest Program Example
 
 > Warning: This example is experimental, and has not been extensively tested
 

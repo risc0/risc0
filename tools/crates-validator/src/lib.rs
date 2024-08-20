@@ -445,7 +445,7 @@ impl Validator {
             let reader = BufReader::new(guest_log_file);
             let mut build_log_trimmed = String::new();
             let mut count = 0;
-            for line in reader.lines().flatten() {
+            for line in reader.lines().map_while(Result::ok) {
                 if count < MAX_ERROR_LINES {
                     build_log_trimmed += &line;
                     build_log_trimmed += "\n";

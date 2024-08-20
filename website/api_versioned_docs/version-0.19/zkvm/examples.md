@@ -8,11 +8,11 @@
 - **[ECDSA signature verification]**: prove the validity of an ECDSA signature
 - **[zkEVM]**: demo of running EVM engine on the Risc Zero zkVM
 
+[ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.19/examples/ecdsa
 [Hello World]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world
 [JSON]: https://github.com/risc0/risc0/tree/release-0.19/examples/json
 [Where's Waldo]: https://github.com/risc0/risc0/tree/release-0.19/examples/waldo
 [Where's Waldo blog]: https://risczero.com/news/waldo
 [ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess
 [ZK Proof of Exploit]: https://risczero.com/news/zkpoex
-[ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.19/examples/ecdsa
 [zkEVM]: https://github.com/risc0/risc0/tree/release-0.19/examples/zkevm-demo

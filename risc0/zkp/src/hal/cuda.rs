@@ -33,10 +33,7 @@ use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
-        hash::{
-            poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
-            HashSuite,
-        },
+        hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite, HashSuite},
         log2_ceil,
     },
     FRI_FOLD,
@@ -140,52 +137,6 @@ impl CudaHash for CudaHashSha256 {
     }
 }
 
-pub struct CudaHashPoseidon {
-    suite: HashSuite<BabyBear>,
-}
-
-impl CudaHash for CudaHashPoseidon {
-    fn new(_hal: &CudaHal<Self>) -> Self {
-        CudaHashPoseidon {
-            suite: PoseidonHashSuite::new_suite(),
-        }
-    }
-
-    fn hash_fold(&self, io: &BufferImpl<Digest>, output_size: usize) {
-        let err = unsafe {
-            let input = io.as_device_ptr_with_offset(2 * output_size);
-            let output = io.as_device_ptr_with_offset(output_size);
-
-            sppark_poseidon_fold(output, input, output_size)
-        };
-        if err.code != 0 {
-            panic!("Failure during hash_fold: {err}");
-        }
-    }
-
-    fn hash_rows(&self, output: &BufferImpl<Digest>, matrix: &BufferImpl<BabyBearElem>) {
-        let row_size = output.size();
-        let col_size = matrix.size() / output.size();
-        assert_eq!(matrix.size(), col_size * row_size);
-
-        let err = unsafe {
-            sppark_poseidon_rows(
-                output.as_device_ptr(),
-                matrix.as_device_ptr(),
-                row_size as u32,
-                col_size as u32,
-            )
-        };
-        if err.code != 0 {
-            panic!("Failure during hash_rows: {err}");
-        }
-    }
-
-    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
-        &self.suite
-    }
-}
-
 pub struct CudaHashPoseidon2 {
     suite: HashSuite<BabyBear>,
 }
@@ -239,7 +190,6 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
 }
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
-pub type CudaHalPoseidon = CudaHal<CudaHashPoseidon>;
 pub type CudaHalPoseidon2 = CudaHal<CudaHashPoseidon2>;
 
 struct RawBuffer {
@@ -941,7 +891,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
 mod tests {
     use test_log::test;
 
-    use super::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
+    use super::{CudaHalPoseidon2, CudaHalSha256};
     use crate::hal::testutil;
 
     #[test]
@@ -973,16 +923,6 @@ mod tests {
     #[test]
     fn hash_fold_sha256() {
         testutil::hash_fold(CudaHalSha256::new());
-    }
-
-    #[test]
-    fn hash_rows_poseidon() {
-        testutil::hash_rows(CudaHalPoseidon::new());
-    }
-
-    #[test]
-    fn hash_fold_poseidon() {
-        testutil::hash_fold(CudaHalPoseidon::new());
     }
 
     #[test]

@@ -8,10 +8,8 @@ Welcome to the [RISC Zero] documentation! This site contains documentation for:
 
 - **[Bonsai]**:
   A software development stack that allows on-chain and off-chain applications to request and receive proofs from our zkVM.
-
 - **[The RISC Zero zkVM]**:
   A high-performance tool for proving correct execution of arbitrary code.
-
 - **[The RISC Zero Proof System]**:
   The cryptographic techniques underlying the zkVM.
 
@@ -37,12 +35,6 @@ Key among these use cases are:
 
 To enable ZK builders to thrive, we're working on two core products: the [zkVM] and [Bonsai].
 
-[startup]: https://risczero.com/news/series-a
-[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
-[RISC Zero]: https://risczero.com
-[zkVM]: ./zkvm/
-
 ## Bonsai
 
 In 2023, we released [Bonsai], a proving service that allows on-chain and off-chain applications to request and receive [zkVM] proofs.
@@ -53,7 +45,7 @@ Bonsai lets you integrate zero-knowledge proofs directly into any smart contract
 
 Our zkVM is the foundation of Bonsai and enables widespread language compatibility with support for provable Rust code and the potential for zero-knowledge provable code in any language that compiles to RISC-V like C++, Rust, Go, and more. With a combination of recursive proofs, a bespoke circuit compiler, state continuations, and continuous improvements to the proving algorithm, Bonsai enables anyone to generate highly performant ZK proofs for a variety of applications.
 
-Read more on Bonsai [here](./bonsai/bonsai-overview.md).
+[Read more on Bonsai](./bonsai/bonsai-overview.md).
 
 ## The RISC Zero zkVM
 
@@ -70,13 +62,6 @@ These applications include:
 - **[ZK Proof of Exploit]**: prove that you _could_ exploit an Ethereum account, without revealing the exploit
 - **[ECDSA signature verification]**: prove the validity of an ECDSA signature
 
-[April 2022]: https://www.risczero.com/news/announce
-[JSON]: https://github.com/risc0/risc0/tree/release-0.18/examples/json
-[Where's Waldo]: https://risczero.com/news/waldo
-[ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess
-[ZK Proof of Exploit]: https://risczero.com/news/zkpoex
-[ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.18/examples/ecdsa
-
 These examples are all made possible by **leveraging a mature software ecosystem**: over 70% of the [top 1000 Rust crates] work out-of-the-box in the zkVM.
 Being able to import Rust crates is a game changer for the ZK software world: projects that would take months or years to build on other platforms can be solved trivially on our platform.
 
@@ -84,10 +69,6 @@ In addition to being far easier to build on, we're also delivering on [performan
 The zkVM has GPU acceleration for CUDA and Metal, and with [continuations] we've enabled parallel proving of large programs.
 
 Given the ease of development and the performance, the zkVM is the clear choice for your ZK needs.
-
-[top 1000 Rust crates]: https://reports.risczero.com/crates-validation
-[performance]: https://dev.risczero.com/zkvm/benchmarks
-[continuations]: https://risczero.com/news/continuations
 
 ## Connect with us
 
@@ -97,8 +78,21 @@ You're welcome to join [our Discord community](https://discord.gg/risczero) to d
 
 Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.youtube.com/@risczero), and [sign up for our mailing list](https://fmree464va4.typeform.com/to/X3KJB85v) to get our latest announcements.
 
-[The RISC Zero zkVM]: zkvm/zkvm_overview.md
+[April 2022]: https://www.risczero.com/news/announce
 [Bonsai]: bonsai/bonsai-overview.md
-[The RISC Zero Proof System]: /proof-system
-[computational receipt]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/receipt
+[continuations]: https://risczero.com/news/continuations
 [docs.rs]: https://docs.rs/risc0-zkvm/0.18/
+[ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.18/examples/ecdsa
+[JSON]: https://github.com/risc0/risc0/tree/release-0.18/examples/json
+[our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
+[performance]: https://dev.risczero.com/zkvm/benchmarks
+[RISC Zero]: https://risczero.com
+[startup]: https://risczero.com/news/series-a
+[The RISC Zero Proof System]: /proof-system
+[The RISC Zero zkVM]: zkvm/zkvm-overview.md
+[top 1000 Rust crates]: https://reports.risczero.com/crates-validation
+[Where's Waldo]: https://risczero.com/news/waldo
+[ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess
+[zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
+[ZK Proof of Exploit]: https://risczero.com/news/zkpoex
+[zkVM]: ./zkvm/

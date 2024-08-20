@@ -52,7 +52,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-    ();
 
     let args = Args::parse();
 
@@ -78,7 +77,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Check consistency of the journal against the input Where's Waldo image.
     let journal: Journal = receipt.journal.decode()?;
-    if &journal.root != &img_merkle_tree.root() {
+    if journal.root != img_merkle_tree.root() {
         return Err(format!(
             "Image root in journal does not match the expected image: {:?} != {:?}",
             &journal.root,

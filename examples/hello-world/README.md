@@ -63,11 +63,11 @@ tutorial][tutorial]. For more materials, check out the [developer docs].
 [`src/main.rs`]: ./src/main.rs
 [Bonsai]: https://dev.bonsai.xyz
 [developer docs]: https://dev.risczero.com/zkvm
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [executes]: https://dev.risczero.com/terminology#execute
 [guest program]: https://dev.risczero.com/terminology#guest-program
-[host program]: https://dev.risczero.com/terminology#host-program
 [host]: https://dev.risczero.com/terminology#host
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[host program]: https://dev.risczero.com/terminology#host-program
 [journal]: https://dev.risczero.com/terminology#journal
 [prove]: https://dev.risczero.com/terminology#prove
 [receipt]: https://dev.risczero.com/terminology#receipt

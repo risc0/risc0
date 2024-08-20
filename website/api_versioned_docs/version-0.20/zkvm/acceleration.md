@@ -1,9 +1,9 @@
 # Cryptography Acceleration
 
-RISC Zero’s rv32im implementation includes a number of specialized extension
-circuits, including two “accelerators” for cryptographic functions: SHA-256 and
+RISC Zero's rv32im implementation includes a number of specialized extension
+circuits, including two "accelerators" for cryptographic functions: SHA-256 and
 [256-bit modular multiplication][bigint], referred to as "bigint"
-multiplication. By implementing these operations directly in the “hardware” of
+multiplication. By implementing these operations directly in the "hardware" of
 the zkVM, programs that use these accelerators execute faster and can be proven
 with significantly less resources [^1].
 
@@ -52,8 +52,7 @@ RustCrypto's secp256k1 ECDSA library. This fork starts from the base
 implementation, and changes the core operations to use the accelerated 256-bit
 modular multiplication instruction. E.g. [`FieldElement8x32R0::mul`][field-mul].
 
-[^1]:
-    This is similar to the cryptography support such as [AES-NI] or the [SHA
+[^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
@@ -67,6 +66,6 @@ modular multiplication instruction. E.g. [`FieldElement8x32R0::mul`][field-mul].
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.1..k256/v0.13.1-risczero.1
 [RustCrypto-crypto-bigint]: https://github.com/risc0/RustCrypto-crypto-bigint/tree/risczero
-[RustCrypto-hashes]: https://github.com/risc0/RustCrypto-hashes/tree/risczero
 [RustCrypto-elliptic-curves]: https://github.com/risc0/RustCrypto-elliptic-curves/tree/risczero
+[RustCrypto-hashes]: https://github.com/risc0/RustCrypto-hashes/tree/risczero
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
