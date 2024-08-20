@@ -97,21 +97,21 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
     rng.mix(&folded);
     let z = rng.random_ext_elem();
 
-    tracing::error!("test_zkr: z is {z:?}");
+    tracing::trace!("test_zkr: z is {z:?}");
 
     let program = crate::zkr::get_zkr_for_test(zkr_name)?;
 
-    tracing::error!("test_zkr: Program created from ZKR named {zkr_name:?}");
+    tracing::trace!("test_zkr: Program created from ZKR named {zkr_name:?}");
 
     let mut prover = Prover::new(program, "poseidon2");
-    tracing::error!("test_zkr: Prover made");
+    tracing::trace!("test_zkr: Prover made");
     prover.add_input(&[0u32; 8]); //control id
     prover.add_input(&z.to_u32_words());
     prover.add_input(&all_coeffs);
-    tracing::error!("test_zkr: Inputs added, all_coeffs is {all_coeffs:?}");
+    tracing::trace!("test_zkr: Inputs added, all_coeffs is {all_coeffs:?}");
     let receipt = prover.run()?;
 
-    tracing::error!("test_zkr: receipt is {receipt:?}");
+    tracing::trace!("test_zkr: receipt is {receipt:?}");
 
     risc0_zkp::verify::verify(
         &risc0_circuit_recursion::CIRCUIT,
