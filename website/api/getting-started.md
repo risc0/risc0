@@ -17,18 +17,12 @@ To harness the power of ZK, you'll need to:
     1. Build a zkVM app.
     2. Generate proofs for their zkVM app.
     3. Integrate proofs into blockchain applications."]
-
-
-
     zkvm_app["1. zkVM Application Development"]
         zkvm_quickstart["zkVM Quickstart"]
     proof_generation["2. Generating proofs for your zkVM application"]
-
     chain_integration["3. Blockchain Integration"]
         getting_proofs_on_chain["Post proofs on-chain"]
         onchain_verifier["Call our on-chain verifier"]
-
-
     dev_mode["Dev Mode
     - Skips proving enabling fast prototyping"]
     local_proving["Local Proving
@@ -36,9 +30,6 @@ To harness the power of ZK, you'll need to:
     - Important for privacy applications"]
     remote_proving["Remote Proving
     - Bonsai is a scalable proving service, <br/>ready to generate proofs as needed."]
-
-
-
     getting_started --> zkvm_app
         zkvm_app --> zkvm_quickstart
     getting_started --> proof_generation
