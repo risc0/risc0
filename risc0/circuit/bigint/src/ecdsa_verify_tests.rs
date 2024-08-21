@@ -40,17 +40,17 @@ fn golden_values() -> Vec<BigUint> {
         from_hex("1f"), // prime: 31
         from_hex("00"), // a: 0
         from_hex("03"), // b: 3
-        from_hex("01"), // base_pt_X: 1
-        from_hex("02"), // base_pt_Y: 2
+        from_hex("01"), // base_pt_x: 1
+        from_hex("02"), // base_pt_y: 2
         from_hex("2b"), // base_pt_order: 43
-        from_hex("12"), // pub_key_X: 18
-        from_hex("0a"), // pub_key_Y: 10
+        from_hex("12"), // pub_key_x: 18
+        from_hex("0a"), // pub_key_y: 10
         from_hex("05"), // msg_hash: 5
         from_hex("1b"), // r: 27
         from_hex("06"), // s: 6
         // TODO: looking for a workable Arbitrary point
-        from_hex("04"), // arbitrary_X: ?
-        from_hex("06"), // arbitrary_Y: ?
+        from_hex("04"), // arbitrary_x: ?
+        from_hex("06"), // arbitrary_y: ?
     ])
 }
 
@@ -125,26 +125,25 @@ fn test_zkr() -> anyhow::Result<()> {
     Ok(())
 }
 
-// Runs the end-to-end test using the rsa prover implementation
 #[test]
 fn prove_and_verify_ecdsa_verify() -> Result<()> {
-    let [prime, a, b, base_pt_X, base_pt_Y, base_pt_order, pub_key_X, pub_key_Y, msg_hash, r, s, arbitrary_X, arbitrary_Y] =
+    let [prime, a, b, base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
         &ECDSA_VERIFY_8,
         prime,
         a,
         b,
-        base_pt_X,
-        base_pt_Y,
+        base_pt_x,
+        base_pt_y,
         base_pt_order,
-        pub_key_X,
-        pub_key_Y,
+        pub_key_x,
+        pub_key_y,
         msg_hash,
         r,
         s,
-        arbitrary_X,
-        arbitrary_Y,
+        arbitrary_x,
+        arbitrary_y,
     );
     let zkr = crate::zkr::get_zkr("ecdsa_verify_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_8, zkr)?;
