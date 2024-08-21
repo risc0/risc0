@@ -108,10 +108,6 @@ export default async function createConfigAsync() {
         "data-domain": "risczero.com",
         defer: true,
       },
-      {
-        src: "/init-mermaid.js",
-        type: "module",
-      },
     ],
 
     themeConfig:
