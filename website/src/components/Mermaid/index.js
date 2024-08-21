@@ -1,6 +1,6 @@
 import React, { useEffect, useId } from "react";
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-import 'https://cdn.jsdelivr.net/npm/svg-pan-zoom/dist/svg-pan-zoom.min.js';
+import mermaid from 'mermaid/dist/mermaid.esm.min.mjs';
+import svgPanZoom from 'svg-pan-zoom/dist/svg-pan-zoom.min.js';
 
 mermaid.initialize({ startOnLoad: false, theme: "default" });
 

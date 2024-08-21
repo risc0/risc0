@@ -15,6 +15,7 @@ The rest of this page describes low-level details that are not necessary for use
 The end-to-end process for proof generation is shown in the following diagram.
 
 <Mermaid
+  height="580"
   definition={`
 flowchart TB
 
