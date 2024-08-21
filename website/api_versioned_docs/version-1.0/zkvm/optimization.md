@@ -65,7 +65,7 @@ cycles that have occurred in your program.
 
 As an example:
 
-<!-- NOTE: Ignored since we do not yet have a way to test guest code in docs -->
+{/* NOTE: Ignored since we do not yet have a way to test guest code in docs */}
 
 ```rust no_run title="methods/guest/src/main.rs"
 # use risc0_zkvm::guest::env;

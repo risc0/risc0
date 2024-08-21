@@ -8,7 +8,7 @@ In order to prove code using Bonsai, you need to write the code you want proven.
 
 ![Bonsai ETH Relay overview](/img/eth-relay-diagram.jpg)
 
-<!-- TODO: Modify the diagram to highlight the right zkVM portion. -->
+{/* TODO: Modify the diagram to highlight the right zkVM portion. */}
 
 The zkVM is used as an internal component of Bonsai. It is what runs your program off-chain using inputs from your smart contract call, and it is what [proves] your code was [executed] in a way anyone can [verify]. Bonsai runs most of the zkVM for you: all you need to provide is the code you want proven, which we call the zkVM [guest program].
 

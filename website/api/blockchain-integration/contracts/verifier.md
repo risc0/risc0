@@ -52,7 +52,7 @@ Contracts are not deployed for unreleased versions.
 You can use the [deployed contracts for a released version][doc-released-contracts].
 :::
 
-<!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
+{/* TODO: Move this example into risc0-ethereum such that it will be under the same version management */}
 
 [doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
