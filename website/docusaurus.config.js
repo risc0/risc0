@@ -109,9 +109,9 @@ export default async function createConfigAsync() {
         defer: true,
       },
       {
-        src:   "/init-mermaid.js",
-        type: "module"
-      }
+        src: "/init-mermaid.js",
+        type: "module",
+      },
     ],
 
     themeConfig:
