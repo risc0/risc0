@@ -1,3 +1,5 @@
+import Mermaid from "../src/components/Mermaid"
+
 # Recursive Proving
 
 RISC Zero's zkVM uses recursive proving in order to achieve unbounded computation size, constant proof size, proof aggregation, and proof composition.
@@ -12,7 +14,9 @@ The rest of this page describes low-level details that are not necessary for use
 
 The end-to-end process for proof generation is shown in the following diagram.
 
-```mermaid
+<Mermaid
+  height="580"
+  definition={`
 flowchart TB
 
 execute(".execute()")
@@ -96,7 +100,9 @@ id-->suc41("<a target="_blank" href='https://docs.rs/risc0-zkvm/latest/risc0_zkv
 suc41-->compress(".compress()")
 
 compress-->groth16("<a target="_blank" href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html'>Groth16Receipt</a>")
-```
+  `
+}
+/>
 
 To summarize the diagram:
 

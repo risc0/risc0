@@ -1,3 +1,5 @@
+import Mermaid from "../../src/components/Mermaid"
+
 # Getting Started
 
 To harness the power of ZK, you'll need to:
@@ -6,9 +8,8 @@ To harness the power of ZK, you'll need to:
 2. [Generate proofs for your zkVM application][bonsai-quickstart].
 3. [Integrate your proofs into on-chain applications][bonsai-on-eth].
 
-```mermaid
-
-flowchart TD
+<Mermaid
+  definition={`flowchart TD
     %% Level 0
     getting_started["Getting Started
     To use the zkVM and/or Bonsai for blockchain applications, users will need to:
@@ -46,11 +47,8 @@ flowchart TD
     getting_started --> chain_integration
         chain_integration --> getting_proofs_on_chain
         chain_integration --> onchain_verifier
-
-
-
-
-```
+`}
+/>
 
 [bonsai-on-eth]: ./blockchain-integration/bonsai-on-eth.md
 [bonsai-quickstart]: ./generating-proofs/proving-options.md

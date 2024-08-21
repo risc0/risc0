@@ -11,6 +11,7 @@
     "remark-preset-lint-recommended",
     "remark-preset-lint-markdown-style-guide",
     "remark-frontmatter",
+    "remark-mdx",
     "remark-gfm",
     "remark-directive",
     "remark-math",

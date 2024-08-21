@@ -48,7 +48,7 @@ You can build your example and run the prover locally with:
 cargo run --release
 ```
 
-> **Congratulations!** <br/>_That's all it takes to build and run a minimal RISC Zero application._
+> **Congratulations!** <br />_That's all it takes to build and run a minimal RISC Zero application._
 
 ## Local & Remote Proving
 

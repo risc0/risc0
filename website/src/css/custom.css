@@ -47,6 +47,21 @@
   font-weight: 500;
 }
 
+#mermaid-svg-id {
+  height: 100%;
+  width: 100%;
+}
+
+html[data-theme="light"] .mermaid-graph {
+  /* styles for mermaid graphs in light mode */
+  background: rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="dark"] .mermaid-graph {
+  /* styles for mermaid graphs in dark mode */
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .sidebar-heading {
   font-weight: bold;
   text-transform: uppercase;
