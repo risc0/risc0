@@ -3332,6 +3332,7 @@ pub fn ec_aff_add_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x6: BytePoly = def(ctx, 1, 4, 1)?;
     let x7: BytePoly = def(ctx, 1, 5, 1)?;
     let x8: BytePoly = def(ctx, 1, 6, 1)?;
+    eqz(ctx, &sub(&x4, &x4)?, 34, 1)?;
     let x9: BytePoly = add(&sub(&x6, &x3)?, &x1)?;
     let x10: BytePoly = nondet_quot(ctx, &x9, &x1, 1)?;
     let x11: BytePoly = nondet_rem(ctx, &x9, &x1, 1)?;
@@ -3436,6 +3437,7 @@ pub fn ec_aff_doub_test_8(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &sub(&add(&mul(&x41, &x3)?, &x42)?, &x40)?, 8131, 2)?;
     eqz(ctx, &sub(&x36, &x7)?, 34, 1)?;
     eqz(ctx, &sub(&x42, &x8)?, 34, 1)?;
+    eqz(ctx, &sub(&x6, &x6)?, 34, 1)?;
     return Ok(());
 }
 pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
@@ -4136,6 +4138,7 @@ pub fn ec_aff_neg_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x5: BytePoly = def(ctx, 1, 4, 1)?;
     eqz(ctx, &sub(&x1, &x4)?, 34, 1)?;
     eqz(ctx, &sub(&sub(&x0, &x2)?, &x5)?, 34, 1)?;
+    eqz(ctx, &sub(&x3, &x3)?, 34, 1)?;
     return Ok(());
 }
 pub fn ec_aff_sub_test_8(ctx: &mut BigIntContext) -> Result<()> {
@@ -4192,6 +4195,7 @@ pub fn ec_aff_sub_test_8(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &sub(&add(&mul(&x38, &x1)?, &x39)?, &x37)?, 8131, 2)?;
     eqz(ctx, &sub(&x33, &x7)?, 34, 1)?;
     eqz(ctx, &sub(&x39, &x8)?, 34, 1)?;
+    eqz(ctx, &sub(&x4, &x4)?, 34, 1)?;
     return Ok(());
 }
 pub fn ec_pts_eq_test_8(ctx: &mut BigIntContext) -> Result<()> {
@@ -4202,6 +4206,7 @@ pub fn ec_pts_eq_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x4: BytePoly = def(ctx, 1, 4, 1)?;
     eqz(ctx, &sub(&x0, &x3)?, 34, 1)?;
     eqz(ctx, &sub(&x1, &x4)?, 34, 1)?;
+    eqz(ctx, &sub(&x2, &x2)?, 34, 1)?;
     return Ok(());
 }
 bigint_program_info! {rsa_256_x1, /*iters=*/1,
