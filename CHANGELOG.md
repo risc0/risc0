@@ -1,6 +1,26 @@
 # CHANGELOG
 
 ## Next (upcoming release)
+## [v1.1.0-rc.2 (2024-08-22)](https://github.com/risc0/risc0/releases/tag/v1.1.0-rc.2)
+### 🔥 Performance Improvements
+* Improve GPU performance by 28%. For more information checkout our [reports page](https://reports.risczero.com/benchmarks#Linux-nvidia_rtx_3090_ti-succinct). (#2211)
+* Speed up building guest programs by 20x. The `risc0-build` crate is responsible for building guest programs and is invoked from Rust build scripts which is run using a dev profile by default. This results in significant overhead when computing the image ID of the guest. To speed up the build process call out to the `r0vm` binary in order to compute the image ID. (#2208)
+
+### 🛠 Fixes
+* Released Rust toolchain `r0.1.79.0-1`. This toolchain fixes a crash in the guest that appears when enabling the heap allocator in combination with `thread_local!` in the zkVM guest.
+* Clean up `risc0_core::scope!` macro used to measure performance. (#2217)
+* Clippy now works by default on host-side code for rust projects that contain risc0 guest code. To run Clippy on the host-side code for risc0 projects, specify `RISC0_SKIP_BUILD=1` as a part of the Clippy command. (#2210)
+* Add linter to website (#2096)
+
+### ⚡️ Features
+* Add `cargo risczero datasheet` command. This enables users to run performance benchmarks on their machines locally. When run on arm64 macOS, the datasheet is generated using GPU proving. When run on Linux, this command will the prover on CPU by default. (#2196)
+* Move `risc0-circuit-bigint` to risc0 repo. This is a foundational component for our accelerators. More documentation will follow as we solidify this crate and accelerators. (#2201)
+* Add examples and improve verbiage for datasheet. (#2242)
+* Add blog link and use a cleaner mermaid theme for code examples on developer documentation website. (#2190)
+### 🚨 Breaking Changes
+* The poseidon hashing function has been removed from the prover. This hashing function has been superseded by poseidon2 in the prover for a while now. For those who are using default prover configurations and the public API, this has absolutely no impact. For those who are using the old poseidon hash function to generate risc0 proofs, it is highly encouraged to switch to poseidon2 for improved performance.
+
+## [v1.1.0-rc.1 (2024-08-09)](https://github.com/risc0/risc0/releases/tag/v1.1.0-rc.1)
 
 ### 🔥 Performance Improvements
 * CUDA performance improvements. This results in about a 20-30% performance improvement. https://github.com/risc0/risc0/pull/2054
