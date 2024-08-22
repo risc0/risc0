@@ -91,7 +91,7 @@ impl TestClient {
     }
 
     fn prove(&self, env: &ExecutorEnv<'_>, opts: &ProverOpts, binary: Asset) -> Receipt {
-        with_server(self.addr, || self.client.prove(&env, opts, binary)).receipt
+        with_server(self.addr, || self.client.prove(env, opts, binary)).receipt
     }
 
     fn prove_segment(&self, opts: &ProverOpts, segment: Asset) -> SegmentReceipt {
@@ -242,11 +242,13 @@ fn lift_join_identity() {
 
     // Verify the identity_p254 succinct receipt. This is pretty ugly, but its not expected to be a
     // common operation.
-    let mut verifier_parameters = SuccinctReceiptVerifierParameters::default();
-    verifier_parameters.control_root = MerkleGroup::new(vec![BN254_IDENTITY_CONTROL_ID])
-        .unwrap()
-        .calc_root(Poseidon254HashSuite::new_suite().hashfn.as_ref());
-    verifier_parameters.inner_control_root = Some(ALLOWED_CONTROL_ROOT);
+    let verifier_parameters = SuccinctReceiptVerifierParameters {
+        control_root: MerkleGroup::new(vec![BN254_IDENTITY_CONTROL_ID])
+            .unwrap()
+            .calc_root(Poseidon254HashSuite::new_suite().hashfn.as_ref()),
+        inner_control_root: Some(ALLOWED_CONTROL_ROOT),
+        ..Default::default()
+    };
     p254_receipt
         .verify_integrity_with_context(
             &VerifierContext::empty()
@@ -258,7 +260,7 @@ fn lift_join_identity() {
         )
         .unwrap();
 
-    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
+    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes);
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 

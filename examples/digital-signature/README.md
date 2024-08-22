@@ -1,4 +1,4 @@
-# Simple digital signature
+# Simple Digital Signature
 
 A simple digital signature scheme built on the RISC Zero platform.
 
@@ -12,16 +12,15 @@ Then, run the example with:
 cargo run --release -- "This is a signed message" --passphrase="passw0rd"
 ```
 
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-
 ## Summary
 
 From [Wikipedia](https://en.wikipedia.org/wiki/Digital_signature):
+
 > A digital signature is a mathematical scheme for verifying the authenticity of
-digital messages or documents. A valid digital signature, where the
-prerequisites are satisfied, gives a recipient very high confidence that the
-message was created by a known sender (authenticity), and that the message was
-not altered in transit (integrity).
+> digital messages or documents. A valid digital signature, where the
+> prerequisites are satisfied, gives a recipient very high confidence that the
+> message was created by a known sender (authenticity), and that the message was
+> not altered in transit (integrity).
 
 This example shows how to build a simple digital signature scheme on the Risc0
 platform. In this scheme, the sender possesses a passphrase which they use to
@@ -39,3 +38,5 @@ receipt proves that the identity was computed by taking the SHA-256d of
 the signer's passphrase (i.e. not just copied). Thus the signer must possess the
 passphrase. Sending those along with the message covers the full scope of a
 typical digital signature scheme.
+
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

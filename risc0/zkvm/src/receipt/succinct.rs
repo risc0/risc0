@@ -185,6 +185,11 @@ where
         self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
     }
 
+    /// Number of bytes used by the seal for this receipt.
+    pub fn seal_size(&self) -> usize {
+        core::mem::size_of_val(self.seal.as_slice())
+    }
+
     #[cfg(feature = "prove")]
     pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
         let hash_suite = risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)

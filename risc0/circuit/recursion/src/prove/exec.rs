@@ -18,6 +18,7 @@ use crate::{CircuitImpl, Externs};
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
+use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStep, CircuitStepContext, CircuitStepHandler},
     field::{
@@ -259,8 +260,8 @@ impl CircuitStepHandler<BabyBearElem> for MachineContext {
         }
     }
 
-    #[tracing::instrument(skip(self))]
     fn sort(&mut self, _: &str) {
+        scope!("sort");
         self.wom_plonk.sort();
     }
 }
@@ -278,6 +279,7 @@ impl<'a> RecursionExecutor<'a> {
         machine: MachineContext,
         split_points: Vec<usize>,
     ) -> Self {
+        scope!("RecursionExecutor::new");
         let io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
         let executor = Executor::new(circuit, machine, zkr.po2, &io);
         Self {
@@ -287,8 +289,9 @@ impl<'a> RecursionExecutor<'a> {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<usize> {
+        scope!("execute");
+
         let used_cycles = self.zkr.code_rows();
         tracing::debug!(
             "Starting recursion code of length {}/{}",
@@ -297,7 +300,7 @@ impl<'a> RecursionExecutor<'a> {
         );
         assert!(used_cycles < self.executor.steps);
 
-        tracing::info_span!("step_exec").in_scope(|| -> Result<()> {
+        scope!("step_exec", {
             let code = self.executor.code.as_slice_sync();
             let io = self.executor.io.as_slice_sync();
             let data = self.executor.data.as_slice_sync();
@@ -331,8 +334,9 @@ impl<'a> RecursionExecutor<'a> {
                     .handler
                     .call(0, "plonkWrite", "wom", elem.as_slice(), &mut [])?;
             }
-            Ok(())
+            Result::<(), anyhow::Error>::Ok(())
         })?;
+
         self.executor.cycle = self.executor.steps - ZK_CYCLES;
         self.executor.halted = true;
         self.executor.finalize();

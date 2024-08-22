@@ -32,7 +32,7 @@ use tabled::{settings::Style, Table, Tabled};
 
 const ITERATIONS: &[(u32, u64)] = &[
     (1, 1 << 16),           // 16, 64K
-    (4 * 1024, 1 << 17),    // 17, 128K
+    (8 * 1024, 1 << 17),    // 17, 128K
     (32 * 1024, 1 << 18),   // 18, 256K
     (64 * 1024, 1 << 19),   // 19, 512K
     (128 * 1024, 1 << 20),  // 20, 1M
@@ -78,7 +78,7 @@ struct Args {
 
 fn po2_in_range(s: &str) -> Result<usize, String> {
     let po2: usize = s.parse().map_err(|_| format!("`{s}` must be an integer"))?;
-    if po2 >= MIN_PO2 && po2 <= MAX_CYCLES_PO2 {
+    if (MIN_PO2..=MAX_CYCLES_PO2).contains(&po2) {
         Ok(po2)
     } else {
         Err(format!("po2 must be in range: {MIN_PO2}-{MAX_CYCLES_PO2}",))
@@ -357,7 +357,7 @@ impl Datasheet {
         tracker().lock().unwrap().reset();
 
         let start = Instant::now();
-        let receipt = black_box(risc0_zkvm::recursion::identity_p254(&succinct_receipt).unwrap());
+        let receipt = black_box(risc0_zkvm::recursion::identity_p254(succinct_receipt).unwrap());
         let duration = start.elapsed();
 
         let ram = tracker().lock().unwrap().peak;

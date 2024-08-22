@@ -690,6 +690,7 @@ pub unsafe extern "C" fn sys_argv(
 }
 
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[deprecated]
 pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
     unsafe { sys_alloc_aligned(WORD_SIZE * nwords, WORD_SIZE) as *mut u32 }
 }

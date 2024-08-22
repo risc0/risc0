@@ -17,7 +17,10 @@ use core::cmp::max;
 use anyhow::Result;
 use rand::thread_rng;
 use rayon::prelude::*;
-use risc0_core::field::{Elem, Field};
+use risc0_core::{
+    field::{Elem, Field},
+    scope,
+};
 use tracing::debug;
 
 use crate::{
@@ -137,7 +140,7 @@ where
         let args: &[SyncSlice<F::Elem>] = &[code_buf, io_buf, data_buf];
 
         self.handler.sort("ram");
-        tracing::info_span!("step_verify_mem").in_scope(|| {
+        scope!("step_verify_mem", {
             for i in 0..self.cycle {
                 let ctx = CircuitStepContext {
                     cycle: i,
@@ -150,7 +153,7 @@ where
         });
 
         self.handler.sort("bytes");
-        tracing::info_span!("step_verify_bytes").in_scope(|| {
+        scope!("step_verify_bytes", {
             for i in 0..self.cycle {
                 let ctx = CircuitStepContext {
                     cycle: i,
@@ -163,8 +166,9 @@ where
         });
     }
 
-    #[tracing::instrument(skip_all)]
     pub fn finalize(&mut self) {
+        scope!("finalize");
+
         assert!(self.halted);
         assert_eq!(self.cycle, self.steps - ZK_CYCLES);
 

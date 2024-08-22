@@ -21,9 +21,12 @@ use cust::{
     DeviceCopy,
 };
 use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
-use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    map_pow, Elem, RootsOfUnity,
+use risc0_core::{
+    field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        map_pow, Elem, RootsOfUnity,
+    },
+    scope,
 };
 use risc0_sys::{cuda::SpparkError, CppError};
 use risc0_zkp::{
@@ -155,7 +158,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         po2: usize,
         steps: usize,
     ) {
-        nvtx::range_push!("eval_check");
+        scope!("eval_check");
 
         let ctrl = groups[REGISTER_GROUP_CTRL];
         let data = groups[REGISTER_GROUP_DATA];
@@ -201,8 +204,6 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             )
             .unwrap();
         };
-
-        nvtx::range_pop!();
     }
 
     fn accumulate(
@@ -214,7 +215,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         accum: &CudaBuffer<BabyBearElem>,
         steps: usize,
     ) {
-        nvtx::range_push!("accumulate");
+        scope!("accumulate");
 
         let count = steps - ZK_CYCLES;
 
@@ -230,7 +231,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         };
         let ctx = DeviceBox::new(&ctx).unwrap();
 
-        tracing::info_span!("step_compute_accum").in_scope(|| {
+        scope!("step_compute_accum", {
             unsafe {
                 risc0_circuit_rv32im_cuda_step_compute_accum(
                     ctx.as_device_ptr(),
@@ -246,7 +247,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             };
         });
 
-        tracing::info_span!("prefix_products").in_scope(|| {
+        scope!("prefix_products", {
             extern "C" {
                 fn sppark_calc_prefix_operation(
                     d_elems: DevicePointer<DeviceExtElem>,
@@ -278,7 +279,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             }
         });
 
-        tracing::info_span!("step_verify_accum").in_scope(|| {
+        scope!("step_verify_accum", {
             unsafe {
                 risc0_circuit_rv32im_cuda_step_verify_accum(
                     ctx.as_device_ptr(),
@@ -294,12 +295,10 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             };
         });
 
-        tracing::info_span!("zeroize").in_scope(|| {
+        scope!("zeroize", {
             self.hal.eltwise_zeroize_elem(accum);
             self.hal.eltwise_zeroize_elem(io);
         });
-
-        nvtx::range_pop!();
     }
 }
 

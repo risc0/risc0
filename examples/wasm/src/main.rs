@@ -75,7 +75,7 @@ fn run_guest(iters: i32) -> i32 {
     )
     "#;
 
-    let wasm = wat2wasm(&wat).expect("Failed to parse_str");
+    let wasm = wat2wasm(wat).expect("Failed to parse_str");
 
     let env = ExecutorEnv::builder()
         .write(&wasm)

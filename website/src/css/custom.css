@@ -38,29 +38,36 @@
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* Mermaid elements must be changed to be visible in dark mode */
-[data-theme="dark"] .mermaid .messageLine0,
-.messageLine1 {
-  filter: invert(51%) sepia(84%) saturate(405%) hue-rotate(21deg)
-    brightness(94%) contrast(91%) !important;
-}
-/* NOTE Must be a separate specification from the above or it won't toggle off */
-[data-theme="dark"] .mermaid .flowchart-link {
-  filter: invert(51%) sepia(84%) saturate(405%) hue-rotate(21deg)
-    brightness(94%) contrast(91%) !important;
-}
-[data-theme="dark"] .mermaid .cluster-label {
-  filter: invert(51%) sepia(84%) saturate(405%) hue-rotate(21deg)
-    brightness(94%) contrast(91%) !important;
-}
-[data-theme="dark"] .mermaid .messageText {
-  stroke: none !important;
-  fill: white !important;
-}
-
 /* Our additions */
 .anchor {
   scroll-margin-top: 50pt;
+}
+
+.nodeLabel {
+  font-weight: 500;
+}
+
+.sidebar-heading {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 0;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.sidebar-heading-divider {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: var(--ifm-hover-overlay);
+}
+
+[data-theme="dark"] .label-container,
+[data-theme="dark"] .navbar__logo {
+  filter: invert(1);
 }
 
 @media (max-width: 996px) {

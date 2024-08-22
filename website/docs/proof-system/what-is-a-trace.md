@@ -1,4 +1,4 @@
-# What is an Execution Trace?
+# What Is an Execution Trace?
 
 When a piece of code runs on a machine, the **execution trace** is a complete
 record of the computation: a snapshot of the full state of the machine at each

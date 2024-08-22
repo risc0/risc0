@@ -12,8 +12,6 @@ Then, run the example with:
 cargo run --release
 ```
 
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-
 ## Use Cases
 
 Verifying digital signatures is a primary method of authentication for many protocols, and ECDSA is
@@ -23,10 +21,6 @@ ECDSA signature on curve secp256k1, which is used on Ethereum and Bitcoin.
 Signature verification can be combined with other application logic for powerful results such as
 [anonymous group signatures][1], [applying transformations to authenticated data][2], and [fully succinct
 transaction ledgers][3].
-
-[1]: https://semaphore.appliedzkp.org/
-[2]: https://medium.com/@boneh/using-zk-proofs-to-fight-disinformation-17e7d57fe52f
-[3]: https://minaprotocol.com/
 
 ## Guest Acceleration
 
@@ -46,8 +40,13 @@ example of how to use the big integer accelerator circuit to speed up other cryp
 (e.g. P-256, or RSA).
 
 [^1]: About 126s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
+
 [^2]: About 17s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
 
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [RustCrypto]: https://docs.rs/k256/latest/k256/
+[1]: https://semaphore.appliedzkp.org/
+[2]: https://medium.com/@boneh/using-zk-proofs-to-fight-disinformation-17e7d57fe52f
+[3]: https://minaprotocol.com/
 [4]: methods/guest/Cargo.toml
 [5]: https://github.com/risc0/RustCrypto-elliptic-curves/pull/1

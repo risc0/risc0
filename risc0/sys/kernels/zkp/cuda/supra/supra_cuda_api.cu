@@ -7,55 +7,7 @@
 #endif
 
 #include "calc_prefix_operation.cuh"
-#include "poseidon_baby_bear/poseidon.cu"
 #include "poseidon_baby_bear/poseidon2.cu"
-
-extern "C" RustError::by_value sppark_poseidon_fold(fr_t* d_out, fr_t* d_in, size_t num_hashes) {
-  const gpu_t& gpu = select_gpu();
-
-  size_t block_size = num_hashes < 256 ? num_hashes : 256;
-  size_t num_blocks = num_hashes < 256 ? 1 : num_hashes / 256;
-  size_t shared_size = std::max(block_size, (size_t)32) * CELLS * sizeof(fr_t);
-
-  try {
-    CUDA_OK(cudaDeviceSynchronize());
-
-    _poseidon_fold<<<num_blocks, block_size, shared_size, gpu>>>(d_out, d_in);
-
-    CUDA_OK(cudaGetLastError());
-
-    gpu.sync();
-  } catch (const cuda_error& e) {
-    gpu.sync();
-    return RustError{e.code(), e.what()};
-  }
-
-  return RustError{cudaSuccess};
-}
-
-extern "C" RustError::by_value
-sppark_poseidon_rows(fr_t* d_out, fr_t* d_in, uint32_t count, uint32_t col_size) {
-  const gpu_t& gpu = select_gpu();
-
-  size_t block_size = count < 256 ? count : 256;
-  size_t num_blocks = count < 256 ? 1 : count / 256;
-  size_t shared_size = std::max(block_size, (size_t)32) * CELLS * sizeof(fr_t);
-
-  try {
-    CUDA_OK(cudaDeviceSynchronize());
-
-    _poseidon_rows<<<num_blocks, block_size, shared_size, gpu>>>(d_out, d_in, count, col_size);
-
-    CUDA_OK(cudaGetLastError());
-
-    gpu.sync();
-  } catch (const cuda_error& e) {
-    gpu.sync();
-    return RustError{e.code(), e.what()};
-  }
-
-  return RustError{cudaSuccess};
-}
 
 extern "C" RustError::by_value
 sppark_poseidon2_fold(poseidon_out_t* d_out, const poseidon_in_t* d_in, size_t num_hashes) {

@@ -29,8 +29,8 @@ type TaskNumber = usize;
 
 pub enum JobKind {
     Segment(Asset),
-    Join(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>),
-    Receipt(SuccinctReceipt<ReceiptClaim>),
+    Join(Box<(SuccinctReceipt<ReceiptClaim>, SuccinctReceipt<ReceiptClaim>)>),
+    Receipt(Box<SuccinctReceipt<ReceiptClaim>>),
 }
 
 pub struct Job {
@@ -83,7 +83,7 @@ impl TaskManager {
                 JobKind::Receipt(receipt) => receipt.clone(),
                 _ => unreachable!(),
             };
-            self.receipts.insert(job_id, receipt.clone());
+            self.receipts.insert(job_id, *receipt.clone());
             self.completed.insert(job_id);
             let ready_tasks = self.collect_ready_tasks();
             for next_task in ready_tasks {
@@ -95,7 +95,7 @@ impl TaskManager {
                 break;
             }
         }
-        root_receipt.unwrap()
+        *root_receipt.unwrap()
     }
 
     fn collect_ready_tasks(&self) -> Vec<Task> {
@@ -123,14 +123,14 @@ impl TaskManager {
                 let right = self.receipts.get(&task.depends_on[1]).unwrap();
                 Job {
                     task,
-                    kind: JobKind::Join(left.clone(), right.clone()),
+                    kind: JobKind::Join(Box::new((left.clone(), right.clone()))),
                 }
             }
             Command::Finalize => {
                 let receipt = self.receipts.get(&task.depends_on[0]).unwrap();
                 Job {
                     task,
-                    kind: JobKind::Receipt(receipt.clone()),
+                    kind: JobKind::Receipt(Box::new(receipt.clone())),
                 }
             }
         };

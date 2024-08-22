@@ -489,6 +489,8 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
 
 #[cfg(test)]
 mod tests {
+    use core::f32;
+
     use alloc::{string::String, vec::Vec};
 
     use serde::{Deserialize, Serialize};
@@ -547,7 +549,7 @@ mod tests {
             5,
             -6_i32 as u32,
             6,
-            f32::to_bits(3.14f32),
+            f32::to_bits(f32::consts::PI),
             -7_i32 as u32,
             0xffffffff,
             7,
@@ -563,7 +565,7 @@ mod tests {
             u16: 5,
             i32: -6,
             u32: 6,
-            f32: 3.14,
+            f32: f32::consts::PI,
             i64: -7,
             u64: 7,
             f64: 2.71,

@@ -216,6 +216,12 @@ impl CompositeReceipt {
             .map_err(|_: PrunedValueError| VerificationError::ReceiptFormatError)?
             .unwrap_or_default())
     }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        // NOTE: This sum cannot overflow because all seals are in memory.
+        self.segments.iter().map(|s| s.seal_size()).sum()
+    }
 }
 
 /// Verifier parameters for [CompositeReceipt][super::CompositeReceipt].
