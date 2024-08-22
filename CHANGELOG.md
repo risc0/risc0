@@ -2,7 +2,9 @@
 
 ## Next (upcoming release)
 ## [v1.1.0-rc.2 (2024-08-22)](https://github.com/risc0/risc0/releases/tag/v1.1.0-rc.2)
+
 ### 🔥 Performance Improvements
+
 * Improve GPU performance by 28%. For more information checkout our [reports page](https://reports.risczero.com/benchmarks#Linux-nvidia_rtx_3090_ti-succinct). (#2211)
 * Speed up null builds of guest programs by 20x. (#2208)
 
