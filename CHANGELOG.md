@@ -7,6 +7,7 @@
 * Speed up null builds of guest programs by 20x. (#2208)
 
 ### 🛠 Fixes
+
 * Released Rust toolchain `r0.1.79.0-1`. This toolchain fixes a crash in the guest that appears when enabling the heap allocator in combination with `thread_local!` in the zkVM guest.
 * Clean up `risc0_core::scope!` macro used to measure performance. (#2217)
 * Clippy now works by default on host-side code for rust projects that contain risc0 guest code. To run Clippy on the host-side code for risc0 projects, specify `RISC0_SKIP_BUILD=1` as a part of the Clippy command. (#2210)
