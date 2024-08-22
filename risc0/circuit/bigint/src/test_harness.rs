@@ -63,8 +63,6 @@ pub(crate) fn test_witgen(
 }
 
 pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
-    tracing::error!("Hello world!!!");
-
     let hash_suite = Poseidon2HashSuite::new_suite();
 
     let mut all_coeffs: Vec<u32> = Vec::new();
@@ -92,31 +90,28 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
     }
 
     let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
-    tracing::error!("public_digest: {public_digest}");
     let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
-    tracing::error!("private_digest: {private_digest}");
     let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
-    tracing::error!("folded: {folded}");
 
     let mut rng = hash_suite.rng.new_rng();
     rng.mix(&folded);
     let z = rng.random_ext_elem();
 
-    tracing::error!("chkpt A");
+    tracing::trace!("test_zkr: z is {z:?}");
 
     let program = crate::zkr::get_zkr_for_test(zkr_name)?;
-    tracing::error!("chkpt B");
 
-    tracing::error!("z is {z:?}");
-    tracing::error!("all_coeffs is {all_coeffs:?}");
+    tracing::trace!("test_zkr: Program created from ZKR named {zkr_name:?}");
+
     let mut prover = Prover::new(program, "poseidon2");
+    tracing::trace!("test_zkr: Prover made");
     prover.add_input(&[0u32; 8]); //control id
     prover.add_input(&z.to_u32_words());
     prover.add_input(&all_coeffs);
+    tracing::trace!("test_zkr: Inputs added, all_coeffs is {all_coeffs:?}");
     let receipt = prover.run()?;
-    tracing::error!("chkpt C");
 
-    tracing::error!("Test receipt: {receipt:?}");
+    tracing::trace!("test_zkr: receipt is {receipt:?}");
 
     risc0_zkp::verify::verify(
         &risc0_circuit_recursion::CIRCUIT,

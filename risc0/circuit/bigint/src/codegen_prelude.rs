@@ -60,6 +60,18 @@ pub fn nondet_rem(
     Ok(out)
 }
 
+pub fn nondet_inv(
+    ctx: &mut BigIntContext,
+    lhs: &BytePoly,
+    rhs: &BytePoly,
+    coeffs: usize,
+) -> Result<BytePoly> {
+    let out = lhs.nondet_inv(rhs, coeffs);
+    trace!("inv: {out}");
+    ctx.private_witness.push(out.clone());
+    Ok(out)
+}
+
 pub fn add(lhs: &BytePoly, rhs: &BytePoly) -> Result<BytePoly> {
     let out = lhs + rhs;
     trace!("add: {out}");
