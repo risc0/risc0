@@ -4,7 +4,7 @@
 ## [v1.1.0-rc.2 (2024-08-22)](https://github.com/risc0/risc0/releases/tag/v1.1.0-rc.2)
 ### 🔥 Performance Improvements
 * Improve GPU performance by 28%. For more information checkout our [reports page](https://reports.risczero.com/benchmarks#Linux-nvidia_rtx_3090_ti-succinct). (#2211)
-* Speed up building guest programs by 20x. The `risc0-build` crate is responsible for building guest programs and is invoked from Rust build scripts which is run using a dev profile by default. This results in significant overhead when computing the image ID of the guest. To speed up the build process call out to the `r0vm` binary in order to compute the image ID. (#2208)
+* Speed up null builds of guest programs by 20x. (#2208)
 
 ### 🛠 Fixes
 * Released Rust toolchain `r0.1.79.0-1`. This toolchain fixes a crash in the guest that appears when enabling the heap allocator in combination with `thread_local!` in the zkVM guest.
