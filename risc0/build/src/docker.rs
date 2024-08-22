@@ -145,7 +145,7 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0")
+        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-2")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -250,7 +250,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "4f790fdbe2c982c3dea8fb8cbaddf8a98b946fddd09a48b30ddb437cffa913f3",
+            "4679ebca21b61281042d78eb53d5243f14fa08b3ded8bce84e581a29bbd0ead1",
         );
     }
 }
