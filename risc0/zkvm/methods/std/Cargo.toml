@@ -32,3 +32,8 @@ release = false
 [features]
 test_feature1 = []
 test_feature2 = []
+test_feature3 = []
+
+[[bin]]
+name = "test_required_features"
+required-features = ["test_feature3"]
