@@ -25,6 +25,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
     BLST_ELF, HEAP_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -1157,6 +1158,16 @@ fn heap_alloc() {
         .build()
         .unwrap();
     let session = ExecutorImpl::from_elf(env, HEAP_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
+fn heap_bug_zkvm_527() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let session = ExecutorImpl::from_elf(env, ZKVM_527_ELF)
         .unwrap()
         .run()
         .unwrap();
