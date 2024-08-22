@@ -1,12 +1,11 @@
 import React, { useEffect, useId } from "react";
 import mermaid from "../../../node_modules/mermaid/dist/mermaid.esm.min.mjs";
 import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
-import { useColorMode } from '@docusaurus/theme-common';
+import { useColorMode } from "@docusaurus/theme-common";
 
 export default function Mermaid({ definition, height = 280 }) {
   const id = useId();
   const isDarkTheme = useColorMode().colorMode === "dark";
-
 
   useEffect(() => {
     if (ExecutionEnvironment.canUseDOM) {
@@ -17,7 +16,7 @@ export default function Mermaid({ definition, height = 280 }) {
               `#${CSS.escape(id)}-mermaid`,
             );
 
-            console.log('mermaid.initialize', mermaid);
+            console.log("mermaid.initialize", mermaid);
 
             mermaid.initialize({
               theme: "dark",
@@ -42,18 +41,18 @@ export default function Mermaid({ definition, height = 280 }) {
 
           drawDiagram();
         })
-        .catch((console.error));
+        .catch(console.error);
     }
   }, [isDarkTheme]);
 
   return (
     <>
-    <div>{isDarkTheme ? 'Dark' : 'Light'}</div>
-    <div
-      id={`${id}-mermaid`}
-      className="mermaid-graph"
-      style={{ height: Number(height), borderRadius: 12 }}
-    />
+      <div>{isDarkTheme ? "Dark" : "Light"}</div>
+      <div
+        id={`${id}-mermaid`}
+        className="mermaid-graph"
+        style={{ height: Number(height), borderRadius: 12 }}
+      />
     </>
   );
 }
