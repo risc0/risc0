@@ -14,7 +14,7 @@
 
 ### ⚡️ Features
 * Add `cargo risczero datasheet` command. This enables users to run performance benchmarks on their machines locally. When run on arm64 macOS, the datasheet is generated using GPU proving. When run on Linux, this command will the prover on CPU by default. (#2196)
-* Move `risc0-circuit-bigint` to risc0 repo. This is a foundational component for our accelerators. More documentation will follow as we solidify this crate and accelerators. (#2201)
+* Add the `risc0-circuit-bigint` crate. This is a foundational component for our accelerators. More documentation will follow as we solidify this crate and accelerators. (#2201)
 * Add examples and improve verbiage for datasheet. (#2242)
 * Add blog link and use a cleaner mermaid theme for code examples on developer documentation website. (#2190)
 ### 🚨 Breaking Changes
