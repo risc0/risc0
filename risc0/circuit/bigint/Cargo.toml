@@ -1,5 +1,6 @@
 [package]
 name = "risc0-circuit-bigint"
+description = "RISC Zero Circuit for Big Integer Computation"
 version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
