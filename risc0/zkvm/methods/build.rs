@@ -38,7 +38,6 @@ fn main() {
     };
 
     let map = HashMap::from([
-        ("risc0-zkvm-methods-cfg", GuestOptions::default()),
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
@@ -53,7 +52,6 @@ fn main() {
                 ..Default::default()
             },
         ),
-        ("risc0-zkvm-methods-cpp-crates", GuestOptions::default()),
     ]);
 
     embed_methods_with_options(map);
