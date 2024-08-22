@@ -17,8 +17,10 @@
 * Add the `risc0-circuit-bigint` crate. This is a foundational component for our accelerators. More documentation will follow as we solidify this crate and accelerators. (#2201)
 * Add examples and improve verbiage for datasheet. (#2242)
 * Add blog link and use a cleaner mermaid theme for code examples on developer documentation website. (#2190)
+
 ### 🚨 Breaking Changes
-* The poseidon hashing function has been removed from the prover. This hashing function has been superseded by poseidon2 in the prover for a while now. For those who are using default prover configurations and the public API, this has absolutely no impact. For those who are using the old poseidon hash function to generate risc0 proofs, it is highly encouraged to switch to poseidon2 for improved performance.
+
+* Drop the obsolete and unused poseidon hashing function, which has been superseded by poseidon2.
 
 ## [v1.1.0-rc.1 (2024-08-09)](https://github.com/risc0/risc0/releases/tag/v1.1.0-rc.1)
 
