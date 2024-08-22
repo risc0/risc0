@@ -22,9 +22,6 @@ pub use crate::generated::ECDSA_VERIFY_8;
 /// Construct a bigint claim of an ECDSA Verification  // TODO: From here
 pub fn claim(
     prog_info: &BigIntProgram,
-    prime: BigUint,
-    a: BigUint,
-    b: BigUint,
     base_pt_x: BigUint,
     base_pt_y: BigUint,
     base_pt_order: BigUint,
@@ -37,9 +34,6 @@ pub fn claim(
     arbitrary_y: BigUint,
 ) -> BigIntClaim {
     BigIntClaim::from_biguints(prog_info, &[
-        prime,
-        a,
-        b,
         base_pt_x,
         base_pt_y,
         base_pt_order,

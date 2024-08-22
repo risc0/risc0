@@ -37,9 +37,6 @@ fn from_hex(s: &str) -> BigUint {
 fn golden_values() -> Vec<BigUint> {
     // TODO: Better test values
     Vec::from([
-        from_hex("1f"), // prime: 31
-        from_hex("00"), // a: 0
-        from_hex("03"), // b: 3
         from_hex("01"), // base_pt_x: 1
         from_hex("02"), // base_pt_y: 2
         from_hex("2b"), // base_pt_order: 43
@@ -127,13 +124,10 @@ fn test_zkr() -> anyhow::Result<()> {
 
 #[test]
 fn prove_and_verify_ecdsa_verify() -> Result<()> {
-    let [prime, a, b, base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+    let [base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
         &ECDSA_VERIFY_8,
-        prime,
-        a,
-        b,
         base_pt_x,
         base_pt_y,
         base_pt_order,
