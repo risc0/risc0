@@ -45,9 +45,8 @@ fn golden_values() -> Vec<BigUint> {
         from_hex("05"), // msg_hash: 5
         from_hex("1b"), // r: 27
         from_hex("06"), // s: 6
-        // TODO: looking for a workable Arbitrary point
-        from_hex("04"), // arbitrary_x: ?
-        from_hex("06"), // arbitrary_y: ?
+        from_hex("04"), // arbitrary_x: 4
+        from_hex("06"), // arbitrary_y: 6
     ])
 }
 
