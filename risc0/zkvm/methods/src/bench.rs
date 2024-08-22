@@ -42,6 +42,7 @@ pub enum BenchmarkSpec {
     },
     Read,
     ReadFramed,
+    #[cfg(feature = "std")]
     ReadBuffered,
     #[cfg(feature = "std")]
     Bincode,
@@ -97,6 +98,7 @@ impl BenchmarkSpec {
                 let claims: Vec<ReceiptClaim> = env::read_framed().unwrap();
                 memory_barrier(&claims);
             }
+            #[cfg(feature = "std")]
             BenchmarkSpec::ReadBuffered => {
                 let claims: Vec<ReceiptClaim> = env::read_buffered().unwrap();
                 memory_barrier(&claims);
