@@ -328,11 +328,21 @@ fn get_env_var(name: &str) -> String {
 }
 
 /// Returns all methods associated with the given guest crate.
-fn guest_methods<G: GuestBuilder>(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<G> {
+fn guest_methods<G: GuestBuilder>(
+    pkg: &Package,
+    target_dir: impl AsRef<Path>,
+    guest_features: &[String],
+) -> Vec<G> {
     let profile = if is_debug() { "debug" } else { "release" };
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
+        .filter(|target| {
+            target
+                .required_features
+                .iter()
+                .all(|required_feature| guest_features.contains(required_feature))
+        })
         .map(|target| {
             G::build(
                 &target.name,
@@ -745,7 +755,7 @@ fn do_embed_methods<G: GuestBuilder>(
             guest_methods_docker(&guest_pkg, &guest_dir)
         } else {
             build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
-            guest_methods(&guest_pkg, &guest_dir)
+            guest_methods(&guest_pkg, &guest_dir, &guest_build_opts.features)
         };
 
         for method in methods {
