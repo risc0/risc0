@@ -33,6 +33,8 @@ pub use guest::*;
 pub(crate) mod control_id;
 
 #[cfg(test)]
+mod ec_tests;
+#[cfg(test)]
 mod ecdsa_verify_tests;
 #[cfg(test)]
 mod op_tests;
