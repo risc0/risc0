@@ -1,13 +1,18 @@
 # CHANGELOG
 
 ## Next (upcoming release)
-
 ### 🔥 Performance Improvements
+
+* Improve GPU performance by 28%. For more information checkout our [reports page](https://reports.risczero.com/benchmarks#Linux-nvidia_rtx_3090_ti-succinct). https://github.com/risc0/risc0/pull/2211
+* Speed up null builds of guest programs by 20x. https://github.com/risc0/risc0/pull/2208
 * CUDA performance improvements. This results in about a 20-30% performance improvement. https://github.com/risc0/risc0/pull/2054
 * Add recursion preflight support for checked bytes/bigint https://github.com/risc0/risc0/pull/1973
 
 ### 🛠 Fixes
 
+* Released Rust toolchain `r0.1.79.0-1`. This toolchain fixes a crash in the guest that appears when enabling the heap allocator in combination with `thread_local!` in the zkVM guest.
+* Clippy now works by default on host-side code for rust projects that contain risc0 guest code. To run Clippy on the host-side code for risc0 projects, specify `RISC0_SKIP_BUILD=1` as a part of the Clippy command. https://github.com/risc0/risc0/pull/2210
+* Add linter to website https://github.com/risc0/risc0/pull/2096
 * Improve zero-knowledge property of the prover by increasing the amount of noise. We have used techniques described in this [paper](https://eprint.iacr.org/2024/1037.pdf) to strengthen the ZK property of the prover. See [these docs](https://dev.risczero.com/api/security-model#zero-knowledge-proving) for more information about zero knowledge and our proving system. This change results in a new set of control IDs. See the breaking changes section to learn more about this minor breaking change. https://github.com/risc0/risc0/pull/1970
 * Fix template generation for `--nostd` mode. https://github.com/risc0/risc0/pull/2030
 * Serializer: fix serialization of types such as `chronos::NaiveDate` that call into `collect_str`. https://github.com/risc0/risc0/pull/2035
@@ -16,6 +21,11 @@
 
 ### ⚡️ Features
 
+* Add `cargo risczero datasheet` command. This enables users to run performance benchmarks on their machines locally. https://github.com/risc0/risc0/pull/2196
+* Add the `risc0-circuit-bigint` crate. This is a foundational component for our accelerators. More documentation will follow as we solidify this crate and accelerators. https://github.com/risc0/risc0/pull/2201
+* Add examples and improve verbiage for datasheet.  https://github.com/risc0/risc0/pull/2242
+* Add a `risc0_core::scope!` macro used to measure performance. https://github.com/risc0/risc0/pull/2217 https://github.com/risc0/risc0/pull/2211
+* Add blog link and use a cleaner mermaid theme for code examples on developer documentation website. https://github.com/risc0/risc0/pull/2190
 * Add "light builds". A new faster way to build guest programs intended for development only. This will allow the user to build the guest without linking the emitted ELF bytes. https://github.com/risc0/risc0/pull/2166
 * Add an optional embedded allocator to the zkVM guest. By default, the zkvm uses an allocator that does not deallocate heap memory. The embedded allocator deallocates and is useful for situations where the guest runs out of memory. If used, this allocator will result in an increased amount of cycles due to the extra operations necessary to deallocate memory. https://github.com/risc0/risc0/pull/2174
 * Add experimental support for `sys_fork`. This syscall allows the zkVM to execute unconstrained code. The RISC-V code executed within this system call will not be encoded as a part of the trace execution. This can be used to implement hints and advice. For example, the square root of two can be computed using `sys_fork` and the solution can be verified in the guest by checking that the square of this solution is equal to two. https://github.com/risc0/risc0/pull/2084
