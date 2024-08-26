@@ -475,112 +475,112 @@ jobs:
         working-directory: tools/crates-validator
       - run: sccache --show-stats
 
-  # crates-validation:
-  #   if: needs.changes.outputs.crates-validation == 'true'
-  #   needs: changes
-  #   runs-on: [self-hosted, prod, Linux, cpu]
-  #   env:
-  #     RUST_BACKTRACE: full
-  #     RUST_LOG: info
-  #     TOP_N_CRATES: 10
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./.github/actions/rustup
-  #     - uses: ./.github/actions/sccache
-  #     - run: cargo install --force --path risc0/cargo-risczero
-  #     - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
-  #     - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     - run: cargo build --release
-  #       working-directory: tools/crates-validator/
-  #     - name: Create working directory
-  #       run: mkdir -p ${{ runner.temp }}/crate-validation/
-  #     - name: Generate the profile
-  #       run: |
-  #         target/release/gen-profiles \
-  #         -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
-  #         -o ${{ runner.temp }}/crate-validation/profiles.yaml \
-  #         -c $TOP_N_CRATES
-  #       working-directory: tools/crates-validator/
-  #     - name: Validate profiles
-  #       run: |
-  #         target/release/main \
-  #         -p ${{ github.workspace }} \
-  #         -P ${{ runner.temp }}/crate-validation/profiles.yaml \
-  #         -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
-  #       shell: bash
-  #       working-directory: tools/crates-validator/
-  #     - name: Delete input profile
-  #       run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
-  #     - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
-  #       if: always()
-  #     - run: sccache --show-stats
+  crates-validation:
+    if: needs.changes.outputs.crates-validation == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      RUST_BACKTRACE: full
+      RUST_LOG: info
+      TOP_N_CRATES: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - run: cargo install --force --path risc0/cargo-risczero
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo build --release
+        working-directory: tools/crates-validator/
+      - name: Create working directory
+        run: mkdir -p ${{ runner.temp }}/crate-validation/
+      - name: Generate the profile
+        run: |
+          target/release/gen-profiles \
+          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
+          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -c $TOP_N_CRATES
+        working-directory: tools/crates-validator/
+      - name: Validate profiles
+        run: |
+          target/release/main \
+          -p ${{ github.workspace }} \
+          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+        shell: bash
+        working-directory: tools/crates-validator/
+      - name: Delete input profile
+        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
+      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
+        if: always()
+      - run: sccache --show-stats
 
-  # browser:
-  #   if: needs.changes.outputs.browser == 'true'
-  #   needs: changes
-  #   runs-on: [self-hosted, prod, Linux, cpu]
-  #   env:
-  #     RISC0_BUILD_LOCKED: 1
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: browser-actions/setup-firefox@v1
-  #     - run: firefox --version
-  #     - uses: ./.github/actions/rustup
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
-  #     - uses: ./.github/actions/sccache
-  #       with:
-  #         key: Linux-default
-  #     - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
-  #     - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-  #     - run: cargo xtask install
-  #     - run: cargo xtask gen-receipt
-  #     - run: |
-  #         npm install
-  #         npm test -- --firefox
-  #       working-directory: examples/browser-verify
-  #     - run: sccache --show-stats
+  browser:
+    if: needs.changes.outputs.browser == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      RISC0_BUILD_LOCKED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: browser-actions/setup-firefox@v1
+      - run: firefox --version
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo xtask install
+      - run: cargo xtask gen-receipt
+      - run: |
+          npm install
+          npm test -- --firefox
+        working-directory: examples/browser-verify
+      - run: sccache --show-stats
 
-  # docker:
-  #   if: needs.changes.outputs.test == 'true'
-  #   needs: changes
-  #   runs-on: [self-hosted, prod, Linux, cpu, docker]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         lfs: true
-  #     - run: git lfs pull
-  #     - uses: ./.github/actions/rustup
-  #     - uses: ./.github/actions/sccache
-  #       with:
-  #         key: Linux-default
-  #     - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
-  #     - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-  #     - run: cargo test -p risc0-build -F docker
-  #     - run: cargo test -p risc0-groth16 -F prove --release
-  #     - run: cargo test -p risc0-zkvm -F docker -F prove -- docker
-  #       env:
-  #         RISC0_USE_DOCKER: "1"
-  #     - run: sccache --show-stats
+  docker:
+    if: needs.changes.outputs.test == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu, docker]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
+      - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
+      - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
+      - run: cargo test -p risc0-build -F docker
+      - run: cargo test -p risc0-groth16 -F prove --release
+      - run: cargo test -p risc0-zkvm -F docker -F prove -- docker
+        env:
+          RISC0_USE_DOCKER: "1"
+      - run: sccache --show-stats
 
-  # web:
-  #   if: needs.changes.outputs.web == 'true'
-  #   needs: changes
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: 🍞 Setup Bun
-  #       uses: risc0/setup-bun@v1.2.1
-  #       with:
-  #         bun-version: 1.1.21
-  #     - run: bun install
-  #       working-directory: web
-  #     - run: bun run ci
-  #       working-directory: web
-  #     - run: bun run typecheck
-  #       working-directory: web
-  #     - run: bun run test
-  #       working-directory: web
+  web:
+    if: needs.changes.outputs.web == 'true'
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 🍞 Setup Bun
+        uses: risc0/setup-bun@v1.2.1
+        with:
+          bun-version: 1.1.21
+      - run: bun install
+        working-directory: web
+      - run: bun run ci
+        working-directory: web
+      - run: bun run typecheck
+        working-directory: web
+      - run: bun run test
+        working-directory: web
