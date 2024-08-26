@@ -91,8 +91,8 @@ bigint_tests! {
         ["01", "0b"],
         [343779641, 1140264970, 300416676, 725384026]
     ),
-    ec_aff_mul1_test_8(
-        ec_aff_mul_test_8,
+    ec_aff_mul1_test_5(
+        ec_aff_mul_test_5,
         [
             "06",   // inp_x:       6
             "04",   // inp_y:       4
@@ -103,7 +103,7 @@ bigint_tests! {
             "06",   // expected_x:  6
             "04",   // expected_y:  4
         ],
-        ["07", "04", "0b00", "06", "04", "07", "07"],  // TODO: Unconvinced these numbers are right
+        ["06", "04", "01", "00", "0a", "0b00", "06", "04"],  // TODO: Unconvinced these numbers are right
         [
             "01", "03", "c3c3", "1f1f", "00", "0a", "c3c3", "1f1f", "0a", "090000", "01", "43434343",
             "5f5f5f5f", "22", "020000", "08", "43434343", "5f5f5f5f", "050000", "01", "43434343",
@@ -114,8 +114,8 @@ bigint_tests! {
         ["01"],
         [346372436, 1604795053, 31129203, 246390035]
     ),
-    ec_aff_mul2_test_8(
-        ec_aff_mul_test_8,
+    ec_aff_mul2_test_5(
+        ec_aff_mul_test_5,
         [
             "06",   // inp_x:       6
             "04",   // inp_y:       4
@@ -126,7 +126,7 @@ bigint_tests! {
             "00",   // expected_x:  0
             "01",   // expected_y:  1
         ],
-        ["07", "04", "0b00", "06", "04", "07", "07"],  // TODO: Unconvinced these numbers are right
+        ["06", "04", "02", "08", "05", "0b00", "00", "01"],  // TODO: Unconvinced these numbers are right
         [
             "01", "03", "c3c3", "1f1f", "00", "0a", "c3c3", "1f1f", "0a", "090000", "01", "43434343",
             "5f5f5f5f", "22", "020000", "08", "43434343", "5f5f5f5f", "050000", "01", "43434343",
