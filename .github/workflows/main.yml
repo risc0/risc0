@@ -178,15 +178,11 @@ jobs:
   clippy:
     if: needs.changes.outputs.risc0 == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: Linux
-            feature: default
-          - os: Linux
-            feature: cuda
           - os: macOS
             feature: default
     env:
@@ -213,17 +209,11 @@ jobs:
   test:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: Linux
-            feature: default
-            device: cpu
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_a5000
           - os: macOS
             feature: default
             device: apple_m2_pro
@@ -278,17 +268,11 @@ jobs:
   examples:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, test, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: Linux
-            feature: default
-            device: cpu
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_a5000
           - os: macOS
             feature: default
             device: apple_m2_pro
@@ -356,7 +340,7 @@ jobs:
   doc:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -373,7 +357,7 @@ jobs:
   docs-rs:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
     steps:
@@ -394,7 +378,7 @@ jobs:
   check-external:
     if: needs.changes.outputs.check-external == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -408,11 +392,11 @@ jobs:
   check-semver:
     if: needs.changes.outputs.check-semver == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
+        os: [macOS]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -441,11 +425,11 @@ jobs:
   check-template:
     if: needs.changes.outputs.check-template == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    runs-on: [self-hosted, test, cpu, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
+        os: [macOS]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -478,7 +462,7 @@ jobs:
   crates-validator:
     if: needs.changes.outputs.crates-validator == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
