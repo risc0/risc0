@@ -208,7 +208,7 @@ cycles per page, or 1.35 cycles per byte.
 In order to support continuation after the segment ends (i.e. the zkVM
 "hibernates"), it needs to **page-out** pages that were modified. Paging-out
 takes the same number of operations as paging-in, so for the first time any
-given page is written to in a segment, there is an page-out cost of 1094 to 5130
+given page is written to in a segment, there is a page-out cost of 1094 to 5130
 cycles.
 
 If, after profiling your application, you learn page-in and page-out operations

@@ -170,7 +170,7 @@ constexpr inline FpExt inv(FpExt in) {
 #define a in.elems
   // Compute the multiplicative inverse by basically looking at FpExt as a composite field and using
   // the same basic methods used to invert complex numbers.  We imagine that initially we have a
-  // numerator of 1, and an denominator of a. i.e out = 1 / a; We set a' to be a with the first and
+  // numerator of 1, and a denominator of a. i.e out = 1 / a; We set a' to be a with the first and
   // third components negated.  We then multiply the numerator and the denominator by a', producing
   // out = a' / (a * a'). By construction (a * a') has 0's in it's first and third elements.  We
   // call this number, 'b' and compute it as follows.

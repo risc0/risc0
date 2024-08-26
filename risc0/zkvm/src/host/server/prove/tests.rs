@@ -829,8 +829,8 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_integrity_halt_1() {
-        // Generate a receipt for a execution ending in a guest error indicated by
-        // ExitCode::Halted(1).
+        // Generate a receipt for an execution ending in a guest error indicated
+        // by ExitCode::Halted(1).
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
