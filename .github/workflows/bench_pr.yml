@@ -42,19 +42,13 @@ jobs:
 
   bench:
     runs-on:
-      labels: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+      labels: [self-hosted, test, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
     if: needs.changes.outputs.trigger-bench == 'true'
     needs: changes
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: Linux
-            feature: prove
-            device: cpu
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_3090_ti
           - os: macOS
             feature: prove
             device: apple_m2_pro
