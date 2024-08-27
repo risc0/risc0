@@ -713,6 +713,32 @@ impl VerifierContext {
         ])
     }
 
+    /// Construct a verifier context that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(po2_max: usize) -> Self {
+        Self {
+            suites: Self::default_hash_suites(),
+            segment_verifier_parameters: Some(SegmentReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+            succinct_verifier_parameters: Some(SuccinctReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+            groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+        }
+    }
+
+    /// Construct a verifier context that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
+
     /// Return [VerifierContext] with the given map of hash suites.
     pub fn with_suites(mut self, suites: BTreeMap<String, HashSuite<BabyBear>>) -> Self {
         self.suites = suites;

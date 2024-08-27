@@ -277,8 +277,10 @@ pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars:
-        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    pub env_vars: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]
@@ -331,6 +333,8 @@ pub struct ProverOpts {
     pub receipt_kind: i32,
     #[prost(message, repeated, tag = "4")]
     pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
+    #[prost(uint64, tag = "5")]
+    pub segment_po2_max: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
