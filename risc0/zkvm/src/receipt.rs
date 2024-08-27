@@ -256,6 +256,11 @@ impl Receipt {
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         self.inner.claim()
     }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        self.inner.seal_size()
+    }
 }
 
 /// A record of the public commitments for a proven zkVM execution.
@@ -374,6 +379,16 @@ impl InnerReceipt {
             Self::Groth16(ref inner) => inner.verifier_parameters,
             Self::Succinct(ref inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
+        }
+    }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        match self {
+            Self::Composite(receipt) => receipt.seal_size(),
+            Self::Succinct(receipt) => receipt.seal_size(),
+            Self::Groth16(receipt) => receipt.seal_size(),
+            Self::Fake(_) => 0,
         }
     }
 }
@@ -637,6 +652,16 @@ impl InnerAssumptionReceipt {
             Self::Groth16(ref inner) => inner.verifier_parameters,
             Self::Succinct(ref inner) => inner.verifier_parameters,
             Self::Fake(_) => Digest::ZERO,
+        }
+    }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        match self {
+            Self::Composite(receipt) => receipt.seal_size(),
+            Self::Succinct(receipt) => receipt.seal_size(),
+            Self::Groth16(receipt) => receipt.seal_size(),
+            Self::Fake(_) => 0,
         }
     }
 }

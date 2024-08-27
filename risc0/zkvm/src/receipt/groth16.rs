@@ -114,6 +114,11 @@ where
             verifier_parameters: self.verifier_parameters,
         }
     }
+
+    /// Number of bytes used by the seal for this receipt.
+    pub fn seal_size(&self) -> usize {
+        core::mem::size_of_val(self.seal.as_slice())
+    }
 }
 
 /// Verifier parameters used to verify a [Groth16Receipt].
