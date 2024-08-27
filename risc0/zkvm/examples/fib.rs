@@ -95,7 +95,7 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
             .unwrap()
             .segments
             .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
+            .fold(0, |acc, segment| acc + segment.seal_size())
     };
 
     Metrics {
