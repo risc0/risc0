@@ -374,7 +374,6 @@ impl Loader {
     pub fn compute_control_id_table<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<(String, Digest)> {
         // Make the digest for each level
         let mut table = Vec::new();
-        // TODO: Should we actually return up to po2 24 here?
         for po2 in MIN_CYCLES_PO2..=MAX_CYCLES_PO2 {
             table.push((
                 format!("rv32im po2={po2}"),
