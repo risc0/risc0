@@ -91,8 +91,8 @@ bigint_tests! {
         ["01", "0b"],
         [343779641, 1140264970, 300416676, 725384026]
     ),
-    ec_aff_mul1_test_5(
-        ec_aff_mul_test_5,
+    ec_aff_mul1_test_8(
+        ec_aff_mul_test_8,
         [
             "06",   // inp_x:       6
             "04",   // inp_y:       4
@@ -114,8 +114,8 @@ bigint_tests! {
         ["01"],
         [346372436, 1604795053, 31129203, 246390035]
     ),
-    ec_aff_mul2_test_5(
-        ec_aff_mul_test_5,
+    ec_aff_mul2_test_8(
+        ec_aff_mul_test_8,
         [
             "06",   // inp_x:       6
             "04",   // inp_y:       4
