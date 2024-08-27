@@ -140,7 +140,7 @@ impl Groth16ReceiptVerifierParameters {
     #[stability::unstable]
     pub fn from_max_po2(po2_max: usize) -> Self {
         Self {
-            control_root: allowed_control_root("poseidon2", po2_max),
+            control_root: allowed_control_root("poseidon2", po2_max).unwrap(),
             bn254_control_id: BN254_IDENTITY_CONTROL_ID,
             verifying_key: risc0_groth16::verifying_key(),
         }
