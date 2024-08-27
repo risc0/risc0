@@ -222,11 +222,6 @@ export default {
 					href: "https://hackenproof.com/programs/risc-zero-zkvm",
 				},
 				{
-					type: "link",
-					label: "Rekt Test",
-					href: "https://www.risczero.com/blog/risc-zero-take-the-rekt-test",
-				},
-				{
 					type: "doc",
 					label: "Cryptographic Security Model",
 					id: "security-model",
