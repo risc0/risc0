@@ -240,6 +240,27 @@ pub struct CompositeReceiptVerifierParameters {
     pub groth16: MaybePruned<Groth16ReceiptVerifierParameters>,
 }
 
+impl CompositeReceiptVerifierParameters {
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(po2_max: usize) -> Self {
+        Self {
+            segment: MaybePruned::Value(SegmentReceiptVerifierParameters::from_max_po2(po2_max)),
+            succinct: MaybePruned::Value(SuccinctReceiptVerifierParameters::from_max_po2(po2_max)),
+            groth16: MaybePruned::Value(Groth16ReceiptVerifierParameters::from_max_po2(po2_max)),
+        }
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
+}
+
 impl Digestible for CompositeReceiptVerifierParameters {
     /// Hash the [Groth16ReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {

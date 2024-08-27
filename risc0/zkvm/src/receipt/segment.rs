@@ -18,10 +18,7 @@ use core::fmt::Debug;
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
-use risc0_circuit_rv32im::{
-    control_id::{control_id_blake2b, control_id_poseidon2, control_id_sha256},
-    layout, CircuitImpl, CIRCUIT,
-};
+use risc0_circuit_rv32im::{layout, CircuitImpl, CIRCUIT};
 use risc0_zkp::{
     adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
@@ -153,30 +150,24 @@ impl SegmentReceiptVerifierParameters {
     /// Construct verifier parameters that will accept receipts with control any of the default
     /// control ID associated with cycle counts as powers of two (po2) up to the given max
     /// inclusive.
-    fn from_max_po2(max_po2: usize) -> Self {
-        Self::from_po2s(risc0_zkp::MIN_CYCLES_PO2..=max_po2)
-    }
-
-    /// Construct verifier parameters that will accept receipts with control any of the default
-    /// control ID associated with cycle counts of all supported powers of two (po2).
-    pub fn all_po2s() -> Self {
-        Self::from_po2s(risc0_zkp::MIN_CYCLES_PO2..=risc0_zkp::MAX_CYCLES_PO2)
-    }
-
-    /// Construct verifier parameters that will accept receipts with control any of the default
-    /// control ID associated with the given set of cycle counts as powers of two (po2).
-    fn from_po2s(po2s: impl Iterator<Item = usize> + Clone) -> Self {
+    #[stability::unstable]
+    pub fn from_max_po2(max_po2: usize) -> Self {
         Self {
             control_ids: BTreeSet::from_iter(
-                po2s.clone()
-                    .map(control_id_poseidon2)
-                    .chain(po2s.clone().map(control_id_sha256))
-                    .chain(po2s.clone().map(control_id_blake2b))
-                    .map(Option::unwrap),
+                ["poseidon2", "sha-256", "blake2b"]
+                    .into_iter()
+                    .flat_map(|hash_name| risc0_circuit_rv32im::control_ids(hash_name, max_po2)),
             ),
             proof_system_info: PROOF_SYSTEM_INFO,
             circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
         }
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 }
 

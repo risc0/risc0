@@ -24,7 +24,6 @@ use risc0_build::risc0_data;
 use serde::{Deserialize, Serialize};
 
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
-use risc0_circuit_rv32im::control_id::SHA256_CONTROL_IDS;
 use risc0_zkp::core::digest::Digest;
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
@@ -208,7 +207,7 @@ impl ProverOpts {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
-            control_ids: SHA256_CONTROL_IDS.to_vec(),
+            control_ids: risc0_circuit_rv32im::control_ids("sha-256", 21).collect(),
         }
     }
 

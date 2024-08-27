@@ -66,30 +66,3 @@ pub const BLAKE2B_CONTROL_IDS: ControlIds = [
     digest!("d0a94a254af9bfc8e457d5f84afe5150d680579cff65e37140720aa112e63b9f"), // rv32im po2=23
     digest!("46b765782f325e05cf04188e530fa6f33c6a8c33050f3b929bd6eedb541eb5a0"), // rv32im po2=24
 ];
-
-#[inline]
-pub const fn control_id_sha256(po2: usize) -> Option<Digest> {
-    if po2 < risc0_zkp::MIN_CYCLES_PO2 || po2 > risc0_zkp::MAX_CYCLES_PO2 {
-        None
-    } else {
-        Some(SHA256_CONTROL_IDS[po2 - risc0_zkp::MIN_CYCLES_PO2])
-    }
-}
-
-#[inline]
-pub const fn control_id_poseidon2(po2: usize) -> Option<Digest> {
-    if po2 < risc0_zkp::MIN_CYCLES_PO2 || po2 > risc0_zkp::MAX_CYCLES_PO2 {
-        None
-    } else {
-        Some(POSEIDON2_CONTROL_IDS[po2 - risc0_zkp::MIN_CYCLES_PO2])
-    }
-}
-
-#[inline]
-pub const fn control_id_blake2b(po2: usize) -> Option<Digest> {
-    if po2 < risc0_zkp::MIN_CYCLES_PO2 || po2 > risc0_zkp::MAX_CYCLES_PO2 {
-        None
-    } else {
-        Some(BLAKE2B_CONTROL_IDS[po2 - risc0_zkp::MIN_CYCLES_PO2])
-    }
-}
