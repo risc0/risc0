@@ -18,6 +18,7 @@ use crate::{BigIntClaim, BigIntProgram};
 
 // Re-export program info
 pub use crate::generated::ECDSA_VERIFY_8;
+pub use crate::generated::ECDSA_VERIFY_256;
 
 /// Construct a bigint claim of an ECDSA Verification  // TODO: From here
 pub fn claim(
