@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, bail, ensure, Context, Result};
 use risc0_circuit_rv32im::prove::SegmentProver;
 
 use super::ProverServer;
@@ -165,6 +165,13 @@ impl ProverServer for ProverImpl {
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        ensure!(
+            segment.po2() <= self.opts.segment_limit_po2,
+            "segment po2 exceeds max on ProverOpts: {} > {}",
+            segment.po2(),
+            self.opts.segment_limit_po2
+        );
+
         let seal = self.segment_prover.prove_segment(&segment.inner)?;
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;

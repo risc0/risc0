@@ -91,7 +91,12 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        self.prove_with_ctx(env, &VerifierContext::default(), elf, opts)
+        self.prove_with_ctx(
+            env,
+            &VerifierContext::from_max_po2(opts.segment_limit_po2),
+            elf,
+            opts,
+        )
     }
 
     /// Prove zkVM execution of the specified ELF binary and using the specified [VerifierContext]
