@@ -357,7 +357,7 @@ jobs:
   docs-rs:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, test, macOS, cpu]
     env:
       RUSTDOCFLAGS: "--cfg docsrs -D warnings"
     steps:
