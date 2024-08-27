@@ -69,9 +69,7 @@ pub const BLAKE2B_CONTROL_IDS: ControlIds = [
 
 #[inline]
 pub const fn control_id_sha256(po2: usize) -> Option<Digest> {
-    if po2 < risc0_zkp::MIN_CYCLES_PO2 {
-        None
-    } else if po2 > risc0_zkp::MAX_CYCLES_PO2 {
+    if po2 < risc0_zkp::MIN_CYCLES_PO2 || po2 > risc0_zkp::MAX_CYCLES_PO2 {
         None
     } else {
         Some(SHA256_CONTROL_IDS[po2 - risc0_zkp::MIN_CYCLES_PO2])
@@ -80,9 +78,7 @@ pub const fn control_id_sha256(po2: usize) -> Option<Digest> {
 
 #[inline]
 pub const fn control_id_poseidon2(po2: usize) -> Option<Digest> {
-    if po2 < risc0_zkp::MIN_CYCLES_PO2 {
-        None
-    } else if po2 > risc0_zkp::MAX_CYCLES_PO2 {
+    if po2 < risc0_zkp::MIN_CYCLES_PO2 || po2 > risc0_zkp::MAX_CYCLES_PO2 {
         None
     } else {
         Some(POSEIDON2_CONTROL_IDS[po2 - risc0_zkp::MIN_CYCLES_PO2])
@@ -91,9 +87,7 @@ pub const fn control_id_poseidon2(po2: usize) -> Option<Digest> {
 
 #[inline]
 pub const fn control_id_blake2b(po2: usize) -> Option<Digest> {
-    if po2 < risc0_zkp::MIN_CYCLES_PO2 {
-        None
-    } else if po2 > risc0_zkp::MAX_CYCLES_PO2 {
+    if po2 < risc0_zkp::MIN_CYCLES_PO2 || po2 > risc0_zkp::MAX_CYCLES_PO2 {
         None
     } else {
         Some(BLAKE2B_CONTROL_IDS[po2 - risc0_zkp::MIN_CYCLES_PO2])
