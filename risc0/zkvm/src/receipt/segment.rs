@@ -19,7 +19,7 @@ use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
 use risc0_circuit_rv32im::{
-    control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
+    control_id::{control_id_blake2b, control_id_poseidon2, control_id_sha256},
     layout, CircuitImpl, CIRCUIT,
 };
 use risc0_zkp::{
@@ -149,6 +149,37 @@ pub struct SegmentReceiptVerifierParameters {
     pub circuit_info: ProtocolInfo,
 }
 
+impl SegmentReceiptVerifierParameters {
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    fn from_max_po2(max_po2: usize) -> Self {
+        Self::from_po2s(risc0_zkp::MIN_CYCLES_PO2..=max_po2)
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    pub fn all_po2s() -> Self {
+        Self::from_po2s(risc0_zkp::MIN_CYCLES_PO2..=risc0_zkp::MAX_CYCLES_PO2)
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with the given set of cycle counts as powers of two (po2).
+    fn from_po2s(po2s: impl Iterator<Item = usize> + Clone) -> Self {
+        Self {
+            control_ids: BTreeSet::from_iter(
+                po2s.clone()
+                    .map(control_id_poseidon2)
+                    .chain(po2s.clone().map(control_id_sha256))
+                    .chain(po2s.clone().map(control_id_blake2b))
+                    .map(Option::unwrap),
+            ),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
+        }
+    }
+}
+
 impl Digestible for SegmentReceiptVerifierParameters {
     /// Hash the [SegmentReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
@@ -167,16 +198,8 @@ impl Digestible for SegmentReceiptVerifierParameters {
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self {
-            control_ids: BTreeSet::from_iter(
-                POSEIDON2_CONTROL_IDS
-                    .into_iter()
-                    .chain(SHA256_CONTROL_IDS)
-                    .chain(BLAKE2B_CONTROL_IDS),
-            ),
-            proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-        }
+        // By default, po2 up to 21 is included, which achieves a 97 bit securty target.
+        Self::from_max_po2(21)
     }
 }
 

@@ -26,6 +26,7 @@ use risc0_zkp::{
     },
     field::baby_bear::BabyBear,
     hal::cpu::CpuHal,
+    MIN_CYCLES_PO2,
 };
 use risc0_zkvm::{
     recursion::{MerkleGroup, Program},
@@ -80,7 +81,7 @@ impl Bootstrap {
             Loader::compute_control_id_table(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
 
         let contents = format!(
-            include_str!("templates/control_id_rv32im.rs"),
+            include_str!("templates/control_id_rv32im.rs.tmpl"),
             Self::format_control_ids(control_id_sha256),
             Self::format_control_ids(&control_id_poseidon2),
             Self::format_control_ids(control_id_blake2b),
@@ -96,18 +97,23 @@ impl Bootstrap {
             .status()
             .expect("failed to format {CONTROL_ID_PATH_RV32IM}");
 
-        control_id_poseidon2
+        // Return the control IDs that should be included in the allowed control IDs that are used
+        // by default in segment receipt verification, and in forming the control root. By default,
+        // po2 up to 21 is included, which achieves a 97 bit securty target.
+        control_id_poseidon2[..=21 - MIN_CYCLES_PO2].to_vec()
     }
 
     fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<(String, Digest)>) {
-        // Recursion programs (ZKRs) that are to be included in the allowed set.
+        // Recursion programs (ZKRs) that are to be included in the allowed set, used in the
+        // default verifier context.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
-        // set of allowed programs (e.g. accelerators).
+        // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
+        // enabled by using a custom VerifierContext.
         let allowed_zkr_names: HashSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
             .map(str::to_string)
             .into_iter()
-            .chain((14..=24).map(|i| format!("lift_{i}.zkr")))
+            .chain((14..=21).map(|i| format!("lift_{i}.zkr")))
             .collect();
 
         tracing::info!("unzipping recursion programs (zkrs)");
