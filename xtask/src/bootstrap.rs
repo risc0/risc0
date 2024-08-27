@@ -81,7 +81,7 @@ impl Bootstrap {
             Loader::compute_control_id_table(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
 
         let contents = format!(
-            include_str!("templates/control_id_rv32im.rs.tmpl"),
+            include_str!("templates/control_id_rv32im.rs"),
             Self::format_control_ids(control_id_sha256),
             Self::format_control_ids(&control_id_poseidon2),
             Self::format_control_ids(control_id_blake2b),
