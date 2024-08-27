@@ -281,7 +281,10 @@ mod benches {
         println!("rv32im ({hashfn}): {expected_cycles}");
 
         let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
-        let env = util::loop_env(iters)?;
+        let env = util::loop_env_builder(iters)
+            .segment_limit_po2(po2)
+            .build()?;
+
         let (info, duration) = try_time(|| util::prove(client, &env, LOOP_ELF, &opts))?;
 
         let cycles = info.stats.total_cycles;
