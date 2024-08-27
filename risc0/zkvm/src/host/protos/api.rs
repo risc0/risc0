@@ -334,7 +334,7 @@ pub struct ProverOpts {
     #[prost(message, repeated, tag = "4")]
     pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
     #[prost(uint64, tag = "5")]
-    pub segment_po2_max: u64,
+    pub segment_limit_po2: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
