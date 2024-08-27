@@ -193,15 +193,7 @@ impl Datasheet {
                 let ram = tracker().lock().unwrap().peak;
                 assert_eq!(info.stats.total_cycles, *expected);
                 let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-                let seal = info
-                    .receipt
-                    .inner
-                    .composite()
-                    .unwrap()
-                    .segments
-                    .iter()
-                    .map(|x| x.get_seal_bytes().len())
-                    .sum();
+                let seal = info.receipt.inner.composite().unwrap().seal_size();
 
                 self.results.push(PerformanceData {
                     name: "rv32im".into(),
@@ -243,7 +235,7 @@ impl Datasheet {
         let ram = tracker().lock().unwrap().peak;
         let cycles = 1 << RECURSION_PO2;
         let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let seal = receipt.seal_size();
 
         self.results.push(PerformanceData {
             name: "lift".into(),
@@ -287,7 +279,7 @@ impl Datasheet {
         let ram = tracker().lock().unwrap().peak;
         let cycles = 1 << RECURSION_PO2;
         let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let seal = receipt.seal_size();
 
         self.results.push(PerformanceData {
             name: "join".into(),
@@ -320,13 +312,7 @@ impl Datasheet {
 
         let ram = tracker().lock().unwrap().peak;
         let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-        let seal = info
-            .receipt
-            .inner
-            .succinct()
-            .unwrap()
-            .get_seal_bytes()
-            .len();
+        let seal = info.receipt.inner.succinct().unwrap().seal_size();
 
         self.results.push(PerformanceData {
             name: "succinct".into(),
@@ -363,7 +349,7 @@ impl Datasheet {
         let ram = tracker().lock().unwrap().peak;
         let cycles = 1 << RECURSION_PO2;
         let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let seal = receipt.seal_size();
 
         self.results.push(PerformanceData {
             name: "identity_p254".into(),
@@ -434,7 +420,7 @@ impl Datasheet {
 
         let ram = tracker().lock().unwrap().peak;
         let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-        let seal = info.receipt.inner.groth16().unwrap().seal.len();
+        let seal = info.receipt.inner.groth16().unwrap().seal_size();
 
         self.results.push(PerformanceData {
             name: "groth16".into(),
