@@ -236,6 +236,12 @@ export default {
           label: "Trusted Setup",
           id: "trusted-setup-ceremony",
         },
+        {
+          type: "link",
+          label: "Verifier Version Management Design",
+          href: "https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md",
+        },
+
       ]
     },
     {
