@@ -209,7 +209,7 @@ impl Default for ProverOpts {
 
 impl ProverOpts {
     /// Construct a [ProverOpts] ready to prove segments with up to the given max cycle count as a
-    /// power of two (po2). All fields are equal to the defailt expect where they need to be
+    /// power of two (po2). All fields are equal to the default expect where they need to be
     /// adjusted to support a larger po2.
     ///
     /// NOTE: If the po2 used to prove is greater than the targeted verifier supports,
