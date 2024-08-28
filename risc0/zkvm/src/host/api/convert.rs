@@ -227,6 +227,10 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .into_iter()
                 .map(TryInto::try_into)
                 .collect::<Result<_>>()?,
+            max_segment_po2: opts
+                .max_segment_po2
+                .try_into()
+                .map_err(|_| malformed_err())?,
         })
     }
 }
@@ -238,6 +242,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
+            max_segment_po2: opts.max_segment_po2 as u64,
         }
     }
 }
