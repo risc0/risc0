@@ -93,7 +93,7 @@ pub trait Prover {
     ) -> Result<ProveInfo> {
         self.prove_with_ctx(
             env,
-            &VerifierContext::from_max_po2(opts.segment_limit_po2),
+            &VerifierContext::from_max_po2(opts.segment_po2_max),
             elf,
             opts,
         )
@@ -168,7 +168,7 @@ pub struct ProverOpts {
     /// [SuccinctReceiptVerifierParameters][crate::SuccinctReceiptVerifierParameters].
     pub control_ids: Vec<Digest>,
     /// Maximum cycle count, as a power of two (po2) that these prover options support.
-    pub(crate) segment_limit_po2: usize,
+    pub(crate) segment_po2_max: usize,
 }
 
 /// An enumeration of receipt kinds that can be requested to be generated.
@@ -202,7 +202,7 @@ impl Default for ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: DEFAULT_MAX_PO2,
+            segment_po2_max: DEFAULT_MAX_PO2,
         }
     }
 }
@@ -223,7 +223,7 @@ impl ProverOpts {
             control_ids: crate::receipt::succinct::allowed_control_ids("poseidon2", po2_max)
                 .unwrap()
                 .collect(),
-            segment_limit_po2: po2_max,
+            segment_po2_max: po2_max,
         }
     }
 
@@ -242,7 +242,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: risc0_circuit_rv32im::control_ids("sha-256", DEFAULT_MAX_PO2).collect(),
-            segment_limit_po2: DEFAULT_MAX_PO2,
+            segment_po2_max: DEFAULT_MAX_PO2,
         }
     }
 
@@ -254,7 +254,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: DEFAULT_MAX_PO2,
+            segment_po2_max: DEFAULT_MAX_PO2,
         }
     }
 
@@ -266,7 +266,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: DEFAULT_MAX_PO2,
+            segment_po2_max: DEFAULT_MAX_PO2,
         }
     }
 
@@ -280,7 +280,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: DEFAULT_MAX_PO2,
+            segment_po2_max: DEFAULT_MAX_PO2,
         }
     }
 
@@ -316,11 +316,11 @@ impl ProverOpts {
         }
     }
 
-    /// Return [ProverOpts] with the segment_limit_po2 set to the given value.
+    /// Return [ProverOpts] with the segment_po2_max set to the given value.
     #[stability::unstable]
-    pub fn with_segment_limit_po2(self, segment_limit_po2: usize) -> Self {
+    pub fn with_segment_po2_max(self, segment_po2_max: usize) -> Self {
         Self {
-            segment_limit_po2,
+            segment_po2_max,
             ..self
         }
     }

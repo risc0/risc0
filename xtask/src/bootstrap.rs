@@ -30,7 +30,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm::{
     recursion::{MerkleGroup, Program},
-    Loader, RECURSION_PO2,
+    Loader, DEFAULT_MAX_PO2, RECURSION_PO2,
 };
 
 #[derive(Parser)]
@@ -98,9 +98,8 @@ impl Bootstrap {
             .expect("failed to format {CONTROL_ID_PATH_RV32IM}");
 
         // Return the control IDs that should be included in the allowed control IDs that are used
-        // by default in segment receipt verification, and in forming the control root. By default,
-        // po2 up to 21 is included, which achieves a 97 bit securty target.
-        control_id_poseidon2[..=21 - MIN_CYCLES_PO2].to_vec()
+        // by default in segment receipt verification, and in forming the control root.
+        control_id_poseidon2[..=DEFAULT_MAX_PO2 - MIN_CYCLES_PO2].to_vec()
     }
 
     fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<(String, Digest)>) {
@@ -113,7 +112,7 @@ impl Bootstrap {
         let allowed_zkr_names: HashSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
             .map(str::to_string)
             .into_iter()
-            .chain((14..=21).map(|i| format!("lift_{i}.zkr")))
+            .chain((14..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
             .collect();
 
         tracing::info!("unzipping recursion programs (zkrs)");

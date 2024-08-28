@@ -28,7 +28,7 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use super::VerifierContext;
+use super::{VerifierContext, DEFAULT_MAX_PO2};
 use crate::{sha, MaybePruned, ReceiptClaim};
 
 /// A receipt attesting to the execution of a Segment.
@@ -189,7 +189,7 @@ impl Digestible for SegmentReceiptVerifierParameters {
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self::from_max_po2()
+        Self::from_max_po2(DEFAULT_MAX_PO2)
     }
 }
 
