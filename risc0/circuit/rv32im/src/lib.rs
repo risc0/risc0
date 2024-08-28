@@ -84,6 +84,7 @@ pub fn control_ids(
     hash_name: impl AsRef<str> + 'static,
     po2_max: usize,
 ) -> impl Iterator<Item = Digest> {
+    // Using `take_while` here ensures termination when po2_max is much greater than the highest po2.
     (risc0_zkp::MIN_CYCLES_PO2..=po2_max)
         .map(move |po2| control_id(hash_name.as_ref(), po2))
         .take_while(Option::is_some)
