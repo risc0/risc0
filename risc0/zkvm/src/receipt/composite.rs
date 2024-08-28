@@ -220,7 +220,19 @@ impl CompositeReceipt {
     /// Total number of bytes used by the seals of this receipt.
     pub fn seal_size(&self) -> usize {
         // NOTE: This sum cannot overflow because all seals are in memory.
-        self.segments.iter().map(|s| s.seal_size()).sum()
+        let mut result = 0;
+
+        for receipt in &self.segments {
+            result += receipt.seal_size();
+        }
+
+        // Take into account the assumption receipts since this is not a
+        // verifiable receipt without them.
+        for receipt in &self.assumption_receipts {
+            result += receipt.seal_size();
+        }
+
+        result
     }
 }
 
