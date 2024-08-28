@@ -242,8 +242,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
-            // conversion from usize to u64 will always work.
-            segment_limit_po2: opts.segment_limit_po2.try_into().unwrap(),
+            segment_limit_po2: opts.segment_limit_po2 as u64,
         }
     }
 }
