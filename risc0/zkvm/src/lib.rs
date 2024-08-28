@@ -144,7 +144,7 @@ pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
     InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
     SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext,
+    VerifierContext, DEFAULT_MAX_PO2,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
 pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};

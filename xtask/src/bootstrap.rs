@@ -26,10 +26,11 @@ use risc0_zkp::{
     },
     field::baby_bear::BabyBear,
     hal::cpu::CpuHal,
+    MIN_CYCLES_PO2,
 };
 use risc0_zkvm::{
     recursion::{MerkleGroup, Program},
-    Loader, RECURSION_PO2,
+    Loader, DEFAULT_MAX_PO2, RECURSION_PO2,
 };
 
 #[derive(Parser)]
@@ -37,6 +38,8 @@ pub struct Bootstrap;
 
 const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
+
+const MIN_LIFT_PO2: usize = 14;
 
 impl Bootstrap {
     // Format a list of control IDs, including a description as comments.
@@ -96,18 +99,22 @@ impl Bootstrap {
             .status()
             .expect("failed to format {CONTROL_ID_PATH_RV32IM}");
 
-        control_id_poseidon2
+        // Return the control IDs that should be included in the allowed control IDs that are used
+        // by default in segment receipt verification, and in forming the control root.
+        control_id_poseidon2[..=DEFAULT_MAX_PO2 - MIN_CYCLES_PO2].to_vec()
     }
 
     fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<(String, Digest)>) {
-        // Recursion programs (ZKRs) that are to be included in the allowed set.
+        // Recursion programs (ZKRs) that are to be included in the allowed set, used in the
+        // default verifier context.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
-        // set of allowed programs (e.g. accelerators).
+        // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
+        // enabled by using a custom VerifierContext.
         let allowed_zkr_names: HashSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
             .map(str::to_string)
             .into_iter()
-            .chain((14..=24).map(|i| format!("lift_{i}.zkr")))
+            .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
             .collect();
 
         tracing::info!("unzipping recursion programs (zkrs)");
@@ -145,6 +152,7 @@ impl Bootstrap {
         tracing::info!("Computed bn254_identity_control_id: {bn254_identity_control_id}");
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
+            MIN_LIFT_PO2,
             Self::format_control_ids(&allowed_control_ids),
             allowed_control_root,
             bn254_identity_control_id,
