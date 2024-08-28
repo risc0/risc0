@@ -166,10 +166,10 @@ impl ProverServer for ProverImpl {
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         ensure!(
-            segment.po2() <= self.opts.segment_po2_max,
+            segment.po2() <= self.opts.max_segment_po2,
             "segment po2 exceeds max on ProverOpts: {} > {}",
             segment.po2(),
-            self.opts.segment_po2_max
+            self.opts.max_segment_po2
         );
 
         let seal = self.segment_prover.prove_segment(&segment.inner)?;
