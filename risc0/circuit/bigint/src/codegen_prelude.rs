@@ -14,92 +14,86 @@
 
 use tracing::trace;
 
-pub use crate::{byte_poly::BytePoly, BigIntContext, BigIntProgram, WitnessInfo};
+pub use crate::{byte_poly, BigIntContext, BigIntProgram, WitnessInfo};
 pub use anyhow::Result;
 
-pub fn def(
-    ctx: &mut BigIntContext,
-    coeffs: usize,
-    label: usize,
-    is_public: usize,
-) -> Result<BytePoly> {
-    let val = BytePoly::from_biguint(ctx.in_values[label].clone(), coeffs);
+pub fn def<const N: usize>(ctx: &mut BigIntContext, label: usize, is_public: usize) -> [i32; N] {
+    let val = byte_poly::from_biguint_fixed::<N>(ctx.in_values[label].clone());
     if is_public > 0 {
-        ctx.public_witness.push(val.clone())
+        ctx.public_witness.push(val.to_vec())
     } else {
-        ctx.private_witness.push(val.clone())
+        ctx.private_witness.push(val.to_vec())
     }
     trace!(
-        "def({label}, {}) -> {val:?}",
-        ["private", "public"][is_public]
+        "def({label}, {}) -> {}",
+        ["private", "public"][is_public],
+        byte_poly::dump(val)
     );
-    Ok(val)
+    val
 }
 
-pub fn nondet_quot(
+pub fn nondet_quot<const N: usize>(
     ctx: &mut BigIntContext,
-    lhs: &BytePoly,
-    rhs: &BytePoly,
-    coeffs: usize,
-) -> Result<BytePoly> {
-    let out = lhs.nondet_quot(rhs, coeffs);
-    trace!("quot: {out}");
-    ctx.private_witness.push(out.clone());
-    Ok(out)
+    lhs: impl AsRef<[i32]>,
+    rhs: impl AsRef<[i32]>,
+) -> [i32; N] {
+    let out = byte_poly::nondet_quot_fixed::<N>(lhs.as_ref(), rhs.as_ref());
+    trace!("quot: {}", byte_poly::to_biguint(out));
+    ctx.private_witness.push(out.to_vec());
+    out
 }
 
-pub fn nondet_rem(
+pub fn nondet_rem<const N: usize>(
     ctx: &mut BigIntContext,
-    lhs: &BytePoly,
-    rhs: &BytePoly,
-    coeffs: usize,
-) -> Result<BytePoly> {
-    let out = lhs.nondet_rem(rhs, coeffs);
-    trace!("rem: {out}");
-    ctx.private_witness.push(out.clone());
-    Ok(out)
+    lhs: impl AsRef<[i32]>,
+    rhs: impl AsRef<[i32]>,
+) -> [i32; N] {
+    let out = byte_poly::nondet_rem_fixed::<N>(lhs.as_ref(), rhs.as_ref());
+    trace!("rem: {}", byte_poly::to_biguint(out));
+    ctx.private_witness.push(out.to_vec());
+    out
 }
 
-pub fn nondet_inv(
+pub fn nondet_inv<const N: usize>(
     ctx: &mut BigIntContext,
-    lhs: &BytePoly,
-    rhs: &BytePoly,
-    coeffs: usize,
-) -> Result<BytePoly> {
-    let out = lhs.nondet_inv(rhs, coeffs);
-    trace!("inv: {out}");
-    ctx.private_witness.push(out.clone());
-    Ok(out)
-}
-
-pub fn add(lhs: &BytePoly, rhs: &BytePoly) -> Result<BytePoly> {
-    let out = lhs + rhs;
-    trace!("add: {out}");
-    Ok(out)
-}
-
-pub fn sub(lhs: &BytePoly, rhs: &BytePoly) -> Result<BytePoly> {
-    let out = lhs - rhs;
-    trace!("sub: {out}");
-    Ok(out)
-}
-
-pub fn mul(lhs: &BytePoly, rhs: &BytePoly) -> Result<BytePoly> {
-    let out = lhs * rhs;
-    trace!("mul: {out}");
-    Ok(out)
+    lhs: impl AsRef<[i32]>,
+    rhs: impl AsRef<[i32]>,
+) -> [i32; N] {
+    let out = byte_poly::nondet_inv_fixed::<N>(lhs.as_ref(), rhs.as_ref());
+    trace!("inv: {}", byte_poly::to_biguint(out));
+    ctx.private_witness.push(out.to_vec());
+    out
 }
 
 pub fn eqz(
     ctx: &mut BigIntContext,
-    val: &BytePoly,
+    val: impl AsRef<[i32]>,
     carry_offset: usize,
     carry_bytes: usize,
 ) -> Result<()> {
-    trace!("eqz({val:?}, {carry_offset}, {carry_bytes}");
-    let evaluated = val.eval_constraint(carry_offset, carry_bytes);
-    ctx.private_witness.extend(evaluated);
+    trace!(
+        "eqz({}, {carry_offset}, {carry_bytes}",
+        byte_poly::dump(val.as_ref())
+    );
+    let evaluated = byte_poly::eval_constraint(val.as_ref(), carry_offset, carry_bytes);
+    ctx.private_witness
+        .extend(evaluated.into_iter().map(|x| x.to_vec()));
     Ok(())
+}
+
+pub fn bigint_make_const<'a, const N: usize>(
+    ctx: &mut BigIntContext,
+    coeffs: [i32; N],
+) -> [i32; N] {
+    ctx.constant_witness.push(coeffs.to_vec());
+    coeffs
+}
+
+#[macro_export]
+macro_rules! bigint_declare_byte_poly {
+    {$typename:ident, $n:literal} => {
+        type $typename = [i32; $n];
+    }
 }
 
 #[macro_export]
@@ -154,16 +148,61 @@ macro_rules! bigint_program_list {
 }
 
 #[macro_export]
+macro_rules! bigint_def {
+    ($ctx:tt, $n: literal, $($rest:expr),* ) => {
+        def::<$n>($ctx, $($rest,)* )
+    }
+}
+
+#[macro_export]
 macro_rules! bigint_const {
     ($ctx:tt, $($coeff:expr),*) => {
-        {
-            let ret = BytePoly::from_coeffs(&[ $($coeff,)* ]);
-            $ctx.constant_witness.push(ret.clone());
-            ret
-        }
+        bigint_make_const($ctx, [ $($coeff,)* ])
     }
+}
+
+#[macro_export]
+macro_rules! bigint_add {
+    ($lhs:expr, $rhs:expr, $n:literal) => {
+        $crate::byte_poly::add_fixed::<$n>(&$lhs, &$rhs)
+    };
+}
+
+#[macro_export]
+macro_rules! bigint_sub {
+    ($lhs:expr, $rhs:expr, $n:literal) => {
+        $crate::byte_poly::sub_fixed::<$n>(&$lhs, &$rhs)
+    };
+}
+#[macro_export]
+macro_rules! bigint_mul {
+    ($lhs:expr, $rhs:expr, $n:literal) => {
+        $crate::byte_poly::mul_fixed::<$n>(&$lhs, &$rhs)
+    };
+}
+#[macro_export]
+macro_rules! bigint_nondet_quot {
+    ($ctx:tt, $lhs:expr, $rhs:expr, $n:literal) => {
+        nondet_quot::<$n>($ctx, &$lhs, &$rhs)
+    };
+}
+#[macro_export]
+macro_rules! bigint_nondet_rem {
+    ($ctx:tt, $lhs:expr, $rhs:expr, $n:literal) => {
+        nondet_rem::<$n>($ctx, &$lhs, &$rhs)
+    };
+}
+#[macro_export]
+macro_rules! bigint_nondet_inv {
+    ($ctx:tt, $lhs:expr, $rhs:expr, $n:literal) => {
+        nondet_inv::<$n>($ctx, &$lhs, &$rhs)
+    };
 }
 
 // #[macro_export] defines macros in the top level of the crate.
 // Re-import them here so they're in local scope.
-pub use crate::{bigint_const, bigint_program_info, bigint_program_list, bigint_witness_info};
+pub use crate::{
+    bigint_add, bigint_const, bigint_declare_byte_poly, bigint_def, bigint_mul, bigint_nondet_inv,
+    bigint_nondet_quot, bigint_nondet_rem, bigint_program_info, bigint_program_list, bigint_sub,
+    bigint_witness_info,
+};

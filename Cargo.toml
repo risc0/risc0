@@ -67,5 +67,15 @@ opt-level = 3
 debug = 0
 
 [profile.release]
-debug = 0
 lto = true
+
+# Minimize debug info for generated code as rustc can't handle it.
+[profile.release.package.risc0-circuit-bigint]
+debug = 0
+
+[profile.test.package.risc0-circuit-bigint]
+debug = 0
+
+[profile.dev.package.risc0-circuit-bigint]
+debug = 0
+
