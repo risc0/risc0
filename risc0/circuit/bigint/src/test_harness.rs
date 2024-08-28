@@ -23,7 +23,7 @@ use risc0_zkp::{
 };
 use tracing::trace;
 
-use crate::{BigIntContext, BytePoly};
+use crate::{byte_poly, BigIntContext};
 
 impl BigIntContext {
     pub(crate) fn from_values(in_values: Vec<BigUint>) -> Self {
@@ -36,9 +36,9 @@ impl BigIntContext {
 
 pub(crate) fn test_witgen(
     ctx: BigIntContext,
-    pub_wit: Vec<BytePoly>,
-    priv_wit: Vec<BytePoly>,
-    const_wit: Vec<BytePoly>,
+    pub_wit: Vec<Vec<i32>>,
+    priv_wit: Vec<Vec<i32>>,
+    const_wit: Vec<Vec<i32>>,
     gold_z: BabyBearExtElem,
 ) -> Result<()> {
     assert_eq!(ctx.public_witness, pub_wit);
@@ -47,9 +47,9 @@ pub(crate) fn test_witgen(
 
     let hash_suite = Poseidon2HashSuite::new_suite();
 
-    let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+    let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
     trace!("public_digest: {public_digest}");
-    let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+    let private_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
     trace!("private_digest: {private_digest}");
     let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
     trace!("folded: {folded}");
@@ -89,8 +89,8 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
         }
     }
 
-    let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
-    let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+    let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+    let private_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
     let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
 
     let mut rng = hash_suite.rng.new_rng();
@@ -123,8 +123,8 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn witness_test_data(data: &[&str]) -> Vec<BytePoly> {
-    data.iter().map(|d| BytePoly::from_hex(d)).collect()
+pub(crate) fn witness_test_data(data: &[&str]) -> Vec<Vec<i32>> {
+    data.iter().map(|d| byte_poly::from_hex(d)).collect()
 }
 
 pub(crate) fn from_hex(s: &str) -> BigUint {

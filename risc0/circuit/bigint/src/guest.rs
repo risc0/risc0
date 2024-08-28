@@ -13,15 +13,14 @@
 // limitations under the License.
 
 use anyhow::Result;
-use num_bigint::BigUint;
 use risc0_zkp::{core::hash::poseidon2::Poseidon2HashSuite, field::Elem};
 use risc0_zkvm::{guest::env, guest::sha::Impl as Sha256};
 use risc0_zkvm_platform::syscall;
 use tracing::trace;
 
 use crate::{
-    byte_poly::BytePoly, claim_list_digest, pad_claim_list, BigIntClaim, BigIntContext,
-    BigIntProgram, CHECKED_COEFFS_PER_POLY,
+    byte_poly, claim_list_digest, pad_claim_list, BigIntClaim, BigIntContext, BigIntProgram,
+    CHECKED_COEFFS_PER_POLY,
 };
 
 pub fn prove(prog: &BigIntProgram, claims: &[BigIntClaim]) -> Result<()> {
@@ -40,7 +39,8 @@ pub fn prove(prog: &BigIntProgram, claims: &[BigIntClaim]) -> Result<()> {
             ctx.in_values = claim
                 .public_witness
                 .iter()
-                .map(|val| BigUint::from(val))
+                .map(Vec::as_slice)
+                .map(byte_poly::to_biguint)
                 .collect();
 
             (prog.unconstrained_eval_fn)(&mut ctx).unwrap();
@@ -72,9 +72,9 @@ pub fn prove(prog: &BigIntProgram, claims: &[BigIntClaim]) -> Result<()> {
             }
 
             let public_digest =
-                BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+                byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
             let private_digest =
-                BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+                byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
             let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
             trace!("folded: {folded}");
 
