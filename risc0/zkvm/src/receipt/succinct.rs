@@ -25,7 +25,7 @@ use anyhow::bail;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
 use risc0_circuit_recursion::{
-    control_id::{ALLOWED_CONTROL_ROOT, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
+    control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
     CircuitImpl, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBearElem;
@@ -240,7 +240,7 @@ pub(crate) fn allowed_control_ids(
     let allowed_zkr_names: BTreeSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
         .map(str::to_string)
         .into_iter()
-        .chain((14..=po2_max).map(|i| format!("lift_{i}.zkr")))
+        .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
         .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
