@@ -347,7 +347,7 @@ impl Default for SuccinctReceiptVerifierParameters {
 #[cfg(test)]
 mod tests {
     use super::{allowed_control_root, SuccinctReceiptVerifierParameters, ALLOWED_CONTROL_ROOT};
-    use crate::sha::Digestible;
+    use crate::{receipt::DEFAULT_MAX_PO2, sha::Digestible};
     use risc0_zkp::core::digest::digest;
 
     // Check that the verifier parameters has a stable digest (and therefore a stable value). This
@@ -364,9 +364,8 @@ mod tests {
 
     #[test]
     fn allowed_control_root_fn_matches_bootstrap() {
-        // Runtime computed value with max po2 21 should equal bootstrap
         assert_eq!(
-            allowed_control_root("poseidon2", 21).unwrap(),
+            allowed_control_root("poseidon2", DEFAULT_MAX_PO2).unwrap(),
             ALLOWED_CONTROL_ROOT
         )
     }

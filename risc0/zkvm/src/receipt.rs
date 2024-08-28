@@ -677,6 +677,12 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
     }
 }
 
+/// Maximum segment size, as a power of two (po2) that the default verifier parameters will accept.
+///
+/// A default of 21 was selected to reach a target of 97 bits of security under our analysis. Using
+/// a po2 higher than 21 shows a degradation of 1 bit of security per po2, to 94 bits at po2 24.
+pub const DEFAULT_MAX_PO2: usize = 21;
+
 /// Context available to the verification process.
 #[non_exhaustive]
 pub struct VerifierContext {

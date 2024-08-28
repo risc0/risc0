@@ -28,8 +28,8 @@ use risc0_zkp::core::digest::Digest;
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
 use crate::{
-    get_version, host::prove_info::ProveInfo, is_dev_mode, ExecutorEnv, Receipt, SessionInfo,
-    VerifierContext,
+    get_version, host::prove_info::ProveInfo, is_dev_mode, receipt::DEFAULT_MAX_PO2, ExecutorEnv,
+    Receipt, SessionInfo, VerifierContext,
 };
 
 /// A Prover can execute a given ELF binary and produce a
@@ -202,7 +202,7 @@ impl Default for ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: 21,
+            segment_limit_po2: DEFAULT_MAX_PO2,
         }
     }
 }
@@ -212,8 +212,8 @@ impl ProverOpts {
     /// power of two (po2). All fields are equal to the defailt expect where they need to be
     /// adjusted to support a larger po2.
     ///
-    /// NOTE: If the po2 used to prove is greater than the targeted verifier supports, 21 by
-    /// default, receipts will be rejected by the verifier.
+    /// NOTE: If the po2 used to prove is greater than the targeted verifier supports,
+    /// [DEFAULT_MAX_PO2] by default, receipts will be rejected by the verifier.
     #[stability::unstable]
     pub fn from_max_po2(po2_max: usize) -> Self {
         Self {
@@ -241,8 +241,8 @@ impl ProverOpts {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
-            control_ids: risc0_circuit_rv32im::control_ids("sha-256", 21).collect(),
-            segment_limit_po2: 21,
+            control_ids: risc0_circuit_rv32im::control_ids("sha-256", DEFAULT_MAX_PO2).collect(),
+            segment_limit_po2: DEFAULT_MAX_PO2,
         }
     }
 
@@ -254,7 +254,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Composite,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: 21,
+            segment_limit_po2: DEFAULT_MAX_PO2,
         }
     }
 
@@ -266,7 +266,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Succinct,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: 21,
+            segment_limit_po2: DEFAULT_MAX_PO2,
         }
     }
 
@@ -280,7 +280,7 @@ impl ProverOpts {
             prove_guest_errors: false,
             receipt_kind: ReceiptKind::Groth16,
             control_ids: ALLOWED_CONTROL_IDS.to_vec(),
-            segment_limit_po2: 21,
+            segment_limit_po2: DEFAULT_MAX_PO2,
         }
     }
 

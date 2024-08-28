@@ -189,8 +189,7 @@ impl Digestible for SegmentReceiptVerifierParameters {
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        // By default, po2 up to 21 is included, which achieves a 97 bit securty target.
-        Self::from_max_po2(21)
+        Self::from_max_po2()
     }
 }
 
