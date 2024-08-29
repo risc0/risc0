@@ -4342,7 +4342,6 @@ dependencies = [
  "embedded-alloc",
  "getrandom",
  "libm",
- "stability",
 ]
 
 [[package]]
