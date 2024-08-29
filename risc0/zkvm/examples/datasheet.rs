@@ -23,7 +23,8 @@ use enum_iterator::Sequence;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
+    RECURSION_PO2,
 };
 use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF};
 use serde::Serialize;
@@ -171,7 +172,7 @@ impl Datasheet {
 
     fn composite(&mut self, args: &Args) {
         for hashfn in ["sha-256", "poseidon2"] {
-            let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
+            let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
             let prover = get_prover_server(&opts).unwrap();
 
             for (iterations, expected) in ITERATIONS.iter().take(args.max_po2 - MIN_PO2 + 1) {
@@ -219,9 +220,9 @@ impl Datasheet {
     fn lift(&mut self) {
         println!("lift");
 
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::all_po2s();
 
         let env = ExecutorEnv::builder()
             .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
@@ -259,9 +260,9 @@ impl Datasheet {
     fn join(&mut self) {
         println!("join");
 
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::all_po2s();
 
         let env = ExecutorEnv::builder()
             .write(&BenchmarkSpec::SimpleLoop { iters: 4 * 1024 })
@@ -303,7 +304,7 @@ impl Datasheet {
     fn succinct(&mut self) {
         println!("succinct");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -342,7 +343,7 @@ impl Datasheet {
     fn identity_p254(&mut self) {
         println!("identity_p254");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -380,7 +381,7 @@ impl Datasheet {
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -417,7 +418,7 @@ impl Datasheet {
     fn groth16(&mut self) {
         println!("groth16");
 
-        let opts = ProverOpts::groth16();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Groth16);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -452,7 +453,7 @@ impl Datasheet {
         {
             println!("warmup");
 
-            let opts = ProverOpts::succinct();
+            let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
 
             let env = ExecutorEnv::builder()

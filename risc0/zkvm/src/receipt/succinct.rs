@@ -12,22 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{collections::VecDeque, string::String, vec::Vec};
+use alloc::{
+    collections::BTreeSet,
+    collections::VecDeque,
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::fmt::Debug;
 
+use anyhow::bail;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{read_sha_halfs, tagged_struct, Digestible};
-use risc0_circuit_recursion::{control_id::ALLOWED_CONTROL_ROOT, CircuitImpl, CIRCUIT};
+use risc0_circuit_recursion::{
+    control_id::{ALLOWED_CONTROL_ROOT, MIN_LIFT_PO2, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
+    CircuitImpl, CIRCUIT,
+};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{
     adapter::{CircuitInfo, ProtocolInfo, PROOF_SYSTEM_INFO},
-    core::{digest::Digest, hash::sha::Sha256},
+    core::{
+        digest::Digest,
+        hash::{hash_suite_from_name, sha::Sha256},
+    },
     verify::VerificationError,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    receipt::{merkle::MerkleProof, VerifierContext},
+    receipt::{
+        merkle::{MerkleGroup, MerkleProof},
+        VerifierContext,
+    },
     receipt_claim::{MaybePruned, Unknown},
     sha,
 };
@@ -192,7 +208,7 @@ where
 
     #[cfg(feature = "prove")]
     pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
-        let hash_suite = risc0_zkp::core::hash::hash_suite_from_name(&self.hashfn)
+        let hash_suite = hash_suite_from_name(&self.hashfn)
             .ok_or_else(|| anyhow::anyhow!("unsupported hash function: {}", self.hashfn))?;
         Ok(self
             .control_inclusion_proof
@@ -213,6 +229,52 @@ where
     }
 }
 
+/// Constructs the set of allowed control IDs, given a maximum cycle count as a po2.
+pub(crate) fn allowed_control_ids(
+    hash_name: impl AsRef<str> + 'static,
+    po2_max: usize,
+) -> anyhow::Result<impl Iterator<Item = Digest>> {
+    // Recursion programs (ZKRs) that are to be included in the allowed set.
+    // NOTE: Although the rv32im circuit has control IDs down to po2 13, lift predicates are only
+    // generated for po2 14 and above, hence the magic 14 below.
+    let allowed_zkr_names: BTreeSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
+        .map(str::to_string)
+        .into_iter()
+        .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
+        .collect();
+
+    let zkr_control_ids = match hash_name.as_ref() {
+        "sha-256" => SHA256_CONTROL_IDS,
+        "poseidon2" => POSEIDON2_CONTROL_IDS,
+        _ => bail!(
+            "unrecognized hash name for zkr control ids: {}",
+            hash_name.as_ref()
+        ),
+    };
+
+    Ok(risc0_circuit_rv32im::control_ids(hash_name, po2_max).chain(
+        zkr_control_ids
+            .into_iter()
+            .filter_map(move |(name, digest)| allowed_zkr_names.contains(name).then_some(digest)),
+    ))
+}
+
+/// Constructs the root for the set of allowed control IDs, given a maximum cycle count as a po2.
+pub(crate) fn allowed_control_root(
+    hash_name: impl AsRef<str> + 'static,
+    po2_max: usize,
+) -> anyhow::Result<Digest> {
+    Ok(
+        MerkleGroup::new(allowed_control_ids(hash_name.as_ref().to_string(), po2_max)?.collect())?
+            .calc_root(
+                hash_suite_from_name(hash_name.as_ref())
+                    .unwrap()
+                    .hashfn
+                    .as_ref(),
+            ),
+    )
+}
+
 /// Verifier parameters used to verify a [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct SuccinctReceiptVerifierParameters {
@@ -228,6 +290,28 @@ pub struct SuccinctReceiptVerifierParameters {
     pub proof_system_info: ProtocolInfo,
     /// Protocol info string distinguishing circuit with which the receipt should verify.
     pub circuit_info: ProtocolInfo,
+}
+
+impl SuccinctReceiptVerifierParameters {
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(po2_max: usize) -> Self {
+        Self {
+            control_root: allowed_control_root("poseidon2", po2_max).unwrap(),
+            inner_control_root: None,
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: CircuitImpl::CIRCUIT_INFO,
+        }
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
 }
 
 impl Digestible for SuccinctReceiptVerifierParameters {
@@ -250,6 +334,8 @@ impl Default for SuccinctReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SuccinctReceipt].
     fn default() -> Self {
         Self {
+            // ALLOWED_CONTROL_ROOT is a precalculated version of the control root, as calculated
+            // by the allowed_control_root function above.
             control_root: ALLOWED_CONTROL_ROOT,
             inner_control_root: None,
             proof_system_info: PROOF_SYSTEM_INFO,
@@ -260,8 +346,8 @@ impl Default for SuccinctReceiptVerifierParameters {
 
 #[cfg(test)]
 mod tests {
-    use super::SuccinctReceiptVerifierParameters;
-    use crate::sha::Digestible;
+    use super::{allowed_control_root, SuccinctReceiptVerifierParameters, ALLOWED_CONTROL_ROOT};
+    use crate::{receipt::DEFAULT_MAX_PO2, sha::Digestible};
     use risc0_zkp::core::digest::digest;
 
     // Check that the verifier parameters has a stable digest (and therefore a stable value). This
@@ -272,7 +358,28 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("37d9d23aac932321eb4009f0e4c751e995814fbe62faa343f9ade741265d5b91")
+            digest!("71023badfee05b76de871c5cc5a95cbedf50395e3634ffb9f3192950b16a77ae")
+        );
+    }
+
+    #[test]
+    fn allowed_control_root_fn_matches_bootstrap() {
+        assert_eq!(
+            allowed_control_root("poseidon2", DEFAULT_MAX_PO2).unwrap(),
+            ALLOWED_CONTROL_ROOT
+        )
+    }
+
+    #[test]
+    fn allowed_control_root_fn_doesnt_panic() {
+        for i in 0..=24 {
+            allowed_control_root("poseidon2", i)
+                .unwrap_or_else(|_| panic!("allowed_control_root panicked with i = {}", i));
+        }
+        // When po2_max is greater than 24, this simply returns the same result as 24.
+        assert_eq!(
+            allowed_control_root("poseidon2", 24).unwrap(),
+            allowed_control_root("poseidon2", 25).unwrap(),
         );
     }
 }
