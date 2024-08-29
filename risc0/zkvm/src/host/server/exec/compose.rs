@@ -111,6 +111,7 @@ impl SysCompose {
         Ok((0, 0))
     }
 
+    #[stability::unstable]
     pub(crate) fn sys_execute_zkr(
         &mut self,
         control_id: &Digest,

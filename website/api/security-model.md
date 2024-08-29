@@ -1,4 +1,4 @@
-# Security Model
+# Cryptographic Security Model
 
 RISC Zero is proud to offer an end-to-end solution for verifiable computation.
 Users can generate proofs for correct execution of software code using the [RISC Zero zkVM],
