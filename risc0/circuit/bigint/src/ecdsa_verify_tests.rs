@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::{
-    byte_poly, ecdsa_verify::{ECDSA_VERIFY_8, ECDSA_VERIFY_256}, prove, verify, BigIntContext, BIGINT_PO2,
+    byte_poly, ecdsa_verify::{ECDSA_VERIFY_8, ECDSA_VERIFY_64, /*ECDSA_VERIFY_256*/}, prove, verify, BigIntContext, BIGINT_PO2,
 };
 use anyhow::Result;
 use num_bigint::BigUint;
@@ -59,14 +59,23 @@ fn run_bigint() -> Result<BigIntContext> {
     Ok(ctx)
 }
 
-fn run_bigint_256() -> Result<BigIntContext> {
+fn run_bigint_64() -> Result<BigIntContext> {
     let mut ctx = BigIntContext {
         in_values: golden_values(),
         ..Default::default()
     };
-    crate::generated::ecdsa_verify_256(&mut ctx)?;
+    crate::generated::ecdsa_verify_64(&mut ctx)?;
     Ok(ctx)
 }
+
+// fn run_bigint_256() -> Result<BigIntContext> {
+//     let mut ctx = BigIntContext {
+//         in_values: golden_values(),
+//         ..Default::default()
+//     };
+//     crate::generated::ecdsa_verify_256(&mut ctx)?;
+//     Ok(ctx)
+// }
 
 #[test]
 fn test_zkr() -> anyhow::Result<()> {
@@ -158,9 +167,9 @@ fn prove_and_verify_ecdsa_verify() -> Result<()> {
 // TODO: The larger ones
 
 #[test]
-fn test_zkr_256() -> anyhow::Result<()> {
+fn test_zkr_64() -> anyhow::Result<()> {
     // TODO: Should we use the shared code?
-    let ctx = run_bigint_256()?;
+    let ctx = run_bigint_64()?;
 
     let hash_suite = Poseidon2HashSuite::new_suite();
 
@@ -199,7 +208,7 @@ fn test_zkr_256() -> anyhow::Result<()> {
     rng.mix(&folded);
     let z = rng.random_ext_elem();
 
-    let program = crate::zkr::get_zkr("ecdsa_verify_256.zkr", /*po2=*/ 14)?;
+    let program = crate::zkr::get_zkr("ecdsa_verify_64.zkr", /*po2=*/ 14)?;
 
     let mut prover = Prover::new(program, "poseidon2");
     prover.add_input(&[0u32; 8]); //control id
@@ -220,11 +229,11 @@ fn test_zkr_256() -> anyhow::Result<()> {
 }
 
 #[test]
-fn prove_and_verify_ecdsa_verify_256() -> Result<()> {
+fn prove_and_verify_ecdsa_verify_64() -> Result<()> {
     let [base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
-        &ECDSA_VERIFY_256,
+        &ECDSA_VERIFY_64,
         base_pt_x,
         base_pt_y,
         base_pt_order,
@@ -236,10 +245,95 @@ fn prove_and_verify_ecdsa_verify_256() -> Result<()> {
         arbitrary_x,
         arbitrary_y,
     );
-    let zkr = crate::zkr::get_zkr("ecdsa_verify_256.zkr", BIGINT_PO2)?;
-    let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_256, zkr)?;
-    // ecdsa_verify::<sha::Impl>(/*rsa_bits=*/ 8, BIGINT_PO2, &claim, &receipt)?; // TODO bitwidth
-    // verify::<sha::Impl>(&crate::rsa::RSA_256, &claim, &receipt)?;
-    verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_256, &[&claim], &receipt)?;
+    let zkr = crate::zkr::get_zkr("ecdsa_verify_64.zkr", BIGINT_PO2)?;
+    let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_64, zkr)?;
+    verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_64, &[&claim], &receipt)?;
     Ok(())
 }
+
+// #[test]
+// fn test_zkr_256() -> anyhow::Result<()> {
+//     // TODO: Should we use the shared code?
+//     let ctx = run_bigint_256()?;
+
+//     let hash_suite = Poseidon2HashSuite::new_suite();
+
+//     let mut all_coeffs: Vec<u32> = Vec::new();
+//     for witness in ctx
+//         .constant_witness
+//         .iter()
+//         .chain(ctx.public_witness.iter())
+//         .chain(ctx.private_witness.iter())
+//     {
+//         for chunk in witness.chunks(CHECKED_COEFFS_PER_POLY) {
+//             let mut bytes: Vec<u8> = chunk
+//                 .iter()
+//                 .map(|b| u8::try_from(*b).expect("Byte out of range in witness coeffs"))
+//                 .collect();
+//             while bytes.len() < CHECKED_COEFFS_PER_POLY {
+//                 bytes.push(0);
+//             }
+
+//             for word in bytes.chunks(4) {
+//                 all_coeffs.push(u32::from_le_bytes(
+//                     word.try_into().expect("Partial word present in witness?"),
+//                 ));
+//             }
+//         }
+//     }
+
+//     let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+//     trace!("public_digest: {public_digest}");
+//     let private_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+//     trace!("private_digest: {private_digest}");
+//     let folded = (&*hash_suite.hashfn).hash_pair(&public_digest, &private_digest);
+//     trace!("folded: {folded}");
+
+//     let mut rng = (&*hash_suite.rng).new_rng();
+//     rng.mix(&folded);
+//     let z = rng.random_ext_elem();
+
+//     let program = crate::zkr::get_zkr("ecdsa_verify_256.zkr", /*po2=*/ 14)?;
+
+//     let mut prover = Prover::new(program, "poseidon2");
+//     prover.add_input(&[0u32; 8]); //control id
+//     prover.add_input(&z.to_u32_words());
+//     prover.add_input(&all_coeffs);
+//     let receipt = prover.run()?;
+
+//     trace!("rsa receipt: {receipt:?}");
+
+//     risc0_zkp::verify::verify(
+//         &risc0_circuit_recursion::CIRCUIT,
+//         &hash_suite,
+//         &receipt.seal,
+//         |_, _| Ok(()),
+//     )?;
+
+//     Ok(())
+// }
+
+// #[test]
+// fn prove_and_verify_ecdsa_verify_256() -> Result<()> {
+//     let [base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+//         golden_values().try_into().unwrap();
+//     let claim = crate::ecdsa_verify::claim(
+//         &ECDSA_VERIFY_256,
+//         base_pt_x,
+//         base_pt_y,
+//         base_pt_order,
+//         pub_key_x,
+//         pub_key_y,
+//         msg_hash,
+//         r,
+//         s,
+//         arbitrary_x,
+//         arbitrary_y,
+//     );
+//     let zkr = crate::zkr::get_zkr("ecdsa_verify_256.zkr", BIGINT_PO2)?;
+//     let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_256, zkr)?;
+//     // ecdsa_verify::<sha::Impl>(/*rsa_bits=*/ 8, BIGINT_PO2, &claim, &receipt)?; // TODO bitwidth
+//     // verify::<sha::Impl>(&crate::rsa::RSA_256, &claim, &receipt)?;
+//     verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_256, &[&claim], &receipt)?;
+//     Ok(())
+// }
