@@ -18,10 +18,7 @@ use core::fmt::Debug;
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
-use risc0_circuit_rv32im::{
-    control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
-    layout, CircuitImpl, CIRCUIT,
-};
+use risc0_circuit_rv32im::{layout, CircuitImpl, CIRCUIT};
 use risc0_zkp::{
     adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
@@ -31,7 +28,7 @@ use risc0_zkp::{
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use super::VerifierContext;
+use super::{VerifierContext, DEFAULT_MAX_PO2};
 use crate::{sha, MaybePruned, ReceiptClaim};
 
 /// A receipt attesting to the execution of a Segment.
@@ -149,6 +146,31 @@ pub struct SegmentReceiptVerifierParameters {
     pub circuit_info: ProtocolInfo,
 }
 
+impl SegmentReceiptVerifierParameters {
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(max_po2: usize) -> Self {
+        Self {
+            control_ids: BTreeSet::from_iter(
+                ["poseidon2", "sha-256", "blake2b"]
+                    .into_iter()
+                    .flat_map(|hash_name| risc0_circuit_rv32im::control_ids(hash_name, max_po2)),
+            ),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
+        }
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
+}
+
 impl Digestible for SegmentReceiptVerifierParameters {
     /// Hash the [SegmentReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
@@ -167,16 +189,7 @@ impl Digestible for SegmentReceiptVerifierParameters {
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self {
-            control_ids: BTreeSet::from_iter(
-                POSEIDON2_CONTROL_IDS
-                    .into_iter()
-                    .chain(SHA256_CONTROL_IDS)
-                    .chain(BLAKE2B_CONTROL_IDS),
-            ),
-            proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-        }
+        Self::from_max_po2(DEFAULT_MAX_PO2)
     }
 }
 
@@ -245,7 +258,7 @@ mod tests {
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SegmentReceiptVerifierParameters::default().digest(),
-            digest!("c41779698e58f1a53204aa5f27be49875791fbd9a299c464a0dfc4bc892e3623")
+            digest!("52a27aff2de5a8206e3e88cb8dcb087c1193ede8efaf4889117bc68e704cf29a")
         );
     }
 }
