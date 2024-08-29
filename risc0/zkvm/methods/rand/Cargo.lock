@@ -795,7 +795,6 @@ dependencies = [
  "bytemuck",
  "getrandom",
  "libm",
- "stability",
 ]
 
 [[package]]
