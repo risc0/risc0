@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Document how BytePoly works.
+// byte_poly big integers are represented as slices of i32.  The big
+// integer represented by [a0, a1, a2...] is a0 * 256^0 + a1 * 256^1 +
+// a2 * 256^3 + ....
+//
+// This representation allows more than one representation of a given
+// big integer.  However, we call it 'normalied' when each term is in
+// the range [0, 256).
+//
+// TODO: Document more how byte_poly works.
 
 use std::cmp::max;
 
@@ -27,52 +35,36 @@ use tracing::trace;
 
 pub const BITS_PER_COEFF: usize = 8;
 
-pub fn to_biguint(bp: impl AsRef<[i32]>) -> BigUint {
-    let bp = bp.as_ref();
-    let mut out = BigInt::default();
-    let mut mul = BigInt::from(1usize);
-    let coeff_mul = BigInt::from(1usize << BITS_PER_COEFF);
-    for i in 0..bp.len() {
-        out += &mul * bp[i];
-        mul *= &coeff_mul;
-    }
-    out.to_biguint().expect("Unable to make unsigned bigint")
-}
-
+/// Show the given byte poly including both the bigint it represents
+/// and its i32 terms.  Used for debugging.
 pub fn dump(bp: impl AsRef<[i32]>) -> String {
     let bp = bp.as_ref();
     format!("{} ({:?})", to_biguint(bp), bp)
 }
 
-pub fn from_biguint(mut val: BigUint, coeffs: usize) -> Vec<i32> {
-    let mut out = vec![0; coeffs];
-    let mut i = 0;
+fn fill_from_bigint(mut val: BigUint, mut dest: &mut [i32]) {
     let mul = BigUint::from(1usize << BITS_PER_COEFF);
     while !val.is_zero() {
-        assert!(i < coeffs, "{val} exceeds {coeffs}");
-        let remain;
+        let (term, remain);
+        (term, dest) = dest
+            .split_first_mut()
+            .expect("bigint value exceeds size of byte poly");
         (val, remain) = val.div_rem(&mul);
-        out[i] = remain
+        *term = remain
             .try_into()
             .expect("Unable to convert coefficient from bigint");
-        i += 1;
     }
+}
+
+pub fn from_biguint(val: BigUint, coeffs: usize) -> Vec<i32> {
+    let mut out = vec![0; coeffs];
+    fill_from_bigint(val, &mut out);
     out
 }
 
-pub fn from_biguint_fixed<const N: usize>(mut val: BigUint) -> [i32; N] {
+pub fn from_biguint_fixed<const N: usize>(val: BigUint) -> [i32; N] {
     let mut out = [0i32; N];
-    let mut i = 0;
-    let mul = BigUint::from(1usize << BITS_PER_COEFF);
-    while !val.is_zero() {
-        assert!(i < N, "{val} exceeds {N}");
-        let remain;
-        (val, remain) = val.div_rem(&mul);
-        out[i] = remain
-            .try_into()
-            .expect("Unable to convert coefficient from bigint");
-        i += 1;
-    }
+    fill_from_bigint(val, &mut out);
     out
 }
 
@@ -166,6 +158,35 @@ pub fn eval_constraint(
     carry_polys
 }
 
+pub fn compute_digest<F: Field>(
+    hash: &dyn HashFn<F>,
+    witness: &[impl AsRef<[i32]>],
+    group_count: usize,
+) -> Digest {
+    let mut group: usize = 0;
+    let mut cur = [F::Elem::ZERO; CHECKED_COEFFS_PER_POLY];
+    let mut elems = Vec::new();
+
+    for wit in witness.iter() {
+        for chunk in wit.as_ref().chunks(CHECKED_COEFFS_PER_POLY) {
+            for (k, elem) in cur.iter_mut().enumerate() {
+                *elem = *elem * F::Elem::from_u64(1u64 << BITS_PER_COEFF)
+                    + F::Elem::from_u64(*chunk.get(k).unwrap_or(&0) as u64);
+            }
+            group += 1;
+            if group == group_count {
+                elems.extend(cur);
+                cur = Default::default();
+                group = 0;
+            }
+        }
+    }
+    if group != 0 {
+        elems.extend(cur);
+    }
+    *hash.hash_elem_slice(&elems)
+}
+
 /// Packs this byte poly into u32s, 4 bytes per u32, for use in
 /// calculating digests.  Each byte must be normalized, i.e. fit
 /// into a u8.
@@ -194,6 +215,18 @@ pub fn into_padded_u32s(bp: impl AsRef<[i32]>) -> Vec<u32> {
         .collect()
 }
 
+pub fn to_biguint(bp: impl AsRef<[i32]>) -> BigUint {
+    let bp = bp.as_ref();
+    let mut out = BigInt::default();
+    let mut mul = BigInt::from(1usize);
+    let coeff_mul = BigInt::from(1usize << BITS_PER_COEFF);
+    for i in 0..bp.len() {
+        out += &mul * bp[i];
+        mul *= &coeff_mul;
+    }
+    out.to_biguint().expect("Unable to make unsigned bigint")
+}
+
 pub fn add_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>) -> [i32; N] {
     let lhs = lhs.as_ref();
     let rhs = rhs.as_ref();
@@ -219,33 +252,4 @@ pub fn mul_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>)
         }
     }
     out
-}
-
-pub fn compute_digest<F: Field>(
-    hash: &dyn HashFn<F>,
-    witness: &[impl AsRef<[i32]>],
-    group_count: usize,
-) -> Digest {
-    let mut group: usize = 0;
-    let mut cur = [F::Elem::ZERO; CHECKED_COEFFS_PER_POLY];
-    let mut elems = Vec::new();
-
-    for wit in witness.iter() {
-        for chunk in wit.as_ref().chunks(CHECKED_COEFFS_PER_POLY) {
-            for (k, elem) in cur.iter_mut().enumerate() {
-                *elem = *elem * F::Elem::from_u64(1u64 << BITS_PER_COEFF)
-                    + F::Elem::from_u64(*chunk.get(k).unwrap_or(&0) as u64);
-            }
-            group += 1;
-            if group == group_count {
-                elems.extend(cur);
-                cur = Default::default();
-                group = 0;
-            }
-        }
-    }
-    if group != 0 {
-        elems.extend(cur);
-    }
-    *hash.hash_elem_slice(&elems)
 }
