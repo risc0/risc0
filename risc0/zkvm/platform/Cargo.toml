@@ -7,6 +7,9 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[dependencies]
+stability = "0.2"
+
 # This crate should have as few dependencies as possible so it can be
 # used as many places as possible to share the platform definitions.
 [target.'cfg(target_os = "zkvm")'.dependencies]
@@ -28,6 +31,7 @@ features = [
   "export-libm",
   "export-getrandom",
   "getrandom",
+  "unstable",
 ]
 
 [features]
@@ -47,3 +51,4 @@ heap-embedded-alloc = [
   "dep:embedded-alloc",
   "rust-runtime",
 ]
+unstable = []

@@ -863,6 +863,7 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 ///
 /// `input` must be aligned and have `input_len` u32s dereferenceable
 #[cfg(feature = "export-syscalls")]
+#[stability::unstable]
 #[no_mangle]
 pub unsafe extern "C" fn sys_execute_zkr(
     control_id: *const [u32; DIGEST_WORDS],
