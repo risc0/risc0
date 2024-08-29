@@ -28,6 +28,7 @@ features = [
   "export-libm",
   "export-getrandom",
   "getrandom",
+  "unstable",
 ]
 
 [features]
@@ -47,3 +48,4 @@ heap-embedded-alloc = [
   "dep:embedded-alloc",
   "rust-runtime",
 ]
+unstable = []
