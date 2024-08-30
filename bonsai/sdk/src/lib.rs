@@ -192,7 +192,7 @@ pub mod responses {
     use risc0_groth16::Seal;
     use serde::{Deserialize, Serialize};
 
-    /// Response of a upload request
+    /// Response of an upload request
     #[derive(Deserialize, Serialize)]
     pub struct UploadRes {
         /// Presigned URL to be supplied to a PUT request
@@ -298,7 +298,7 @@ pub mod responses {
 
     /// Snark Receipt object
     ///
-    /// All relevant data to verify both the snark proof an corresponding
+    /// All relevant data to verify both the snark proof a corresponding
     /// imageId on chain.
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     pub struct SnarkReceipt {
