@@ -135,7 +135,7 @@
  * name, such as some OS thread creation APIs.  This API support resource naming though 
  * both through resource objects and functions following the pattern 
  * nvtxName[RESOURCE_TYPE][A|W](identifier, name).  Resource objects introduced in NVTX_VERSION 2 
- * supersede the other functions with a a more general method of assigning names to OS resources,
+ * supersede the other functions with a more general method of assigning names to OS resources,
  * along with associating them to domains too.  The older nvtxName* functions are only associated 
  * with the default domain.
  * \section EXTENSIONS Optional Extensions
@@ -1298,7 +1298,7 @@ NVTX_DECLSPEC void NVTX_API nvtxNameOsThreadW(uint32_t threadId, const wchar_t* 
 *
 * Registered strings are intended to increase performance by lowering instrumentation
 * overhead.  String may be registered once and the handle may be passed in place of
-* a string where an the APIs may allow.
+* a string where the APIs may allow.
 *
 * See \ref STRING_REGISTRATION for more details
 *
