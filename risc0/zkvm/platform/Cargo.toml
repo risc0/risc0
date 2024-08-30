@@ -7,6 +7,9 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[dependencies]
+stability = "0.2"
+
 # This crate should have as few dependencies as possible so it can be
 # used as many places as possible to share the platform definitions.
 [target.'cfg(target_os = "zkvm")'.dependencies]
@@ -33,14 +36,11 @@ features = [
 
 [features]
 default = []
-# Build a rust runtime
-rust-runtime = ["export-syscalls", "export-libm"]
-panic-handler = []
 entrypoint = []
-export-syscalls = []
-export-libm = ["dep:libm"]
 # exports a `getrandom` implementation that panics
-export-getrandom = ["dep:getrandom", "dep:bytemuck"]
+export-getrandom = ["dep:bytemuck", "dep:getrandom"]
+export-libm = ["dep:libm"]
+export-syscalls = []
 # exports a `getrandom` implementation that uses sys_random
 getrandom = ["export-getrandom"]
 heap-embedded-alloc = [
@@ -48,4 +48,7 @@ heap-embedded-alloc = [
   "dep:embedded-alloc",
   "rust-runtime",
 ]
+panic-handler = []
+# Build a rust runtime
+rust-runtime = ["export-libm", "export-syscalls"]
 unstable = []

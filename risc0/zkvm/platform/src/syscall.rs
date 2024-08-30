@@ -132,6 +132,7 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_EXECUTE_ZKR);
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
@@ -142,7 +143,6 @@ pub mod nr {
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
-    declare_syscall!(pub SYS_EXECUTE_ZKR);
 }
 
 impl SyscallName {
@@ -862,8 +862,9 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 /// `control_id` must be aligned and dereferenceable.
 ///
 /// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg(all(feature = "export-syscalls", feature = "unstable"))]
+#[cfg(feature = "export-syscalls")]
 #[no_mangle]
+#[stability::unstable]
 pub unsafe extern "C" fn sys_execute_zkr(
     control_id: *const [u32; DIGEST_WORDS],
     input: *const u32,
