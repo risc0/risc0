@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::{
-    byte_poly, ecdsa_verify::{ECDSA_VERIFY_8, ECDSA_VERIFY_64, /*ECDSA_VERIFY_256*/}, prove, verify, BigIntContext, BIGINT_PO2,
+    byte_poly, ecdsa_verify::{ECDSA_VERIFY_8, ECDSA_VERIFY_32, /*ECDSA_VERIFY_256*/}, prove, verify, BigIntContext, BIGINT_PO2,
 };
 use anyhow::Result;
 use num_bigint::BigUint;
@@ -59,12 +59,12 @@ fn run_bigint() -> Result<BigIntContext> {
     Ok(ctx)
 }
 
-fn run_bigint_64() -> Result<BigIntContext> {
+fn run_bigint_32() -> Result<BigIntContext> {
     let mut ctx = BigIntContext {
         in_values: golden_values(),
         ..Default::default()
     };
-    crate::generated::ecdsa_verify_64(&mut ctx)?;
+    crate::generated::ecdsa_verify_32(&mut ctx)?;
     Ok(ctx)
 }
 
@@ -167,9 +167,9 @@ fn prove_and_verify_ecdsa_verify() -> Result<()> {
 // TODO: The larger ones
 
 #[test]
-fn test_zkr_64() -> anyhow::Result<()> {
+fn test_zkr_32() -> anyhow::Result<()> {
     // TODO: Should we use the shared code?
-    let ctx = run_bigint_64()?;
+    let ctx = run_bigint_32()?;
 
     let hash_suite = Poseidon2HashSuite::new_suite();
 
@@ -229,11 +229,11 @@ fn test_zkr_64() -> anyhow::Result<()> {
 }
 
 #[test]
-fn prove_and_verify_ecdsa_verify_64() -> Result<()> {
+fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
     let [base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
-        &ECDSA_VERIFY_64,
+        &ECDSA_VERIFY_32,
         base_pt_x,
         base_pt_y,
         base_pt_order,
@@ -245,9 +245,9 @@ fn prove_and_verify_ecdsa_verify_64() -> Result<()> {
         arbitrary_x,
         arbitrary_y,
     );
-    let zkr = crate::zkr::get_zkr("ecdsa_verify_64.zkr", BIGINT_PO2)?;
-    let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_64, zkr)?;
-    verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_64, &[&claim], &receipt)?;
+    let zkr = crate::zkr::get_zkr("ecdsa_verify_32.zkr", BIGINT_PO2)?;
+    let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_32, zkr)?;
+    verify::<sha::Impl>(&crate::ecdsa_verify::ECDSA_VERIFY_32, &[&claim], &receipt)?;
     Ok(())
 }
 

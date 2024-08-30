@@ -137,8 +137,8 @@ bigint_tests! {
         ["01"],
         [346372436, 1604795053, 31129203, 246390035]
     ),
-    ec_aff_mul2_test_64(
-        ec_aff_mul_test_64,
+    ec_aff_mul2_test_32(
+        ec_aff_mul_test_32,
         [
             "06",   // inp_x:       6
             "04",   // inp_y:       4
