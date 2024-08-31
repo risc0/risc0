@@ -17,7 +17,6 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
-mod config;
 mod docker;
 
 use std::{
@@ -38,10 +37,6 @@ use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-use crate::config::GuestBuildOptions;
-use crate::docker::build_guest_package_docker;
-use config::GuestMetadata;
-pub use config::{DockerOptions, GuestOptions};
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
 /// This const represents a filename that is used in the use to indicate to in
@@ -429,27 +424,8 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 
     println!("Building guest package: cargo {}", args.join(" "));
 
-    let encoded_rust_flags = encode_rust_flags(rust_flags);
-
-    if !cpp_toolchain_override() {
-        let cc_path = risc0_data()
-            .unwrap()
-            .join("cpp/bin/riscv32-unknown-elf-gcc");
-        cmd.env("CC", cc_path)
-            .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
-    }
-
-    cmd.env("RUSTC", rustc)
-        .env("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags)
-        .args(args);
-    cmd
-}
-
-/// Returns a string that can be set as the value of CARGO_ENCODED_RUSTFLAGS when compiling guests
-pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
-    [
-        // Append other rust flags
-        rustc_flags,
+    let rustflags_envvar = [
+        rust_flags,
         &[
             // Replace atomic ops with nonatomic versions since the guest is single threaded.
             "-C",
@@ -470,7 +446,20 @@ pub(crate) fn encode_rust_flags(rustc_flags: &[&str]) -> String {
         ],
     ]
     .concat()
-    .join("\x1f")
+    .join("\x1f");
+
+    if !cpp_toolchain_override() {
+        let cc_path = risc0_data()
+            .unwrap()
+            .join("cpp/bin/riscv32-unknown-elf-gcc");
+        cmd.env("CC", cc_path)
+            .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+    }
+
+    cmd.env("RUSTC", rustc)
+        .env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar)
+        .args(args);
+    cmd
 }
 
 fn cpp_toolchain_override() -> bool {
@@ -578,7 +567,7 @@ fn tty_println(msg: &str) {
 fn build_guest_package<P>(
     pkg: &Package,
     target_dir: P,
-    guest_opts: &GuestBuildOptions,
+    guest_opts: &GuestOptions,
     runtime_lib: Option<&str>,
 ) where
     P: AsRef<Path>,
@@ -589,19 +578,11 @@ fn build_guest_package<P>(
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
-    let runtime_rust_flags = runtime_lib
-        .map(|lib| vec![String::from("-C"), format!("link_arg={}", lib)])
-        .unwrap_or_default();
-    let rust_flags: Vec<_> = [
-        runtime_rust_flags
-            .iter()
-            .map(|s| s.as_str())
-            .collect::<Vec<_>>(),
-        guest_opts.rustc_flags.iter().map(|s| s.as_str()).collect(),
-    ]
-    .concat();
-
-    let mut cmd = cargo_command("build", &rust_flags);
+    let mut cmd = if let Some(lib) = runtime_lib {
+        cargo_command("build", &["-C", &format!("link_arg={}", lib)])
+    } else {
+        cargo_command("build", &[])
+    };
 
     let features_str = guest_opts.features.join(",");
     if !features_str.is_empty() {
@@ -660,6 +641,26 @@ fn detect_toolchain(name: &str) {
         eprintln!("  rzup install");
         std::process::exit(-1);
     }
+}
+
+/// Options for configuring a docker build environment.
+#[derive(Clone)]
+pub struct DockerOptions {
+    /// Specify the root directory for docker builds.
+    ///
+    /// The current working directory is used if `None` is specified.
+    pub root_dir: Option<PathBuf>,
+}
+
+/// Options defining how to embed a guest package in
+/// [`embed_methods_with_options`].
+#[derive(Default, Clone)]
+pub struct GuestOptions {
+    /// Features for cargo to build the guest with.
+    pub features: Vec<String>,
+
+    /// Use a docker environment for building.
+    pub use_docker: Option<DockerOptions>,
 }
 
 fn get_guest_dir() -> PathBuf {
@@ -735,27 +736,24 @@ fn do_embed_methods<G: GuestBuilder>(
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        let guest_embed_opts = guest_pkg_to_options
+        let guest_opts = guest_pkg_to_options
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
-        let guest_build_opts = GuestBuildOptions::from(guest_embed_opts)
-            .with_metadata(GuestMetadata::from(&guest_pkg));
 
-        let methods: Vec<G> = if let Some(ref docker_opts) = guest_build_opts.use_docker {
+        let methods: Vec<G> = if let Some(docker_opts) = guest_opts.use_docker {
             let src_dir = docker_opts
                 .root_dir
-                .clone()
                 .unwrap_or_else(|| std::env::current_dir().unwrap());
-            build_guest_package_docker(
+            docker_build(
                 guest_pkg.manifest_path.as_std_path(),
                 &src_dir,
-                &guest_build_opts,
+                &guest_opts.features,
             )
             .unwrap();
             guest_methods_docker(&guest_pkg, &guest_dir)
         } else {
-            build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
-            guest_methods(&guest_pkg, &guest_dir, &guest_build_opts.features)
+            build_guest_package(&guest_pkg, &guest_dir, &guest_opts, None);
+            guest_methods(&guest_pkg, &guest_dir, &guest_opts.features)
         };
 
         for method in methods {

@@ -18,11 +18,13 @@ use anyhow::{bail, Context, Result};
 use cargo_metadata::MetadataCommand;
 use docker_generate::DockerFile;
 use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
+use risc0_zkvm_platform::{
+    memory::{GUEST_MAX_MEM, TEXT_START},
+    PAGE_SIZE,
+};
 use tempfile::tempdir;
 
-use crate::config::GuestBuildOptions;
-use crate::{encode_rust_flags, get_env_var, GuestOptions};
+use crate::get_env_var;
 
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
@@ -47,15 +49,7 @@ pub enum BuildStatus {
 pub fn docker_build(
     manifest_path: &Path,
     src_dir: &Path,
-    guest_opts: &GuestOptions,
-) -> Result<BuildStatus> {
-    build_guest_package_docker(manifest_path, src_dir, &guest_opts.clone().into())
-}
-
-pub(crate) fn build_guest_package_docker(
-    manifest_path: &Path,
-    src_dir: &Path,
-    guest_opts: &GuestBuildOptions,
+    features: &[String],
 ) -> Result<BuildStatus> {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
         eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
@@ -94,7 +88,7 @@ pub(crate) fn build_guest_package_docker(
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
-        create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), guest_opts)?;
+        create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
         build(&src_dir, temp_path)?;
     }
     println!("ELFs ready at:");
@@ -117,17 +111,13 @@ fn create_dockerfile(
     manifest_path: &Path,
     temp_dir: &Path,
     pkg_name: &str,
-    guest_opts: &GuestBuildOptions,
+    features: &[String],
 ) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
-    let encoded_rust_flags = encode_rust_flags(
-        &guest_opts
-            .rustc_flags
-            .iter()
-            .map(|s| s.as_str())
-            .collect::<Vec<_>>(),
+    let rustflags = format!(
+        "-C passes=loweratomic -C link-arg=-Ttext=0x{TEXT_START:08X} -C link-arg=--fatal-warnings",
     );
-    let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
+    let rustflags_env = &[("RUSTFLAGS", rustflags.as_str())];
 
     let common_args = vec![
         "--locked",
@@ -138,8 +128,8 @@ fn create_dockerfile(
     ];
 
     let mut build_args = common_args.clone();
-    let features_str = guest_opts.features.join(",");
-    if !guest_opts.features.is_empty() {
+    let features_str = features.join(",");
+    if !features.is_empty() {
         build_args.push("--features");
         build_args.push(&features_str);
     }
@@ -230,16 +220,16 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use super::{build_guest_package_docker, TARGET_DIR};
-    use crate::config::GuestBuildOptions;
     use std::path::Path;
+
+    use super::{docker_build, TARGET_DIR};
 
     const SRC_DIR: &str = "../..";
 
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        build_guest_package_docker(manifest_path, src_dir, &GuestBuildOptions::default()).unwrap();
+        self::docker_build(manifest_path, src_dir, &[]).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {

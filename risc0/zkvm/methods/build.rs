@@ -14,8 +14,7 @@
 
 use std::{collections::HashMap, env};
 
-use risc0_build::embed_methods_with_options;
-use risc0_build::{DockerOptions, GuestOptions};
+use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
 
 fn main() {
     tracing_subscriber::fmt()
@@ -41,15 +40,22 @@ fn main() {
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
+                features: vec![],
                 use_docker,
-                ..Default::default()
             },
         ),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
-                ..Default::default()
+                use_docker: None,
+            },
+        ),
+        (
+            "risc0-zkvm-methods-cpp-crates",
+            GuestOptions {
+                features: vec![],
+                use_docker: None,
             },
         ),
     ]);
