@@ -24,7 +24,8 @@ use clap::ValueEnum;
 use risc0_zkp::MAX_CYCLES_PO2;
 use risc0_zkvm::{
     ApiClient, Asset, AssetRequest, ExecutorEnv, ExecutorEnvBuilder, ProveInfo, ProverOpts,
-    ReceiptClaim, SegmentInfo, SessionInfo, SuccinctReceipt, VerifierContext, RECURSION_PO2,
+    ReceiptClaim, ReceiptKind, SegmentInfo, SessionInfo, SuccinctReceipt, VerifierContext,
+    RECURSION_PO2,
 };
 use serde_with::{serde_as, DurationSeconds};
 use tabled::{settings::Style, Table, Tabled};
@@ -127,7 +128,7 @@ impl Datasheet {
             &client,
             &util::loop_env(0)?,
             LOOP_ELF,
-            &ProverOpts::succinct(),
+            &ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct),
         )?);
 
         let mut data = Vec::new();
@@ -228,7 +229,7 @@ mod util {
         let binary = risc0_zkvm::Asset::Inline(elf.to_vec().into());
         let prove_info = client.prove(env, opts, binary)?;
 
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::all_po2s();
         if opts.prove_guest_errors {
             prove_info.receipt.verify_integrity_with_context(&ctx)?;
         } else {
@@ -280,8 +281,11 @@ mod benches {
         let expected_cycles = 1u64 << po2;
         println!("rv32im ({hashfn}): {expected_cycles}");
 
-        let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
-        let env = util::loop_env(iters)?;
+        let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
+        let env = util::loop_env_builder(iters)
+            .segment_limit_po2(po2)
+            .build()?;
+
         let (info, duration) = try_time(|| util::prove(client, &env, LOOP_ELF, &opts))?;
 
         let cycles = info.stats.total_cycles;
@@ -303,7 +307,7 @@ mod benches {
     pub fn succinct(client: &ApiClient, iters: u32) -> Result<BenchmarkData> {
         println!("succinct: {iters}");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let env = util::loop_env(iters)?;
         let (info, duration) = try_time(|| util::prove(client, &env, LOOP_ELF, &opts))?;
 
@@ -323,7 +327,7 @@ mod benches {
         println!("lift");
 
         let env = util::loop_env(0)?;
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
 
         let segment: Asset = {
             let mut segment_count = 0;
@@ -363,7 +367,7 @@ mod benches {
         // for instruction".
         let (po2, iters) = CYCLES_PO2_ITERS[1];
 
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
         let env = util::loop_env_builder(iters)
             .segment_limit_po2(po2 - 1)
             .build()?;
@@ -412,7 +416,7 @@ mod benches {
     pub fn identity_p254(client: &ApiClient) -> Result<BenchmarkData> {
         println!("identity_p254");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let info = util::prove(client, &util::loop_env(0)?, LOOP_ELF, &opts)?;
 
         let InnerReceipt::Succinct(receipt) = info.receipt.inner else {

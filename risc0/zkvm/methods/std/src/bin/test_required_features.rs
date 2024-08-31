@@ -12,18 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::core::digest::Digest;
-use risc0_zkp::digest;
+#[allow(unused_imports)]
+use std::compile_error;
 
-const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2 + 1;
+use risc0_zkvm as _;
 
-pub type ControlIds = [Digest; CONTROL_ID_ENTRIES];
-
-/// Control IDs for each power-of-two of the rv32im circuit using SHA-256.
-pub const SHA256_CONTROL_IDS: ControlIds = [{}];
-
-/// Control IDs for each power-of-two of the rv32im circuit using Poseidon2.
-pub const POSEIDON2_CONTROL_IDS: ControlIds = [{}];
-
-/// Control IDs for each power-of-two of the rv32im circuit using Blake2b.
-pub const BLAKE2B_CONTROL_IDS: ControlIds = [{}];
+fn main() {
+    #[cfg(not(feature = "test_feature3"))]
+    compile_error!("Test feature was not found.");
+}

@@ -12,18 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::core::digest::Digest;
-use risc0_zkp::digest;
+use risc0_zkvm::guest::env;
 
-const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2 + 1;
+thread_local! {
+    pub static MY_STATIC_VAR: StaticVar = StaticVar::new();
+}
 
-pub type ControlIds = [Digest; CONTROL_ID_ENTRIES];
+struct StaticVar {
+    pub value: String,
+}
 
-/// Control IDs for each power-of-two of the rv32im circuit using SHA-256.
-pub const SHA256_CONTROL_IDS: ControlIds = [{}];
+impl StaticVar {
+    pub fn new() -> Self {
+        env::log("new");
+        Self {
+            value: "xxx".to_string(),
+        }
+    }
+}
 
-/// Control IDs for each power-of-two of the rv32im circuit using Poseidon2.
-pub const POSEIDON2_CONTROL_IDS: ControlIds = [{}];
-
-/// Control IDs for each power-of-two of the rv32im circuit using Blake2b.
-pub const BLAKE2B_CONTROL_IDS: ControlIds = [{}];
+fn main() {
+    env::log("main");
+    MY_STATIC_VAR.with(|x| println!("{}", x.value));
+}

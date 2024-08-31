@@ -227,6 +227,10 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .into_iter()
                 .map(TryInto::try_into)
                 .collect::<Result<_>>()?,
+            max_segment_po2: opts
+                .max_segment_po2
+                .try_into()
+                .map_err(|_| malformed_err())?,
         })
     }
 }
@@ -238,6 +242,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
+            max_segment_po2: opts.max_segment_po2 as u64,
         }
     }
 }
@@ -729,6 +734,7 @@ impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
             input: match value.input {
                 None => MaybePruned::Value(None),
                 Some(x) => match MaybePruned::<Input>::try_from(x)? {
+                    #[allow(unreachable_patterns)]
                     MaybePruned::Value(input) => MaybePruned::Value(Some(input)),
                     MaybePruned::Pruned(digest) => MaybePruned::Pruned(digest),
                 },
@@ -956,6 +962,7 @@ impl From<MaybePruned<Unknown>> for pb::core::MaybePruned {
     fn from(value: MaybePruned<Unknown>) -> Self {
         Self {
             kind: Some(match value {
+                #[allow(unreachable_patterns)]
                 MaybePruned::Value(inner) => {
                     match inner { /* unreachable */ }
                 }
