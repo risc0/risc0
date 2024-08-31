@@ -20,8 +20,7 @@ use cargo_metadata::MetadataCommand;
 use clap::Parser;
 use risc0_build::BuildStatus;
 
-use crate::commands::build_guest;
-use crate::utils;
+use crate::{commands::build_guest, utils};
 
 /// `cargo risczero deploy`
 ///
