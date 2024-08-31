@@ -734,6 +734,7 @@ impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
             input: match value.input {
                 None => MaybePruned::Value(None),
                 Some(x) => match MaybePruned::<Input>::try_from(x)? {
+                    #[allow(unreachable_patterns)]
                     MaybePruned::Value(input) => MaybePruned::Value(Some(input)),
                     MaybePruned::Pruned(digest) => MaybePruned::Pruned(digest),
                 },
@@ -961,6 +962,7 @@ impl From<MaybePruned<Unknown>> for pb::core::MaybePruned {
     fn from(value: MaybePruned<Unknown>) -> Self {
         Self {
             kind: Some(match value {
+                #[allow(unreachable_patterns)]
                 MaybePruned::Value(inner) => {
                     match inner { /* unreachable */ }
                 }
