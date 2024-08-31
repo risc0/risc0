@@ -15,6 +15,9 @@
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
+/// Smallest cycle limit, as a power of two (po2), supported as a lift program.
+pub const MIN_LIFT_PO2: usize = 14;
+
 /// Control IDs allowed in the default set of recursion programs. Includes control IDs for the base
 /// set of recursion programs, and each power-of-two of the rv32im circuit, using Poseidon2.
 pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
@@ -27,8 +30,6 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("17d75c070f373f333bbbaf33a688bb74fc05670435cd5d6378d37b608448e300"), // rv32im po2=19
     digest!("f3cf1217485c403cea526b1e52e70835c31bdc6e3016ee12916f6c6561fc0977"), // rv32im po2=20
     digest!("4043ce1426811d4f0e6a9c27256d052513c95739e9b80c74f628f313c739b75c"), // rv32im po2=21
-    digest!("b4edfc3f2c49f10285bcdc7493eb81063959820a59569356fb73b62c1586e01f"), // rv32im po2=22
-    digest!("cc1bd6753bb8fd41d41bba14bb56e90ffa9ddf4f20f7727734d140675a9cc52b"), // rv32im po2=23
     digest!("0e51536ec08ac01e42de3d2a0b2a552d8ff2c75e4ef2b5285eed23582a13ef5d"), // recursion identity.zkr
     digest!("d7b56f6ef29d18203ac26960eb21160d60da6f1975124261fbe38d1364fa0e6b"), // recursion join.zkr
     digest!("1131f74f290f9d52f9aa2e7343b0445dff1765597a1e1849ed5f3f0afaba9f4e"), // recursion lift_14.zkr
@@ -39,15 +40,12 @@ pub const ALLOWED_CONTROL_IDS: &[Digest] = &[
     digest!("c607b103592326302802cf1ff1c6ee5dab7f112e85c6106b4085e55c46535f1d"), // recursion lift_19.zkr
     digest!("deca5917ab949d3769a17415d4b5753d0a49f818af600815ad92c85067322217"), // recursion lift_20.zkr
     digest!("cc4245191072ea38989b65721112584cd548385f0eda402d76c70e0e718e0f73"), // recursion lift_21.zkr
-    digest!("dd6cd51e766f484d625df405e74e11067283c1269dbdae21bc6a031b1daa952e"), // recursion lift_22.zkr
-    digest!("4726ab732cc10d26e233aa6c82a32001f2d83a1878e5da7531017b737054dc6d"), // recursion lift_23.zkr
-    digest!("8ea32467c6445926da67365554e3b64be92a5076d071ff0632f45b294787253f"), // recursion lift_24.zkr
     digest!("18386311e4b86b527f3d966de55df3271f7e52209c037b607a41a62c8b4c9f61"), // recursion resolve.zkr
 ];
 
 /// Root of the Merkle tree constructed from [ALLOWED_CONTROL_IDS], using Poseidon2.
 pub const ALLOWED_CONTROL_ROOT: Digest =
-    digest!("9a3767040e4cf554112afa68bc043274a8636a06565e1d5e2b7fa90fda941218");
+    digest!("8b6dcf11d463ac455361b41fb3ed053febb817491bdea00fdb340e45013b852e");
 
 /// Control ID for the identity recursion programs (ZKR), using Poseidon over the BN254 scalar field.
 pub const BN254_IDENTITY_CONTROL_ID: Digest =

@@ -15,7 +15,7 @@
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
-const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2;
+const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2 + 1;
 
 pub type ControlIds = [Digest; CONTROL_ID_ENTRIES];
 
