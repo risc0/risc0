@@ -169,4 +169,4 @@ std = [
   "serde/std",
   "sha2/std",
 ]
-unstable = []
+unstable = ["risc0-zkvm-platform/unstable"]

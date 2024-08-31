@@ -590,7 +590,7 @@ pub(crate) trait Merge: Digestible + Sized {
 
     /// Merge two structs to assigning self as the union of the fields populated in the two inputs.
     fn merge_with(&mut self, other: &Self) -> Result<(), MergeInequalityError> {
-        // Not an very efficient implementation.
+        // Not a very efficient implementation.
         *self = self.merge(other)?;
         Ok(())
     }
