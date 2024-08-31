@@ -36,18 +36,17 @@ use cargo_metadata::{Message, MetadataCommand, Package};
 use risc0_binfmt::compute_image_id;
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
-use serde::Deserialize;
 
-use crate::config::GuestBuildOptions;
-use crate::docker::build_guest_package_docker;
-use config::GuestMetadata;
+use self::{
+    config::{GuestBuildOptions, Risc0Metadata},
+    docker::build_guest_package_docker,
+};
+
 pub use config::{DockerOptions, GuestOptions};
 pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
-/// This const represents a filename that is used in the use to indicate to in
-/// order to indicate to the client and the risc0-build crate that the new rust
-/// implementation of rzup is in use. The rust implementation of rzup will place
-/// a file with this name under `$RISC0_HOME`.
+/// This is used to detect if the rust-based rzup implementation is in use.
+/// The rust-based rzup will place a file with this name under `$RISC0_HOME`.
 pub const RUST_RZUP_INDICATOR: &str = ".rzup";
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
@@ -87,18 +86,6 @@ fn risc0_data_compat() -> Result<PathBuf> {
     };
 
     Ok(dir)
-}
-
-#[derive(Debug, Deserialize)]
-struct Risc0Metadata {
-    methods: Vec<String>,
-}
-
-impl Risc0Metadata {
-    fn from_package(pkg: &Package) -> Option<Risc0Metadata> {
-        let obj = pkg.metadata.get("risc0").unwrap();
-        serde_json::from_value(obj.clone()).unwrap()
-    }
 }
 
 trait GuestBuilder: Sized {
@@ -304,11 +291,9 @@ fn current_package() -> Package {
 
 /// Returns all inner packages specified the "methods" list inside
 /// "package.metadata.risc0".
-fn guest_packages(pkg: &Package) -> Vec<Package> {
+fn guest_packages(pkg: &Package, methods: &[String]) -> Vec<Package> {
     let manifest_dir = pkg.manifest_path.parent().unwrap();
-    Risc0Metadata::from_package(pkg)
-        .unwrap()
-        .methods
+    methods
         .iter()
         .map(|inner| get_package(manifest_dir.join(inner)))
         .collect()
@@ -575,12 +560,8 @@ fn tty_println(msg: &str) {
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(
-    pkg: &Package,
-    target_dir: P,
-    guest_opts: &GuestBuildOptions,
-    runtime_lib: Option<&str>,
-) where
+fn build_guest_package<P>(pkg: &Package, target_dir: P, guest_opts: &GuestBuildOptions)
+where
     P: AsRef<Path>,
 {
     if is_skip_build() {
@@ -589,18 +570,7 @@ fn build_guest_package<P>(
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
-    let runtime_rust_flags = runtime_lib
-        .map(|lib| vec![String::from("-C"), format!("link_arg={}", lib)])
-        .unwrap_or_default();
-    let rust_flags: Vec<_> = [
-        runtime_rust_flags
-            .iter()
-            .map(|s| s.as_str())
-            .collect::<Vec<_>>(),
-        guest_opts.rustc_flags.iter().map(|s| s.as_str()).collect(),
-    ]
-    .concat();
-
+    let rust_flags: Vec<_> = guest_opts.rustc_flags.iter().map(|s| s.as_str()).collect();
     let mut cmd = cargo_command("build", &rust_flags);
 
     let features_str = guest_opts.features.join(",");
@@ -711,8 +681,9 @@ fn do_embed_methods<G: GuestBuilder>(
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = get_guest_dir();
     // Read the cargo metadata for info from `[package.metadata.risc0]`.
-    let pkg = current_package();
-    let guest_packages = guest_packages(&pkg);
+    let pkg = &current_package();
+    let risc0_metadata: Risc0Metadata = pkg.into();
+    let guest_packages = guest_packages(pkg, &risc0_metadata.methods);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
@@ -738,8 +709,8 @@ fn do_embed_methods<G: GuestBuilder>(
         let guest_embed_opts = guest_pkg_to_options
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
-        let guest_build_opts = GuestBuildOptions::from(guest_embed_opts)
-            .with_metadata(GuestMetadata::from(&guest_pkg));
+        let guest_build_opts =
+            GuestBuildOptions::from(guest_embed_opts).with_metadata(&risc0_metadata);
 
         let methods: Vec<G> = if let Some(ref docker_opts) = guest_build_opts.use_docker {
             let src_dir = docker_opts
@@ -754,7 +725,7 @@ fn do_embed_methods<G: GuestBuilder>(
             .unwrap();
             guest_methods_docker(&guest_pkg, &guest_dir)
         } else {
-            build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
+            build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts);
             guest_methods(&guest_pkg, &guest_dir, &guest_build_opts.features)
         };
 

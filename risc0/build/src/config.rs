@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::path::PathBuf;
+
 use cargo_metadata::Package;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 /// Options for configuring a docker build environment.
 #[derive(Clone, Serialize, Deserialize)]
@@ -36,19 +37,19 @@ pub struct GuestOptions {
     pub use_docker: Option<DockerOptions>,
 }
 
-/// Metadata defining options to build a guest
-#[derive(Serialize, Deserialize, Clone, Default)]
-pub(crate) struct GuestMetadata {
+#[derive(Debug, Deserialize)]
+pub(crate) struct Risc0Metadata {
+    /// List of methods to build.
+    pub(crate) methods: Vec<String>,
+
     /// Configuration flags to build the guest with.
     #[serde(rename = "rustc-flags")]
     pub(crate) rustc_flags: Option<Vec<String>>,
 }
 
-impl From<&Package> for GuestMetadata {
-    fn from(value: &Package) -> Self {
-        let Some(obj) = value.metadata.get("risc0") else {
-            return Default::default();
-        };
+impl From<&Package> for Risc0Metadata {
+    fn from(pkg: &Package) -> Self {
+        let obj = pkg.metadata.get("risc0").unwrap();
         serde_json::from_value(obj.clone()).unwrap()
     }
 }
@@ -78,8 +79,8 @@ impl From<GuestOptions> for GuestBuildOptions {
 }
 
 impl GuestBuildOptions {
-    pub(crate) fn with_metadata(mut self, metadata: GuestMetadata) -> Self {
-        self.rustc_flags = metadata.rustc_flags.unwrap_or_default();
+    pub(crate) fn with_metadata(mut self, metadata: &Risc0Metadata) -> Self {
+        self.rustc_flags = metadata.rustc_flags.clone().unwrap_or_default();
         self
     }
 }

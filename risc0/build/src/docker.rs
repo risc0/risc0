@@ -21,8 +21,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
-use crate::config::GuestBuildOptions;
-use crate::{encode_rust_flags, get_env_var, GuestOptions};
+use crate::{config::GuestBuildOptions, encode_rust_flags, get_env_var, GuestOptions};
 
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile

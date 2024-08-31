@@ -11,7 +11,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 release = false
 
 [package.metadata.risc0]
-methods = ["cfg", "guest", "heap", "rand", "std", "cpp-crates"]
+methods = ["guest", "heap", "rand", "std", "cpp-crates"]
+rustc-flags = ['--cfg', 'risc0_custom_cfg_test="flagged"']
 
 [dependencies]
 bincode = { version = "1.3", optional = true }
