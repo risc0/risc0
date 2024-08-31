@@ -19,8 +19,9 @@ use bonsai_sdk::blocking::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, is_dev_mode, sha::Digestible, ExecutorEnv, Groth16Receipt, InnerReceipt,
-    ProveInfo, ProverOpts, Receipt, ReceiptKind, VerifierContext,
+    compute_image_id, is_dev_mode, sha::Digestible, AssumptionReceipt, ExecutorEnv, Groth16Receipt,
+    InnerAssumptionReceipt, InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind,
+    VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
@@ -36,6 +37,25 @@ impl BonsaiProver {
     pub fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
+        }
+    }
+}
+
+/// Serializes the assumption receipt to upload to Bonsai. Will error if an unsupported receipt type
+/// is provided.
+fn serialize_succinct_assumption_receipt(assumption: &AssumptionReceipt) -> Result<Vec<u8>> {
+    match assumption {
+        AssumptionReceipt::Proven(receipt) => {
+            if !matches!(receipt, InnerAssumptionReceipt::Succinct(_)) {
+                bail!(
+                    "only succinct starks can be provided as assumptions for Bonsai. \
+                    Use `ProverOpts::succinct()` when generating any assumptions locally."
+                );
+            };
+            Ok(bincode::serialize(receipt)?)
+        }
+        crate::AssumptionReceipt::Unresolved(_) => {
+            bail!("only proven assumptions can be uploaded to Bonsai.")
         }
     }
 }
@@ -65,12 +85,7 @@ impl Prover for BonsaiProver {
         // upload receipts
         let mut receipts_ids: Vec<String> = vec![];
         for assumption in &env.assumptions.borrow().cached {
-            let serialized_receipt = match assumption {
-                crate::AssumptionReceipt::Proven(receipt) => bincode::serialize(receipt)?,
-                crate::AssumptionReceipt::Unresolved(_) => {
-                    bail!("only proven assumptions can be uploaded to Bonsai.")
-                }
-            };
+            let serialized_receipt = serialize_succinct_assumption_receipt(assumption)?;
             let receipt_id = client.upload_receipt(serialized_receipt)?;
             receipts_ids.push(receipt_id);
         }
