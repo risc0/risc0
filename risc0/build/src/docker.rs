@@ -118,7 +118,6 @@ fn create_dockerfile(
     pkg_name: &str,
     guest_opts: &GuestBuildOptions,
 ) -> Result<()> {
-    let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
     let encoded_rust_flags = encode_rust_flags(
         &guest_opts
             .rustc_flags
@@ -126,7 +125,6 @@ fn create_dockerfile(
             .map(|s| s.as_str())
             .collect::<Vec<_>>(),
     );
-    let rustflags_env = &[("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str())];
 
     let common_args = vec![
         "--locked",
@@ -153,16 +151,20 @@ fn create_dockerfile(
     .concat()
     .join(" ");
 
+    let env_vars = [
+        ("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap()),
+        ("CARGO_ENCODED_RUSTFLAGS", encoded_rust_flags.as_str()),
+        ("CARGO_TARGET_DIR", "target"),
+    ];
     let build = DockerFile::new()
         .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-2")
         .workdir("/src")
         .copy(".", ".")
-        .env(manifest_env)
-        .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&env_vars)
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)
+        .run("echo $CARGO_ENCODED_RUSTFLAGS")
         .run(&build_cmd);
 
     let out_dir = format!("/{pkg_name}");
@@ -238,7 +240,18 @@ mod test {
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        build_guest_package_docker(manifest_path, src_dir, &GuestBuildOptions::default()).unwrap();
+        build_guest_package_docker(
+            manifest_path,
+            src_dir,
+            &GuestBuildOptions {
+                rustc_flags: vec![
+                    String::from("--cfg"),
+                    String::from("risc0_custom_cfg_test=\\\"flagged\\\""),
+                ],
+                ..Default::default()
+            },
+        )
+        .unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
