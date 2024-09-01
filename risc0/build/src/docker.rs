@@ -124,7 +124,8 @@ fn create_dockerfile(
             .iter()
             .map(|s| s.as_str())
             .collect::<Vec<_>>(),
-    );
+    )
+    .replace('"', "\\\"");
 
     let common_args = vec![
         "--locked",
@@ -246,7 +247,7 @@ mod test {
             &GuestBuildOptions {
                 rustc_flags: vec![
                     String::from("--cfg"),
-                    String::from("risc0_custom_cfg_test=\\\"flagged\\\""),
+                    String::from("risc0_custom_cfg_test=\"flagged\""),
                 ],
                 ..Default::default()
             },
