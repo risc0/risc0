@@ -38,11 +38,13 @@ use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-use crate::config::GuestBuildOptions;
-use crate::docker::build_guest_package_docker;
-use config::GuestMetadata;
-pub use config::{DockerOptions, GuestOptions};
-pub use docker::{docker_build, BuildStatus, TARGET_DIR};
+use self::{
+    config::{GuestBuildOptions, GuestMetadata},
+    docker::build_guest_package_docker,
+};
+
+pub use self::config::{DockerOptions, GuestOptions};
+pub use self::docker::{docker_build, BuildStatus, TARGET_DIR};
 
 /// This const represents a filename that is used in the use to indicate to in
 /// order to indicate to the client and the risc0-build crate that the new rust

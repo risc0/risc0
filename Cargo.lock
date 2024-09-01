@@ -4070,6 +4070,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "test-log",
  "tracing",
+ "tracing-subscriber 0.3.18",
  "zip",
 ]
 
@@ -4200,6 +4201,7 @@ dependencies = [
  "bincode",
  "bytemuck",
  "clap",
+ "risc0-circuit-bigint",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "temp-env",

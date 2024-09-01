@@ -104,7 +104,7 @@ pub enum MultiTestSpec {
         // Number of guest cycles to use, including startup.
         cycles: u64,
     },
-    SysExecuteZkr {
+    SysProveZkr {
         // Control id of ZKR to execute
         control_id: Digest,
         // Input to provide to ZKR execution

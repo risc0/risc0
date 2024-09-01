@@ -14,9 +14,14 @@
 
 pub mod zkr;
 
-use std::{collections::VecDeque, fmt::Debug};
+use std::{
+    collections::{BTreeMap, VecDeque},
+    fmt::Debug,
+    sync::Mutex,
+};
 
-use anyhow::{anyhow, ensure, Context, Result};
+use anyhow::{anyhow, bail, ensure, Context, Result};
+use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
     control_id::BN254_IDENTITY_CONTROL_ID,
     prove::{DigestKind, RecursionReceipt},
@@ -25,7 +30,10 @@ use risc0_circuit_recursion::{
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_IDS;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::{digest::Digest, hash::hash_suite_from_name},
+    core::{
+        digest::{Digest, DIGEST_SHORTS},
+        hash::hash_suite_from_name,
+    },
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::{CircuitHal, Hal},
     verify::ReadIOP,
@@ -40,13 +48,20 @@ use crate::{
     },
     receipt_claim::{Assumption, MaybePruned, Merge},
     sha::Digestible,
-    ProverOpts, ReceiptClaim,
+    ProverOpts, ReceiptClaim, Unknown,
 };
 
 use risc0_circuit_recursion::prove::Program;
 
 /// Number of rows to use for the recursion circuit witness as a power of 2.
 pub const RECURSION_PO2: usize = 18;
+
+pub(crate) type ZkrRegistryEntry = Box<dyn Fn() -> Result<Program> + Send + 'static>;
+
+pub(crate) type ZkrRegistry = BTreeMap<Digest, ZkrRegistryEntry>;
+
+/// A registry to look up programs by control ID.
+pub(crate) static ZKR_REGISTRY: Mutex<ZkrRegistry> = Mutex::new(BTreeMap::new());
 
 /// Run the lift program to transform an rv32im segment receipt into a recursion receipt.
 ///
@@ -228,6 +243,63 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
     })
 }
 
+/// Prove the specified program identified by the `control_id` using the specified `input`.
+pub fn prove_zkr(control_id: &Digest, input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
+    let zkr = get_registered_zkr(control_id)?;
+    let hashfn = "poseidon2";
+    let suite = hash_suite_from_name(hashfn).unwrap();
+    let opts = ProverOpts::succinct();
+    let mut prover = Prover::new(zkr, *control_id, opts);
+    prover.add_input(bytemuck::cast_slice(input));
+
+    tracing::debug!("Running prover");
+    let receipt = prover.run()?;
+
+    tracing::debug!("zkr receipt: {receipt:?}");
+
+    // Read the claim digest from the second of the global output slots.
+    let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(
+        bytemuck::checked::cast_slice::<_, BabyBearElem>(
+            &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
+        )
+        .iter()
+        .copied()
+        .map(u32::from),
+    ))?;
+
+    let control_id_group = MerkleGroup::new([*control_id].into())?;
+    let control_inclusion_proof = control_id_group.get_proof_by_index(0, &*suite.hashfn);
+    let succinct_receipt = SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: hashfn.to_string(),
+        control_id: *control_id,
+        control_inclusion_proof,
+        claim: MaybePruned::<Unknown>::Pruned(claim_digest),
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    };
+
+    tracing::debug!("succinct receipt: {succinct_receipt:?}");
+    Ok(succinct_receipt)
+}
+
+/// Registers a function to retrieve a recursion program (zkr) based on a control id.
+pub fn register_zkr(
+    control_id: &Digest,
+    get_program_fn: impl Fn() -> Result<Program> + Send + 'static,
+) -> Option<ZkrRegistryEntry> {
+    let mut registry = ZKR_REGISTRY.lock().unwrap();
+    registry.insert(*control_id, Box::new(get_program_fn))
+}
+
+/// Returns a registered ZKR program, or an error if not found.
+pub fn get_registered_zkr(control_id: &Digest) -> Result<Program> {
+    let registry = ZKR_REGISTRY.lock().unwrap();
+    registry
+        .get(control_id)
+        .map(|f| f())
+        .unwrap_or_else(|| bail!("Control id {control_id} unregistered"))
+}
+
 /// Prove the test_recursion_circuit. This is useful for testing purposes.
 ///
 /// digest1 will be passed through to the first of the output globals, as the "inner control root".
@@ -253,7 +325,6 @@ pub fn test_recursion_circuit(
     let receipt = prover.run()?;
 
     // Read the claim digest from the second of the global output slots.
-    const DIGEST_SHORTS: usize = crate::sha::DIGEST_WORDS * 2;
     let claim_digest = risc0_binfmt::read_sha_halfs(&mut VecDeque::from_iter(
         bytemuck::checked::cast_slice::<_, BabyBearElem>(
             &receipt.seal[DIGEST_SHORTS..2 * DIGEST_SHORTS],
