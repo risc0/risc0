@@ -14,9 +14,8 @@ cargo xtask gen-receipt
 Next, install the `cargo-risczero` tool and install the toolchain with:
 
 ```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
+curl -L https://risczero.com/install | bash
+rzup install
 ```
 
 ### Running a test of in-browser verification
@@ -29,9 +28,10 @@ npm test -- --$BROWSER
 ```
 
 where `$BROWSER` is one of
+
 - `chrome`
 - `firefox`
 - `safari`
 
-[Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [Node.js]: https://nodejs.dev/en/learn/how-to-install-nodejs/
+[Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html

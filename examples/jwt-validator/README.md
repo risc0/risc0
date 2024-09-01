@@ -21,10 +21,6 @@ For example, you might want an identity provider to issue a JWT through a sign-i
 
 To learn more about this use case, check out our blog post Bonsai as a [zk coprocessor] or its direct implementation in our [Bonsai Pay Demonstration Application] using Google's Sign-In-with-Google SDK.
 
-[Bonsai application]: https://dev.bonsai.xyz
-[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[Bonsai Pay Demonstration Application]: https://github.com/risc0/demos/tree/main/bonsai-pay
-
 ## Project Organization
 
 zkVM applications consist of a [host program] and a [guest program]. The host program resides in [`src/main.rs`], and the guest program is in [`methods/guest/src/main.rs`]. The foundational JWT issuing/validation library is located in [`core/src/lib.rs`].
@@ -43,25 +39,21 @@ The [guest code] confirms the JWT's integrity using the public key and records t
 
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-[`src/main.rs`]: src/main.rs
-[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [`core/src/lib.rs`]: core/src/lib.rs
-[host]: https://dev.risczero.com/terminology#host
-[executes]: https://dev.risczero.com/terminology#execute
-[guest program]: https://dev.risczero.com/terminology#guest-program
-[host program]: https://dev.risczero.com/terminology#host-program
-[proves the execution]: https://dev.risczero.com/terminology#prove
-[receipt]: https://dev.risczero.com/terminology#receipt
-[verify]: https://dev.risczero.com/terminology#verify
-[journal]: https://dev.risczero.com/terminology#journal
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-[here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
-[zkVM]: https://dev.risczero.com/zkvm
-[shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
-[Rust Resources]: https://dev.risczero.com/api/zkvm/rust-resources
-[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
-[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
-[journal]: https://dev.risczero.com/terminology#journal
+[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
+[`src/main.rs`]: src/main.rs
+[Bonsai application]: https://dev.bonsai.xyz
+[Bonsai Pay Demonstration Application]: https://github.com/risc0/demos/tree/main/bonsai-pay
 [developer docs]: https://dev.risczero.com
-[excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
+[guest program]: https://dev.risczero.com/terminology#guest-program
+[host]: https://dev.risczero.com/terminology#host
+[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
+[host program]: https://dev.risczero.com/terminology#host-program
+[journal]: https://dev.risczero.com/terminology#journal
 [jwt-compact]: https://github.com/slowli/jwt-compact
+[receipt]: https://dev.risczero.com/terminology#receipt
+[Rust Resources]: https://dev.risczero.com/api/zkvm/rust-resources
+[zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
+[zkVM]: https://dev.risczero.com/zkvm

@@ -15,18 +15,18 @@
   ECDSA signature
 - **[zkEVM][example-zkevm]**: demo of running EVM engine on the Risc Zero zkVM
 
-## Running the examples
+## Running the Examples
 
 The examples listed above and others can be found in RISC Zero's repository
 under [/examples][examples-dir]. Unless otherwise noted in their own READMEs,
 the examples can be run following the instructions below.
 
-### Install dependencies
+### Install Dependencies
 
 First, ensure that you have all RISC Zero tools installed. See [installation
 instructions][install] for more information.
 
-### Check out the correct version of the example
+### Check out the Correct Version of the Example
 
 The compilation of the examples is tied to the version installed, so it is
 important to check out the correct version that corresponds to the local one. To
@@ -42,7 +42,7 @@ Then check out the corresponding branch of the example:
 git checkout release-$VERSION # e.g. release-0.19
 ```
 
-### Run the example
+### Run the Example
 
 Finally, run the example with:
 

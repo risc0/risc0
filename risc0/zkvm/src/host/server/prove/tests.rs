@@ -273,8 +273,8 @@ fn session_events() {
     session.add_hook(logger);
     prove_session_fast(&session);
     assert_eq!(session.hooks.len(), 1);
-    assert_eq!(on_pre_prove_segment_flag.take(), true);
-    assert_eq!(on_post_prove_segment_flag.take(), true);
+    assert!(on_pre_prove_segment_flag.take());
+    assert!(on_post_prove_segment_flag.take());
 }
 
 // These tests come from:
@@ -701,7 +701,7 @@ mod sys_verify {
 
     fn hello_commit_receipt() -> &'static Receipt {
         static ONCE: OnceLock<Receipt> = OnceLock::new();
-        ONCE.get_or_init(|| prove_hello_commit())
+        ONCE.get_or_init(prove_hello_commit)
     }
 
     #[test]
@@ -829,8 +829,8 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_integrity_halt_1() {
-        // Generate a receipt for a execution ending in a guest error indicated by
-        // ExitCode::Halted(1).
+        // Generate a receipt for an execution ending in a guest error indicated
+        // by ExitCode::Halted(1).
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {

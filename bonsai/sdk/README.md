@@ -2,7 +2,7 @@
 
 A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 
-Both blocking and non_blocking (async) versions of the module are available.
+Both blocking and non-blocking (async) versions of the module are available.
 
 ## Example Usage
 

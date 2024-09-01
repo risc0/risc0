@@ -40,4 +40,3 @@ crate. With `ProverOpts::groth16()` it will produce a Groth16 proof.
 [risc0-zkvm]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/
 
 <!-- cargo-rdme end -->
-

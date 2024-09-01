@@ -23,13 +23,11 @@
 // change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
 // that we are unlikely to need more.
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
-#[cfg(feature = "prove")]
 pub const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 
 use alloc::vec::Vec;
 
 use anyhow::{ensure, Result};
-#[cfg(feature = "borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::core::{digest::Digest, hash::HashFn};
@@ -38,7 +36,6 @@ use serde::{Deserialize, Serialize};
 /// Merkle tree implementation used in the recursion system to commit to a set of recursion
 /// programs, and to verify the inclusion of a given program in the set.
 #[non_exhaustive]
-#[cfg(feature = "prove")]
 pub struct MerkleGroup {
     /// Depth of the Merkle tree.
     pub depth: u32,
@@ -50,8 +47,7 @@ pub struct MerkleGroup {
 /// An inclusion proof for the [MerkleGroup]. Used to verify inclusion of a given recursion program
 /// in the committed set.
 #[non_exhaustive]
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize)]
 pub struct MerkleProof {
     /// Index of the leaf for which inclusion is being proven.
     pub index: u32,
@@ -60,7 +56,6 @@ pub struct MerkleProof {
     pub digests: Vec<Digest>,
 }
 
-#[cfg(feature = "prove")]
 impl MerkleGroup {
     /// Create a new [MerkleGroup] from the given leaves.
     /// Will fail if too many leaves are given for the default depth.
@@ -102,6 +97,7 @@ impl MerkleGroup {
 
     /// Calculate and return a [MerkleProof] for the given leaf.
     /// Will return an error if the given leaf is not in the tree.
+    #[cfg(feature = "prove")]
     pub fn get_proof(
         &self,
         control_id: &Digest,
@@ -115,6 +111,7 @@ impl MerkleGroup {
 
     /// Calculate and return a [MerkleProof] for the given leaf.
     /// Will panic if the given index is out of the range of leaves.
+    #[cfg(feature = "prove")]
     pub fn get_proof_by_index(&self, index: u32, hashfn: &dyn HashFn<BabyBear>) -> MerkleProof {
         let mut digests: Vec<Digest> = Vec::with_capacity(self.depth as usize);
 

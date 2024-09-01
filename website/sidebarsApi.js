@@ -4,6 +4,12 @@
 export default {
   api: [
     {
+      type: "html",
+      value:
+        '<h4 class="sidebar-heading">LEARN <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true,
+    },
+    {
       type: "doc",
       label: "Introduction",
       id: "introduction",
@@ -14,11 +20,6 @@ export default {
       id: "use-cases",
     },
     {
-      type: "doc",
-      label: "Getting Started",
-      id: "getting-started",
-    },
-    {
       type: "category",
       label: "What is a zkVM Application?",
       collapsed: true,
@@ -26,7 +27,7 @@ export default {
         {
           type: "doc",
           label: "Overview",
-          id: "zkvm/zkvm_overview",
+          id: "zkvm/zkvm-overview",
         },
         {
           type: "doc",
@@ -51,9 +52,20 @@ export default {
       ],
     },
     {
+      type: "html",
+      value:
+        '<h4 class="sidebar-heading">Build <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true,
+    },
+    {
+      type: "doc",
+      label: "Getting Started",
+      id: "getting-started",
+    },
+    {
       type: "category",
       label: "Writing your zkVM Application",
-      collapsed: false,
+      collapsed: true,
       items: [
         {
           type: "doc",
@@ -174,8 +186,61 @@ export default {
       ],
     },
     {
+      type: "html",
+      value:
+        '<h4 class="sidebar-heading">Miscellaneous <span class="sidebar-heading-divider"></span></h4>',
+      defaultStyle: true,
+    },
+    {
       type: "category",
-      label: "Reference",
+      label: "Security",
+      collapsed: true,
+      items: [
+        {
+          type: "doc",
+          label: "Secure Development Lifecycle",
+          id: "secure-sdlc",
+        },
+        {
+          type: "link",
+          label: "Security Policy",
+          href: "https://github.com/risc0/risc0/security/policy",
+        },
+        {
+          type: "link",
+          label: "Audit Reports",
+          href: "https://github.com/risc0/rz-security/tree/main/audits",
+        },
+        {
+          type: "link",
+          label: "Advisories",
+          href: "https://github.com/risc0/risc0/security/advisories",
+        },
+        {
+          type: "link",
+          label: "Bug Bounty",
+          href: "https://hackenproof.com/programs/risc-zero-zkvm",
+        },
+        {
+          type: "doc",
+          label: "Cryptographic Security Model",
+          id: "security-model",
+        },
+        {
+          type: "doc",
+          label: "Trusted Setup",
+          id: "trusted-setup-ceremony",
+        },
+        {
+          type: "link",
+          label: "Verifier Version Management Design",
+          href: "https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "zkVM Technical Reference",
       collapsed: true,
       items: [
         {
@@ -185,30 +250,15 @@ export default {
         },
         {
           type: "doc",
-          label: "Secure Development Lifecycle",
-          id: "secure-sdlc",
-        },
-        {
-          type: "doc",
-          label: "Cryptographic Security",
-          id: "security-model",
-        },
-        {
-          type: "doc",
-          label: "Trusted Setup Security",
-          id: "trusted-setup-ceremony",
-        },
-        {
-          type: "doc",
           label: "zkVM technical specification",
           id: "zkvm/zkvm-specification",
         },
-        {
-          type: "link",
-          label: "Awesome risc0",
-          href: "https://github.com/inversebrah/awesome-risc0",
-        },
       ],
+    },
+    {
+      type: "link",
+      label: "Awesome risc0",
+      href: "https://github.com/inversebrah/awesome-risc0",
     },
   ],
 };

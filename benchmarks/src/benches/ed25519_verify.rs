@@ -34,7 +34,7 @@ pub fn new_jobs() -> Vec<Job> {
     .unwrap();
 
     vec![Job::new(
-        format!("ed25519_verify"),
+        "ed25519_verify".to_string(),
         risc0_benchmark_methods::ED25519_VERIFY_ELF,
         risc0_benchmark_methods::ED25519_VERIFY_ID.into(),
         guest_input,

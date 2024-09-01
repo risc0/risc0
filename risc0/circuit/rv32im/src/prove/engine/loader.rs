@@ -19,7 +19,10 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use risc0_core::field::{baby_bear::BabyBearElem, Elem};
+use risc0_core::{
+    field::{baby_bear::BabyBearElem, Elem},
+    scope,
+};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::{
@@ -285,8 +288,9 @@ impl Loader {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     pub fn load(&mut self) -> usize {
+        scope!("load");
+
         self.pre_steps();
         self.body();
         self.post_steps();
@@ -370,7 +374,7 @@ impl Loader {
     pub fn compute_control_id_table<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<(String, Digest)> {
         // Make the digest for each level
         let mut table = Vec::new();
-        for po2 in MIN_CYCLES_PO2..MAX_CYCLES_PO2 {
+        for po2 in MIN_CYCLES_PO2..=MAX_CYCLES_PO2 {
             table.push((
                 format!("rv32im po2={po2}"),
                 Self::compute_control_id(hal, po2),

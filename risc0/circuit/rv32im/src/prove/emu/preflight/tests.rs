@@ -58,7 +58,7 @@ fn basic() {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
+        &NullSyscall,
         None,
     )
     .unwrap();
@@ -124,14 +124,7 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let result = execute(
-        image,
-        14,
-        DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
-        None,
-    )
-    .unwrap();
+    let result = execute(image, 14, DEFAULT_SESSION_LIMIT, &NullSyscall, None).unwrap();
     let segments = result.segments;
 
     assert_eq!(segments.len(), 2);

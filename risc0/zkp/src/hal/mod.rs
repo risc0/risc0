@@ -18,7 +18,7 @@ pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
 pub mod dual;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))]
 pub mod metal;
 
 use std::{
@@ -65,6 +65,27 @@ pub trait Hal {
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem>;
     fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem>;
     fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32>;
+
+    fn alloc_elem_init(
+        &self,
+        name: &'static str,
+        size: usize,
+        value: Self::Elem,
+    ) -> Self::Buffer<Self::Elem> {
+        let buffer = self.alloc_elem(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(value);
+        });
+        buffer
+    }
+
+    fn alloc_extelem_zeroed(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        let buffer = self.alloc_extelem(name, size);
+        buffer.view_mut(|slice| {
+            slice.fill(Self::ExtElem::ZERO);
+        });
+        buffer
+    }
 
     fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest>;
     fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem>;
@@ -129,6 +150,19 @@ pub trait Hal {
         input: &Self::Buffer<Self::Elem>,
     );
 
+    #[allow(clippy::too_many_arguments)]
+    fn eltwise_copy_elem_slice(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        from: &[Self::Elem],
+        from_rows: usize,
+        from_cols: usize,
+        from_offset: usize,
+        from_stride: usize,
+        into_offset: usize,
+        into_stride: usize,
+    );
+
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>);
 
     fn fri_fold(
@@ -149,6 +183,14 @@ pub trait Hal {
         idx: usize,
         size: usize,
         stride: usize,
+    );
+
+    fn scatter(
+        &self,
+        into: &Self::Buffer<Self::Elem>,
+        index: &[u32],
+        offsets: &[u32],
+        values: &[Self::Elem],
     );
 
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>);
@@ -273,7 +315,7 @@ mod testutil {
         let xs = hal.copy_from_extelem("xs", &vec![z_pow; eval_size]);
         let out = hal.alloc_extelem("out", eval_size);
 
-        hal.batch_evaluate_any(&coeffs, poly_count as usize, &which, &xs, &out);
+        hal.batch_evaluate_any(&coeffs, poly_count, &which, &xs, &out);
     }
 
     pub(crate) fn batch_expand_into_evaluate_ntt<H: Hal>(hal_gpu: H) {

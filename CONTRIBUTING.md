@@ -31,20 +31,19 @@ When testing and running examples within this library, you can install `cargo-ri
 
 ```bash
 cargo install --force --path risc0/cargo-risczero
-cargo risczero install
 ```
 
 Otherwise, if using a stable version branch, you can install `cargo-risczero` through the standard flow:
 
 ```bash
 curl -L https://risczero.com/install | bash
-rzup
+rzup install
 ```
 
 Optionally, you can specify which version of `cargo-risczero` to install with:
 
 ```bash
-rzup --version $VERSION
+rzup install --version $VERSION
 ```
 
 > NOTE: It is only important that you install `cargo-risczero` with a matching version of the `zkvm` crate when interacting with the proof system as a separate, pre-built process ([`ExternalProver`](https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExternalProver.html)), which is currently the default. If you are using the `prove` feature on the `risc0-zkvm` crate for the host, this will compile the proving system into the host binary.
@@ -61,8 +60,19 @@ cargo xtask gen-receipt
 Before submitting a PR, ensure the following:
 
 1. Fork the `risc0` repository and create a new branch there to do your work.
-2. Format with `cargo fmt --all`.
-3. Lint with `python3 clippy.py`.
-4. Perform a license check with `python3 license-check.py`.
-5. Tests pass with `cargo test -F prove`.
-6. Open a PR against the `main` branch.
+1. Format with `cargo fmt --all`.
+1. Lint with:
+    ```
+    RISC0_SKIP_BUILD=1 cargo clippy
+    $(cd examples && RISC0_SKIP_BUILD=1 cargo clippy)
+    $(cd benchmarks && RISC0_SKIP_BUILD=1 cargo clippy)
+    ```
+1. Perform the license check with `python3 license-check.py`.
+1. Tests pass with:
+    ```
+    cargo test -F prove -F docker
+    $(cd examples && cargo test)
+    $(cd benchmarks && cargo test)
+    ```
+1. Commit any outdated `Cargo.lock` files.
+1. Open a PR against the `main` branch.

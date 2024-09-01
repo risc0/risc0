@@ -4,13 +4,13 @@ id: benchmarks
 
 # Performance Benchmarks
 
-## Pregenerated benchmarks
+## Pregenerated Benchmarks
 
 We have [a performance datasheet][datasheet] with runtime and memory performance information.
 This information is organized by both program size and hardware target, and includes both CPU and GPU targets.
 The datasheet also includes the RISC Zero zkVM version used and the size of several example programs to give context for the [cycle count] size data.
 
-## Generating your own benchmarks
+## Generating Your Own Benchmarks
 
 You can generate benchmarks yourself to get performance data for your exact system, or if you want benchmarks for a different RISC Zero zkVM version than used in the datasheet.
 
@@ -28,16 +28,13 @@ If you want to benchmark a GPU, you will need to build with the `cuda` or `metal
 To do this, use the following commands:
 
 - **Metal**
-
-```bash
-cargo run --release -F metal --example loop
-```
-
+  ```bash
+  cargo run --release -F metal --example loop
+  ```
 - **CUDA**
-
-```bash
-cargo run --release -F cuda --example loop
-```
+  ```bash
+  cargo run --release -F cuda --example loop
+  ```
 
 We also have a Fibonacci computation benchmark, which you can run with
 

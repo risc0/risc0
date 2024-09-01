@@ -144,7 +144,7 @@ pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
     InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
     SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext,
+    VerifierContext, DEFAULT_MAX_PO2,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
 pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
@@ -175,4 +175,11 @@ pub fn is_dev_mode() -> bool {
     }
 
     cfg!(not(feature = "disable-dev-mode")) && is_env_set
+}
+
+#[cfg(feature = "metal")]
+#[test]
+fn metal_implies_prove() {
+    // we should be able to access prove feature items when metal has been enabled
+    let _prover = get_prover_server(&ProverOpts::default());
 }

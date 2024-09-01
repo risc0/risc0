@@ -13,7 +13,7 @@ fn main() {
 
     // An executor environment describes the configurations for the zkVM
     // including program inputs.
-    // An default ExecutorEnv can be created like so:
+    // A default ExecutorEnv can be created like so:
     // `let env = ExecutorEnv::builder().build().unwrap();`
     // However, this `env` does not have any inputs.
     //

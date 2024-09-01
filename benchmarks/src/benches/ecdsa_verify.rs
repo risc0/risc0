@@ -28,7 +28,7 @@ pub fn new_jobs() -> Vec<Job> {
     let guest_input = to_vec(&(1, verifying_key, message, signature)).unwrap();
 
     vec![Job::new(
-        format!("ecdsa_verify"),
+        "ecdsa_verify".to_string(),
         risc0_benchmark_methods::ECDSA_VERIFY_ELF,
         risc0_benchmark_methods::ECDSA_VERIFY_ID.into(),
         guest_input,

@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0-2
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
@@ -148,7 +148,7 @@ jobs:
           version: "1.4.3"
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
@@ -192,6 +192,8 @@ jobs:
             feature: default
     env:
       FEATURE: ${{ matrix.feature }}
+      RISC0_SKIP_BUILD: 1
+      RISC0_SKIP_BUILD_KERNELS: 1
     steps:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
@@ -200,7 +202,14 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: python3 -u clippy.py -F $FEATURE
+      - name: "root: cargo clippy"
+        run: cargo clippy -F $FEATURE --all-targets
+      - name: "benchmarks: cargo clippy"
+        run: cargo clippy -F $FEATURE --all-targets
+        working-directory: benchmarks
+      - name: "examples: cargo clippy"
+        run: cargo clippy -F $FEATURE --all-targets
+        working-directory: examples
 
   test:
     if: needs.changes.outputs.test == 'true'
@@ -237,8 +246,6 @@ jobs:
         run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
       - name: test workspace
         run: cargo test -F $FEATURE -F prove --workspace --timings --exclude doc-test
-      - name: test borsh
-        run: cargo test -F $FEATURE -F prove -F borsh -p risc0-zkvm --lib -- borsh
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
@@ -248,6 +255,9 @@ jobs:
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
       - name: build risc0-zkvm tests without the prove feature
         run: cargo test -p risc0-zkvm -F $FEATURE --no-run
+      - name: build risc0-zkvm tests with the metal feature
+        if: matrix.os == 'macOS'
+        run: cargo test -p risc0-zkvm -F metal --no-run
       - name: test risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
@@ -418,13 +428,13 @@ jobs:
           crate: cargo-semver-checks
           version: "0.31.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
-        # There seems to be a bug in cargo-semver-checks that can't locate the platform crate...
-        # All other excluded crates aren't published and therefore do not need this check
         run: |
           cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
-            --exclude risc0-zkvm-platform \
+            --exclude cargo-risczero \
             --exclude doc-test \
             --exclude fibonacci-methods \
+            --exclude risc0-circuit-bigint \
+            --exclude risc0-circuit-bigint-test-methods \
             --exclude risc0-zkvm-receipts \
             --exclude risc0-zkvm-methods
       - run: sccache --show-stats
@@ -537,7 +547,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
@@ -588,7 +598,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - name: 🍞 Setup Bun
+        uses: risc0/setup-bun@v1.2.1
+        with:
+          bun-version: 1.1.21
       - run: bun install
         working-directory: web
       - run: bun run ci

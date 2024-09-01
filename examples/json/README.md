@@ -12,8 +12,8 @@ Then, run the example with:
 cargo run --release
 ```
 
-[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
-
 ## Video Tutorial
 
-For a walk-through of this example, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=6vIgBHx61vc&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=7).
+For a walk-through of this example, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=6vIgBHx61vc\&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5\&index=7).
+
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

@@ -10,7 +10,7 @@ Users can choose between:
 
 We recommend option 1 during development, option 2 for applications involving private inputs, and option 3 for all other applications.
 
+[Bonsai]: https://bonsai.xyz
 [dev-mode]: ./dev-mode.md
 [Local Proving]: ./local-proving.md
 [Remote Proving]: ./remote-proving.md
-[Bonsai]: https://bonsai.xyz
