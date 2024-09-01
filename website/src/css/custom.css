@@ -47,6 +47,11 @@
   font-weight: 500;
 }
 
+#mermaid-svg-id {
+  height: 100%;
+  width: 100%;
+}
+
 .sidebar-heading {
   font-weight: bold;
   text-transform: uppercase;
