@@ -18,7 +18,7 @@ The complexity of a [guest program]'s [execution] is measured in clock cycles as
 
 Generally, a single cycle corresponds to a single [RISC-V] operation. However, some operations require two cycles.
 
-See the [Optimization Guide](/api/zkvm/optimization) for more information about the zkVM cycles and performance.
+See the [Optimization Guide](/website/api/zkvm/optimization.md) for more information about the zkVM cycles and performance.
 
 ### Commit
 
@@ -257,7 +257,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [`cargo risczero build`]: https://docs.rs/crate/cargo-risczero/latest
 [About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups/#validity-proofs
 [About STARKs]: ./reference-docs/about-starks.md
-[Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
+[Arithmetic Circuits]: /website/docs/reference-docs/about-arithmetic-circuits.md
 [assumptions]: #assumption
 [circuit]: #circuit
 [clock cycles]: #clock-cycles
