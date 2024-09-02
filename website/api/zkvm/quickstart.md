@@ -117,14 +117,14 @@ proportional to the number of cycles and segments used.
 [Bonsai]: ../generating-proofs/remote-proving.md
 [dev-mode]: ../generating-proofs/dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[guest]: /terminology#guest-program
+[guest]: /website/docs/terminology.md#guest-program
 [hello-world]: ./tutorials/hello-world.md
-[host]: /terminology#host-program
-[journal]: /terminology#journal
-[prover]: /terminology#prover
-[receipt]: /terminology#receipt
+[host]: /website/docs/terminology.md#host-program
+[journal]: /website/docs/terminology.md#journal
+[prover]: /website/docs/terminology.md#prover
+[receipt]: /website/docs/terminology.md#receipt
 [request access]: https://bonsai.xyz/apply
-[seal]: /terminology#seal
+[seal]: /website/docs/terminology.md#seal
 [tutorial-step-2]: tutorials/hello-world.md#step-2-host-share-private-data-as-input-with-the-guest
 [tutorial-step-3]: tutorials/hello-world.md#step-3-guest-read-input-and-commit-output
 [tutorial-step-4]: tutorials/hello-world.md#step-4-host-generate-a-receipt-and-read-its-journal-contents
