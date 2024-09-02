@@ -370,19 +370,20 @@ where
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| {
-            G::build(
-                &target.name,
-                target_dir
-                    .as_ref()
-                    .join("riscv32im-risc0-zkvm-elf")
-                    .join("docker")
-                    .join(pkg.name.replace('-', "_"))
-                    .join(&target.name)
-                    .to_str()
-                    .context("elf path contains invalid unicode")
-                    .unwrap(),
-            )
-            .unwrap()
+            let elf_path = target_dir
+                .as_ref()
+                .join("riscv32im-risc0-zkvm-elf")
+                .join("docker")
+                .join(pkg.name.replace('-', "_"))
+                .join(&target.name)
+                .to_str()
+                .context("elf path contains invalid unicode")
+                .unwrap()
+                .to_string();
+            G::build(&target.name, &elf_path).expect(&format!(
+                "Failed to locate ELF for guest {} at {}",
+                &target.name, elf_path
+            ))
         })
         .collect()
 }
@@ -662,8 +663,7 @@ fn detect_toolchain(name: &str) {
     }
 }
 
-fn get_guest_dir<H: AsRef<Path>, G: AsRef<Path>>(host_pkg: H, guest_pkg: G) -> PathBuf {
-    // Determine the output directory, in the target folder, for the guest binary.
+fn get_out_dir() -> PathBuf {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     out_dir
@@ -676,8 +676,10 @@ fn get_guest_dir<H: AsRef<Path>, G: AsRef<Path>>(host_pkg: H, guest_pkg: G) -> P
         .parent() // $profile
         .unwrap()
         .join("riscv-guest")
-        .join(host_pkg)
-        .join(guest_pkg)
+}
+
+fn get_guest_dir<H: AsRef<Path>, G: AsRef<Path>>(host_pkg: H, guest_pkg: G) -> PathBuf {
+    get_out_dir().join(host_pkg).join(guest_pkg)
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
@@ -743,7 +745,6 @@ fn do_embed_methods<G: GuestBuilder>(
         let guest_build_opts = GuestBuildOptions::from(guest_embed_opts)
             .with_metadata(GuestMetadata::from(&guest_pkg));
 
-        let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
         let methods: Vec<G> = if let Some(ref docker_opts) = guest_build_opts.use_docker {
             let src_dir = docker_opts
                 .root_dir
@@ -755,8 +756,9 @@ fn do_embed_methods<G: GuestBuilder>(
                 &guest_build_opts,
             )
             .unwrap();
-            guest_methods_docker(&guest_pkg, &guest_dir)
+            guest_methods_docker(&guest_pkg, &get_out_dir())
         } else {
+            let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
             build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
             guest_methods(&guest_pkg, &guest_dir, &guest_build_opts.features)
         };
