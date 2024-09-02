@@ -711,6 +711,7 @@ fn do_embed_methods<G: GuestBuilder>(
 ) -> Vec<G> {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
+
     // Read the cargo metadata for info from `[package.metadata.risc0]`.
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
