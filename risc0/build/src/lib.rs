@@ -370,20 +370,19 @@ where
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| {
-            let elf_path = target_dir
-                .as_ref()
-                .join("riscv32im-risc0-zkvm-elf")
-                .join("docker")
-                .join(pkg.name.replace('-', "_"))
-                .join(&target.name)
-                .to_str()
-                .context("elf path contains invalid unicode")
-                .unwrap()
-                .to_string();
-            G::build(&target.name, &elf_path).expect(&format!(
-                "Failed to locate ELF for guest {} at {}",
-                &target.name, elf_path
-            ))
+            G::build(
+                &target.name,
+                target_dir
+                    .as_ref()
+                    .join("riscv32im-risc0-zkvm-elf")
+                    .join("docker")
+                    .join(pkg.name.replace('-', "_"))
+                    .join(&target.name)
+                    .to_str()
+                    .context("elf path contains invalid unicode")
+                    .unwrap(),
+            )
+            .unwrap()
         })
         .collect()
 }
