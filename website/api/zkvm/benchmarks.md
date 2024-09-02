@@ -53,9 +53,9 @@ were added per second) with separate statistics for [execution] and
 the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
 appropriate feature flag.
 
-[cycle count]: /terminology#clock-cycles
+[cycle count]: /website/docs/terminology.md#clock-cycles
 [datasheet]: https://benchmarks.risczero.com/main/datasheet
-[execution]: /terminology#execute
+[execution]: /website/docs/terminology.md#execute
 [install]: ./install.md
-[prover]: /terminology#prover
+[prover]: /website/docs/terminology.md#prover
 [risc0 repository]: https://github.com/risc0/risc0
