@@ -60,9 +60,9 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierRouter.sol
-[term-image-id]: /terminology#image-id
-[term-journal]: /terminology#journal
-[term-receipt]: /terminology#receipt
-[term-verify]: /terminology#verify
-[term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
+[term-image-id]: /website/docs/terminology.md#image-id
+[term-journal]: /website/docs/terminology.md#journal
+[term-receipt]: /website/docs/terminology.md#receipt
+[term-verify]: /website/docs/terminology.md#verify
+[term-zkvm]: /website/docs/terminology.md#zero-knowledge-virtual-machine-zkvm
 [VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
