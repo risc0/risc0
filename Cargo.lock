@@ -761,7 +761,6 @@ dependencies = [
  "httpmock",
  "maybe-async",
  "reqwest 0.12.5",
- "risc0-groth16",
  "risc0-zkvm",
  "serde",
  "temp-env",

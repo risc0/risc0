@@ -105,6 +105,7 @@
 //!
 //! use anyhow::Result;
 //! use bonsai_sdk::blocking::Client;
+//! use risc0_zkvm::Receipt;
 //!
 //! fn run_stark2snark(session_id: String) -> Result<()> {
 //!     let client = Client::from_env(risc0_zkvm::VERSION)?;
@@ -120,8 +121,8 @@
 //!                 continue;
 //!             }
 //!             "SUCCEEDED" => {
-//!                 let snark_receipt = res.output;
-//!                 eprintln!("Snark proof!: {snark_receipt:?}");
+//!                 let receipt_buf = client.download(&res.output.unwrap())?;
+//!                 let snark_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
 //!                 break;
 //!             }
 //!             _ => {
@@ -189,7 +190,6 @@ enum ImageExistsOpt {
 
 /// Collection of serialization object for the REST api
 pub mod responses {
-    use risc0_groth16::Seal;
     use serde::{Deserialize, Serialize};
 
     /// Response of an upload request
@@ -298,23 +298,6 @@ pub mod responses {
         pub session_id: String,
     }
 
-    /// Snark Receipt object
-    ///
-    /// All relevant data to verify both the snark proof a corresponding
-    /// imageId on chain.
-    #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct SnarkReceipt {
-        /// SNARK Groth16 seal object encoded in big endian
-        pub snark: Seal,
-        /// Post State Digest
-        ///
-        /// Collected from the STARK proof via
-        /// `receipt.get_metadata().post.digest()`
-        pub post_state_digest: Vec<u8>,
-        /// Journal data from the risc-zkvm Receipt object
-        pub journal: Vec<u8>,
-    }
-
     /// Session Status response
     #[derive(Deserialize, Serialize)]
     pub struct SnarkStatusRes {
@@ -322,10 +305,10 @@ pub mod responses {
         ///
         /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
-        /// SNARK receipt output
+        /// SNARK receipt download URL
         ///
-        /// Generated snark receipt,
-        pub output: Option<SnarkReceipt>,
+        /// Url to download the snark (receipt `risc0::Receipt` bincode encoded)
+        pub output: Option<String>,
         /// Snark Error message
         ///
         /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the
