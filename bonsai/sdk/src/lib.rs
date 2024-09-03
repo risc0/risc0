@@ -451,6 +451,22 @@ pub mod module_type {
             }
             Ok(())
         }
+
+        /// Fetchs a journal from execute_only jobs
+        ///
+        /// After the Execution phase of a execute_only session it is possible to fetch the journal
+        /// contents from the executor
+        #[maybe_async_attr]
+        pub async fn exec_only_journal(&self, client: &Client) -> Result<Vec<u8>, SdkErr> {
+            let url = format!("{}/sessions/exec_only_journal/{}", client.url, self.uuid);
+            let res = client.client.get(url).send().await?;
+
+            if !res.status().is_success() {
+                let body = res.text().await?;
+                return Err(SdkErr::InternalServerErr(body));
+            }
+            Ok(res.bytes().await?.to_vec())
+        }
     }
 
     /// Stark2Snark Session representation
@@ -1274,6 +1290,34 @@ mod tests {
         let logs = session_id.logs(&client).unwrap();
 
         assert_eq!(logs, "\"Hello\\nWorld\"");
+
+        create_mock.assert();
+    }
+
+    #[test]
+    fn session_exec_only_journal() {
+        let server = MockServer::start();
+
+        let uuid = Uuid::new_v4().to_string();
+        let session_id = SessionId::new(uuid);
+        let response = vec![0x41, 0x41, 0x41, 0x41];
+
+        let create_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/sessions/exec_only_journal/{}", session_id.uuid))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "text/plain")
+                .body(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+
+        let journal = session_id.exec_only_journal(&client).unwrap();
+
+        assert_eq!(journal, response);
 
         create_mock.assert();
     }
