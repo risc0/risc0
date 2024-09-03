@@ -93,7 +93,13 @@ impl Prover for BonsaiProver {
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
-        let session = client.create_session(image_id_hex, input_id, receipts_ids, false)?;
+        let session = client.create_session_with_limit(
+            image_id_hex,
+            input_id,
+            receipts_ids,
+            false,
+            env.session_limit,
+        )?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
         let succinct_prove_info = loop {
