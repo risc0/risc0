@@ -6,6 +6,10 @@ RISC Zero's zkVM uses recursive proving in order to achieve unbounded computatio
 [`Prover::prove_with_opts`] allows users to choose between [composite, succinct or groth16 receipts].
 :::
 
+:::info
+For benchmarks, check out [reports.risczero.com].
+:::
+
 The rest of this page describes low-level details that are not necessary for users.
 
 ## Recursive Proving Process
@@ -139,5 +143,6 @@ The final step in the recursion process is `compress()`, which outputs a [Groth1
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.Groth16Receipt.html
 [proof system]: /proof-system/proof-system-sequence-diagram
 [Prover]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/trait.Prover.html#method.prove_with_opts
+[reports.risczero.com]: https://reports.risczero.com
 [RISC Zero Verifier Contract]: blockchain-integration/contracts/verifier.md
 [SuccinctReceipt]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.SuccinctReceipt.html

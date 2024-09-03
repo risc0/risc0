@@ -26,7 +26,7 @@ use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
 use crate::{
-    receipt::VerifierContext,
+    receipt::{succinct::allowed_control_root, VerifierContext},
     receipt_claim::{MaybePruned, Unknown},
     sha,
 };
@@ -114,6 +114,11 @@ where
             verifier_parameters: self.verifier_parameters,
         }
     }
+
+    /// Number of bytes used by the seal for this receipt.
+    pub fn seal_size(&self) -> usize {
+        core::mem::size_of_val(self.seal.as_slice())
+    }
 }
 
 /// Verifier parameters used to verify a [Groth16Receipt].
@@ -126,6 +131,27 @@ pub struct Groth16ReceiptVerifierParameters {
     pub bn254_control_id: Digest,
     /// Groth16 verifying key with which the receipt is expected to verify.
     pub verifying_key: VerifyingKey,
+}
+
+impl Groth16ReceiptVerifierParameters {
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(po2_max: usize) -> Self {
+        Self {
+            control_root: allowed_control_root("poseidon2", po2_max).unwrap(),
+            bn254_control_id: BN254_IDENTITY_CONTROL_ID,
+            verifying_key: risc0_groth16::verifying_key(),
+        }
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
 }
 
 impl Digestible for Groth16ReceiptVerifierParameters {
@@ -168,7 +194,7 @@ mod tests {
     fn groth16_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             Groth16ReceiptVerifierParameters::default().digest(),
-            digest!("4c630d87e830256effaae0f27082e2fee7ce4d7e06bcf56c4ec538c3d77aca98")
+            digest!("50bd1769093e74abda3711c315d84d78e3e282173f6304a33272d92abb590ef5")
         );
     }
 }

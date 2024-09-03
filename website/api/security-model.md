@@ -1,4 +1,4 @@
-# Security Model
+# Cryptographic Security Model
 
 RISC Zero is proud to offer an end-to-end solution for verifiable computation.
 Users can generate proofs for correct execution of software code using the [RISC Zero zkVM],
@@ -10,16 +10,15 @@ RISC Zero offers the following components, each of which is ready for use on tes
 
 ## Overview of Components
 
-1. The **cargo risczero** tool, which compiles user-written Rust code into RISC-V ELF binaries [deterministically].
-2. The **RISC-V Prover**, which executes and proves ELF binaries produced by the `cargo risczero` tool.
-3. The **Recursion Prover**, which is used to aggregate proofs from the RISC-V Prover.
-   The recursion prover supports a small number of programs, including [lift], [join], and [resolve].
-   Each recursion program is identified by a [control ID], and the full list of allowed programs is identified by the [control root].
-4. The **STARK-to-SNARK Prover**, which verifies proofs from the RISC Zero Recursion Prover, compressing the STARK into a Groth16 SNARK.
-   The [control root] is passed to as a public input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.
-5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
-   The control root is hard-coded into the on-chain verifier contract.
-   Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc.
+The RISC Zero zkVM and its on-chain dependencies necessary for verifying proofs on chain, can be described as the following five high-level components.
+
+| Component Name                  | Latest Audit  | Description                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **cargo risczero** tool         | [10/31/2023↗] | Compiles user-written Rust code into RISC-V ELF binaries [deterministically]                                                                                                                                                                                                                                                                                                                                                   |
+| **RISC-V Prover**               | [10/31/2023↗] | Executes and proves execution of ELF binaries produced by the `cargo risczero` tool                                                                                                                                                                                                                                                                                                                                            |
+| **Recursion Prover**            | [10/31/2023↗] | Aggregates proofs from the RISC-V Prover; supports a small number of programs like [lift], [join], [resolve]. Each program is identified by a [control ID] and the full list of allowed programs is identified in [control root].                                                                                                                                                                                              |
+| **STARK-to-SNARK Prover**       | [05/20/2024↗] | Verifies STARK proofs from the RISC Zero Recursion Prover, compressing them into a Groth16 SNARK for efficient on-chain verification. The [control root] is passed to as a public input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.                                                                                                                                             |
+| **On-chain verifier contracts** | [06/05/2024↗] | Verifies Groth16 proofs from the RISC Zero STARK-to-SNARK Prover. The control root is hard-coded into the on-chain verifier contract. Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc. |
 
 Together, these components allow developers to integrate proofs of arbitrary Rust code into their on-chain applications.
 In order to use these components, developers provide:
@@ -99,6 +98,9 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
+[10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
+[05/20/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/circuits/hexens_v1c_stark2snark_20240520.pdf
+[06/05/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/contracts/hexens_verifiercontract_20240605.pdf
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [control ID]: /terminology#control-id

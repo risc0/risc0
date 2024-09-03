@@ -213,7 +213,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
     }
 }
 
-/// Perform a unpadded hash of a vector of elements.  Because this is unpadded
+/// Perform an unpadded hash of a vector of elements.  Because this is unpadded
 /// collision resistance is only true for vectors of the same size.  If the size
 /// is variable, this is subject to length extension attacks.
 pub fn unpadded_hash<'a, I>(iter: I) -> [BabyBearElem; CELLS_OUT]

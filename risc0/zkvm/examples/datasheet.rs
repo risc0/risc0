@@ -23,7 +23,8 @@ use enum_iterator::Sequence;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
+    RECURSION_PO2,
 };
 use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF};
 use serde::Serialize;
@@ -171,7 +172,7 @@ impl Datasheet {
 
     fn composite(&mut self, args: &Args) {
         for hashfn in ["sha-256", "poseidon2"] {
-            let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
+            let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
             let prover = get_prover_server(&opts).unwrap();
 
             for (iterations, expected) in ITERATIONS.iter().take(args.max_po2 - MIN_PO2 + 1) {
@@ -193,15 +194,7 @@ impl Datasheet {
                 let ram = tracker().lock().unwrap().peak;
                 assert_eq!(info.stats.total_cycles, *expected);
                 let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-                let seal = info
-                    .receipt
-                    .inner
-                    .composite()
-                    .unwrap()
-                    .segments
-                    .iter()
-                    .map(|x| x.get_seal_bytes().len())
-                    .sum();
+                let seal = info.receipt.inner.composite().unwrap().seal_size();
 
                 self.results.push(PerformanceData {
                     name: "rv32im".into(),
@@ -219,9 +212,9 @@ impl Datasheet {
     fn lift(&mut self) {
         println!("lift");
 
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::all_po2s();
 
         let env = ExecutorEnv::builder()
             .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
@@ -243,7 +236,7 @@ impl Datasheet {
         let ram = tracker().lock().unwrap().peak;
         let cycles = 1 << RECURSION_PO2;
         let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let seal = receipt.seal_size();
 
         self.results.push(PerformanceData {
             name: "lift".into(),
@@ -259,9 +252,9 @@ impl Datasheet {
     fn join(&mut self) {
         println!("join");
 
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::all_po2s();
 
         let env = ExecutorEnv::builder()
             .write(&BenchmarkSpec::SimpleLoop { iters: 4 * 1024 })
@@ -287,7 +280,7 @@ impl Datasheet {
         let ram = tracker().lock().unwrap().peak;
         let cycles = 1 << RECURSION_PO2;
         let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let seal = receipt.seal_size();
 
         self.results.push(PerformanceData {
             name: "join".into(),
@@ -303,7 +296,7 @@ impl Datasheet {
     fn succinct(&mut self) {
         println!("succinct");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -320,13 +313,7 @@ impl Datasheet {
 
         let ram = tracker().lock().unwrap().peak;
         let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-        let seal = info
-            .receipt
-            .inner
-            .succinct()
-            .unwrap()
-            .get_seal_bytes()
-            .len();
+        let seal = info.receipt.inner.succinct().unwrap().seal_size();
 
         self.results.push(PerformanceData {
             name: "succinct".into(),
@@ -342,7 +329,7 @@ impl Datasheet {
     fn identity_p254(&mut self) {
         println!("identity_p254");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -363,7 +350,7 @@ impl Datasheet {
         let ram = tracker().lock().unwrap().peak;
         let cycles = 1 << RECURSION_PO2;
         let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let seal = receipt.seal_size();
 
         self.results.push(PerformanceData {
             name: "identity_p254".into(),
@@ -380,7 +367,7 @@ impl Datasheet {
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -417,7 +404,7 @@ impl Datasheet {
     fn groth16(&mut self) {
         println!("groth16");
 
-        let opts = ProverOpts::groth16();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Groth16);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
@@ -434,7 +421,7 @@ impl Datasheet {
 
         let ram = tracker().lock().unwrap().peak;
         let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-        let seal = info.receipt.inner.groth16().unwrap().seal.len();
+        let seal = info.receipt.inner.groth16().unwrap().seal_size();
 
         self.results.push(PerformanceData {
             name: "groth16".into(),
@@ -452,7 +439,7 @@ impl Datasheet {
         {
             println!("warmup");
 
-            let opts = ProverOpts::succinct();
+            let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
 
             let env = ExecutorEnv::builder()

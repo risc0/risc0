@@ -220,7 +220,19 @@ impl CompositeReceipt {
     /// Total number of bytes used by the seals of this receipt.
     pub fn seal_size(&self) -> usize {
         // NOTE: This sum cannot overflow because all seals are in memory.
-        self.segments.iter().map(|s| s.seal_size()).sum()
+        let mut result = 0;
+
+        for receipt in &self.segments {
+            result += receipt.seal_size();
+        }
+
+        // Take into account the assumption receipts since this is not a
+        // verifiable receipt without them.
+        for receipt in &self.assumption_receipts {
+            result += receipt.seal_size();
+        }
+
+        result
     }
 }
 
@@ -238,6 +250,27 @@ pub struct CompositeReceiptVerifierParameters {
     pub succinct: MaybePruned<SuccinctReceiptVerifierParameters>,
     /// Verifier parameters related to [Groth16Receipt][crate::Groth16Receipt].
     pub groth16: MaybePruned<Groth16ReceiptVerifierParameters>,
+}
+
+impl CompositeReceiptVerifierParameters {
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(po2_max: usize) -> Self {
+        Self {
+            segment: MaybePruned::Value(SegmentReceiptVerifierParameters::from_max_po2(po2_max)),
+            succinct: MaybePruned::Value(SuccinctReceiptVerifierParameters::from_max_po2(po2_max)),
+            groth16: MaybePruned::Value(Groth16ReceiptVerifierParameters::from_max_po2(po2_max)),
+        }
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
 }
 
 impl Digestible for CompositeReceiptVerifierParameters {
@@ -280,7 +313,7 @@ mod tests {
     fn composite_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             CompositeReceiptVerifierParameters::default().digest(),
-            digest!("9d30e0a248d01263aa8a61aff7f614a090c19f9e98c8832e2e9c1a43b12de1fd")
+            digest!("e676b5e35f46df092b82e64c17d1b9d96341c70c03e68cb6ebd0968e5529c193")
         );
     }
 }
