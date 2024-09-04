@@ -86,6 +86,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use bonsai_sdk::blocking::Client;
+use risc0_zkvm::Receipt;
 
 fn run_stark2snark(session_id: String) -> Result<()> {
     let client = Client::from_env(risc0_zkvm::VERSION)?;
@@ -101,8 +102,8 @@ fn run_stark2snark(session_id: String) -> Result<()> {
                 continue;
             }
             "SUCCEEDED" => {
-                let snark_receipt = res.output;
-                eprintln!("Snark proof!: {snark_receipt:?}");
+                let receipt_buf = client.download(&res.output.unwrap())?;
+                let snark_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
                 break;
             }
             _ => {

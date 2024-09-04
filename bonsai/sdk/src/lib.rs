@@ -105,6 +105,7 @@
 //!
 //! use anyhow::Result;
 //! use bonsai_sdk::blocking::Client;
+//! use risc0_zkvm::Receipt;
 //!
 //! fn run_stark2snark(session_id: String) -> Result<()> {
 //!     let client = Client::from_env(risc0_zkvm::VERSION)?;
@@ -120,8 +121,8 @@
 //!                 continue;
 //!             }
 //!             "SUCCEEDED" => {
-//!                 let snark_receipt = res.output;
-//!                 eprintln!("Snark proof!: {snark_receipt:?}");
+//!                 let receipt_buf = client.download(&res.output.unwrap())?;
+//!                 let snark_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
 //!                 break;
 //!             }
 //!             _ => {
@@ -189,7 +190,6 @@ enum ImageExistsOpt {
 
 /// Collection of serialization object for the REST api
 pub mod responses {
-    use risc0_groth16::Seal;
     use serde::{Deserialize, Serialize};
 
     /// Response of an upload request
@@ -226,6 +226,8 @@ pub mod responses {
         pub assumptions: Vec<String>,
         /// Execute Only Mode
         pub execute_only: bool,
+        /// executor cycle limit
+        pub exec_cycle_limit: Option<u64>,
     }
 
     /// Session statistics metadata file
@@ -296,23 +298,6 @@ pub mod responses {
         pub session_id: String,
     }
 
-    /// Snark Receipt object
-    ///
-    /// All relevant data to verify both the snark proof a corresponding
-    /// imageId on chain.
-    #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct SnarkReceipt {
-        /// SNARK Groth16 seal object encoded in big endian
-        pub snark: Seal,
-        /// Post State Digest
-        ///
-        /// Collected from the STARK proof via
-        /// `receipt.get_metadata().post.digest()`
-        pub post_state_digest: Vec<u8>,
-        /// Journal data from the risc-zkvm Receipt object
-        pub journal: Vec<u8>,
-    }
-
     /// Session Status response
     #[derive(Deserialize, Serialize)]
     pub struct SnarkStatusRes {
@@ -320,10 +305,10 @@ pub mod responses {
         ///
         /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
-        /// SNARK receipt output
+        /// SNARK receipt download URL
         ///
-        /// Generated snark receipt,
-        pub output: Option<SnarkReceipt>,
+        /// Url to download the snark (receipt `risc0::Receipt` bincode encoded)
+        pub output: Option<String>,
         /// Snark Error message
         ///
         /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the
@@ -769,17 +754,18 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
 
         // - /sessions
 
-        /// Create a new proof request Session
+        /// Create a new proof request Session with executor cycle limit
         ///
         /// Supply the image_id and input_id created from uploading those files in
         /// previous steps
         #[maybe_async_attr]
-        pub async fn create_session(
+        pub async fn create_session_with_limit(
             &self,
             img_id: String,
             input_id: String,
             assumptions: Vec<String>,
             execute_only: bool,
+            exec_cycle_limit: Option<u64>,
         ) -> Result<SessionId, SdkErr> {
             let url = format!("{}/sessions/create", self.url);
 
@@ -788,6 +774,7 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
                 input: input_id,
                 assumptions,
                 execute_only,
+                exec_cycle_limit,
             };
 
             let res = self.client.post(url).json(&req).send().await?;
@@ -800,6 +787,22 @@ bonsai_sdk::non_blocking::Client::from_env(risc0_zkvm::VERSION)
             let res: CreateSessRes = res.json().await?;
 
             Ok(SessionId::new(res.uuid))
+        }
+
+        /// Create a new proof request Session
+        ///
+        /// Supply the image_id and input_id created from uploading those files in
+        /// previous steps
+        #[maybe_async_attr]
+        pub async fn create_session(
+            &self,
+            img_id: String,
+            input_id: String,
+            assumptions: Vec<String>,
+            execute_only: bool,
+        ) -> Result<SessionId, SdkErr> {
+            self.create_session_with_limit(img_id, input_id, assumptions, execute_only, None)
+                .await
         }
 
         // Utilities
@@ -1198,6 +1201,7 @@ mod tests {
             input: Uuid::new_v4().to_string(),
             assumptions: vec![],
             execute_only: false,
+            exec_cycle_limit: None,
         };
         let response = CreateSessRes {
             uuid: Uuid::new_v4().to_string(),
@@ -1219,11 +1223,12 @@ mod tests {
         let client = Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
         let res = client
-            .create_session(
+            .create_session_with_limit(
                 request.img,
                 request.input,
                 request.assumptions,
                 request.execute_only,
+                request.exec_cycle_limit,
             )
             .unwrap();
         assert_eq!(res.uuid, response.uuid);
