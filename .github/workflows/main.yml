@@ -427,7 +427,6 @@ jobs:
       - name: generate a template and test it
         run: |
           cargo risczero new \
-            --path $(pwd) \
             --dest ${{ runner.temp }} \
             --guest-name test_method \
             template-test
