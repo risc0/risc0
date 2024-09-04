@@ -423,7 +423,7 @@ jobs:
       - name: install rzup from source
         run: cargo install --force --path rzup
       - name: run the `rzup install` command
-        run: rzup install
+        run: rzup install --force
       - name: generate a template and test it
         run: |
           cargo risczero new \
