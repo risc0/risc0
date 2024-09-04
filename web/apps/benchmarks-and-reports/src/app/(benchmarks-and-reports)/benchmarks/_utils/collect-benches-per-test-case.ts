@@ -32,14 +32,14 @@ export type FormattedDataSetEntry = Omit<DataSetEntry, "benches"> & {
 };
 
 export function collectBenchesPerTestCase(entries: DataSetEntry[]): Map<string, FormattedDataSetEntry[]> {
-  const map = new Map();
+  const map: Map<string, FormattedDataSetEntry[]> = new Map();
 
   for (const entry of entries) {
     const { commit, date, tool, benches } = entry;
 
     for (const bench of benches) {
       const result = { commit, date, tool, bench };
-      const arr = map.get(bench.name);
+      const arr: FormattedDataSetEntry[] | undefined = map.get(bench.name);
 
       if (arr === undefined) {
         map.set(bench.name, [result]);
