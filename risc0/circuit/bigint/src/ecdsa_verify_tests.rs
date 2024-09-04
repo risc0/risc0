@@ -39,7 +39,6 @@ fn golden_values() -> Vec<BigUint> {
     Vec::from([
         from_hex("01"), // base_pt_x: 1
         from_hex("02"), // base_pt_y: 2
-        from_hex("2b"), // base_pt_order: 43
         from_hex("12"), // pub_key_x: 18
         from_hex("0a"), // pub_key_y: 10
         from_hex("05"), // msg_hash: 5
@@ -141,13 +140,12 @@ fn test_zkr() -> anyhow::Result<()> {
 
 #[test]
 fn prove_and_verify_ecdsa_verify() -> Result<()> {
-    let [base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+    let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
         &ECDSA_VERIFY_8,
         base_pt_x,
         base_pt_y,
-        base_pt_order,
         pub_key_x,
         pub_key_y,
         msg_hash,
@@ -230,13 +228,12 @@ fn test_zkr_32() -> anyhow::Result<()> {
 
 #[test]
 fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
-    let [base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+    let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
         &ECDSA_VERIFY_32,
         base_pt_x,
         base_pt_y,
-        base_pt_order,
         pub_key_x,
         pub_key_y,
         msg_hash,
@@ -315,13 +312,12 @@ fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
 
 // #[test]
 // fn prove_and_verify_ecdsa_verify_256() -> Result<()> {
-//     let [base_pt_x, base_pt_y, base_pt_order, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+//     let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
 //         golden_values().try_into().unwrap();
 //     let claim = crate::ecdsa_verify::claim(
 //         &ECDSA_VERIFY_256,
 //         base_pt_x,
 //         base_pt_y,
-//         base_pt_order,
 //         pub_key_x,
 //         pub_key_y,
 //         msg_hash,

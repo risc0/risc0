@@ -26,7 +26,6 @@ pub fn claim(
     prog_info: &BigIntProgram,
     base_pt_x: BigUint,
     base_pt_y: BigUint,
-    base_pt_order: BigUint,
     pub_key_x: BigUint,
     pub_key_y: BigUint,
     msg_hash: BigUint,
@@ -38,7 +37,6 @@ pub fn claim(
     BigIntClaim::from_biguints(prog_info, &[
         base_pt_x,
         base_pt_y,
-        base_pt_order,
         pub_key_x,
         pub_key_y,
         msg_hash,
