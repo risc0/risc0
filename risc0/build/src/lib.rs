@@ -43,8 +43,10 @@ use self::{
     docker::build_guest_package_docker,
 };
 
-pub use self::config::{DockerOptions, GuestOptions};
-pub use self::docker::{docker_build, BuildStatus, TARGET_DIR};
+pub use self::{
+    config::{DockerOptions, GuestOptions},
+    docker::{docker_build, BuildStatus, TARGET_DIR},
+};
 
 /// This const represents a filename that is used in the use to indicate to in
 /// order to indicate to the client and the risc0-build crate that the new rust

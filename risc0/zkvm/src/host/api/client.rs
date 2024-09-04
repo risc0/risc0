@@ -29,7 +29,7 @@ use crate::{
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim, Unknown,
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -177,11 +177,15 @@ impl Client {
 
     /// Prove the specified ZKR proof request.
     #[stability::unstable]
-    pub fn prove_zkr(
+    pub fn prove_zkr<Claim>(
         &self,
         proof_request: ProveZkrRequest,
         receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt<Unknown>> {
+    ) -> Result<SuccinctReceipt<Claim>>
+    where
+        Claim: risc0_binfmt::Digestible + std::fmt::Debug + Clone + serde::Serialize,
+        crate::MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+    {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
