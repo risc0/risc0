@@ -32,11 +32,16 @@ pub fn to_biguint(bp: impl AsRef<[i32]>) -> BigUint {
     let mut out = BigInt::default();
     let mut mul = BigInt::from(1usize);
     let coeff_mul = BigInt::from(1usize << BITS_PER_COEFF);
+    let mut log = String::new();
     for i in 0..bp.len() {
+        if i != 0 {
+            log += ", ";
+        }
         out += &mul * bp[i];
         mul *= &coeff_mul;
+        log += &bp[i].to_string();
     }
-    out.to_biguint().expect("Unable to make unsigned bigint")
+    out.to_biguint().expect(&format!("Unable to make unsigned bigint: {log}", log=log))
 }
 
 pub fn dump(bp: impl AsRef<[i32]>) -> String {
