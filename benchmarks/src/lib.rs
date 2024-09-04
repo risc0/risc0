@@ -142,7 +142,7 @@ impl Job {
         metrics.total_duration = metrics.exec_duration + metrics.proof_duration;
         metrics.speed = self.size as f32 / metrics.total_duration.as_secs_f32();
         metrics.output_bytes = receipt.journal.bytes.len();
-        metrics.proof_bytes = receipt.inner.succinct().unwrap().get_seal_bytes().len();
+        metrics.proof_bytes = receipt.inner.succinct().unwrap().seal_size();
 
         let start = Instant::now();
         receipt.verify(self.image_id).unwrap();

@@ -8,7 +8,7 @@ In this document, we present an overview to the RISC Zero STARK protocol, as wel
 RISC Zero's [receipts][Receipt] are built on the shoulders of several recent advances in the world of zero-knowledge cryptography.
 The core of the proof system is [STARK]-based, implementing [DEEP-ALI & FRI].
 This proof system is used to generate zero-knowledge validity proofs for RISC Zero's RISC-V circuit and RISC Zero's recursion circuit.
-Users may also be interested in reading about the [RISC Zero Groth16 Circuit], which enables on-chain verification.
+Users may also be interested in reading about the [RISC Zero Groth16 Circuit][groth16-circuit], which enables on-chain verification.
 
 At a high level, the design of the RISC Zero STARK protocol is very similar to the system described in [ethSTARK], and the system implemented in [Winterfell].
 
@@ -39,17 +39,15 @@ These enhancements are described well in [From AIRs to RAPs].
 
 We use this Auxiliary Execution Trace to support:
 
-1. A permutation argument for [memory verification](https://www.youtube.com/watch?v=dYuEPvRLwLo&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N&index=5)<br/>
+1. A permutation argument for [memory verification](https://www.youtube.com/watch?v=dYuEPvRLwLo\&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N\&index=5)<br/>
    The permutation argument is currently implemented as a grand product accumulator argument, as in [PLONK](https://eprint.iacr.org/2019/953.pdf).
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit.<br/>
    Here, operations corresponding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
-
-1. A lookup argument for range checks<br/>
+2. A lookup argument for range checks<br/>
    The lookup argument is currently implemented using the approach described in [PLOOKUP].
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit. <br/>
    Here, the tables and the witness are committed in the main trace, and grand product accumulators are committed in the auxiliary trace.
-
-1. A big integer accelerator to enable [fast cryptographic operations][acceleration]<br/>
+3. A big integer accelerator to enable [fast cryptographic operations][acceleration]<br/>
    The bigint accelerator implements multiplication of `a` and `b` by asking the host to provide the product `c` as non-deterministic advice. Then, the verifier provides randomness `r`, and the constraints enforce that when `a`, `b`, and `c` are interpreted as polynomials, `a(r) * b(r) == c(r)`. <br/>
    Here, `a`, `b`, and `c` are committed in the main trace, and the evaluations at `r` are committed in the auxiliary trace.
 
@@ -120,7 +118,6 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 ### DEEP-ALI (part 1)
 
 - The Prover uses the `constraint mixing parameter`, the `Trace Polynomials`, and the `Rule Checking Polynomials` to construct a few `Low Degree Validity Polynomials.` The details are as follows:
-
   - By writing $k$ publicly known `Rule Checking Polynomials`, $R_0, R_1, ..., R_{k-1}$, in terms of the private `Trace Polynomials`, the Prover generates $k$ `Constraint Polynomials`, $C_j(x)$.
     - The key point about these polynomials is that for each of the $k$ rules and each input $z$ that's associated with the trace, $C_j(z)$ will return 0 if the trace "passes the test," so to speak.
   - Using the `constraint mixing parameter` $\alpha$, the Prover combines the `Constraint Polynomials`, $C_j$ into a single `Mixed Constraint Polynomial`, $C$, by computing $C(x)=\alpha^0C_0(x)+\ldots+\alpha^{k-1}C_{k-1}(x).$
@@ -155,10 +152,11 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 Thanks for reading! If you have questions or feedback, we'd love to hear from you on Discord or Twitter.
 
-[acceleration]: /api/zkvm/acceleration
+[acceleration]: /api/zkvm/acceleration/
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
 [ethSTARK]: https://eprint.iacr.org/2021/582.pdf
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
+[groth16-circuit]: /terminology#groth16-circuit
 [Image ID]: /terminology#image-id
 [log derivative]: https://eprint.iacr.org/2022/1530.pdf
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
@@ -166,4 +164,3 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [STARK]: ../reference-docs/about-starks.md
 [Winterfell]: https://github.com/facebook/winterfell
 [ZKP Whitepaper]: https://dev.risczero.com/proof-system-in-detail.pdf
-[zkVM]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/

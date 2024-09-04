@@ -9,7 +9,6 @@ members = [
   "chess",
   "chess/core",
   "composition",
-  "cycle-counter",
   "digital-signature",
   "digital-signature/core",
   "ecdsa",

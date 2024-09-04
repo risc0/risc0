@@ -42,6 +42,7 @@ pub enum BenchmarkSpec {
     },
     Read,
     ReadFramed,
+    #[cfg(feature = "std")]
     ReadBuffered,
     #[cfg(feature = "std")]
     Bincode,
@@ -74,8 +75,7 @@ impl BenchmarkSpec {
                 let src_align = src_align as usize;
                 let dst_align = dst_align as usize;
                 let src_len = src.len() - src_align;
-                let mut dst: Vec<u8> = Vec::new();
-                dst.resize(src_len + dst_align, 0);
+                let mut dst = alloc::vec![0; src_len + dst_align];
                 let dst_slice: &mut [u8] = &mut dst[dst_align..];
                 let src_slice: &[u8] = &src[src_align..];
 
@@ -84,11 +84,10 @@ impl BenchmarkSpec {
             }
             BenchmarkSpec::Memset { len } => {
                 let len = len as usize;
-                let mut dst: Vec<u8> = Vec::new();
-                dst.resize(len, 0);
+                let mut dst = alloc::vec![0; len];
                 let dst_slice = &mut dst[..];
 
-                dst_slice.fill(0);
+                dst_slice.fill(1);
                 memory_barrier(&dst_slice);
             }
             BenchmarkSpec::Read => {
@@ -99,6 +98,7 @@ impl BenchmarkSpec {
                 let claims: Vec<ReceiptClaim> = env::read_framed().unwrap();
                 memory_barrier(&claims);
             }
+            #[cfg(feature = "std")]
             BenchmarkSpec::ReadBuffered => {
                 let claims: Vec<ReceiptClaim> = env::read_buffered().unwrap();
                 memory_barrier(&claims);

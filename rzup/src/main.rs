@@ -128,6 +128,7 @@ fn init() -> Result<()> {
         fs::create_dir_all(new_rzup_indicator.parent().unwrap())?;
         OpenOptions::new()
             .create(true)
+            .truncate(true)
             .write(true)
             .open(new_rzup_indicator)?;
     }

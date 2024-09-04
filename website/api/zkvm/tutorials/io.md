@@ -1,4 +1,4 @@
-# Understanding I/O in the zkVM
+# Understanding I/O In the zkVM
 
 In the [Hello World Tutorial][docs-hello-world], we had a brief introduction to
 how to perform I/O operations in the zkVM. Now we'll dive deeper into the subject.
@@ -34,7 +34,7 @@ If your application handles sensitive data, it's important to be aware of
 specifically which data is [`commit`][source-env::commit]ed to the journal, avoiding
 any sensitive data to be included in the proof.
 
-## Sending data from the host to the guest
+## Sending Data from the Host to the Guest
 
 The [`stdin`][stdin] file descriptor is used to send input data from the host to
 the guest.
@@ -59,7 +59,7 @@ let env = ExecutorEnv::builder().write(&input)?.build()?;
 Since we mentioned the `read`/`write` methods and their `_slice` variants, let's
 take a moment to understand the difference between them.
 
-## A note on performance
+## A Note on Performance
 
 During the process of sending data from host to guest and vice-versa, we can
 either do so while (de)serializing the data or by sending raw bytes.
@@ -80,7 +80,7 @@ shouldn't be a problem.
 We have a [more detailed explanation][docs-guest-code-optmization] on guest code
 optimization if you want to learn more about this topic.
 
-## Sending _Private_ data from the guest
+## Sending _Private_ Data from the Guest
 
 Back where we were, after getting data from the host and performing some
 transformations on it, we might want to send _private_ data back.
@@ -122,7 +122,7 @@ composition in a capable proving service like [Bonsai][docs-remote-proving] to
 speed up the proof generation.
 :::
 
-## Sending _Public_ data from the guest
+## Sending _Public_ Data from the Guest
 
 We saw how to send _private_ data directly to the host, but we might also want
 to [`commit`][source-env::commit] _public_ data, attesting to some fact that we
@@ -146,7 +146,7 @@ On the host side, (or any other regular program that has access to the
 calling the [`Journal`][source-Journal]'s method
 [`decode`][source-Journal::decode].
 
-## Reading _Private_ data in the host
+## Reading _Private_ Data in the Host
 
 Once we sent data from the guest, we can read it back in the host by leveraging
 the [`from_slice`][source-from_slice] method. This method is used to deserialize
@@ -177,7 +177,7 @@ let receipt = prover.prove(env, ELF).unwrap().receipt;
 let public_data = receipt.journal.decode()?;
 ```
 
-## Sharing data structures between host and guest
+## Sharing Data Structures Between Host and Guest
 
 A good pattern to follow when handling shared data structures between the host
 and guest is to have a common `core` module that contains the shared data
@@ -196,7 +196,7 @@ Similarly, the [Chess example][example-chess] does the same with its
 
 Other examples leveraging this pattern can be found in the [examples page].
 
-## Putting it all together
+## Putting It All Together
 
 Now that we've covered some details about I/O in the zkVM, let's see how a real
 program implements it in practice.
@@ -280,47 +280,47 @@ Happy coding!
 [docs-guest-code-optmization]: ../optimization.md#when-reading-data-as-raw-bytes-use-envread_slice
 [docs-hello-world]: ./hello-world.md
 [docs-remote-proving]: ../../generating-proofs/remote-proving.md
+[example-chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [example-chess-core]: https://github.com/risc0/risc0/blob/main/examples/chess/core/src/lib.rs
 [example-chess-guest]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
 [example-chess-host]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs
-[example-chess]: https://github.com/risc0/risc0/tree/main/examples/chess
+[example-jwt-validator]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/README.md
 [example-jwt-validator-core]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/core/src/lib.rs
 [example-jwt-validator-guest]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/methods/guest/src/main.rs
 [example-jwt-validator-host]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/src/lib.rs
-[example-jwt-validator]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/README.md
+[example-voting-machine]: https://github.com/risc0/risc0/tree/main/examples/voting-machine
 [example-voting-machine-core]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/core/src/lib.rs
+[example-voting-machine-guest-elf-init]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/methods/guest/src/bin/init.rs
 [example-voting-machine-guest-elf-init-commit]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/methods/guest/src/bin/init.rs#L29-L33
 [example-voting-machine-guest-elf-init-read]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/methods/guest/src/bin/init.rs#L28
-[example-voting-machine-guest-elf-init]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/methods/guest/src/bin/init.rs
 [example-voting-machine-guest-elf-submit-commit]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/methods/guest/src/bin/submit.rs#L31-L39
 [example-voting-machine-guest-elf-submit-write]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/methods/guest/src/bin/submit.rs#L30
+[example-voting-machine-host]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs
 [example-voting-machine-host-freeze]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L99-L112
-[example-voting-machine-host-init-write]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L79
 [example-voting-machine-host-init]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L77-L83
+[example-voting-machine-host-init-write]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L79
+[example-voting-machine-host-submit]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L85-L97
 [example-voting-machine-host-submit-output-buffer]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L88
 [example-voting-machine-host-submit-output-from_slice]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L95
 [example-voting-machine-host-submit-output-stdout]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L91
-[example-voting-machine-host-submit]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs#L85-L97
-[example-voting-machine-host]: https://github.com/risc0/risc0/blob/main/examples/voting-machine/src/lib.rs
-[example-voting-machine]: https://github.com/risc0/risc0/tree/main/examples/voting-machine
 [examples page]: ../examples.md
 [guest]: https://dev.risczero.com/terminology#guest
 [host]: https://dev.risczero.com/terminology#host
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.journal.html
-[source-ExecutorEnvBuilder::stderr]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stderr
-[source-ExecutorEnvBuilder::stdout]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stdout
-[source-ExecutorEnvBuilder::write]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.write
-[source-ExecutorEnvBuilder::write_slice]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.write_slice
-[source-Journal::decode]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Journal.html#method.decode
-[source-Journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Journal.html
 [source-env::commit]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [source-env::commit_slice]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
 [source-env::read]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read.html
 [source-env::read_slice]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
 [source-env::write]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.write.html
 [source-executor-env]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnv.html
+[source-ExecutorEnvBuilder::stderr]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stderr
+[source-ExecutorEnvBuilder::stdout]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stdout
+[source-ExecutorEnvBuilder::write]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.write
+[source-ExecutorEnvBuilder::write_slice]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.write_slice
 [source-fileno]: https://docs.rs/risc0-zkvm-platform/*/risc0_zkvm_platform/fileno/index.html
 [source-from_slice]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/serde/fn.from_slice.html
+[source-Journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Journal.html
+[source-Journal::decode]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Journal.html#method.decode
 [source-receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [stderr]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stderr.html
 [stdin]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stdin.html

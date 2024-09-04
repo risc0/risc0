@@ -173,7 +173,7 @@ public:
   }
 };
 
-/// Raise an value to a power
+/// Raise a value to a power
 __device__ constexpr inline Fp pow(Fp x, size_t n) {
   Fp tot = 1;
   while (n != 0) {

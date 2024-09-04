@@ -31,16 +31,13 @@ If you want to benchmark a GPU, you will need to build with the `cuda` or
 this, use the following commands:
 
 - **Metal**
-
-```bash
-cargo run --release -F metal --example loop
-```
-
+  ```bash
+  cargo run --release -F metal --example loop
+  ```
 - **CUDA**
-
-```bash
-cargo run --release -F cuda --example loop
-```
+  ```bash
+  cargo run --release -F cuda --example loop
+  ```
 
 We also have a Fibonacci computation benchmark, which you can run with
 

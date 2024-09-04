@@ -37,23 +37,23 @@ We have an [FAQ](/faq) that discusses some frequently encountered problems. You 
 
 ## Diving deeper
 
-We have [extensive resources](../zkvm/zkvm_overview.md) on writing zkVM code.
+We have [extensive resources](../zkvm/zkvm-overview.md) on writing zkVM code.
 
 Many of these resources assume you are developing without the aid of Bonsai. Here are some differences you might encounter when reading these docs:
 
 - zkVM docs frequently refer to the [guest] and [host]. With Bonsai, you only write code for the [guest]; Bonsai itself runs the [host]. A partial exception is providing inputs and receiving the [receipt], which is handled by the [host] without Bonsai, and by the off-chain component of your app (e.g. a dApp client or server) when using Bonsai.
 - You might see our zkVM documentation refer to sessions, and segments. These code-level concepts are related to [continuations](https://www.risczero.com/news/continuations), a feature that lets us design our zkVM program proof work to be parallelizable and not limited by the size of the program to be proven. Bonsai takes advantage of this feature to parallelize proofs about off-chain computation. If you're reading about these in zkVM documentation, you're almost certainly looking at host-side details that you don't need in order to write provable code.
 
-[Bonsai]: bonsai-overview.md
-[Discord]: https://discord.gg/risczero
-[Rust]: https://www.rust-lang.org/
 [alloy]: https://github.com/alloy-rs
+[Bonsai]: bonsai-overview.md
 [committing]: /terminology#commit
+[Discord]: https://discord.gg/risczero
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
 [guest]: /terminology#guest
 [host]: /terminology#host
 [journal]: /terminology#journal
 [receipt]: /terminology#receipt
+[Rust]: https://www.rust-lang.org/
 [rust-learn]: https://www.rust-lang.org/learn
 [term-guest-program]: /terminology#guest-program
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm

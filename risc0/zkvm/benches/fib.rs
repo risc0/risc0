@@ -95,7 +95,7 @@ fn lift(group: &mut BenchGroup) {
                 let segment = session.segments[0].resolve().unwrap();
                 prover.prove_segment(&ctx, &segment).unwrap()
             },
-            |receipt| prover.lift(&receipt),
+            |receipt| prover.lift(receipt),
         );
     })
 }
@@ -124,7 +124,7 @@ fn join(group: &mut BenchGroup) {
                 let right = prover.lift(&composite.segments[1]).unwrap();
                 (left, right)
             },
-            |(left, right)| prover.join(&left, &right),
+            |(left, right)| prover.join(left, right),
         );
     });
 }

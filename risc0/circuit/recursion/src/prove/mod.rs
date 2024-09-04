@@ -72,6 +72,13 @@ pub struct RecursionReceipt {
     pub output: Vec<u32>,
 }
 
+impl RecursionReceipt {
+    /// Total number of bytes used by the seal of this receipt.
+    pub fn seal_size(&self) -> usize {
+        core::mem::size_of_val(self.seal.as_slice())
+    }
+}
+
 /// Prover for the recursion circuit.
 pub struct Prover {
     program: Program,

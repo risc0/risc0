@@ -10,7 +10,7 @@ _This page describes guidelines for community contributions to this [website](ht
 > - Contribute to our tutorials and how-to guides for our [templates](https://github.com/risc0/risc0/tree/main/risc0/cargo-risczero/templates) and [Rust examples](https://github.com/risc0/risc0/tree/main/examples)
 > - Ask questions on [Discord](https://discord.gg/risczero)
 
-## How To Contribute
+## How to Contribute
 
 - All changes to this website are managed through GitHub pull requests, so you'll need a [GitHub Account](https://github.com) to contribute.
 - You can suggest an edit directly via the `Edit this Page` button at the bottom of each page.
@@ -56,7 +56,7 @@ We typically organize reference docs according to the following sections; we use
 
 > **Topic**
 >
-> _Topic is used to [concise explanation of relevance to RISC Zero]_
+> _Topic is used to \[concise explanation of relevance to RISC Zero]_
 >
 > - Documentation
 > - Basic Function
@@ -72,7 +72,7 @@ _Changes to this organization can be proposed for discussion via a [GitHub issue
 Our explainer docs are currently split into `zkVM Explainers` and `ZKP Explainers`.
 Explainers contain clearly articulated goals in the header, as well as pointers to related content.
 
-## Thank you!
+## Thank You!
 
 We're excited about the engagement we've seen so far, and we're looking forward to building a vibrant community together.
 

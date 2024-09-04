@@ -26,9 +26,12 @@ pub mod trace;
 
 use risc0_zkp::{
     adapter::{CircuitCoreDef, TapsProvider},
+    core::digest::Digest,
     field::baby_bear::BabyBear,
     taps::TapSet,
 };
+
+use control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS};
 
 pub struct CircuitImpl;
 
@@ -54,3 +57,36 @@ impl TapsProvider for CircuitImpl {
 }
 
 impl CircuitCoreDef<BabyBear> for CircuitImpl {}
+
+/// Fetch a control ID with the given hash, by name, and cycle limit as a power of two (po2) from
+/// the precomputed table. If the hash function is not precomputed, or the po2 is out of range,
+/// this function will return `None`.
+///
+/// Supported values for hash_name are "sha-256", "poseidon2", and "blake2b".
+#[inline]
+pub fn control_id(hash_name: impl AsRef<str>, po2: usize) -> Option<Digest> {
+    if !(risc0_zkp::MIN_CYCLES_PO2..=risc0_zkp::MAX_CYCLES_PO2).contains(&po2) {
+        return None;
+    }
+    let idx = po2 - risc0_zkp::MIN_CYCLES_PO2;
+    match hash_name.as_ref() {
+        "sha-256" => Some(SHA256_CONTROL_IDS[idx]),
+        "poseidon2" => Some(POSEIDON2_CONTROL_IDS[idx]),
+        "blake2b" => Some(BLAKE2B_CONTROL_IDS[idx]),
+        _ => None,
+    }
+}
+
+/// Fetch all precomputed control IDs using the given hash, by name, and up to the cycle limit as a
+/// power of two (po2). If po2 is larger than the max supported, only supported po2s will be
+/// returned.
+pub fn control_ids(
+    hash_name: impl AsRef<str> + 'static,
+    po2_max: usize,
+) -> impl Iterator<Item = Digest> {
+    // Using `take_while` here ensures termination when po2_max is much greater than the highest po2.
+    (risc0_zkp::MIN_CYCLES_PO2..=po2_max)
+        .map(move |po2| control_id(hash_name.as_ref(), po2))
+        .take_while(Option::is_some)
+        .map(Option::unwrap)
+}

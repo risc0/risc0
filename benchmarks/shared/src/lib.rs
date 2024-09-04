@@ -52,7 +52,7 @@ impl MembershipProof {
 
 pub fn generate_mock_proof(leaf_data: &[u8], n: u32) -> MembershipProof {
     let leaf = *sha::Impl::hash_bytes(leaf_data);
-    let mut current_hash = leaf.clone();
+    let mut current_hash = leaf;
     let mut path = Vec::new();
 
     for i in 0..n {
@@ -63,7 +63,7 @@ pub fn generate_mock_proof(leaf_data: &[u8], n: u32) -> MembershipProof {
         } else {
             Direction::Right
         };
-        path.push((direction.clone(), sibling_hash.clone()));
+        path.push((direction.clone(), sibling_hash));
         current_hash = if direction == Direction::Left {
             *sha::Impl::hash_pair(&sibling_hash, &current_hash)
         } else {
