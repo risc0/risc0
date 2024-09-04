@@ -1,10 +1,7 @@
 {
   "name": "web",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo build",
     "check": "cd .. && bunx @biomejs/biome check --write --unsafe web",

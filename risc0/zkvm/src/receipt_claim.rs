@@ -66,7 +66,7 @@ pub struct ReceiptClaim {
 }
 
 impl ReceiptClaim {
-    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded normally (i.e.
+    /// Construct a [ReceiptClaim] representing a zkVM execution that ended normally (i.e.
     /// Halted(0)) with the given image ID and journal.
     pub fn ok(
         image_id: impl Into<Digest>,
@@ -88,7 +88,7 @@ impl ReceiptClaim {
         }
     }
 
-    /// Construct a [ReceiptClaim] representing a zkVM execution that eneded in a normal paused
+    /// Construct a [ReceiptClaim] representing a zkVM execution that ended in a normal paused
     /// state (i.e. Paused(0)) with the given image ID and journal.
     pub fn paused(
         image_id: impl Into<Digest>,
