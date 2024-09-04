@@ -57,12 +57,12 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
-[Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
-[IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
-[RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierRouter.sol
+[Groth16Receipt]: https://docs.rs/risc0-zkvm/1.1/risc0_zkvm/struct.Groth16Receipt.html
+[IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/src/IRiscZeroVerifier.sol
+[RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/src/RiscZeroVerifierRouter.sol
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
-[VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
+[VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/version-management-design.md

@@ -60,8 +60,8 @@ modular multiplication instruction. E.g. [`FieldElement8x32R0::mul`][field-mul].
 [bigint]: https://github.com/risc0/risc0/pull/466
 [cargo-patch]: https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section
 [curve25519-dalek]: https://github.com/risc0/curve25519-dalek/tree/risczero
-[ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
-[ecdsa-patched]: https://github.com/risc0/risc0/blob/main/examples/ecdsa/methods/guest/Cargo.toml#L13-L18
+[ecdsa]: https://github.com/risc0/risc0/tree/release-1.1/examples/ecdsa
+[ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.1/examples/ecdsa/methods/guest/Cargo.toml#L13-L18
 [field-mul]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.1..k256/v0.13.1-risczero.1#diff-ab10e01be1d99a874f90c9a6143bb1c64f37e04dcb220b5ab50b9273d99e0a0cR176-R179
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.1..k256/v0.13.1-risczero.1

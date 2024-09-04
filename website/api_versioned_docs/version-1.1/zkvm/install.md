@@ -23,7 +23,7 @@ Running `rzup` will install the latest version of the RISC Zero toolchain.
 
 For a specific version, use `rzup install --version <version>`, where the `<version>` is a [release tag].
 
-See `rzup --help` for more options. You can find out more about `rzup` [here](https://github.com/risc0/risc0/tree/main/rzup).
+See `rzup --help` for more options. You can find out more about `rzup` [here](https://github.com/risc0/risc0/tree/release-1.1/rzup).
 
 ### Manual Installation and installation for all other systems (e.g. x86-64 macOS, arm64 Linux)
 
