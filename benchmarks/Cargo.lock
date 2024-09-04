@@ -426,7 +426,6 @@ dependencies = [
  "duplicate",
  "maybe-async",
  "reqwest 0.12.5",
- "risc0-groth16",
  "serde",
  "thiserror",
 ]
