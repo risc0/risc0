@@ -40,6 +40,7 @@ jobs:
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       risc0: ${{ steps.filter.outputs.risc0 }}
+      rzup: ${{ steps.filter.outputs.rzup }}
       test: ${{ steps.filter.outputs.test }}
       test-crates: ${{ steps.filter.outputs.test-crates }}
       web: ${{ steps.filter.outputs.web }}
@@ -64,6 +65,9 @@ jobs:
               - *base
               - external/**
               - risc0/**
+            rzup:
+              - *base
+              - rzup/**
             check-semver:
               - *base
               - risc0/**
@@ -113,9 +117,10 @@ jobs:
       - crates-validator
       - crates-validation
       - doc
+      - docker
       - docs-rs
       - examples
-      - docker
+      - rzup
       - test
       # - test-crates
       - web
@@ -404,6 +409,32 @@ jobs:
       - run: cargo check
         working-directory: external/substrate
       - run: sccache --show-stats
+
+  rzup:
+    if: needs.changes.outputs.rzup == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: macOS-default
+      - name: install rzup from source
+        run: cargo install --force --path rzup
+      - name: run the `rzup install` command
+        run: rzup install
+      - name: generate a template and test it
+        run: |
+          cargo risczero new \
+            --path $(pwd) \
+            --dest ${{ runner.temp }} \
+            --guest-name test_method \
+            template-test
+        shell: bash
+      - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
+      - run: sccache --show-stats
+
 
   check-semver:
     if: needs.changes.outputs.check-semver == 'true'
