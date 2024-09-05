@@ -19,8 +19,8 @@ use bonsai_sdk::blocking::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, is_dev_mode, sha::Digestible, ExecutorEnv, Groth16Receipt, InnerReceipt,
-    ProveInfo, ProverOpts, Receipt, ReceiptKind, VerifierContext,
+    compute_image_id, is_dev_mode, ExecutorEnv, InnerReceipt, ProveInfo, ProverOpts, Receipt,
+    ReceiptKind, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
@@ -78,7 +78,13 @@ impl Prover for BonsaiProver {
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
-        let session = client.create_session(image_id_hex, input_id, receipts_ids, false)?;
+        let session = client.create_session_with_limit(
+            image_id_hex,
+            input_id,
+            receipts_ids,
+            false,
+            env.session_limit,
+        )?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
         let succinct_prove_info = loop {
@@ -142,7 +148,7 @@ impl Prover for BonsaiProver {
 
         // Request that Bonsai compress further, to Groth16.
         let snark_session = client.create_snark(session.uuid)?;
-        let snark_receipt = loop {
+        let snark_receipt_url = loop {
             let res = snark_session.status(&client)?;
             match res.status.as_str() {
                 "RUNNING" => {
@@ -177,14 +183,8 @@ impl Prover for BonsaiProver {
         // the verifier parameters for this version of risc0-zkvm, which may be different than
         // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
         // matches the verifying key used here.
-        let groth16_receipt = Receipt::new(
-            InnerReceipt::Groth16(Groth16Receipt {
-                seal: snark_receipt.snark.to_vec(),
-                claim: succinct_prove_info.receipt.claim()?,
-                verifier_parameters: ctx.groth16_verifier_parameters.digest(),
-            }),
-            succinct_prove_info.receipt.journal.bytes,
-        );
+        let receipt_buf = client.download(&snark_receipt_url)?;
+        let groth16_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
         groth16_receipt
             .verify_integrity_with_context(ctx)
             .context("failed to verify Groth16Receipt returned by Bonsai")?;
