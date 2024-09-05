@@ -51,11 +51,15 @@ impl Syscall for SysProveZkr {
             input,
         };
 
-        for assumption in ctx.syscall_table().assumptions.borrow().iter() {
-            if assumption.claim_digest()? == claim_digest {
-                // This assumption is already known, no need to create another proof.
-                return Ok((0, 0));
-            }
+        // TODO: add a test for this situation
+        let assumption = ctx
+            .syscall_table()
+            .assumptions
+            .borrow()
+            .find_assumption(&claim_digest, &control_root)?;
+        if assumption.is_some() {
+            // This assumption is already known, no need to create another proof.
+            return Ok((0, 0));
         }
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
@@ -75,6 +79,7 @@ impl Syscall for SysProveZkr {
         ctx.syscall_table()
             .assumptions
             .borrow_mut()
+            .0
             .push(AssumptionReceipt::Unresolved(assumption));
 
         Ok((0, 0))

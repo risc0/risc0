@@ -520,6 +520,7 @@ impl Client {
             assumptions: env
                 .assumptions
                 .borrow()
+                .0
                 .iter()
                 .map(|a| {
                     Ok(match a {

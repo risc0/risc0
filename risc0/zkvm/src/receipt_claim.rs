@@ -284,7 +284,9 @@ impl Digestible for Output {
 /// and remove the assumption.
 ///
 /// [assumption]: https://dev.risczero.com/terminology#assumption
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize)]
+#[derive(
+    Clone, Debug, Serialize, Deserialize, Eq, Hash, PartialEq, BorshSerialize, BorshDeserialize,
+)]
 pub struct Assumption {
     /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
     /// be the digest of the claim for a different circuit such as an accelerator.

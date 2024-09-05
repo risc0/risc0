@@ -436,3 +436,63 @@ impl Syscall for SysLog {
         Ok((0, 0))
     }
 }
+
+impl AssumptionReceipts {
+    #[cfg(feature = "prove")]
+    pub(crate) fn find_assumption(
+        &self,
+        claim_digest: &Digest,
+        control_root: &Digest,
+    ) -> Result<Option<(Assumption, AssumptionReceipt)>> {
+        use anyhow::Context;
+
+        for assumption_receipt in self.0.iter() {
+            let cached_claim_digest = assumption_receipt
+                .claim_digest()
+                .context("failed to access claim digest on cached assumption")?;
+
+            if cached_claim_digest != *claim_digest {
+                tracing::debug!("receipt with claim {cached_claim_digest} does not match");
+                continue;
+            }
+
+            // If the control root supplied by the guest is not zero, then they are requesting a
+            // specific set of recursion programs be used to resolve the assumption. Check that the
+            // given receipt can indeed resolve the assumption.
+            // NOTE: We currently only support using Succinct receipts here.
+            if *control_root != Digest::ZERO {
+                let Some(cached_control_root) = (match assumption_receipt {
+                    AssumptionReceipt::Proven(receipt) => receipt
+                        .succinct()
+                        .ok()
+                        .map(|r| r.control_root())
+                        .transpose()?,
+                    AssumptionReceipt::Unresolved(unresolved) => Some(unresolved.control_root),
+                }) else {
+                    // Elevate to warning because this really is likely an error.
+                    tracing::warn!(
+                        "receipt with claim {cached_claim_digest} is not a succinct receipt"
+                    );
+                    continue;
+                };
+                if cached_control_root != *control_root {
+                    // Elevate to warning because this really is likely an error.
+                    tracing::warn!(
+                        "receipt with claim {cached_claim_digest} has control root {cached_control_root}; guest requested {control_root}"
+                    );
+                    continue;
+                }
+            }
+
+            return Ok(Some((
+                Assumption {
+                    claim: *claim_digest,
+                    control_root: *control_root,
+                },
+                assumption_receipt.clone(),
+            )));
+        }
+
+        Ok(None)
+    }
+}

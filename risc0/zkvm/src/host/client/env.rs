@@ -47,9 +47,6 @@ pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
 
-/// Container for assumptions in the executor environment.
-pub(crate) type AssumptionReceipts = Vec<AssumptionReceipt>;
-
 #[allow(dead_code)]
 #[derive(Clone)]
 pub enum SegmentPath {
@@ -88,6 +85,10 @@ pub trait CoprocessorCallback {
 }
 
 pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;
+
+/// Container for assumptions in the executor environment.
+#[derive(Default)]
+pub(crate) struct AssumptionReceipts(pub(crate) Vec<AssumptionReceipt>);
 
 /// The [Executor][crate::Executor] is configured from this object.
 ///
@@ -372,7 +373,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// [composition]: https://dev.risczero.com/terminology#composition
     pub fn add_assumption(&mut self, assumption: impl Into<AssumptionReceipt>) -> &mut Self {
-        self.inner.assumptions.borrow_mut().push(assumption.into());
+        self.inner
+            .assumptions
+            .borrow_mut()
+            .0
+            .push(assumption.into());
         self
     }
 

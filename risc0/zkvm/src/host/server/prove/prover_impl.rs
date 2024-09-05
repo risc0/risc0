@@ -30,8 +30,8 @@ use crate::{
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
     sha::Digestible,
-    AssumptionReceipt, CompositeReceipt, InnerAssumptionReceipt, Output, ProverOpts, Receipt,
-    ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, InnerAssumptionReceipt, Output, ProverOpts,
+    Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -101,21 +101,23 @@ impl ProverServer for ProverImpl {
         let mut zkr_receipts = HashMap::new();
         for proof_request in session.pending_zkrs.iter() {
             let receipt = prove_zkr(&proof_request.control_id, &proof_request.input)?;
-            let claim_digest = receipt.claim.digest();
-            zkr_receipts.insert(claim_digest, receipt);
+            let assumption = Assumption {
+                claim: receipt.claim.digest(),
+                control_root: receipt.control_root()?,
+            };
+            zkr_receipts.insert(assumption, receipt);
         }
 
+        // TODO: add test case for when a single session refers to the same assumption multiple times
         let inner_assumption_receipts: Vec<_> = session_assumption_receipts
             .into_iter()
             .map(|assumption_receipt| match assumption_receipt {
                 AssumptionReceipt::Proven(receipt) => Ok(receipt),
                 AssumptionReceipt::Unresolved(assumption) => {
                     let receipt = zkr_receipts
-                        .remove(&assumption.claim)
-                        .ok_or(anyhow::anyhow!(
-                            "no receipt available for unresolved assumption"
-                        ))?;
-                    Ok(InnerAssumptionReceipt::Succinct(receipt))
+                        .get(&assumption)
+                        .ok_or(anyhow!("no receipt available for unresolved assumption"))?;
+                    Ok(InnerAssumptionReceipt::Succinct(receipt.clone()))
                 }
             })
             .collect::<Result<_>>()?;

@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
-use crate::{
-    host::client::env::AssumptionReceipts,
-    sha::{Digest, DIGEST_BYTES},
-    Assumption, AssumptionReceipt,
-};
+use crate::sha::{Digest, DIGEST_BYTES};
 
 use super::{Syscall, SyscallContext};
 
 #[derive(Clone)]
 pub(crate) struct SysVerify;
+
+fn not_found_err(claim_digest: &Digest, control_root: &Digest) -> anyhow::Error {
+    anyhow!("sys_verify_integrity: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}")
+}
 
 impl Syscall for SysVerify {
     fn syscall(
@@ -47,12 +47,12 @@ impl Syscall for SysVerify {
 
         tracing::debug!("SYS_VERIFY_INTEGRITY: ({}, {})", claim_digest, control_root);
 
-        let assumption = self
-            .find_assumption(&ctx.syscall_table().assumptions.borrow(), &claim_digest, &control_root)?
-            .ok_or(anyhow!(
-                "sys_verify_integrity: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}"
-            )
-        )?;
+        let assumption = ctx
+            .syscall_table()
+            .assumptions
+            .borrow()
+            .find_assumption(&claim_digest, &control_root)?
+            .ok_or_else(|| not_found_err(&claim_digest, &control_root))?;
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         ctx.syscall_table()
@@ -60,66 +60,5 @@ impl Syscall for SysVerify {
             .borrow_mut()
             .insert(0, assumption);
         Ok((0, 0))
-    }
-}
-
-impl SysVerify {
-    // Iterate over the list looking for a matching assumption.
-    fn find_assumption(
-        &self,
-        assumptions: &AssumptionReceipts,
-        claim_digest: &Digest,
-        control_root: &Digest,
-    ) -> Result<Option<(Assumption, AssumptionReceipt)>> {
-        for cached_assumption in assumptions.iter() {
-            let cached_claim_digest = cached_assumption
-                .claim_digest()
-                .context("failed to access claim digest on cached assumption")?;
-
-            if cached_claim_digest != *claim_digest {
-                tracing::debug!(
-                    "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} does not match"
-                );
-                continue;
-            }
-
-            // If the control root supplied by the guest is not zero, then they are requesting a
-            // specific set of recursion programs be used to resolve the assumption. Check that the
-            // given receipt can indeed resolve the assumption.
-            // NOTE: We currently only support using Succinct receipts here.
-            if *control_root != Digest::ZERO {
-                let Some(cached_control_root) = (match cached_assumption {
-                    AssumptionReceipt::Proven(receipt) => receipt
-                        .succinct()
-                        .ok()
-                        .map(|r| r.control_root())
-                        .transpose()?,
-                    AssumptionReceipt::Unresolved(unresolved) => Some(unresolved.control_root),
-                }) else {
-                    // Elevate to warning because this really is likely an error.
-                    tracing::warn!(
-                        "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} is not a succinct receipt"
-                    );
-                    continue;
-                };
-                if cached_control_root != *control_root {
-                    // Elevate to warning because this really is likely an error.
-                    tracing::warn!(
-                        "SYS_VERIFY_INTEGRITY: receipt with claim {cached_claim_digest} has control root {cached_control_root}; guest requested {control_root}"
-                    );
-                    continue;
-                }
-            }
-
-            return Ok(Some((
-                Assumption {
-                    claim: *claim_digest,
-                    control_root: *control_root,
-                },
-                cached_assumption.clone(),
-            )));
-        }
-
-        Ok(None)
     }
 }
