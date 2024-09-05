@@ -246,10 +246,8 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 /// Prove the specified program identified by the `control_id` using the specified `input`.
 pub fn prove_zkr(control_id: &Digest, input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
     let zkr = get_registered_zkr(control_id)?;
-    let hashfn = "poseidon2";
-    let suite = hash_suite_from_name(hashfn).unwrap();
-    let opts = ProverOpts::succinct();
-    let mut prover = Prover::new(zkr, *control_id, opts);
+    let opts = ProverOpts::succinct().with_control_ids(vec![*control_id]);
+    let mut prover = Prover::new(zkr, *control_id, opts.clone());
     prover.add_input(bytemuck::cast_slice(input));
 
     tracing::debug!("Running prover");
@@ -267,19 +265,18 @@ pub fn prove_zkr(control_id: &Digest, input: &[u8]) -> Result<SuccinctReceipt<Un
         .map(u32::from),
     ))?;
 
-    let control_id_group = MerkleGroup::new([*control_id].into())?;
-    let control_inclusion_proof = control_id_group.get_proof_by_index(0, &*suite.hashfn);
-    let succinct_receipt = SuccinctReceipt {
+    let hashfn = opts.hash_suite()?.hashfn;
+    let control_inclusion_proof =
+        MerkleGroup::new(opts.control_ids.clone())?.get_proof(control_id, hashfn.as_ref())?;
+
+    Ok(SuccinctReceipt {
         seal: receipt.seal,
-        hashfn: hashfn.to_string(),
+        hashfn: opts.hashfn,
         control_id: *control_id,
         control_inclusion_proof,
         claim: MaybePruned::<Unknown>::Pruned(claim_digest),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
-    };
-
-    tracing::debug!("succinct receipt: {succinct_receipt:?}");
-    Ok(succinct_receipt)
+    })
 }
 
 /// Registers a function to retrieve a recursion program (zkr) based on a control id.

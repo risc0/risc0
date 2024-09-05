@@ -51,6 +51,13 @@ impl Syscall for SysProveZkr {
             input,
         };
 
+        for assumption in ctx.syscall_table().assumptions.borrow().iter() {
+            if assumption.claim_digest()? == claim_digest {
+                // This assumption is already known, no need to create another proof.
+                return Ok((0, 0));
+            }
+        }
+
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
             coprocessor.borrow_mut().prove_zkr(proof_request)?;
         } else {
