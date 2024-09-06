@@ -174,18 +174,19 @@ pub const REDUCE_TEST_128_CONTROL_ID: Digest =
 pub const REDUCE_TEST_128_CONTROL_ROOT: Digest =
     digest!("9ea6c9016ca0036732577e6e4feabf43e418b800a9bb8d6d0ed5e04c47ef2757");
 
-// Perf tests
-pub const REP_EC_AFF_ADD_TEST_256_R5_CONTROL_ID: Digest =
-    digest!("d9803b4d5d64c238de13315770ed3b372332622fedd05a0950fa5b376b368c19");
-pub const REP_EC_AFF_ADD_TEST_256_R5_CONTROL_ROOT: Digest =
-    digest!("9ea6c9016ca0036732577e6e4feabf43e418b800a9bb8d6d0ed5e04c47ef2757");
+// TODO
+// // Perf tests
+// pub const REP_EC_AFF_ADD_TEST_256_R5_CONTROL_ID: Digest =
+//     digest!("d9803b4d5d64c238de13315770ed3b372332622fedd05a0950fa5b376b368c19");
+// pub const REP_EC_AFF_ADD_TEST_256_R5_CONTROL_ROOT: Digest =
+//     digest!("9ea6c9016ca0036732577e6e4feabf43e418b800a9bb8d6d0ed5e04c47ef2757");
 
-pub const REP_EC_AFF_ADD_TEST_256_R10_CONTROL_ID: Digest =
-    digest!("d9803b4d5d64c238de13315770ed3b372332622fedd05a0950fa5b376b368c19");
-pub const REP_EC_AFF_ADD_TEST_256_R10_CONTROL_ROOT: Digest =
-    digest!("9ea6c9016ca0036732577e6e4feabf43e418b800a9bb8d6d0ed5e04c47ef2757");
+// pub const REP_EC_AFF_ADD_TEST_256_R10_CONTROL_ID: Digest =
+//     digest!("d9803b4d5d64c238de13315770ed3b372332622fedd05a0950fa5b376b368c19");
+// pub const REP_EC_AFF_ADD_TEST_256_R10_CONTROL_ROOT: Digest =
+//     digest!("9ea6c9016ca0036732577e6e4feabf43e418b800a9bb8d6d0ed5e04c47ef2757");
 
-pub const REP_EC_AFF_ADD_TEST_256_R256_CONTROL_ID: Digest =
-    digest!("d9803b4d5d64c238de13315770ed3b372332622fedd05a0950fa5b376b368c19");
-pub const REP_EC_AFF_ADD_TEST_256_R256_CONTROL_ROOT: Digest =
-    digest!("9ea6c9016ca0036732577e6e4feabf43e418b800a9bb8d6d0ed5e04c47ef2757");
+// pub const REP_EC_AFF_ADD_TEST_256_R256_CONTROL_ID: Digest =
+//     digest!("d9803b4d5d64c238de13315770ed3b372332622fedd05a0950fa5b376b368c19");
+// pub const REP_EC_AFF_ADD_TEST_256_R256_CONTROL_ROOT: Digest =
+//     digest!("9ea6c9016ca0036732577e6e4feabf43e418b800a9bb8d6d0ed5e04c47ef2757");
