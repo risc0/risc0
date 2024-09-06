@@ -61,5 +61,5 @@ cargo run --release
 [examples-dir]: https://github.com/risc0/risc0/tree/main/examples
 [install]: ./install.md
 [releases]: https://github.com/risc0/risc0/releases
-[waldo-blog]: https://risczero.com/news/waldo
-[zkpoex]: https://risczero.com/news/zkpoex
+[waldo-blog]: https://risczero.com/blog/waldo
+[zkpoex]: https://risczero.com/blog/zkpoex

@@ -142,7 +142,7 @@ You can reference the <a href="https://github.com/risc0/risc0/tree/v0.11.0/examp
 <summary>
 Q: What is the maximum execution length for a program running on the zkVM?
 </summary>
-A: Since we added support for <a href="https://www.risczero.com/news/continuations"> continuations</a>, the execution length can be very large.
+A: Since we added support for <a href="https://www.risczero.com/blog/continuations"> continuations</a>, the execution length can be very large.
 So far, we've made proofs for executions that exceed 4 billion cycles, and there's plenty of room to expand that further.
 </details>
 

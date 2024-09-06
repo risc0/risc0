@@ -79,12 +79,12 @@ _Looking for information about blockchain integration?_ <br/>
 Check out [Bonsai].
 
 _Curious about Zeth?_<br/>
-Read the [article](https://risczero.com/news/zeth-release).
+Read the [article](https://risczero.com/blog/zeth-release).
 
 [`zkVM Quick Start`]: ./quickstart.md
 [alloy]: https://github.com/alloy-rs
 [Bonsai]: ../bonsai/bonsai-overview.md
-[continuations]: https://www.risczero.com/news/continuations
+[continuations]: https://www.risczero.com/blog/continuations
 [ELF binary]: /terminology#elf-binary
 [ethers]: https://github.com/ethers-io/ethers.js
 [executor]: /terminology#executor
@@ -95,9 +95,9 @@ Read the [article](https://risczero.com/news/zeth-release).
 [performance benchmarks]: benchmarks.md
 [proofs about private data]: https://github.com/risc0/risc0/tree/release-0.19/examples/json#json-example
 [prove]: /terminology#validity-proof
-[prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
+[prove correct construction of Ethereum blocks]: https://risczero.com/blog/zeth-release
 [prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess#zk-checkmate
-[prove you can find Waldo]: https://www.risczero.com/news/waldo
+[prove you can find Waldo]: https://www.risczero.com/blog/waldo
 [prover]: /terminology#prover
 [publicly shared outputs]: /terminology#journal
 [receipt]: developer-guide/receipts.md

@@ -504,7 +504,7 @@ below.
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
 [CBOR]: https://cbor.io/
-[continuation segments]: https://www.risczero.com/news/continuations
+[continuation segments]: https://www.risczero.com/blog/continuations
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
 [example-ecdsa]: https://github.com/risc0/risc0/tree/release-0.21/examples/ecdsa

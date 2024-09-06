@@ -20,6 +20,6 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
 [revm]: https://crates.io/crates/revm
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
-[zeth-article]: https://www.risczero.com/news/zeth-release
+[zeth-article]: https://www.risczero.com/blog/zeth-release
 [zeth-repo]: https://github.com/risc0/zeth
 [zkvm-examples]: /api/zkvm/examples

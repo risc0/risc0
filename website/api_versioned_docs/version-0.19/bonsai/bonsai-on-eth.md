@@ -80,9 +80,9 @@ You may also want to check out our [Bonsai Quick Start](quickstart.md) page and/
 [Bonsai Relay SDK]: https://docs.rs/crate/bonsai-ethereum-relay/latest
 [Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
 [described above]: #bonsai-relay
-[Groth16 SNARK]: https://www.risczero.com/news/on-chain-verification
+[Groth16 SNARK]: https://www.risczero.com/blog/on-chain-verification
 [guest program]: /terminology#guest-program
 [receipt]: /terminology#receipt
 [REST]: https://en.wikipedia.org/wiki/REST
-[SNARK proofs]: https://www.risczero.com/news/on-chain-verification
+[SNARK proofs]: https://www.risczero.com/blog/on-chain-verification
 [zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability

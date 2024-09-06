@@ -15,5 +15,5 @@ _With local proof generation, you can generate proofs about your private data, w
 
 [Bonsai]: ./remote-proving.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[open-source]: https://risczero.com/news/open-source
+[open-source]: https://risczero.com/blog/open-source
 [zkVM]: ../zkvm/zkvm-overview.md

@@ -39,10 +39,10 @@ The `RiscZeroGroth16Verifier` contract is a stateless and immutable verifier the
 > The `RiscZeroGroth16Verifier` contract is deployed to Sepolia at [`0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8`][etherscan-0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8].
 > You can choose to use this contract, or deploy your own.
 
-[coprocessor-article]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
+[coprocessor-article]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [etherscan-0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
-[groth16-article]: https://www.risczero.com/news/on-chain-verification
+[groth16-article]: https://www.risczero.com/blog/on-chain-verification
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-0.7/contracts/src/IRiscZeroVerifier.sol
 [RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-0.7/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [term-journal]: /terminology#journal

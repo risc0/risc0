@@ -12,7 +12,7 @@
 [Hello World]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world
 [JSON]: https://github.com/risc0/risc0/tree/release-0.19/examples/json
 [Where's Waldo]: https://github.com/risc0/risc0/tree/release-0.19/examples/waldo
-[Where's Waldo blog]: https://risczero.com/news/waldo
+[Where's Waldo blog]: https://risczero.com/blog/waldo
 [ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess
-[ZK Proof of Exploit]: https://risczero.com/news/zkpoex
+[ZK Proof of Exploit]: https://risczero.com/blog/zkpoex
 [zkEVM]: https://github.com/risc0/risc0/tree/release-0.19/examples/zkevm-demo

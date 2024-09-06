@@ -102,7 +102,7 @@ Read the [article][zeth].
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../bonsai/bonsai-overview.md
 [chess]: https://github.com/risc0/risc0/tree/release-0.20/examples/chess#zk-checkmate
-[continuations]: https://www.risczero.com/news/continuations
+[continuations]: https://www.risczero.com/blog/continuations
 [ELF binary]: /terminology#elf-binary
 [ethers]: https://github.com/ethers-io/ethers.js
 [examples]: ./examples.md
@@ -121,6 +121,6 @@ Read the [article][zeth].
 [segments]: /terminology#segment
 [session]: /terminology#session
 [verify]: /terminology#verify
-[waldo]: https://www.risczero.com/news/waldo
-[zeth]: https://risczero.com/news/zeth-release
+[waldo]: https://www.risczero.com/blog/waldo
+[zeth]: https://risczero.com/blog/zeth-release
 [zkVM]: /terminology#zero-knowledge-virtual-machine-zkvm

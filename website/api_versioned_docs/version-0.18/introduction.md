@@ -78,21 +78,21 @@ You're welcome to join [our Discord community](https://discord.gg/risczero) to d
 
 Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.youtube.com/@risczero), and [sign up for our mailing list](https://fmree464va4.typeform.com/to/X3KJB85v) to get our latest announcements.
 
-[April 2022]: https://www.risczero.com/news/announce
+[April 2022]: https://www.risczero.com/blog/announce
 [Bonsai]: bonsai/bonsai-overview.md
-[continuations]: https://risczero.com/news/continuations
+[continuations]: https://risczero.com/blog/continuations
 [docs.rs]: https://docs.rs/risc0-zkvm/0.18/
 [ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.18/examples/ecdsa
 [JSON]: https://github.com/risc0/risc0/tree/release-0.18/examples/json
 [our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
 [performance]: https://dev.risczero.com/zkvm/benchmarks
 [RISC Zero]: https://risczero.com
-[startup]: https://risczero.com/news/series-a
+[startup]: https://risczero.com/blog/series-a
 [The RISC Zero Proof System]: /proof-system
 [The RISC Zero zkVM]: zkvm/zkvm-overview.md
 [top 1000 Rust crates]: https://reports.risczero.com/crates-validation
-[Where's Waldo]: https://risczero.com/news/waldo
+[Where's Waldo]: https://risczero.com/blog/waldo
 [ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess
 [zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[ZK Proof of Exploit]: https://risczero.com/news/zkpoex
+[ZK Proof of Exploit]: https://risczero.com/blog/zkpoex
 [zkVM]: ./zkvm/

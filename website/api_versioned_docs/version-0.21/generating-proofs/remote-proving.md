@@ -42,12 +42,12 @@ You can log the cycle count and other performance info for your zkVM Guest progr
 [email-devrel]: mailto:devrel@risczero.com
 [external-api-user-quotas]: https://api.bonsai.xyz/swagger-ui/#/user/route_user_quota
 [external-bonsai-apply]: https://bonsai.xyz/apply
-[external-bonsai-pay]: https://www.risczero.com/news/bonsai-pay
+[external-bonsai-pay]: https://www.risczero.com/blog/bonsai-pay
 [external-bonsai-rest-api]: https://api.bonsai.xyz/swagger-ui/
 [external-bonsai-sdk]: https://crates.io/crates/bonsai-sdk
 [external-cargo-risczero]: https://crates.io/crates/cargo-risczero
 [external-foundry-template]: https://github.com/risc0/bonsai-foundry-template/blob/main/README.md
 [external-governance-showcase]: https://github.com/risc0/risc0/tree/release-0.21/bonsai/examples/governance#readme
-[external-zeth]: https://www.risczero.com/news/zeth-release
-[external-zkcoprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
+[external-zeth]: https://www.risczero.com/blog/zeth-release
+[external-zkcoprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [term-cycles]: /terminology#clock-cycles

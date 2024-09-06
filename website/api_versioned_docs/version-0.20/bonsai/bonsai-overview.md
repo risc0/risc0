@@ -57,7 +57,7 @@ We're building technology that allows anyone to generate highly performant zero-
 
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
-[Bonsai Pay]: https://www.risczero.com/news/bonsai-pay
+[Bonsai Pay]: https://www.risczero.com/blog/bonsai-pay
 [Bonsai Quick Start]: quickstart.md
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
@@ -67,4 +67,4 @@ We're building technology that allows anyone to generate highly performant zero-
 [litepaper]: /litepaper
 [receipt]: /terminology#receipt
 [Request access here]: https://bonsai.xyz/apply
-[Zeth]: https://www.risczero.com/news/zeth-release
+[Zeth]: https://www.risczero.com/blog/zeth-release

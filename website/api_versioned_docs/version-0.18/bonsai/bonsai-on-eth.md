@@ -23,5 +23,5 @@ You may also want to check out our [Bonsai Quick Start](quickstart.md) page.
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 [program]: https://github.com/risc0/bonsai-foundry-template/tree/main/methods/guest/src/bin
 [smart contract]: https://github.com/risc0/bonsai-foundry-template/tree/main/contracts
-[verified proofs]: https://risczero.com/news/on-chain-verification
+[verified proofs]: https://risczero.com/blog/on-chain-verification
 [zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability

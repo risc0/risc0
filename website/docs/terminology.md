@@ -266,7 +266,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [composition]: #composition
 [conditional]: #conditional
 [continuations]: #continuations
-[Continuations blog]: https://www.risczero.com/news/continuations
+[Continuations blog]: https://www.risczero.com/blog/continuations
 [Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [control ID]: #control-id
 [ELF binary]: #elf-binary
