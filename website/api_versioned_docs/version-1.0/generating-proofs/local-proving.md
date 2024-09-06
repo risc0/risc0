@@ -80,7 +80,7 @@ This can take a few minutes, but should only happen once.
 
 [Bonsai]: ./remote-proving.md
 [apple-metal]: https://developer.apple.com/metal/
-[datasheet]: https://benchmarks.risczero.com/main/datasheet
+[datasheet]: https://benchmarks.risczero.com/release-1.0/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [open-source]: https://risczero.com/news/open-source
 [segment-limit-docs-latest]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
