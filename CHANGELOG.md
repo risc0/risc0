@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## Next (upcoming release)
+
+## [v1.1.0 (2024-09-09)](https://github.com/risc0/risc0/releases/tag/v1.1.0)
+
 ### 🔥 Performance Improvements
 
 * Improve GPU performance by 28%. For more information checkout our [reports page](https://reports.risczero.com/benchmarks#Linux-nvidia_rtx_3090_ti-succinct). https://github.com/risc0/risc0/pull/2211
