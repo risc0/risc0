@@ -16,9 +16,8 @@ With local proof generation your private data never leaves your machine.
 RISC Zero's proving system for multiple hardware targets.
 
 :::tip
-In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs-latest].
+In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs].
 You can find information about expected memory consumption on our [benchmarks page][datasheet].
-
 :::
 
 :::info
@@ -27,12 +26,15 @@ The Groth16 prover currently _only_ works on x86 architecture, and so Apple Sili
 You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
 :::
 
+:::note
+When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.
+This can take a few minutes, but should only happen once.
+:::
+
 ### CPU
 
 RISC Zero proving will run on nearly any modern CPU (x86 or ARM).
 Proving on CPU is the easiest to setup, and the most portable, but will not result in the highest performance or compute costs.
-
-On platforms other than MacOS, CPU proving unless otherwise configured.
 
 ### NVIDIA GPU
 
@@ -73,15 +75,10 @@ RUSTFLAGS="-C target-cpu=native" cargo run -F cuda -r --example datasheet
 On MacOS, when using a machine with Apple Silicon (such as the M-series Macbooks), RISC Zero will use the integrated [Metal][apple-metal] compute cores.
 No options need to be configured to take advantage of acceraltion through use of Metal.
 
-:::note
-When run for the first time, the Metal kernels may need to be JIT compiled.
-This can take a few minutes, but should only happen once.
-:::
-
 [Bonsai]: ./remote-proving.md
 [apple-metal]: https://developer.apple.com/metal/
-[datasheet]: https://benchmarks.risczero.com/main/datasheet
+[datasheet]: https://benchmarks.risczero.com/release-1.0/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [open-source]: https://risczero.com/news/open-source
-[segment-limit-docs-latest]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
+[segment-limit-docs]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
 [zkVM]: ../zkvm/zkvm-overview.md
