@@ -533,6 +533,27 @@ impl From<Assumption> for AssumptionReceipt {
     }
 }
 
+#[cfg(feature = "prove")]
+impl TryFrom<AssumptionReceipt> for Assumption {
+    type Error = anyhow::Error;
+
+    fn try_from(receipt: AssumptionReceipt) -> Result<Self> {
+        Ok(match receipt {
+            AssumptionReceipt::Proven(ref inner) => {
+                let control_root = match inner {
+                    InnerAssumptionReceipt::Succinct(receipt) => receipt.control_root()?,
+                    _ => Digest::ZERO,
+                };
+                Assumption {
+                    claim: receipt.claim_digest()?,
+                    control_root,
+                }
+            }
+            AssumptionReceipt::Unresolved(assumption) => assumption,
+        })
+    }
+}
+
 impl From<MaybePruned<ReceiptClaim>> for AssumptionReceipt {
     /// Create an unresolved assumption from a [MaybePruned] [ReceiptClaim].
     ///

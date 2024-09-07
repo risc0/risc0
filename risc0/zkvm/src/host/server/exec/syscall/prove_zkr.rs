@@ -45,22 +45,28 @@ impl Syscall for SysProveZkr {
         let input_len = ctx.load_register(REG_A7);
         let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
 
+        let assumption = Assumption {
+            claim: claim_digest,
+            control_root,
+        };
+
+        if ctx
+            .syscall_table()
+            .assumptions
+            .borrow()
+            .0
+            .contains_key(&assumption)
+        {
+            // TODO: add a test for this situation
+            // This assumption is already known, no need to create another proof.
+            return Ok((0, 0));
+        }
+
         let proof_request = ProveZkrRequest {
             claim_digest,
             control_id,
             input,
         };
-
-        // TODO: add a test for this situation
-        let assumption = ctx
-            .syscall_table()
-            .assumptions
-            .borrow()
-            .find_assumption(&claim_digest, &control_root)?;
-        if assumption.is_some() {
-            // This assumption is already known, no need to create another proof.
-            return Ok((0, 0));
-        }
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
             coprocessor.borrow_mut().prove_zkr(proof_request)?;
@@ -72,15 +78,10 @@ impl Syscall for SysProveZkr {
                 .push(proof_request);
         }
 
-        let assumption = Assumption {
-            claim: claim_digest,
-            control_root,
-        };
-        ctx.syscall_table()
-            .assumptions
-            .borrow_mut()
-            .0
-            .push(AssumptionReceipt::Unresolved(assumption));
+        ctx.syscall_table().assumptions.borrow_mut().0.insert(
+            assumption.clone(),
+            AssumptionReceipt::Unresolved(assumption),
+        );
 
         Ok((0, 0))
     }

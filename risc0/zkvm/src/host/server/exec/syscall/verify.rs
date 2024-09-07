@@ -16,15 +16,18 @@ use anyhow::{anyhow, Result};
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
-use crate::sha::{Digest, DIGEST_BYTES};
+use crate::{
+    sha::{Digest, DIGEST_BYTES},
+    Assumption,
+};
 
 use super::{Syscall, SyscallContext};
 
 #[derive(Clone)]
 pub(crate) struct SysVerify;
 
-fn not_found_err(claim_digest: &Digest, control_root: &Digest) -> anyhow::Error {
-    anyhow!("sys_verify_integrity: no receipt found to resolve assumption: claim digest {claim_digest}, control root {control_root}")
+fn not_found_err(assumption: &Assumption) -> anyhow::Error {
+    anyhow!("sys_verify_integrity: no receipt found to resolve assumption: {assumption:?}")
 }
 
 impl Syscall for SysVerify {
@@ -47,18 +50,26 @@ impl Syscall for SysVerify {
 
         tracing::debug!("SYS_VERIFY_INTEGRITY: ({}, {})", claim_digest, control_root);
 
-        let assumption = ctx
+        let assumption = Assumption {
+            claim: claim_digest,
+            control_root,
+        };
+
+        let assumption_receipt = ctx
             .syscall_table()
             .assumptions
             .borrow()
-            .find_assumption(&claim_digest, &control_root)?
-            .ok_or_else(|| not_found_err(&claim_digest, &control_root))?;
+            .0
+            .get(&assumption)
+            .cloned()
+            .ok_or_else(|| not_found_err(&assumption))?;
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         ctx.syscall_table()
             .assumptions_used
             .borrow_mut()
-            .insert(0, assumption);
+            .insert(0, (assumption, assumption_receipt));
+
         Ok((0, 0))
     }
 }
