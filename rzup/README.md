@@ -4,8 +4,6 @@ Install, update, or revert to a specific RISC Zero version.
 
 ## Install
 
-<!-- TODO: Replace this friendly redirect URL once set up -->
-
 ```sh
 curl -L https://risczero.com/install | bash
 ```

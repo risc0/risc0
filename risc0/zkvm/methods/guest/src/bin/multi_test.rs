@@ -40,7 +40,7 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_execute_zkr, sys_exit, sys_fork, sys_log, sys_pipe, sys_read,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr, sys_read,
         sys_read_words, sys_write,
     },
     PAGE_SIZE,
@@ -412,14 +412,20 @@ fn main() {
                 env::log("Done running control");
             }
         }
-        MultiTestSpec::SysExecuteZkr {
+        MultiTestSpec::SysProveZkr {
             control_id,
             input,
             claim_digest,
             control_root,
         } => {
             unsafe {
-                sys_execute_zkr(control_id.as_ref(), input.as_ptr(), input.len());
+                sys_prove_zkr(
+                    claim_digest.as_ref(),
+                    control_id.as_ref(),
+                    control_root.as_ref(),
+                    input.as_ptr(),
+                    input.len(),
+                );
             }
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
