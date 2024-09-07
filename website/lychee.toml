@@ -8,4 +8,6 @@ max_retries = 3
 exclude = [
   # rate limited
   "https://epubs.siam.org/doi/10.1137/0108018",
+  # 403 for link checking only
+  "https://www.theblock.co",
 ]
