@@ -27,7 +27,7 @@ curl -L https://risczero.com/install | bash
 Run `rzup` to install the RISC Zero toolchain and `cargo-risczero`.
 
 ```bash
-rzup
+rzup install
 ```
 
 > Note: To install a specific version instead of using the latest stable
