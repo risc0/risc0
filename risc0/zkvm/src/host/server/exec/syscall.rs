@@ -86,7 +86,7 @@ pub(crate) trait SyscallContext<'a> {
         Ok(region)
     }
 
-    /// Loads a digest from the given address.
+    /// Loads a digest from the address in the specified register.
     fn load_digest_from_register(&mut self, idx: usize) -> Result<Digest> {
         let addr = ByteAddr(self.load_register(idx));
         self.load_region(addr, DIGEST_BYTES as u32)?
@@ -136,10 +136,10 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_LOG, SysLog)
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_PIPE, SysPipe::default())
+            .with_syscall(SYS_PROVE_ZKR, SysProveZkr)
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_READ, SysRead)
             .with_syscall(SYS_VERIFY_INTEGRITY, SysVerify)
-            .with_syscall(SYS_PROVE_ZKR, SysProveZkr)
             .with_syscall(SYS_WRITE, SysWrite);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
@@ -438,7 +438,6 @@ impl Syscall for SysLog {
 }
 
 impl AssumptionReceipts {
-    #[cfg(feature = "prove")]
     pub(crate) fn find_assumption(
         &self,
         claim_digest: &Digest,
