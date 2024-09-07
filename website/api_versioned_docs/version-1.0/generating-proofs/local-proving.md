@@ -15,21 +15,18 @@ With local proof generation your private data never leaves your machine.
 
 RISC Zero's proving system for multiple hardware targets.
 
-:::tip
-In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs].
-You can find information about expected memory consumption on our [benchmarks page][datasheet].
-:::
-
 :::info
 The Groth16 prover currently _only_ works on x86 architecture, and so Apple Silicon is _currently unsupported_ (even via Docker).
 
 You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
 :::
 
-:::note
-When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.
-This can take a few minutes, but should only happen once.
-:::
+
+> TIP: In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs].
+> You can find information about expected memory consumption on our [benchmarks page][datasheet].
+
+> NOTE: When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.
+> This can take a few minutes, but should only happen once.
 
 ### CPU
 
