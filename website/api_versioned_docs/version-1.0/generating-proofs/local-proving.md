@@ -21,7 +21,6 @@ The Groth16 prover currently _only_ works on x86 architecture, and so Apple Sili
 You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
 :::
 
-
 > TIP: In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs].
 > You can find information about expected memory consumption on our [benchmarks page][datasheet].
 
