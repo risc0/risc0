@@ -71,6 +71,8 @@ RUSTFLAGS="-C target-cpu=native" cargo run -F cuda -r --example datasheet
 On MacOS, when using a machine with Apple Silicon (such as the M-series MacBooks), RISC Zero will use the integrated [Metal][apple-metal] compute cores.
 No options need to be configured to take advantage of acceleration through the use of Metal.
 
+[#1520]: https://github.com/risc0/risc0/issues/1520
+[#1749]: https://github.com/risc0/risc0/issues/1749
 [Bonsai]: ./remote-proving.md
 [apple-metal]: https://developer.apple.com/metal/
 [datasheet]: https://benchmarks.risczero.com/main/datasheet
