@@ -18,7 +18,6 @@
 //! [crate::Session] contains one or more [crate::Segment]s, each of which
 //! contains an execution trace of the specified program.
 
-pub(crate) mod compose;
 pub(crate) mod executor;
 pub(crate) mod profiler;
 mod proto;
