@@ -32,8 +32,6 @@ use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
-#[cfg(feature = "prove")]
-use crate::Assumption;
 use crate::{
     host::client::{
         posix_io::PosixIo,
@@ -47,16 +45,6 @@ use crate::{
 #[derive(Default)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
-}
-
-/// Container for assumptions in the executor environment.
-#[derive(Debug, Default)]
-pub(crate) struct AssumptionReceipts {
-    pub(crate) cached: Vec<AssumptionReceipt>,
-    // An ordered list of assumptions accessed during execution, along a receipt if available. Each
-    // time an assumption is used, it is cloned and pushed to the head of the list.
-    #[cfg(feature = "prove")]
-    pub(crate) accessed: Vec<(Assumption, AssumptionReceipt)>,
 }
 
 #[allow(dead_code)]
@@ -74,6 +62,33 @@ impl SegmentPath {
         }
     }
 }
+
+/// A ZKR proof request.
+#[stability::unstable]
+pub struct ProveZkrRequest {
+    /// The digest of the claim that this ZKR program is expected to produce.
+    pub claim_digest: Digest,
+
+    /// The control ID uniquely identifies the ZKR program to be proven.
+    pub control_id: Digest,
+
+    /// The input that the ZKR program should operate on.
+    pub input: Vec<u8>,
+}
+
+/// A trait that supports the ability to be notified of ZKR proof requests
+/// on-demand.
+#[stability::unstable]
+pub trait CoprocessorCallback {
+    /// Request that a proof of a ZKR is produced.
+    fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
+}
+
+pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;
+
+/// Container for assumptions in the executor environment.
+#[derive(Default)]
+pub(crate) struct AssumptionReceipts(pub(crate) Vec<AssumptionReceipt>);
 
 /// The [Executor][crate::Executor] is configured from this object.
 ///
@@ -93,6 +108,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) segment_path: Option<SegmentPath>,
     pub(crate) pprof_out: Option<PathBuf>,
     pub(crate) input_digest: Option<Digest>,
+    pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -360,7 +376,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self.inner
             .assumptions
             .borrow_mut()
-            .cached
+            .0
             .push(assumption.into());
         self
     }
@@ -386,6 +402,13 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Set the input digest.
     pub fn input_digest(&mut self, digest: Digest) -> &mut Self {
         self.inner.input_digest = Some(digest);
+        self
+    }
+
+    /// Add a callback for coprocessor requests.
+    #[stability::unstable]
+    pub fn coprocessor_callback(&mut self, handler: CoprocessorCallbackRef<'a>) -> &mut Self {
+        self.inner.coprocessor = Some(handler);
         self
     }
 }

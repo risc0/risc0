@@ -314,10 +314,10 @@ jobs:
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
       - name: test in dev mode
-        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE --workspace --exclude prover
+        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE --workspace --exclude prover-example
         working-directory: examples
       - name: test prover example
-        run: cargo test --locked -F $FEATURE -p prover
+        run: cargo test --locked -F $FEATURE -p prover-example
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:

@@ -14,8 +14,7 @@
 
 use std::{collections::HashMap, env};
 
-use risc0_build::embed_methods_with_options;
-use risc0_build::{DockerOptions, GuestOptions};
+use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
 
 fn main() {
     tracing_subscriber::fmt()

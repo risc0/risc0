@@ -22,16 +22,16 @@ use risc0_zkp::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
 };
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use test_log::test;
 
 use crate::{
     byte_poly::BytePoly,
     prove,
-    rsa::{/*RSA_256_X1,*/ RSA_256_X2},
+    rsa::RSA_256_X2,
     test_harness::{from_hex, test_witgen, test_zkr, witness_test_data},
     verify,
-    zkr::get_zkr,
+    zkr::{get_zkr, register_zkrs},
     BigIntContext, BIGINT_PO2,
 };
 
@@ -39,11 +39,11 @@ use crate::{
 // bazelisk run //zirgen/Dialect/BigInt/IR/test:test -- --test
 
 fn golden_values() -> Vec<BigUint> {
-    Vec::from([
+    vec![
         from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5"),
         from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677"),
         from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa"),
-    ])
+    ]
 }
 
 fn golden_z() -> BabyBearExtElem {
@@ -219,10 +219,9 @@ fn run_guest_compose(claims: &[impl Borrow<[BigUint; 3]>]) -> Result<()> {
         .write(&claims)?
         .build()?;
 
-    crate::zkr::register_zkrs();
+    register_zkrs();
 
-    // Obtain the default prover.
-    let prover = default_prover();
+    let prover = get_prover_server(&ProverOpts::fast())?;
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove(env, RSA_ELF)?.receipt;
