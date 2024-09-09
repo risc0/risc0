@@ -21,9 +21,9 @@
     "@vercel/speed-insights": "1.0.12",
     "chart.js": "2.9.4",
     "deepmerge": "4.3.1",
-    "framer-motion": "11.5.2",
-    "lucide-react": "0.438.0",
-    "next": "15.0.0-canary.140",
+    "framer-motion": "11.5.4",
+    "lucide-react": "0.439.0",
+    "next": "15.0.0-canary.146",
     "next-themes": "0.3.0",
     "prism-react-renderer": "2.4.0",
     "radash": "12.1.0",
@@ -32,23 +32,21 @@
     "react-dom": "19.0.0-rc-827cbea417-20240606",
     "react-rainbow-ascii": "1.0.3",
     "sharp": "0.33.5",
-    "turbo": "2.0.14",
-    "typescript": "5.5.4",
     "zod": "3.23.8"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@next/bundle-analyzer": "15.0.0-canary.140",
+    "@next/bundle-analyzer": "15.0.0-canary.146",
     "@total-typescript/ts-reset": "0.6.1",
     "@types/chart.js": "2.9.41",
     "@types/jest": "29.5.12",
     "@types/ms": "0.7.34",
-    "@types/node": "22.5.3",
+    "@types/node": "22.5.4",
     "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "turbo": "2.1.1",
-    "typescript": "5.5.4",
+    "typescript": "5.6.2",
     "vitest": "2.0.5"
   },
-  "packageManager": "bun@1.1.26"
+  "packageManager": "bun@1.1.27"
 }
