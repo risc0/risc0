@@ -6,7 +6,7 @@ The [feature flags] include options to toggle between CPU and GPU proving.
 
 ## Local vs. Remote Proving
 
-For most use cases, we recommend remote proving using [Bonsai], our scalable and highly parralel proving service.
+For most use cases, we recommend remote proving using [Bonsai], our scalable and highly parallel proving service.
 
 Proving with **private data** is a key reason to consider using local proof generation, as whoever is generating the proofs can see all private information involved.
 With local proof generation your private data never leaves your machine.
@@ -68,7 +68,7 @@ RUSTFLAGS="-C target-cpu=native" cargo run -F cuda -r --example datasheet
 
 ### Apple Metal
 
-On MacOS, when using a machine with Apple Silicon (such as the M-series Macbooks), RISC Zero will use the integrated [Metal][apple-metal] compute cores.
+On MacOS, when using a machine with Apple Silicon (such as the M-series MacBooks), RISC Zero will use the integrated [Metal][apple-metal] compute cores.
 No options need to be configured to take advantage of acceleration through the use of Metal.
 
 [Bonsai]: ./remote-proving.md

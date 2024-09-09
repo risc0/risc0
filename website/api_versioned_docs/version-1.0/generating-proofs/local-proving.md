@@ -18,7 +18,7 @@ RISC Zero's proving system for multiple hardware targets.
 :::info
 The Groth16 prover currently _only_ works on x86 architecture, and so Apple Silicon is _currently unsupported_ (even via Docker).
 
-You can find out more info in the relevant issues [here](https://github.com/risc0/risc0/issues/1520) and [here](https://github.com/risc0/risc0/issues/1749).
+You can find out more info in the relevant issues [#1520] and [#1749].
 :::
 
 > TIP: In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs].
@@ -68,8 +68,8 @@ RUSTFLAGS="-C target-cpu=native" cargo run -F cuda -r --example datasheet
 
 ### Apple Metal
 
-On MacOS, when using a machine with Apple Silicon (such as the M-series Macbooks), RISC Zero will use the integrated [Metal][apple-metal] compute cores.
-No options need to be configured to take advantage of acceraltion through use of Metal.
+On MacOS, when using a machine with Apple Silicon (such as the M-series MacBooks), RISC Zero will use the integrated [Metal][apple-metal] compute cores.
+No options need to be configured to take advantage of acceleration through the use of Metal.
 
 [Bonsai]: ./remote-proving.md
 [apple-metal]: https://developer.apple.com/metal/
