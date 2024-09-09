@@ -23,7 +23,7 @@ pub(crate) mod succinct;
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
@@ -533,7 +533,6 @@ impl From<Assumption> for AssumptionReceipt {
     }
 }
 
-#[cfg(feature = "prove")]
 impl TryFrom<AssumptionReceipt> for Assumption {
     type Error = anyhow::Error;
 
@@ -545,7 +544,7 @@ impl TryFrom<AssumptionReceipt> for Assumption {
                     _ => Digest::ZERO,
                 };
                 Assumption {
-                    claim: receipt.claim_digest()?,
+                    claim: receipt.claim_digest().map_err(|err| anyhow!("{err}"))?,
                     control_root,
                 }
             }

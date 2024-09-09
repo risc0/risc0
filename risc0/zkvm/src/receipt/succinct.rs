@@ -206,7 +206,6 @@ where
         core::mem::size_of_val(self.seal.as_slice())
     }
 
-    #[cfg(feature = "prove")]
     pub(crate) fn control_root(&self) -> anyhow::Result<Digest> {
         let hash_suite = hash_suite_from_name(&self.hashfn)
             .ok_or_else(|| anyhow::anyhow!("unsupported hash function: {}", self.hashfn))?;
