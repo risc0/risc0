@@ -178,16 +178,19 @@ jobs:
   clippy:
     if: needs.changes.outputs.risc0 == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}"]
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
+            arch: X64
             feature: default
           - os: Linux
+            arch: X64
             feature: cuda
           - os: macOS
+            arch: ARM64
             feature: default
     env:
       FEATURE: ${{ matrix.feature }}
@@ -213,18 +216,21 @@ jobs:
   test:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
+            arch: X64
             feature: default
             device: cpu
           - os: Linux
+            arch: X64
             feature: cuda
             device: nvidia_rtx_a5000
           - os: macOS
+            arch: ARM64
             feature: default
             device: apple_m2_pro
     env:
@@ -278,18 +284,21 @@ jobs:
   examples:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
+            arch: X64
             feature: default
             device: cpu
           - os: Linux
+            arch: X64
             feature: cuda
             device: nvidia_rtx_a5000
           - os: macOS
+            arch: ARM64
             feature: default
             device: apple_m2_pro
     env:
@@ -408,11 +417,15 @@ jobs:
   check-semver:
     if: needs.changes.outputs.check-semver == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
+        include:
+          - os: Linux
+            arch: X64
+          - os: macOS
+            arch: ARM64
     steps:
       - uses: actions/checkout@v4
         with:
@@ -441,11 +454,15 @@ jobs:
   check-template:
     if: needs.changes.outputs.check-template == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}", "${{ matrix.arch }}"]
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
+        include:
+          - os: Linux
+            arch: X64
+          - os: macOS
+            arch: ARM64
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
@@ -494,7 +511,7 @@ jobs:
   crates-validation:
     if: needs.changes.outputs.crates-validation == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu]
+    runs-on: [self-hosted, prod, Linux, X64, cpu]
     env:
       RUST_BACKTRACE: full
       RUST_LOG: info
@@ -536,7 +553,7 @@ jobs:
   browser:
     if: needs.changes.outputs.browser == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu]
+    runs-on: [self-hosted, prod, Linux, X64, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
@@ -563,7 +580,7 @@ jobs:
   docker:
     if: needs.changes.outputs.test == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu, docker]
+    runs-on: [self-hosted, prod, Linux, X64, cpu, docker]
     steps:
       - uses: actions/checkout@v4
         with:

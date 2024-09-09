@@ -21,14 +21,16 @@ env:
 
 jobs:
   release:
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", cpu]
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", cpu]
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: Linux
+            arch: X64
             target: x86_64-unknown-linux-gnu
           - os: macOS
+            arch: ARM64
             target: aarch64-apple-darwin
     env:
       TARGET: ${{ matrix.target }}
