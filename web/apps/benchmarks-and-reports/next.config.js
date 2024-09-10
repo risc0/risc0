@@ -20,6 +20,11 @@ let config = deepmerge(nextConfigBase, {
         destination: "/:version/applications-benchmarks/macOS-apple_m2_pro", // TODO: make sure this is the right default
         permanent: true,
       },
+      {
+        source: "/benchmarks",
+        destination: "/benchmarks/Linux-cpu", // TODO: make sure this is the right default
+        permanent: true,
+      },
     ];
   },
 });

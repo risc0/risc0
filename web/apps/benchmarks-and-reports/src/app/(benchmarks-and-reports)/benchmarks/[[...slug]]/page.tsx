@@ -16,10 +16,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BenchmarksPage({ params }: { params: { slug: string } }) {
+export default function BenchmarksPage() {
   return (
     <div className="container max-w-screen-3xl">
-      <Benchmarks selectedBench={params.slug} />
+      <Benchmarks />
     </div>
   );
 }
