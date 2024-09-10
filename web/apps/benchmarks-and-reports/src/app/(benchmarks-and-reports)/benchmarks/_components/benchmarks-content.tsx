@@ -2,9 +2,9 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { joinWords } from "@risc0/ui/utils/join-words";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment, useEffect, useMemo, useState } from "react";
-import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
+import { Fragment, useEffect, useMemo } from "react";
 import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 import { renderGraph } from "../_utils/render-graph";
 import { BenchmarksList } from "./benchmarks-list";
@@ -50,11 +50,11 @@ export function BenchmarksContent({
           .filter((name) => !HIDDEN_BENCHMARKS.includes(name))
           .map((name) => {
             return (
-              <ProgressBarLink href={`/benchmarks/${name}`} key={name}>
+              <Link href={`/benchmarks/${name}`} key={name}>
                 <TabsTrigger className="capitalize" value={name}>
                   {joinWords(name)}
                 </TabsTrigger>
-              </ProgressBarLink>
+              </Link>
             );
           })}
       </TabsList>

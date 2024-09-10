@@ -2,7 +2,6 @@ import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@risc0/ui/popover";
 import { Separator } from "@risc0/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@risc0/ui/tooltip";
 import { InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { type PropsWithChildren, Suspense } from "react";
