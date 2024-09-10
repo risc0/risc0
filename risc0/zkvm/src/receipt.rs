@@ -23,7 +23,7 @@ pub(crate) mod succinct;
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
@@ -530,26 +530,6 @@ impl From<Assumption> for AssumptionReceipt {
     /// Create an unresolved assumption from an [Assumption].
     fn from(assumption: Assumption) -> Self {
         Self::Unresolved(assumption)
-    }
-}
-
-impl TryFrom<AssumptionReceipt> for Assumption {
-    type Error = anyhow::Error;
-
-    fn try_from(receipt: AssumptionReceipt) -> Result<Self> {
-        Ok(match receipt {
-            AssumptionReceipt::Proven(ref inner) => {
-                let control_root = match inner {
-                    InnerAssumptionReceipt::Succinct(receipt) => receipt.control_root()?,
-                    _ => Digest::ZERO,
-                };
-                Assumption {
-                    claim: receipt.claim_digest().map_err(|err| anyhow!("{err}"))?,
-                    control_root,
-                }
-            }
-            AssumptionReceipt::Unresolved(assumption) => assumption,
-        })
     }
 }
 

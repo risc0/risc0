@@ -83,7 +83,7 @@ impl Prover for BonsaiProver {
 
         // upload receipts
         let mut receipts_ids = vec![];
-        for assumption in env.assumptions.borrow().0.values() {
+        for assumption in env.assumptions.borrow().0.iter() {
             let inner_receipt = get_inner_assumption_receipt(assumption)?;
             let serialized_receipt = bincode::serialize(inner_receipt)?;
             let receipt_id = client.upload_receipt(serialized_receipt)?;

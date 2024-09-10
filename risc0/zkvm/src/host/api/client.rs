@@ -521,7 +521,7 @@ impl Client {
                 .assumptions
                 .borrow()
                 .0
-                .values()
+                .iter()
                 .map(|a| {
                     Ok(match a {
                         AssumptionReceipt::Proven(inner) => pb::api::AssumptionReceipt {

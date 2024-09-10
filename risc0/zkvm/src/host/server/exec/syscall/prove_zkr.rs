@@ -45,19 +45,12 @@ impl Syscall for SysProveZkr {
         let input_len = ctx.load_register(REG_A7);
         let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
 
-        let assumption = Assumption {
-            claim: claim_digest,
-            control_root,
-        };
-
-        if ctx
+        let assumption = ctx
             .syscall_table()
             .assumptions
             .borrow()
-            .0
-            .contains_key(&assumption)
-        {
-            // TODO: add a test for this situation
+            .find_assumption(&claim_digest, &control_root)?;
+        if assumption.is_some() {
             // This assumption is already known, no need to create another proof.
             return Ok((0, 0));
         }
@@ -78,10 +71,15 @@ impl Syscall for SysProveZkr {
                 .push(proof_request);
         }
 
-        ctx.syscall_table().assumptions.borrow_mut().0.insert(
-            assumption.clone(),
-            AssumptionReceipt::Unresolved(assumption),
-        );
+        let assumption = Assumption {
+            claim: claim_digest,
+            control_root,
+        };
+        ctx.syscall_table()
+            .assumptions
+            .borrow_mut()
+            .0
+            .push(AssumptionReceipt::Unresolved(assumption));
 
         Ok((0, 0))
     }
