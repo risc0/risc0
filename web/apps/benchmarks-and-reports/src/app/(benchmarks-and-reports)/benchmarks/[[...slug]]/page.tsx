@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { joinWords } from "@risc0/ui/utils/join-words";
+import upperFirst from "lodash-es/upperFirst";
 import { BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
 import { Benchmarks } from "../_components/benchmarks";
 
@@ -13,19 +14,36 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug: [slug] }));
 }
 
-export const metadata: Metadata = {
-  title: "Benchmarks",
-  description: BENCHMARKS_DESCRIPTION,
-  openGraph: {
-    images: [
-      {
-        url: `https://benchmarks.risczero.com/api/og?title=Benchmarks&description=${encodeURIComponent(
-          BENCHMARKS_DESCRIPTION,
-        )}`,
-      },
-    ],
-  },
-};
+export function generateMetadata({
+  params,
+}: {
+  params: {
+    slug: string;
+  };
+}) {
+  if (!params.slug[0]) {
+    return;
+  }
+
+  const title = joinWords(params.slug[0])
+    .split(" ")
+    .map((word) => upperFirst(word))
+    .join(" ");
+
+  return {
+    title: `${title ? `${title} ` : ""} Benchmarks`,
+    description: BENCHMARKS_DESCRIPTION,
+    openGraph: {
+      images: [
+        {
+          url: `https://reports.risczero.com/api/og?title=Benchmarks&description=${encodeURIComponent(
+            BENCHMARKS_DESCRIPTION,
+          )}`,
+        },
+      ],
+    },
+  };
+}
 
 export default function BenchmarksPage() {
   return (

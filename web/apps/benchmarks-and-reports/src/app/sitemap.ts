@@ -1,6 +1,6 @@
 import { VERSIONS } from "~/versions";
 
-export const baseUrl = "https://benchmarks.risczero.com";
+export const baseUrl = "https://reports.risczero.com";
 
 // @TODO: add individual tabs for app benchmarks?
 export default async function sitemap() {
