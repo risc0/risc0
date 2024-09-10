@@ -1,6 +1,6 @@
 # Mini zkEVM on RISC Zero
 
-_**Check out our [blogpost](https://www.risczero.com/news/continuations) on this example!**_
+_**Check out our [blogpost](https://www.risczero.com/blog/continuations) on this example!**_
 
 A demo of how to run an EVM engine within the Risc Zero zkVM. It uses the [revm](https://crates.io/crates/revm) crate as an EVM interpreter and does a pre-flight pass to capture all the relevant data from an Ethereum JSON-RPC interface.
 

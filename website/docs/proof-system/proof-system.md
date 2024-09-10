@@ -58,7 +58,7 @@ generate proofs on their own hardware using the implementations available at our
 In addition to the links in the sidebar, we recommend the following resources:
 
 - [About the zkVM][about-zkvm]
-- [RISC Zero News][news]
+- [RISC Zero Blog][blog]
 - [Start Building][quickstart]
 - [Study Club]
 
@@ -75,7 +75,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 [Groth16 receipt]: /terminology#groth16-receipt
 [guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
-[news]: https://risczero.com/news
+[blog]: https://risczero.com/blog
 [open-source]: https://risczero.com/blog/open-source
 [proof composition]: /terminology#composition
 [quickstart]: /api/zkvm/quickstart/
