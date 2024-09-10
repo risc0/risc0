@@ -111,7 +111,7 @@ impl CompositeReceipt {
         }
 
         // Verify all assumptions on the receipt are resolved by attached receipts.
-        // Ensure that there is one receipt for every assumption. An explicity check is required
+        // Ensure that there is one receipt for every assumption. An explicit check is required
         // because zip will terminate if either iterator terminates.
         let assumptions = self.assumptions()?;
         if assumptions.len() != self.assumption_receipts.len() {
