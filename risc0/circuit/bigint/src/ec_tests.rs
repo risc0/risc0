@@ -112,15 +112,15 @@ bigint_tests! {
     ec_aff_mul1_test_8(
         ec_aff_mul_test_8,
         [
-            "06",   // inp_x:       6
-            "04",   // inp_y:       4
-            "01",   // scale:       1
-            "00",   // arb_x:       0
-            "0a",   // arb_y:      10
-            "06",   // expected_x:  6
-            "04",   // expected_y:  4
+            "ac",   // inp_x:      172
+            "3c",   // inp_y:       60
+            "01",   // scale:        1
+            "07",   // arb_x:        7
+            "02",   // arb_y:        2
+            "ac",   // expected_x: 172
+            "3c",   // expected_y:  60
         ],
-        ["06", "04", "01", "00", "0a", "06", "04"],  // TODO: Unconvinced these numbers are right
+        ["ac", "3c", "01", "07", "02", "ac", "3c"],  // TODO: Unconvinced these numbers are right
         [
             "01", "03", "c3c3", "1f1f", "00", "0a", "c3c3", "1f1f", "0a", "090000", "01", "43434343",
             "5f5f5f5f", "22", "020000", "08", "43434343", "5f5f5f5f", "050000", "01", "43434343",
