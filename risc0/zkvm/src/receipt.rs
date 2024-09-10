@@ -493,16 +493,6 @@ impl AssumptionReceipt {
             Self::Unresolved(assumption) => Ok(assumption.claim),
         }
     }
-
-    #[cfg(feature = "prove")]
-    pub(crate) fn into_receipt(self) -> Result<InnerAssumptionReceipt> {
-        match self {
-            Self::Proven(receipt) => Ok(receipt),
-            Self::Unresolved(_) => Err(anyhow::anyhow!(
-                "no receipt available for unresolved assumption"
-            )),
-        }
-    }
 }
 
 impl From<Receipt> for AssumptionReceipt {

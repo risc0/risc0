@@ -16,35 +16,38 @@
 
 mod fork;
 mod pipe;
+mod prove_zkr;
+mod verify;
 
 use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{
     fileno,
     syscall::{
         nr::{
-            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_EXECUTE_ZKR, SYS_FORK, SYS_GETENV, SYS_LOG,
-            SYS_PANIC, SYS_PIPE, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_LOG, SYS_PANIC,
+            SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
-        SyscallName,
+        SyscallName, DIGEST_BYTES,
     },
     WORD_SIZE,
 };
 
 use crate::{
-    host::{
-        client::{posix_io::PosixIo, slice_io::SliceIo},
-        server::exec::compose::SysCompose,
+    host::client::{
+        env::{AssumptionReceipts, CoprocessorCallbackRef, ProveZkrRequest},
+        posix_io::PosixIo,
+        slice_io::SliceIo,
     },
-    sha::{Digest, DIGEST_BYTES},
-    ExecutorEnv,
+    Assumption, AssumptionReceipt, ExecutorEnv,
 };
 
-use self::{fork::SysFork, pipe::SysPipe};
+use self::{fork::SysFork, pipe::SysPipe, prove_zkr::SysProveZkr, verify::SysVerify};
 
 /// A host-side implementation of a system call.
 pub(crate) trait Syscall {
@@ -83,6 +86,14 @@ pub(crate) trait SyscallContext<'a> {
         Ok(region)
     }
 
+    /// Loads a digest from the address in the specified register.
+    fn load_digest_from_register(&mut self, idx: usize) -> Result<Digest> {
+        let addr = ByteAddr(self.load_register(idx));
+        self.load_region(addr, DIGEST_BYTES as u32)?
+            .try_into()
+            .map_err(|vec| anyhow!("invalid digest: {vec:?}"))
+    }
+
     /// Load a page from memory at the specified page index.
     fn load_page(&mut self, page_idx: u32) -> Result<Vec<u8>>;
 
@@ -90,24 +101,32 @@ pub(crate) trait SyscallContext<'a> {
     fn syscall_table(&self) -> &SyscallTable<'a>;
 }
 
+pub(crate) type AssumptionUsage = Vec<(Assumption, AssumptionReceipt)>;
+
 #[derive(Clone)]
 pub(crate) struct SyscallTable<'a> {
     pub(crate) inner: HashMap<String, Rc<RefCell<dyn Syscall + 'a>>>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
+    pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
+    pub(crate) assumptions_used: Rc<RefCell<AssumptionUsage>>,
+    pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
+    pub(crate) pending_zkrs: Rc<RefCell<Vec<ProveZkrRequest>>>,
 }
 
 impl<'a> SyscallTable<'a> {
-    pub fn new(posix_io: Rc<RefCell<PosixIo<'a>>>) -> Self {
+    pub fn new(env: &ExecutorEnv<'a>) -> Self {
         Self {
-            inner: HashMap::new(),
-            posix_io,
+            inner: Default::default(),
+            posix_io: env.posix_io.clone(),
+            assumptions: env.assumptions.clone(),
+            assumptions_used: Default::default(),
+            coprocessor: env.coprocessor.clone(),
+            pending_zkrs: Default::default(),
         }
     }
 
     pub fn from_env(env: &ExecutorEnv<'a>) -> Self {
-        let mut this = Self::new(env.posix_io.clone());
-
-        let sys_compose = SysCompose::new(env.assumptions.clone());
+        let mut this = Self::new(env);
 
         this.with_syscall(SYS_ARGC, Args(env.args.clone()))
             .with_syscall(SYS_ARGV, Args(env.args.clone()))
@@ -117,10 +136,10 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_LOG, SysLog)
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_PIPE, SysPipe::default())
+            .with_syscall(SYS_PROVE_ZKR, SysProveZkr)
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_READ, SysRead)
-            .with_syscall(SYS_VERIFY_INTEGRITY, sys_compose.clone())
-            .with_syscall(SYS_EXECUTE_ZKR, sys_compose.clone())
+            .with_syscall(SYS_VERIFY_INTEGRITY, SysVerify)
             .with_syscall(SYS_WRITE, SysWrite);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
@@ -418,75 +437,61 @@ impl Syscall for SysLog {
     }
 }
 
-impl Syscall for SysCompose {
-    fn syscall(
-        &mut self,
-        syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        if syscall == SYS_VERIFY_INTEGRITY.as_str() {
-            let from_guest_ptr = ByteAddr(ctx.load_register(REG_A3));
-            let from_guest_len = ctx.load_register(REG_A4);
-            let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
-            self.sys_verify_integrity(from_guest)
-        } else if syscall == SYS_EXECUTE_ZKR.as_str() {
-            let control_id_ptr = ByteAddr(ctx.load_register(REG_A3));
-            let control_id: Digest = ctx
-                .load_region(control_id_ptr, DIGEST_BYTES as u32)?
-                .try_into()
-                .map_err(|vec| anyhow!("failed to convert to Digest: {vec:?}"))?;
-            let input_ptr = ByteAddr(ctx.load_register(REG_A4));
-            let input_len = ctx.load_register(REG_A5);
-            let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
+impl AssumptionReceipts {
+    pub(crate) fn find_assumption(
+        &self,
+        claim_digest: &Digest,
+        control_root: &Digest,
+    ) -> Result<Option<(Assumption, AssumptionReceipt)>> {
+        use anyhow::Context;
 
-            self.sys_execute_zkr(&control_id, bytemuck::cast_slice(input.as_slice()))
-        } else {
-            bail!("SysCompose received unrecognized syscall: {syscall}")
+        for assumption_receipt in self.0.iter() {
+            let cached_claim_digest = assumption_receipt
+                .claim_digest()
+                .context("failed to access claim digest on cached assumption")?;
+
+            if cached_claim_digest != *claim_digest {
+                tracing::debug!("receipt with claim {cached_claim_digest} does not match");
+                continue;
+            }
+
+            // If the control root supplied by the guest is not zero, then they are requesting a
+            // specific set of recursion programs be used to resolve the assumption. Check that the
+            // given receipt can indeed resolve the assumption.
+            // NOTE: We currently only support using Succinct receipts here.
+            if *control_root != Digest::ZERO {
+                let Some(cached_control_root) = (match assumption_receipt {
+                    AssumptionReceipt::Proven(receipt) => receipt
+                        .succinct()
+                        .ok()
+                        .map(|r| r.control_root())
+                        .transpose()?,
+                    AssumptionReceipt::Unresolved(unresolved) => Some(unresolved.control_root),
+                }) else {
+                    // Elevate to warning because this really is likely an error.
+                    tracing::warn!(
+                        "receipt with claim {cached_claim_digest} is not a succinct receipt"
+                    );
+                    continue;
+                };
+                if cached_control_root != *control_root {
+                    // Elevate to warning because this really is likely an error.
+                    tracing::warn!(
+                        "receipt with claim {cached_claim_digest} has control root {cached_control_root}; guest requested {control_root}"
+                    );
+                    continue;
+                }
+            }
+
+            return Ok(Some((
+                Assumption {
+                    claim: *claim_digest,
+                    control_root: *control_root,
+                },
+                assumption_receipt.clone(),
+            )));
         }
+
+        Ok(None)
     }
 }
-
-// SysCycleCount:
-//     ctx.get_cycle()
-
-// SysGetenv:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-
-// SysPanic:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-
-// SysRandom:
-//     write to_guest
-
-// SysVerify:
-//     let from_guest_ptr = ctx.load_register(REG_A3);
-//     let from_guest_len = ctx.load_register(REG_A4);
-//     let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
-
-// SysArgs:
-//     let arg_index = ctx.load_register(REG_A3);
-
-// SysSliceIo:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-
-// PosixIo/sys_read:
-//     let fd = ctx.load_register(REG_A3);
-//     let nbytes = ctx.load_register(REG_A4) as usize;
-
-// PosixIo/sys_write:
-//     let fd = ctx.load_register(REG_A3);
-//     let buf_ptr = ctx.load_register(REG_A4);
-//     let buf_len = ctx.load_register(REG_A5);
-//     let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
-
-// PosixIo/sys_log:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;

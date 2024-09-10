@@ -45,7 +45,7 @@ pub fn prove<S: Sha256>(
     prover.add_input(prog.control_root.as_words());
 
     let hash_suite = Poseidon2HashSuite::new_suite();
-    let mut rng = (*hash_suite.rng).new_rng();
+    let mut rng = hash_suite.rng.new_rng();
 
     for claim in pad_claim_list(prog, claims)? {
         debug!("claim: {claim:?}");

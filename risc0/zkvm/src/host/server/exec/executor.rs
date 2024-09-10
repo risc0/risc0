@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, io::Write, mem, rc::Rc, sync::Arc, time::Instant};
+use std::{cell::RefCell, io::Write, rc::Rc, sync::Arc, time::Instant};
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{MemoryImage, Program};
@@ -158,10 +158,9 @@ impl<'a> ExecutorImpl<'a> {
                             Ok(Output {
                                 journal: journal.into(),
                                 assumptions: Assumptions(
-                                    self.env
-                                        .assumptions
+                                    self.syscall_table
+                                        .assumptions_used
                                         .borrow()
-                                        .accessed
                                         .iter()
                                         .map(|(a, _)| a.clone().into())
                                         .collect::<Vec<_>>(),
@@ -198,7 +197,8 @@ impl<'a> ExecutorImpl<'a> {
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+        let assumptions = self.syscall_table.assumptions_used.take();
+        let pending_zkrs = self.syscall_table.pending_zkrs.take();
 
         if let Some(profiler) = self.profiler.take() {
             let report = profiler.borrow_mut().finalize_to_vec();
@@ -218,6 +218,7 @@ impl<'a> ExecutorImpl<'a> {
             result.total_cycles,
             result.pre_state,
             result.post_state,
+            pending_zkrs,
         );
 
         tracing::info!("execution time: {elapsed:?}");

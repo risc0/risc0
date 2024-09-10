@@ -41,8 +41,7 @@ jobs:
               - risc0/**
 
   bench:
-    runs-on:
-      labels: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     if: needs.changes.outputs.trigger-bench == 'true'
     needs: changes
     strategy:
@@ -50,12 +49,15 @@ jobs:
       matrix:
         include:
           - os: Linux
+            arch: X64
             feature: prove
             device: cpu
           - os: Linux
+            arch: X64
             feature: cuda
             device: nvidia_rtx_3090_ti
           - os: macOS
+            arch: ARM64
             feature: prove
             device: apple_m2_pro
 
