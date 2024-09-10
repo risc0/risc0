@@ -1,14 +1,11 @@
 import { VERSIONS } from "~/versions";
 import { APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES } from "./(benchmarks-and-reports)/[version]/applications-benchmarks/[slug]/_utils/constants";
+import { fetchBenchmarks } from "./(benchmarks-and-reports)/benchmarks/_actions/fetch-benchmarks";
 
 export const baseUrl = "https://reports.risczero.com";
 
 export default async function sitemap() {
-  const response = await fetch("https://risc0.github.io/ghpages/dev/bench/data.js", {
-    cache: "no-store",
-  });
-  const text = await response.text();
-  const data = JSON.parse(text.replace("window.BENCHMARK_DATA = ", "").trim());
+  const data = await fetchBenchmarks();
   const benchmarksSlugs = Object.keys(data.entries);
 
   return [

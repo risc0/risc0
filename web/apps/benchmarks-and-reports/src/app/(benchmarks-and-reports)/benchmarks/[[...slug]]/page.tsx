@@ -1,14 +1,11 @@
 import { joinWords } from "@risc0/ui/utils/join-words";
 import upperFirst from "lodash-es/upperFirst";
 import { BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
+import { fetchBenchmarks } from "../_actions/fetch-benchmarks";
 import { Benchmarks } from "../_components/benchmarks";
 
 export async function generateStaticParams() {
-  const response = await fetch("https://risc0.github.io/ghpages/dev/bench/data.js", {
-    cache: "no-store",
-  });
-  const text = await response.text();
-  const data = JSON.parse(text.replace("window.BENCHMARK_DATA = ", "").trim());
+  const data = await fetchBenchmarks();
   const slugs = Object.keys(data.entries);
 
   return slugs.map((slug) => ({ slug: [slug] }));

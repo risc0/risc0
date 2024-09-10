@@ -8,6 +8,7 @@ import { latestVersion } from "./src/versions.js";
 /** @type {import("next").NextConfig} */
 let config = deepmerge(nextConfigBase, {
   async redirects() {
+    // @TODO: use the action instead, this can be achieved in https://github.com/risc0/risc0/pull/1940 gets merged in with typescript support for next config
     const response = await fetch("https://risc0.github.io/ghpages/dev/bench/data.js", {
       cache: "no-store",
     });
