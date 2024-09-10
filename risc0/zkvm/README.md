@@ -37,7 +37,7 @@ default features by setting `default-features = false`.
 | client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
 | cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 | disable-dev-mode | all except rv32im |            | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
-| metal            | macos             | prove, std | Deprecated - Metal GPU acceleration for the prover is now enabled by default for arm64 macos.                                                                |
+| metal            | macos             | prove, std | Deprecated - Metal GPU acceleration for the prover is now enabled by default on Apple Silicon.                                                               |
 | prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 | std              | all               |            | Support for the Rust stdlib.                                                                                                                                 |
 
