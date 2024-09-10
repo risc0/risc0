@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { BENCHMARKS_DESCRIPTION } from "../_utils/constants";
-import { Benchmarks } from "./_components/benchmarks";
+import { BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
+import { Benchmarks } from "../_components/benchmarks";
 
 export const metadata: Metadata = {
   title: "Benchmarks",
@@ -16,10 +16,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BenchmarksPage() {
+export default function BenchmarksPage({ params }: { params: { slug: string } }) {
   return (
     <div className="container max-w-screen-3xl">
-      <Benchmarks />
+      <Benchmarks selectedBench={params.slug} />
     </div>
   );
 }

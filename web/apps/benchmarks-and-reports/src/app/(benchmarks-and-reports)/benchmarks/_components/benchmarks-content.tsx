@@ -2,7 +2,9 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { joinWords } from "@risc0/ui/utils/join-words";
-import { type Dispatch, Fragment, type SetStateAction } from "react";
+import { usePathname } from "next/navigation";
+import { Fragment } from "react";
+import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
 import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 import { renderGraph } from "../_utils/render-graph";
 import { BenchmarksList } from "./benchmarks-list";
@@ -12,43 +14,38 @@ const HIDDEN_BENCHMARKS: string[] = [];
 
 export function BenchmarksContent({
   names,
-  setSelectedPlatform,
-  selectedPlatform,
   benchSet,
 }: {
   names?: string[];
-  setSelectedPlatform: Dispatch<SetStateAction<string | undefined>>;
-  selectedPlatform?: string;
   benchSet?: {
     name: string;
     dataSet: Map<string, FormattedDataSetEntry[]>;
   }[];
 }) {
+  const pathname = usePathname();
+  const selectedBench = pathname.split("/").pop() ?? "";
+
   if (!names) {
     return null;
   }
 
   return (
-    <Tabs
-      onValueChange={(value) => {
-        setSelectedPlatform(value);
-      }}
-      defaultValue={names[0]}
-      className="mt-6"
-    >
+    <Tabs className="mt-6" value={selectedBench}>
       <TabsList>
         {names
           .filter((name) => !HIDDEN_BENCHMARKS.includes(name))
           .map((name) => (
-            <TabsTrigger className="capitalize" key={name} value={name}>
-              {joinWords(name)}
-            </TabsTrigger>
+            <ProgressBarLink href={`/benchmarks/${name}`} key={name}>
+              <TabsTrigger className="capitalize" value={name}>
+                {joinWords(name)}
+              </TabsTrigger>
+            </ProgressBarLink>
           ))}
       </TabsList>
 
       <div className="mt-4 flex flex-row gap-8">
         <div className="sticky top-6 hidden min-w-[240px] self-start lg:block">
-          {benchSet && selectedPlatform && <BenchmarksList charts={benchSet} selectedPlatform={selectedPlatform} />}
+          {benchSet && <BenchmarksList charts={benchSet} />}
         </div>
 
         <div className="w-full lg:w-[calc(100%-240px-32px)]">
