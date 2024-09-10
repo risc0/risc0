@@ -77,6 +77,6 @@ No options need to be configured to take advantage of acceleration through the u
 [apple-metal]: https://developer.apple.com/metal/
 [datasheet]: https://benchmarks.risczero.com/release-1.1/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[open-source]: https://risczero.com/news/open-source
+[open-source]: https://risczero.com/blog/open-source
 [segment-limit-docs]: https://docs.rs/risc0-zkvm/1.1/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
 [zkVM]: ../zkvm/zkvm-overview.md
