@@ -355,7 +355,7 @@ fn test_recursion_lift_resolve_e2e() {
 #[test]
 fn test_recursion_circuit() {
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-    super::test_recursion_circuit(&digest, &digest, RECURSION_PO2).unwrap();
+    super::test_zkr(&digest, &digest, RECURSION_PO2).unwrap();
 }
 
 #[test]
@@ -370,7 +370,7 @@ fn test_po2_16() {
     let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
     let control_root = control_tree.calc_root(suite.hashfn.as_ref());
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-    let receipt = super::test_recursion_circuit(&control_root, &digest, po2).unwrap();
+    let receipt = super::test_zkr(&control_root, &digest, po2).unwrap();
     let ctx = VerifierContext::empty()
         .with_suites(VerifierContext::default_hash_suites())
         .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {

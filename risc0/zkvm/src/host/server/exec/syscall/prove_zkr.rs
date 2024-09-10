@@ -45,13 +45,6 @@ impl Syscall for SysProveZkr {
         let input_len = ctx.load_register(REG_A7);
         let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
 
-        let proof_request = ProveZkrRequest {
-            claim_digest,
-            control_id,
-            input,
-        };
-
-        // TODO: add a test for this situation
         let assumption = ctx
             .syscall_table()
             .assumptions
@@ -61,6 +54,12 @@ impl Syscall for SysProveZkr {
             // This assumption is already known, no need to create another proof.
             return Ok((0, 0));
         }
+
+        let proof_request = ProveZkrRequest {
+            claim_digest,
+            control_id,
+            input,
+        };
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
             coprocessor.borrow_mut().prove_zkr(proof_request)?;

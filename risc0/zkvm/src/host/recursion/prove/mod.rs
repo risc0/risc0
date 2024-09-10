@@ -302,7 +302,7 @@ pub fn get_registered_zkr(control_id: &Digest) -> Result<Program> {
 /// digest1 will be passed through to the first of the output globals, as the "inner control root".
 /// digest1 and digest2 will be used to calculate a "claim digest", placed in the second output.
 #[cfg(test)]
-pub fn test_recursion_circuit(
+pub fn test_zkr(
     digest1: &Digest,
     digest2: &Digest,
     po2: usize,
