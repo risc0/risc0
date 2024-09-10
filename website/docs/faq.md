@@ -121,7 +121,7 @@ As a consequence, _functionally equivalent_ binaries, from the zkVM perspective,
 <summary>
 Q: Are performance benchmarks available?
 </summary>
-A: Yes. We have a <a href="https://benchmarks.risczero.com/">benchmarks website</a>, and you can also generate your own benchmarks. More details are available on the <a href="https://dev.risczero.com/zkvm/benchmarks">benchmarks page</a>.
+A: Yes. We have a <a href="https://reports.risczero.com/">benchmarks website</a>, and you can also generate your own benchmarks. More details are available on the <a href="https://dev.risczero.com/zkvm/benchmarks">benchmarks page</a>.
 </details>
 
 <a class="anchor" id="language-support"></a>

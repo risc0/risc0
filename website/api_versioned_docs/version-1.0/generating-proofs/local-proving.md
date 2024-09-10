@@ -75,7 +75,7 @@ No options need to be configured to take advantage of acceleration through the u
 [#1749]: https://github.com/risc0/risc0/issues/1749
 [Bonsai]: ./remote-proving.md
 [apple-metal]: https://developer.apple.com/metal/
-[datasheet]: https://benchmarks.risczero.com/release-1.0/datasheet
+[datasheet]: https://reports.risczero.com/release-1.0/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [open-source]: https://risczero.com/news/open-source
 [segment-limit-docs]: https://docs.rs/risc0-zkvm/1.0/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.segment_limit_po2
