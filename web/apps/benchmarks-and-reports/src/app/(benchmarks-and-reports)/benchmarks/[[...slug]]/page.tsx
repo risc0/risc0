@@ -31,7 +31,7 @@ export function generateMetadata({
     .join(" ");
 
   return {
-    title: `${title ? `${title} ` : ""} Benchmarks`,
+    title: `${title ? `${title} ` : ""}Benchmarks`,
     description: BENCHMARKS_DESCRIPTION,
     openGraph: {
       images: [
