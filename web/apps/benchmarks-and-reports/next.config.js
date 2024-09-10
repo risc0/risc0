@@ -7,8 +7,14 @@ import { latestVersion } from "./src/versions.js";
 
 /** @type {import("next").NextConfig} */
 let config = deepmerge(nextConfigBase, {
-  // biome-ignore lint/suspicious/useAwait: needs to be async
   async redirects() {
+    const response = await fetch("https://risc0.github.io/ghpages/dev/bench/data.js", {
+      cache: "no-store",
+    });
+    const text = await response.text();
+    const data = JSON.parse(text.replace("window.BENCHMARK_DATA = ", "").trim());
+    const benchmarksSlugs = Object.keys(data.entries);
+
     return [
       {
         source: "/",
@@ -22,7 +28,7 @@ let config = deepmerge(nextConfigBase, {
       },
       {
         source: "/benchmarks",
-        destination: "/benchmarks/Linux-cpu", // TODO: make sure this is the right default
+        destination: `/benchmarks/${benchmarksSlugs[0]}`,
         permanent: true,
       },
     ];
