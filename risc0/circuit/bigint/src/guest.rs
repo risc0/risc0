@@ -33,7 +33,7 @@ pub fn prove(prog: &BigIntProgram, claims: &[BigIntClaim]) -> Result<()> {
         input.extend(prog.control_root.as_words());
 
         let hash_suite = Poseidon2HashSuite::new_suite();
-        let mut rng = (&*hash_suite.rng).new_rng();
+        let mut rng = hash_suite.rng.new_rng();
 
         for claim in pad_claim_list(prog, claims).unwrap() {
             let mut ctx = BigIntContext::default();
@@ -88,7 +88,13 @@ pub fn prove(prog: &BigIntProgram, claims: &[BigIntClaim]) -> Result<()> {
             input.extend(all_coeffs);
         }
         unsafe {
-            syscall::sys_execute_zkr(prog.control_id.as_ref(), input.as_ptr(), input.len());
+            syscall::sys_prove_zkr(
+                claim_digest.as_ref(),
+                prog.control_id.as_ref(),
+                prog.control_root.as_ref(),
+                input.as_ptr(),
+                input.len(),
+            );
         }
     });
 

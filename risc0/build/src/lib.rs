@@ -38,11 +38,15 @@ use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-use crate::config::GuestBuildOptions;
-use crate::docker::build_guest_package_docker;
-use config::GuestMetadata;
-pub use config::{DockerOptions, GuestOptions};
-pub use docker::{docker_build, BuildStatus, TARGET_DIR};
+use self::{
+    config::{GuestBuildOptions, GuestMetadata},
+    docker::build_guest_package_docker,
+};
+
+pub use self::{
+    config::{DockerOptions, GuestOptions},
+    docker::{docker_build, BuildStatus, TARGET_DIR},
+};
 
 /// This const represents a filename that is used in the use to indicate to in
 /// order to indicate to the client and the risc0-build crate that the new rust
@@ -493,7 +497,7 @@ pub fn build_rust_runtime() -> String {
 
 /// Builds a static library and returns the name of the resultant file.
 fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
-    let guest_dir = get_guest_dir();
+    let guest_dir = get_guest_dir("static-lib", guest_pkg);
 
     let mut cmd = cargo_command("rustc", &[]);
 
@@ -662,8 +666,7 @@ fn detect_toolchain(name: &str) {
     }
 }
 
-fn get_guest_dir() -> PathBuf {
-    // Determine the output directory, in the target folder, for the guest binary.
+fn get_out_dir() -> PathBuf {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     out_dir
@@ -676,6 +679,10 @@ fn get_guest_dir() -> PathBuf {
         .parent() // $profile
         .unwrap()
         .join("riscv-guest")
+}
+
+fn get_guest_dir<H: AsRef<Path>, G: AsRef<Path>>(host_pkg: H, guest_pkg: G) -> PathBuf {
+    get_out_dir().join(host_pkg).join(guest_pkg)
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
@@ -709,7 +716,7 @@ fn do_embed_methods<G: GuestBuilder>(
 ) -> Vec<G> {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-    let guest_dir = get_guest_dir();
+
     // Read the cargo metadata for info from `[package.metadata.risc0]`.
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
@@ -752,8 +759,9 @@ fn do_embed_methods<G: GuestBuilder>(
                 &guest_build_opts,
             )
             .unwrap();
-            guest_methods_docker(&guest_pkg, &guest_dir)
+            guest_methods_docker(&guest_pkg, &get_out_dir())
         } else {
+            let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
             build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
             guest_methods(&guest_pkg, &guest_dir, &guest_build_opts.features)
         };

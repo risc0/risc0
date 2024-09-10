@@ -132,17 +132,18 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_EXECUTE_ZKR);
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
+    declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
-    declare_syscall!(pub SYS_EXECUTE_ZKR);
 }
 
 impl SyscallName {
@@ -864,17 +865,22 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 /// `input` must be aligned and have `input_len` u32s dereferenceable
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_execute_zkr(
+#[stability::unstable]
+pub unsafe extern "C" fn sys_prove_zkr(
+    claim_digest: *const [u32; DIGEST_WORDS],
     control_id: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
     input: *const u32,
     input_len: usize,
 ) {
     let Return(a0, _) = unsafe {
-        syscall_3(
-            nr::SYS_EXECUTE_ZKR,
+        syscall_5(
+            nr::SYS_PROVE_ZKR,
             null_mut(),
             0,
+            claim_digest as u32,
             control_id as u32,
+            control_root as u32,
             input as u32,
             input_len as u32,
         )
@@ -884,7 +890,7 @@ pub unsafe extern "C" fn sys_execute_zkr(
     // Currently, this should always be the case. This check is
     // included for forwards-compatibility.
     if a0 != 0 {
-        const MSG: &[u8] = "sys_execute_zkr returned error result".as_bytes();
+        const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 }

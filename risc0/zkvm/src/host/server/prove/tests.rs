@@ -829,8 +829,8 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_integrity_halt_1() {
-        // Generate a receipt for a execution ending in a guest error indicated by
-        // ExitCode::Halted(1).
+        // Generate a receipt for an execution ending in a guest error indicated
+        // by ExitCode::Halted(1).
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
@@ -910,7 +910,7 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_execute_zkr() {
+    fn sys_prove_zkr() {
         // Random Poseidon2 "digest" to act as the "control root".
         let suite = Poseidon2HashSuite::new_suite();
         let (program, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
@@ -927,7 +927,7 @@ mod sys_verify {
         input.extend(control_root.as_words());
         input.extend(inner_claim_digest.as_words());
 
-        let spec = &MultiTestSpec::SysExecuteZkr {
+        let spec = &MultiTestSpec::SysProveZkr {
             control_id,
             input,
             claim_digest,
@@ -951,11 +951,11 @@ mod sys_verify {
     }
 }
 
-const RUN_UNCONSTRAINED_PO2: u32 = 17;
-const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
-
 #[test]
 fn run_unconstrained() -> Result<()> {
+    const RUN_UNCONSTRAINED_PO2: u32 = 17;
+    const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
+
     for unconstrained in [false, true] {
         let spec = MultiTestSpec::RunUnconstrained {
             unconstrained,

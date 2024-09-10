@@ -30,6 +30,9 @@ pub use risc0_zkvm_platform::WORD_SIZE;
 /// The number of words in the representation of a [Digest].
 pub const DIGEST_WORDS: usize = 8;
 
+/// The number of shorts in the representation of a [Digest].
+pub const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
+
 /// Size of the [Digest] representation in bytes.
 ///
 /// Note that digests are stored in memory as words instead of bytes.

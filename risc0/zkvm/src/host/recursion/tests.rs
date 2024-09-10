@@ -18,7 +18,7 @@ use risc0_binfmt::tagged_struct;
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::digest::{digest, Digest, DIGEST_WORDS},
+    core::digest::{digest, Digest, DIGEST_SHORTS},
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -59,7 +59,6 @@ fn test_recursion_poseidon254() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
@@ -96,7 +95,6 @@ fn test_recursion_poseidon2() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);

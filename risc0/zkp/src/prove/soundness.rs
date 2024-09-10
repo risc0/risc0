@@ -22,7 +22,7 @@
 //! 3. Proven soundness in the list-decoding regime
 //! 4. Proven soundness in the unique-decoding regime
 //!
-//! With default parameters, RISC Zero's zkVM targets 99 bits of conjectured soundness,
+//! RISC Zero's on-chain verifier contracts target 97 bits of conjectured soundness,
 //! using the Toy Problem Conjecture.
 //!
 //! This target assumes a SEGMENT_SIZE of 2^20 cycles.
