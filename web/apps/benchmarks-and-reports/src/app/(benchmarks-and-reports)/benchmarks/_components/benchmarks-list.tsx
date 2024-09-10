@@ -1,7 +1,6 @@
 "use client";
 
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@risc0/ui/command";
-import { joinWords } from "@risc0/ui/utils/join-words";
+import { Command, CommandGroup, CommandItem, CommandList } from "@risc0/ui/command";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
@@ -16,9 +15,7 @@ export function BenchmarksList({
 
   return (
     <Command className="border">
-      <CommandInput className="capitalize" placeholder={`${joinWords(selectedBench)} Benchmarks`} />
       <CommandList className="max-h-[calc(100dvh-19.5rem)] overscroll-contain">
-        <CommandEmpty>No Results</CommandEmpty>
         {charts.flatMap((chart) =>
           chart.name === selectedBench
             ? [
