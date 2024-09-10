@@ -15,7 +15,7 @@ stability = "0.2"
 [target.'cfg(target_os = "zkvm")'.dependencies]
 bytemuck = { version = "1.13", optional = true }
 critical-section = { version = "1.1.2", optional = true }
-embedded-alloc = { version = "0.5.1", features = [
+embedded-alloc = { version = "0.6.0", features = [
   "allocator_api",
 ], optional = true }
 getrandom = { version = "0.2", features = ["custom"], optional = true }
