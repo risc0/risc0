@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { usePathname } from "next/navigation";
-import { Fragment } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { ProgressBarLink } from "shared/client/providers/progress-bar-provider";
 import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 import { renderGraph } from "../_utils/render-graph";
@@ -24,6 +24,20 @@ export function BenchmarksContent({
 }) {
   const pathname = usePathname();
   const selectedBench = pathname.split("/").pop() ?? "";
+  const getCurrentHash = useMemo(
+    () => () => (typeof window !== "undefined" ? window.location.hash.replace(/^#!?/, "") : ""),
+    [],
+  );
+
+  useEffect(() => {
+    const hash = getCurrentHash();
+
+    if (!names || !benchSet || !hash) {
+      return;
+    }
+
+    document.getElementById(hash)?.scrollIntoView({ behavior: "instant" });
+  }, [getCurrentHash, names, benchSet]);
 
   if (!names) {
     return null;
@@ -34,13 +48,15 @@ export function BenchmarksContent({
       <TabsList>
         {names
           .filter((name) => !HIDDEN_BENCHMARKS.includes(name))
-          .map((name) => (
-            <ProgressBarLink href={`/benchmarks/${name}`} key={name}>
-              <TabsTrigger className="capitalize" value={name}>
-                {joinWords(name)}
-              </TabsTrigger>
-            </ProgressBarLink>
-          ))}
+          .map((name) => {
+            return (
+              <ProgressBarLink href={`/benchmarks/${name}`} key={name}>
+                <TabsTrigger className="capitalize" value={name}>
+                  {joinWords(name)}
+                </TabsTrigger>
+              </ProgressBarLink>
+            );
+          })}
       </TabsList>
 
       <div className="mt-4 flex flex-row gap-8">
