@@ -1,8 +1,8 @@
 "use client";
 
-import { Command, CommandGroup, CommandItem, CommandList } from "@risc0/ui/command";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUrlHash } from "shared/client/hooks/use-url-hash";
 import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 
 export function BenchmarksList({
@@ -12,24 +12,28 @@ export function BenchmarksList({
 }) {
   const pathname = usePathname();
   const selectedBench = pathname.split("/").pop() ?? "";
+  const urlHash = useUrlHash();
 
-  return (
-    <Command className="border">
-      <CommandList className="max-h-[calc(100dvh-19.5rem)] overscroll-contain">
-        {charts.flatMap((chart) =>
-          chart.name === selectedBench
-            ? [
-                <CommandGroup key={chart.name}>
-                  {[...chart.dataSet.keys()].map((benchmark) => (
-                    <Link tabIndex={-1} key={`${chart.name}-${benchmark}`} scroll href={`#${chart.name}-${benchmark}`}>
-                      <CommandItem className="cursor-pointer">{benchmark}</CommandItem>
-                    </Link>
-                  ))}
-                </CommandGroup>,
-              ]
-            : [],
-        )}
-      </CommandList>
-    </Command>
+  return charts.flatMap((chart) =>
+    chart.name === selectedBench
+      ? [
+          <div className="rounded-md border p-1" key={chart.name}>
+            {[...chart.dataSet.keys()].map((benchmark) => {
+              return (
+                <Link
+                  tabIndex={-1}
+                  key={`${chart.name}-${benchmark}`}
+                  scroll
+                  aria-selected={`${chart.name}-${benchmark}` === urlHash}
+                  href={`#${chart.name}-${benchmark}`}
+                  className="flex select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent aria-selected:bg-accent aria-selected:text-accent-foreground"
+                >
+                  {benchmark}
+                </Link>
+              );
+            })}
+          </div>,
+        ]
+      : [],
   );
 }

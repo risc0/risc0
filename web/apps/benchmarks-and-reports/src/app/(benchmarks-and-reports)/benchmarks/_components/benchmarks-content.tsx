@@ -24,20 +24,20 @@ export function BenchmarksContent({
 }) {
   const pathname = usePathname();
   const selectedBench = pathname.split("/").pop() ?? "";
-  const getCurrentHash = useMemo(
+  const getCurrentUrlHash = useMemo(
     () => () => (typeof window !== "undefined" ? window.location.hash.replace(/^#!?/, "") : ""),
     [],
   );
 
   useEffect(() => {
-    const hash = getCurrentHash();
+    const urlHash = getCurrentUrlHash();
 
-    if (!names || !benchSet || !hash) {
+    if (!names || !benchSet || !urlHash) {
       return;
     }
 
-    document.getElementById(hash)?.scrollIntoView({ behavior: "instant" });
-  }, [getCurrentHash, names, benchSet]);
+    document.getElementById(urlHash)?.scrollIntoView({ behavior: "instant" });
+  }, [getCurrentUrlHash, names, benchSet]);
 
   if (!names) {
     return null;
