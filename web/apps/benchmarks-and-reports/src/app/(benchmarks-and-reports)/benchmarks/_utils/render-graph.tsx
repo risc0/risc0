@@ -79,6 +79,7 @@ export function renderGraph({
             </defs>
 
             <Area
+              animationDuration={500}
               dataKey="value"
               type="monotone"
               fill="url(#fill)"
