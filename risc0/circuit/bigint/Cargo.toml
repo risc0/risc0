@@ -8,6 +8,7 @@ repository = { workspace = true }
 
 [[bin]]
 name = "make_control_ids"
+required-features = ["make_control_ids"]
 
 [dependencies]
 anyhow = "1.0"
@@ -41,3 +42,7 @@ risc0-circuit-bigint-test-methods = { path = "methods" }
 default = ["prove"]
 # Enables ZKR registration to actually generate proofs.
 prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
+# Omits control_ids.rs, and instead uses all zeros for control ids.
+# This is needed for the 'make_control_ids' binary to compile if any
+# new bigint programs are added.
+make_control_ids = []
