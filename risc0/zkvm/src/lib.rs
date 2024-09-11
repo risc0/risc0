@@ -54,7 +54,7 @@
 //! | client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
 //! | cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 //! | disable-dev-mode | all except rv32im |            | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
-//! | metal            | macos             | prove, std | Enables Metal GPU acceleration for the prover.                                                                                                               |
+//! | metal            | macos             | prove, std | Deprecated - Metal GPU acceleration for the prover is now enabled by default on Apple Silicon.                                                               |
 //! | prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 //! | std              | all               |            | Support for the Rust stdlib.                                                                                                                                 |
 //!
@@ -91,16 +91,21 @@ pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 pub use self::receipt_claim::{
-    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim,
+    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim, Unknown,
 };
-#[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub use {
     self::host::{
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
-        recursion::RECURSION_PO2,
+        recursion::{
+            prove::{prove_zkr, register_zkr},
+            RECURSION_PO2,
+        },
         server::{
-            exec::{compose::register_zkr, executor::ExecutorImpl},
+            exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
@@ -113,7 +118,9 @@ pub use {
         docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
     },
 };
-#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
 pub use {
     self::host::{
         api::{
@@ -129,6 +136,12 @@ pub use {
     },
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+#[cfg(feature = "unstable")]
+pub use self::host::client::env::{CoprocessorCallback, ProveZkrRequest};
+
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
@@ -144,7 +157,7 @@ pub use receipt::{
     AssumptionReceipt, CompositeReceipt, CompositeReceiptVerifierParameters, FakeReceipt,
     InnerAssumptionReceipt, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt,
     SegmentReceiptVerifierParameters, SuccinctReceipt, SuccinctReceiptVerifierParameters,
-    VerifierContext,
+    VerifierContext, DEFAULT_MAX_PO2,
 };
 //#[cfg(any(not(target_os = "zkvm"), feature = "std"))]
 pub use receipt::{Groth16Receipt, Groth16ReceiptVerifierParameters};
@@ -175,4 +188,11 @@ pub fn is_dev_mode() -> bool {
     }
 
     cfg!(not(feature = "disable-dev-mode")) && is_env_set
+}
+
+#[cfg(feature = "metal")]
+#[test]
+fn metal_implies_prove() {
+    // we should be able to access prove feature items when metal has been enabled
+    let _prover = get_prover_server(&ProverOpts::default());
 }

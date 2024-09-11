@@ -1,4 +1,4 @@
-# What is dev-mode, and how can you use it safely?
+# What Is dev-mode, and How Can You Use It Safely?
 
 We support a development-only mode for standalone risc0 projects in which code is executed but not proven. This adds efficiency to the development cycle during development stages where proving correct execution is not yet critical.
 

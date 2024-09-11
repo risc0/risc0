@@ -24,7 +24,6 @@ use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-#[cfg(feature = "borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
@@ -112,8 +111,7 @@ pub use self::{
 /// The public outputs of the [Receipt] are contained in the [Receipt::journal].
 /// You can use [Journal::decode] to deserialize the journal as typed and
 /// structured data, or access the [Journal::bytes] directly.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Receipt {
     /// The polymorphic [InnerReceipt].
@@ -258,6 +256,11 @@ impl Receipt {
     pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         self.inner.claim()
     }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        self.inner.seal_size()
+    }
 }
 
 /// A record of the public commitments for a proven zkVM execution.
@@ -265,8 +268,9 @@ impl Receipt {
 /// Public outputs, including commitments to important inputs, are written to the journal during
 /// zkVM execution. Along with an image ID, it constitutes the statement proven by a given
 /// [Receipt]
-#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(
+    Clone, Debug, Default, Deserialize, Serialize, PartialEq, BorshSerialize, BorshDeserialize,
+)]
 pub struct Journal {
     /// The raw bytes of the journal.
     pub bytes: Vec<u8>,
@@ -299,8 +303,7 @@ impl AsRef<[u8]> for Journal {
 /// A lower level receipt, containing the cryptographic seal (i.e. zero-knowledge proof) and
 /// verification logic for a specific proof system and circuit. All inner receipt types are
 /// zero-knowledge proofs of execution for a RISC-V zkVM.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerReceipt {
@@ -378,6 +381,16 @@ impl InnerReceipt {
             Self::Fake(_) => Digest::ZERO,
         }
     }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        match self {
+            Self::Composite(receipt) => receipt.seal_size(),
+            Self::Succinct(receipt) => receipt.seal_size(),
+            Self::Groth16(receipt) => receipt.seal_size(),
+            Self::Fake(_) => 0,
+        }
+    }
 }
 
 /// A fake receipt for testing and development.
@@ -390,8 +403,7 @@ impl InnerReceipt {
 /// This type solely exists to improve development experience, for further
 /// information about development-only mode see our [dev-mode
 /// documentation](https://dev.risczero.com/api/generating-proofs/dev-mode).
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Serialize, Deserialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub struct FakeReceipt<Claim>
@@ -441,8 +453,7 @@ where
 /// with interoperability. It is not cryptographically bound to the receipt, and should not be used
 /// for security-relevant decisions, such as choosing whether or not to accept a receipt based on
 /// it's stated version.
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[non_exhaustive]
 pub struct ReceiptMetadata {
     /// Information which can be used to decide whether a given verifier is compatible with this
@@ -480,16 +491,6 @@ impl AssumptionReceipt {
         match self {
             Self::Proven(receipt) => Ok(receipt.claim_digest()?),
             Self::Unresolved(assumption) => Ok(assumption.claim),
-        }
-    }
-
-    #[cfg(feature = "prove")]
-    pub(crate) fn into_receipt(self) -> Result<InnerAssumptionReceipt> {
-        match self {
-            Self::Proven(receipt) => Ok(receipt),
-            Self::Unresolved(_) => Err(anyhow::anyhow!(
-                "no receipt available for unresolved assumption"
-            )),
         }
     }
 }
@@ -563,8 +564,7 @@ impl From<ReceiptClaim> for AssumptionReceipt {
 /// An enumeration of receipt types similar to [InnerReceipt], but for use in [AssumptionReceipt].
 /// Instead of proving only RISC-V execution with [ReceiptClaim], this type can prove any claim
 /// implemented by one of its inner types.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[derive(Clone, Debug, Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 #[non_exhaustive]
 pub enum InnerAssumptionReceipt {
@@ -644,6 +644,16 @@ impl InnerAssumptionReceipt {
             Self::Fake(_) => Digest::ZERO,
         }
     }
+
+    /// Total number of bytes used by the seals of this receipt.
+    pub fn seal_size(&self) -> usize {
+        match self {
+            Self::Composite(receipt) => receipt.seal_size(),
+            Self::Succinct(receipt) => receipt.seal_size(),
+            Self::Groth16(receipt) => receipt.seal_size(),
+            Self::Fake(_) => 0,
+        }
+    }
 }
 
 impl From<InnerReceipt> for InnerAssumptionReceipt {
@@ -656,6 +666,12 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
         }
     }
 }
+
+/// Maximum segment size, as a power of two (po2) that the default verifier parameters will accept.
+///
+/// A default of 21 was selected to reach a target of 97 bits of security under our analysis. Using
+/// a po2 higher than 21 shows a degradation of 1 bit of security per po2, to 94 bits at po2 24.
+pub const DEFAULT_MAX_PO2: usize = 21;
 
 /// Context available to the verification process.
 #[non_exhaustive]
@@ -691,6 +707,32 @@ impl VerifierContext {
             ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
             ("sha-256".into(), Sha256HashSuite::new_suite()),
         ])
+    }
+
+    /// Construct a verifier context that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(po2_max: usize) -> Self {
+        Self {
+            suites: Self::default_hash_suites(),
+            segment_verifier_parameters: Some(SegmentReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+            succinct_verifier_parameters: Some(SuccinctReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+            groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+        }
+    }
+
+    /// Construct a verifier context that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 
     /// Return [VerifierContext] with the given map of hash suites.
@@ -800,7 +842,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "borsh")]
     fn borsh_serde() {
         use crate::ReceiptClaim;
         use risc0_zkvm_methods::MULTI_TEST_ID;

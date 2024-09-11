@@ -16,8 +16,8 @@ use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer,
-    VerifierContext,
+    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
+    ProverServer, VerifierContext,
 };
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
@@ -67,6 +67,10 @@ struct Cli {
     /// The receipt kind produced by the r0vm prover
     #[arg(long, value_enum, default_value_t = ReceiptKind::Composite)]
     receipt_kind: ReceiptKind,
+
+    /// Compute the image_id for the specified ELF
+    #[arg(long)]
+    id: bool,
 }
 
 #[derive(Args)]
@@ -108,6 +112,16 @@ pub fn main() {
         .init();
 
     let args = Cli::parse();
+
+    if args.id {
+        let elf = fs::read(args.mode.elf.unwrap()).unwrap();
+        let image_id = compute_image_id(&elf).unwrap();
+        println!("{image_id}");
+        return;
+    }
+
+    risc0_circuit_bigint::zkr::register_zkrs();
+
     if let Some(port) = args.mode.port {
         run_server(port);
         return;

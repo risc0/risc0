@@ -68,7 +68,7 @@ fn fwd_rev_ab_test(program: Program) {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
+        &NullSyscall,
         None,
     )
     .unwrap();
@@ -79,7 +79,7 @@ fn fwd_rev_ab_test(program: Program) {
             use crate::prove::hal::cuda::CudaCircuitHalSha256;
             let hal = Rc::new(CudaHalSha256::new());
             let circuit_hal = CudaCircuitHalSha256::new(hal.clone());
-        } else if #[cfg(any(target_os = "macos", target_os = "ios"))] {
+        } else if #[cfg(any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios"))] {
             use risc0_zkp::hal::metal::MetalHalSha256;
             use crate::prove::hal::metal::MetalCircuitHal;
             let hal = Rc::new(MetalHalSha256::new());
@@ -125,7 +125,7 @@ fn basic() {
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
+        &NullSyscall,
         None,
     )
     .unwrap();
@@ -133,7 +133,7 @@ fn basic() {
     let segment = segments.first().unwrap();
 
     let prover = segment_prover("sha-256").unwrap();
-    let seal = prover.prove_segment(&segment).unwrap();
+    let seal = prover.prove_segment(segment).unwrap();
 
     let suite = Sha256HashSuite::new_suite();
     let hal = CpuHal::new(suite.clone());
@@ -146,14 +146,7 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let result = execute(
-        image,
-        14,
-        DEFAULT_SESSION_LIMIT,
-        &NullSyscall::default(),
-        None,
-    )
-    .unwrap();
+    let result = execute(image, 14, DEFAULT_SESSION_LIMIT, &NullSyscall, None).unwrap();
 
     let prover = segment_prover("sha-256").unwrap();
     let suite = Sha256HashSuite::new_suite();

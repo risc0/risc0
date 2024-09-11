@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, io::Write, mem, rc::Rc, sync::Arc, time::Instant};
+use std::{cell::RefCell, io::Write, rc::Rc, sync::Arc, time::Instant};
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{MemoryImage, Program};
@@ -23,6 +23,7 @@ use risc0_circuit_rv32im::prove::emu::{
         DEFAULT_SEGMENT_LIMIT_PO2,
     },
 };
+use risc0_core::scope;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
@@ -66,10 +67,10 @@ impl<'a> ExecutorImpl<'a> {
     /// # Example
     /// ```
     /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
-    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
+    /// use risc0_zkvm_methods::{BENCH_ELF, bench::BenchmarkSpec};
     ///
     /// let env = ExecutorEnv::builder()
-    ///     .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 1))
+    ///     .write(&BenchmarkSpec::SimpleLoop { iters: 1 })
     ///     .unwrap()
     ///     .build()
     ///     .unwrap();
@@ -121,7 +122,7 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        nvtx::range_push!("execute");
+        scope!("execute");
 
         let journal = Journal::default();
         self.env
@@ -157,10 +158,9 @@ impl<'a> ExecutorImpl<'a> {
                             Ok(Output {
                                 journal: journal.into(),
                                 assumptions: Assumptions(
-                                    self.env
-                                        .assumptions
+                                    self.syscall_table
+                                        .assumptions_used
                                         .borrow()
-                                        .accessed
                                         .iter()
                                         .map(|(a, _)| a.clone().into())
                                         .collect::<Vec<_>>(),
@@ -197,7 +197,8 @@ impl<'a> ExecutorImpl<'a> {
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+        let assumptions = self.syscall_table.assumptions_used.take();
+        let pending_zkrs = self.syscall_table.pending_zkrs.take();
 
         if let Some(profiler) = self.profiler.take() {
             let report = profiler.borrow_mut().finalize_to_vec();
@@ -217,14 +218,12 @@ impl<'a> ExecutorImpl<'a> {
             result.total_cycles,
             result.pre_state,
             result.post_state,
+            pending_zkrs,
         );
 
-        tracing::info_span!("executor").in_scope(|| {
-            tracing::info!("execution time: {elapsed:?}");
-            session.log();
-        });
+        tracing::info!("execution time: {elapsed:?}");
+        session.log();
 
-        nvtx::range_pop!();
         Ok(session)
     }
 }

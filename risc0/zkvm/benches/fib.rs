@@ -39,7 +39,10 @@ fn execute(group: &mut BenchGroup) {
 }
 
 fn warmup(_group: &mut BenchGroup) {
-    #[cfg(any(feature = "cuda", any(target_os = "macos", target_os = "ios")))]
+    #[cfg(any(
+        feature = "cuda",
+        any(all(target_os = "macos", target_arch = "aarch64"), target_os = "ios")
+    ))]
     {
         println!("warmup");
         let opts = ProverOpts::default();
@@ -92,7 +95,7 @@ fn lift(group: &mut BenchGroup) {
                 let segment = session.segments[0].resolve().unwrap();
                 prover.prove_segment(&ctx, &segment).unwrap()
             },
-            |receipt| prover.lift(&receipt),
+            |receipt| prover.lift(receipt),
         );
     })
 }
@@ -121,7 +124,7 @@ fn join(group: &mut BenchGroup) {
                 let right = prover.lift(&composite.segments[1]).unwrap();
                 (left, right)
             },
-            |(left, right)| prover.join(&left, &right),
+            |(left, right)| prover.join(left, right),
         );
     });
 }

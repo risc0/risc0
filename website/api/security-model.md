@@ -1,4 +1,4 @@
-# Security Model
+# Cryptographic Security Model
 
 RISC Zero is proud to offer an end-to-end solution for verifiable computation.
 Users can generate proofs for correct execution of software code using the [RISC Zero zkVM],
@@ -10,20 +10,15 @@ RISC Zero offers the following components, each of which is ready for use on tes
 
 ## Overview of Components
 
-1. The **cargo risczero** tool, which compiles user-written Rust code into RISC-V ELF binaries [deterministically].
+The RISC Zero zkVM and its on-chain dependencies necessary for verifying proofs on chain, can be described as the following five high-level components.
 
-2. The **RISC-V Prover**, which executes and proves ELF binaries produced by the `cargo risczero` tool.
-
-3. The **Recursion Prover**, which is used to aggregate proofs from the RISC-V Prover.
-   The recursion prover supports a small number of programs, including [lift], [join], and [resolve].
-   Each recursion program is identified by a [control ID], and the full list of allowed programs is identified by the [control root].
-
-4. The **STARK-to-SNARK Prover**, which verifies proofs from the RISC Zero Recursion Prover, compressing the STARK into a Groth16 SNARK.
-   The [control root] is passed to as a public input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.
-
-5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
-   The control root is hard-coded into the on-chain verifier contract.
-   Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc.
+| Component Name                  | Latest Audit  | Description                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **cargo risczero** tool         | [10/31/2023↗] | Compiles user-written Rust code into RISC-V ELF binaries [deterministically]                                                                                                                                                                                                                                                                                                                                                   |
+| **RISC-V Prover**               | [10/31/2023↗] | Executes and proves execution of ELF binaries produced by the `cargo risczero` tool                                                                                                                                                                                                                                                                                                                                            |
+| **Recursion Prover**            | [10/31/2023↗] | Aggregates proofs from the RISC-V Prover; supports a small number of programs like [lift], [join], [resolve]. Each program is identified by a [control ID] and the full list of allowed programs is identified in [control root].                                                                                                                                                                                              |
+| **STARK-to-SNARK Prover**       | [05/20/2024↗] | Verifies STARK proofs from the RISC Zero Recursion Prover, compressing them into a Groth16 SNARK for efficient on-chain verification. The [control root] is passed to as a public input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.                                                                                                                                             |
+| **On-chain verifier contracts** | [06/05/2024↗] | Verifies Groth16 proofs from the RISC Zero STARK-to-SNARK Prover. The control root is hard-coded into the on-chain verifier contract. Addresses for the on-chain verifier contracts we have deployed are available in our [verifier contract] documentation, and a detailed description of the options for governance, upgrades, and deprecation are available in our [Version Management Design][VersionManagement@main] doc. |
 
 Together, these components allow developers to integrate proofs of arbitrary Rust code into their on-chain applications.
 In order to use these components, developers provide:
@@ -46,19 +41,15 @@ We urge those with critical privacy requirements to take caution until the neces
 We also point out the following caveats with respect to privacy:
 
 :::warning
-
 Whoever is generating the proofs can see the secret data. Users may choose to use any of these provers locally to ensure their data stays private.
-
 :::
 
 :::warning
-
 Proofs generated by the **RISC-V Prover** that haven't been passed through the **Recursion Prover** leak information about the length of execution.
 Passing proofs through the Recursion Prover resolves this warning: recursion proofs leak no information about execution length.
-
 :::
 
-# Cryptographic Security
+## Cryptographic Security
 
 In analyzing the cryptographic security of our system, we consider two primary questions:
 
@@ -67,11 +58,11 @@ In analyzing the cryptographic security of our system, we consider two primary q
 
 The first question is about the **soundness** of the protocol, and the second question is whether the protocol is **zero-knowledge**.
 
-Soundness is often quantified in terms of “[bits]” — our system currently targets 98 bits of security.
+Soundness is often quantified in terms of "[bits]" — our [on-chain verifier contracts][Verifier Contract] target 97 bits of security.
 
 | Prover                | Cryptographic Assumptions                                                                                                                     | Bits of Security | Quantum Safe? |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------- |
-| RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 98               | Yes           |
+| RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 97               | Yes           |
 | Recursion Prover      | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 99               | Yes           |
 | STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption <br/> - Integrity of Groth16 Trusted Setup Ceremony | 99+              | No            |
 
@@ -107,22 +98,24 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
+[10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
+[05/20/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/circuits/hexens_v1c_stark2snark_20240520.pdf
+[06/05/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/contracts/hexens_verifiercontract_20240605.pdf
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
-[examples]: https://www.pcmag.com/news/zuckerbergs-meta-is-spending-billions-to-buy-350000-nvidia-h100-gpus
-[lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
-[join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
-[resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
+[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
-[execution trace]: /terminology#execution-trace
-[ethSTARK documentation]: https://eprint.iacr.org/2021/582
 [deterministically]: /terminology#deterministic-builds
+[ethSTARK documentation]: https://eprint.iacr.org/2021/582
+[examples]: https://www.pcmag.com/news/zuckerbergs-meta-is-spending-billions-to-buy-350000-nvidia-h100-gpus
+[execution trace]: /terminology#execution-trace
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
-[receipt claim]: /terminology#receipt-claim
+[join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
+[lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
 [proof-system]: pathname:///proof-system-in-detail.pdf
+[receipt claim]: /terminology#receipt-claim
+[resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
 [RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
-[this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
-[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [Verifier Contract]: ./blockchain-integration/contracts/verifier.md
 [VersionManagement@main]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md

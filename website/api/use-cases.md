@@ -60,4 +60,4 @@ Check out our [Getting Started] page.
 [Zeth]: https://risczero.com/news/zeth-release
 [zk-coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [zkpoex]: https://risczero.com/news/zkpoex
-[zkVM]: ./zkvm/zkvm_overview.md
+[zkVM]: ./zkvm/zkvm-overview.md

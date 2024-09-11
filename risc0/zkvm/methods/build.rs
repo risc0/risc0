@@ -40,22 +40,15 @@ fn main() {
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
-                features: vec![],
                 use_docker,
+                ..Default::default()
             },
         ),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
-                use_docker: None,
-            },
-        ),
-        (
-            "risc0-zkvm-methods-cpp-crates",
-            GuestOptions {
-                features: vec![],
-                use_docker: None,
+                ..Default::default()
             },
         ),
     ]);

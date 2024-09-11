@@ -1,6 +1,6 @@
 # Performance Benchmarks
 
-## Pregenerated benchmarks
+## Pregenerated Benchmarks
 
 We have [a performance datasheet][datasheet] with runtime and memory performance
 information. This information is organized by both program size and hardware
@@ -31,16 +31,13 @@ If you want to benchmark a GPU, you will need to build with the `cuda` or
 this, use the following commands:
 
 - **Metal**
-
-```bash
-cargo run --release -F metal --example loop
-```
-
+  ```bash
+  cargo run --release -F metal --example loop
+  ```
 - **CUDA**
-
-```bash
-cargo run --release -F cuda --example loop
-```
+  ```bash
+  cargo run --release -F cuda --example loop
+  ```
 
 We also have a Fibonacci computation benchmark, which you can run with
 

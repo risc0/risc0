@@ -213,7 +213,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
     }
 }
 
-/// Perform a unpadded hash of a vector of elements.  Because this is unpadded
+/// Perform an unpadded hash of a vector of elements.  Because this is unpadded
 /// collision resistance is only true for vectors of the same size.  If the size
 /// is variable, this is subject to length extension attacks.
 pub fn unpadded_hash<'a, I>(iter: I) -> [BabyBearElem; CELLS_OUT]
@@ -274,11 +274,11 @@ mod tests {
         let old_cells = *cells;
         for i in 0..CELLS {
             let mut tot = BabyBearElem::ZERO;
-            for j in 0..CELLS {
+            for (j, old_cell) in old_cells.iter().enumerate().take(CELLS) {
                 if i == j {
-                    tot += (M_INT_DIAG_HZN[i] + BabyBearElem::ONE) * old_cells[j];
+                    tot += (M_INT_DIAG_HZN[i] + BabyBearElem::ONE) * *old_cell;
                 } else {
-                    tot += old_cells[j];
+                    tot += *old_cell;
                 }
             }
             cells[i] = tot;
@@ -326,14 +326,14 @@ mod tests {
 
     #[test]
     fn poseidon2_test_vectors() {
-        let mut buf: &mut [BabyBearElem; CELLS] = &mut baby_bear_array![
+        let buf: &mut [BabyBearElem; CELLS] = &mut baby_bear_array![
             0x00000000, 0x00000001, 0x00000002, 0x00000003, 0x00000004, 0x00000005, 0x00000006,
             0x00000007, 0x00000008, 0x00000009, 0x0000000A, 0x0000000B, 0x0000000C, 0x0000000D,
             0x0000000E, 0x0000000F, 0x00000010, 0x00000011, 0x00000012, 0x00000013, 0x00000014,
             0x00000015, 0x00000016, 0x00000017,
         ];
         tracing::debug!("input: {:?}", buf);
-        poseidon2_mix(&mut buf);
+        poseidon2_mix(buf);
         let goal: [u32; CELLS] = [
             0x2ed3e23d, 0x12921fb0, 0x0e659e79, 0x61d81dc9, 0x32bae33b, 0x62486ae3, 0x1e681b60,
             0x24b91325, 0x2a2ef5b9, 0x50e8593e, 0x5bc818ec, 0x10691997, 0x35a14520, 0x2ba6a3c5,
@@ -360,17 +360,17 @@ mod tests {
         let suite = Poseidon2HashSuite::new_suite();
         let result = suite.hashfn.hash_elem_slice(&buf);
         let goal: [u32; DIGEST_WORDS] = [
-            (BabyBearElem::from(0x722baada as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x5b352fed as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x3684017b as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x540d4a7b as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x44ffd422 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x48615f97 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x1a496f45 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x203ca999 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x722baada_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x5b352fed_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x3684017b_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x540d4a7b_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x44ffd422_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x48615f97_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x1a496f45_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x203ca999_u32)).as_u32_montgomery(),
         ];
-        for i in 0..DIGEST_WORDS {
-            assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
+        for (i, word) in goal.iter().enumerate() {
+            assert_eq!(result.as_words()[i], *word, "At entry {i}");
         }
     }
 
@@ -384,17 +384,17 @@ mod tests {
         let suite = Poseidon2HashSuite::new_suite();
         let result = suite.hashfn.hash_elem_slice(&buf);
         let goal: [u32; DIGEST_WORDS] = [
-            (BabyBearElem::from(0x622615d7 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x1cfe9764 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x166cb1c9 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x76febcde as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x6056219f as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x326359cf as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x5c2cca75 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x233dc3ff as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x622615d7_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x1cfe9764_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x166cb1c9_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x76febcde_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x6056219f_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x326359cf_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x5c2cca75_u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x233dc3ff_u32)).as_u32_montgomery(),
         ];
-        for i in 0..DIGEST_WORDS {
-            assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
+        for (i, word) in goal.iter().enumerate() {
+            assert_eq!(result.as_words()[i], *word, "At entry {i}");
         }
     }
 }

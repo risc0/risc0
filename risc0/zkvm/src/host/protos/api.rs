@@ -2,7 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerRequest {
-    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
+    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
 /// Nested message and enum types in `ServerRequest`.
@@ -26,6 +26,8 @@ pub mod server_request {
         Resolve(super::ResolveRequest),
         #[prost(message, tag = "8")]
         Compress(super::CompressRequest),
+        #[prost(message, tag = "9")]
+        ProveZkr(super::ProveZkrRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -101,6 +103,42 @@ pub mod prove_segment_reply {
         #[prost(message, tag = "2")]
         Error(super::GenericError),
     }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ProveZkrRequest {
+    #[prost(message, optional, tag = "1")]
+    pub claim_digest: ::core::option::Option<super::base::Digest>,
+    #[prost(message, optional, tag = "2")]
+    pub control_id: ::core::option::Option<super::base::Digest>,
+    #[prost(bytes = "vec", tag = "3")]
+    pub input: ::prost::alloc::vec::Vec<u8>,
+    /// This is optional in the context of a CoprocessorRequest
+    #[prost(message, optional, tag = "4")]
+    pub receipt_out: ::core::option::Option<AssetRequest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ProveZkrReply {
+    #[prost(oneof = "prove_zkr_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<prove_zkr_reply::Kind>,
+}
+/// Nested message and enum types in `ProveZkrReply`.
+pub mod prove_zkr_reply {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        Ok(super::ProveZkrResult),
+        #[prost(message, tag = "2")]
+        Error(super::GenericError),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ProveZkrResult {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -300,6 +338,8 @@ pub struct ExecutorEnv {
     pub assumptions: ::prost::alloc::vec::Vec<AssumptionReceipt>,
     #[prost(string, tag = "12")]
     pub segment_path: ::prost::alloc::string::String,
+    #[prost(bool, tag = "13")]
+    pub coprocessor: bool,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -331,6 +371,8 @@ pub struct ProverOpts {
     pub receipt_kind: i32,
     #[prost(message, repeated, tag = "4")]
     pub control_ids: ::prost::alloc::vec::Vec<super::base::Digest>,
+    #[prost(uint64, tag = "5")]
+    pub max_segment_po2: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -435,7 +477,7 @@ pub mod client_callback {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct OnIoRequest {
-    #[prost(oneof = "on_io_request::Kind", tags = "1, 2, 3")]
+    #[prost(oneof = "on_io_request::Kind", tags = "1, 2, 3, 4")]
     pub kind: ::core::option::Option<on_io_request::Kind>,
 }
 /// Nested message and enum types in `OnIoRequest`.
@@ -449,6 +491,8 @@ pub mod on_io_request {
         Slice(super::SliceIo),
         #[prost(message, tag = "3")]
         Trace(super::TraceEvent),
+        #[prost(message, tag = "4")]
+        Coprocessor(super::CoprocessorRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -529,6 +573,21 @@ pub mod trace_event {
         RegisterSet(RegisterSet),
         #[prost(message, tag = "3")]
         MemorySet(MemorySet),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CoprocessorRequest {
+    #[prost(oneof = "coprocessor_request::Kind", tags = "1")]
+    pub kind: ::core::option::Option<coprocessor_request::Kind>,
+}
+/// Nested message and enum types in `CoprocessorRequest`.
+pub mod coprocessor_request {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        ProveZkr(super::ProveZkrRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

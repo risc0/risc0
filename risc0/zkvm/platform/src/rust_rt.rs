@@ -20,12 +20,9 @@
 //! * It includes a panic handler.
 //! * It includes an allocator.
 
-use core::{
-    alloc::{GlobalAlloc, Layout},
-    panic::PanicInfo,
-};
+use core::panic::PanicInfo;
 
-use crate::syscall::{sys_alloc_aligned, sys_panic};
+use crate::syscall::sys_panic;
 
 extern crate alloc;
 
@@ -79,24 +76,3 @@ mod entrypoint {
         sym STACK_TOP
     );
 }
-
-struct BumpPointerAlloc;
-
-unsafe impl GlobalAlloc for BumpPointerAlloc {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        sys_alloc_aligned(layout.size(), layout.align())
-    }
-
-    unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
-        // this allocator never deallocates memory
-    }
-
-    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        // NOTE: This is safe to avoid zeroing allocated bytes, as the bump allocator does not
-        //       re-use memory and the zkVM memory is zero-initialized.
-        self.alloc(layout)
-    }
-}
-
-#[global_allocator]
-static HEAP: BumpPointerAlloc = BumpPointerAlloc;

@@ -2,7 +2,7 @@
 
 _A brief introduction to the RISC Zero [receipt]._
 
-## What is a receipt?
+## What Is a Receipt?
 
 A receipt gives the results of your program along with proof that they were produced honestly.
 
@@ -20,7 +20,7 @@ the seal is the opaque blob that cryptographically attests to the validity of th
 
 <!-- End receipt definition. -->
 
-## How are receipts used?
+## How Are Receipts Used?
 
 Suppose Alice and Bob have agreed on some computation that needs to get done.
 In particular, they've agreed on some zkVM [guest program], and they each have access to the source code and the [Image ID] for that guest program.
@@ -58,22 +58,20 @@ Hopefully, these guides and the [zkVM Quick Start] page will be sufficient for y
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[zkVM application]: ../zkvm_overview.md
-[receipt]: /terminology#receipt
-[validity proof]: /terminology#validity-proof
+[Discord]: https://discord.gg/risczero
+[examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [execution]: /terminology#execution-trace
-[verified]: /terminology#verify
-[journal]: /terminology#journal
-[seal]: /terminology#seal
 [guest program]: /terminology#guest-program
 [Image ID]: /terminology#image-id
-[Sessions]: /terminology#session
-[segments]: /terminology#segment
-[receipt.verify()]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/struct.Receipt.html#method.verify
+[journal]: /terminology#journal
+[receipt]: /terminology#receipt
 [receipt.journal]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/struct.Receipt.html#structfield.journal
+[receipt.verify()]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/struct.Receipt.html#method.verify
+[seal]: /terminology#seal
+[these docs]: https://github.com/risc0/risc0/issues/new/choose
+[validity proof]: /terminology#validity-proof
+[verified]: /terminology#verify
 [verify]: /terminology#verify
 [Verifying]: /terminology#verify
-[examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
-[these docs]: https://github.com/risc0/risc0/issues/new/choose
-[Discord]: https://discord.gg/risczero
+[zkVM application]: ../zkvm-overview.md
 [zkVM Quick Start]: ../quickstart.md

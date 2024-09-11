@@ -29,6 +29,7 @@ fn main() -> Result<()> {
         RisczeroCmd::Build(cmd) => cmd.run(),
         RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
         RisczeroCmd::Install(cmd) => cmd.run(),
+        RisczeroCmd::Datasheet(cmd) => cmd.run(),
         RisczeroCmd::New(cmd) => cmd.run(),
         RisczeroCmd::Deploy(cmd) => cmd.run(),
         RisczeroCmd::Verify(cmd) => cmd.run(),
@@ -36,5 +37,8 @@ fn main() -> Result<()> {
         RisczeroCmd::BuildCrate(build) => build.run(BuildSubcommand::Build),
         #[cfg(feature = "experimental")]
         RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
+
+        // TODO: Define this enum within the binary rather than `lib.rs`.
+        _ => unreachable!(),
     }
 }

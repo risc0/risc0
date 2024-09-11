@@ -11,6 +11,7 @@ repository = { workspace = true }
 bincode = "1.3"
 bytemuck = "1.12"
 clap = { version = "4.5", features = ["derive", "env"] }
+risc0-circuit-bigint = { workspace = true, features = ["prove"] }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -29,4 +30,4 @@ cuda = ["risc0-zkvm/cuda"]
 default = []
 disable-dev-mode = ["risc0-zkvm/disable-dev-mode"]
 dual = ["risc0-zkvm/dual"]
-metal = []
+metal = ["risc0-zkvm/metal"]

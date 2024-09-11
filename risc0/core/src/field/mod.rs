@@ -322,9 +322,9 @@ mod tests {
             let xi: u128 = x.into() as _;
             let yi: u128 = y.into() as _;
 
-            assert_eq!((x + y).into() as u128, (&xi + &yi) % p);
-            assert_eq!((x * y).into() as u128, (&xi * &yi) % p);
-            assert_eq!((x - y).into() as u128, (&xi + p - &yi) % p);
+            assert_eq!((x + y).into() as u128, (xi + yi) % p);
+            assert_eq!((x * y).into() as u128, (xi * yi) % p);
+            assert_eq!((x - y).into() as u128, (xi + p - yi) % p);
 
             let xinv = x.inv();
             if x != F::ONE {

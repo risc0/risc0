@@ -18,7 +18,7 @@ use risc0_binfmt::tagged_struct;
 use risc0_circuit_recursion::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
-    core::digest::{digest, Digest, DIGEST_WORDS},
+    core::digest::{digest, Digest, DIGEST_SHORTS},
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -59,7 +59,6 @@ fn test_recursion_poseidon254() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
@@ -96,7 +95,6 @@ fn test_recursion_poseidon2() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
         bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
@@ -135,20 +133,6 @@ fn test_recursion_poseidon2() {
     succinct_receipt
         .verify_integrity_with_context(&ctx)
         .unwrap();
-}
-
-#[test]
-#[should_panic(expected = "assertion failed: elem.is_reduced()")]
-fn test_poseidon_sanitized_inputs() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
-
-    let suite = PoseidonHashSuite::new_suite();
-
-    // Add two digests, one of which has an element >= the Baby Bear prime
-    // Then `hash_pair` should fail as its inputs aren't in reduced form
-    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
-    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
-    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
 }
 
 #[test]
@@ -278,7 +262,7 @@ fn test_recursion_identity_sha256() {
     let hashfn = opts.hash_suite().unwrap().hashfn;
     let sha256_control_tree = MerkleGroup::new(opts.control_ids.clone()).unwrap();
     let sha256_control_inclusion_proof = sha256_control_tree
-        .get_proof(&prover.control_id(), hashfn.as_ref())
+        .get_proof(prover.control_id(), hashfn.as_ref())
         .unwrap();
     let sha256_control_root = sha256_control_tree.calc_root(hashfn.as_ref());
     let params = SuccinctReceiptVerifierParameters {
@@ -349,7 +333,7 @@ fn test_recursion_lift_resolve_e2e() {
     tracing::info!("Done proving: env::verify");
 
     let succinct_receipt = prover
-        .composite_to_succinct(&composition_receipt.inner.composite().unwrap())
+        .composite_to_succinct(composition_receipt.inner.composite().unwrap())
         .unwrap();
 
     let receipt = Receipt::new(
@@ -371,7 +355,7 @@ fn test_recursion_lift_resolve_e2e() {
 #[test]
 fn test_recursion_circuit() {
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-    super::test_recursion_circuit(&digest, &digest, RECURSION_PO2).unwrap();
+    super::test_zkr(&digest, &digest, RECURSION_PO2).unwrap();
 }
 
 #[test]
@@ -386,7 +370,7 @@ fn test_po2_16() {
     let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
     let control_root = control_tree.calc_root(suite.hashfn.as_ref());
     let digest = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-    let receipt = super::test_recursion_circuit(&control_root, &digest, po2).unwrap();
+    let receipt = super::test_zkr(&control_root, &digest, po2).unwrap();
     let ctx = VerifierContext::empty()
         .with_suites(VerifierContext::default_hash_suites())
         .with_succinct_verifier_parameters(SuccinctReceiptVerifierParameters {
@@ -405,6 +389,6 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_CONTROL_ROOT,
-        digest!("9a3767040e4cf554112afa68bc043274a8636a06565e1d5e2b7fa90fda941218")
+        digest!("8b6dcf11d463ac455361b41fb3ed053febb817491bdea00fdb340e45013b852e")
     );
 }

@@ -79,7 +79,7 @@ pub enum TrapCause {
     IllegalInstruction(u32),
     Breakpoint,
     LoadAddressMisaligned,
-    LoadAccessFault,
+    LoadAccessFault(ByteAddr),
     StoreAddressMisaligned(ByteAddr),
     StoreAccessFault,
     EnvironmentCallFromUserMode,
@@ -521,7 +521,7 @@ impl Emulator {
         let _rs2 = ctx.load_register(decoded.rs2 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
-            return ctx.trap(TrapCause::LoadAccessFault);
+            return ctx.trap(TrapCause::LoadAccessFault(addr));
         }
         let data = ctx.load_memory(addr.waddr())?;
         let shift = 8 * (addr.0 & 3);

@@ -40,7 +40,7 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_execute_zkr, sys_exit, sys_fork, sys_log, sys_pipe, sys_read,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr, sys_read,
         sys_read_words, sys_write,
     },
     PAGE_SIZE,
@@ -281,6 +281,7 @@ fn main() {
             let expected = "029E365B60971D5A499FF5E1C288B954D3A5DCF52482CEE46DB90DC860B725A8D6CA031146FA156E9F17579BE6122FFB11DAC35E59B2193D75F7B31CE1442DDE7F4FF7885AD5D6080266E9A33BB4CEC93FCC2B6B885457A0ABF19E2DAA00876F694B37F535F119925CCCF9A17B90AE6CF39F07D7FEFBEECDF1B344C14B728196DDD154230BADDEDA5A7EFF373F6CD3EF6D41789572A7A068E3A252D3B7D5D706C6170D8CFDB48C8E738A4B3BFEA3E15716805E376EBD99EA09C6E82F3CFA13CEB23CD289E8F95C27F489ADC05AAACE8A9276EE7CED3B7A5C7264F0D34FF18CEDC3E91D667FCF9992A8CFDE8562F65FDDE1E06595C27E0F82063839A358C927B2";
             assert_eq!(format!("{}", signature), expected);
         }
+        #[allow(asm_sub_register)]
         MultiTestSpec::OutOfBounds => unsafe {
             let addr: u32 = env::read();
             // Access memory outside of allowed boundaries. This is intended to cause a
@@ -411,14 +412,20 @@ fn main() {
                 env::log("Done running control");
             }
         }
-        MultiTestSpec::SysExecuteZkr {
+        MultiTestSpec::SysProveZkr {
             control_id,
             input,
             claim_digest,
             control_root,
         } => {
             unsafe {
-                sys_execute_zkr(control_id.as_ref(), input.as_ptr(), input.len());
+                sys_prove_zkr(
+                    claim_digest.as_ref(),
+                    control_id.as_ref(),
+                    control_root.as_ref(),
+                    input.as_ptr(),
+                    input.len(),
+                );
             }
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");

@@ -17,3 +17,4 @@ tmp/
 tools/smoke-test/Cargo.lock
 compile_commands.json
 .vercel
+node_modules
