@@ -13,7 +13,7 @@
   "dependencies": {
     "@joshdavenport/tailwindcss-filter-order": "0.2.0",
     "@poppinss/intl-formatter": "3.0.3",
-    "@risc0/ui": "0.0.162",
+    "@risc0/ui": "0.0.163",
     "@t3-oss/env-nextjs": "0.11.1",
     "@tanstack/match-sorter-utils": "8.19.4",
     "@tanstack/react-table": "8.20.5",
@@ -23,7 +23,7 @@
     "deepmerge": "4.3.1",
     "framer-motion": "11.5.4",
     "lucide-react": "0.439.0",
-    "next": "15.0.0-rc.0",
+    "next": "15.0.0-canary.149",
     "next-themes": "0.3.0",
     "prism-react-renderer": "2.4.0",
     "radash": "12.1.0",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@next/bundle-analyzer": "15.0.0-canary.146",
+    "@next/bundle-analyzer": "15.0.0-canary.149",
     "@total-typescript/ts-reset": "0.6.1",
     "@types/chart.js": "2.9.41",
     "@types/jest": "29.5.12",
