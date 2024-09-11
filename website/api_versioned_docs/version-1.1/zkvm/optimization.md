@@ -1,3 +1,5 @@
+<!-- DO NOT MERGE: Apply updates about dirty pages here -->
+
 # Guest Optimization Guide
 
 RISC Zero's zkVM is designed and built to act like a physical CPU. We did this
