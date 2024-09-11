@@ -86,7 +86,46 @@ macro_rules! bigint_tests {
     }
 }
 
+// Testing that witgen produces expected "golden" values for the public, private, and constant witnesses is only occasionally helpful and is quite tedious to generate golden values for, especially on the longer tests. This test macro omits the witgen test.
+macro_rules! bigint_short_tests {
+    ($($name:ident($zkr:ident, $in:expr, $z:expr),)*) => {
+        $(
+            paste::paste! {
+                fn [<$name _values>]() -> Vec<BigUint> {
+                    $in.into_iter().map($crate::test_harness::from_hex).collect()
+                }
+
+                fn [<$name _context>]() -> anyhow::Result<BigIntContext> {
+                    let mut ctx = BigIntContext::from_values([<$name _values>]());
+                    $crate::generated::$zkr(&mut ctx)?;
+                    Ok(ctx)
+                }
+
+                fn [<$name _filename>]() -> &'static str {
+                    concat!(stringify!($zkr), ".zkr")
+                }
+
+                #[test]
+                fn [<$name _zkr>]() -> anyhow::Result<()> {
+                    test_zkr([<$name _context>]()?, [<$name _filename>]())
+                }
+
+                #[test]
+                fn [<$name _prove>]() -> Result<()> {
+                    use $crate::generated::[<$zkr:snake:upper>];
+                    let claim = BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
+                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2)?;
+                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr)?;
+                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt)?;
+                    Ok(())
+                }
+            }
+        )*
+    }
+}
+
 pub(crate) use bigint_tests;
+pub(crate) use bigint_short_tests;
 
 pub(crate) fn test_witgen(
     ctx: BigIntContext,
