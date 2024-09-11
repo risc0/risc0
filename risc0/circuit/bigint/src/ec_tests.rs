@@ -64,7 +64,8 @@ bigint_tests! {
         ["01", "0b"],
         [1128832057, 317413175, 332470790, 90798634]
     ),
-    ec_aff_add_test_8_reverse(  // TODO: Regularize or remove (this is `ec_aff_add_test_8` with LHS & RHS swapped)
+    // This is `ec_aff_add_test_8` with LHS & RHS swapped
+    ec_aff_add_test_8_reverse(
         ec_aff_add_test_8,
         [
             "07",   // lhs_x:       7
