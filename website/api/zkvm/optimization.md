@@ -192,8 +192,9 @@ host; as a CPU would use a hard drive.
 
 The first time a page is accessed in a segment, it needs to be **paged-in**,
 loading it from the host. Confirming the page is correct, the guest verifies a
-Merkle inclusion proof for the page against the image ID. These hashing
-operations required take a number of cycles.
+Merkle inclusion proof for the page against the image ID. Note as well that the
+address of the program counter must be paged-in, as instructions are loaded
+from memory. These hashing operations required take a number of cycles.
 
 In order to support continuation after the segment ends (i.e. the zkVM
 "hibernates"), it needs to **page-out** pages that were modified. Paging-out
@@ -418,14 +419,14 @@ cycle counts added.
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
 | BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [dirty](#paging) 1094 to 5130 otherwise    |
-| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1094 to 5130 otherwise    |
-| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1094 to 5130 otherwise    |
+| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
 | SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
 | SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |

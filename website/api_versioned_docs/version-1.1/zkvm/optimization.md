@@ -1,5 +1,3 @@
-<!-- DO NOT MERGE: Apply updates about dirty pages here -->
-
 # Guest Optimization Guide
 
 RISC Zero's zkVM is designed and built to act like a physical CPU. We did this
@@ -194,24 +192,27 @@ host; as a CPU would use a hard drive.
 
 The first time a page is accessed in a segment, it needs to be **paged-in**,
 loading it from the host. Confirming the page is correct, the guest verifies a
-Merkle inclusion proof for the page against the image ID. These hashing
-operations required take a number of cycles.
-
-**A page-in operation takes between 1094 and 5130 cycles; 1130 cycles on
-average.**
-
-The very first page-in takes longer, 5130 cycles, because it needs to traverse
-up the page table (i.e. Merkle tree) all the way to the root, which is equal to
-the image ID. Once a path is verified, it doesn't need to be hashed again, so
-most page-in operations only need to hash the leaf (i.e. data) page. If a
-program were to iterate over memory in sequence, it would cost on average 1130
-cycles per page, or 1.35 cycles per byte.
+Merkle inclusion proof for the page against the image ID. Note as well that the
+address of the program counter must be paged-in, as instructions are loaded
+from memory. These hashing operations required take a number of cycles.
 
 In order to support continuation after the segment ends (i.e. the zkVM
 "hibernates"), it needs to **page-out** pages that were modified. Paging-out
 takes the same number of operations as paging-in, so for the first time any
-given page is written to in a segment, there is a page-out cost of 1094 to 5130
-cycles.
+given page is written to in a segment, it is marked as "dirty". At the end
+of segment execution, every dirty page must be "paged-out" at a cost of 1094 to
+5130 cycles. An exception to this rule is the last segment, where no paging out
+occurrs, since there will be no continuation from the last segment.
+
+**A page-in or page-out operation takes between 1094 and 5130 cycles; 1130
+cycles on average.**
+
+The very first page-in or page-out takes longer, 5130 cycles, because it needs
+to traverse up the page table (i.e. Merkle tree) all the way to the root, which
+is equal to the image ID. Once a path is verified, it doesn't need to be hashed
+again, so most page-in operations only need to hash the leaf (i.e. data) page.
+If a program were to iterate over memory in sequence, it would cost on average
+1130 cycles per page, or 1.35 cycles per byte.
 
 If, after profiling your application, you learn page-in and page-out operations
 are a significant overhead, you can optimize your application by reducing it's
@@ -418,14 +419,14 @@ cycle counts added.
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
 | BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
 | SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
 | SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
