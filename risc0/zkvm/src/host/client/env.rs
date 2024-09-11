@@ -161,6 +161,13 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Set a segment limit, specified in powers of 2 cycles.
     ///
+    /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
+    /// roughly linear with the segment size, so lowering this value by 1 will cut memory
+    /// consumpton by about half.
+    ///
+    /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
+    /// either up or down, may result in better proving performance.
+    ///
     /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
     /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: u32) -> &mut Self {
@@ -407,8 +414,15 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Add a callback for coprocessor requests.
     #[stability::unstable]
-    pub fn coprocessor_callback(&mut self, handler: CoprocessorCallbackRef<'a>) -> &mut Self {
-        self.inner.coprocessor = Some(handler);
+    pub fn coprocessor_callback(&mut self, callback: impl CoprocessorCallback + 'a) -> &mut Self {
+        self.inner.coprocessor = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Add a callback for coprocessor requests.
+    #[stability::unstable]
+    pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
+        self.inner.coprocessor = Some(callback);
         self
     }
 }
