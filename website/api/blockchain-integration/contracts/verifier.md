@@ -35,7 +35,7 @@ RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally i
 
 All of our deployed verifier contracts implement the [IRiscZeroVerifier][IRiscZeroVerifier] interface.
 
-We deploy a base verifier implementation, the emergency stop wrapper, and the router as part of our \[version management design]\[version-management].
+We deploy a base verifier implementation, the emergency stop wrapper, and the router as part of our [version management design][version-management].
 It is recommended that most applications use [RiscZeroVerifierRouter](#verifier-router).
 In some cases, your application may wish to make calls directly to either the emergency stop wrapper, or the base implementation.
 
@@ -50,7 +50,7 @@ By using the `RiscZeroVerifierRouter`, your contract can accept multiple types o
 
 RISC Zero deploys and manages the `RiscZeroVerifierRouter` contract listed below.
 This contract will have verifiers added for each release of the zkVM, and will have verifiers removed in the case of security vulnerabilities.
-You can find detailed information in the \[version management design]\[version-management], including information about how to manage your own copy of the smart contracts, if your application requires it.
+You can find detailed information in the [version management design][version-management], including information about how to manage your own copy of the smart contracts, if your application requires it.
 
 ### Contract Addresses
 
@@ -66,10 +66,9 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
-[RiscZeroVerifierRouter.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierRouter.sol
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
-[VersionManagement]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md
+[version-management]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/version-management-design.md
