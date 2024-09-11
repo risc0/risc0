@@ -1,6 +1,7 @@
 import { Badge } from "@risc0/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@risc0/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip } from "@risc0/ui/chart";
+import { joinWords } from "@risc0/ui/utils/join-words";
 import { Area, AreaChart, CartesianGrid, Label, XAxis, YAxis } from "recharts";
 import type { FormattedDataSetEntry } from "./collect-benches-per-test-case";
 
@@ -57,7 +58,7 @@ export function renderGraph({
       <CardHeader className="pt-0">
         <CardTitle className="flex flex-row items-baseline gap-5">
           <span className="font-mono">{benchName}</span>
-          <span className="text-muted-foreground text-xs">{platformName}</span>
+          <span className="text-muted-foreground text-xs">{joinWords(platformName)}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
