@@ -13,11 +13,9 @@
 // limitations under the License.
 
 use std::{
-    cell::RefCell,
     error::Error as StdError,
     io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Read, Write},
     path::{Path, PathBuf},
-    rc::Rc,
 };
 
 use anyhow::{anyhow, bail, Result};
@@ -749,7 +747,7 @@ fn build_env<'a>(
     }
     if request.coprocessor {
         let proxy = CoprocessorProxy::new(conn.try_clone()?);
-        env_builder.coprocessor_callback(Rc::new(RefCell::new(proxy)));
+        env_builder.coprocessor_callback(proxy);
     }
 
     for assumption in request.assumptions.iter() {

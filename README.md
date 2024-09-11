@@ -112,6 +112,15 @@ For more guidance on how to use RISC Zero, how RISC Zero projects are typically
 structured, and other resources useful to developers new to RISC Zero, see our
 [Getting Started page][quickstart].
 
+## Documentation
+
+Documentation for the zkVM SDK and other Rust crates can be found at [docs.rs/risc0-zkvm](https://docs.rs/risc0-zkvm).
+All other documentation can be found at [dev.risczero.com](https://dev.risczero.com).
+
+You can build and view the Rust documentation locally by using `cargo doc`.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for dependencies.
+Source code for the documentation website can be found in the [website directory](./website).
+
 ## Building from source
 
 Building from source requires some additional tools and steps.
