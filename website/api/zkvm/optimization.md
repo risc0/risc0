@@ -52,8 +52,8 @@ Don't assume you know what the bottlenecks are. Measure and experiment.
 If you make a function 100x faster (or ∞x faster) but it only takes 1% of your
 execution time, you'll see less than 1% improvement in performance. This is
 generally referred to as [Amdahl's Law][amdhal], and practically it means you
-shouldn't waste your time optimizing something that's not the taking a
-significant portion of execution time.
+shouldn't waste your time optimizing something that's not taking a significant 
+portion of execution time.
 
 ### Measuring by Printing to Console
 
@@ -184,7 +184,7 @@ state (a.k.a. image) is referenced by an [image ID], which contains a [Merkle
 root] committing to all data in memory. For efficiency, data in memory is split
 into 1 kB pages.
 
-Pages in the zkVM are analogous a [page in an operating system][os-page], and in
+Pages in the zkVM are analogous to a [page in an operating system][os-page], and in
 particular this term was chosen in reference to [memory paging], or swapping,
 systems. Execution of a program is split into [continuation segments]. Between
 segments, the zkVM essentially [hibernates], saving all working memory to the
@@ -202,7 +202,7 @@ takes the same number of operations as paging-in, so for the first time any
 given page is written to in a segment, it is marked as "dirty". At the end
 of segment execution, every dirty page must be "paged-out" at a cost of 1094 to
 5130 cycles. An exception to this rule is the last segment, where no paging out
-occurrs, since there will be no continuation from the last segment.
+occurs, since there will be no continuation from the last segment.
 
 **A page-in or page-out operation takes between 1094 and 5130 cycles; 1130
 cycles on average.**
@@ -215,7 +215,7 @@ If a program were to iterate over memory in sequence, it would cost on average
 1130 cycles per page, or 1.35 cycles per byte.
 
 If, after profiling your application, you learn page-in and page-out operations
-are a significant overhead, you can optimize your application by reducing it's
+are a significant overhead, you can optimize your application by reducing its
 memory usage and locality. This will be somewhat similar to optimizing for data
 locality and L1/2 cache usage. Using fewer pages, using the same page repeatedly
 instead of a random access pattern, and condensing the range of addresses
