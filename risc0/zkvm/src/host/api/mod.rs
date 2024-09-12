@@ -41,7 +41,7 @@ use lazy_regex::regex_captures;
 use prost::Message;
 use semver::Version;
 
-use crate::{get_version, ExitCode, Journal};
+use crate::{get_version, ExitCode, Journal, ReceiptClaim};
 
 mod pb {
     pub(crate) mod api {
@@ -356,6 +356,10 @@ pub struct SessionInfo {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
+    /// proven if this session is passed to the Prover.
+    pub receipt_claim: ReceiptClaim,
 }
 
 impl SessionInfo {

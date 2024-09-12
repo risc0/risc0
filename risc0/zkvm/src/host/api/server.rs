@@ -353,6 +353,7 @@ impl Server {
                 Ok(Box::new(NullSegmentRef))
             })?;
 
+            let receipt_claim = session.claim()?;
             Ok(pb::api::ServerReply {
                 kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                     kind: Some(pb::api::client_callback::Kind::SessionDone(
@@ -361,6 +362,15 @@ impl Server {
                                 segments: session.segments.len().try_into()?,
                                 journal: session.journal.unwrap_or_default().bytes,
                                 exit_code: Some(session.exit_code.into()),
+                                receipt_claim: Some(pb::api::Asset::from_bytes(
+                                    &pb::api::AssetRequest {
+                                        kind: Some(pb::api::asset_request::Kind::Inline(())),
+                                    },
+                                    pb::core::ReceiptClaim::from(receipt_claim)
+                                        .encode_to_vec()
+                                        .into(),
+                                    "session_info.claim",
+                                )?),
                             }),
                         },
                     )),
