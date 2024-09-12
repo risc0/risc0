@@ -201,8 +201,6 @@ You can find detailed information in the [version management design][version-man
 
 <!-- GENERATED CONTENT END-->
 
-<!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
-
 [deployment.toml]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/deployment.toml
 [estop-1-etherscan]: https://etherscan.io/address/0x08AeD6C108E500540a9544beF7a8B8a05E056e87#code
 [estop-10-etherscan]: https://optimistic.etherscan.io/address/0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1#code
