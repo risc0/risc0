@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::test_harness::{test_witgen, test_zkr, witness_test_data, bigint_tests, bigint_short_tests};
+use crate::test_harness::{
+    bigint_short_tests, bigint_tests, test_witgen, test_zkr, witness_test_data,
+};
 use crate::{BigIntClaim, BigIntContext, BIGINT_PO2};
 use anyhow::Result;
 use num_bigint::BigUint;
@@ -22,9 +24,6 @@ use risc0_zkp::field::{
     Elem, ExtElem,
 };
 use test_log::test;
-
-
-
 
 // fn ec_aff_sub_test_golden_values() -> Vec<BigUint> {
 //     // TODO: These specific values yield an A - (-A), which should give a failure
@@ -41,8 +40,6 @@ use test_log::test;
 //         from_hex("04"), // expected_y:  4
 //     ])
 // }
-
-
 
 // name(zkr, in_values, public_witness, private_witness, constant_witness, golden_z)
 bigint_tests! {

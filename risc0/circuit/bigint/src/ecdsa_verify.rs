@@ -17,8 +17,8 @@ use num_bigint::BigUint;
 use crate::{BigIntClaim, BigIntProgram};
 
 // Re-export program info
-pub use crate::generated::ECDSA_VERIFY_8;
 pub use crate::generated::ECDSA_VERIFY_32;
+pub use crate::generated::ECDSA_VERIFY_8;
 // pub use crate::generated::ECDSA_VERIFY_256;
 
 /// Construct a bigint claim of an ECDSA Verification  // TODO: From here
@@ -34,15 +34,18 @@ pub fn claim(
     arbitrary_x: BigUint,
     arbitrary_y: BigUint,
 ) -> BigIntClaim {
-    BigIntClaim::from_biguints(prog_info, &[
-        base_pt_x,
-        base_pt_y,
-        pub_key_x,
-        pub_key_y,
-        msg_hash,
-        r,
-        s,
-        arbitrary_x,
-        arbitrary_y,
-    ])
+    BigIntClaim::from_biguints(
+        prog_info,
+        &[
+            base_pt_x,
+            base_pt_y,
+            pub_key_x,
+            pub_key_y,
+            msg_hash,
+            r,
+            s,
+            arbitrary_x,
+            arbitrary_y,
+        ],
+    )
 }

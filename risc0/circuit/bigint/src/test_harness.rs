@@ -124,8 +124,8 @@ macro_rules! bigint_short_tests {
     }
 }
 
-pub(crate) use bigint_tests;
 pub(crate) use bigint_short_tests;
+pub(crate) use bigint_tests;
 
 pub(crate) fn test_witgen(
     ctx: BigIntContext,

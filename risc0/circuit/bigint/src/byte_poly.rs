@@ -229,7 +229,8 @@ pub fn to_biguint(bp: impl AsRef<[i32]>) -> BigUint {
         mul *= &coeff_mul;
         log += &bp[i].to_string();
     }
-    out.to_biguint().expect(&format!("Unable to make unsigned bigint: {log}", log=log))
+    out.to_biguint()
+        .expect(&format!("Unable to make unsigned bigint: {log}", log = log))
 }
 
 pub fn add_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>) -> [i32; N] {

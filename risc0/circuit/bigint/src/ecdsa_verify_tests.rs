@@ -13,7 +13,9 @@
 // limitations under the License.
 
 use crate::{
-    byte_poly, ecdsa_verify::{ECDSA_VERIFY_8, ECDSA_VERIFY_32, /*ECDSA_VERIFY_256*/}, prove, verify, BigIntContext, BIGINT_PO2,
+    byte_poly,
+    ecdsa_verify::{ECDSA_VERIFY_32 /*ECDSA_VERIFY_256*/, ECDSA_VERIFY_8},  // TODO clean up what's included
+    prove, verify, BigIntContext, BIGINT_PO2,
 };
 use anyhow::Result;
 use num_bigint::BigUint;
@@ -206,7 +208,7 @@ fn test_zkr_32() -> anyhow::Result<()> {
     rng.mix(&folded);
     let z = rng.random_ext_elem();
 
-    let program = crate::zkr::get_zkr("ecdsa_verify_64.zkr", /*po2=*/ 14)?;
+    let program = crate::zkr::get_zkr("ecdsa_verify_32.zkr", /*po2=*/ 14)?;
 
     let mut prover = Prover::new(program, "poseidon2");
     prover.add_input(&[0u32; 8]); //control id

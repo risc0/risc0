@@ -22,7 +22,7 @@ use risc0_zkp::field::{
 use test_log::test;
 
 use crate::{
-    test_harness::{test_witgen, test_zkr, witness_test_data, bigint_tests},
+    test_harness::{bigint_tests, test_witgen, test_zkr, witness_test_data},
     BigIntClaim, BigIntContext, BIGINT_PO2,
 };
 
