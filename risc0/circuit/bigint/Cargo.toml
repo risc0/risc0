@@ -25,7 +25,7 @@ risc0-zkvm = { workspace = true, features = [
   "std",
   "unstable",
 ], default-features = false }
-risc0-zkvm-platform = { workspace = true }
+risc0-zkvm-platform = { workspace = true, features = ["unstable"] }
 tracing = "0.1.40"
 zip = { version = "2.0", default-features = false, features = ["deflate"] }
 
@@ -36,8 +36,10 @@ test-log = { version = "0.2", features = ["trace"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 risc0-circuit-bigint-test-methods = { path = "methods" }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 default = ["prove"]
+make_control_ids = []
 # Enables ZKR registration to actually generate proofs.
 prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]

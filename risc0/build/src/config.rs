@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::path::PathBuf;
+
 use cargo_metadata::Package;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 /// Options for configuring a docker build environment.
 #[derive(Clone, Serialize, Deserialize)]

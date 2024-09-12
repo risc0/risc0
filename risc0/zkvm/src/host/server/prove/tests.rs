@@ -68,21 +68,6 @@ fn hashfn_poseidon2() {
     prove_nothing("poseidon2").unwrap();
 }
 
-// #[test]
-// fn hashfn_blake2b() {
-//     let hal_pair = HalPair {
-//         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
-//         circuit_hal: Rc::new(CpuCircuitHal::new()),
-//     };
-//     let env = ExecutorEnv::builder()
-//         .write(&MultiTestSpec::DoNothing)
-//         .unwrap()
-//         .build()
-//         .unwrap();
-//     let prover = ProverImpl::new("cpu:blake2b", hal_pair, ReceiptKind::Composite);
-//     prover.prove(env, MULTI_TEST_ELF).unwrap();
-// }
-
 #[test]
 fn receipt_serde() {
     let receipt = prove_nothing("sha-256").unwrap().receipt;
@@ -626,7 +611,7 @@ mod docker {
 }
 
 mod sys_verify {
-    use std::sync::OnceLock;
+    use std::{cell::RefCell, rc::Rc, sync::OnceLock};
 
     use risc0_zkp::core::{digest::digest, hash::poseidon2::Poseidon2HashSuite};
     use risc0_zkvm_methods::{
@@ -637,12 +622,12 @@ mod sys_verify {
     use super::get_prover_server;
     use crate::{
         receipt_claim::Unknown,
-        recursion::{prove::zkr, MerkleGroup},
+        recursion::{prove::zkr, test_zkr, MerkleGroup},
         register_zkr,
         serde::to_vec,
         sha::Digestible,
-        Assumption, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts, Receipt,
-        SuccinctReceipt, RECURSION_PO2,
+        Assumption, CoprocessorCallback, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
+        ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, RECURSION_PO2,
     };
 
     fn prove_hello_commit() -> Receipt {
@@ -691,12 +676,12 @@ mod sys_verify {
     fn prove_test_recursion_circuit() -> SuccinctReceipt<Unknown> {
         // Random Poseidon2 "digest" to act as the "control root".
         let suite = Poseidon2HashSuite::new_suite();
-        let (_, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+        let (_, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
         let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
         let control_root = control_tree.calc_root(suite.hashfn.as_ref());
 
         let digest2 = digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
-        crate::recursion::test_recursion_circuit(&control_root, &digest2, RECURSION_PO2).unwrap()
+        test_zkr(&control_root, &digest2, RECURSION_PO2).unwrap()
     }
 
     fn hello_commit_receipt() -> &'static Receipt {
@@ -910,10 +895,10 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_execute_zkr() {
+    fn sys_prove_zkr() {
         // Random Poseidon2 "digest" to act as the "control root".
         let suite = Poseidon2HashSuite::new_suite();
-        let (program, control_id) = zkr::test_recursion_circuit("poseidon2").unwrap();
+        let (program, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
         register_zkr(&control_id, move || Ok(program.clone()));
         let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
         let control_root = control_tree.calc_root(suite.hashfn.as_ref());
@@ -927,35 +912,96 @@ mod sys_verify {
         input.extend(control_root.as_words());
         input.extend(inner_claim_digest.as_words());
 
-        let spec = &MultiTestSpec::SysExecuteZkr {
+        let spec = &MultiTestSpec::SysProveZkr {
             control_id,
             input,
             claim_digest,
             control_root,
         };
 
-        // Test that we can produce a verifying CompositeReceipt.
+        // Test that we can produce a verifying Receipt.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
             .build()
             .unwrap();
-        let receipt = get_prover_server(&ProverOpts::fast())
+        let opts = ProverOpts::succinct().with_control_ids(control_tree.leaves);
+        let receipt = get_prover_server(&opts)
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .receipt;
         receipt.verify(MULTI_TEST_ID).unwrap();
-        // Double-check that the result is a composite receipt.
-        receipt.inner.composite().unwrap();
+    }
+
+    struct Coprocessor {
+        pub(crate) requests: Vec<ProveZkrRequest>,
+    }
+
+    impl Coprocessor {
+        fn new() -> Self {
+            Self { requests: vec![] }
+        }
+    }
+
+    impl CoprocessorCallback for Coprocessor {
+        fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> anyhow::Result<()> {
+            self.requests.push(proof_request);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn sys_prove_zkr_noop() {
+        let suite = Poseidon2HashSuite::new_suite();
+        let (_, control_id) = zkr::test_recursion_circuit(&suite.name).unwrap();
+        let control_tree = MerkleGroup::new(vec![control_id]).unwrap();
+        let control_root = control_tree.calc_root(suite.hashfn.as_ref());
+
+        let inner_claim_digest =
+            digest!("00000000000000de00000000000000ad00000000000000be00000000000000ef");
+        let test_receipt = test_zkr(&control_root, &inner_claim_digest, RECURSION_PO2).unwrap();
+
+        let claim_digest =
+            digest!("a558268a11892374b41d03857a40cdc5e87e351a3bfc17aa2054f47712a17bc3");
+
+        let mut input: Vec<u32> = Vec::new();
+        input.extend(control_root.as_words());
+        input.extend(inner_claim_digest.as_words());
+
+        let spec = &MultiTestSpec::SysProveZkr {
+            control_id,
+            input,
+            claim_digest,
+            control_root,
+        };
+
+        let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
+
+        let env = ExecutorEnv::builder()
+            .coprocessor_callback_ref(coprocessor.clone())
+            .add_assumption(test_receipt)
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
+        assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+        // Because we added an already proven assumption, there should be no
+        // request to invoke the coprocessor.
+        assert!(coprocessor.borrow().requests.is_empty());
     }
 }
 
-const RUN_UNCONSTRAINED_PO2: u32 = 17;
-const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
-
 #[test]
 fn run_unconstrained() -> Result<()> {
+    const RUN_UNCONSTRAINED_PO2: u32 = 17;
+    const RUN_UNCONSTRAINED_CYCLES: u64 = 1 << RUN_UNCONSTRAINED_PO2;
+
     for unconstrained in [false, true] {
         let spec = MultiTestSpec::RunUnconstrained {
             unconstrained,

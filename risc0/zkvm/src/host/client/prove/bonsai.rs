@@ -20,7 +20,8 @@ use bonsai_sdk::blocking::Client;
 use super::Prover;
 use crate::{
     compute_image_id, is_dev_mode, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt,
-    InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, VerifierContext,
+    InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, SessionStats, VerifierContext,
+    VERSION,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
@@ -40,20 +41,19 @@ impl BonsaiProver {
     }
 }
 
-/// Serializes the assumption receipt to upload to Bonsai. Will error if an unsupported receipt type
-/// is provided.
-fn serialize_succinct_assumption_receipt(assumption: &AssumptionReceipt) -> Result<Vec<u8>> {
+// Only proven assumptions that are succinct are supported by Bonsai.
+fn get_inner_assumption_receipt(assumption: &AssumptionReceipt) -> Result<&InnerAssumptionReceipt> {
     match assumption {
         AssumptionReceipt::Proven(receipt) => {
             if !matches!(receipt, InnerAssumptionReceipt::Succinct(_)) {
                 bail!(
-                    "only succinct starks can be provided as assumptions for Bonsai. \
-                    Use `ProverOpts::succinct()` when generating any assumptions locally."
+                    "Bonsai only supports succinct assumption receipts. \
+                    Use `ProverOpts::succinct()` when proving any assumptions."
                 );
             };
-            Ok(bincode::serialize(receipt)?)
+            Ok(receipt)
         }
-        crate::AssumptionReceipt::Unresolved(_) => {
+        AssumptionReceipt::Unresolved(_) => {
             bail!("only proven assumptions can be uploaded to Bonsai.")
         }
     }
@@ -71,7 +71,7 @@ impl Prover for BonsaiProver {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        let client = Client::from_env(crate::VERSION)?;
+        let client = Client::from_env(VERSION)?;
 
         // Compute the ImageID and upload the ELF binary
         let image_id = compute_image_id(elf)?;
@@ -82,9 +82,10 @@ impl Prover for BonsaiProver {
         let input_id = client.upload_input(env.input)?;
 
         // upload receipts
-        let mut receipts_ids: Vec<String> = vec![];
-        for assumption in &env.assumptions.borrow().cached {
-            let serialized_receipt = serialize_succinct_assumption_receipt(assumption)?;
+        let mut receipts_ids = vec![];
+        for assumption in env.assumptions.borrow().0.iter() {
+            let inner_receipt = get_inner_assumption_receipt(assumption)?;
+            let serialized_receipt = bincode::serialize(inner_receipt)?;
             let receipt_id = client.upload_receipt(serialized_receipt)?;
             receipts_ids.push(receipt_id);
         }
@@ -101,13 +102,18 @@ impl Prover for BonsaiProver {
         )?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
+        // TODO(#1759): Improve upon this polling solution.
+        let polling_interval = if let Ok(ms) = std::env::var("BONSAI_POLL_INTERVAL_MS") {
+            Duration::from_millis(ms.parse().context("invalid bonsai poll interval")?)
+        } else {
+            Duration::from_secs(1)
+        };
         let succinct_prove_info = loop {
             // The session has already been started in the executor. Poll bonsai to check if
             // the proof request succeeded.
             let res = session.status(&client)?;
             if res.status == "RUNNING" {
-                // TODO(#1759): Improve upon this polling solution.
-                std::thread::sleep(Duration::from_secs(5));
+                std::thread::sleep(polling_interval);
                 continue;
             }
             if res.status == "SUCCEEDED" {
@@ -135,7 +141,7 @@ impl Prover for BonsaiProver {
                 }
                 break ProveInfo {
                     receipt,
-                    stats: crate::SessionStats {
+                    stats: SessionStats {
                         segments: stats.segments,
                         total_cycles: stats.total_cycles,
                         user_cycles: stats.cycles,
@@ -166,8 +172,7 @@ impl Prover for BonsaiProver {
             let res = snark_session.status(&client)?;
             match res.status.as_str() {
                 "RUNNING" => {
-                    // TODO(#1759): Improve upon this polling solution.
-                    std::thread::sleep(Duration::from_secs(5));
+                    std::thread::sleep(polling_interval);
                     continue;
                 }
                 "SUCCEEDED" => {

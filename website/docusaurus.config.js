@@ -70,6 +70,7 @@ export default async function createConfigAsync() {
             // Otherwise we risk losing the update on the next release.
             return `https://github.com/risc0/risc0/edit/main/website/api/${docPath}`;
           },
+          lastVersion: "1.0",
         },
       ],
       [

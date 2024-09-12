@@ -201,7 +201,7 @@ impl std::error::Error for DecodeError {}
 /// A receipt (e.g. [SuccinctReceipt][crate::SuccinctReceipt]) may have an unknown claim type when
 /// only the digest of the claim is needed, and the full claim value cannot be determined by the
 /// compiler. This allows for a collection of receipts to be created even when the underlying
-/// claims are of heterogeneous types (e.g. Vec<SuccinctReceipt<Unknown>>).
+/// claims are of heterogeneous types (e.g. `Vec<SuccinctReceipt<Unknown>>`).
 ///
 /// Note that this is an uninhabited type, similar to the [never type].
 ///
@@ -284,7 +284,9 @@ impl Digestible for Output {
 /// and remove the assumption.
 ///
 /// [assumption]: https://dev.risczero.com/terminology#assumption
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, BorshSerialize, BorshDeserialize)]
+#[derive(
+    Clone, Debug, Serialize, Deserialize, Eq, Hash, PartialEq, BorshSerialize, BorshDeserialize,
+)]
 pub struct Assumption {
     /// Commitment to the assumption claim. It may be the digest of a [ReceiptClaim], or it could
     /// be the digest of the claim for a different circuit such as an accelerator.

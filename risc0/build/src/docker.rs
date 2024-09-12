@@ -21,8 +21,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
-use crate::config::GuestBuildOptions;
-use crate::{encode_rust_flags, get_env_var, GuestOptions};
+use crate::{config::GuestBuildOptions, encode_rust_flags, get_env_var, GuestOptions};
 
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
@@ -230,9 +229,10 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
+    use std::path::Path;
+
     use super::{build_guest_package_docker, TARGET_DIR};
     use crate::config::GuestBuildOptions;
-    use std::path::Path;
 
     const SRC_DIR: &str = "../..";
 
@@ -260,7 +260,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "a239070d89948e4fcae489ef664c21bd2c15f430e1e1937792339a289b792ce0",
+            "0aab0a5128e26c3bef9fced492b66a50cf0c5e7241f5c923cfce3d9719c7bcf8",
         );
     }
 }
