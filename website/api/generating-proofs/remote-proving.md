@@ -19,7 +19,7 @@ While you wait, you can make use of the local proving option on the [RISC Zero F
 
 ## API Limits
 
-Bonsai enforces a number of API limits. These limits are configurable on a per API key basis. If your limits are too low to support your use case or you run out cycles, email us at [`devrel@risczero.com`][email-devrel] to request more.
+Bonsai enforces a number of API limits. These limits are configurable on a per API key basis. If your limits are too low to support your use case or you run out of cycles, email us at [`devrel@risczero.com`][email-devrel] to request more.
 
 These limits are:
 
