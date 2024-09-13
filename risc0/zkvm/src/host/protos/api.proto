@@ -206,6 +206,7 @@ message SessionInfo {
   uint32 segments = 1;
   bytes journal = 2;
   base.ExitCode exit_code = 3;
+  Asset receipt_claim = 4;
 }
 
 message SegmentInfo {

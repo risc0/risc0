@@ -607,6 +607,10 @@ impl Client {
                                         .exit_code
                                         .ok_or(malformed_err())?
                                         .try_into()?,
+                                    receipt_claim: pb::core::ReceiptClaim::decode(
+                                        session.receipt_claim.ok_or(malformed_err())?.as_bytes()?,
+                                    )?
+                                    .try_into()?,
                                 }),
                                 None => Err(malformed_err()),
                             }

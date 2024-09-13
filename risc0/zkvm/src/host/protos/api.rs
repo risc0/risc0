@@ -383,6 +383,8 @@ pub struct SessionInfo {
     pub journal: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
     pub exit_code: ::core::option::Option<super::base::ExitCode>,
+    #[prost(message, optional, tag = "4")]
+    pub receipt_claim: ::core::option::Option<Asset>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
