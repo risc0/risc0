@@ -37,18 +37,26 @@ pub fn nondet_quot<const N: usize>(
     lhs: impl AsRef<[i32]> + Clone,
     rhs: impl AsRef<[i32]> + Clone,
 ) -> [i32; N] {
-    // tracing::error!("quot will be...");
-    // tracing::error!("(based on lhs[0] {} and rhs[0] {}", lhs.as_ref()[0], rhs.as_ref()[0]);
-    // tracing::error!("  (based on the below raw data)");
-    // tracing::error!("    lhs:");
-    // for it in lhs.as_ref().iter() {
-    //     tracing::error!("    {it}");
-    // }
-    // tracing::error!("    rhs:");
-    // for it in rhs.as_ref().iter() {
-    //     tracing::error!("    {it}");
-    // }
-    // tracing::error!("calculated from {} / {}", byte_poly::to_biguint(lhs.clone()), byte_poly::to_biguint(rhs.clone()));
+    tracing::error!("quot will be...");
+    tracing::error!(
+        "(based on lhs[0] {} and rhs[0] {}",
+        lhs.as_ref()[0],
+        rhs.as_ref()[0]
+    );
+    tracing::error!("  (based on the below raw data)");
+    tracing::error!("    lhs:");
+    for it in lhs.as_ref().iter() {
+        tracing::error!("    {it}");
+    }
+    tracing::error!("    rhs:");
+    for it in rhs.as_ref().iter() {
+        tracing::error!("    {it}");
+    }
+    tracing::error!(
+        "calculated from {} / {}",
+        byte_poly::to_biguint(lhs.clone()),
+        byte_poly::to_biguint(rhs.clone())
+    );
     let out = byte_poly::nondet_quot_fixed::<N>(lhs.as_ref(), rhs.as_ref());
     // tracing::error!("quot: {}", byte_poly::to_biguint(out));
     ctx.private_witness.push(out.to_vec());

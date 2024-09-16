@@ -39,8 +39,8 @@ pub const BITS_PER_COEFF: usize = 8;
 /// and its i32 terms.  Used for debugging.
 pub fn dump(bp: impl AsRef<[i32]>) -> String {
     let bp = bp.as_ref();
-    // tracing::error!("dump will be...");
-    // tracing::error!("dump: {}", to_biguint(bp));
+    tracing::error!("dump will be...");
+    tracing::error!("dump: {}", to_biguint(bp));
     format!("{} ({:?})", to_biguint(bp), bp)
 }
 
@@ -76,14 +76,14 @@ pub fn from_hex(hex: &str) -> Vec<i32> {
 }
 
 pub fn nondet_quot_fixed<const N: usize>(
-    lhs: impl AsRef<[i32]>,
-    rhs: impl AsRef<[i32]>,
+    lhs: impl AsRef<[i32]> + Clone,
+    rhs: impl AsRef<[i32]> + Clone,
 ) -> [i32; N] {
-    // tracing::error!("nondet_quot_fixed lhs will be...");
-    // tracing::error!("nondet_quot_fixed lhs: {}", to_biguint(lhs));
+    tracing::error!("nondet_quot_fixed lhs will be...");
+    tracing::error!("nondet_quot_fixed lhs: {}", to_biguint(lhs.clone()));
     let lhs = to_biguint(lhs);
-    // tracing::error!("nondet_quot_fixed rhs will be...");
-    // tracing::error!("nondet_quot_fixed rhs: {}", to_biguint(rhs));
+    tracing::error!("nondet_quot_fixed rhs will be...");
+    tracing::error!("nondet_quot_fixed rhs: {}", to_biguint(rhs.clone()));
     let rhs = to_biguint(rhs);
     let quot = lhs.div_floor(&rhs);
     trace!("quot({lhs},{rhs}) = {quot}");
@@ -91,30 +91,30 @@ pub fn nondet_quot_fixed<const N: usize>(
 }
 
 pub fn nondet_rem_fixed<const N: usize>(
-    lhs: impl AsRef<[i32]>,
-    rhs: impl AsRef<[i32]>,
+    lhs: impl AsRef<[i32]> + Clone,
+    rhs: impl AsRef<[i32]> + Clone,
 ) -> [i32; N] {
-    // tracing::error!("nondet_rem_fixed lhs will be...");
-    // tracing::error!("nondet_rem_fixed lhs: {}", to_biguint(lhs));
-    // tracing::error!("nondet_rem_fixed rhs will be...");
-    // tracing::error!("nondet_rem_fixed rhs: {}", to_biguint(rhs));
+    tracing::error!("nondet_rem_fixed lhs will be...");
+    tracing::error!("nondet_rem_fixed lhs: {}", to_biguint(lhs.clone()));
+    tracing::error!("nondet_rem_fixed rhs will be...");
+    tracing::error!("nondet_rem_fixed rhs: {}", to_biguint(rhs.clone()));
     let rem = to_biguint(lhs).mod_floor(&to_biguint(rhs));
     from_biguint_fixed(rem)
 }
 
 pub fn nondet_inv_fixed<const N: usize>(
-    lhs: impl AsRef<[i32]>,
-    rhs: impl AsRef<[i32]>,
+    lhs: impl AsRef<[i32]> + Clone,
+    rhs: impl AsRef<[i32]> + Clone,
 ) -> [i32; N] {
     // Computes the inverse of LHS mod RHS via the `inv = lhs^{rhs - 2} % rhs` algorithm
     // Note that this assumes `rhs` is prime. For non-prime `rhs`, this algorithm can
     // fail (compute an incorrect inverse). Note that this is not a soundness problem, as
     // this is a nondet and the correctness of the inversion must be checked inside the
     // circuit regardless.
-    // tracing::error!("nondet_inv_fixed lhs will be...");
-    // tracing::error!("nondet_inv_fixed lhs: {}", to_biguint(lhs));
-    // tracing::error!("nondet_inv_fixed rhs will be...");
-    // tracing::error!("nondet_inv_fixed rhs: {}", to_biguint(rhs));
+    tracing::error!("nondet_inv_fixed lhs will be...");
+    tracing::error!("nondet_inv_fixed lhs: {}", to_biguint(lhs.clone()));
+    tracing::error!("nondet_inv_fixed rhs will be...");
+    tracing::error!("nondet_inv_fixed rhs: {}", to_biguint(rhs.clone()));
     let lhs = to_biguint(lhs);
     let rhs = to_biguint(rhs);
     let exp = rhs.clone() - 2u8;
