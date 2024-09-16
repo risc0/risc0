@@ -14,8 +14,11 @@
 
 use crate::{
     byte_poly,
-    ecdsa_verify::{ECDSA_VERIFY_32 /*ECDSA_VERIFY_256*/, ECDSA_VERIFY_8},  // TODO clean up what's included
-    prove, verify, BigIntContext, BIGINT_PO2,
+    ecdsa_verify::{ECDSA_VERIFY_32 /*ECDSA_VERIFY_256*/, ECDSA_VERIFY_8}, // TODO clean up what's included
+    prove,
+    verify,
+    BigIntContext,
+    BIGINT_PO2,
 };
 use anyhow::Result;
 use num_bigint::BigUint;

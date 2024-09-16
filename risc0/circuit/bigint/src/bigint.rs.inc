@@ -795,7 +795,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x54: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x49, x51, 2), x5, 1);
-    let x55: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x54, x50, 2), x49, 2), x5, 2);
+    let x55: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x54, x50, 2), x49, 2), x5, 2),
+        x5,
+        2
+    );
     let x56: BytePoly_3 = bigint_nondet_quot!(ctx, x55, x5, 3);
     eqz(ctx, &bigint_sub!(x55, bigint_mul!(x56, x5, 4), 4), 24387, 2)?;
     let x57: BytePoly_2 = bigint_mul!(x54, x54, 2);
@@ -954,7 +958,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x95: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x90, x92, 2), x5, 1);
-    let x96: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x95, x91, 2), x90, 2), x5, 2);
+    let x96: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x95, x91, 2), x90, 2), x5, 2),
+        x5,
+        2
+    );
     let x97: BytePoly_3 = bigint_nondet_quot!(ctx, x96, x5, 3);
     eqz(ctx, &bigint_sub!(x96, bigint_mul!(x97, x5, 4), 4), 24387, 2)?;
     let x98: BytePoly_2 = bigint_mul!(x95, x95, 2);
@@ -1112,7 +1120,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x135: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x130, x132, 2), x5, 1);
-    let x136: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x135, x131, 2), x130, 2), x5, 2);
+    let x136: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x135, x131, 2), x130, 2), x5, 2),
+        x5,
+        2
+    );
     let x137: BytePoly_3 = bigint_nondet_quot!(ctx, x136, x5, 3);
     eqz(
         ctx,
@@ -1275,7 +1287,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x175: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x170, x172, 2), x5, 1);
-    let x176: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x175, x171, 2), x170, 2), x5, 2);
+    let x176: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x175, x171, 2), x170, 2), x5, 2),
+        x5,
+        2
+    );
     let x177: BytePoly_3 = bigint_nondet_quot!(ctx, x176, x5, 3);
     eqz(
         ctx,
@@ -1438,7 +1454,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x215: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x210, x212, 2), x5, 1);
-    let x216: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x215, x211, 2), x210, 2), x5, 2);
+    let x216: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x215, x211, 2), x210, 2), x5, 2),
+        x5,
+        2
+    );
     let x217: BytePoly_3 = bigint_nondet_quot!(ctx, x216, x5, 3);
     eqz(
         ctx,
@@ -1601,7 +1621,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x255: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x250, x252, 2), x5, 1);
-    let x256: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x255, x251, 2), x250, 2), x5, 2);
+    let x256: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x255, x251, 2), x250, 2), x5, 2),
+        x5,
+        2
+    );
     let x257: BytePoly_3 = bigint_nondet_quot!(ctx, x256, x5, 3);
     eqz(
         ctx,
@@ -1764,7 +1788,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x295: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x290, x292, 2), x5, 1);
-    let x296: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x295, x291, 2), x290, 2), x5, 2);
+    let x296: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x295, x291, 2), x290, 2), x5, 2),
+        x5,
+        2
+    );
     let x297: BytePoly_3 = bigint_nondet_quot!(ctx, x296, x5, 3);
     eqz(
         ctx,
@@ -1927,7 +1955,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x335: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x330, x332, 2), x5, 1);
-    let x336: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x335, x331, 2), x330, 2), x5, 2);
+    let x336: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x335, x331, 2), x330, 2), x5, 2),
+        x5,
+        2
+    );
     let x337: BytePoly_3 = bigint_nondet_quot!(ctx, x336, x5, 3);
     eqz(
         ctx,
@@ -2081,7 +2113,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x373: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x368, x370, 2), x5, 1);
-    let x374: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x373, x369, 2), x368, 2), x5, 2);
+    let x374: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x373, x369, 2), x368, 2), x5, 2),
+        x5,
+        2
+    );
     let x375: BytePoly_3 = bigint_nondet_quot!(ctx, x374, x5, 3);
     eqz(
         ctx,
@@ -2204,7 +2240,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x398: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x393, x395, 2), x5, 1);
-    let x399: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x398, x394, 2), x393, 2), x5, 2);
+    let x399: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x398, x394, 2), x393, 2), x5, 2),
+        x5,
+        2
+    );
     let x400: BytePoly_3 = bigint_nondet_quot!(ctx, x399, x5, 3);
     eqz(
         ctx,
@@ -2366,7 +2406,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x437: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x432, x434, 2), x5, 1);
-    let x438: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x437, x433, 2), x432, 2), x5, 2);
+    let x438: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x437, x433, 2), x432, 2), x5, 2),
+        x5,
+        2
+    );
     let x439: BytePoly_3 = bigint_nondet_quot!(ctx, x438, x5, 3);
     eqz(
         ctx,
@@ -2529,7 +2573,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x477: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x472, x474, 2), x5, 1);
-    let x478: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x477, x473, 2), x472, 2), x5, 2);
+    let x478: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x477, x473, 2), x472, 2), x5, 2),
+        x5,
+        2
+    );
     let x479: BytePoly_3 = bigint_nondet_quot!(ctx, x478, x5, 3);
     eqz(
         ctx,
@@ -2692,7 +2740,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x517: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x512, x514, 2), x5, 1);
-    let x518: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x517, x513, 2), x512, 2), x5, 2);
+    let x518: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x517, x513, 2), x512, 2), x5, 2),
+        x5,
+        2
+    );
     let x519: BytePoly_3 = bigint_nondet_quot!(ctx, x518, x5, 3);
     eqz(
         ctx,
@@ -2855,7 +2907,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x557: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x552, x554, 2), x5, 1);
-    let x558: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x557, x553, 2), x552, 2), x5, 2);
+    let x558: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x557, x553, 2), x552, 2), x5, 2),
+        x5,
+        2
+    );
     let x559: BytePoly_3 = bigint_nondet_quot!(ctx, x558, x5, 3);
     eqz(
         ctx,
@@ -3018,7 +3074,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x597: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x592, x594, 2), x5, 1);
-    let x598: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x597, x593, 2), x592, 2), x5, 2);
+    let x598: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x597, x593, 2), x592, 2), x5, 2),
+        x5,
+        2
+    );
     let x599: BytePoly_3 = bigint_nondet_quot!(ctx, x598, x5, 3);
     eqz(
         ctx,
@@ -3181,7 +3241,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x637: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x632, x634, 2), x5, 1);
-    let x638: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x637, x633, 2), x632, 2), x5, 2);
+    let x638: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x637, x633, 2), x632, 2), x5, 2),
+        x5,
+        2
+    );
     let x639: BytePoly_3 = bigint_nondet_quot!(ctx, x638, x5, 3);
     eqz(
         ctx,
@@ -3344,7 +3408,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x677: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x672, x674, 2), x5, 1);
-    let x678: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x677, x673, 2), x672, 2), x5, 2);
+    let x678: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x677, x673, 2), x672, 2), x5, 2),
+        x5,
+        2
+    );
     let x679: BytePoly_3 = bigint_nondet_quot!(ctx, x678, x5, 3);
     eqz(
         ctx,
@@ -3497,7 +3565,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x714: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x709, x711, 2), x5, 1);
-    let x715: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x714, x710, 2), x709, 2), x5, 2);
+    let x715: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x714, x710, 2), x709, 2), x5, 2),
+        x5,
+        2
+    );
     let x716: BytePoly_3 = bigint_nondet_quot!(ctx, x715, x5, 3);
     eqz(
         ctx,
@@ -3584,7 +3656,11 @@ pub fn ecdsa_verify_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x731: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x726, x728, 2), x5, 1);
-    let x732: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x731, x727, 2), x726, 2), x5, 2);
+    let x732: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x731, x727, 2), x726, 2), x5, 2),
+        x5,
+        2
+    );
     let x733: BytePoly_3 = bigint_nondet_quot!(ctx, x732, x5, 3);
     eqz(
         ctx,
@@ -3818,7 +3894,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x54: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x49, x51, 8), x5, 4);
-    let x55: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x54, x50, 8), x49, 8), x5, 8);
+    let x55: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x54, x50, 8), x49, 8), x5, 8),
+        x5,
+        8
+    );
     let x56: BytePoly_9 = bigint_nondet_quot!(ctx, x55, x5, 9);
     eqz(
         ctx,
@@ -3982,7 +4062,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x95: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x90, x92, 8), x5, 4);
-    let x96: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x95, x91, 8), x90, 8), x5, 8);
+    let x96: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x95, x91, 8), x90, 8), x5, 8),
+        x5,
+        8
+    );
     let x97: BytePoly_9 = bigint_nondet_quot!(ctx, x96, x5, 9);
     eqz(
         ctx,
@@ -4145,7 +4229,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x135: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x130, x132, 8), x5, 4);
-    let x136: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x135, x131, 8), x130, 8), x5, 8);
+    let x136: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x135, x131, 8), x130, 8), x5, 8),
+        x5,
+        8
+    );
     let x137: BytePoly_9 = bigint_nondet_quot!(ctx, x136, x5, 9);
     eqz(
         ctx,
@@ -4308,7 +4396,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x175: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x170, x172, 8), x5, 4);
-    let x176: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x175, x171, 8), x170, 8), x5, 8);
+    let x176: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x175, x171, 8), x170, 8), x5, 8),
+        x5,
+        8
+    );
     let x177: BytePoly_9 = bigint_nondet_quot!(ctx, x176, x5, 9);
     eqz(
         ctx,
@@ -4471,7 +4563,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x215: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x210, x212, 8), x5, 4);
-    let x216: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x215, x211, 8), x210, 8), x5, 8);
+    let x216: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x215, x211, 8), x210, 8), x5, 8),
+        x5,
+        8
+    );
     let x217: BytePoly_9 = bigint_nondet_quot!(ctx, x216, x5, 9);
     eqz(
         ctx,
@@ -4634,7 +4730,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x255: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x250, x252, 8), x5, 4);
-    let x256: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x255, x251, 8), x250, 8), x5, 8);
+    let x256: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x255, x251, 8), x250, 8), x5, 8),
+        x5,
+        8
+    );
     let x257: BytePoly_9 = bigint_nondet_quot!(ctx, x256, x5, 9);
     eqz(
         ctx,
@@ -4797,7 +4897,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x295: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x290, x292, 8), x5, 4);
-    let x296: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x295, x291, 8), x290, 8), x5, 8);
+    let x296: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x295, x291, 8), x290, 8), x5, 8),
+        x5,
+        8
+    );
     let x297: BytePoly_9 = bigint_nondet_quot!(ctx, x296, x5, 9);
     eqz(
         ctx,
@@ -4960,7 +5064,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x335: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x330, x332, 8), x5, 4);
-    let x336: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x335, x331, 8), x330, 8), x5, 8);
+    let x336: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x335, x331, 8), x330, 8), x5, 8),
+        x5,
+        8
+    );
     let x337: BytePoly_9 = bigint_nondet_quot!(ctx, x336, x5, 9);
     eqz(
         ctx,
@@ -5123,7 +5231,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x375: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x370, x372, 8), x5, 4);
-    let x376: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x375, x371, 8), x370, 8), x5, 8);
+    let x376: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x375, x371, 8), x370, 8), x5, 8),
+        x5,
+        8
+    );
     let x377: BytePoly_9 = bigint_nondet_quot!(ctx, x376, x5, 9);
     eqz(
         ctx,
@@ -5286,7 +5398,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x415: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x410, x412, 8), x5, 4);
-    let x416: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x415, x411, 8), x410, 8), x5, 8);
+    let x416: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x415, x411, 8), x410, 8), x5, 8),
+        x5,
+        8
+    );
     let x417: BytePoly_9 = bigint_nondet_quot!(ctx, x416, x5, 9);
     eqz(
         ctx,
@@ -5449,7 +5565,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x455: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x450, x452, 8), x5, 4);
-    let x456: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x455, x451, 8), x450, 8), x5, 8);
+    let x456: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x455, x451, 8), x450, 8), x5, 8),
+        x5,
+        8
+    );
     let x457: BytePoly_9 = bigint_nondet_quot!(ctx, x456, x5, 9);
     eqz(
         ctx,
@@ -5612,7 +5732,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x495: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x490, x492, 8), x5, 4);
-    let x496: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x495, x491, 8), x490, 8), x5, 8);
+    let x496: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x495, x491, 8), x490, 8), x5, 8),
+        x5,
+        8
+    );
     let x497: BytePoly_9 = bigint_nondet_quot!(ctx, x496, x5, 9);
     eqz(
         ctx,
@@ -5775,7 +5899,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x535: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x530, x532, 8), x5, 4);
-    let x536: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x535, x531, 8), x530, 8), x5, 8);
+    let x536: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x535, x531, 8), x530, 8), x5, 8),
+        x5,
+        8
+    );
     let x537: BytePoly_9 = bigint_nondet_quot!(ctx, x536, x5, 9);
     eqz(
         ctx,
@@ -5938,7 +6066,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x575: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x570, x572, 8), x5, 4);
-    let x576: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x575, x571, 8), x570, 8), x5, 8);
+    let x576: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x575, x571, 8), x570, 8), x5, 8),
+        x5,
+        8
+    );
     let x577: BytePoly_9 = bigint_nondet_quot!(ctx, x576, x5, 9);
     eqz(
         ctx,
@@ -6101,7 +6233,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x615: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x610, x612, 8), x5, 4);
-    let x616: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x615, x611, 8), x610, 8), x5, 8);
+    let x616: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x615, x611, 8), x610, 8), x5, 8),
+        x5,
+        8
+    );
     let x617: BytePoly_9 = bigint_nondet_quot!(ctx, x616, x5, 9);
     eqz(
         ctx,
@@ -6264,7 +6400,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x655: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x650, x652, 8), x5, 4);
-    let x656: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x655, x651, 8), x650, 8), x5, 8);
+    let x656: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x655, x651, 8), x650, 8), x5, 8),
+        x5,
+        8
+    );
     let x657: BytePoly_9 = bigint_nondet_quot!(ctx, x656, x5, 9);
     eqz(
         ctx,
@@ -6427,7 +6567,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x695: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x690, x692, 8), x5, 4);
-    let x696: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x695, x691, 8), x690, 8), x5, 8);
+    let x696: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x695, x691, 8), x690, 8), x5, 8),
+        x5,
+        8
+    );
     let x697: BytePoly_9 = bigint_nondet_quot!(ctx, x696, x5, 9);
     eqz(
         ctx,
@@ -6590,7 +6734,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x735: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x730, x732, 8), x5, 4);
-    let x736: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x735, x731, 8), x730, 8), x5, 8);
+    let x736: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x735, x731, 8), x730, 8), x5, 8),
+        x5,
+        8
+    );
     let x737: BytePoly_9 = bigint_nondet_quot!(ctx, x736, x5, 9);
     eqz(
         ctx,
@@ -6753,7 +6901,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x775: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x770, x772, 8), x5, 4);
-    let x776: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x775, x771, 8), x770, 8), x5, 8);
+    let x776: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x775, x771, 8), x770, 8), x5, 8),
+        x5,
+        8
+    );
     let x777: BytePoly_9 = bigint_nondet_quot!(ctx, x776, x5, 9);
     eqz(
         ctx,
@@ -6916,7 +7068,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x815: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x810, x812, 8), x5, 4);
-    let x816: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x815, x811, 8), x810, 8), x5, 8);
+    let x816: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x815, x811, 8), x810, 8), x5, 8),
+        x5,
+        8
+    );
     let x817: BytePoly_9 = bigint_nondet_quot!(ctx, x816, x5, 9);
     eqz(
         ctx,
@@ -7079,7 +7235,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x855: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x850, x852, 8), x5, 4);
-    let x856: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x855, x851, 8), x850, 8), x5, 8);
+    let x856: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x855, x851, 8), x850, 8), x5, 8),
+        x5,
+        8
+    );
     let x857: BytePoly_9 = bigint_nondet_quot!(ctx, x856, x5, 9);
     eqz(
         ctx,
@@ -7242,7 +7402,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x895: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x890, x892, 8), x5, 4);
-    let x896: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x895, x891, 8), x890, 8), x5, 8);
+    let x896: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x895, x891, 8), x890, 8), x5, 8),
+        x5,
+        8
+    );
     let x897: BytePoly_9 = bigint_nondet_quot!(ctx, x896, x5, 9);
     eqz(
         ctx,
@@ -7405,7 +7569,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x935: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x930, x932, 8), x5, 4);
-    let x936: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x935, x931, 8), x930, 8), x5, 8);
+    let x936: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x935, x931, 8), x930, 8), x5, 8),
+        x5,
+        8
+    );
     let x937: BytePoly_9 = bigint_nondet_quot!(ctx, x936, x5, 9);
     eqz(
         ctx,
@@ -7568,7 +7736,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x975: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x970, x972, 8), x5, 4);
-    let x976: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x975, x971, 8), x970, 8), x5, 8);
+    let x976: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x975, x971, 8), x970, 8), x5, 8),
+        x5,
+        8
+    );
     let x977: BytePoly_9 = bigint_nondet_quot!(ctx, x976, x5, 9);
     eqz(
         ctx,
@@ -7739,7 +7911,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1015: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1010, x1012, 8), x5, 4);
-    let x1016: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1015, x1011, 8), x1010, 8), x5, 8);
+    let x1016: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1015, x1011, 8), x1010, 8), x5, 8),
+        x5,
+        8
+    );
     let x1017: BytePoly_9 = bigint_nondet_quot!(ctx, x1016, x5, 9);
     eqz(
         ctx,
@@ -7924,7 +8100,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1055: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1050, x1052, 8), x5, 4);
-    let x1056: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1055, x1051, 8), x1050, 8), x5, 8);
+    let x1056: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1055, x1051, 8), x1050, 8), x5, 8),
+        x5,
+        8
+    );
     let x1057: BytePoly_9 = bigint_nondet_quot!(ctx, x1056, x5, 9);
     eqz(
         ctx,
@@ -8123,7 +8303,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1095: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1090, x1092, 8), x5, 4);
-    let x1096: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1095, x1091, 8), x1090, 8), x5, 8);
+    let x1096: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1095, x1091, 8), x1090, 8), x5, 8),
+        x5,
+        8
+    );
     let x1097: BytePoly_9 = bigint_nondet_quot!(ctx, x1096, x5, 9);
     eqz(
         ctx,
@@ -8322,7 +8506,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1135: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1130, x1132, 8), x5, 4);
-    let x1136: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1135, x1131, 8), x1130, 8), x5, 8);
+    let x1136: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1135, x1131, 8), x1130, 8), x5, 8),
+        x5,
+        8
+    );
     let x1137: BytePoly_9 = bigint_nondet_quot!(ctx, x1136, x5, 9);
     eqz(
         ctx,
@@ -8521,7 +8709,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1175: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1170, x1172, 8), x5, 4);
-    let x1176: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1175, x1171, 8), x1170, 8), x5, 8);
+    let x1176: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1175, x1171, 8), x1170, 8), x5, 8),
+        x5,
+        8
+    );
     let x1177: BytePoly_9 = bigint_nondet_quot!(ctx, x1176, x5, 9);
     eqz(
         ctx,
@@ -8720,7 +8912,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1215: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1210, x1212, 8), x5, 4);
-    let x1216: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1215, x1211, 8), x1210, 8), x5, 8);
+    let x1216: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1215, x1211, 8), x1210, 8), x5, 8),
+        x5,
+        8
+    );
     let x1217: BytePoly_9 = bigint_nondet_quot!(ctx, x1216, x5, 9);
     eqz(
         ctx,
@@ -8919,7 +9115,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1255: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1250, x1252, 8), x5, 4);
-    let x1256: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1255, x1251, 8), x1250, 8), x5, 8);
+    let x1256: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1255, x1251, 8), x1250, 8), x5, 8),
+        x5,
+        8
+    );
     let x1257: BytePoly_9 = bigint_nondet_quot!(ctx, x1256, x5, 9);
     eqz(
         ctx,
@@ -9118,7 +9318,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1295: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1290, x1292, 8), x5, 4);
-    let x1296: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1295, x1291, 8), x1290, 8), x5, 8);
+    let x1296: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1295, x1291, 8), x1290, 8), x5, 8),
+        x5,
+        8
+    );
     let x1297: BytePoly_9 = bigint_nondet_quot!(ctx, x1296, x5, 9);
     eqz(
         ctx,
@@ -9308,7 +9512,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1333: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1328, x1330, 8), x5, 4);
-    let x1334: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1333, x1329, 8), x1328, 8), x5, 8);
+    let x1334: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1333, x1329, 8), x1328, 8), x5, 8),
+        x5,
+        8
+    );
     let x1335: BytePoly_9 = bigint_nondet_quot!(ctx, x1334, x5, 9);
     eqz(
         ctx,
@@ -9443,7 +9651,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1358: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1353, x1355, 8), x5, 4);
-    let x1359: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1358, x1354, 8), x1353, 8), x5, 8);
+    let x1359: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1358, x1354, 8), x1353, 8), x5, 8),
+        x5,
+        8
+    );
     let x1360: BytePoly_9 = bigint_nondet_quot!(ctx, x1359, x5, 9);
     eqz(
         ctx,
@@ -9627,7 +9839,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1397: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1392, x1394, 8), x5, 4);
-    let x1398: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1397, x1393, 8), x1392, 8), x5, 8);
+    let x1398: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1397, x1393, 8), x1392, 8), x5, 8),
+        x5,
+        8
+    );
     let x1399: BytePoly_9 = bigint_nondet_quot!(ctx, x1398, x5, 9);
     eqz(
         ctx,
@@ -9826,7 +10042,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1437: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1432, x1434, 8), x5, 4);
-    let x1438: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1437, x1433, 8), x1432, 8), x5, 8);
+    let x1438: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1437, x1433, 8), x1432, 8), x5, 8),
+        x5,
+        8
+    );
     let x1439: BytePoly_9 = bigint_nondet_quot!(ctx, x1438, x5, 9);
     eqz(
         ctx,
@@ -10025,7 +10245,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1477: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1472, x1474, 8), x5, 4);
-    let x1478: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1477, x1473, 8), x1472, 8), x5, 8);
+    let x1478: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1477, x1473, 8), x1472, 8), x5, 8),
+        x5,
+        8
+    );
     let x1479: BytePoly_9 = bigint_nondet_quot!(ctx, x1478, x5, 9);
     eqz(
         ctx,
@@ -10224,7 +10448,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1517: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1512, x1514, 8), x5, 4);
-    let x1518: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1517, x1513, 8), x1512, 8), x5, 8);
+    let x1518: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1517, x1513, 8), x1512, 8), x5, 8),
+        x5,
+        8
+    );
     let x1519: BytePoly_9 = bigint_nondet_quot!(ctx, x1518, x5, 9);
     eqz(
         ctx,
@@ -10423,7 +10651,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1557: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1552, x1554, 8), x5, 4);
-    let x1558: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1557, x1553, 8), x1552, 8), x5, 8);
+    let x1558: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1557, x1553, 8), x1552, 8), x5, 8),
+        x5,
+        8
+    );
     let x1559: BytePoly_9 = bigint_nondet_quot!(ctx, x1558, x5, 9);
     eqz(
         ctx,
@@ -10622,7 +10854,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1597: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1592, x1594, 8), x5, 4);
-    let x1598: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1597, x1593, 8), x1592, 8), x5, 8);
+    let x1598: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1597, x1593, 8), x1592, 8), x5, 8),
+        x5,
+        8
+    );
     let x1599: BytePoly_9 = bigint_nondet_quot!(ctx, x1598, x5, 9);
     eqz(
         ctx,
@@ -10821,7 +11057,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1637: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1632, x1634, 8), x5, 4);
-    let x1638: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1637, x1633, 8), x1632, 8), x5, 8);
+    let x1638: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1637, x1633, 8), x1632, 8), x5, 8),
+        x5,
+        8
+    );
     let x1639: BytePoly_9 = bigint_nondet_quot!(ctx, x1638, x5, 9);
     eqz(
         ctx,
@@ -11020,7 +11260,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1677: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1672, x1674, 8), x5, 4);
-    let x1678: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1677, x1673, 8), x1672, 8), x5, 8);
+    let x1678: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1677, x1673, 8), x1672, 8), x5, 8),
+        x5,
+        8
+    );
     let x1679: BytePoly_9 = bigint_nondet_quot!(ctx, x1678, x5, 9);
     eqz(
         ctx,
@@ -11219,7 +11463,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1717: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1712, x1714, 8), x5, 4);
-    let x1718: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1717, x1713, 8), x1712, 8), x5, 8);
+    let x1718: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1717, x1713, 8), x1712, 8), x5, 8),
+        x5,
+        8
+    );
     let x1719: BytePoly_9 = bigint_nondet_quot!(ctx, x1718, x5, 9);
     eqz(
         ctx,
@@ -11418,7 +11666,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1757: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1752, x1754, 8), x5, 4);
-    let x1758: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1757, x1753, 8), x1752, 8), x5, 8);
+    let x1758: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1757, x1753, 8), x1752, 8), x5, 8),
+        x5,
+        8
+    );
     let x1759: BytePoly_9 = bigint_nondet_quot!(ctx, x1758, x5, 9);
     eqz(
         ctx,
@@ -11617,7 +11869,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1797: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1792, x1794, 8), x5, 4);
-    let x1798: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1797, x1793, 8), x1792, 8), x5, 8);
+    let x1798: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1797, x1793, 8), x1792, 8), x5, 8),
+        x5,
+        8
+    );
     let x1799: BytePoly_9 = bigint_nondet_quot!(ctx, x1798, x5, 9);
     eqz(
         ctx,
@@ -11816,7 +12072,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1837: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1832, x1834, 8), x5, 4);
-    let x1838: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1837, x1833, 8), x1832, 8), x5, 8);
+    let x1838: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1837, x1833, 8), x1832, 8), x5, 8),
+        x5,
+        8
+    );
     let x1839: BytePoly_9 = bigint_nondet_quot!(ctx, x1838, x5, 9);
     eqz(
         ctx,
@@ -12015,7 +12275,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1877: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1872, x1874, 8), x5, 4);
-    let x1878: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1877, x1873, 8), x1872, 8), x5, 8);
+    let x1878: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1877, x1873, 8), x1872, 8), x5, 8),
+        x5,
+        8
+    );
     let x1879: BytePoly_9 = bigint_nondet_quot!(ctx, x1878, x5, 9);
     eqz(
         ctx,
@@ -12214,7 +12478,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1917: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1912, x1914, 8), x5, 4);
-    let x1918: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1917, x1913, 8), x1912, 8), x5, 8);
+    let x1918: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1917, x1913, 8), x1912, 8), x5, 8),
+        x5,
+        8
+    );
     let x1919: BytePoly_9 = bigint_nondet_quot!(ctx, x1918, x5, 9);
     eqz(
         ctx,
@@ -12413,7 +12681,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1957: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1952, x1954, 8), x5, 4);
-    let x1958: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1957, x1953, 8), x1952, 8), x5, 8);
+    let x1958: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1957, x1953, 8), x1952, 8), x5, 8),
+        x5,
+        8
+    );
     let x1959: BytePoly_9 = bigint_nondet_quot!(ctx, x1958, x5, 9);
     eqz(
         ctx,
@@ -12612,7 +12884,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1997: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1992, x1994, 8), x5, 4);
-    let x1998: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1997, x1993, 8), x1992, 8), x5, 8);
+    let x1998: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1997, x1993, 8), x1992, 8), x5, 8),
+        x5,
+        8
+    );
     let x1999: BytePoly_9 = bigint_nondet_quot!(ctx, x1998, x5, 9);
     eqz(
         ctx,
@@ -12811,7 +13087,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2037: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2032, x2034, 8), x5, 4);
-    let x2038: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2037, x2033, 8), x2032, 8), x5, 8);
+    let x2038: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2037, x2033, 8), x2032, 8), x5, 8),
+        x5,
+        8
+    );
     let x2039: BytePoly_9 = bigint_nondet_quot!(ctx, x2038, x5, 9);
     eqz(
         ctx,
@@ -13010,7 +13290,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2077: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2072, x2074, 8), x5, 4);
-    let x2078: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2077, x2073, 8), x2072, 8), x5, 8);
+    let x2078: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2077, x2073, 8), x2072, 8), x5, 8),
+        x5,
+        8
+    );
     let x2079: BytePoly_9 = bigint_nondet_quot!(ctx, x2078, x5, 9);
     eqz(
         ctx,
@@ -13209,7 +13493,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2117: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2112, x2114, 8), x5, 4);
-    let x2118: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2117, x2113, 8), x2112, 8), x5, 8);
+    let x2118: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2117, x2113, 8), x2112, 8), x5, 8),
+        x5,
+        8
+    );
     let x2119: BytePoly_9 = bigint_nondet_quot!(ctx, x2118, x5, 9);
     eqz(
         ctx,
@@ -13408,7 +13696,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2157: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2152, x2154, 8), x5, 4);
-    let x2158: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2157, x2153, 8), x2152, 8), x5, 8);
+    let x2158: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2157, x2153, 8), x2152, 8), x5, 8),
+        x5,
+        8
+    );
     let x2159: BytePoly_9 = bigint_nondet_quot!(ctx, x2158, x5, 9);
     eqz(
         ctx,
@@ -13607,7 +13899,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2197: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2192, x2194, 8), x5, 4);
-    let x2198: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2197, x2193, 8), x2192, 8), x5, 8);
+    let x2198: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2197, x2193, 8), x2192, 8), x5, 8),
+        x5,
+        8
+    );
     let x2199: BytePoly_9 = bigint_nondet_quot!(ctx, x2198, x5, 9);
     eqz(
         ctx,
@@ -13806,7 +14102,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2237: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2232, x2234, 8), x5, 4);
-    let x2238: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2237, x2233, 8), x2232, 8), x5, 8);
+    let x2238: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2237, x2233, 8), x2232, 8), x5, 8),
+        x5,
+        8
+    );
     let x2239: BytePoly_9 = bigint_nondet_quot!(ctx, x2238, x5, 9);
     eqz(
         ctx,
@@ -14005,7 +14305,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2277: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2272, x2274, 8), x5, 4);
-    let x2278: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2277, x2273, 8), x2272, 8), x5, 8);
+    let x2278: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2277, x2273, 8), x2272, 8), x5, 8),
+        x5,
+        8
+    );
     let x2279: BytePoly_9 = bigint_nondet_quot!(ctx, x2278, x5, 9);
     eqz(
         ctx,
@@ -14204,7 +14508,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2317: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2312, x2314, 8), x5, 4);
-    let x2318: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2317, x2313, 8), x2312, 8), x5, 8);
+    let x2318: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2317, x2313, 8), x2312, 8), x5, 8),
+        x5,
+        8
+    );
     let x2319: BytePoly_9 = bigint_nondet_quot!(ctx, x2318, x5, 9);
     eqz(
         ctx,
@@ -14403,7 +14711,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2357: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2352, x2354, 8), x5, 4);
-    let x2358: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2357, x2353, 8), x2352, 8), x5, 8);
+    let x2358: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2357, x2353, 8), x2352, 8), x5, 8),
+        x5,
+        8
+    );
     let x2359: BytePoly_9 = bigint_nondet_quot!(ctx, x2358, x5, 9);
     eqz(
         ctx,
@@ -14602,7 +14914,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2397: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2392, x2394, 8), x5, 4);
-    let x2398: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2397, x2393, 8), x2392, 8), x5, 8);
+    let x2398: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2397, x2393, 8), x2392, 8), x5, 8),
+        x5,
+        8
+    );
     let x2399: BytePoly_9 = bigint_nondet_quot!(ctx, x2398, x5, 9);
     eqz(
         ctx,
@@ -14801,7 +15117,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2437: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2432, x2434, 8), x5, 4);
-    let x2438: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2437, x2433, 8), x2432, 8), x5, 8);
+    let x2438: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2437, x2433, 8), x2432, 8), x5, 8),
+        x5,
+        8
+    );
     let x2439: BytePoly_9 = bigint_nondet_quot!(ctx, x2438, x5, 9);
     eqz(
         ctx,
@@ -15000,7 +15320,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2477: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2472, x2474, 8), x5, 4);
-    let x2478: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2477, x2473, 8), x2472, 8), x5, 8);
+    let x2478: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2477, x2473, 8), x2472, 8), x5, 8),
+        x5,
+        8
+    );
     let x2479: BytePoly_9 = bigint_nondet_quot!(ctx, x2478, x5, 9);
     eqz(
         ctx,
@@ -15199,7 +15523,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2517: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2512, x2514, 8), x5, 4);
-    let x2518: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2517, x2513, 8), x2512, 8), x5, 8);
+    let x2518: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2517, x2513, 8), x2512, 8), x5, 8),
+        x5,
+        8
+    );
     let x2519: BytePoly_9 = bigint_nondet_quot!(ctx, x2518, x5, 9);
     eqz(
         ctx,
@@ -15398,7 +15726,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2557: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2552, x2554, 8), x5, 4);
-    let x2558: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2557, x2553, 8), x2552, 8), x5, 8);
+    let x2558: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2557, x2553, 8), x2552, 8), x5, 8),
+        x5,
+        8
+    );
     let x2559: BytePoly_9 = bigint_nondet_quot!(ctx, x2558, x5, 9);
     eqz(
         ctx,
@@ -15597,7 +15929,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2597: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2592, x2594, 8), x5, 4);
-    let x2598: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2597, x2593, 8), x2592, 8), x5, 8);
+    let x2598: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2597, x2593, 8), x2592, 8), x5, 8),
+        x5,
+        8
+    );
     let x2599: BytePoly_9 = bigint_nondet_quot!(ctx, x2598, x5, 9);
     eqz(
         ctx,
@@ -15786,7 +16122,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2634: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2629, x2631, 8), x5, 4);
-    let x2635: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2634, x2630, 8), x2629, 8), x5, 8);
+    let x2635: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2634, x2630, 8), x2629, 8), x5, 8),
+        x5,
+        8
+    );
     let x2636: BytePoly_9 = bigint_nondet_quot!(ctx, x2635, x5, 9);
     eqz(
         ctx,
@@ -15881,7 +16221,11 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x2651: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x2646, x2648, 8), x5, 4);
-    let x2652: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x2651, x2647, 8), x2646, 8), x5, 8);
+    let x2652: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x2651, x2647, 8), x2646, 8), x5, 8),
+        x5,
+        8
+    );
     let x2653: BytePoly_9 = bigint_nondet_quot!(ctx, x2652, x5, 9);
     eqz(
         ctx,
@@ -15989,7 +16333,11 @@ pub fn ec_aff_add_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x13: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 2), x1, 1);
-    let x14: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 2), x8, 2), x1, 2);
+    let x14: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 2), x8, 2), x1, 2),
+        x1,
+        2
+    );
     let x15: BytePoly_3 = bigint_nondet_quot!(ctx, x14, x1, 3);
     eqz(ctx, &bigint_sub!(x14, bigint_mul!(x15, x1, 4), 4), 24387, 2)?;
     let x16: BytePoly_2 = bigint_mul!(x13, x13, 2);
@@ -16088,7 +16436,11 @@ pub fn ec_aff_add_test_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x13: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 64), x1, 32);
-    let x14: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64);
+    let x14: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64),
+        x1,
+        64
+    );
     let x15: BytePoly_66 = bigint_nondet_quot!(ctx, x14, x1, 66);
     eqz(
         ctx,
@@ -16168,7 +16520,107 @@ pub fn ec_aff_add_test_256(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x23, x7, 32), 34, 1)?;
     return Ok(());
 }
-pub fn ec_aff_add_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_add_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 1);
+    let x1: BytePoly_1 = bigint_const!(ctx, 179);
+    let x2: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
+    let x3: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
+    let x4: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
+    let x5: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
+    let x6: BytePoly_1 = bigint_def!(ctx, 1, 4, 1);
+    let x7: BytePoly_1 = bigint_def!(ctx, 1, 5, 1);
+    let x8: BytePoly_1 = bigint_add!(bigint_sub!(x5, x3, 1), x1, 1);
+    let x9: BytePoly_1 = bigint_add!(bigint_sub!(x4, x2, 1), x1, 1);
+    let x10: BytePoly_1 = bigint_nondet_inv!(ctx, x9, x1, 1);
+    let x11: BytePoly_2 = bigint_mul!(x9, x10, 2);
+    let x12: BytePoly_3 = bigint_nondet_quot!(ctx, x11, x1, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x11, bigint_mul!(x12, x1, 4), 4), x0, 4),
+        24387,
+        2,
+    )?;
+    let x13: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 2), x1, 1);
+    let x14: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 2), x8, 2), x1, 2),
+        x1,
+        2
+    );
+    let x15: BytePoly_3 = bigint_nondet_quot!(ctx, x14, x1, 3);
+    eqz(ctx, &bigint_sub!(x14, bigint_mul!(x15, x1, 4), 4), 24387, 2)?;
+    let x16: BytePoly_2 = bigint_mul!(x13, x13, 2);
+    let x17: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x16, x2, 2), x1, 2), x4, 2),
+        x1,
+        2
+    );
+    let x18: BytePoly_3 = bigint_nondet_quot!(ctx, x17, x1, 3);
+    let x19: BytePoly_1 = bigint_nondet_rem!(ctx, x17, x1, 1);
+    let x20: BytePoly_2 = bigint_mul!(x1, x1, 2);
+    let x21: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x1,
+                    bigint_add!(
+                        bigint_mul!(x13, x19, 2),
+                        bigint_add!(bigint_sub!(x3, bigint_mul!(x13, x2, 2), 2), x1, 2),
+                        2
+                    ),
+                    2
+                ),
+                x1,
+                2
+            ),
+            x1,
+            2
+        ),
+        x20,
+        2
+    );
+    let x22: BytePoly_3 = bigint_nondet_quot!(ctx, x21, x1, 3);
+    let x23: BytePoly_1 = bigint_nondet_rem!(ctx, x21, x1, 1);
+    let x24: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x16, bigint_mul!(x18, x1, 4), 4), x2, 4),
+                    x4,
+                    4
+                ),
+                x1,
+                4
+            ),
+            x1,
+            4
+        ),
+        x19,
+        4
+    );
+    eqz(ctx, &x24, 24387, 2)?;
+    let x25: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x22, x1, 4), x23, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x13, bigint_sub!(x2, x19, 1), 2), x3, 2),
+                    x1,
+                    2
+                ),
+                x1,
+                2
+            ),
+            x20,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x25, 24387, 2)?;
+    eqz(ctx, &bigint_sub!(x19, x6, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x23, x7, 1), 34, 1)?;
+    return Ok(());
+}
+pub fn ec_add_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_32 = bigint_const!(
         ctx, 47, 252, 255, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -16192,7 +16644,11 @@ pub fn ec_aff_add_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x13: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 64), x1, 32);
-    let x14: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64);
+    let x14: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64),
+        x1,
+        64
+    );
     let x15: BytePoly_34 = bigint_nondet_quot!(ctx, x14, x1, 34);
     eqz(
         ctx,
@@ -16398,7 +16854,67 @@ pub fn ec_aff_doub_test_256(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x20, x5, 32), 34, 1)?;
     return Ok(());
 }
-pub fn ec_aff_doub_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_doub_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 1);
+    let x1: BytePoly_1 = bigint_const!(ctx, 179);
+    let x2: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
+    let x3: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
+    let x4: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
+    let x5: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
+    let x6: BytePoly_2 = bigint_mul!(x2, x2, 2);
+    let x7: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x6, x6, 2), x6, 2), x0, 2);
+    let x8: BytePoly_2 = bigint_mul!(x1, x1, 2);
+    let x9: BytePoly_2 = bigint_add!(bigint_add!(x8, x8, 2), x7, 2);
+    let x10: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x3, x3, 1), x1, 1);
+    let x11: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x7, x10, 3), x1, 1);
+    let x12: BytePoly_2 = bigint_mul!(x3, x11, 2);
+    let x13: BytePoly_2 = bigint_add!(x12, x12, 2);
+    let x14: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x9, x13, 2), x1, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x14, x1, 4), x13, 4), x9, 4),
+        24387,
+        2,
+    )?;
+    let x15: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x11, x11, 2), x1, 2), x1, 2),
+            x2,
+            2
+        ),
+        x2,
+        2
+    );
+    let x16: BytePoly_3 = bigint_nondet_quot!(ctx, x15, x1, 3);
+    let x17: BytePoly_1 = bigint_nondet_rem!(ctx, x15, x1, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x16, x1, 4), x17, 4), x15, 4),
+        24387,
+        2,
+    )?;
+    let x18: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x8, bigint_mul!(x11, x17, 2), 2), x1, 2),
+            x3,
+            2
+        ),
+        bigint_mul!(x11, x2, 2),
+        2
+    );
+    let x19: BytePoly_3 = bigint_nondet_quot!(ctx, x18, x1, 3);
+    let x20: BytePoly_1 = bigint_nondet_rem!(ctx, x18, x1, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x19, x1, 4), x20, 4), x18, 4),
+        24387,
+        2,
+    )?;
+    eqz(ctx, &bigint_sub!(x17, x4, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x20, x5, 1), 34, 1)?;
+    return Ok(());
+}
+pub fn ec_doub_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 0);
     let x1: BytePoly_32 = bigint_const!(
         ctx, 47, 252, 255, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -16535,7 +17051,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x27: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x22, x24, 2), x2, 1);
-    let x28: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x27, x23, 2), x22, 2), x2, 2);
+    let x28: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x27, x23, 2), x22, 2), x2, 2),
+        x2,
+        2
+    );
     let x29: BytePoly_3 = bigint_nondet_quot!(ctx, x28, x2, 3);
     eqz(ctx, &bigint_sub!(x28, bigint_mul!(x29, x2, 4), 4), 24387, 2)?;
     let x30: BytePoly_2 = bigint_mul!(x27, x27, 2);
@@ -16694,7 +17214,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x68: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x63, x65, 2), x2, 1);
-    let x69: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x68, x64, 2), x63, 2), x2, 2);
+    let x69: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x68, x64, 2), x63, 2), x2, 2),
+        x2,
+        2
+    );
     let x70: BytePoly_3 = bigint_nondet_quot!(ctx, x69, x2, 3);
     eqz(ctx, &bigint_sub!(x69, bigint_mul!(x70, x2, 4), 4), 24387, 2)?;
     let x71: BytePoly_2 = bigint_mul!(x68, x68, 2);
@@ -16852,7 +17376,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x108: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x103, x105, 2), x2, 1);
-    let x109: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x108, x104, 2), x103, 2), x2, 2);
+    let x109: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x108, x104, 2), x103, 2), x2, 2),
+        x2,
+        2
+    );
     let x110: BytePoly_3 = bigint_nondet_quot!(ctx, x109, x2, 3);
     eqz(
         ctx,
@@ -17015,7 +17543,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x148: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x143, x145, 2), x2, 1);
-    let x149: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x148, x144, 2), x143, 2), x2, 2);
+    let x149: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x148, x144, 2), x143, 2), x2, 2),
+        x2,
+        2
+    );
     let x150: BytePoly_3 = bigint_nondet_quot!(ctx, x149, x2, 3);
     eqz(
         ctx,
@@ -17178,7 +17710,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x188: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x183, x185, 2), x2, 1);
-    let x189: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x188, x184, 2), x183, 2), x2, 2);
+    let x189: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x188, x184, 2), x183, 2), x2, 2),
+        x2,
+        2
+    );
     let x190: BytePoly_3 = bigint_nondet_quot!(ctx, x189, x2, 3);
     eqz(
         ctx,
@@ -17341,7 +17877,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x228: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x223, x225, 2), x2, 1);
-    let x229: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x228, x224, 2), x223, 2), x2, 2);
+    let x229: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x228, x224, 2), x223, 2), x2, 2),
+        x2,
+        2
+    );
     let x230: BytePoly_3 = bigint_nondet_quot!(ctx, x229, x2, 3);
     eqz(
         ctx,
@@ -17504,7 +18044,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x268: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x263, x265, 2), x2, 1);
-    let x269: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x268, x264, 2), x263, 2), x2, 2);
+    let x269: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x268, x264, 2), x263, 2), x2, 2),
+        x2,
+        2
+    );
     let x270: BytePoly_3 = bigint_nondet_quot!(ctx, x269, x2, 3);
     eqz(
         ctx,
@@ -17667,7 +18211,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x308: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x303, x305, 2), x2, 1);
-    let x309: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x308, x304, 2), x303, 2), x2, 2);
+    let x309: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x308, x304, 2), x303, 2), x2, 2),
+        x2,
+        2
+    );
     let x310: BytePoly_3 = bigint_nondet_quot!(ctx, x309, x2, 3);
     eqz(
         ctx,
@@ -17820,7 +18368,11 @@ pub fn ec_aff_mul_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x345: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x340, x342, 2), x2, 1);
-    let x346: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x345, x341, 2), x340, 2), x2, 2);
+    let x346: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x345, x341, 2), x340, 2), x2, 2),
+        x2,
+        2
+    );
     let x347: BytePoly_3 = bigint_nondet_quot!(ctx, x346, x2, 3);
     eqz(
         ctx,
@@ -17974,7 +18526,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x28: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x23, x25, 8), x3, 4);
-    let x29: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x28, x24, 8), x23, 8), x3, 8);
+    let x29: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x28, x24, 8), x23, 8), x3, 8),
+        x3,
+        8
+    );
     let x30: BytePoly_9 = bigint_nondet_quot!(ctx, x29, x3, 9);
     eqz(
         ctx,
@@ -18138,7 +18694,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x69: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x64, x66, 8), x3, 4);
-    let x70: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x69, x65, 8), x64, 8), x3, 8);
+    let x70: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x69, x65, 8), x64, 8), x3, 8),
+        x3,
+        8
+    );
     let x71: BytePoly_9 = bigint_nondet_quot!(ctx, x70, x3, 9);
     eqz(
         ctx,
@@ -18301,7 +18861,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x109: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x104, x106, 8), x3, 4);
-    let x110: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x109, x105, 8), x104, 8), x3, 8);
+    let x110: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x109, x105, 8), x104, 8), x3, 8),
+        x3,
+        8
+    );
     let x111: BytePoly_9 = bigint_nondet_quot!(ctx, x110, x3, 9);
     eqz(
         ctx,
@@ -18464,7 +19028,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x149: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x144, x146, 8), x3, 4);
-    let x150: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x149, x145, 8), x144, 8), x3, 8);
+    let x150: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x149, x145, 8), x144, 8), x3, 8),
+        x3,
+        8
+    );
     let x151: BytePoly_9 = bigint_nondet_quot!(ctx, x150, x3, 9);
     eqz(
         ctx,
@@ -18627,7 +19195,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x189: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x184, x186, 8), x3, 4);
-    let x190: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x189, x185, 8), x184, 8), x3, 8);
+    let x190: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x189, x185, 8), x184, 8), x3, 8),
+        x3,
+        8
+    );
     let x191: BytePoly_9 = bigint_nondet_quot!(ctx, x190, x3, 9);
     eqz(
         ctx,
@@ -18790,7 +19362,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x229: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x224, x226, 8), x3, 4);
-    let x230: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x229, x225, 8), x224, 8), x3, 8);
+    let x230: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x229, x225, 8), x224, 8), x3, 8),
+        x3,
+        8
+    );
     let x231: BytePoly_9 = bigint_nondet_quot!(ctx, x230, x3, 9);
     eqz(
         ctx,
@@ -18953,7 +19529,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x269: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x264, x266, 8), x3, 4);
-    let x270: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x269, x265, 8), x264, 8), x3, 8);
+    let x270: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x269, x265, 8), x264, 8), x3, 8),
+        x3,
+        8
+    );
     let x271: BytePoly_9 = bigint_nondet_quot!(ctx, x270, x3, 9);
     eqz(
         ctx,
@@ -19116,7 +19696,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x309: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x304, x306, 8), x3, 4);
-    let x310: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x309, x305, 8), x304, 8), x3, 8);
+    let x310: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x309, x305, 8), x304, 8), x3, 8),
+        x3,
+        8
+    );
     let x311: BytePoly_9 = bigint_nondet_quot!(ctx, x310, x3, 9);
     eqz(
         ctx,
@@ -19279,7 +19863,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x349: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x344, x346, 8), x3, 4);
-    let x350: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x349, x345, 8), x344, 8), x3, 8);
+    let x350: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x349, x345, 8), x344, 8), x3, 8),
+        x3,
+        8
+    );
     let x351: BytePoly_9 = bigint_nondet_quot!(ctx, x350, x3, 9);
     eqz(
         ctx,
@@ -19442,7 +20030,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x389: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x384, x386, 8), x3, 4);
-    let x390: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x389, x385, 8), x384, 8), x3, 8);
+    let x390: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x389, x385, 8), x384, 8), x3, 8),
+        x3,
+        8
+    );
     let x391: BytePoly_9 = bigint_nondet_quot!(ctx, x390, x3, 9);
     eqz(
         ctx,
@@ -19605,7 +20197,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x429: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x424, x426, 8), x3, 4);
-    let x430: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x429, x425, 8), x424, 8), x3, 8);
+    let x430: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x429, x425, 8), x424, 8), x3, 8),
+        x3,
+        8
+    );
     let x431: BytePoly_9 = bigint_nondet_quot!(ctx, x430, x3, 9);
     eqz(
         ctx,
@@ -19768,7 +20364,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x469: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x464, x466, 8), x3, 4);
-    let x470: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x469, x465, 8), x464, 8), x3, 8);
+    let x470: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x469, x465, 8), x464, 8), x3, 8),
+        x3,
+        8
+    );
     let x471: BytePoly_9 = bigint_nondet_quot!(ctx, x470, x3, 9);
     eqz(
         ctx,
@@ -19931,7 +20531,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x509: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x504, x506, 8), x3, 4);
-    let x510: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x509, x505, 8), x504, 8), x3, 8);
+    let x510: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x509, x505, 8), x504, 8), x3, 8),
+        x3,
+        8
+    );
     let x511: BytePoly_9 = bigint_nondet_quot!(ctx, x510, x3, 9);
     eqz(
         ctx,
@@ -20094,7 +20698,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x549: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x544, x546, 8), x3, 4);
-    let x550: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x549, x545, 8), x544, 8), x3, 8);
+    let x550: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x549, x545, 8), x544, 8), x3, 8),
+        x3,
+        8
+    );
     let x551: BytePoly_9 = bigint_nondet_quot!(ctx, x550, x3, 9);
     eqz(
         ctx,
@@ -20257,7 +20865,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x589: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x584, x586, 8), x3, 4);
-    let x590: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x589, x585, 8), x584, 8), x3, 8);
+    let x590: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x589, x585, 8), x584, 8), x3, 8),
+        x3,
+        8
+    );
     let x591: BytePoly_9 = bigint_nondet_quot!(ctx, x590, x3, 9);
     eqz(
         ctx,
@@ -20420,7 +21032,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x629: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x624, x626, 8), x3, 4);
-    let x630: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x629, x625, 8), x624, 8), x3, 8);
+    let x630: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x629, x625, 8), x624, 8), x3, 8),
+        x3,
+        8
+    );
     let x631: BytePoly_9 = bigint_nondet_quot!(ctx, x630, x3, 9);
     eqz(
         ctx,
@@ -20583,7 +21199,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x669: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x664, x666, 8), x3, 4);
-    let x670: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x669, x665, 8), x664, 8), x3, 8);
+    let x670: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x669, x665, 8), x664, 8), x3, 8),
+        x3,
+        8
+    );
     let x671: BytePoly_9 = bigint_nondet_quot!(ctx, x670, x3, 9);
     eqz(
         ctx,
@@ -20746,7 +21366,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x709: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x704, x706, 8), x3, 4);
-    let x710: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x709, x705, 8), x704, 8), x3, 8);
+    let x710: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x709, x705, 8), x704, 8), x3, 8),
+        x3,
+        8
+    );
     let x711: BytePoly_9 = bigint_nondet_quot!(ctx, x710, x3, 9);
     eqz(
         ctx,
@@ -20909,7 +21533,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x749: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x744, x746, 8), x3, 4);
-    let x750: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x749, x745, 8), x744, 8), x3, 8);
+    let x750: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x749, x745, 8), x744, 8), x3, 8),
+        x3,
+        8
+    );
     let x751: BytePoly_9 = bigint_nondet_quot!(ctx, x750, x3, 9);
     eqz(
         ctx,
@@ -21072,7 +21700,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x789: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x784, x786, 8), x3, 4);
-    let x790: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x789, x785, 8), x784, 8), x3, 8);
+    let x790: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x789, x785, 8), x784, 8), x3, 8),
+        x3,
+        8
+    );
     let x791: BytePoly_9 = bigint_nondet_quot!(ctx, x790, x3, 9);
     eqz(
         ctx,
@@ -21235,7 +21867,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x829: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x824, x826, 8), x3, 4);
-    let x830: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x829, x825, 8), x824, 8), x3, 8);
+    let x830: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x829, x825, 8), x824, 8), x3, 8),
+        x3,
+        8
+    );
     let x831: BytePoly_9 = bigint_nondet_quot!(ctx, x830, x3, 9);
     eqz(
         ctx,
@@ -21398,7 +22034,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x869: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x864, x866, 8), x3, 4);
-    let x870: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x869, x865, 8), x864, 8), x3, 8);
+    let x870: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x869, x865, 8), x864, 8), x3, 8),
+        x3,
+        8
+    );
     let x871: BytePoly_9 = bigint_nondet_quot!(ctx, x870, x3, 9);
     eqz(
         ctx,
@@ -21561,7 +22201,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x909: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x904, x906, 8), x3, 4);
-    let x910: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x909, x905, 8), x904, 8), x3, 8);
+    let x910: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x909, x905, 8), x904, 8), x3, 8),
+        x3,
+        8
+    );
     let x911: BytePoly_9 = bigint_nondet_quot!(ctx, x910, x3, 9);
     eqz(
         ctx,
@@ -21724,7 +22368,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x949: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x944, x946, 8), x3, 4);
-    let x950: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x949, x945, 8), x944, 8), x3, 8);
+    let x950: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x949, x945, 8), x944, 8), x3, 8),
+        x3,
+        8
+    );
     let x951: BytePoly_9 = bigint_nondet_quot!(ctx, x950, x3, 9);
     eqz(
         ctx,
@@ -21887,7 +22535,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x989: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x984, x986, 8), x3, 4);
-    let x990: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x989, x985, 8), x984, 8), x3, 8);
+    let x990: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x989, x985, 8), x984, 8), x3, 8),
+        x3,
+        8
+    );
     let x991: BytePoly_9 = bigint_nondet_quot!(ctx, x990, x3, 9);
     eqz(
         ctx,
@@ -22070,7 +22722,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1029: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1024, x1026, 8), x3, 4);
-    let x1030: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1029, x1025, 8), x1024, 8), x3, 8);
+    let x1030: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1029, x1025, 8), x1024, 8), x3, 8),
+        x3,
+        8
+    );
     let x1031: BytePoly_9 = bigint_nondet_quot!(ctx, x1030, x3, 9);
     eqz(
         ctx,
@@ -22269,7 +22925,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1069: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1064, x1066, 8), x3, 4);
-    let x1070: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1069, x1065, 8), x1064, 8), x3, 8);
+    let x1070: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1069, x1065, 8), x1064, 8), x3, 8),
+        x3,
+        8
+    );
     let x1071: BytePoly_9 = bigint_nondet_quot!(ctx, x1070, x3, 9);
     eqz(
         ctx,
@@ -22468,7 +23128,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1109: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1104, x1106, 8), x3, 4);
-    let x1110: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1109, x1105, 8), x1104, 8), x3, 8);
+    let x1110: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1109, x1105, 8), x1104, 8), x3, 8),
+        x3,
+        8
+    );
     let x1111: BytePoly_9 = bigint_nondet_quot!(ctx, x1110, x3, 9);
     eqz(
         ctx,
@@ -22667,7 +23331,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1149: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1144, x1146, 8), x3, 4);
-    let x1150: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1149, x1145, 8), x1144, 8), x3, 8);
+    let x1150: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1149, x1145, 8), x1144, 8), x3, 8),
+        x3,
+        8
+    );
     let x1151: BytePoly_9 = bigint_nondet_quot!(ctx, x1150, x3, 9);
     eqz(
         ctx,
@@ -22866,7 +23534,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1189: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1184, x1186, 8), x3, 4);
-    let x1190: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1189, x1185, 8), x1184, 8), x3, 8);
+    let x1190: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1189, x1185, 8), x1184, 8), x3, 8),
+        x3,
+        8
+    );
     let x1191: BytePoly_9 = bigint_nondet_quot!(ctx, x1190, x3, 9);
     eqz(
         ctx,
@@ -23065,7 +23737,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1229: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1224, x1226, 8), x3, 4);
-    let x1230: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1229, x1225, 8), x1224, 8), x3, 8);
+    let x1230: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1229, x1225, 8), x1224, 8), x3, 8),
+        x3,
+        8
+    );
     let x1231: BytePoly_9 = bigint_nondet_quot!(ctx, x1230, x3, 9);
     eqz(
         ctx,
@@ -23264,7 +23940,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1269: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1264, x1266, 8), x3, 4);
-    let x1270: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1269, x1265, 8), x1264, 8), x3, 8);
+    let x1270: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1269, x1265, 8), x1264, 8), x3, 8),
+        x3,
+        8
+    );
     let x1271: BytePoly_9 = bigint_nondet_quot!(ctx, x1270, x3, 9);
     eqz(
         ctx,
@@ -23453,7 +24133,11 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x1306: BytePoly_4 = bigint_nondet_rem!(ctx, bigint_mul!(x1301, x1303, 8), x3, 4);
-    let x1307: BytePoly_8 = bigint_add!(bigint_sub!(bigint_mul!(x1306, x1302, 8), x1301, 8), x3, 8);
+    let x1307: BytePoly_8 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1306, x1302, 8), x1301, 8), x3, 8),
+        x3,
+        8
+    );
     let x1308: BytePoly_9 = bigint_nondet_quot!(ctx, x1307, x3, 9);
     eqz(
         ctx,
@@ -23540,7 +24224,1481 @@ pub fn ec_aff_mul_test_32(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x1315, x12, 4), 34, 1)?;
     return Ok(());
 }
-pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_mul_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 12);
+    let x1: BytePoly_1 = bigint_const!(ctx, 1);
+    let x2: BytePoly_1 = bigint_const!(ctx, 179);
+    let x3: BytePoly_1 = bigint_const!(ctx, 2);
+    let x4: BytePoly_1 = bigint_const!(ctx, 1);
+    let x5: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
+    let x6: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
+    let x7: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
+    let x8: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
+    let x9: BytePoly_1 = bigint_def!(ctx, 1, 4, 1);
+    let x10: BytePoly_1 = bigint_def!(ctx, 1, 5, 1);
+    let x11: BytePoly_1 = bigint_def!(ctx, 1, 6, 1);
+    eqz(ctx, &bigint_sub!(x5, x5, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x6, x6, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x7, x7, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x8, x8, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x9, x9, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x10, x10, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x11, x11, 1), 34, 1)?;
+    let x12: BytePoly_2 = bigint_mul!(x8, x8, 2);
+    let x13: BytePoly_3 = bigint_nondet_quot!(ctx, x12, x2, 3);
+    let x14: BytePoly_1 = bigint_nondet_rem!(ctx, x12, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x13, x2, 4), x14, 4), x12, 4),
+        24387,
+        2,
+    )?;
+    let x15: BytePoly_2 = bigint_mul!(x2, x2, 2);
+    let x16: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(
+                bigint_add!(bigint_mul!(x8, x14, 2), bigint_mul!(x8, x1, 2), 2),
+                x0,
+                2
+            ),
+            bigint_mul!(x9, x9, 2),
+            2
+        ),
+        x15,
+        2
+    );
+    let x17: BytePoly_3 = bigint_nondet_quot!(ctx, x16, x2, 3);
+    let x18: BytePoly_1 = bigint_nondet_rem!(ctx, x16, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x17, x2, 4), x18, 4), x16, 4),
+        24387,
+        2,
+    )?;
+    eqz(ctx, &x18, 34, 1)?;
+    let x19: BytePoly_1 = bigint_nondet_rem!(ctx, x7, x3, 1);
+    let x20: BytePoly_1 = bigint_nondet_quot!(ctx, x7, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x20, x3, 2), x19, 2), x7, 2),
+        8131,
+        2,
+    )?;
+    let x21: BytePoly_1 = bigint_sub!(x4, x19, 1);
+    eqz(ctx, &bigint_mul!(x19, x21, 2), 8131, 2)?;
+    let x22: BytePoly_1 = bigint_add!(bigint_sub!(x6, x9, 1), x2, 1);
+    let x23: BytePoly_1 = bigint_add!(bigint_sub!(x5, x8, 1), x2, 1);
+    let x24: BytePoly_1 = bigint_nondet_inv!(ctx, x23, x2, 1);
+    let x25: BytePoly_2 = bigint_mul!(x23, x24, 2);
+    let x26: BytePoly_3 = bigint_nondet_quot!(ctx, x25, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x25, bigint_mul!(x26, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x27: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x22, x24, 2), x2, 1);
+    let x28: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x27, x23, 2), x22, 2), x2, 2),
+        x2,
+        2
+    );
+    let x29: BytePoly_3 = bigint_nondet_quot!(ctx, x28, x2, 3);
+    eqz(ctx, &bigint_sub!(x28, bigint_mul!(x29, x2, 4), 4), 24387, 2)?;
+    let x30: BytePoly_2 = bigint_mul!(x27, x27, 2);
+    let x31: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x30, x8, 2), x2, 2), x5, 2),
+        x2,
+        2
+    );
+    let x32: BytePoly_3 = bigint_nondet_quot!(ctx, x31, x2, 3);
+    let x33: BytePoly_1 = bigint_nondet_rem!(ctx, x31, x2, 1);
+    let x34: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x27, x33, 2),
+                        bigint_add!(bigint_sub!(x9, bigint_mul!(x27, x8, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x35: BytePoly_3 = bigint_nondet_quot!(ctx, x34, x2, 3);
+    let x36: BytePoly_1 = bigint_nondet_rem!(ctx, x34, x2, 1);
+    let x37: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x30, bigint_mul!(x32, x2, 4), 4), x8, 4),
+                    x5,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x33,
+        4
+    );
+    eqz(ctx, &x37, 24387, 2)?;
+    let x38: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x35, x2, 4), x36, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x27, bigint_sub!(x8, x33, 1), 2), x9, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x38, 24387, 2)?;
+    let x39: BytePoly_2 = bigint_add!(bigint_mul!(x33, x19, 2), bigint_mul!(x8, x21, 2), 2);
+    let x40: BytePoly_2 = bigint_add!(bigint_mul!(x36, x19, 2), bigint_mul!(x9, x21, 2), 2);
+    let x41: BytePoly_3 = bigint_nondet_quot!(ctx, x39, x2, 3);
+    let x42: BytePoly_1 = bigint_nondet_rem!(ctx, x39, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x41, x2, 4), x42, 4), x39, 4),
+        24387,
+        2,
+    )?;
+    let x43: BytePoly_3 = bigint_nondet_quot!(ctx, x40, x2, 3);
+    let x44: BytePoly_1 = bigint_nondet_rem!(ctx, x40, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x43, x2, 4), x44, 4), x40, 4),
+        24387,
+        2,
+    )?;
+    let x45: BytePoly_2 = bigint_mul!(x5, x5, 2);
+    let x46: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x45, x45, 2), x45, 2), x1, 2);
+    let x47: BytePoly_2 = bigint_add!(x15, x15, 2);
+    let x48: BytePoly_2 = bigint_add!(x47, x46, 2);
+    let x49: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x6, x6, 1), x2, 1);
+    let x50: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x46, x49, 3), x2, 1);
+    let x51: BytePoly_2 = bigint_mul!(x6, x50, 2);
+    let x52: BytePoly_2 = bigint_add!(x51, x51, 2);
+    let x53: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x48, x52, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x53, x2, 4), x52, 4), x48, 4),
+        24387,
+        2,
+    )?;
+    let x54: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x50, x50, 2), x2, 2), x2, 2),
+            x5,
+            2
+        ),
+        x5,
+        2
+    );
+    let x55: BytePoly_3 = bigint_nondet_quot!(ctx, x54, x2, 3);
+    let x56: BytePoly_1 = bigint_nondet_rem!(ctx, x54, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x55, x2, 4), x56, 4), x54, 4),
+        24387,
+        2,
+    )?;
+    let x57: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x50, x56, 2), 2), x2, 2),
+            x6,
+            2
+        ),
+        bigint_mul!(x50, x5, 2),
+        2
+    );
+    let x58: BytePoly_3 = bigint_nondet_quot!(ctx, x57, x2, 3);
+    let x59: BytePoly_1 = bigint_nondet_rem!(ctx, x57, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x58, x2, 4), x59, 4), x57, 4),
+        24387,
+        2,
+    )?;
+    let x60: BytePoly_1 = bigint_nondet_rem!(ctx, x20, x3, 1);
+    let x61: BytePoly_1 = bigint_nondet_quot!(ctx, x20, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x61, x3, 2), x60, 2), x20, 2),
+        8131,
+        2,
+    )?;
+    let x62: BytePoly_1 = bigint_sub!(x4, x60, 1);
+    eqz(ctx, &bigint_mul!(x60, x62, 2), 8131, 2)?;
+    let x63: BytePoly_1 = bigint_add!(bigint_sub!(x59, x44, 1), x2, 1);
+    let x64: BytePoly_1 = bigint_add!(bigint_sub!(x56, x42, 1), x2, 1);
+    let x65: BytePoly_1 = bigint_nondet_inv!(ctx, x64, x2, 1);
+    let x66: BytePoly_2 = bigint_mul!(x64, x65, 2);
+    let x67: BytePoly_3 = bigint_nondet_quot!(ctx, x66, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x66, bigint_mul!(x67, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x68: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x63, x65, 2), x2, 1);
+    let x69: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x68, x64, 2), x63, 2), x2, 2),
+        x2,
+        2
+    );
+    let x70: BytePoly_3 = bigint_nondet_quot!(ctx, x69, x2, 3);
+    eqz(ctx, &bigint_sub!(x69, bigint_mul!(x70, x2, 4), 4), 24387, 2)?;
+    let x71: BytePoly_2 = bigint_mul!(x68, x68, 2);
+    let x72: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x71, x42, 2), x2, 2), x56, 2),
+        x2,
+        2
+    );
+    let x73: BytePoly_3 = bigint_nondet_quot!(ctx, x72, x2, 3);
+    let x74: BytePoly_1 = bigint_nondet_rem!(ctx, x72, x2, 1);
+    let x75: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x68, x74, 2),
+                        bigint_add!(bigint_sub!(x44, bigint_mul!(x68, x42, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x76: BytePoly_3 = bigint_nondet_quot!(ctx, x75, x2, 3);
+    let x77: BytePoly_1 = bigint_nondet_rem!(ctx, x75, x2, 1);
+    let x78: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x71, bigint_mul!(x73, x2, 4), 4), x42, 4),
+                    x56,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x74,
+        4
+    );
+    eqz(ctx, &x78, 24387, 2)?;
+    let x79: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x76, x2, 4), x77, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x68, bigint_sub!(x42, x74, 1), 2), x44, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x79, 24387, 2)?;
+    let x80: BytePoly_2 = bigint_add!(bigint_mul!(x74, x60, 2), bigint_mul!(x42, x62, 2), 2);
+    let x81: BytePoly_2 = bigint_add!(bigint_mul!(x77, x60, 2), bigint_mul!(x44, x62, 2), 2);
+    let x82: BytePoly_3 = bigint_nondet_quot!(ctx, x80, x2, 3);
+    let x83: BytePoly_1 = bigint_nondet_rem!(ctx, x80, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x82, x2, 4), x83, 4), x80, 4),
+        24387,
+        2,
+    )?;
+    let x84: BytePoly_3 = bigint_nondet_quot!(ctx, x81, x2, 3);
+    let x85: BytePoly_1 = bigint_nondet_rem!(ctx, x81, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x84, x2, 4), x85, 4), x81, 4),
+        24387,
+        2,
+    )?;
+    let x86: BytePoly_2 = bigint_mul!(x56, x56, 2);
+    let x87: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x86, x86, 2), x86, 2), x1, 2);
+    let x88: BytePoly_2 = bigint_add!(x47, x87, 2);
+    let x89: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x59, x59, 1), x2, 1);
+    let x90: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x87, x89, 3), x2, 1);
+    let x91: BytePoly_2 = bigint_mul!(x59, x90, 2);
+    let x92: BytePoly_2 = bigint_add!(x91, x91, 2);
+    let x93: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x88, x92, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x93, x2, 4), x92, 4), x88, 4),
+        24387,
+        2,
+    )?;
+    let x94: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x90, x90, 2), x2, 2), x2, 2),
+            x56,
+            2
+        ),
+        x56,
+        2
+    );
+    let x95: BytePoly_3 = bigint_nondet_quot!(ctx, x94, x2, 3);
+    let x96: BytePoly_1 = bigint_nondet_rem!(ctx, x94, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x95, x2, 4), x96, 4), x94, 4),
+        24387,
+        2,
+    )?;
+    let x97: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x90, x96, 2), 2), x2, 2),
+            x59,
+            2
+        ),
+        bigint_mul!(x90, x56, 2),
+        2
+    );
+    let x98: BytePoly_3 = bigint_nondet_quot!(ctx, x97, x2, 3);
+    let x99: BytePoly_1 = bigint_nondet_rem!(ctx, x97, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x98, x2, 4), x99, 4), x97, 4),
+        24387,
+        2,
+    )?;
+    let x100: BytePoly_1 = bigint_nondet_rem!(ctx, x61, x3, 1);
+    let x101: BytePoly_1 = bigint_nondet_quot!(ctx, x61, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x101, x3, 2), x100, 2), x61, 2),
+        8131,
+        2,
+    )?;
+    let x102: BytePoly_1 = bigint_sub!(x4, x100, 1);
+    eqz(ctx, &bigint_mul!(x100, x102, 2), 8131, 2)?;
+    let x103: BytePoly_1 = bigint_add!(bigint_sub!(x99, x85, 1), x2, 1);
+    let x104: BytePoly_1 = bigint_add!(bigint_sub!(x96, x83, 1), x2, 1);
+    let x105: BytePoly_1 = bigint_nondet_inv!(ctx, x104, x2, 1);
+    let x106: BytePoly_2 = bigint_mul!(x104, x105, 2);
+    let x107: BytePoly_3 = bigint_nondet_quot!(ctx, x106, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x106, bigint_mul!(x107, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x108: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x103, x105, 2), x2, 1);
+    let x109: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x108, x104, 2), x103, 2), x2, 2),
+        x2,
+        2
+    );
+    let x110: BytePoly_3 = bigint_nondet_quot!(ctx, x109, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(x109, bigint_mul!(x110, x2, 4), 4),
+        24387,
+        2,
+    )?;
+    let x111: BytePoly_2 = bigint_mul!(x108, x108, 2);
+    let x112: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x111, x83, 2), x2, 2), x96, 2),
+        x2,
+        2
+    );
+    let x113: BytePoly_3 = bigint_nondet_quot!(ctx, x112, x2, 3);
+    let x114: BytePoly_1 = bigint_nondet_rem!(ctx, x112, x2, 1);
+    let x115: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x108, x114, 2),
+                        bigint_add!(bigint_sub!(x85, bigint_mul!(x108, x83, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x116: BytePoly_3 = bigint_nondet_quot!(ctx, x115, x2, 3);
+    let x117: BytePoly_1 = bigint_nondet_rem!(ctx, x115, x2, 1);
+    let x118: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x111, bigint_mul!(x113, x2, 4), 4), x83, 4),
+                    x96,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x114,
+        4
+    );
+    eqz(ctx, &x118, 24387, 2)?;
+    let x119: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x116, x2, 4), x117, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x108, bigint_sub!(x83, x114, 1), 2), x85, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x119, 24387, 2)?;
+    let x120: BytePoly_2 = bigint_add!(bigint_mul!(x114, x100, 2), bigint_mul!(x83, x102, 2), 2);
+    let x121: BytePoly_2 = bigint_add!(bigint_mul!(x117, x100, 2), bigint_mul!(x85, x102, 2), 2);
+    let x122: BytePoly_3 = bigint_nondet_quot!(ctx, x120, x2, 3);
+    let x123: BytePoly_1 = bigint_nondet_rem!(ctx, x120, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x122, x2, 4), x123, 4), x120, 4),
+        24387,
+        2,
+    )?;
+    let x124: BytePoly_3 = bigint_nondet_quot!(ctx, x121, x2, 3);
+    let x125: BytePoly_1 = bigint_nondet_rem!(ctx, x121, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x124, x2, 4), x125, 4), x121, 4),
+        24387,
+        2,
+    )?;
+    let x126: BytePoly_2 = bigint_mul!(x96, x96, 2);
+    let x127: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x126, x126, 2), x126, 2), x1, 2);
+    let x128: BytePoly_2 = bigint_add!(x47, x127, 2);
+    let x129: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x99, x99, 1), x2, 1);
+    let x130: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x127, x129, 3), x2, 1);
+    let x131: BytePoly_2 = bigint_mul!(x99, x130, 2);
+    let x132: BytePoly_2 = bigint_add!(x131, x131, 2);
+    let x133: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x128, x132, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x133, x2, 4), x132, 4), x128, 4),
+        24387,
+        2,
+    )?;
+    let x134: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x130, x130, 2), x2, 2), x2, 2),
+            x96,
+            2
+        ),
+        x96,
+        2
+    );
+    let x135: BytePoly_3 = bigint_nondet_quot!(ctx, x134, x2, 3);
+    let x136: BytePoly_1 = bigint_nondet_rem!(ctx, x134, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x135, x2, 4), x136, 4), x134, 4),
+        24387,
+        2,
+    )?;
+    let x137: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x130, x136, 2), 2), x2, 2),
+            x99,
+            2
+        ),
+        bigint_mul!(x130, x96, 2),
+        2
+    );
+    let x138: BytePoly_3 = bigint_nondet_quot!(ctx, x137, x2, 3);
+    let x139: BytePoly_1 = bigint_nondet_rem!(ctx, x137, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x138, x2, 4), x139, 4), x137, 4),
+        24387,
+        2,
+    )?;
+    let x140: BytePoly_1 = bigint_nondet_rem!(ctx, x101, x3, 1);
+    let x141: BytePoly_1 = bigint_nondet_quot!(ctx, x101, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x141, x3, 2), x140, 2), x101, 2),
+        8131,
+        2,
+    )?;
+    let x142: BytePoly_1 = bigint_sub!(x4, x140, 1);
+    eqz(ctx, &bigint_mul!(x140, x142, 2), 8131, 2)?;
+    let x143: BytePoly_1 = bigint_add!(bigint_sub!(x139, x125, 1), x2, 1);
+    let x144: BytePoly_1 = bigint_add!(bigint_sub!(x136, x123, 1), x2, 1);
+    let x145: BytePoly_1 = bigint_nondet_inv!(ctx, x144, x2, 1);
+    let x146: BytePoly_2 = bigint_mul!(x144, x145, 2);
+    let x147: BytePoly_3 = bigint_nondet_quot!(ctx, x146, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x146, bigint_mul!(x147, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x148: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x143, x145, 2), x2, 1);
+    let x149: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x148, x144, 2), x143, 2), x2, 2),
+        x2,
+        2
+    );
+    let x150: BytePoly_3 = bigint_nondet_quot!(ctx, x149, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(x149, bigint_mul!(x150, x2, 4), 4),
+        24387,
+        2,
+    )?;
+    let x151: BytePoly_2 = bigint_mul!(x148, x148, 2);
+    let x152: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x151, x123, 2), x2, 2), x136, 2),
+        x2,
+        2
+    );
+    let x153: BytePoly_3 = bigint_nondet_quot!(ctx, x152, x2, 3);
+    let x154: BytePoly_1 = bigint_nondet_rem!(ctx, x152, x2, 1);
+    let x155: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x148, x154, 2),
+                        bigint_add!(bigint_sub!(x125, bigint_mul!(x148, x123, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x156: BytePoly_3 = bigint_nondet_quot!(ctx, x155, x2, 3);
+    let x157: BytePoly_1 = bigint_nondet_rem!(ctx, x155, x2, 1);
+    let x158: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x151, bigint_mul!(x153, x2, 4), 4), x123, 4),
+                    x136,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x154,
+        4
+    );
+    eqz(ctx, &x158, 24387, 2)?;
+    let x159: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x156, x2, 4), x157, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x148, bigint_sub!(x123, x154, 1), 2), x125, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x159, 24387, 2)?;
+    let x160: BytePoly_2 = bigint_add!(bigint_mul!(x154, x140, 2), bigint_mul!(x123, x142, 2), 2);
+    let x161: BytePoly_2 = bigint_add!(bigint_mul!(x157, x140, 2), bigint_mul!(x125, x142, 2), 2);
+    let x162: BytePoly_3 = bigint_nondet_quot!(ctx, x160, x2, 3);
+    let x163: BytePoly_1 = bigint_nondet_rem!(ctx, x160, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x162, x2, 4), x163, 4), x160, 4),
+        24387,
+        2,
+    )?;
+    let x164: BytePoly_3 = bigint_nondet_quot!(ctx, x161, x2, 3);
+    let x165: BytePoly_1 = bigint_nondet_rem!(ctx, x161, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x164, x2, 4), x165, 4), x161, 4),
+        24387,
+        2,
+    )?;
+    let x166: BytePoly_2 = bigint_mul!(x136, x136, 2);
+    let x167: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x166, x166, 2), x166, 2), x1, 2);
+    let x168: BytePoly_2 = bigint_add!(x47, x167, 2);
+    let x169: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x139, x139, 1), x2, 1);
+    let x170: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x167, x169, 3), x2, 1);
+    let x171: BytePoly_2 = bigint_mul!(x139, x170, 2);
+    let x172: BytePoly_2 = bigint_add!(x171, x171, 2);
+    let x173: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x168, x172, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x173, x2, 4), x172, 4), x168, 4),
+        24387,
+        2,
+    )?;
+    let x174: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x170, x170, 2), x2, 2), x2, 2),
+            x136,
+            2
+        ),
+        x136,
+        2
+    );
+    let x175: BytePoly_3 = bigint_nondet_quot!(ctx, x174, x2, 3);
+    let x176: BytePoly_1 = bigint_nondet_rem!(ctx, x174, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x175, x2, 4), x176, 4), x174, 4),
+        24387,
+        2,
+    )?;
+    let x177: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x170, x176, 2), 2), x2, 2),
+            x139,
+            2
+        ),
+        bigint_mul!(x170, x136, 2),
+        2
+    );
+    let x178: BytePoly_3 = bigint_nondet_quot!(ctx, x177, x2, 3);
+    let x179: BytePoly_1 = bigint_nondet_rem!(ctx, x177, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x178, x2, 4), x179, 4), x177, 4),
+        24387,
+        2,
+    )?;
+    let x180: BytePoly_1 = bigint_nondet_rem!(ctx, x141, x3, 1);
+    let x181: BytePoly_1 = bigint_nondet_quot!(ctx, x141, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x181, x3, 2), x180, 2), x141, 2),
+        8131,
+        2,
+    )?;
+    let x182: BytePoly_1 = bigint_sub!(x4, x180, 1);
+    eqz(ctx, &bigint_mul!(x180, x182, 2), 8131, 2)?;
+    let x183: BytePoly_1 = bigint_add!(bigint_sub!(x179, x165, 1), x2, 1);
+    let x184: BytePoly_1 = bigint_add!(bigint_sub!(x176, x163, 1), x2, 1);
+    let x185: BytePoly_1 = bigint_nondet_inv!(ctx, x184, x2, 1);
+    let x186: BytePoly_2 = bigint_mul!(x184, x185, 2);
+    let x187: BytePoly_3 = bigint_nondet_quot!(ctx, x186, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x186, bigint_mul!(x187, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x188: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x183, x185, 2), x2, 1);
+    let x189: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x188, x184, 2), x183, 2), x2, 2),
+        x2,
+        2
+    );
+    let x190: BytePoly_3 = bigint_nondet_quot!(ctx, x189, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(x189, bigint_mul!(x190, x2, 4), 4),
+        24387,
+        2,
+    )?;
+    let x191: BytePoly_2 = bigint_mul!(x188, x188, 2);
+    let x192: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x191, x163, 2), x2, 2), x176, 2),
+        x2,
+        2
+    );
+    let x193: BytePoly_3 = bigint_nondet_quot!(ctx, x192, x2, 3);
+    let x194: BytePoly_1 = bigint_nondet_rem!(ctx, x192, x2, 1);
+    let x195: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x188, x194, 2),
+                        bigint_add!(bigint_sub!(x165, bigint_mul!(x188, x163, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x196: BytePoly_3 = bigint_nondet_quot!(ctx, x195, x2, 3);
+    let x197: BytePoly_1 = bigint_nondet_rem!(ctx, x195, x2, 1);
+    let x198: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x191, bigint_mul!(x193, x2, 4), 4), x163, 4),
+                    x176,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x194,
+        4
+    );
+    eqz(ctx, &x198, 24387, 2)?;
+    let x199: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x196, x2, 4), x197, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x188, bigint_sub!(x163, x194, 1), 2), x165, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x199, 24387, 2)?;
+    let x200: BytePoly_2 = bigint_add!(bigint_mul!(x194, x180, 2), bigint_mul!(x163, x182, 2), 2);
+    let x201: BytePoly_2 = bigint_add!(bigint_mul!(x197, x180, 2), bigint_mul!(x165, x182, 2), 2);
+    let x202: BytePoly_3 = bigint_nondet_quot!(ctx, x200, x2, 3);
+    let x203: BytePoly_1 = bigint_nondet_rem!(ctx, x200, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x202, x2, 4), x203, 4), x200, 4),
+        24387,
+        2,
+    )?;
+    let x204: BytePoly_3 = bigint_nondet_quot!(ctx, x201, x2, 3);
+    let x205: BytePoly_1 = bigint_nondet_rem!(ctx, x201, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x204, x2, 4), x205, 4), x201, 4),
+        24387,
+        2,
+    )?;
+    let x206: BytePoly_2 = bigint_mul!(x176, x176, 2);
+    let x207: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x206, x206, 2), x206, 2), x1, 2);
+    let x208: BytePoly_2 = bigint_add!(x47, x207, 2);
+    let x209: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x179, x179, 1), x2, 1);
+    let x210: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x207, x209, 3), x2, 1);
+    let x211: BytePoly_2 = bigint_mul!(x179, x210, 2);
+    let x212: BytePoly_2 = bigint_add!(x211, x211, 2);
+    let x213: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x208, x212, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x213, x2, 4), x212, 4), x208, 4),
+        24387,
+        2,
+    )?;
+    let x214: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x210, x210, 2), x2, 2), x2, 2),
+            x176,
+            2
+        ),
+        x176,
+        2
+    );
+    let x215: BytePoly_3 = bigint_nondet_quot!(ctx, x214, x2, 3);
+    let x216: BytePoly_1 = bigint_nondet_rem!(ctx, x214, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x215, x2, 4), x216, 4), x214, 4),
+        24387,
+        2,
+    )?;
+    let x217: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x210, x216, 2), 2), x2, 2),
+            x179,
+            2
+        ),
+        bigint_mul!(x210, x176, 2),
+        2
+    );
+    let x218: BytePoly_3 = bigint_nondet_quot!(ctx, x217, x2, 3);
+    let x219: BytePoly_1 = bigint_nondet_rem!(ctx, x217, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x218, x2, 4), x219, 4), x217, 4),
+        24387,
+        2,
+    )?;
+    let x220: BytePoly_1 = bigint_nondet_rem!(ctx, x181, x3, 1);
+    let x221: BytePoly_1 = bigint_nondet_quot!(ctx, x181, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x221, x3, 2), x220, 2), x181, 2),
+        8131,
+        2,
+    )?;
+    let x222: BytePoly_1 = bigint_sub!(x4, x220, 1);
+    eqz(ctx, &bigint_mul!(x220, x222, 2), 8131, 2)?;
+    let x223: BytePoly_1 = bigint_add!(bigint_sub!(x219, x205, 1), x2, 1);
+    let x224: BytePoly_1 = bigint_add!(bigint_sub!(x216, x203, 1), x2, 1);
+    let x225: BytePoly_1 = bigint_nondet_inv!(ctx, x224, x2, 1);
+    let x226: BytePoly_2 = bigint_mul!(x224, x225, 2);
+    let x227: BytePoly_3 = bigint_nondet_quot!(ctx, x226, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x226, bigint_mul!(x227, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x228: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x223, x225, 2), x2, 1);
+    let x229: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x228, x224, 2), x223, 2), x2, 2),
+        x2,
+        2
+    );
+    let x230: BytePoly_3 = bigint_nondet_quot!(ctx, x229, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(x229, bigint_mul!(x230, x2, 4), 4),
+        24387,
+        2,
+    )?;
+    let x231: BytePoly_2 = bigint_mul!(x228, x228, 2);
+    let x232: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x231, x203, 2), x2, 2), x216, 2),
+        x2,
+        2
+    );
+    let x233: BytePoly_3 = bigint_nondet_quot!(ctx, x232, x2, 3);
+    let x234: BytePoly_1 = bigint_nondet_rem!(ctx, x232, x2, 1);
+    let x235: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x228, x234, 2),
+                        bigint_add!(bigint_sub!(x205, bigint_mul!(x228, x203, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x236: BytePoly_3 = bigint_nondet_quot!(ctx, x235, x2, 3);
+    let x237: BytePoly_1 = bigint_nondet_rem!(ctx, x235, x2, 1);
+    let x238: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x231, bigint_mul!(x233, x2, 4), 4), x203, 4),
+                    x216,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x234,
+        4
+    );
+    eqz(ctx, &x238, 24387, 2)?;
+    let x239: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x236, x2, 4), x237, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x228, bigint_sub!(x203, x234, 1), 2), x205, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x239, 24387, 2)?;
+    let x240: BytePoly_2 = bigint_add!(bigint_mul!(x234, x220, 2), bigint_mul!(x203, x222, 2), 2);
+    let x241: BytePoly_2 = bigint_add!(bigint_mul!(x237, x220, 2), bigint_mul!(x205, x222, 2), 2);
+    let x242: BytePoly_3 = bigint_nondet_quot!(ctx, x240, x2, 3);
+    let x243: BytePoly_1 = bigint_nondet_rem!(ctx, x240, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x242, x2, 4), x243, 4), x240, 4),
+        24387,
+        2,
+    )?;
+    let x244: BytePoly_3 = bigint_nondet_quot!(ctx, x241, x2, 3);
+    let x245: BytePoly_1 = bigint_nondet_rem!(ctx, x241, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x244, x2, 4), x245, 4), x241, 4),
+        24387,
+        2,
+    )?;
+    let x246: BytePoly_2 = bigint_mul!(x216, x216, 2);
+    let x247: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x246, x246, 2), x246, 2), x1, 2);
+    let x248: BytePoly_2 = bigint_add!(x47, x247, 2);
+    let x249: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x219, x219, 1), x2, 1);
+    let x250: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x247, x249, 3), x2, 1);
+    let x251: BytePoly_2 = bigint_mul!(x219, x250, 2);
+    let x252: BytePoly_2 = bigint_add!(x251, x251, 2);
+    let x253: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x248, x252, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x253, x2, 4), x252, 4), x248, 4),
+        24387,
+        2,
+    )?;
+    let x254: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x250, x250, 2), x2, 2), x2, 2),
+            x216,
+            2
+        ),
+        x216,
+        2
+    );
+    let x255: BytePoly_3 = bigint_nondet_quot!(ctx, x254, x2, 3);
+    let x256: BytePoly_1 = bigint_nondet_rem!(ctx, x254, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x255, x2, 4), x256, 4), x254, 4),
+        24387,
+        2,
+    )?;
+    let x257: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x250, x256, 2), 2), x2, 2),
+            x219,
+            2
+        ),
+        bigint_mul!(x250, x216, 2),
+        2
+    );
+    let x258: BytePoly_3 = bigint_nondet_quot!(ctx, x257, x2, 3);
+    let x259: BytePoly_1 = bigint_nondet_rem!(ctx, x257, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x258, x2, 4), x259, 4), x257, 4),
+        24387,
+        2,
+    )?;
+    let x260: BytePoly_1 = bigint_nondet_rem!(ctx, x221, x3, 1);
+    let x261: BytePoly_1 = bigint_nondet_quot!(ctx, x221, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x261, x3, 2), x260, 2), x221, 2),
+        8131,
+        2,
+    )?;
+    let x262: BytePoly_1 = bigint_sub!(x4, x260, 1);
+    eqz(ctx, &bigint_mul!(x260, x262, 2), 8131, 2)?;
+    let x263: BytePoly_1 = bigint_add!(bigint_sub!(x259, x245, 1), x2, 1);
+    let x264: BytePoly_1 = bigint_add!(bigint_sub!(x256, x243, 1), x2, 1);
+    let x265: BytePoly_1 = bigint_nondet_inv!(ctx, x264, x2, 1);
+    let x266: BytePoly_2 = bigint_mul!(x264, x265, 2);
+    let x267: BytePoly_3 = bigint_nondet_quot!(ctx, x266, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x266, bigint_mul!(x267, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x268: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x263, x265, 2), x2, 1);
+    let x269: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x268, x264, 2), x263, 2), x2, 2),
+        x2,
+        2
+    );
+    let x270: BytePoly_3 = bigint_nondet_quot!(ctx, x269, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(x269, bigint_mul!(x270, x2, 4), 4),
+        24387,
+        2,
+    )?;
+    let x271: BytePoly_2 = bigint_mul!(x268, x268, 2);
+    let x272: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x271, x243, 2), x2, 2), x256, 2),
+        x2,
+        2
+    );
+    let x273: BytePoly_3 = bigint_nondet_quot!(ctx, x272, x2, 3);
+    let x274: BytePoly_1 = bigint_nondet_rem!(ctx, x272, x2, 1);
+    let x275: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x268, x274, 2),
+                        bigint_add!(bigint_sub!(x245, bigint_mul!(x268, x243, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x276: BytePoly_3 = bigint_nondet_quot!(ctx, x275, x2, 3);
+    let x277: BytePoly_1 = bigint_nondet_rem!(ctx, x275, x2, 1);
+    let x278: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x271, bigint_mul!(x273, x2, 4), 4), x243, 4),
+                    x256,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x274,
+        4
+    );
+    eqz(ctx, &x278, 24387, 2)?;
+    let x279: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x276, x2, 4), x277, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x268, bigint_sub!(x243, x274, 1), 2), x245, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x279, 24387, 2)?;
+    let x280: BytePoly_2 = bigint_add!(bigint_mul!(x274, x260, 2), bigint_mul!(x243, x262, 2), 2);
+    let x281: BytePoly_2 = bigint_add!(bigint_mul!(x277, x260, 2), bigint_mul!(x245, x262, 2), 2);
+    let x282: BytePoly_3 = bigint_nondet_quot!(ctx, x280, x2, 3);
+    let x283: BytePoly_1 = bigint_nondet_rem!(ctx, x280, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x282, x2, 4), x283, 4), x280, 4),
+        24387,
+        2,
+    )?;
+    let x284: BytePoly_3 = bigint_nondet_quot!(ctx, x281, x2, 3);
+    let x285: BytePoly_1 = bigint_nondet_rem!(ctx, x281, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x284, x2, 4), x285, 4), x281, 4),
+        24387,
+        2,
+    )?;
+    let x286: BytePoly_2 = bigint_mul!(x256, x256, 2);
+    let x287: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x286, x286, 2), x286, 2), x1, 2);
+    let x288: BytePoly_2 = bigint_add!(x47, x287, 2);
+    let x289: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x259, x259, 1), x2, 1);
+    let x290: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x287, x289, 3), x2, 1);
+    let x291: BytePoly_2 = bigint_mul!(x259, x290, 2);
+    let x292: BytePoly_2 = bigint_add!(x291, x291, 2);
+    let x293: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x288, x292, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x293, x2, 4), x292, 4), x288, 4),
+        24387,
+        2,
+    )?;
+    let x294: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x290, x290, 2), x2, 2), x2, 2),
+            x256,
+            2
+        ),
+        x256,
+        2
+    );
+    let x295: BytePoly_3 = bigint_nondet_quot!(ctx, x294, x2, 3);
+    let x296: BytePoly_1 = bigint_nondet_rem!(ctx, x294, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x295, x2, 4), x296, 4), x294, 4),
+        24387,
+        2,
+    )?;
+    let x297: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x290, x296, 2), 2), x2, 2),
+            x259,
+            2
+        ),
+        bigint_mul!(x290, x256, 2),
+        2
+    );
+    let x298: BytePoly_3 = bigint_nondet_quot!(ctx, x297, x2, 3);
+    let x299: BytePoly_1 = bigint_nondet_rem!(ctx, x297, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x298, x2, 4), x299, 4), x297, 4),
+        24387,
+        2,
+    )?;
+    let x300: BytePoly_1 = bigint_nondet_rem!(ctx, x261, x3, 1);
+    let x301: BytePoly_1 = bigint_nondet_quot!(ctx, x261, x3, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x301, x3, 2), x300, 2), x261, 2),
+        8131,
+        2,
+    )?;
+    let x302: BytePoly_1 = bigint_sub!(x4, x300, 1);
+    eqz(ctx, &bigint_mul!(x300, x302, 2), 8131, 2)?;
+    let x303: BytePoly_1 = bigint_add!(bigint_sub!(x299, x285, 1), x2, 1);
+    let x304: BytePoly_1 = bigint_add!(bigint_sub!(x296, x283, 1), x2, 1);
+    let x305: BytePoly_1 = bigint_nondet_inv!(ctx, x304, x2, 1);
+    let x306: BytePoly_2 = bigint_mul!(x304, x305, 2);
+    let x307: BytePoly_3 = bigint_nondet_quot!(ctx, x306, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x306, bigint_mul!(x307, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x308: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x303, x305, 2), x2, 1);
+    let x309: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x308, x304, 2), x303, 2), x2, 2),
+        x2,
+        2
+    );
+    let x310: BytePoly_3 = bigint_nondet_quot!(ctx, x309, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(x309, bigint_mul!(x310, x2, 4), 4),
+        24387,
+        2,
+    )?;
+    let x311: BytePoly_2 = bigint_mul!(x308, x308, 2);
+    let x312: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x311, x283, 2), x2, 2), x296, 2),
+        x2,
+        2
+    );
+    let x313: BytePoly_3 = bigint_nondet_quot!(ctx, x312, x2, 3);
+    let x314: BytePoly_1 = bigint_nondet_rem!(ctx, x312, x2, 1);
+    let x315: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x308, x314, 2),
+                        bigint_add!(bigint_sub!(x285, bigint_mul!(x308, x283, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x316: BytePoly_3 = bigint_nondet_quot!(ctx, x315, x2, 3);
+    let x317: BytePoly_1 = bigint_nondet_rem!(ctx, x315, x2, 1);
+    let x318: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x311, bigint_mul!(x313, x2, 4), 4), x283, 4),
+                    x296,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x314,
+        4
+    );
+    eqz(ctx, &x318, 24387, 2)?;
+    let x319: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x316, x2, 4), x317, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x308, bigint_sub!(x283, x314, 1), 2), x285, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x319, 24387, 2)?;
+    let x320: BytePoly_2 = bigint_add!(bigint_mul!(x314, x300, 2), bigint_mul!(x283, x302, 2), 2);
+    let x321: BytePoly_2 = bigint_add!(bigint_mul!(x317, x300, 2), bigint_mul!(x285, x302, 2), 2);
+    let x322: BytePoly_3 = bigint_nondet_quot!(ctx, x320, x2, 3);
+    let x323: BytePoly_1 = bigint_nondet_rem!(ctx, x320, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x322, x2, 4), x323, 4), x320, 4),
+        24387,
+        2,
+    )?;
+    let x324: BytePoly_3 = bigint_nondet_quot!(ctx, x321, x2, 3);
+    let x325: BytePoly_1 = bigint_nondet_rem!(ctx, x321, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x324, x2, 4), x325, 4), x321, 4),
+        24387,
+        2,
+    )?;
+    let x326: BytePoly_2 = bigint_mul!(x296, x296, 2);
+    let x327: BytePoly_2 = bigint_add!(bigint_add!(bigint_add!(x326, x326, 2), x326, 2), x1, 2);
+    let x328: BytePoly_2 = bigint_add!(x47, x327, 2);
+    let x329: BytePoly_1 = bigint_nondet_inv!(ctx, bigint_add!(x299, x299, 1), x2, 1);
+    let x330: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x327, x329, 3), x2, 1);
+    let x331: BytePoly_2 = bigint_mul!(x299, x330, 2);
+    let x332: BytePoly_2 = bigint_add!(x331, x331, 2);
+    let x333: BytePoly_3 = bigint_nondet_quot!(ctx, bigint_sub!(x328, x332, 2), x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x333, x2, 4), x332, 4), x328, 4),
+        24387,
+        2,
+    )?;
+    let x334: BytePoly_2 = bigint_sub!(
+        bigint_sub!(
+            bigint_add!(bigint_add!(bigint_mul!(x330, x330, 2), x2, 2), x2, 2),
+            x296,
+            2
+        ),
+        x296,
+        2
+    );
+    let x335: BytePoly_3 = bigint_nondet_quot!(ctx, x334, x2, 3);
+    let x336: BytePoly_1 = bigint_nondet_rem!(ctx, x334, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x335, x2, 4), x336, 4), x334, 4),
+        24387,
+        2,
+    )?;
+    let x337: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(bigint_sub!(x15, bigint_mul!(x330, x336, 2), 2), x2, 2),
+            x299,
+            2
+        ),
+        bigint_mul!(x330, x296, 2),
+        2
+    );
+    let x338: BytePoly_3 = bigint_nondet_quot!(ctx, x337, x2, 3);
+    let x339: BytePoly_1 = bigint_nondet_rem!(ctx, x337, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x338, x2, 4), x339, 4), x337, 4),
+        24387,
+        2,
+    )?;
+    let x340: BytePoly_1 = bigint_add!(bigint_sub!(bigint_sub!(x2, x9, 1), x325, 1), x2, 1);
+    let x341: BytePoly_1 = bigint_add!(bigint_sub!(x8, x323, 1), x2, 1);
+    let x342: BytePoly_1 = bigint_nondet_inv!(ctx, x341, x2, 1);
+    let x343: BytePoly_2 = bigint_mul!(x341, x342, 2);
+    let x344: BytePoly_3 = bigint_nondet_quot!(ctx, x343, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x343, bigint_mul!(x344, x2, 4), 4), x1, 4),
+        24387,
+        2,
+    )?;
+    let x345: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x340, x342, 2), x2, 1);
+    let x346: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x345, x341, 2), x340, 2), x2, 2),
+        x2,
+        2
+    );
+    let x347: BytePoly_3 = bigint_nondet_quot!(ctx, x346, x2, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(x346, bigint_mul!(x347, x2, 4), 4),
+        24387,
+        2,
+    )?;
+    let x348: BytePoly_2 = bigint_mul!(x345, x345, 2);
+    let x349: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x348, x323, 2), x2, 2), x8, 2),
+        x2,
+        2
+    );
+    let x350: BytePoly_3 = bigint_nondet_quot!(ctx, x349, x2, 3);
+    let x351: BytePoly_1 = bigint_nondet_rem!(ctx, x349, x2, 1);
+    let x352: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x2,
+                    bigint_add!(
+                        bigint_mul!(x345, x351, 2),
+                        bigint_add!(bigint_sub!(x325, bigint_mul!(x345, x323, 2), 2), x2, 2),
+                        2
+                    ),
+                    2
+                ),
+                x2,
+                2
+            ),
+            x2,
+            2
+        ),
+        x15,
+        2
+    );
+    let x353: BytePoly_3 = bigint_nondet_quot!(ctx, x352, x2, 3);
+    let x354: BytePoly_1 = bigint_nondet_rem!(ctx, x352, x2, 1);
+    let x355: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x348, bigint_mul!(x350, x2, 4), 4), x323, 4),
+                    x8,
+                    4
+                ),
+                x2,
+                4
+            ),
+            x2,
+            4
+        ),
+        x351,
+        4
+    );
+    eqz(ctx, &x355, 24387, 2)?;
+    let x356: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x353, x2, 4), x354, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x345, bigint_sub!(x323, x351, 1), 2), x325, 2),
+                    x2,
+                    2
+                ),
+                x2,
+                2
+            ),
+            x15,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x356, 24387, 2)?;
+    eqz(ctx, &bigint_sub!(x351, x10, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x354, x11, 1), 34, 1)?;
+    return Ok(());
+}
+pub fn ec_mul_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_1 = bigint_const!(ctx, 7);
     let x2: BytePoly_1 = bigint_const!(ctx, 0);
@@ -23618,7 +25776,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x28: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x23, x25, 64), x3, 32);
-    let x29: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x28, x24, 64), x23, 64), x3, 64);
+    let x29: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x28, x24, 64), x23, 64), x3, 64),
+        x3,
+        64
+    );
     let x30: BytePoly_34 = bigint_nondet_quot!(ctx, x29, x3, 34);
     eqz(
         ctx,
@@ -23782,7 +25944,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x69: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x64, x66, 64), x3, 32);
-    let x70: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x69, x65, 64), x64, 64), x3, 64);
+    let x70: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x69, x65, 64), x64, 64), x3, 64),
+        x3,
+        64
+    );
     let x71: BytePoly_34 = bigint_nondet_quot!(ctx, x70, x3, 34);
     eqz(
         ctx,
@@ -23945,7 +26111,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x104, x106, 64), x3, 32);
-    let x110: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x109, x105, 64), x104, 64), x3, 64);
+    let x110: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x109, x105, 64), x104, 64), x3, 64),
+        x3,
+        64
+    );
     let x111: BytePoly_34 = bigint_nondet_quot!(ctx, x110, x3, 34);
     eqz(
         ctx,
@@ -24110,7 +26280,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x144, x146, 64), x3, 32);
-    let x150: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x149, x145, 64), x144, 64), x3, 64);
+    let x150: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x149, x145, 64), x144, 64), x3, 64),
+        x3,
+        64
+    );
     let x151: BytePoly_34 = bigint_nondet_quot!(ctx, x150, x3, 34);
     eqz(
         ctx,
@@ -24275,7 +26449,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x184, x186, 64), x3, 32);
-    let x190: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x189, x185, 64), x184, 64), x3, 64);
+    let x190: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x189, x185, 64), x184, 64), x3, 64),
+        x3,
+        64
+    );
     let x191: BytePoly_34 = bigint_nondet_quot!(ctx, x190, x3, 34);
     eqz(
         ctx,
@@ -24440,7 +26618,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x224, x226, 64), x3, 32);
-    let x230: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x229, x225, 64), x224, 64), x3, 64);
+    let x230: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x229, x225, 64), x224, 64), x3, 64),
+        x3,
+        64
+    );
     let x231: BytePoly_34 = bigint_nondet_quot!(ctx, x230, x3, 34);
     eqz(
         ctx,
@@ -24605,7 +26787,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x264, x266, 64), x3, 32);
-    let x270: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x269, x265, 64), x264, 64), x3, 64);
+    let x270: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x269, x265, 64), x264, 64), x3, 64),
+        x3,
+        64
+    );
     let x271: BytePoly_34 = bigint_nondet_quot!(ctx, x270, x3, 34);
     eqz(
         ctx,
@@ -24770,7 +26956,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x304, x306, 64), x3, 32);
-    let x310: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x309, x305, 64), x304, 64), x3, 64);
+    let x310: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x309, x305, 64), x304, 64), x3, 64),
+        x3,
+        64
+    );
     let x311: BytePoly_34 = bigint_nondet_quot!(ctx, x310, x3, 34);
     eqz(
         ctx,
@@ -24935,7 +27125,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x344, x346, 64), x3, 32);
-    let x350: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x349, x345, 64), x344, 64), x3, 64);
+    let x350: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x349, x345, 64), x344, 64), x3, 64),
+        x3,
+        64
+    );
     let x351: BytePoly_34 = bigint_nondet_quot!(ctx, x350, x3, 34);
     eqz(
         ctx,
@@ -25100,7 +27294,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x384, x386, 64), x3, 32);
-    let x390: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x389, x385, 64), x384, 64), x3, 64);
+    let x390: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x389, x385, 64), x384, 64), x3, 64),
+        x3,
+        64
+    );
     let x391: BytePoly_34 = bigint_nondet_quot!(ctx, x390, x3, 34);
     eqz(
         ctx,
@@ -25265,7 +27463,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x424, x426, 64), x3, 32);
-    let x430: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x429, x425, 64), x424, 64), x3, 64);
+    let x430: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x429, x425, 64), x424, 64), x3, 64),
+        x3,
+        64
+    );
     let x431: BytePoly_34 = bigint_nondet_quot!(ctx, x430, x3, 34);
     eqz(
         ctx,
@@ -25430,7 +27632,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x464, x466, 64), x3, 32);
-    let x470: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x469, x465, 64), x464, 64), x3, 64);
+    let x470: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x469, x465, 64), x464, 64), x3, 64),
+        x3,
+        64
+    );
     let x471: BytePoly_34 = bigint_nondet_quot!(ctx, x470, x3, 34);
     eqz(
         ctx,
@@ -25595,7 +27801,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x504, x506, 64), x3, 32);
-    let x510: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x509, x505, 64), x504, 64), x3, 64);
+    let x510: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x509, x505, 64), x504, 64), x3, 64),
+        x3,
+        64
+    );
     let x511: BytePoly_34 = bigint_nondet_quot!(ctx, x510, x3, 34);
     eqz(
         ctx,
@@ -25760,7 +27970,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x544, x546, 64), x3, 32);
-    let x550: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x549, x545, 64), x544, 64), x3, 64);
+    let x550: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x549, x545, 64), x544, 64), x3, 64),
+        x3,
+        64
+    );
     let x551: BytePoly_34 = bigint_nondet_quot!(ctx, x550, x3, 34);
     eqz(
         ctx,
@@ -25925,7 +28139,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x584, x586, 64), x3, 32);
-    let x590: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x589, x585, 64), x584, 64), x3, 64);
+    let x590: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x589, x585, 64), x584, 64), x3, 64),
+        x3,
+        64
+    );
     let x591: BytePoly_34 = bigint_nondet_quot!(ctx, x590, x3, 34);
     eqz(
         ctx,
@@ -26090,7 +28308,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x624, x626, 64), x3, 32);
-    let x630: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x629, x625, 64), x624, 64), x3, 64);
+    let x630: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x629, x625, 64), x624, 64), x3, 64),
+        x3,
+        64
+    );
     let x631: BytePoly_34 = bigint_nondet_quot!(ctx, x630, x3, 34);
     eqz(
         ctx,
@@ -26255,7 +28477,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x664, x666, 64), x3, 32);
-    let x670: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x669, x665, 64), x664, 64), x3, 64);
+    let x670: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x669, x665, 64), x664, 64), x3, 64),
+        x3,
+        64
+    );
     let x671: BytePoly_34 = bigint_nondet_quot!(ctx, x670, x3, 34);
     eqz(
         ctx,
@@ -26420,7 +28646,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x704, x706, 64), x3, 32);
-    let x710: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x709, x705, 64), x704, 64), x3, 64);
+    let x710: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x709, x705, 64), x704, 64), x3, 64),
+        x3,
+        64
+    );
     let x711: BytePoly_34 = bigint_nondet_quot!(ctx, x710, x3, 34);
     eqz(
         ctx,
@@ -26585,7 +28815,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x744, x746, 64), x3, 32);
-    let x750: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x749, x745, 64), x744, 64), x3, 64);
+    let x750: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x749, x745, 64), x744, 64), x3, 64),
+        x3,
+        64
+    );
     let x751: BytePoly_34 = bigint_nondet_quot!(ctx, x750, x3, 34);
     eqz(
         ctx,
@@ -26750,7 +28984,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x784, x786, 64), x3, 32);
-    let x790: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x789, x785, 64), x784, 64), x3, 64);
+    let x790: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x789, x785, 64), x784, 64), x3, 64),
+        x3,
+        64
+    );
     let x791: BytePoly_34 = bigint_nondet_quot!(ctx, x790, x3, 34);
     eqz(
         ctx,
@@ -26915,7 +29153,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x824, x826, 64), x3, 32);
-    let x830: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x829, x825, 64), x824, 64), x3, 64);
+    let x830: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x829, x825, 64), x824, 64), x3, 64),
+        x3,
+        64
+    );
     let x831: BytePoly_34 = bigint_nondet_quot!(ctx, x830, x3, 34);
     eqz(
         ctx,
@@ -27080,7 +29322,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x864, x866, 64), x3, 32);
-    let x870: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x869, x865, 64), x864, 64), x3, 64);
+    let x870: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x869, x865, 64), x864, 64), x3, 64),
+        x3,
+        64
+    );
     let x871: BytePoly_34 = bigint_nondet_quot!(ctx, x870, x3, 34);
     eqz(
         ctx,
@@ -27245,7 +29491,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x904, x906, 64), x3, 32);
-    let x910: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x909, x905, 64), x904, 64), x3, 64);
+    let x910: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x909, x905, 64), x904, 64), x3, 64),
+        x3,
+        64
+    );
     let x911: BytePoly_34 = bigint_nondet_quot!(ctx, x910, x3, 34);
     eqz(
         ctx,
@@ -27410,7 +29660,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x944, x946, 64), x3, 32);
-    let x950: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x949, x945, 64), x944, 64), x3, 64);
+    let x950: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x949, x945, 64), x944, 64), x3, 64),
+        x3,
+        64
+    );
     let x951: BytePoly_34 = bigint_nondet_quot!(ctx, x950, x3, 34);
     eqz(
         ctx,
@@ -27575,7 +29829,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x984, x986, 64), x3, 32);
-    let x990: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x989, x985, 64), x984, 64), x3, 64);
+    let x990: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x989, x985, 64), x984, 64), x3, 64),
+        x3,
+        64
+    );
     let x991: BytePoly_34 = bigint_nondet_quot!(ctx, x990, x3, 34);
     eqz(
         ctx,
@@ -27765,7 +30023,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1024, x1026, 64), x3, 32);
     let x1030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1029, x1025, 64), x1024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1029, x1025, 64), x1024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -27984,7 +30246,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1064, x1066, 64), x3, 32);
     let x1070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1069, x1065, 64), x1064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1069, x1065, 64), x1064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -28203,7 +30469,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1104, x1106, 64), x3, 32);
     let x1110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1109, x1105, 64), x1104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1109, x1105, 64), x1104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -28422,7 +30692,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1144, x1146, 64), x3, 32);
     let x1150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1149, x1145, 64), x1144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1149, x1145, 64), x1144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -28641,7 +30915,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1184, x1186, 64), x3, 32);
     let x1190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1189, x1185, 64), x1184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1189, x1185, 64), x1184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -28860,7 +31138,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1224, x1226, 64), x3, 32);
     let x1230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1229, x1225, 64), x1224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1229, x1225, 64), x1224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -29079,7 +31361,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1264, x1266, 64), x3, 32);
     let x1270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1269, x1265, 64), x1264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1269, x1265, 64), x1264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -29298,7 +31584,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1304, x1306, 64), x3, 32);
     let x1310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1309, x1305, 64), x1304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1309, x1305, 64), x1304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -29517,7 +31807,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1344, x1346, 64), x3, 32);
     let x1350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1349, x1345, 64), x1344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1349, x1345, 64), x1344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -29736,7 +32030,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1384, x1386, 64), x3, 32);
     let x1390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1389, x1385, 64), x1384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1389, x1385, 64), x1384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -29955,7 +32253,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1424, x1426, 64), x3, 32);
     let x1430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1429, x1425, 64), x1424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1429, x1425, 64), x1424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -30174,7 +32476,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1464, x1466, 64), x3, 32);
     let x1470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1469, x1465, 64), x1464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1469, x1465, 64), x1464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -30393,7 +32699,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1504, x1506, 64), x3, 32);
     let x1510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1509, x1505, 64), x1504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1509, x1505, 64), x1504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -30612,7 +32922,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1544, x1546, 64), x3, 32);
     let x1550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1549, x1545, 64), x1544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1549, x1545, 64), x1544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -30831,7 +33145,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1584, x1586, 64), x3, 32);
     let x1590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1589, x1585, 64), x1584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1589, x1585, 64), x1584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -31050,7 +33368,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1624, x1626, 64), x3, 32);
     let x1630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1629, x1625, 64), x1624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1629, x1625, 64), x1624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -31269,7 +33591,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1664, x1666, 64), x3, 32);
     let x1670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1669, x1665, 64), x1664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1669, x1665, 64), x1664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -31488,7 +33814,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1704, x1706, 64), x3, 32);
     let x1710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1709, x1705, 64), x1704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1709, x1705, 64), x1704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -31707,7 +34037,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1744, x1746, 64), x3, 32);
     let x1750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1749, x1745, 64), x1744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1749, x1745, 64), x1744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -31926,7 +34260,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1784, x1786, 64), x3, 32);
     let x1790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1789, x1785, 64), x1784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1789, x1785, 64), x1784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -32145,7 +34483,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1824, x1826, 64), x3, 32);
     let x1830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1829, x1825, 64), x1824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1829, x1825, 64), x1824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -32364,7 +34706,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1864, x1866, 64), x3, 32);
     let x1870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1869, x1865, 64), x1864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1869, x1865, 64), x1864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -32583,7 +34929,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1904, x1906, 64), x3, 32);
     let x1910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1909, x1905, 64), x1904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1909, x1905, 64), x1904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -32802,7 +35152,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1944, x1946, 64), x3, 32);
     let x1950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1949, x1945, 64), x1944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1949, x1945, 64), x1944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -33021,7 +35375,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x1989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1984, x1986, 64), x3, 32);
     let x1990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1989, x1985, 64), x1984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1989, x1985, 64), x1984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -33240,7 +35598,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2024, x2026, 64), x3, 32);
     let x2030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2029, x2025, 64), x2024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2029, x2025, 64), x2024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -33459,7 +35821,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2064, x2066, 64), x3, 32);
     let x2070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2069, x2065, 64), x2064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2069, x2065, 64), x2064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -33678,7 +36044,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2104, x2106, 64), x3, 32);
     let x2110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2109, x2105, 64), x2104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2109, x2105, 64), x2104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -33897,7 +36267,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2144, x2146, 64), x3, 32);
     let x2150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2149, x2145, 64), x2144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2149, x2145, 64), x2144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -34116,7 +36490,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2184, x2186, 64), x3, 32);
     let x2190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2189, x2185, 64), x2184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2189, x2185, 64), x2184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -34335,7 +36713,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2224, x2226, 64), x3, 32);
     let x2230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2229, x2225, 64), x2224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2229, x2225, 64), x2224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -34554,7 +36936,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2264, x2266, 64), x3, 32);
     let x2270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2269, x2265, 64), x2264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2269, x2265, 64), x2264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -34773,7 +37159,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2304, x2306, 64), x3, 32);
     let x2310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2309, x2305, 64), x2304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2309, x2305, 64), x2304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -34992,7 +37382,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2344, x2346, 64), x3, 32);
     let x2350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2349, x2345, 64), x2344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2349, x2345, 64), x2344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -35211,7 +37605,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2384, x2386, 64), x3, 32);
     let x2390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2389, x2385, 64), x2384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2389, x2385, 64), x2384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -35430,7 +37828,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2424, x2426, 64), x3, 32);
     let x2430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2429, x2425, 64), x2424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2429, x2425, 64), x2424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -35649,7 +38051,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2464, x2466, 64), x3, 32);
     let x2470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2469, x2465, 64), x2464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2469, x2465, 64), x2464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -35868,7 +38274,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2504, x2506, 64), x3, 32);
     let x2510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2509, x2505, 64), x2504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2509, x2505, 64), x2504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -36087,7 +38497,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2544, x2546, 64), x3, 32);
     let x2550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2549, x2545, 64), x2544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2549, x2545, 64), x2544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -36306,7 +38720,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2584, x2586, 64), x3, 32);
     let x2590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2589, x2585, 64), x2584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2589, x2585, 64), x2584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -36525,7 +38943,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2624, x2626, 64), x3, 32);
     let x2630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2629, x2625, 64), x2624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2629, x2625, 64), x2624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -36744,7 +39166,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2664, x2666, 64), x3, 32);
     let x2670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2669, x2665, 64), x2664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2669, x2665, 64), x2664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -36963,7 +39389,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2704, x2706, 64), x3, 32);
     let x2710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2709, x2705, 64), x2704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2709, x2705, 64), x2704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -37182,7 +39612,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2744, x2746, 64), x3, 32);
     let x2750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2749, x2745, 64), x2744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2749, x2745, 64), x2744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -37401,7 +39835,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2784, x2786, 64), x3, 32);
     let x2790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2789, x2785, 64), x2784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2789, x2785, 64), x2784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -37620,7 +40058,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2824, x2826, 64), x3, 32);
     let x2830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2829, x2825, 64), x2824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2829, x2825, 64), x2824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -37839,7 +40281,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2864, x2866, 64), x3, 32);
     let x2870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2869, x2865, 64), x2864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2869, x2865, 64), x2864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -38058,7 +40504,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2904, x2906, 64), x3, 32);
     let x2910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2909, x2905, 64), x2904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2909, x2905, 64), x2904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -38277,7 +40727,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2944, x2946, 64), x3, 32);
     let x2950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2949, x2945, 64), x2944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2949, x2945, 64), x2944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -38496,7 +40950,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x2989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2984, x2986, 64), x3, 32);
     let x2990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2989, x2985, 64), x2984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2989, x2985, 64), x2984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -38715,7 +41173,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3024, x3026, 64), x3, 32);
     let x3030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3029, x3025, 64), x3024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3029, x3025, 64), x3024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -38934,7 +41396,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3064, x3066, 64), x3, 32);
     let x3070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3069, x3065, 64), x3064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3069, x3065, 64), x3064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -39153,7 +41619,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3104, x3106, 64), x3, 32);
     let x3110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3109, x3105, 64), x3104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3109, x3105, 64), x3104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -39372,7 +41842,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3144, x3146, 64), x3, 32);
     let x3150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3149, x3145, 64), x3144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3149, x3145, 64), x3144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -39591,7 +42065,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3184, x3186, 64), x3, 32);
     let x3190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3189, x3185, 64), x3184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3189, x3185, 64), x3184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -39810,7 +42288,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3224, x3226, 64), x3, 32);
     let x3230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3229, x3225, 64), x3224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3229, x3225, 64), x3224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -40029,7 +42511,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3264, x3266, 64), x3, 32);
     let x3270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3269, x3265, 64), x3264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3269, x3265, 64), x3264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -40248,7 +42734,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3304, x3306, 64), x3, 32);
     let x3310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3309, x3305, 64), x3304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3309, x3305, 64), x3304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -40467,7 +42957,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3344, x3346, 64), x3, 32);
     let x3350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3349, x3345, 64), x3344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3349, x3345, 64), x3344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -40686,7 +43180,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3384, x3386, 64), x3, 32);
     let x3390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3389, x3385, 64), x3384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3389, x3385, 64), x3384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -40905,7 +43403,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3424, x3426, 64), x3, 32);
     let x3430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3429, x3425, 64), x3424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3429, x3425, 64), x3424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -41124,7 +43626,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3464, x3466, 64), x3, 32);
     let x3470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3469, x3465, 64), x3464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3469, x3465, 64), x3464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -41343,7 +43849,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3504, x3506, 64), x3, 32);
     let x3510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3509, x3505, 64), x3504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3509, x3505, 64), x3504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -41562,7 +44072,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3544, x3546, 64), x3, 32);
     let x3550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3549, x3545, 64), x3544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3549, x3545, 64), x3544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -41781,7 +44295,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3584, x3586, 64), x3, 32);
     let x3590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3589, x3585, 64), x3584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3589, x3585, 64), x3584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -42000,7 +44518,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3624, x3626, 64), x3, 32);
     let x3630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3629, x3625, 64), x3624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3629, x3625, 64), x3624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -42219,7 +44741,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3664, x3666, 64), x3, 32);
     let x3670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3669, x3665, 64), x3664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3669, x3665, 64), x3664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -42438,7 +44964,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3704, x3706, 64), x3, 32);
     let x3710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3709, x3705, 64), x3704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3709, x3705, 64), x3704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -42657,7 +45187,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3744, x3746, 64), x3, 32);
     let x3750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3749, x3745, 64), x3744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3749, x3745, 64), x3744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -42876,7 +45410,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3784, x3786, 64), x3, 32);
     let x3790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3789, x3785, 64), x3784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3789, x3785, 64), x3784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -43095,7 +45633,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3824, x3826, 64), x3, 32);
     let x3830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3829, x3825, 64), x3824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3829, x3825, 64), x3824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -43314,7 +45856,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3864, x3866, 64), x3, 32);
     let x3870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3869, x3865, 64), x3864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3869, x3865, 64), x3864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -43533,7 +46079,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3904, x3906, 64), x3, 32);
     let x3910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3909, x3905, 64), x3904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3909, x3905, 64), x3904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -43752,7 +46302,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3944, x3946, 64), x3, 32);
     let x3950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3949, x3945, 64), x3944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3949, x3945, 64), x3944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -43971,7 +46525,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x3989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3984, x3986, 64), x3, 32);
     let x3990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3989, x3985, 64), x3984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3989, x3985, 64), x3984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -44190,7 +46748,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4024, x4026, 64), x3, 32);
     let x4030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4029, x4025, 64), x4024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4029, x4025, 64), x4024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -44409,7 +46971,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4064, x4066, 64), x3, 32);
     let x4070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4069, x4065, 64), x4064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4069, x4065, 64), x4064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -44628,7 +47194,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4104, x4106, 64), x3, 32);
     let x4110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4109, x4105, 64), x4104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4109, x4105, 64), x4104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -44847,7 +47417,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4144, x4146, 64), x3, 32);
     let x4150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4149, x4145, 64), x4144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4149, x4145, 64), x4144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -45066,7 +47640,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4184, x4186, 64), x3, 32);
     let x4190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4189, x4185, 64), x4184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4189, x4185, 64), x4184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -45285,7 +47863,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4224, x4226, 64), x3, 32);
     let x4230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4229, x4225, 64), x4224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4229, x4225, 64), x4224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -45504,7 +48086,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4264, x4266, 64), x3, 32);
     let x4270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4269, x4265, 64), x4264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4269, x4265, 64), x4264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -45723,7 +48309,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4304, x4306, 64), x3, 32);
     let x4310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4309, x4305, 64), x4304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4309, x4305, 64), x4304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -45942,7 +48532,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4344, x4346, 64), x3, 32);
     let x4350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4349, x4345, 64), x4344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4349, x4345, 64), x4344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -46161,7 +48755,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4384, x4386, 64), x3, 32);
     let x4390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4389, x4385, 64), x4384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4389, x4385, 64), x4384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -46380,7 +48978,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4424, x4426, 64), x3, 32);
     let x4430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4429, x4425, 64), x4424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4429, x4425, 64), x4424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -46599,7 +49201,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4464, x4466, 64), x3, 32);
     let x4470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4469, x4465, 64), x4464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4469, x4465, 64), x4464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -46818,7 +49424,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4504, x4506, 64), x3, 32);
     let x4510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4509, x4505, 64), x4504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4509, x4505, 64), x4504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -47037,7 +49647,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4544, x4546, 64), x3, 32);
     let x4550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4549, x4545, 64), x4544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4549, x4545, 64), x4544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -47256,7 +49870,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4584, x4586, 64), x3, 32);
     let x4590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4589, x4585, 64), x4584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4589, x4585, 64), x4584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -47475,7 +50093,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4624, x4626, 64), x3, 32);
     let x4630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4629, x4625, 64), x4624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4629, x4625, 64), x4624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -47694,7 +50316,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4664, x4666, 64), x3, 32);
     let x4670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4669, x4665, 64), x4664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4669, x4665, 64), x4664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -47913,7 +50539,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4704, x4706, 64), x3, 32);
     let x4710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4709, x4705, 64), x4704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4709, x4705, 64), x4704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -48132,7 +50762,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4744, x4746, 64), x3, 32);
     let x4750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4749, x4745, 64), x4744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4749, x4745, 64), x4744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -48351,7 +50985,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4784, x4786, 64), x3, 32);
     let x4790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4789, x4785, 64), x4784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4789, x4785, 64), x4784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -48570,7 +51208,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4824, x4826, 64), x3, 32);
     let x4830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4829, x4825, 64), x4824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4829, x4825, 64), x4824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -48789,7 +51431,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4864, x4866, 64), x3, 32);
     let x4870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4869, x4865, 64), x4864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4869, x4865, 64), x4864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -49008,7 +51654,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4904, x4906, 64), x3, 32);
     let x4910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4909, x4905, 64), x4904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4909, x4905, 64), x4904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -49227,7 +51877,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4944, x4946, 64), x3, 32);
     let x4950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4949, x4945, 64), x4944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4949, x4945, 64), x4944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -49446,7 +52100,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x4989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4984, x4986, 64), x3, 32);
     let x4990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4989, x4985, 64), x4984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4989, x4985, 64), x4984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -49665,7 +52323,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5024, x5026, 64), x3, 32);
     let x5030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5029, x5025, 64), x5024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5029, x5025, 64), x5024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -49884,7 +52546,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5064, x5066, 64), x3, 32);
     let x5070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5069, x5065, 64), x5064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5069, x5065, 64), x5064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -50103,7 +52769,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5104, x5106, 64), x3, 32);
     let x5110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5109, x5105, 64), x5104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5109, x5105, 64), x5104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -50322,7 +52992,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5144, x5146, 64), x3, 32);
     let x5150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5149, x5145, 64), x5144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5149, x5145, 64), x5144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -50541,7 +53215,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5184, x5186, 64), x3, 32);
     let x5190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5189, x5185, 64), x5184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5189, x5185, 64), x5184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -50760,7 +53438,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5224, x5226, 64), x3, 32);
     let x5230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5229, x5225, 64), x5224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5229, x5225, 64), x5224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -50979,7 +53661,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5264, x5266, 64), x3, 32);
     let x5270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5269, x5265, 64), x5264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5269, x5265, 64), x5264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -51198,7 +53884,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5304, x5306, 64), x3, 32);
     let x5310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5309, x5305, 64), x5304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5309, x5305, 64), x5304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -51417,7 +54107,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5344, x5346, 64), x3, 32);
     let x5350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5349, x5345, 64), x5344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5349, x5345, 64), x5344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -51636,7 +54330,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5384, x5386, 64), x3, 32);
     let x5390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5389, x5385, 64), x5384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5389, x5385, 64), x5384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -51855,7 +54553,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5424, x5426, 64), x3, 32);
     let x5430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5429, x5425, 64), x5424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5429, x5425, 64), x5424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -52074,7 +54776,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5464, x5466, 64), x3, 32);
     let x5470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5469, x5465, 64), x5464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5469, x5465, 64), x5464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -52293,7 +54999,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5504, x5506, 64), x3, 32);
     let x5510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5509, x5505, 64), x5504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5509, x5505, 64), x5504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -52512,7 +55222,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5544, x5546, 64), x3, 32);
     let x5550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5549, x5545, 64), x5544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5549, x5545, 64), x5544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -52731,7 +55445,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5584, x5586, 64), x3, 32);
     let x5590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5589, x5585, 64), x5584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5589, x5585, 64), x5584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -52950,7 +55668,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5624, x5626, 64), x3, 32);
     let x5630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5629, x5625, 64), x5624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5629, x5625, 64), x5624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -53169,7 +55891,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5664, x5666, 64), x3, 32);
     let x5670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5669, x5665, 64), x5664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5669, x5665, 64), x5664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -53388,7 +56114,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5704, x5706, 64), x3, 32);
     let x5710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5709, x5705, 64), x5704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5709, x5705, 64), x5704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -53607,7 +56337,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5744, x5746, 64), x3, 32);
     let x5750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5749, x5745, 64), x5744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5749, x5745, 64), x5744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -53826,7 +56560,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5784, x5786, 64), x3, 32);
     let x5790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5789, x5785, 64), x5784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5789, x5785, 64), x5784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -54045,7 +56783,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5824, x5826, 64), x3, 32);
     let x5830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5829, x5825, 64), x5824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5829, x5825, 64), x5824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -54264,7 +57006,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5864, x5866, 64), x3, 32);
     let x5870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5869, x5865, 64), x5864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5869, x5865, 64), x5864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -54483,7 +57229,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5904, x5906, 64), x3, 32);
     let x5910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5909, x5905, 64), x5904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5909, x5905, 64), x5904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -54702,7 +57452,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5944, x5946, 64), x3, 32);
     let x5950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5949, x5945, 64), x5944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5949, x5945, 64), x5944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -54921,7 +57675,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x5989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x5984, x5986, 64), x3, 32);
     let x5990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x5989, x5985, 64), x5984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x5989, x5985, 64), x5984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -55140,7 +57898,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6024, x6026, 64), x3, 32);
     let x6030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6029, x6025, 64), x6024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6029, x6025, 64), x6024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -55359,7 +58121,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6064, x6066, 64), x3, 32);
     let x6070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6069, x6065, 64), x6064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6069, x6065, 64), x6064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -55578,7 +58344,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6104, x6106, 64), x3, 32);
     let x6110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6109, x6105, 64), x6104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6109, x6105, 64), x6104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -55797,7 +58567,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6144, x6146, 64), x3, 32);
     let x6150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6149, x6145, 64), x6144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6149, x6145, 64), x6144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -56016,7 +58790,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6184, x6186, 64), x3, 32);
     let x6190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6189, x6185, 64), x6184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6189, x6185, 64), x6184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -56235,7 +59013,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6224, x6226, 64), x3, 32);
     let x6230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6229, x6225, 64), x6224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6229, x6225, 64), x6224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -56454,7 +59236,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6264, x6266, 64), x3, 32);
     let x6270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6269, x6265, 64), x6264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6269, x6265, 64), x6264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -56673,7 +59459,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6304, x6306, 64), x3, 32);
     let x6310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6309, x6305, 64), x6304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6309, x6305, 64), x6304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -56892,7 +59682,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6344, x6346, 64), x3, 32);
     let x6350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6349, x6345, 64), x6344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6349, x6345, 64), x6344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -57111,7 +59905,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6384, x6386, 64), x3, 32);
     let x6390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6389, x6385, 64), x6384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6389, x6385, 64), x6384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -57330,7 +60128,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6424, x6426, 64), x3, 32);
     let x6430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6429, x6425, 64), x6424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6429, x6425, 64), x6424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -57549,7 +60351,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6464, x6466, 64), x3, 32);
     let x6470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6469, x6465, 64), x6464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6469, x6465, 64), x6464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -57768,7 +60574,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6504, x6506, 64), x3, 32);
     let x6510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6509, x6505, 64), x6504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6509, x6505, 64), x6504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -57987,7 +60797,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6544, x6546, 64), x3, 32);
     let x6550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6549, x6545, 64), x6544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6549, x6545, 64), x6544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -58206,7 +61020,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6584, x6586, 64), x3, 32);
     let x6590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6589, x6585, 64), x6584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6589, x6585, 64), x6584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -58425,7 +61243,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6624, x6626, 64), x3, 32);
     let x6630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6629, x6625, 64), x6624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6629, x6625, 64), x6624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -58644,7 +61466,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6664, x6666, 64), x3, 32);
     let x6670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6669, x6665, 64), x6664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6669, x6665, 64), x6664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -58863,7 +61689,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6704, x6706, 64), x3, 32);
     let x6710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6709, x6705, 64), x6704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6709, x6705, 64), x6704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -59082,7 +61912,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6744, x6746, 64), x3, 32);
     let x6750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6749, x6745, 64), x6744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6749, x6745, 64), x6744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -59301,7 +62135,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6784, x6786, 64), x3, 32);
     let x6790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6789, x6785, 64), x6784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6789, x6785, 64), x6784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -59520,7 +62358,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6824, x6826, 64), x3, 32);
     let x6830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6829, x6825, 64), x6824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6829, x6825, 64), x6824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -59739,7 +62581,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6864, x6866, 64), x3, 32);
     let x6870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6869, x6865, 64), x6864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6869, x6865, 64), x6864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -59958,7 +62804,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6904, x6906, 64), x3, 32);
     let x6910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6909, x6905, 64), x6904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6909, x6905, 64), x6904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -60177,7 +63027,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6944, x6946, 64), x3, 32);
     let x6950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6949, x6945, 64), x6944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6949, x6945, 64), x6944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -60396,7 +63250,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x6989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x6984, x6986, 64), x3, 32);
     let x6990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x6989, x6985, 64), x6984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x6989, x6985, 64), x6984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -60615,7 +63473,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7024, x7026, 64), x3, 32);
     let x7030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7029, x7025, 64), x7024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7029, x7025, 64), x7024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -60834,7 +63696,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7064, x7066, 64), x3, 32);
     let x7070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7069, x7065, 64), x7064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7069, x7065, 64), x7064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -61053,7 +63919,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7104, x7106, 64), x3, 32);
     let x7110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7109, x7105, 64), x7104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7109, x7105, 64), x7104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -61272,7 +64142,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7144, x7146, 64), x3, 32);
     let x7150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7149, x7145, 64), x7144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7149, x7145, 64), x7144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -61491,7 +64365,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7184, x7186, 64), x3, 32);
     let x7190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7189, x7185, 64), x7184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7189, x7185, 64), x7184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -61710,7 +64588,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7224, x7226, 64), x3, 32);
     let x7230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7229, x7225, 64), x7224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7229, x7225, 64), x7224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -61929,7 +64811,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7264, x7266, 64), x3, 32);
     let x7270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7269, x7265, 64), x7264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7269, x7265, 64), x7264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -62148,7 +65034,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7304, x7306, 64), x3, 32);
     let x7310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7309, x7305, 64), x7304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7309, x7305, 64), x7304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -62367,7 +65257,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7344, x7346, 64), x3, 32);
     let x7350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7349, x7345, 64), x7344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7349, x7345, 64), x7344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -62586,7 +65480,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7384, x7386, 64), x3, 32);
     let x7390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7389, x7385, 64), x7384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7389, x7385, 64), x7384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -62805,7 +65703,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7424, x7426, 64), x3, 32);
     let x7430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7429, x7425, 64), x7424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7429, x7425, 64), x7424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -63024,7 +65926,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7464, x7466, 64), x3, 32);
     let x7470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7469, x7465, 64), x7464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7469, x7465, 64), x7464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -63243,7 +66149,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7504, x7506, 64), x3, 32);
     let x7510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7509, x7505, 64), x7504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7509, x7505, 64), x7504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -63462,7 +66372,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7544, x7546, 64), x3, 32);
     let x7550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7549, x7545, 64), x7544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7549, x7545, 64), x7544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -63681,7 +66595,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7584, x7586, 64), x3, 32);
     let x7590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7589, x7585, 64), x7584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7589, x7585, 64), x7584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -63900,7 +66818,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7624, x7626, 64), x3, 32);
     let x7630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7629, x7625, 64), x7624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7629, x7625, 64), x7624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -64119,7 +67041,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7664, x7666, 64), x3, 32);
     let x7670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7669, x7665, 64), x7664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7669, x7665, 64), x7664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -64338,7 +67264,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7704, x7706, 64), x3, 32);
     let x7710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7709, x7705, 64), x7704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7709, x7705, 64), x7704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -64557,7 +67487,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7744, x7746, 64), x3, 32);
     let x7750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7749, x7745, 64), x7744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7749, x7745, 64), x7744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -64776,7 +67710,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7784, x7786, 64), x3, 32);
     let x7790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7789, x7785, 64), x7784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7789, x7785, 64), x7784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -64995,7 +67933,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7824, x7826, 64), x3, 32);
     let x7830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7829, x7825, 64), x7824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7829, x7825, 64), x7824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -65214,7 +68156,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7864, x7866, 64), x3, 32);
     let x7870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7869, x7865, 64), x7864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7869, x7865, 64), x7864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -65433,7 +68379,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7904, x7906, 64), x3, 32);
     let x7910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7909, x7905, 64), x7904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7909, x7905, 64), x7904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -65652,7 +68602,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7944, x7946, 64), x3, 32);
     let x7950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7949, x7945, 64), x7944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7949, x7945, 64), x7944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -65871,7 +68825,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x7989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x7984, x7986, 64), x3, 32);
     let x7990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x7989, x7985, 64), x7984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x7989, x7985, 64), x7984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -66090,7 +69048,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8024, x8026, 64), x3, 32);
     let x8030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8029, x8025, 64), x8024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8029, x8025, 64), x8024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -66309,7 +69271,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8064, x8066, 64), x3, 32);
     let x8070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8069, x8065, 64), x8064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8069, x8065, 64), x8064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -66528,7 +69494,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8104, x8106, 64), x3, 32);
     let x8110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8109, x8105, 64), x8104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8109, x8105, 64), x8104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -66747,7 +69717,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8144, x8146, 64), x3, 32);
     let x8150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8149, x8145, 64), x8144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8149, x8145, 64), x8144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -66966,7 +69940,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8184, x8186, 64), x3, 32);
     let x8190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8189, x8185, 64), x8184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8189, x8185, 64), x8184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -67185,7 +70163,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8224, x8226, 64), x3, 32);
     let x8230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8229, x8225, 64), x8224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8229, x8225, 64), x8224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -67404,7 +70386,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8264, x8266, 64), x3, 32);
     let x8270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8269, x8265, 64), x8264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8269, x8265, 64), x8264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -67623,7 +70609,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8304, x8306, 64), x3, 32);
     let x8310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8309, x8305, 64), x8304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8309, x8305, 64), x8304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -67842,7 +70832,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8344, x8346, 64), x3, 32);
     let x8350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8349, x8345, 64), x8344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8349, x8345, 64), x8344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -68061,7 +71055,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8384, x8386, 64), x3, 32);
     let x8390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8389, x8385, 64), x8384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8389, x8385, 64), x8384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -68280,7 +71278,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8424, x8426, 64), x3, 32);
     let x8430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8429, x8425, 64), x8424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8429, x8425, 64), x8424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -68499,7 +71501,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8464, x8466, 64), x3, 32);
     let x8470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8469, x8465, 64), x8464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8469, x8465, 64), x8464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -68718,7 +71724,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8504, x8506, 64), x3, 32);
     let x8510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8509, x8505, 64), x8504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8509, x8505, 64), x8504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -68937,7 +71947,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8544, x8546, 64), x3, 32);
     let x8550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8549, x8545, 64), x8544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8549, x8545, 64), x8544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -69156,7 +72170,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8584, x8586, 64), x3, 32);
     let x8590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8589, x8585, 64), x8584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8589, x8585, 64), x8584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -69375,7 +72393,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8624, x8626, 64), x3, 32);
     let x8630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8629, x8625, 64), x8624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8629, x8625, 64), x8624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -69594,7 +72616,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8664, x8666, 64), x3, 32);
     let x8670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8669, x8665, 64), x8664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8669, x8665, 64), x8664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -69813,7 +72839,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8704, x8706, 64), x3, 32);
     let x8710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8709, x8705, 64), x8704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8709, x8705, 64), x8704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -70032,7 +73062,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8744, x8746, 64), x3, 32);
     let x8750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8749, x8745, 64), x8744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8749, x8745, 64), x8744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -70251,7 +73285,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8784, x8786, 64), x3, 32);
     let x8790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8789, x8785, 64), x8784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8789, x8785, 64), x8784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -70470,7 +73508,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8824, x8826, 64), x3, 32);
     let x8830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8829, x8825, 64), x8824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8829, x8825, 64), x8824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -70689,7 +73731,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8864, x8866, 64), x3, 32);
     let x8870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8869, x8865, 64), x8864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8869, x8865, 64), x8864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -70908,7 +73954,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8904, x8906, 64), x3, 32);
     let x8910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8909, x8905, 64), x8904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8909, x8905, 64), x8904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -71127,7 +74177,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8944, x8946, 64), x3, 32);
     let x8950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8949, x8945, 64), x8944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8949, x8945, 64), x8944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -71346,7 +74400,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x8989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8984, x8986, 64), x3, 32);
     let x8990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x8989, x8985, 64), x8984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x8989, x8985, 64), x8984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -71565,7 +74623,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9024, x9026, 64), x3, 32);
     let x9030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9029, x9025, 64), x9024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9029, x9025, 64), x9024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -71784,7 +74846,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9064, x9066, 64), x3, 32);
     let x9070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9069, x9065, 64), x9064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9069, x9065, 64), x9064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -72003,7 +75069,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9104, x9106, 64), x3, 32);
     let x9110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9109, x9105, 64), x9104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9109, x9105, 64), x9104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -72222,7 +75292,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9144, x9146, 64), x3, 32);
     let x9150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9149, x9145, 64), x9144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9149, x9145, 64), x9144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -72441,7 +75515,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9184, x9186, 64), x3, 32);
     let x9190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9189, x9185, 64), x9184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9189, x9185, 64), x9184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -72660,7 +75738,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9224, x9226, 64), x3, 32);
     let x9230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9229, x9225, 64), x9224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9229, x9225, 64), x9224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -72879,7 +75961,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9264, x9266, 64), x3, 32);
     let x9270: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9269, x9265, 64), x9264, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9269, x9265, 64), x9264, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -73098,7 +76184,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9304, x9306, 64), x3, 32);
     let x9310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9309, x9305, 64), x9304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9309, x9305, 64), x9304, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -73317,7 +76407,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9344, x9346, 64), x3, 32);
     let x9350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9349, x9345, 64), x9344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9349, x9345, 64), x9344, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -73536,7 +76630,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9389: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9384, x9386, 64), x3, 32);
     let x9390: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9389, x9385, 64), x9384, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9389, x9385, 64), x9384, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -73755,7 +76853,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9429: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9424, x9426, 64), x3, 32);
     let x9430: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9429, x9425, 64), x9424, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9429, x9425, 64), x9424, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -73974,7 +77076,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9469: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9464, x9466, 64), x3, 32);
     let x9470: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9469, x9465, 64), x9464, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9469, x9465, 64), x9464, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -74193,7 +77299,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9509: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9504, x9506, 64), x3, 32);
     let x9510: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9509, x9505, 64), x9504, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9509, x9505, 64), x9504, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -74412,7 +77522,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9549: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9544, x9546, 64), x3, 32);
     let x9550: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9549, x9545, 64), x9544, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9549, x9545, 64), x9544, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -74631,7 +77745,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9589: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9584, x9586, 64), x3, 32);
     let x9590: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9589, x9585, 64), x9584, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9589, x9585, 64), x9584, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -74850,7 +77968,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9624, x9626, 64), x3, 32);
     let x9630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9629, x9625, 64), x9624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9629, x9625, 64), x9624, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -75069,7 +78191,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9664, x9666, 64), x3, 32);
     let x9670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9669, x9665, 64), x9664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9669, x9665, 64), x9664, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -75288,7 +78414,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9709: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9704, x9706, 64), x3, 32);
     let x9710: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9709, x9705, 64), x9704, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9709, x9705, 64), x9704, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -75507,7 +78637,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9749: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9744, x9746, 64), x3, 32);
     let x9750: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9749, x9745, 64), x9744, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9749, x9745, 64), x9744, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -75726,7 +78860,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9789: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9784, x9786, 64), x3, 32);
     let x9790: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9789, x9785, 64), x9784, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9789, x9785, 64), x9784, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -75945,7 +79083,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9829: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9824, x9826, 64), x3, 32);
     let x9830: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9829, x9825, 64), x9824, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9829, x9825, 64), x9824, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -76164,7 +79306,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9869: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9864, x9866, 64), x3, 32);
     let x9870: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9869, x9865, 64), x9864, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9869, x9865, 64), x9864, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -76383,7 +79529,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9909: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9904, x9906, 64), x3, 32);
     let x9910: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9909, x9905, 64), x9904, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9909, x9905, 64), x9904, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -76602,7 +79752,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9944, x9946, 64), x3, 32);
     let x9950: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9949, x9945, 64), x9944, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9949, x9945, 64), x9944, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -76821,7 +79975,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x9989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x9984, x9986, 64), x3, 32);
     let x9990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x9989, x9985, 64), x9984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x9989, x9985, 64), x9984, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -77044,7 +80202,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x10029: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x10024, x10026, 64), x3, 32);
     let x10030: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x10029, x10025, 64), x10024, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x10029, x10025, 64), x10024, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -77267,7 +80429,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x10069: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x10064, x10066, 64), x3, 32);
     let x10070: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x10069, x10065, 64), x10064, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x10069, x10065, 64), x10064, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -77490,7 +80656,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x10109: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x10104, x10106, 64), x3, 32);
     let x10110: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x10109, x10105, 64), x10104, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x10109, x10105, 64), x10104, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -77713,7 +80883,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x10149: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x10144, x10146, 64), x3, 32);
     let x10150: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x10149, x10145, 64), x10144, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x10149, x10145, 64), x10144, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -77936,7 +81110,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x10189: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x10184, x10186, 64), x3, 32);
     let x10190: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x10189, x10185, 64), x10184, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x10189, x10185, 64), x10184, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -78159,7 +81337,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x10229: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x10224, x10226, 64), x3, 32);
     let x10230: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x10229, x10225, 64), x10224, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x10229, x10225, 64), x10224, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -78369,7 +81551,11 @@ pub fn ec_aff_mul_test_full_256(ctx: &mut BigIntContext) -> Result<()> {
     )?;
     let x10266: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x10261, x10263, 64), x3, 32);
     let x10267: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x10266, x10262, 64), x10261, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x10266, x10262, 64), x10261, 64),
+            x3,
+            64
+        ),
         x3,
         64
     );
@@ -78473,6 +81659,29 @@ pub fn ec_aff_neg_test_8(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(bigint_sub!(x0, x2, 1), x4, 1), 34, 1)?;
     return Ok(());
 }
+pub fn ec_neg_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 179);
+    let x1: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
+    let x2: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
+    let x3: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
+    let x4: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
+    eqz(ctx, &bigint_sub!(x1, x3, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(bigint_sub!(x0, x2, 1), x4, 1), 34, 1)?;
+    return Ok(());
+}
+pub fn ec_neg_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_32 = bigint_const!(
+        ctx, 47, 252, 255, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+    );
+    let x1: BytePoly_32 = bigint_def!(ctx, 32, 0, 1);
+    let x2: BytePoly_32 = bigint_def!(ctx, 32, 1, 1);
+    let x3: BytePoly_32 = bigint_def!(ctx, 32, 2, 1);
+    let x4: BytePoly_32 = bigint_def!(ctx, 32, 3, 1);
+    eqz(ctx, &bigint_sub!(x1, x3, 32), 34, 1)?;
+    eqz(ctx, &bigint_sub!(bigint_sub!(x0, x2, 32), x4, 32), 34, 1)?;
+    return Ok(());
+}
 pub fn ec_aff_sub_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_1 = bigint_const!(ctx, 11);
@@ -78494,7 +81703,11 @@ pub fn ec_aff_sub_test_8(ctx: &mut BigIntContext) -> Result<()> {
         2,
     )?;
     let x13: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 2), x1, 1);
-    let x14: BytePoly_2 = bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 2), x8, 2), x1, 2);
+    let x14: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 2), x8, 2), x1, 2),
+        x1,
+        2
+    );
     let x15: BytePoly_3 = bigint_nondet_quot!(ctx, x14, x1, 3);
     eqz(ctx, &bigint_sub!(x14, bigint_mul!(x15, x1, 4), 4), 24387, 2)?;
     let x16: BytePoly_2 = bigint_mul!(x13, x13, 2);
@@ -78569,6 +81782,214 @@ pub fn ec_aff_sub_test_8(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x23, x7, 1), 34, 1)?;
     return Ok(());
 }
+pub fn ec_sub_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 1);
+    let x1: BytePoly_1 = bigint_const!(ctx, 179);
+    let x2: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
+    let x3: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
+    let x4: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
+    let x5: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
+    let x6: BytePoly_1 = bigint_def!(ctx, 1, 4, 1);
+    let x7: BytePoly_1 = bigint_def!(ctx, 1, 5, 1);
+    let x8: BytePoly_1 = bigint_add!(bigint_sub!(bigint_sub!(x1, x5, 1), x3, 1), x1, 1);
+    let x9: BytePoly_1 = bigint_add!(bigint_sub!(x4, x2, 1), x1, 1);
+    let x10: BytePoly_1 = bigint_nondet_inv!(ctx, x9, x1, 1);
+    let x11: BytePoly_2 = bigint_mul!(x9, x10, 2);
+    let x12: BytePoly_3 = bigint_nondet_quot!(ctx, x11, x1, 3);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x11, bigint_mul!(x12, x1, 4), 4), x0, 4),
+        24387,
+        2,
+    )?;
+    let x13: BytePoly_1 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 2), x1, 1);
+    let x14: BytePoly_2 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 2), x8, 2), x1, 2),
+        x1,
+        2
+    );
+    let x15: BytePoly_3 = bigint_nondet_quot!(ctx, x14, x1, 3);
+    eqz(ctx, &bigint_sub!(x14, bigint_mul!(x15, x1, 4), 4), 24387, 2)?;
+    let x16: BytePoly_2 = bigint_mul!(x13, x13, 2);
+    let x17: BytePoly_2 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x16, x2, 2), x1, 2), x4, 2),
+        x1,
+        2
+    );
+    let x18: BytePoly_3 = bigint_nondet_quot!(ctx, x17, x1, 3);
+    let x19: BytePoly_1 = bigint_nondet_rem!(ctx, x17, x1, 1);
+    let x20: BytePoly_2 = bigint_mul!(x1, x1, 2);
+    let x21: BytePoly_2 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x1,
+                    bigint_add!(
+                        bigint_mul!(x13, x19, 2),
+                        bigint_add!(bigint_sub!(x3, bigint_mul!(x13, x2, 2), 2), x1, 2),
+                        2
+                    ),
+                    2
+                ),
+                x1,
+                2
+            ),
+            x1,
+            2
+        ),
+        x20,
+        2
+    );
+    let x22: BytePoly_3 = bigint_nondet_quot!(ctx, x21, x1, 3);
+    let x23: BytePoly_1 = bigint_nondet_rem!(ctx, x21, x1, 1);
+    let x24: BytePoly_4 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x16, bigint_mul!(x18, x1, 4), 4), x2, 4),
+                    x4,
+                    4
+                ),
+                x1,
+                4
+            ),
+            x1,
+            4
+        ),
+        x19,
+        4
+    );
+    eqz(ctx, &x24, 24387, 2)?;
+    let x25: BytePoly_4 = bigint_sub!(
+        bigint_add!(bigint_mul!(x22, x1, 4), x23, 4),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x13, bigint_sub!(x2, x19, 1), 2), x3, 2),
+                    x1,
+                    2
+                ),
+                x1,
+                2
+            ),
+            x20,
+            2
+        ),
+        4
+    );
+    eqz(ctx, &x25, 24387, 2)?;
+    eqz(ctx, &bigint_sub!(x19, x6, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x23, x7, 1), 34, 1)?;
+    return Ok(());
+}
+pub fn ec_sub_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 1);
+    let x1: BytePoly_32 = bigint_const!(
+        ctx, 47, 252, 255, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+    );
+    let x2: BytePoly_32 = bigint_def!(ctx, 32, 0, 1);
+    let x3: BytePoly_32 = bigint_def!(ctx, 32, 1, 1);
+    let x4: BytePoly_32 = bigint_def!(ctx, 32, 2, 1);
+    let x5: BytePoly_32 = bigint_def!(ctx, 32, 3, 1);
+    let x6: BytePoly_32 = bigint_def!(ctx, 32, 4, 1);
+    let x7: BytePoly_32 = bigint_def!(ctx, 32, 5, 1);
+    let x8: BytePoly_32 = bigint_add!(bigint_sub!(bigint_sub!(x1, x5, 32), x3, 32), x1, 32);
+    let x9: BytePoly_32 = bigint_add!(bigint_sub!(x4, x2, 32), x1, 32);
+    let x10: BytePoly_32 = bigint_nondet_inv!(ctx, x9, x1, 32);
+    let x11: BytePoly_64 = bigint_mul!(x9, x10, 64);
+    let x12: BytePoly_34 = bigint_nondet_quot!(ctx, x11, x1, 34);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_sub!(x11, bigint_mul!(x12, x1, 66), 66), x0, 66),
+        276359,
+        4,
+    )?;
+    let x13: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 64), x1, 32);
+    let x14: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64),
+        x1,
+        64
+    );
+    let x15: BytePoly_34 = bigint_nondet_quot!(ctx, x14, x1, 34);
+    eqz(
+        ctx,
+        &bigint_sub!(x14, bigint_mul!(x15, x1, 66), 66),
+        276359,
+        4,
+    )?;
+    let x16: BytePoly_64 = bigint_mul!(x13, x13, 64);
+    let x17: BytePoly_64 = bigint_add!(
+        bigint_sub!(bigint_add!(bigint_sub!(x16, x2, 64), x1, 64), x4, 64),
+        x1,
+        64
+    );
+    let x18: BytePoly_34 = bigint_nondet_quot!(ctx, x17, x1, 34);
+    let x19: BytePoly_32 = bigint_nondet_rem!(ctx, x17, x1, 32);
+    let x20: BytePoly_64 = bigint_mul!(x1, x1, 64);
+    let x21: BytePoly_64 = bigint_add!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    x1,
+                    bigint_add!(
+                        bigint_mul!(x13, x19, 64),
+                        bigint_add!(bigint_sub!(x3, bigint_mul!(x13, x2, 64), 64), x1, 64),
+                        64
+                    ),
+                    64
+                ),
+                x1,
+                64
+            ),
+            x1,
+            64
+        ),
+        x20,
+        64
+    );
+    let x22: BytePoly_34 = bigint_nondet_quot!(ctx, x21, x1, 34);
+    let x23: BytePoly_32 = bigint_nondet_rem!(ctx, x21, x1, 32);
+    let x24: BytePoly_66 = bigint_sub!(
+        bigint_add!(
+            bigint_add!(
+                bigint_sub!(
+                    bigint_sub!(bigint_sub!(x16, bigint_mul!(x18, x1, 66), 66), x2, 66),
+                    x4,
+                    66
+                ),
+                x1,
+                66
+            ),
+            x1,
+            66
+        ),
+        x19,
+        66
+    );
+    eqz(ctx, &x24, 276359, 4)?;
+    let x25: BytePoly_66 = bigint_sub!(
+        bigint_add!(bigint_mul!(x22, x1, 66), x23, 66),
+        bigint_add!(
+            bigint_add!(
+                bigint_add!(
+                    bigint_sub!(bigint_mul!(x13, bigint_sub!(x2, x19, 32), 64), x3, 64),
+                    x1,
+                    64
+                ),
+                x1,
+                64
+            ),
+            x20,
+            64
+        ),
+        66
+    );
+    eqz(ctx, &x25, 276359, 4)?;
+    eqz(ctx, &bigint_sub!(x19, x6, 32), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x23, x7, 32), 34, 1)?;
+    return Ok(());
+}
 pub fn ec_pts_eq_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
     let x1: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
@@ -78576,6 +81997,24 @@ pub fn ec_pts_eq_test_8(ctx: &mut BigIntContext) -> Result<()> {
     let x3: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
     eqz(ctx, &bigint_sub!(x0, x2, 1), 34, 1)?;
     eqz(ctx, &bigint_sub!(x1, x3, 1), 34, 1)?;
+    return Ok(());
+}
+pub fn ec_pts_eq_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
+    let x1: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
+    let x2: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
+    let x3: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
+    eqz(ctx, &bigint_sub!(x0, x2, 1), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x1, x3, 1), 34, 1)?;
+    return Ok(());
+}
+pub fn ec_pts_eq_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_32 = bigint_def!(ctx, 32, 0, 1);
+    let x1: BytePoly_32 = bigint_def!(ctx, 32, 1, 1);
+    let x2: BytePoly_32 = bigint_def!(ctx, 32, 2, 1);
+    let x3: BytePoly_32 = bigint_def!(ctx, 32, 3, 1);
+    eqz(ctx, &bigint_sub!(x0, x2, 32), 34, 1)?;
+    eqz(ctx, &bigint_sub!(x1, x3, 32), 34, 1)?;
     return Ok(());
 }
 pub fn rep_ec_aff_add_test_full_256_r5(ctx: &mut BigIntContext) -> Result<()> {
@@ -78602,7 +82041,11 @@ pub fn rep_ec_aff_add_test_full_256_r5(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x13: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 64), x1, 32);
-    let x14: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64);
+    let x14: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64),
+        x1,
+        64
+    );
     let x15: BytePoly_34 = bigint_nondet_quot!(ctx, x14, x1, 34);
     eqz(
         ctx,
@@ -78690,7 +82133,11 @@ pub fn rep_ec_aff_add_test_full_256_r5(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x31: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x26, x28, 64), x1, 32);
-    let x32: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x31, x27, 64), x26, 64), x1, 64);
+    let x32: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x31, x27, 64), x26, 64), x1, 64),
+        x1,
+        64
+    );
     let x33: BytePoly_34 = bigint_nondet_quot!(ctx, x32, x1, 34);
     eqz(
         ctx,
@@ -78777,7 +82224,11 @@ pub fn rep_ec_aff_add_test_full_256_r5(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x48: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x43, x45, 64), x1, 32);
-    let x49: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x48, x44, 64), x43, 64), x1, 64);
+    let x49: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x48, x44, 64), x43, 64), x1, 64),
+        x1,
+        64
+    );
     let x50: BytePoly_34 = bigint_nondet_quot!(ctx, x49, x1, 34);
     eqz(
         ctx,
@@ -78864,7 +82315,11 @@ pub fn rep_ec_aff_add_test_full_256_r5(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x65: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x60, x62, 64), x1, 32);
-    let x66: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x65, x61, 64), x60, 64), x1, 64);
+    let x66: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x65, x61, 64), x60, 64), x1, 64),
+        x1,
+        64
+    );
     let x67: BytePoly_34 = bigint_nondet_quot!(ctx, x66, x1, 34);
     eqz(
         ctx,
@@ -78951,7 +82406,11 @@ pub fn rep_ec_aff_add_test_full_256_r5(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x82: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x77, x79, 64), x1, 32);
-    let x83: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x82, x78, 64), x77, 64), x1, 64);
+    let x83: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x82, x78, 64), x77, 64), x1, 64),
+        x1,
+        64
+    );
     let x84: BytePoly_34 = bigint_nondet_quot!(ctx, x83, x1, 34);
     eqz(
         ctx,
@@ -79054,7 +82513,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x13: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 64), x1, 32);
-    let x14: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64);
+    let x14: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64),
+        x1,
+        64
+    );
     let x15: BytePoly_34 = bigint_nondet_quot!(ctx, x14, x1, 34);
     eqz(
         ctx,
@@ -79142,7 +82605,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x31: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x26, x28, 64), x1, 32);
-    let x32: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x31, x27, 64), x26, 64), x1, 64);
+    let x32: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x31, x27, 64), x26, 64), x1, 64),
+        x1,
+        64
+    );
     let x33: BytePoly_34 = bigint_nondet_quot!(ctx, x32, x1, 34);
     eqz(
         ctx,
@@ -79229,7 +82696,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x48: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x43, x45, 64), x1, 32);
-    let x49: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x48, x44, 64), x43, 64), x1, 64);
+    let x49: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x48, x44, 64), x43, 64), x1, 64),
+        x1,
+        64
+    );
     let x50: BytePoly_34 = bigint_nondet_quot!(ctx, x49, x1, 34);
     eqz(
         ctx,
@@ -79316,7 +82787,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x65: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x60, x62, 64), x1, 32);
-    let x66: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x65, x61, 64), x60, 64), x1, 64);
+    let x66: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x65, x61, 64), x60, 64), x1, 64),
+        x1,
+        64
+    );
     let x67: BytePoly_34 = bigint_nondet_quot!(ctx, x66, x1, 34);
     eqz(
         ctx,
@@ -79403,7 +82878,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x82: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x77, x79, 64), x1, 32);
-    let x83: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x82, x78, 64), x77, 64), x1, 64);
+    let x83: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x82, x78, 64), x77, 64), x1, 64),
+        x1,
+        64
+    );
     let x84: BytePoly_34 = bigint_nondet_quot!(ctx, x83, x1, 34);
     eqz(
         ctx,
@@ -79490,7 +82969,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x99: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x94, x96, 64), x1, 32);
-    let x100: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x99, x95, 64), x94, 64), x1, 64);
+    let x100: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x99, x95, 64), x94, 64), x1, 64),
+        x1,
+        64
+    );
     let x101: BytePoly_34 = bigint_nondet_quot!(ctx, x100, x1, 34);
     eqz(
         ctx,
@@ -79577,7 +83060,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x116: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x111, x113, 64), x1, 32);
-    let x117: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x116, x112, 64), x111, 64), x1, 64);
+    let x117: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x116, x112, 64), x111, 64), x1, 64),
+        x1,
+        64
+    );
     let x118: BytePoly_34 = bigint_nondet_quot!(ctx, x117, x1, 34);
     eqz(
         ctx,
@@ -79664,7 +83151,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x133: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x128, x130, 64), x1, 32);
-    let x134: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x133, x129, 64), x128, 64), x1, 64);
+    let x134: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x133, x129, 64), x128, 64), x1, 64),
+        x1,
+        64
+    );
     let x135: BytePoly_34 = bigint_nondet_quot!(ctx, x134, x1, 34);
     eqz(
         ctx,
@@ -79751,7 +83242,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x150: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x145, x147, 64), x1, 32);
-    let x151: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x150, x146, 64), x145, 64), x1, 64);
+    let x151: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x150, x146, 64), x145, 64), x1, 64),
+        x1,
+        64
+    );
     let x152: BytePoly_34 = bigint_nondet_quot!(ctx, x151, x1, 34);
     eqz(
         ctx,
@@ -79838,7 +83333,11 @@ pub fn rep_ec_aff_add_test_full_256_r10(ctx: &mut BigIntContext) -> Result<()> {
         4,
     )?;
     let x167: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x162, x164, 64), x1, 32);
-    let x168: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x167, x163, 64), x162, 64), x1, 64);
+    let x168: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x167, x163, 64), x162, 64), x1, 64),
+        x1,
+        64
+    );
     let x169: BytePoly_34 = bigint_nondet_quot!(ctx, x168, x1, 34);
     eqz(
         ctx,
@@ -79941,7 +83440,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x13: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x8, x10, 64), x1, 32);
-    let x14: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64);
+    let x14: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x13, x9, 64), x8, 64), x1, 64),
+        x1,
+        64
+    );
     let x15: BytePoly_34 = bigint_nondet_quot!(ctx, x14, x1, 34);
     eqz(
         ctx,
@@ -80029,7 +83532,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x31: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x26, x28, 64), x1, 32);
-    let x32: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x31, x27, 64), x26, 64), x1, 64);
+    let x32: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x31, x27, 64), x26, 64), x1, 64),
+        x1,
+        64
+    );
     let x33: BytePoly_34 = bigint_nondet_quot!(ctx, x32, x1, 34);
     eqz(
         ctx,
@@ -80116,7 +83623,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x48: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x43, x45, 64), x1, 32);
-    let x49: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x48, x44, 64), x43, 64), x1, 64);
+    let x49: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x48, x44, 64), x43, 64), x1, 64),
+        x1,
+        64
+    );
     let x50: BytePoly_34 = bigint_nondet_quot!(ctx, x49, x1, 34);
     eqz(
         ctx,
@@ -80203,7 +83714,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x65: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x60, x62, 64), x1, 32);
-    let x66: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x65, x61, 64), x60, 64), x1, 64);
+    let x66: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x65, x61, 64), x60, 64), x1, 64),
+        x1,
+        64
+    );
     let x67: BytePoly_34 = bigint_nondet_quot!(ctx, x66, x1, 34);
     eqz(
         ctx,
@@ -80290,7 +83805,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x82: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x77, x79, 64), x1, 32);
-    let x83: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x82, x78, 64), x77, 64), x1, 64);
+    let x83: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x82, x78, 64), x77, 64), x1, 64),
+        x1,
+        64
+    );
     let x84: BytePoly_34 = bigint_nondet_quot!(ctx, x83, x1, 34);
     eqz(
         ctx,
@@ -80377,7 +83896,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x99: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x94, x96, 64), x1, 32);
-    let x100: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x99, x95, 64), x94, 64), x1, 64);
+    let x100: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x99, x95, 64), x94, 64), x1, 64),
+        x1,
+        64
+    );
     let x101: BytePoly_34 = bigint_nondet_quot!(ctx, x100, x1, 34);
     eqz(
         ctx,
@@ -80464,7 +83987,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x116: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x111, x113, 64), x1, 32);
-    let x117: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x116, x112, 64), x111, 64), x1, 64);
+    let x117: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x116, x112, 64), x111, 64), x1, 64),
+        x1,
+        64
+    );
     let x118: BytePoly_34 = bigint_nondet_quot!(ctx, x117, x1, 34);
     eqz(
         ctx,
@@ -80551,7 +84078,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x133: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x128, x130, 64), x1, 32);
-    let x134: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x133, x129, 64), x128, 64), x1, 64);
+    let x134: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x133, x129, 64), x128, 64), x1, 64),
+        x1,
+        64
+    );
     let x135: BytePoly_34 = bigint_nondet_quot!(ctx, x134, x1, 34);
     eqz(
         ctx,
@@ -80638,7 +84169,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x150: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x145, x147, 64), x1, 32);
-    let x151: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x150, x146, 64), x145, 64), x1, 64);
+    let x151: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x150, x146, 64), x145, 64), x1, 64),
+        x1,
+        64
+    );
     let x152: BytePoly_34 = bigint_nondet_quot!(ctx, x151, x1, 34);
     eqz(
         ctx,
@@ -80725,7 +84260,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x167: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x162, x164, 64), x1, 32);
-    let x168: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x167, x163, 64), x162, 64), x1, 64);
+    let x168: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x167, x163, 64), x162, 64), x1, 64),
+        x1,
+        64
+    );
     let x169: BytePoly_34 = bigint_nondet_quot!(ctx, x168, x1, 34);
     eqz(
         ctx,
@@ -80812,7 +84351,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x184: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x179, x181, 64), x1, 32);
-    let x185: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x184, x180, 64), x179, 64), x1, 64);
+    let x185: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x184, x180, 64), x179, 64), x1, 64),
+        x1,
+        64
+    );
     let x186: BytePoly_34 = bigint_nondet_quot!(ctx, x185, x1, 34);
     eqz(
         ctx,
@@ -80899,7 +84442,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x201: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x196, x198, 64), x1, 32);
-    let x202: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x201, x197, 64), x196, 64), x1, 64);
+    let x202: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x201, x197, 64), x196, 64), x1, 64),
+        x1,
+        64
+    );
     let x203: BytePoly_34 = bigint_nondet_quot!(ctx, x202, x1, 34);
     eqz(
         ctx,
@@ -80986,7 +84533,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x218: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x213, x215, 64), x1, 32);
-    let x219: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x218, x214, 64), x213, 64), x1, 64);
+    let x219: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x218, x214, 64), x213, 64), x1, 64),
+        x1,
+        64
+    );
     let x220: BytePoly_34 = bigint_nondet_quot!(ctx, x219, x1, 34);
     eqz(
         ctx,
@@ -81073,7 +84624,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x235: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x230, x232, 64), x1, 32);
-    let x236: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x235, x231, 64), x230, 64), x1, 64);
+    let x236: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x235, x231, 64), x230, 64), x1, 64),
+        x1,
+        64
+    );
     let x237: BytePoly_34 = bigint_nondet_quot!(ctx, x236, x1, 34);
     eqz(
         ctx,
@@ -81160,7 +84715,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x252: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x247, x249, 64), x1, 32);
-    let x253: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x252, x248, 64), x247, 64), x1, 64);
+    let x253: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x252, x248, 64), x247, 64), x1, 64),
+        x1,
+        64
+    );
     let x254: BytePoly_34 = bigint_nondet_quot!(ctx, x253, x1, 34);
     eqz(
         ctx,
@@ -81247,7 +84806,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x269: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x264, x266, 64), x1, 32);
-    let x270: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x269, x265, 64), x264, 64), x1, 64);
+    let x270: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x269, x265, 64), x264, 64), x1, 64),
+        x1,
+        64
+    );
     let x271: BytePoly_34 = bigint_nondet_quot!(ctx, x270, x1, 34);
     eqz(
         ctx,
@@ -81334,7 +84897,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x286: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x281, x283, 64), x1, 32);
-    let x287: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x286, x282, 64), x281, 64), x1, 64);
+    let x287: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x286, x282, 64), x281, 64), x1, 64),
+        x1,
+        64
+    );
     let x288: BytePoly_34 = bigint_nondet_quot!(ctx, x287, x1, 34);
     eqz(
         ctx,
@@ -81421,7 +84988,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x303: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x298, x300, 64), x1, 32);
-    let x304: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x303, x299, 64), x298, 64), x1, 64);
+    let x304: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x303, x299, 64), x298, 64), x1, 64),
+        x1,
+        64
+    );
     let x305: BytePoly_34 = bigint_nondet_quot!(ctx, x304, x1, 34);
     eqz(
         ctx,
@@ -81508,7 +85079,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x320: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x315, x317, 64), x1, 32);
-    let x321: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x320, x316, 64), x315, 64), x1, 64);
+    let x321: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x320, x316, 64), x315, 64), x1, 64),
+        x1,
+        64
+    );
     let x322: BytePoly_34 = bigint_nondet_quot!(ctx, x321, x1, 34);
     eqz(
         ctx,
@@ -81595,7 +85170,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x337: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x332, x334, 64), x1, 32);
-    let x338: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x337, x333, 64), x332, 64), x1, 64);
+    let x338: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x337, x333, 64), x332, 64), x1, 64),
+        x1,
+        64
+    );
     let x339: BytePoly_34 = bigint_nondet_quot!(ctx, x338, x1, 34);
     eqz(
         ctx,
@@ -81682,7 +85261,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x354: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x349, x351, 64), x1, 32);
-    let x355: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x354, x350, 64), x349, 64), x1, 64);
+    let x355: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x354, x350, 64), x349, 64), x1, 64),
+        x1,
+        64
+    );
     let x356: BytePoly_34 = bigint_nondet_quot!(ctx, x355, x1, 34);
     eqz(
         ctx,
@@ -81769,7 +85352,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x371: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x366, x368, 64), x1, 32);
-    let x372: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x371, x367, 64), x366, 64), x1, 64);
+    let x372: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x371, x367, 64), x366, 64), x1, 64),
+        x1,
+        64
+    );
     let x373: BytePoly_34 = bigint_nondet_quot!(ctx, x372, x1, 34);
     eqz(
         ctx,
@@ -81856,7 +85443,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x388: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x383, x385, 64), x1, 32);
-    let x389: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x388, x384, 64), x383, 64), x1, 64);
+    let x389: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x388, x384, 64), x383, 64), x1, 64),
+        x1,
+        64
+    );
     let x390: BytePoly_34 = bigint_nondet_quot!(ctx, x389, x1, 34);
     eqz(
         ctx,
@@ -81943,7 +85534,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x405: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x400, x402, 64), x1, 32);
-    let x406: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x405, x401, 64), x400, 64), x1, 64);
+    let x406: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x405, x401, 64), x400, 64), x1, 64),
+        x1,
+        64
+    );
     let x407: BytePoly_34 = bigint_nondet_quot!(ctx, x406, x1, 34);
     eqz(
         ctx,
@@ -82030,7 +85625,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x422: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x417, x419, 64), x1, 32);
-    let x423: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x422, x418, 64), x417, 64), x1, 64);
+    let x423: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x422, x418, 64), x417, 64), x1, 64),
+        x1,
+        64
+    );
     let x424: BytePoly_34 = bigint_nondet_quot!(ctx, x423, x1, 34);
     eqz(
         ctx,
@@ -82117,7 +85716,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x439: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x434, x436, 64), x1, 32);
-    let x440: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x439, x435, 64), x434, 64), x1, 64);
+    let x440: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x439, x435, 64), x434, 64), x1, 64),
+        x1,
+        64
+    );
     let x441: BytePoly_34 = bigint_nondet_quot!(ctx, x440, x1, 34);
     eqz(
         ctx,
@@ -82204,7 +85807,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x456: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x451, x453, 64), x1, 32);
-    let x457: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x456, x452, 64), x451, 64), x1, 64);
+    let x457: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x456, x452, 64), x451, 64), x1, 64),
+        x1,
+        64
+    );
     let x458: BytePoly_34 = bigint_nondet_quot!(ctx, x457, x1, 34);
     eqz(
         ctx,
@@ -82291,7 +85898,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x473: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x468, x470, 64), x1, 32);
-    let x474: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x473, x469, 64), x468, 64), x1, 64);
+    let x474: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x473, x469, 64), x468, 64), x1, 64),
+        x1,
+        64
+    );
     let x475: BytePoly_34 = bigint_nondet_quot!(ctx, x474, x1, 34);
     eqz(
         ctx,
@@ -82378,7 +85989,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x490: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x485, x487, 64), x1, 32);
-    let x491: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x490, x486, 64), x485, 64), x1, 64);
+    let x491: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x490, x486, 64), x485, 64), x1, 64),
+        x1,
+        64
+    );
     let x492: BytePoly_34 = bigint_nondet_quot!(ctx, x491, x1, 34);
     eqz(
         ctx,
@@ -82465,7 +86080,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x507: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x502, x504, 64), x1, 32);
-    let x508: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x507, x503, 64), x502, 64), x1, 64);
+    let x508: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x507, x503, 64), x502, 64), x1, 64),
+        x1,
+        64
+    );
     let x509: BytePoly_34 = bigint_nondet_quot!(ctx, x508, x1, 34);
     eqz(
         ctx,
@@ -82552,7 +86171,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x524: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x519, x521, 64), x1, 32);
-    let x525: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x524, x520, 64), x519, 64), x1, 64);
+    let x525: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x524, x520, 64), x519, 64), x1, 64),
+        x1,
+        64
+    );
     let x526: BytePoly_34 = bigint_nondet_quot!(ctx, x525, x1, 34);
     eqz(
         ctx,
@@ -82639,7 +86262,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x541: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x536, x538, 64), x1, 32);
-    let x542: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x541, x537, 64), x536, 64), x1, 64);
+    let x542: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x541, x537, 64), x536, 64), x1, 64),
+        x1,
+        64
+    );
     let x543: BytePoly_34 = bigint_nondet_quot!(ctx, x542, x1, 34);
     eqz(
         ctx,
@@ -82726,7 +86353,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x558: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x553, x555, 64), x1, 32);
-    let x559: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x558, x554, 64), x553, 64), x1, 64);
+    let x559: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x558, x554, 64), x553, 64), x1, 64),
+        x1,
+        64
+    );
     let x560: BytePoly_34 = bigint_nondet_quot!(ctx, x559, x1, 34);
     eqz(
         ctx,
@@ -82813,7 +86444,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x575: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x570, x572, 64), x1, 32);
-    let x576: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x575, x571, 64), x570, 64), x1, 64);
+    let x576: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x575, x571, 64), x570, 64), x1, 64),
+        x1,
+        64
+    );
     let x577: BytePoly_34 = bigint_nondet_quot!(ctx, x576, x1, 34);
     eqz(
         ctx,
@@ -82900,7 +86535,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x592: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x587, x589, 64), x1, 32);
-    let x593: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x592, x588, 64), x587, 64), x1, 64);
+    let x593: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x592, x588, 64), x587, 64), x1, 64),
+        x1,
+        64
+    );
     let x594: BytePoly_34 = bigint_nondet_quot!(ctx, x593, x1, 34);
     eqz(
         ctx,
@@ -82987,7 +86626,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x609: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x604, x606, 64), x1, 32);
-    let x610: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x609, x605, 64), x604, 64), x1, 64);
+    let x610: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x609, x605, 64), x604, 64), x1, 64),
+        x1,
+        64
+    );
     let x611: BytePoly_34 = bigint_nondet_quot!(ctx, x610, x1, 34);
     eqz(
         ctx,
@@ -83074,7 +86717,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x626: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x621, x623, 64), x1, 32);
-    let x627: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x626, x622, 64), x621, 64), x1, 64);
+    let x627: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x626, x622, 64), x621, 64), x1, 64),
+        x1,
+        64
+    );
     let x628: BytePoly_34 = bigint_nondet_quot!(ctx, x627, x1, 34);
     eqz(
         ctx,
@@ -83161,7 +86808,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x643: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x638, x640, 64), x1, 32);
-    let x644: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x643, x639, 64), x638, 64), x1, 64);
+    let x644: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x643, x639, 64), x638, 64), x1, 64),
+        x1,
+        64
+    );
     let x645: BytePoly_34 = bigint_nondet_quot!(ctx, x644, x1, 34);
     eqz(
         ctx,
@@ -83248,7 +86899,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x660: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x655, x657, 64), x1, 32);
-    let x661: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x660, x656, 64), x655, 64), x1, 64);
+    let x661: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x660, x656, 64), x655, 64), x1, 64),
+        x1,
+        64
+    );
     let x662: BytePoly_34 = bigint_nondet_quot!(ctx, x661, x1, 34);
     eqz(
         ctx,
@@ -83335,7 +86990,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x677: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x672, x674, 64), x1, 32);
-    let x678: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x677, x673, 64), x672, 64), x1, 64);
+    let x678: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x677, x673, 64), x672, 64), x1, 64),
+        x1,
+        64
+    );
     let x679: BytePoly_34 = bigint_nondet_quot!(ctx, x678, x1, 34);
     eqz(
         ctx,
@@ -83422,7 +87081,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x694: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x689, x691, 64), x1, 32);
-    let x695: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x694, x690, 64), x689, 64), x1, 64);
+    let x695: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x694, x690, 64), x689, 64), x1, 64),
+        x1,
+        64
+    );
     let x696: BytePoly_34 = bigint_nondet_quot!(ctx, x695, x1, 34);
     eqz(
         ctx,
@@ -83509,7 +87172,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x711: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x706, x708, 64), x1, 32);
-    let x712: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x711, x707, 64), x706, 64), x1, 64);
+    let x712: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x711, x707, 64), x706, 64), x1, 64),
+        x1,
+        64
+    );
     let x713: BytePoly_34 = bigint_nondet_quot!(ctx, x712, x1, 34);
     eqz(
         ctx,
@@ -83596,7 +87263,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x728: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x723, x725, 64), x1, 32);
-    let x729: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x728, x724, 64), x723, 64), x1, 64);
+    let x729: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x728, x724, 64), x723, 64), x1, 64),
+        x1,
+        64
+    );
     let x730: BytePoly_34 = bigint_nondet_quot!(ctx, x729, x1, 34);
     eqz(
         ctx,
@@ -83683,7 +87354,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x745: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x740, x742, 64), x1, 32);
-    let x746: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x745, x741, 64), x740, 64), x1, 64);
+    let x746: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x745, x741, 64), x740, 64), x1, 64),
+        x1,
+        64
+    );
     let x747: BytePoly_34 = bigint_nondet_quot!(ctx, x746, x1, 34);
     eqz(
         ctx,
@@ -83770,7 +87445,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x762: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x757, x759, 64), x1, 32);
-    let x763: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x762, x758, 64), x757, 64), x1, 64);
+    let x763: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x762, x758, 64), x757, 64), x1, 64),
+        x1,
+        64
+    );
     let x764: BytePoly_34 = bigint_nondet_quot!(ctx, x763, x1, 34);
     eqz(
         ctx,
@@ -83857,7 +87536,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x779: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x774, x776, 64), x1, 32);
-    let x780: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x779, x775, 64), x774, 64), x1, 64);
+    let x780: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x779, x775, 64), x774, 64), x1, 64),
+        x1,
+        64
+    );
     let x781: BytePoly_34 = bigint_nondet_quot!(ctx, x780, x1, 34);
     eqz(
         ctx,
@@ -83944,7 +87627,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x796: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x791, x793, 64), x1, 32);
-    let x797: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x796, x792, 64), x791, 64), x1, 64);
+    let x797: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x796, x792, 64), x791, 64), x1, 64),
+        x1,
+        64
+    );
     let x798: BytePoly_34 = bigint_nondet_quot!(ctx, x797, x1, 34);
     eqz(
         ctx,
@@ -84031,7 +87718,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x813: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x808, x810, 64), x1, 32);
-    let x814: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x813, x809, 64), x808, 64), x1, 64);
+    let x814: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x813, x809, 64), x808, 64), x1, 64),
+        x1,
+        64
+    );
     let x815: BytePoly_34 = bigint_nondet_quot!(ctx, x814, x1, 34);
     eqz(
         ctx,
@@ -84118,7 +87809,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x830: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x825, x827, 64), x1, 32);
-    let x831: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x830, x826, 64), x825, 64), x1, 64);
+    let x831: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x830, x826, 64), x825, 64), x1, 64),
+        x1,
+        64
+    );
     let x832: BytePoly_34 = bigint_nondet_quot!(ctx, x831, x1, 34);
     eqz(
         ctx,
@@ -84205,7 +87900,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x847: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x842, x844, 64), x1, 32);
-    let x848: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x847, x843, 64), x842, 64), x1, 64);
+    let x848: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x847, x843, 64), x842, 64), x1, 64),
+        x1,
+        64
+    );
     let x849: BytePoly_34 = bigint_nondet_quot!(ctx, x848, x1, 34);
     eqz(
         ctx,
@@ -84292,7 +87991,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x864: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x859, x861, 64), x1, 32);
-    let x865: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x864, x860, 64), x859, 64), x1, 64);
+    let x865: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x864, x860, 64), x859, 64), x1, 64),
+        x1,
+        64
+    );
     let x866: BytePoly_34 = bigint_nondet_quot!(ctx, x865, x1, 34);
     eqz(
         ctx,
@@ -84379,7 +88082,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x881: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x876, x878, 64), x1, 32);
-    let x882: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x881, x877, 64), x876, 64), x1, 64);
+    let x882: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x881, x877, 64), x876, 64), x1, 64),
+        x1,
+        64
+    );
     let x883: BytePoly_34 = bigint_nondet_quot!(ctx, x882, x1, 34);
     eqz(
         ctx,
@@ -84466,7 +88173,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x898: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x893, x895, 64), x1, 32);
-    let x899: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x898, x894, 64), x893, 64), x1, 64);
+    let x899: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x898, x894, 64), x893, 64), x1, 64),
+        x1,
+        64
+    );
     let x900: BytePoly_34 = bigint_nondet_quot!(ctx, x899, x1, 34);
     eqz(
         ctx,
@@ -84553,7 +88264,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x915: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x910, x912, 64), x1, 32);
-    let x916: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x915, x911, 64), x910, 64), x1, 64);
+    let x916: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x915, x911, 64), x910, 64), x1, 64),
+        x1,
+        64
+    );
     let x917: BytePoly_34 = bigint_nondet_quot!(ctx, x916, x1, 34);
     eqz(
         ctx,
@@ -84640,7 +88355,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x932: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x927, x929, 64), x1, 32);
-    let x933: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x932, x928, 64), x927, 64), x1, 64);
+    let x933: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x932, x928, 64), x927, 64), x1, 64),
+        x1,
+        64
+    );
     let x934: BytePoly_34 = bigint_nondet_quot!(ctx, x933, x1, 34);
     eqz(
         ctx,
@@ -84727,7 +88446,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x949: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x944, x946, 64), x1, 32);
-    let x950: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x949, x945, 64), x944, 64), x1, 64);
+    let x950: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x949, x945, 64), x944, 64), x1, 64),
+        x1,
+        64
+    );
     let x951: BytePoly_34 = bigint_nondet_quot!(ctx, x950, x1, 34);
     eqz(
         ctx,
@@ -84814,7 +88537,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x966: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x961, x963, 64), x1, 32);
-    let x967: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x966, x962, 64), x961, 64), x1, 64);
+    let x967: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x966, x962, 64), x961, 64), x1, 64),
+        x1,
+        64
+    );
     let x968: BytePoly_34 = bigint_nondet_quot!(ctx, x967, x1, 34);
     eqz(
         ctx,
@@ -84901,7 +88628,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x983: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x978, x980, 64), x1, 32);
-    let x984: BytePoly_64 = bigint_add!(bigint_sub!(bigint_mul!(x983, x979, 64), x978, 64), x1, 64);
+    let x984: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x983, x979, 64), x978, 64), x1, 64),
+        x1,
+        64
+    );
     let x985: BytePoly_34 = bigint_nondet_quot!(ctx, x984, x1, 34);
     eqz(
         ctx,
@@ -84988,8 +88719,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
         4,
     )?;
     let x1000: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x995, x997, 64), x1, 32);
-    let x1001: BytePoly_64 =
-        bigint_add!(bigint_sub!(bigint_mul!(x1000, x996, 64), x995, 64), x1, 64);
+    let x1001: BytePoly_64 = bigint_add!(
+        bigint_add!(bigint_sub!(bigint_mul!(x1000, x996, 64), x995, 64), x1, 64),
+        x1,
+        64
+    );
     let x1002: BytePoly_34 = bigint_nondet_quot!(ctx, x1001, x1, 34);
     eqz(
         ctx,
@@ -85081,7 +88815,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1017: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1012, x1014, 64), x1, 32);
     let x1018: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1017, x1013, 64), x1012, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1017, x1013, 64), x1012, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85184,7 +88922,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1034: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1029, x1031, 64), x1, 32);
     let x1035: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1034, x1030, 64), x1029, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1034, x1030, 64), x1029, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85287,7 +89029,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1051: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1046, x1048, 64), x1, 32);
     let x1052: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1051, x1047, 64), x1046, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1051, x1047, 64), x1046, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85390,7 +89136,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1068: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1063, x1065, 64), x1, 32);
     let x1069: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1068, x1064, 64), x1063, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1068, x1064, 64), x1063, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85493,7 +89243,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1085: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1080, x1082, 64), x1, 32);
     let x1086: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1085, x1081, 64), x1080, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1085, x1081, 64), x1080, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85596,7 +89350,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1102: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1097, x1099, 64), x1, 32);
     let x1103: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1102, x1098, 64), x1097, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1102, x1098, 64), x1097, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85699,7 +89457,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1119: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1114, x1116, 64), x1, 32);
     let x1120: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1119, x1115, 64), x1114, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1119, x1115, 64), x1114, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85802,7 +89564,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1136: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1131, x1133, 64), x1, 32);
     let x1137: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1136, x1132, 64), x1131, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1136, x1132, 64), x1131, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -85905,7 +89671,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1153: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1148, x1150, 64), x1, 32);
     let x1154: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1153, x1149, 64), x1148, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1153, x1149, 64), x1148, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86008,7 +89778,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1170: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1165, x1167, 64), x1, 32);
     let x1171: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1170, x1166, 64), x1165, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1170, x1166, 64), x1165, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86111,7 +89885,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1187: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1182, x1184, 64), x1, 32);
     let x1188: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1187, x1183, 64), x1182, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1187, x1183, 64), x1182, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86214,7 +89992,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1204: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1199, x1201, 64), x1, 32);
     let x1205: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1204, x1200, 64), x1199, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1204, x1200, 64), x1199, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86317,7 +90099,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1221: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1216, x1218, 64), x1, 32);
     let x1222: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1221, x1217, 64), x1216, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1221, x1217, 64), x1216, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86420,7 +90206,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1238: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1233, x1235, 64), x1, 32);
     let x1239: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1238, x1234, 64), x1233, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1238, x1234, 64), x1233, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86523,7 +90313,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1255: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1250, x1252, 64), x1, 32);
     let x1256: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1255, x1251, 64), x1250, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1255, x1251, 64), x1250, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86626,7 +90420,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1272: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1267, x1269, 64), x1, 32);
     let x1273: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1272, x1268, 64), x1267, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1272, x1268, 64), x1267, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86729,7 +90527,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1289: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1284, x1286, 64), x1, 32);
     let x1290: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1289, x1285, 64), x1284, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1289, x1285, 64), x1284, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86832,7 +90634,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1306: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1301, x1303, 64), x1, 32);
     let x1307: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1306, x1302, 64), x1301, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1306, x1302, 64), x1301, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -86935,7 +90741,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1323: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1318, x1320, 64), x1, 32);
     let x1324: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1323, x1319, 64), x1318, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1323, x1319, 64), x1318, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87038,7 +90848,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1340: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1335, x1337, 64), x1, 32);
     let x1341: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1340, x1336, 64), x1335, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1340, x1336, 64), x1335, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87141,7 +90955,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1357: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1352, x1354, 64), x1, 32);
     let x1358: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1357, x1353, 64), x1352, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1357, x1353, 64), x1352, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87244,7 +91062,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1374: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1369, x1371, 64), x1, 32);
     let x1375: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1374, x1370, 64), x1369, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1374, x1370, 64), x1369, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87347,7 +91169,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1391: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1386, x1388, 64), x1, 32);
     let x1392: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1391, x1387, 64), x1386, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1391, x1387, 64), x1386, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87450,7 +91276,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1408: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1403, x1405, 64), x1, 32);
     let x1409: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1408, x1404, 64), x1403, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1408, x1404, 64), x1403, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87553,7 +91383,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1425: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1420, x1422, 64), x1, 32);
     let x1426: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1425, x1421, 64), x1420, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1425, x1421, 64), x1420, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87656,7 +91490,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1442: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1437, x1439, 64), x1, 32);
     let x1443: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1442, x1438, 64), x1437, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1442, x1438, 64), x1437, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87759,7 +91597,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1459: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1454, x1456, 64), x1, 32);
     let x1460: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1459, x1455, 64), x1454, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1459, x1455, 64), x1454, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87862,7 +91704,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1476: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1471, x1473, 64), x1, 32);
     let x1477: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1476, x1472, 64), x1471, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1476, x1472, 64), x1471, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -87965,7 +91811,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1493: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1488, x1490, 64), x1, 32);
     let x1494: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1493, x1489, 64), x1488, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1493, x1489, 64), x1488, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88068,7 +91918,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1510: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1505, x1507, 64), x1, 32);
     let x1511: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1510, x1506, 64), x1505, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1510, x1506, 64), x1505, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88171,7 +92025,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1527: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1522, x1524, 64), x1, 32);
     let x1528: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1527, x1523, 64), x1522, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1527, x1523, 64), x1522, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88274,7 +92132,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1544: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1539, x1541, 64), x1, 32);
     let x1545: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1544, x1540, 64), x1539, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1544, x1540, 64), x1539, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88377,7 +92239,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1561: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1556, x1558, 64), x1, 32);
     let x1562: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1561, x1557, 64), x1556, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1561, x1557, 64), x1556, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88480,7 +92346,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1578: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1573, x1575, 64), x1, 32);
     let x1579: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1578, x1574, 64), x1573, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1578, x1574, 64), x1573, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88583,7 +92453,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1595: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1590, x1592, 64), x1, 32);
     let x1596: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1595, x1591, 64), x1590, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1595, x1591, 64), x1590, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88686,7 +92560,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1612: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1607, x1609, 64), x1, 32);
     let x1613: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1612, x1608, 64), x1607, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1612, x1608, 64), x1607, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88789,7 +92667,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1629: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1624, x1626, 64), x1, 32);
     let x1630: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1629, x1625, 64), x1624, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1629, x1625, 64), x1624, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88892,7 +92774,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1646: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1641, x1643, 64), x1, 32);
     let x1647: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1646, x1642, 64), x1641, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1646, x1642, 64), x1641, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -88995,7 +92881,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1663: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1658, x1660, 64), x1, 32);
     let x1664: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1663, x1659, 64), x1658, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1663, x1659, 64), x1658, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89098,7 +92988,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1680: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1675, x1677, 64), x1, 32);
     let x1681: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1680, x1676, 64), x1675, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1680, x1676, 64), x1675, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89201,7 +93095,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1697: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1692, x1694, 64), x1, 32);
     let x1698: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1697, x1693, 64), x1692, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1697, x1693, 64), x1692, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89304,7 +93202,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1714: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1709, x1711, 64), x1, 32);
     let x1715: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1714, x1710, 64), x1709, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1714, x1710, 64), x1709, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89407,7 +93309,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1731: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1726, x1728, 64), x1, 32);
     let x1732: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1731, x1727, 64), x1726, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1731, x1727, 64), x1726, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89510,7 +93416,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1748: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1743, x1745, 64), x1, 32);
     let x1749: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1748, x1744, 64), x1743, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1748, x1744, 64), x1743, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89613,7 +93523,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1765: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1760, x1762, 64), x1, 32);
     let x1766: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1765, x1761, 64), x1760, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1765, x1761, 64), x1760, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89716,7 +93630,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1782: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1777, x1779, 64), x1, 32);
     let x1783: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1782, x1778, 64), x1777, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1782, x1778, 64), x1777, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89819,7 +93737,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1799: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1794, x1796, 64), x1, 32);
     let x1800: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1799, x1795, 64), x1794, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1799, x1795, 64), x1794, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -89922,7 +93844,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1816: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1811, x1813, 64), x1, 32);
     let x1817: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1816, x1812, 64), x1811, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1816, x1812, 64), x1811, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90025,7 +93951,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1833: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1828, x1830, 64), x1, 32);
     let x1834: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1833, x1829, 64), x1828, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1833, x1829, 64), x1828, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90128,7 +94058,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1850: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1845, x1847, 64), x1, 32);
     let x1851: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1850, x1846, 64), x1845, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1850, x1846, 64), x1845, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90231,7 +94165,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1867: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1862, x1864, 64), x1, 32);
     let x1868: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1867, x1863, 64), x1862, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1867, x1863, 64), x1862, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90334,7 +94272,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1884: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1879, x1881, 64), x1, 32);
     let x1885: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1884, x1880, 64), x1879, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1884, x1880, 64), x1879, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90437,7 +94379,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1901: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1896, x1898, 64), x1, 32);
     let x1902: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1901, x1897, 64), x1896, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1901, x1897, 64), x1896, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90540,7 +94486,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1918: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1913, x1915, 64), x1, 32);
     let x1919: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1918, x1914, 64), x1913, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1918, x1914, 64), x1913, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90643,7 +94593,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1935: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1930, x1932, 64), x1, 32);
     let x1936: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1935, x1931, 64), x1930, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1935, x1931, 64), x1930, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90746,7 +94700,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1952: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1947, x1949, 64), x1, 32);
     let x1953: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1952, x1948, 64), x1947, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1952, x1948, 64), x1947, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90849,7 +94807,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1969: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1964, x1966, 64), x1, 32);
     let x1970: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1969, x1965, 64), x1964, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1969, x1965, 64), x1964, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -90952,7 +94914,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x1986: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1981, x1983, 64), x1, 32);
     let x1987: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x1986, x1982, 64), x1981, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x1986, x1982, 64), x1981, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91055,7 +95021,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2003: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x1998, x2000, 64), x1, 32);
     let x2004: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2003, x1999, 64), x1998, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2003, x1999, 64), x1998, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91158,7 +95128,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2020: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2015, x2017, 64), x1, 32);
     let x2021: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2020, x2016, 64), x2015, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2020, x2016, 64), x2015, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91261,7 +95235,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2037: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2032, x2034, 64), x1, 32);
     let x2038: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2037, x2033, 64), x2032, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2037, x2033, 64), x2032, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91364,7 +95342,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2054: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2049, x2051, 64), x1, 32);
     let x2055: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2054, x2050, 64), x2049, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2054, x2050, 64), x2049, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91467,7 +95449,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2071: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2066, x2068, 64), x1, 32);
     let x2072: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2071, x2067, 64), x2066, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2071, x2067, 64), x2066, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91570,7 +95556,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2088: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2083, x2085, 64), x1, 32);
     let x2089: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2088, x2084, 64), x2083, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2088, x2084, 64), x2083, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91673,7 +95663,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2105: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2100, x2102, 64), x1, 32);
     let x2106: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2105, x2101, 64), x2100, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2105, x2101, 64), x2100, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91776,7 +95770,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2122: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2117, x2119, 64), x1, 32);
     let x2123: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2122, x2118, 64), x2117, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2122, x2118, 64), x2117, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91879,7 +95877,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2139: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2134, x2136, 64), x1, 32);
     let x2140: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2139, x2135, 64), x2134, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2139, x2135, 64), x2134, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -91982,7 +95984,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2156: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2151, x2153, 64), x1, 32);
     let x2157: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2156, x2152, 64), x2151, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2156, x2152, 64), x2151, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92085,7 +96091,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2173: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2168, x2170, 64), x1, 32);
     let x2174: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2173, x2169, 64), x2168, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2173, x2169, 64), x2168, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92188,7 +96198,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2190: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2185, x2187, 64), x1, 32);
     let x2191: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2190, x2186, 64), x2185, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2190, x2186, 64), x2185, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92291,7 +96305,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2207: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2202, x2204, 64), x1, 32);
     let x2208: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2207, x2203, 64), x2202, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2207, x2203, 64), x2202, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92394,7 +96412,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2224: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2219, x2221, 64), x1, 32);
     let x2225: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2224, x2220, 64), x2219, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2224, x2220, 64), x2219, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92497,7 +96519,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2241: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2236, x2238, 64), x1, 32);
     let x2242: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2241, x2237, 64), x2236, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2241, x2237, 64), x2236, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92600,7 +96626,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2258: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2253, x2255, 64), x1, 32);
     let x2259: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2258, x2254, 64), x2253, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2258, x2254, 64), x2253, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92703,7 +96733,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2275: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2270, x2272, 64), x1, 32);
     let x2276: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2275, x2271, 64), x2270, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2275, x2271, 64), x2270, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92806,7 +96840,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2292: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2287, x2289, 64), x1, 32);
     let x2293: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2292, x2288, 64), x2287, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2292, x2288, 64), x2287, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -92909,7 +96947,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2309: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2304, x2306, 64), x1, 32);
     let x2310: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2309, x2305, 64), x2304, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2309, x2305, 64), x2304, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93012,7 +97054,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2326: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2321, x2323, 64), x1, 32);
     let x2327: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2326, x2322, 64), x2321, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2326, x2322, 64), x2321, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93115,7 +97161,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2343: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2338, x2340, 64), x1, 32);
     let x2344: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2343, x2339, 64), x2338, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2343, x2339, 64), x2338, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93218,7 +97268,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2360: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2355, x2357, 64), x1, 32);
     let x2361: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2360, x2356, 64), x2355, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2360, x2356, 64), x2355, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93321,7 +97375,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2377: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2372, x2374, 64), x1, 32);
     let x2378: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2377, x2373, 64), x2372, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2377, x2373, 64), x2372, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93424,7 +97482,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2394: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2389, x2391, 64), x1, 32);
     let x2395: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2394, x2390, 64), x2389, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2394, x2390, 64), x2389, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93527,7 +97589,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2411: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2406, x2408, 64), x1, 32);
     let x2412: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2411, x2407, 64), x2406, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2411, x2407, 64), x2406, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93630,7 +97696,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2428: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2423, x2425, 64), x1, 32);
     let x2429: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2428, x2424, 64), x2423, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2428, x2424, 64), x2423, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93733,7 +97803,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2445: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2440, x2442, 64), x1, 32);
     let x2446: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2445, x2441, 64), x2440, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2445, x2441, 64), x2440, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93836,7 +97910,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2462: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2457, x2459, 64), x1, 32);
     let x2463: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2462, x2458, 64), x2457, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2462, x2458, 64), x2457, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -93939,7 +98017,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2479: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2474, x2476, 64), x1, 32);
     let x2480: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2479, x2475, 64), x2474, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2479, x2475, 64), x2474, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94042,7 +98124,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2496: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2491, x2493, 64), x1, 32);
     let x2497: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2496, x2492, 64), x2491, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2496, x2492, 64), x2491, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94145,7 +98231,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2513: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2508, x2510, 64), x1, 32);
     let x2514: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2513, x2509, 64), x2508, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2513, x2509, 64), x2508, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94248,7 +98338,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2530: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2525, x2527, 64), x1, 32);
     let x2531: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2530, x2526, 64), x2525, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2530, x2526, 64), x2525, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94351,7 +98445,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2547: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2542, x2544, 64), x1, 32);
     let x2548: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2547, x2543, 64), x2542, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2547, x2543, 64), x2542, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94454,7 +98552,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2564: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2559, x2561, 64), x1, 32);
     let x2565: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2564, x2560, 64), x2559, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2564, x2560, 64), x2559, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94557,7 +98659,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2581: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2576, x2578, 64), x1, 32);
     let x2582: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2581, x2577, 64), x2576, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2581, x2577, 64), x2576, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94660,7 +98766,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2598: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2593, x2595, 64), x1, 32);
     let x2599: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2598, x2594, 64), x2593, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2598, x2594, 64), x2593, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94763,7 +98873,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2615: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2610, x2612, 64), x1, 32);
     let x2616: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2615, x2611, 64), x2610, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2615, x2611, 64), x2610, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94866,7 +98980,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2632: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2627, x2629, 64), x1, 32);
     let x2633: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2632, x2628, 64), x2627, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2632, x2628, 64), x2627, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -94969,7 +99087,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2649: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2644, x2646, 64), x1, 32);
     let x2650: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2649, x2645, 64), x2644, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2649, x2645, 64), x2644, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95072,7 +99194,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2666: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2661, x2663, 64), x1, 32);
     let x2667: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2666, x2662, 64), x2661, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2666, x2662, 64), x2661, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95175,7 +99301,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2683: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2678, x2680, 64), x1, 32);
     let x2684: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2683, x2679, 64), x2678, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2683, x2679, 64), x2678, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95278,7 +99408,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2700: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2695, x2697, 64), x1, 32);
     let x2701: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2700, x2696, 64), x2695, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2700, x2696, 64), x2695, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95381,7 +99515,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2717: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2712, x2714, 64), x1, 32);
     let x2718: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2717, x2713, 64), x2712, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2717, x2713, 64), x2712, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95484,7 +99622,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2734: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2729, x2731, 64), x1, 32);
     let x2735: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2734, x2730, 64), x2729, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2734, x2730, 64), x2729, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95587,7 +99729,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2751: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2746, x2748, 64), x1, 32);
     let x2752: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2751, x2747, 64), x2746, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2751, x2747, 64), x2746, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95690,7 +99836,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2768: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2763, x2765, 64), x1, 32);
     let x2769: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2768, x2764, 64), x2763, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2768, x2764, 64), x2763, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95793,7 +99943,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2785: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2780, x2782, 64), x1, 32);
     let x2786: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2785, x2781, 64), x2780, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2785, x2781, 64), x2780, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95896,7 +100050,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2802: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2797, x2799, 64), x1, 32);
     let x2803: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2802, x2798, 64), x2797, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2802, x2798, 64), x2797, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -95999,7 +100157,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2819: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2814, x2816, 64), x1, 32);
     let x2820: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2819, x2815, 64), x2814, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2819, x2815, 64), x2814, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96102,7 +100264,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2836: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2831, x2833, 64), x1, 32);
     let x2837: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2836, x2832, 64), x2831, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2836, x2832, 64), x2831, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96205,7 +100371,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2853: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2848, x2850, 64), x1, 32);
     let x2854: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2853, x2849, 64), x2848, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2853, x2849, 64), x2848, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96308,7 +100478,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2870: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2865, x2867, 64), x1, 32);
     let x2871: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2870, x2866, 64), x2865, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2870, x2866, 64), x2865, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96411,7 +100585,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2887: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2882, x2884, 64), x1, 32);
     let x2888: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2887, x2883, 64), x2882, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2887, x2883, 64), x2882, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96514,7 +100692,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2904: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2899, x2901, 64), x1, 32);
     let x2905: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2904, x2900, 64), x2899, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2904, x2900, 64), x2899, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96617,7 +100799,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2921: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2916, x2918, 64), x1, 32);
     let x2922: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2921, x2917, 64), x2916, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2921, x2917, 64), x2916, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96720,7 +100906,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2938: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2933, x2935, 64), x1, 32);
     let x2939: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2938, x2934, 64), x2933, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2938, x2934, 64), x2933, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96823,7 +101013,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2955: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2950, x2952, 64), x1, 32);
     let x2956: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2955, x2951, 64), x2950, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2955, x2951, 64), x2950, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -96926,7 +101120,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2972: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2967, x2969, 64), x1, 32);
     let x2973: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2972, x2968, 64), x2967, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2972, x2968, 64), x2967, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97029,7 +101227,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x2989: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x2984, x2986, 64), x1, 32);
     let x2990: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x2989, x2985, 64), x2984, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x2989, x2985, 64), x2984, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97132,7 +101334,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3006: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3001, x3003, 64), x1, 32);
     let x3007: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3006, x3002, 64), x3001, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3006, x3002, 64), x3001, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97235,7 +101441,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3023: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3018, x3020, 64), x1, 32);
     let x3024: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3023, x3019, 64), x3018, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3023, x3019, 64), x3018, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97338,7 +101548,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3040: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3035, x3037, 64), x1, 32);
     let x3041: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3040, x3036, 64), x3035, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3040, x3036, 64), x3035, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97441,7 +101655,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3057: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3052, x3054, 64), x1, 32);
     let x3058: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3057, x3053, 64), x3052, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3057, x3053, 64), x3052, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97544,7 +101762,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3074: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3069, x3071, 64), x1, 32);
     let x3075: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3074, x3070, 64), x3069, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3074, x3070, 64), x3069, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97647,7 +101869,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3091: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3086, x3088, 64), x1, 32);
     let x3092: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3091, x3087, 64), x3086, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3091, x3087, 64), x3086, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97750,7 +101976,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3108: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3103, x3105, 64), x1, 32);
     let x3109: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3108, x3104, 64), x3103, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3108, x3104, 64), x3103, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97853,7 +102083,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3125: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3120, x3122, 64), x1, 32);
     let x3126: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3125, x3121, 64), x3120, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3125, x3121, 64), x3120, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -97956,7 +102190,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3142: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3137, x3139, 64), x1, 32);
     let x3143: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3142, x3138, 64), x3137, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3142, x3138, 64), x3137, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98059,7 +102297,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3159: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3154, x3156, 64), x1, 32);
     let x3160: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3159, x3155, 64), x3154, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3159, x3155, 64), x3154, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98162,7 +102404,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3176: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3171, x3173, 64), x1, 32);
     let x3177: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3176, x3172, 64), x3171, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3176, x3172, 64), x3171, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98265,7 +102511,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3193: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3188, x3190, 64), x1, 32);
     let x3194: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3193, x3189, 64), x3188, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3193, x3189, 64), x3188, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98368,7 +102618,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3210: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3205, x3207, 64), x1, 32);
     let x3211: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3210, x3206, 64), x3205, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3210, x3206, 64), x3205, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98471,7 +102725,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3227: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3222, x3224, 64), x1, 32);
     let x3228: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3227, x3223, 64), x3222, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3227, x3223, 64), x3222, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98574,7 +102832,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3244: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3239, x3241, 64), x1, 32);
     let x3245: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3244, x3240, 64), x3239, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3244, x3240, 64), x3239, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98677,7 +102939,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3261: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3256, x3258, 64), x1, 32);
     let x3262: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3261, x3257, 64), x3256, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3261, x3257, 64), x3256, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98780,7 +103046,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3278: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3273, x3275, 64), x1, 32);
     let x3279: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3278, x3274, 64), x3273, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3278, x3274, 64), x3273, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98883,7 +103153,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3295: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3290, x3292, 64), x1, 32);
     let x3296: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3295, x3291, 64), x3290, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3295, x3291, 64), x3290, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -98986,7 +103260,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3312: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3307, x3309, 64), x1, 32);
     let x3313: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3312, x3308, 64), x3307, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3312, x3308, 64), x3307, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99089,7 +103367,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3329: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3324, x3326, 64), x1, 32);
     let x3330: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3329, x3325, 64), x3324, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3329, x3325, 64), x3324, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99192,7 +103474,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3346: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3341, x3343, 64), x1, 32);
     let x3347: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3346, x3342, 64), x3341, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3346, x3342, 64), x3341, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99295,7 +103581,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3363: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3358, x3360, 64), x1, 32);
     let x3364: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3363, x3359, 64), x3358, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3363, x3359, 64), x3358, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99398,7 +103688,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3380: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3375, x3377, 64), x1, 32);
     let x3381: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3380, x3376, 64), x3375, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3380, x3376, 64), x3375, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99501,7 +103795,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3397: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3392, x3394, 64), x1, 32);
     let x3398: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3397, x3393, 64), x3392, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3397, x3393, 64), x3392, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99604,7 +103902,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3414: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3409, x3411, 64), x1, 32);
     let x3415: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3414, x3410, 64), x3409, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3414, x3410, 64), x3409, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99707,7 +104009,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3431: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3426, x3428, 64), x1, 32);
     let x3432: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3431, x3427, 64), x3426, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3431, x3427, 64), x3426, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99810,7 +104116,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3448: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3443, x3445, 64), x1, 32);
     let x3449: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3448, x3444, 64), x3443, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3448, x3444, 64), x3443, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -99913,7 +104223,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3465: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3460, x3462, 64), x1, 32);
     let x3466: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3465, x3461, 64), x3460, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3465, x3461, 64), x3460, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100016,7 +104330,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3482: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3477, x3479, 64), x1, 32);
     let x3483: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3482, x3478, 64), x3477, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3482, x3478, 64), x3477, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100119,7 +104437,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3499: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3494, x3496, 64), x1, 32);
     let x3500: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3499, x3495, 64), x3494, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3499, x3495, 64), x3494, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100222,7 +104544,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3516: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3511, x3513, 64), x1, 32);
     let x3517: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3516, x3512, 64), x3511, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3516, x3512, 64), x3511, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100325,7 +104651,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3533: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3528, x3530, 64), x1, 32);
     let x3534: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3533, x3529, 64), x3528, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3533, x3529, 64), x3528, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100428,7 +104758,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3550: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3545, x3547, 64), x1, 32);
     let x3551: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3550, x3546, 64), x3545, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3550, x3546, 64), x3545, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100531,7 +104865,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3567: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3562, x3564, 64), x1, 32);
     let x3568: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3567, x3563, 64), x3562, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3567, x3563, 64), x3562, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100634,7 +104972,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3584: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3579, x3581, 64), x1, 32);
     let x3585: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3584, x3580, 64), x3579, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3584, x3580, 64), x3579, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100737,7 +105079,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3601: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3596, x3598, 64), x1, 32);
     let x3602: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3601, x3597, 64), x3596, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3601, x3597, 64), x3596, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100840,7 +105186,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3618: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3613, x3615, 64), x1, 32);
     let x3619: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3618, x3614, 64), x3613, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3618, x3614, 64), x3613, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -100943,7 +105293,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3635: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3630, x3632, 64), x1, 32);
     let x3636: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3635, x3631, 64), x3630, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3635, x3631, 64), x3630, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101046,7 +105400,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3652: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3647, x3649, 64), x1, 32);
     let x3653: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3652, x3648, 64), x3647, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3652, x3648, 64), x3647, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101149,7 +105507,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3669: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3664, x3666, 64), x1, 32);
     let x3670: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3669, x3665, 64), x3664, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3669, x3665, 64), x3664, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101252,7 +105614,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3686: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3681, x3683, 64), x1, 32);
     let x3687: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3686, x3682, 64), x3681, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3686, x3682, 64), x3681, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101355,7 +105721,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3703: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3698, x3700, 64), x1, 32);
     let x3704: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3703, x3699, 64), x3698, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3703, x3699, 64), x3698, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101458,7 +105828,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3720: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3715, x3717, 64), x1, 32);
     let x3721: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3720, x3716, 64), x3715, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3720, x3716, 64), x3715, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101561,7 +105935,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3737: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3732, x3734, 64), x1, 32);
     let x3738: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3737, x3733, 64), x3732, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3737, x3733, 64), x3732, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101664,7 +106042,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3754: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3749, x3751, 64), x1, 32);
     let x3755: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3754, x3750, 64), x3749, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3754, x3750, 64), x3749, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101767,7 +106149,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3771: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3766, x3768, 64), x1, 32);
     let x3772: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3771, x3767, 64), x3766, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3771, x3767, 64), x3766, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101870,7 +106256,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3788: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3783, x3785, 64), x1, 32);
     let x3789: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3788, x3784, 64), x3783, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3788, x3784, 64), x3783, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -101973,7 +106363,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3805: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3800, x3802, 64), x1, 32);
     let x3806: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3805, x3801, 64), x3800, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3805, x3801, 64), x3800, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102076,7 +106470,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3822: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3817, x3819, 64), x1, 32);
     let x3823: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3822, x3818, 64), x3817, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3822, x3818, 64), x3817, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102179,7 +106577,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3839: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3834, x3836, 64), x1, 32);
     let x3840: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3839, x3835, 64), x3834, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3839, x3835, 64), x3834, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102282,7 +106684,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3856: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3851, x3853, 64), x1, 32);
     let x3857: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3856, x3852, 64), x3851, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3856, x3852, 64), x3851, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102385,7 +106791,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3873: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3868, x3870, 64), x1, 32);
     let x3874: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3873, x3869, 64), x3868, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3873, x3869, 64), x3868, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102488,7 +106898,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3890: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3885, x3887, 64), x1, 32);
     let x3891: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3890, x3886, 64), x3885, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3890, x3886, 64), x3885, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102591,7 +107005,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3907: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3902, x3904, 64), x1, 32);
     let x3908: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3907, x3903, 64), x3902, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3907, x3903, 64), x3902, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102694,7 +107112,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3924: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3919, x3921, 64), x1, 32);
     let x3925: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3924, x3920, 64), x3919, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3924, x3920, 64), x3919, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102797,7 +107219,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3941: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3936, x3938, 64), x1, 32);
     let x3942: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3941, x3937, 64), x3936, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3941, x3937, 64), x3936, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -102900,7 +107326,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3958: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3953, x3955, 64), x1, 32);
     let x3959: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3958, x3954, 64), x3953, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3958, x3954, 64), x3953, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103003,7 +107433,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3975: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3970, x3972, 64), x1, 32);
     let x3976: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3975, x3971, 64), x3970, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3975, x3971, 64), x3970, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103106,7 +107540,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x3992: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x3987, x3989, 64), x1, 32);
     let x3993: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x3992, x3988, 64), x3987, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x3992, x3988, 64), x3987, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103209,7 +107647,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4009: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4004, x4006, 64), x1, 32);
     let x4010: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4009, x4005, 64), x4004, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4009, x4005, 64), x4004, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103312,7 +107754,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4026: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4021, x4023, 64), x1, 32);
     let x4027: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4026, x4022, 64), x4021, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4026, x4022, 64), x4021, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103415,7 +107861,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4043: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4038, x4040, 64), x1, 32);
     let x4044: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4043, x4039, 64), x4038, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4043, x4039, 64), x4038, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103518,7 +107968,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4060: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4055, x4057, 64), x1, 32);
     let x4061: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4060, x4056, 64), x4055, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4060, x4056, 64), x4055, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103621,7 +108075,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4077: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4072, x4074, 64), x1, 32);
     let x4078: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4077, x4073, 64), x4072, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4077, x4073, 64), x4072, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103724,7 +108182,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4094: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4089, x4091, 64), x1, 32);
     let x4095: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4094, x4090, 64), x4089, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4094, x4090, 64), x4089, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103827,7 +108289,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4111: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4106, x4108, 64), x1, 32);
     let x4112: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4111, x4107, 64), x4106, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4111, x4107, 64), x4106, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -103930,7 +108396,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4128: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4123, x4125, 64), x1, 32);
     let x4129: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4128, x4124, 64), x4123, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4128, x4124, 64), x4123, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104033,7 +108503,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4145: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4140, x4142, 64), x1, 32);
     let x4146: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4145, x4141, 64), x4140, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4145, x4141, 64), x4140, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104136,7 +108610,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4162: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4157, x4159, 64), x1, 32);
     let x4163: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4162, x4158, 64), x4157, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4162, x4158, 64), x4157, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104239,7 +108717,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4179: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4174, x4176, 64), x1, 32);
     let x4180: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4179, x4175, 64), x4174, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4179, x4175, 64), x4174, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104342,7 +108824,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4196: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4191, x4193, 64), x1, 32);
     let x4197: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4196, x4192, 64), x4191, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4196, x4192, 64), x4191, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104445,7 +108931,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4213: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4208, x4210, 64), x1, 32);
     let x4214: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4213, x4209, 64), x4208, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4213, x4209, 64), x4208, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104548,7 +109038,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4230: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4225, x4227, 64), x1, 32);
     let x4231: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4230, x4226, 64), x4225, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4230, x4226, 64), x4225, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104651,7 +109145,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4247: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4242, x4244, 64), x1, 32);
     let x4248: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4247, x4243, 64), x4242, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4247, x4243, 64), x4242, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104754,7 +109252,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4264: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4259, x4261, 64), x1, 32);
     let x4265: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4264, x4260, 64), x4259, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4264, x4260, 64), x4259, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104857,7 +109359,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4281: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4276, x4278, 64), x1, 32);
     let x4282: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4281, x4277, 64), x4276, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4281, x4277, 64), x4276, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -104960,7 +109466,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4298: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4293, x4295, 64), x1, 32);
     let x4299: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4298, x4294, 64), x4293, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4298, x4294, 64), x4293, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -105063,7 +109573,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4315: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4310, x4312, 64), x1, 32);
     let x4316: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4315, x4311, 64), x4310, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4315, x4311, 64), x4310, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -105166,7 +109680,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4332: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4327, x4329, 64), x1, 32);
     let x4333: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4332, x4328, 64), x4327, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4332, x4328, 64), x4327, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -105269,7 +109787,11 @@ pub fn rep_ec_aff_add_test_full_256_r256(ctx: &mut BigIntContext) -> Result<()> 
     )?;
     let x4349: BytePoly_32 = bigint_nondet_rem!(ctx, bigint_mul!(x4344, x4346, 64), x1, 32);
     let x4350: BytePoly_64 = bigint_add!(
-        bigint_sub!(bigint_mul!(x4349, x4345, 64), x4344, 64),
+        bigint_add!(
+            bigint_sub!(bigint_mul!(x4349, x4345, 64), x4344, 64),
+            x1,
+            64
+        ),
         x1,
         64
     );
@@ -119042,7 +123564,14 @@ bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/5, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_aff_add_test_full_256, /*iters=*/1,
+bigint_program_info! {ec_add_rz8test1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/5, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_add_secp256k1, /*iters=*/1,
 bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -119059,7 +123588,12 @@ bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_aff_doub_test_full_256, /*iters=*/1,
+bigint_program_info! {ec_doub_rz8test1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_doub_secp256k1, /*iters=*/1,
 bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -119080,7 +123614,15 @@ bigint_witness_info!(/*bits=*/32, /*label=*/3, /*public=*/ true, /*min_bits=*/0)
 bigint_witness_info!(/*bits=*/32, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/32, /*label=*/5, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/32, /*label=*/6, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_aff_mul_test_full_256, /*iters=*/1,
+bigint_program_info! {ec_mul_rz8test1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/5, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/6, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_mul_secp256k1, /*iters=*/1,
 bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -119093,6 +123635,16 @@ bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_neg_rz8test1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_neg_secp256k1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
 bigint_program_info! {ec_aff_sub_test_8, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
@@ -119100,11 +123652,35 @@ bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/5, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_sub_rz8test1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/5, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_sub_secp256k1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/5, /*public=*/ true, /*min_bits=*/0)}
 bigint_program_info! {ec_pts_eq_test_8, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_pts_eq_rz8test1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_pts_eq_secp256k1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
 bigint_program_info! {rep_ec_aff_add_test_full_256_r5, /*iters=*/1,
 bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
@@ -119141,4 +123717,4 @@ bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, nondet_inv_test_8, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128, ecdsa_verify_8, ecdsa_verify_32, ec_aff_add_test_8, ec_aff_add_test_256, ec_aff_add_test_full_256, ec_aff_doub_test_8, ec_aff_doub_test_256, ec_aff_doub_test_full_256, ec_aff_mul_test_8, ec_aff_mul_test_32, ec_aff_mul_test_full_256, ec_aff_neg_test_8, ec_aff_sub_test_8, ec_pts_eq_test_8, rep_ec_aff_add_test_full_256_r5, rep_ec_aff_add_test_full_256_r10, rep_ec_aff_add_test_full_256_r256, rep_ec_aff_doub_test_full_256_r5, rep_ec_aff_doub_test_full_256_r10, rep_ec_aff_doub_test_full_256_r256}
+bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, nondet_inv_test_8, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128, ecdsa_verify_8, ecdsa_verify_32, ec_aff_add_test_8, ec_aff_add_test_256, ec_add_rz8test1, ec_add_secp256k1, ec_aff_doub_test_8, ec_aff_doub_test_256, ec_doub_rz8test1, ec_doub_secp256k1, ec_aff_mul_test_8, ec_aff_mul_test_32, ec_mul_rz8test1, ec_mul_secp256k1, ec_aff_neg_test_8, ec_neg_rz8test1, ec_neg_secp256k1, ec_aff_sub_test_8, ec_sub_rz8test1, ec_sub_secp256k1, ec_pts_eq_test_8, ec_pts_eq_rz8test1, ec_pts_eq_secp256k1, rep_ec_aff_add_test_full_256_r5, rep_ec_aff_add_test_full_256_r10, rep_ec_aff_add_test_full_256_r256, rep_ec_aff_doub_test_full_256_r5, rep_ec_aff_doub_test_full_256_r10, rep_ec_aff_doub_test_full_256_r256}
