@@ -97,6 +97,7 @@ export default async function createConfigAsync() {
           redirects: [{ from: "/tech_faq", to: "/faq" }],
         },
       ],
+      "@gracefullight/docusaurus-plugin-vercel-analytics"
     ],
 
     stylesheets: [
@@ -106,14 +107,6 @@ export default async function createConfigAsync() {
         integrity:
           "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
         crossorigin: "anonymous",
-      },
-    ],
-
-    scripts: [
-      {
-        src: "https://plausible.io/js/script.js",
-        "data-domain": "risczero.com",
-        defer: true,
       },
     ],
 
