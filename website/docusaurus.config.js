@@ -5,6 +5,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 import katex from "rehype-katex";
 import math from "remark-math";
 import rustCode from "./src/remark/rust.js";
+import apiVersions from "./api_versions.json";
 
 const baseUrl = process.env.BASE_URL ?? "/";
 
@@ -70,7 +71,7 @@ export default async function createConfigAsync() {
             // Otherwise we risk losing the update on the next release.
             return `https://github.com/risc0/risc0/edit/main/website/api/${docPath}`;
           },
-          lastVersion: "1.1",
+          lastVersion: apiVersions[0],
         },
       ],
       [
