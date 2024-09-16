@@ -97,7 +97,7 @@ export default async function createConfigAsync() {
           redirects: [{ from: "/tech_faq", to: "/faq" }],
         },
       ],
-      "@gracefullight/docusaurus-plugin-vercel-analytics"
+      "@gracefullight/docusaurus-plugin-vercel-analytics",
     ],
 
     stylesheets: [
