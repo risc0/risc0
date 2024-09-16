@@ -24,12 +24,12 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 
 [blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/release-1.0/examples
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
-[governance-example]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance
+[governance-example]: https://github.com/risc0/risc0-ethereum/tree/main/examples/governance
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
 [remote-proving]: ../generating-proofs/remote-proving.md
 [revm]: https://crates.io/crates/revm
 [risc0-ethereum]: https://github.com/risc0/risc0-ethereum/tree/release-1.0
-[signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
+[signature-aggregation]: https://github.com/risc0/risc0-ethereum/blob/main/examples/governance/methods/guest/src/bin/finalize_votes.rs
 [steel-src]: https://github.com/risc0/risc0-ethereum/tree/release-1.0/steel
 [steel-blog]: https://www.risczero.com/blog/introducing-steel
 [steel-repo]: https://crates.io/crates/risc0-steel
