@@ -84,6 +84,5 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
-[verifier-usage-patterns]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md#usage-patterns
 [verify-sepolia-etherscan]: https://sepolia.etherscan.io/tx/0x28803b006ac64c08d386676abf34d8ba6232173b28f09ddd4f0c253e37904f91/advanced
 [version-management]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/version-management-design.md
