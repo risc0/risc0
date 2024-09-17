@@ -32,7 +32,9 @@ use crate::{
         },
         server::session::NullSegmentRef,
     },
-    prove_zkr, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
+    prove_zkr,
+    recursion::identity_p254,
+    Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
     ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
     VerifierContext,
 };
@@ -643,14 +645,11 @@ impl Server {
         request: pb::api::IdentityP254Request,
     ) -> Result<()> {
         fn inner(request: pb::api::IdentityP254Request) -> Result<pb::api::IdentityP254Reply> {
-            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
             let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
             let succinct_receipt: SuccinctReceipt<ReceiptClaim> =
                 bincode::deserialize(&receipt_bytes)?;
 
-            let prover = get_prover_server(&opts)?;
-            let receipt = prover.identity_p254(&succinct_receipt)?;
-
+            let receipt = identity_p254(&succinct_receipt)?;
             let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
