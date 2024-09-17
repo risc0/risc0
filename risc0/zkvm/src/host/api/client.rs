@@ -35,6 +35,7 @@ use crate::{
 /// A client implementation for interacting with a zkVM server.
 pub struct Client {
     connector: Box<dyn Connector>,
+    compat: bool,
 }
 
 impl Default for Client {
@@ -62,7 +63,10 @@ impl Client {
     /// Additionally allows for wider version mismatches, only rejecting major differences
     pub fn new_sub_process_compat<P: AsRef<Path>>(server_path: P) -> Result<Self> {
         let connector = ParentProcessConnector::new_wide_version(server_path)?;
-        Ok(Self::with_connector(Box::new(connector)))
+        Ok(Self {
+            connector: Box::new(connector),
+            compat: true,
+        })
     }
 
     /// Construct a [Client] based on environment variables.
@@ -73,7 +77,10 @@ impl Client {
     /// Construct a [Client] using the specified [Connector] to establish a
     /// connection with the server.
     pub fn with_connector(connector: Box<dyn Connector>) -> Self {
-        Self { connector }
+        Self {
+            connector,
+            compat: false,
+        }
     }
 
     /// Prove the specified ELF binary.
@@ -489,7 +496,13 @@ impl Client {
                     .ok_or(malformed_err())?
                     .try_into()
                     .map_err(|err: semver::Error| anyhow!(err))?;
-                if !check_server_version(&client_version, &server_version) {
+
+                let version_check = if self.compat {
+                    check_server_version_wide
+                } else {
+                    check_server_version
+                };
+                if !version_check(&client_version, &server_version) {
                     let msg = format!("incompatible server version: {server_version}");
                     tracing::warn!("{msg}");
                     bail!(msg);
