@@ -174,6 +174,24 @@ impl ParentProcessConnector {
         })
     }
 
+    pub fn new_wide_version<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let server_version = get_server_version(&server_path)?;
+
+        if !client::check_server_version_wide(&client_version, &server_version) {
+            let msg = format!(
+                "Your installation of r0vm differs by a major version:\n\
+            {client_version} vs {server_version} only minor, patch / pre-releases supported"
+            );
+            tracing::warn!("{msg}");
+            bail!(msg);
+        }
+        Ok(Self {
+            server_path: server_path.as_ref().to_path_buf(),
+            listener: TcpListener::bind("127.0.0.1:0")?,
+        })
+    }
+
     fn spawn_fail(&self) -> String {
         format!(
             "Could not launch zkvm: \"{}\". \n

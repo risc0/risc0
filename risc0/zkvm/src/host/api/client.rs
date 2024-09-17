@@ -56,6 +56,15 @@ impl Client {
         Ok(Self::with_connector(Box::new(connector)))
     }
 
+    /// Construct a [Client] that connects to a sub-process which implements
+    /// the server by calling the specified `server_path`.
+    ///
+    /// Additionally allows for wider version mismatches, only rejecting major differences
+    pub fn new_sub_process_compat<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let connector = ParentProcessConnector::new_wide_version(server_path)?;
+        Ok(Self::with_connector(Box::new(connector)))
+    }
+
     /// Construct a [Client] based on environment variables.
     pub fn from_env() -> Result<Self> {
         Client::new_sub_process(get_r0vm_path()?)
@@ -758,11 +767,18 @@ pub(crate) fn check_server_version(requested: &semver::Version, server: &semver:
     }
 }
 
+pub(crate) fn check_server_version_wide(
+    requested: &semver::Version,
+    server: &semver::Version,
+) -> bool {
+    requested.major == server.major
+}
+
 #[cfg(test)]
 mod tests {
     use semver::Version;
 
-    use super::check_server_version;
+    use super::{check_server_version, check_server_version_wide};
 
     #[test]
     fn check_version() {
@@ -791,5 +807,22 @@ mod tests {
 
         assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
         assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
+    }
+
+    #[test]
+    fn check_wide_version() {
+        fn test(requested: &str, server: &str) -> bool {
+            check_server_version_wide(
+                &Version::parse(requested).unwrap(),
+                &Version::parse(server).unwrap(),
+            )
+        }
+
+        assert!(test("0.1.0", "0.1.0"));
+        assert!(test("0.1.0", "0.1.1"));
+        assert!(test("0.1.0", "0.2.0"));
+        assert!(test("0.1.0-rc.1", "0.2.0"));
+        assert!(test("1.1.0", "1.0.0"));
+        assert!(!test("1.0.0", "2.0.0"));
     }
 }
