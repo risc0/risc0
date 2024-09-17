@@ -211,10 +211,15 @@ fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
 
 impl Connector for ParentProcessConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
+        let passthru_vars: std::collections::HashMap<_, _> = std::env::vars()
+            .filter(|(key, _)| key == "RUST_LOG" || key == "RUST_BACKTRACE")
+            .collect();
+
         let addr = self.listener.local_addr()?;
         let child = Command::new(&self.server_path)
             .arg("--port")
             .arg(addr.port().to_string())
+            .envs(passthru_vars)
             .spawn()
             .with_context(|| self.spawn_fail())?;
 
