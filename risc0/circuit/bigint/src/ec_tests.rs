@@ -245,7 +245,7 @@ bigint_short_tests! {
         ],
         [171553196, 1884525848, 1964417951, 1602581249]
     ),
-    ec_aff_mul2_test_256(
+    ec_aff_mul47_test_256(
         ec_mul_secp256k1,
         [
             "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",   // inp_x
