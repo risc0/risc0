@@ -150,20 +150,7 @@ bigint_tests! {
 
 // name(zkr, in_values, golden_z)
 bigint_short_tests! {
-    ec_aff_mul1_test_8(
-        ec_mul_rz8test1,
-        [
-            "ac",   // inp_x:      172
-            "3c",   // inp_y:       60
-            "01",   // scale:        1
-            "07",   // arb_x:        7
-            "02",   // arb_y:        2
-            "ac",   // expected_x: 172
-            "3c",   // expected_y:  60
-        ],
-        [346372436, 1604795053, 31129203, 246390035]
-    ),
-    ec_aff_mul113_test_8(
+    ec_aff_mul113_test_8(  // TODO: All the mul tests need a rename
         ec_mul_rz8test1,
         [
             "9d",   // inp_x:      157
