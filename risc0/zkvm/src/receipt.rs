@@ -324,7 +324,7 @@ impl InnerReceipt {
         tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Groth16(inner) => inner.verify_integrity(),
+            Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity(),
         }
@@ -585,7 +585,7 @@ impl InnerAssumptionReceipt {
         tracing::debug!("InnerAssumptionReceipt::verify_integrity_with_context");
         match self {
             Self::Composite(inner) => inner.verify_integrity_with_context(ctx),
-            Self::Groth16(inner) => inner.verify_integrity(),
+            Self::Groth16(inner) => inner.verify_integrity_with_context(ctx),
             Self::Succinct(inner) => inner.verify_integrity_with_context(ctx),
             Self::Fake(inner) => inner.verify_integrity(),
         }
