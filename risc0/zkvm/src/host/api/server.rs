@@ -18,9 +18,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
@@ -248,6 +249,7 @@ impl Server {
                 self.on_identity_p254(conn, request)
             }
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
+            pb::api::server_request::Kind::Verify(request) => self.on_verify(conn, request),
         }
     }
 
@@ -446,7 +448,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -484,7 +486,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -535,7 +537,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -575,7 +577,7 @@ impl Server {
             )),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -615,7 +617,27 @@ impl Server {
             )),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_verify(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::VerifyRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::VerifyRequest) -> Result<()> {
+            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
+            let receipt: Receipt =
+                bincode::deserialize(&receipt_bytes).context("deserialize receipt")?;
+            let image_id: Digest = request.image_id.ok_or(malformed_err())?.try_into()?;
+            receipt
+                .verify(image_id)
+                .map_err(|err| anyhow!("verify failed: {err}"))
+        }
+
+        let msg: pb::api::GenericReply = inner(request).into();
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 }
