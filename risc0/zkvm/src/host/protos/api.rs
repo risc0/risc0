@@ -2,7 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerRequest {
-    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
+    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
 /// Nested message and enum types in `ServerRequest`.
@@ -26,6 +26,8 @@ pub mod server_request {
         Resolve(super::ResolveRequest),
         #[prost(message, tag = "8")]
         Compress(super::CompressRequest),
+        #[prost(message, tag = "9")]
+        Verify(super::VerifyRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -273,12 +275,22 @@ pub struct CompressResult {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyRequest {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "2")]
+    pub image_id: ::core::option::Option<super::base::Digest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars:
-        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    pub env_vars: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]

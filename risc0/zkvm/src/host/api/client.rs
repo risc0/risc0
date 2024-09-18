@@ -14,9 +14,10 @@
 
 use std::path::Path;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_zkp::core::digest::Digest;
 
 use super::{
     malformed_err, pb, Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector,
@@ -135,7 +136,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let result = self.execute_handler(segment_callback, &mut conn, env);
@@ -166,7 +167,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::ProveSegmentReply = conn.recv()?;
@@ -209,7 +210,7 @@ impl Client {
                 receipt_out: Some(receipt_out.try_into()?),
             })),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::LiftReply = conn.recv()?;
@@ -252,7 +253,7 @@ impl Client {
                 receipt_out: Some(receipt_out.try_into()?),
             })),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::JoinReply = conn.recv()?;
@@ -299,7 +300,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::ResolveReply = conn.recv()?;
@@ -343,7 +344,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::IdentityP254Reply = conn.recv()?;
@@ -406,7 +407,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::CompressReply = conn.recv()?;
@@ -428,6 +429,36 @@ impl Client {
         result
     }
 
+    /// Verify a [Receipt].
+    pub fn verify(&self, receipt: Asset, image_id: impl Into<Digest>) -> Result<()> {
+        let mut conn = self.connect().context("connect")?;
+        let image_id = image_id.into();
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Verify(
+                pb::api::VerifyRequest {
+                    receipt: Some(receipt.try_into().context("convert receipt asset")?),
+                    image_id: Some(image_id.into()),
+                },
+            )),
+        };
+        // tracing::trace!("tx: {request:?}");
+        conn.send(request).context("send")?;
+
+        let reply: pb::api::GenericReply = conn.recv().context("error from server")?;
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::generic_reply::Kind::Ok(ok) => Ok(ok),
+            pb::api::generic_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close().context("close")?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
     fn connect(&self) -> Result<ConnectionWrapper> {
         let mut conn = self.connector.connect()?;
 
@@ -435,11 +466,11 @@ impl Client {
         let request = pb::api::HelloRequest {
             version: Some(client_version.clone().into()),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::HelloReply = conn.recv()?;
-        tracing::trace!("rx: {reply:?}");
+        // tracing::trace!("rx: {reply:?}");
         match reply.kind.ok_or(malformed_err())? {
             pb::api::hello_reply::Kind::Ok(reply) => {
                 let server_version: semver::Version = reply
@@ -540,14 +571,14 @@ impl Client {
         let mut segments = Vec::new();
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
-            tracing::trace!("rx: {reply:?}");
+            // tracing::trace!("rx: {reply:?}");
 
             match reply.kind.ok_or(malformed_err())? {
                 pb::api::server_reply::Kind::Ok(request) => {
                     match request.kind.ok_or(malformed_err())? {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                            tracing::trace!("tx: {msg:?}");
+                            // tracing::trace!("tx: {msg:?}");
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(segment) => {
@@ -567,7 +598,7 @@ impl Client {
                                     },
                                 )
                                 .into();
-                            tracing::trace!("tx: {reply:?}");
+                            // tracing::trace!("tx: {reply:?}");
                             conn.send(reply)?;
                         }
                         pb::api::client_callback::Kind::SessionDone(session) => {
@@ -600,14 +631,14 @@ impl Client {
     ) -> Result<pb::api::Asset> {
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
-            tracing::trace!("rx: {reply:?}");
+            // tracing::trace!("rx: {reply:?}");
 
             match reply.kind.ok_or(malformed_err())? {
                 pb::api::server_reply::Kind::Ok(request) => {
                     match request.kind.ok_or(malformed_err())? {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                            tracing::trace!("tx: {msg:?}");
+                            // tracing::trace!("tx: {msg:?}");
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(_) => {
