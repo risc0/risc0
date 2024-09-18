@@ -34,31 +34,11 @@ pub fn def<const N: usize>(ctx: &mut BigIntContext, label: usize, is_public: usi
 
 pub fn nondet_quot<const N: usize>(
     ctx: &mut BigIntContext,
-    lhs: impl AsRef<[i32]> + Clone,
-    rhs: impl AsRef<[i32]> + Clone,
+    lhs: impl AsRef<[i32]>,
+    rhs: impl AsRef<[i32]>,
 ) -> [i32; N] {
-    // tracing::error!("quot will be...");
-    // tracing::error!(
-    //     "(based on lhs[0] {} and rhs[0] {}",
-    //     lhs.as_ref()[0],
-    //     rhs.as_ref()[0]
-    // );
-    // tracing::error!("  (based on the below raw data)");
-    // tracing::error!("    lhs:");
-    // for it in lhs.as_ref().iter() {
-    //     tracing::error!("    {it}");
-    // }
-    // tracing::error!("    rhs:");
-    // for it in rhs.as_ref().iter() {
-    //     tracing::error!("    {it}");
-    // }
-    // tracing::error!(
-    //     "calculated from {} / {}",
-    //     byte_poly::to_biguint(lhs.clone()),
-    //     byte_poly::to_biguint(rhs.clone())
-    // );
     let out = byte_poly::nondet_quot_fixed::<N>(lhs.as_ref(), rhs.as_ref());
-    // tracing::error!("quot: {}", byte_poly::to_biguint(out));
+    trace!("quot: {}", byte_poly::to_biguint(out));
     ctx.private_witness.push(out.to_vec());
     out
 }
@@ -68,9 +48,8 @@ pub fn nondet_rem<const N: usize>(
     lhs: impl AsRef<[i32]>,
     rhs: impl AsRef<[i32]>,
 ) -> [i32; N] {
-    // tracing::error!("rem will be...");
     let out = byte_poly::nondet_rem_fixed::<N>(lhs.as_ref(), rhs.as_ref());
-    // tracing::error!("rem: {}", byte_poly::to_biguint(out));
+    trace!("rem: {}", byte_poly::to_biguint(out));
     ctx.private_witness.push(out.to_vec());
     out
 }
@@ -80,9 +59,8 @@ pub fn nondet_inv<const N: usize>(
     lhs: impl AsRef<[i32]>,
     rhs: impl AsRef<[i32]>,
 ) -> [i32; N] {
-    // tracing::error!("inv will be...");
     let out = byte_poly::nondet_inv_fixed::<N>(lhs.as_ref(), rhs.as_ref());
-    // tracing::error!("inv: {}", byte_poly::to_biguint(out));
+    trace!("inv: {}", byte_poly::to_biguint(out));
     ctx.private_witness.push(out.to_vec());
     out
 }
