@@ -41,8 +41,6 @@ use test_log::test;
 //     ])
 // }
 
-// TODO: We build ZKRs for, but don't really test, the secp256k1 versions
-
 // name(zkr, in_values, public_witness, private_witness, constant_witness, golden_z)
 bigint_tests! {
     ec_add_test_8(
