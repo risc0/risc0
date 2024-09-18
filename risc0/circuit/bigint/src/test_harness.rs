@@ -124,7 +124,40 @@ macro_rules! bigint_short_tests {
     }
 }
 
+// Tests that input values which should cause failures do cause failures
+// TODO: Not yet functional
+macro_rules! bigint_should_fail_tests {
+    ($($name:ident($zkr:ident, $in:expr, $z:expr),)*) => {
+        $(
+            paste::paste! {
+                fn [<$name _values>]() -> Vec<BigUint> {
+                    $in.into_iter().map($crate::test_harness::from_hex).collect()
+                }
+
+                fn [<$name _context>]() -> anyhow::Result<BigIntContext> {
+                    let mut ctx = BigIntContext::from_values([<$name _values>]());
+                    $crate::generated::$zkr(&mut ctx)?;
+                    Ok(ctx)
+                }
+
+                // fn [<$name _filename>]() -> &'static str {
+                //     concat!(stringify!($zkr), ".zkr")
+                // }
+
+                #[test]
+                fn [<$name _zkr>]() -> () {
+                    [<$name _context>]().expect_err("Expected valid contex (or should this error?");
+                    // test_zkr([<$name _context>]().expect("Expected valid context"), [<$name _filename>]()).expect_err(&format!(
+                    //     "Expected failure to prove"
+                    // ));
+                }
+            }
+        )*
+    }
+}
+
 pub(crate) use bigint_short_tests;
+pub(crate) use bigint_should_fail_tests;
 pub(crate) use bigint_tests;
 
 pub(crate) fn test_witgen(
