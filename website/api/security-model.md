@@ -1,4 +1,4 @@
-# Security Model
+# Cryptographic Security Model
 
 RISC Zero is proud to offer an end-to-end solution for verifiable computation.
 Users can generate proofs for correct execution of software code using the [RISC Zero zkVM],
@@ -58,11 +58,11 @@ In analyzing the cryptographic security of our system, we consider two primary q
 
 The first question is about the **soundness** of the protocol, and the second question is whether the protocol is **zero-knowledge**.
 
-Soundness is often quantified in terms of "[bits]" — our system currently targets 98 bits of security.
+Soundness is often quantified in terms of "[bits]" — our [on-chain verifier contracts][Verifier Contract] target 97 bits of security.
 
 | Prover                | Cryptographic Assumptions                                                                                                                     | Bits of Security | Quantum Safe? |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------- |
-| RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 98               | Yes           |
+| RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 97               | Yes           |
 | Recursion Prover      | - Random Oracle Model <br/> - Toy Problem Conjecture                                                                                          | 99               | Yes           |
 | STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption <br/> - Integrity of Groth16 Trusted Setup Ceremony | 99+              | No            |
 

@@ -21,6 +21,7 @@ pub(crate) mod server;
 mod tests;
 
 use std::{
+    collections::HashMap,
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
@@ -40,7 +41,7 @@ use lazy_regex::regex_captures;
 use prost::Message;
 use semver::Version;
 
-use crate::{get_version, ExitCode, Journal};
+use crate::{get_version, ExitCode, Journal, ReceiptClaim};
 
 mod pb {
     pub(crate) mod api {
@@ -77,6 +78,7 @@ impl RootMessage for pb::api::ServerReply {}
 impl RootMessage for pb::api::GenericReply {}
 impl RootMessage for pb::api::OnIoReply {}
 impl RootMessage for pb::api::ProveSegmentReply {}
+impl RootMessage for pb::api::ProveZkrReply {}
 impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}
 impl RootMessage for pb::api::JoinRequest {}
@@ -193,10 +195,14 @@ fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
 
 impl Connector for ParentProcessConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
+        let passthru_vars: HashMap<_, _> = std::env::vars()
+            .filter(|(key, _)| key == "RUST_LOG" || key == "RUST_BACKTRACE")
+            .collect();
         let addr = self.listener.local_addr()?;
         let child = Command::new(&self.server_path)
             .arg("--port")
             .arg(addr.port().to_string())
+            .envs(passthru_vars)
             .spawn()
             .with_context(|| self.spawn_fail())?;
 
@@ -350,6 +356,10 @@ pub struct SessionInfo {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
+    /// proven if this session is passed to the Prover.
+    pub receipt_claim: ReceiptClaim,
 }
 
 impl SessionInfo {

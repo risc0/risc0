@@ -493,16 +493,6 @@ impl AssumptionReceipt {
             Self::Unresolved(assumption) => Ok(assumption.claim),
         }
     }
-
-    #[cfg(feature = "prove")]
-    pub(crate) fn into_receipt(self) -> Result<InnerAssumptionReceipt> {
-        match self {
-            Self::Proven(receipt) => Ok(receipt),
-            Self::Unresolved(_) => Err(anyhow::anyhow!(
-                "no receipt available for unresolved assumption"
-            )),
-        }
-    }
 }
 
 impl From<Receipt> for AssumptionReceipt {
@@ -677,6 +667,12 @@ impl From<InnerReceipt> for InnerAssumptionReceipt {
     }
 }
 
+/// Maximum segment size, as a power of two (po2) that the default verifier parameters will accept.
+///
+/// A default of 21 was selected to reach a target of 97 bits of security under our analysis. Using
+/// a po2 higher than 21 shows a degradation of 1 bit of security per po2, to 94 bits at po2 24.
+pub const DEFAULT_MAX_PO2: usize = 21;
+
 /// Context available to the verification process.
 #[non_exhaustive]
 pub struct VerifierContext {
@@ -711,6 +707,32 @@ impl VerifierContext {
             ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
             ("sha-256".into(), Sha256HashSuite::new_suite()),
         ])
+    }
+
+    /// Construct a verifier context that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(po2_max: usize) -> Self {
+        Self {
+            suites: Self::default_hash_suites(),
+            segment_verifier_parameters: Some(SegmentReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+            succinct_verifier_parameters: Some(SuccinctReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+            groth16_verifier_parameters: Some(Groth16ReceiptVerifierParameters::from_max_po2(
+                po2_max,
+            )),
+        }
+    }
+
+    /// Construct a verifier context that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
     }
 
     /// Return [VerifierContext] with the given map of hash suites.

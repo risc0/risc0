@@ -15,6 +15,9 @@
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
+/// Smallest cycle limit, as a power of two (po2), supported as a lift program.
+pub const MIN_LIFT_PO2: usize = {};
+
 /// Control IDs allowed in the default set of recursion programs. Includes control IDs for the base
 /// set of recursion programs, and each power-of-two of the rv32im circuit, using Poseidon2.
 pub const ALLOWED_CONTROL_IDS: &[Digest] = &[{}];

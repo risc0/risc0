@@ -16,8 +16,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use clap::Parser;
-use risc0_build::BuildStatus;
-use risc0_build::GuestOptions;
+use risc0_build::{BuildStatus, GuestOptions};
 
 /// `cargo risczero build`
 ///

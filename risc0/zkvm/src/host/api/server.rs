@@ -25,8 +25,14 @@ use prost::Message;
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
-    host::{client::slice_io::SliceIo, server::session::NullSegmentRef},
-    Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
+    host::{
+        client::{
+            env::{CoprocessorCallback, ProveZkrRequest},
+            slice_io::SliceIo,
+        },
+        server::session::NullSegmentRef,
+    },
+    prove_zkr, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
     ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
     VerifierContext,
 };
@@ -188,6 +194,50 @@ impl TraceCallback for TraceProxy {
     }
 }
 
+struct CoprocessorProxy {
+    conn: ConnectionWrapper,
+}
+
+impl CoprocessorProxy {
+    fn new(conn: ConnectionWrapper) -> Self {
+        Self { conn }
+    }
+}
+
+impl CoprocessorCallback for CoprocessorProxy {
+    fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
+        let request = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
+                        pb::api::CoprocessorRequest {
+                            kind: Some(pb::api::coprocessor_request::Kind::ProveZkr({
+                                pb::api::ProveZkrRequest {
+                                    claim_digest: Some(proof_request.claim_digest.into()),
+                                    control_id: Some(proof_request.control_id.into()),
+                                    input: proof_request.input,
+                                    receipt_out: None,
+                                }
+                            })),
+                        },
+                    )),
+                })),
+            })),
+        };
+        tracing::trace!("tx: {request:?}");
+        self.conn.send(request)?;
+
+        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        tracing::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
+    }
+}
+
 impl Server {
     /// Construct a new [Server] with the specified [Connector].
     pub fn new(connector: Box<dyn Connector>) -> Self {
@@ -247,6 +297,7 @@ impl Server {
                 self.on_identity_p254(conn, request)
             }
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
+            pb::api::server_request::Kind::ProveZkr(request) => self.on_prove_zkr(conn, request),
         }
     }
 
@@ -302,6 +353,7 @@ impl Server {
                 Ok(Box::new(NullSegmentRef))
             })?;
 
+            let receipt_claim = session.claim()?;
             Ok(pb::api::ServerReply {
                 kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                     kind: Some(pb::api::client_callback::Kind::SessionDone(
@@ -310,6 +362,15 @@ impl Server {
                                 segments: session.segments.len().try_into()?,
                                 journal: session.journal.unwrap_or_default().bytes,
                                 exit_code: Some(session.exit_code.into()),
+                                receipt_claim: Some(pb::api::Asset::from_bytes(
+                                    &pb::api::AssetRequest {
+                                        kind: Some(pb::api::asset_request::Kind::Inline(())),
+                                    },
+                                    pb::core::ReceiptClaim::from(receipt_claim)
+                                        .encode_to_vec()
+                                        .into(),
+                                    "session_info.claim",
+                                )?),
                             }),
                         },
                     )),
@@ -405,6 +466,44 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::ProveSegmentReply {
             kind: Some(pb::api::prove_segment_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
+                },
+            )),
+        });
+
+        tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_prove_zkr(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ProveZkrRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::ProveZkrRequest) -> Result<pb::api::ProveZkrReply> {
+            let control_id = request.control_id.ok_or(malformed_err())?.try_into()?;
+            let receipt = prove_zkr(&control_id, &request.input)?;
+
+            let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ProveZkrReply {
+                kind: Some(pb::api::prove_zkr_reply::Kind::Ok(
+                    pb::api::ProveZkrResult {
+                        receipt: Some(asset),
+                    },
+                )),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ProveZkrReply {
+            kind: Some(pb::api::prove_zkr_reply::Kind::Error(
                 pb::api::GenericError {
                     reason: err.to_string(),
                 },
@@ -655,6 +754,10 @@ fn build_env<'a>(
     }
     if !request.segment_path.is_empty() {
         env_builder.segment_path(Path::new(&request.segment_path));
+    }
+    if request.coprocessor {
+        let proxy = CoprocessorProxy::new(conn.try_clone()?);
+        env_builder.coprocessor_callback(proxy);
     }
 
     for assumption in request.assumptions.iter() {

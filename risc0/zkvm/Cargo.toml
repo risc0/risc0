@@ -62,7 +62,7 @@ bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.6", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
-lazy-regex = { version = "3.2", optional = true }
+lazy-regex = { version = "3.3", optional = true }
 prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -104,7 +104,7 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
 # NOTE: cuda and metal are excluded because their build scripts require external tools.
-features = ["client", "prove", "getrandom", "std"]
+features = ["client", "prove", "getrandom", "std", "unstable"]
 
 [features]
 client = [
@@ -169,4 +169,4 @@ std = [
   "serde/std",
   "sha2/std",
 ]
-unstable = []
+unstable = ["risc0-zkvm-platform/unstable"]

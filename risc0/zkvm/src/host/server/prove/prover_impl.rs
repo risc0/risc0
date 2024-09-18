@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Context, Result};
+use std::collections::HashMap;
+
+use anyhow::{anyhow, bail, ensure, Context, Result};
 use risc0_circuit_rv32im::prove::SegmentProver;
 
 use super::ProverServer;
@@ -22,12 +24,14 @@ use crate::{
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
     },
+    prove_zkr,
     receipt::{
         segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, Merge, Unknown},
     sha::Digestible,
-    CompositeReceipt, Output, ProverOpts, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
+    Assumption, AssumptionReceipt, CompositeReceipt, InnerAssumptionReceipt, Output, ProverOpts,
+    Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -66,15 +70,13 @@ impl ProverServer for ProverImpl {
             }
         }
 
-        let (assumptions, session_assumption_receipts) = session
-            .assumptions
-            .iter()
-            .cloned()
-            .unzip::<_, _, Vec<_>, Vec<_>>();
+        let (assumptions, session_assumption_receipts): (Vec<_>, Vec<_>) =
+            session.assumptions.iter().cloned().unzip();
 
         // Merge the output, including journal digest and assumptions, into the last segment.
-        let last_segment = segments.last_mut().ok_or(anyhow!("session is empty"))?;
-        last_segment
+        segments
+            .last_mut()
+            .ok_or(anyhow!("session is empty"))?
             .claim
             .output
             .merge_with(
@@ -96,31 +98,50 @@ impl ProverServer for ProverImpl {
             ))?
             .digest();
 
-        // Collect the proven assumption receipts from the Session.
-        // TODO(#982): Support unresolved assumptions here.
-        let assumption_receipts = session_assumption_receipts
+        let mut zkr_receipts = HashMap::new();
+        for proof_request in session.pending_zkrs.iter() {
+            let receipt = prove_zkr(&proof_request.control_id, &proof_request.input)?;
+            let assumption = Assumption {
+                claim: receipt.claim.digest(),
+                control_root: receipt.control_root()?,
+            };
+            zkr_receipts.insert(assumption, receipt);
+        }
+
+        // TODO: add test case for when a single session refers to the same assumption multiple times
+        let inner_assumption_receipts: Vec<_> = session_assumption_receipts
             .into_iter()
-            .map(|a| a.into_receipt())
+            .map(|assumption_receipt| match assumption_receipt {
+                AssumptionReceipt::Proven(receipt) => Ok(receipt),
+                AssumptionReceipt::Unresolved(assumption) => {
+                    let receipt = zkr_receipts
+                        .get(&assumption)
+                        .ok_or(anyhow!("no receipt available for unresolved assumption"))?;
+                    Ok(InnerAssumptionReceipt::Succinct(receipt.clone()))
+                }
+            })
             .collect::<Result<_>>()?;
+
+        let assumption_receipts: Vec<_> = inner_assumption_receipts
+            .iter()
+            .map(|inner| AssumptionReceipt::Proven(inner.clone()))
+            .collect();
 
         let composite_receipt = CompositeReceipt {
             segments,
-            assumption_receipts,
+            assumption_receipts: inner_assumption_receipts,
             verifier_parameters,
         };
 
+        let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
+
         // Verify the receipt to catch if something is broken in the proving process.
         composite_receipt.verify_integrity_with_context(ctx)?;
-        if composite_receipt.claim()?.digest() != session.claim()?.digest() {
-            tracing::debug!("composite receipt and session claim do not match");
-            tracing::debug!("composite receipt claim: {:#?}", composite_receipt.claim()?);
-            tracing::debug!("session claim: {:#?}", session.claim()?);
-            bail!(
-                "session and composite receipt claim do not match: session {}, receipt {}",
-                hex::encode(session.claim()?.digest()),
-                hex::encode(composite_receipt.claim()?.digest())
-            );
-        }
+        check_claims(
+            &session_claim,
+            "composite",
+            MaybePruned::Value(composite_receipt.claim()?),
+        )?;
 
         // Compress the receipt to the requested level.
         let receipt = match self.opts.receipt_kind {
@@ -147,16 +168,7 @@ impl ProverServer for ProverImpl {
 
         // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
-        if receipt.claim()?.digest() != session.claim()?.digest() {
-            tracing::debug!("receipt and session claim do not match");
-            tracing::debug!("receipt claim: {:#?}", receipt.claim()?);
-            tracing::debug!("session claim: {:#?}", session.claim()?);
-            bail!(
-                "session and receipt claim do not match: session {}, receipt {}",
-                hex::encode(session.claim()?.digest()),
-                hex::encode(receipt.claim()?.digest())
-            );
-        }
+        check_claims(&session_claim, "receipt", receipt.claim()?)?;
 
         Ok(ProveInfo {
             receipt,
@@ -165,6 +177,13 @@ impl ProverServer for ProverImpl {
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        ensure!(
+            segment.po2() <= self.opts.max_segment_po2,
+            "segment po2 exceeds max on ProverOpts: {} > {}",
+            segment.po2(),
+            self.opts.max_segment_po2
+        );
+
         let seal = self.segment_prover.prove_segment(&segment.inner)?;
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
@@ -215,4 +234,24 @@ impl ProverServer for ProverImpl {
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         identity_p254(a)
     }
+}
+
+fn check_claims(
+    session_claim: &ReceiptClaim,
+    other_name: &str,
+    other_claim: MaybePruned<ReceiptClaim>,
+) -> Result<()> {
+    let session_claim_digest = session_claim.digest();
+    let other_claim_digest = other_claim.digest();
+    if session_claim_digest != other_claim_digest {
+        tracing::debug!("session claim and {other_name} do not match");
+        tracing::debug!("session claim: {session_claim:#?}");
+        tracing::debug!("{other_name} claim: {other_claim:#?}");
+        bail!(
+            "session claim: {} != {other_name} claim: {}",
+            hex::encode(session_claim_digest),
+            hex::encode(other_claim_digest)
+        );
+    }
+    Ok(())
 }

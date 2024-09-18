@@ -7,20 +7,23 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.89"
 cfg-if = "1.0.0"
-clap = { version = "4.5.14", features = ["derive"] }
+clap = { version = "4.5.17", features = ["derive"] }
 dirs = "5.0.1"
-flate2 = "1.0.31"
+flate2 = "1.0.33"
 fs2 = "0.4.3"
 lazy_static = "1.5.0"
 regex = "1.10.6"
-reqwest = { version = "0.12.5", features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12.5", default-features = false, features = [
+  "json",
+  "rustls-tls",
+] }
 risc0-build = { path = "../risc0/build" }
-serde = { version = "1.0.204", features = ["derive"] }
+serde = { version = "1.0.209", features = ["derive"] }
 tar = "0.4.41"
 tempfile = "3.12.0"
 termcolor = "1.4.1"
 thiserror = "1.0.63"
-tokio = { version = "1.39.2", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.40.0", features = ["rt-multi-thread", "macros"] }
 xz = "0.1.0"

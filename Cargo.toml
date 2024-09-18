@@ -42,6 +42,7 @@ metal = "0.29"
 risc0-binfmt = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/build" }
 risc0-build-kernel = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/build_kernel" }
+risc0-circuit-bigint = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/circuit/bigint" }
 risc0-circuit-recursion = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/circuit/recursion" }
 risc0-circuit-recursion-sys = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/circuit/recursion-sys" }
 risc0-circuit-rv32im = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/circuit/rv32im" }
