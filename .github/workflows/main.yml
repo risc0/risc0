@@ -223,7 +223,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
+          key: ${{ matrix.os }}-${{ matrix.feature }}-1.0
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
         run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
