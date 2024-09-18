@@ -47,7 +47,7 @@ You can log the cycle count and other performance info for your zkVM Guest progr
 [external-bonsai-sdk]: https://crates.io/crates/bonsai-sdk
 [external-cargo-risczero]: https://crates.io/crates/cargo-risczero
 [external-foundry-template]: https://github.com/risc0/risc0-foundry-template/blob/main/README.md
-[external-governance-showcase]: https://github.com/risc0/risc0-ethereum/tree/main/examples/governance
+[external-governance-showcase]: https://github.com/risc0/risc0-ethereum/tree/release-1.1/examples/governance
 [external-zeth]: https://www.risczero.com/blog/zeth-release
 [external-zkcoprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [term-cycles]: /terminology#clock-cycles
