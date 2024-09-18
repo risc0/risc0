@@ -45,7 +45,7 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 cuda = [
   "dep:cust",
   "prove",
-  "risc0-circuit-rv32im-sys/cuda",
+  "risc0-circuit-rv32im-sys?/cuda",
   "risc0-sys?/cuda",
   "risc0-zkp/cuda",
   "std",
@@ -61,11 +61,11 @@ prove = [
   "dep:lazy-regex",
   "dep:rand",
   "dep:rayon",
+  "dep:risc0-circuit-rv32im-sys",
   "dep:risc0-sys",
   "dep:sha2",
   "risc0-core/perf",
   "risc0-zkp/prove",
-  "risc0-circuit-rv32im-sys",
   "std",
 ]
 std = ["risc0-zkp/std", "serde/std"]
