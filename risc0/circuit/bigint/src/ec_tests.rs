@@ -114,13 +114,13 @@ bigint_tests! {
         ],
         ["37", "90", "97", "ac"],
         [
-            "17", "22",
+            "17", "742300", "a0c3c3", "1f1f1f", "22",
             "620100", "90434343", "5e5f5f5f", "070000",
             "97", "43434343", "5f5f5f5f", "a00000", "ac",
             "43434343", "5f5f5f5f", "22", "22",
         ],
-        ["01", "b3"],
-        [1739853020, 772298456, 1646252721, 890649739]
+        ["01", "01", "b3"],
+        [1190259367, 1384309291, 214804156, 1381364702]
     ),
     ec_neg_test_8(
         ec_neg_rz8test1,
@@ -245,7 +245,6 @@ bigint_short_tests! {
         ],
         [171553196, 1884525848, 1964417951, 1602581249]
     ),
-    // TODO: Broken!
     ec_aff_mul2_test_256(
         ec_mul_secp256k1,
         [
@@ -254,7 +253,6 @@ bigint_short_tests! {
             "2f",   // scale:      47
             "0f66dc33e335abc9a7c06f71ad2c0db65d5ac4b6f46d2dad9465e6a4ac04dc3f",   // arb_x
             "83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c",   // arb_y
-            "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", // order
             "77f230936ee88cbbd73df930d64702ef881d811e0e1498e2f1c13eb1fc345d74",   // expected_x
             "958ef42a7886b6400a08266e9ba1b37896c95330d97077cbbe8eb3c7671c60d6",   // expected_y
         ],
