@@ -76,7 +76,8 @@ fn prover_example() {
         InnerReceipt::Succinct(root_receipt),
         session.journal.bytes.clone(),
     );
-    receipt.verify(FIB_ID).unwrap();
+    let asset = receipt.try_into().unwrap();
+    client.verify(asset, FIB_ID).unwrap();
     println!("Receipt verified!");
 }
 
