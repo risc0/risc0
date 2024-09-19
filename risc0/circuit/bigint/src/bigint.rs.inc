@@ -64661,6 +64661,87 @@ pub fn ec_pts_eq_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x1, x3, 32), 34, 1)?;
     return Ok(());
 }
+pub fn ec_on_curve_rz8test(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 12);
+    let x1: BytePoly_1 = bigint_const!(ctx, 1);
+    let x2: BytePoly_1 = bigint_const!(ctx, 179);
+    let x3: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
+    let x4: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
+    let x5: BytePoly_2 = bigint_mul!(x3, x3, 2);
+    let x6: BytePoly_3 = bigint_nondet_quot!(ctx, x5, x2, 3);
+    let x7: BytePoly_1 = bigint_nondet_rem!(ctx, x5, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x6, x2, 4), x7, 4), x5, 4),
+        24387,
+        2,
+    )?;
+    let x8: BytePoly_2 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(
+                bigint_add!(bigint_mul!(x3, x7, 2), bigint_mul!(x3, x1, 2), 2),
+                x0,
+                2
+            ),
+            bigint_mul!(x4, x4, 2),
+            2
+        ),
+        bigint_mul!(x2, x2, 2),
+        2
+    );
+    let x9: BytePoly_3 = bigint_nondet_quot!(ctx, x8, x2, 3);
+    let x10: BytePoly_1 = bigint_nondet_rem!(ctx, x8, x2, 1);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x9, x2, 4), x10, 4), x8, 4),
+        24387,
+        2,
+    )?;
+    eqz(ctx, &x10, 34, 1)?;
+    return Ok(());
+}
+pub fn ec_on_curve_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
+    let x0: BytePoly_1 = bigint_const!(ctx, 7);
+    let x1: BytePoly_1 = bigint_const!(ctx, 0);
+    let x2: BytePoly_32 = bigint_const!(
+        ctx, 47, 252, 255, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+    );
+    let x3: BytePoly_32 = bigint_def!(ctx, 32, 0, 1);
+    let x4: BytePoly_32 = bigint_def!(ctx, 32, 1, 1);
+    let x5: BytePoly_64 = bigint_mul!(x3, x3, 64);
+    let x6: BytePoly_34 = bigint_nondet_quot!(ctx, x5, x2, 34);
+    let x7: BytePoly_32 = bigint_nondet_rem!(ctx, x5, x2, 32);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x6, x2, 66), x7, 66), x5, 66),
+        276359,
+        4,
+    )?;
+    let x8: BytePoly_64 = bigint_add!(
+        bigint_sub!(
+            bigint_add!(
+                bigint_add!(bigint_mul!(x3, x7, 64), bigint_mul!(x3, x1, 33), 64),
+                x0,
+                64
+            ),
+            bigint_mul!(x4, x4, 64),
+            64
+        ),
+        bigint_mul!(x2, x2, 64),
+        64
+    );
+    let x9: BytePoly_34 = bigint_nondet_quot!(ctx, x8, x2, 34);
+    let x10: BytePoly_32 = bigint_nondet_rem!(ctx, x8, x2, 32);
+    eqz(
+        ctx,
+        &bigint_sub!(bigint_add!(bigint_mul!(x9, x2, 66), x10, 66), x8, 66),
+        276359,
+        4,
+    )?;
+    eqz(ctx, &x10, 34, 1)?;
+    return Ok(());
+}
 pub fn rep_ec_add_secp256k1_r5(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_32 = bigint_const!(
@@ -106869,6 +106950,12 @@ bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_on_curve_rz8test, /*iters=*/1,
+bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0)}
+bigint_program_info! {ec_on_curve_secp256k1, /*iters=*/1,
+bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
+bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0)}
 bigint_program_info! {rep_ec_add_secp256k1_r5, /*iters=*/1,
 bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
@@ -106905,4 +106992,4 @@ bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, nondet_inv_test_8, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128, ecdsa_verify_8, ecdsa_verify_32, ec_add_rz8test, ec_add_secp256k1, ec_doub_rz8test, ec_doub_secp256k1, ec_mul_rz8test, ec_mul_secp256k1, ec_neg_rz8test, ec_neg_secp256k1, ec_sub_rz8test, ec_sub_secp256k1, ec_pts_eq_rz8test, ec_pts_eq_secp256k1, rep_ec_add_secp256k1_r5, rep_ec_add_secp256k1_r10, rep_ec_add_secp256k1_r256, rep_ec_doub_secp256k1_r5, rep_ec_doub_secp256k1_r10, rep_ec_doub_secp256k1_r256}
+bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, nondet_inv_test_8, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128, ecdsa_verify_8, ecdsa_verify_32, ec_add_rz8test, ec_add_secp256k1, ec_doub_rz8test, ec_doub_secp256k1, ec_mul_rz8test, ec_mul_secp256k1, ec_neg_rz8test, ec_neg_secp256k1, ec_sub_rz8test, ec_sub_secp256k1, ec_pts_eq_rz8test, ec_pts_eq_secp256k1, ec_on_curve_rz8test, ec_on_curve_secp256k1, rep_ec_add_secp256k1_r5, rep_ec_add_secp256k1_r10, rep_ec_add_secp256k1_r256, rep_ec_doub_secp256k1_r5, rep_ec_doub_secp256k1_r10, rep_ec_doub_secp256k1_r256}
