@@ -143,7 +143,8 @@ fn prover_example() {
         InnerReceipt::Succinct(succinct_receipt),
         session.journal.bytes.clone(),
     );
-    receipt.verify(RSA_ID).unwrap();
+    let asset = receipt.try_into().unwrap();
+    client.verify(asset, RSA_ID).unwrap();
     println!("Receipt verified!");
 }
 

@@ -21,7 +21,6 @@ pub(crate) mod server;
 mod tests;
 
 use std::{
-    collections::HashMap,
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
@@ -41,7 +40,7 @@ use lazy_regex::regex_captures;
 use prost::Message;
 use semver::Version;
 
-use crate::{get_version, ExitCode, Journal};
+use crate::{get_version, ExitCode, Journal, ReceiptClaim};
 
 mod pb {
     pub(crate) mod api {
@@ -174,6 +173,24 @@ impl ParentProcessConnector {
         })
     }
 
+    pub fn new_wide_version<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let server_version = get_server_version(&server_path)?;
+
+        if !client::check_server_version_wide(&client_version, &server_version) {
+            let msg = format!(
+                "Your installation of r0vm differs by a major version:\n\
+            {client_version} vs {server_version} only minor, patch / pre-releases supported"
+            );
+            tracing::warn!("{msg}");
+            bail!(msg);
+        }
+        Ok(Self {
+            server_path: server_path.as_ref().to_path_buf(),
+            listener: TcpListener::bind("127.0.0.1:0")?,
+        })
+    }
+
     fn spawn_fail(&self) -> String {
         format!(
             "Could not launch zkvm: \"{}\". \n
@@ -195,14 +212,10 @@ fn get_server_version<P: AsRef<Path>>(server_path: P) -> Result<Version> {
 
 impl Connector for ParentProcessConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
-        let passthru_vars: HashMap<_, _> = std::env::vars()
-            .filter(|(key, _)| key == "RUST_LOG" || key == "RUST_BACKTRACE")
-            .collect();
         let addr = self.listener.local_addr()?;
         let child = Command::new(&self.server_path)
             .arg("--port")
             .arg(addr.port().to_string())
-            .envs(passthru_vars)
             .spawn()
             .with_context(|| self.spawn_fail())?;
 
@@ -356,6 +369,10 @@ pub struct SessionInfo {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
+    /// proven if this session is passed to the Prover.
+    pub receipt_claim: ReceiptClaim,
 }
 
 impl SessionInfo {
