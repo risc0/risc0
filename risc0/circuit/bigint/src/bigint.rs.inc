@@ -6723,11 +6723,6 @@ pub fn ec_mul_rz8test(ctx: &mut BigIntContext) -> Result<()> {
     let x6: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
     let x7: BytePoly_1 = bigint_def!(ctx, 1, 3, 1);
     let x8: BytePoly_1 = bigint_def!(ctx, 1, 4, 1);
-    eqz(ctx, &bigint_sub!(x4, x4, 1), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x5, x5, 1), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x6, x6, 1), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x7, x7, 1), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x8, x8, 1), 34, 1)?;
     let x9: BytePoly_1 = bigint_nondet_rem!(ctx, x6, x2, 1);
     let x10: BytePoly_1 = bigint_nondet_quot!(ctx, x6, x2, 1);
     eqz(
@@ -8090,11 +8085,6 @@ pub fn ec_mul_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     let x7: BytePoly_32 = bigint_def!(ctx, 32, 2, 1);
     let x8: BytePoly_32 = bigint_def!(ctx, 32, 3, 1);
     let x9: BytePoly_32 = bigint_def!(ctx, 32, 4, 1);
-    eqz(ctx, &bigint_sub!(x5, x5, 32), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x6, x6, 32), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x7, x7, 32), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x8, x8, 32), 34, 1)?;
-    eqz(ctx, &bigint_sub!(x9, x9, 32), 34, 1)?;
     let x10: BytePoly_1 = bigint_nondet_rem!(ctx, x7, x3, 1);
     let x11: BytePoly_32 = bigint_nondet_quot!(ctx, x7, x3, 32);
     eqz(
