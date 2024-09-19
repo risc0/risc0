@@ -156,8 +156,6 @@ bigint_short_tests! {
             "9d",   // inp_x:      157
             "22",   // inp_y:       34
             "71",   // scale:      113
-            "07",   // arb_x:        7
-            "02",   // arb_y:        2
             "74",   // expected_x: 116
             "a7",   // expected_y: 167
         ],
@@ -169,8 +167,6 @@ bigint_short_tests! {
             "37",   // inp_x:       55
             "90",   // inp_y:      144
             "02",   // scale:        2
-            "07",   // arb_x:        7
-            "b1",   // arb_y:      177
             "97",   // expected_x: 151
             "ac",   // expected_y: 172
         ],
@@ -236,8 +232,6 @@ bigint_short_tests! {
             "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",   // inp_x
             "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",   // inp_y
             "2f",   // scale:      47
-            "0f66dc33e335abc9a7c06f71ad2c0db65d5ac4b6f46d2dad9465e6a4ac04dc3f",   // arb_x
-            "83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c",   // arb_y
             "77f230936ee88cbbd73df930d64702ef881d811e0e1498e2f1c13eb1fc345d74",   // expected_x
             "958ef42a7886b6400a08266e9ba1b37896c95330d97077cbbe8eb3c7671c60d6",   // expected_y
         ],

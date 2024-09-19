@@ -31,21 +31,9 @@ pub fn claim(
     msg_hash: BigUint,
     r: BigUint,
     s: BigUint,
-    arbitrary_x: BigUint,
-    arbitrary_y: BigUint,
 ) -> BigIntClaim {
     BigIntClaim::from_biguints(
         prog_info,
-        &[
-            base_pt_x,
-            base_pt_y,
-            pub_key_x,
-            pub_key_y,
-            msg_hash,
-            r,
-            s,
-            arbitrary_x,
-            arbitrary_y,
-        ],
+        &[base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s],
     )
 }

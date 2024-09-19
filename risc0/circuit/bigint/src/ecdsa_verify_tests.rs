@@ -33,24 +33,15 @@ fn from_hex(s: &str) -> BigUint {
     BigUint::from_str_radix(s, 16).expect("Unable to parse hex value")
 }
 
-// TODO: This is not currently accurate -- I should actually do it
-// "golden" values are the values from running the C++ version:
-// bazelisk run //zirgen/Dialect/BigInt/IR/test:test -- --test
-
-// TODO: come up with fake witnesses
-
 fn golden_values() -> Vec<BigUint> {
-    // TODO: Better test values
     Vec::from([
-        from_hex("01"), // base_pt_x: 1
-        from_hex("02"), // base_pt_y: 2
-        from_hex("12"), // pub_key_x: 18
-        from_hex("0a"), // pub_key_y: 10
+        from_hex("9d"), // base_pt_x: 157
+        from_hex("22"), // base_pt_y: 34
+        from_hex("78"), // pub_key_x: 120
+        from_hex("94"), // pub_key_y: 148
         from_hex("05"), // msg_hash: 5
-        from_hex("1b"), // r: 27
-        from_hex("06"), // s: 6
-        from_hex("04"), // arbitrary_x: 4
-        from_hex("06"), // arbitrary_y: 6
+        from_hex("69"), // r: 105
+        from_hex("b0"), // s: 176
     ])
 }
 
@@ -145,7 +136,7 @@ fn test_zkr() -> anyhow::Result<()> {
 
 #[test]
 fn prove_and_verify_ecdsa_verify() -> Result<()> {
-    let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+    let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
         &ECDSA_VERIFY_8,
@@ -156,8 +147,6 @@ fn prove_and_verify_ecdsa_verify() -> Result<()> {
         msg_hash,
         r,
         s,
-        arbitrary_x,
-        arbitrary_y,
     );
     let zkr = crate::zkr::get_zkr("ecdsa_verify_8.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_8, zkr)?;
@@ -233,7 +222,7 @@ fn test_zkr_32() -> anyhow::Result<()> {
 
 #[test]
 fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
-    let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+    let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s] =
         golden_values().try_into().unwrap();
     let claim = crate::ecdsa_verify::claim(
         &ECDSA_VERIFY_32,
@@ -244,8 +233,6 @@ fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
         msg_hash,
         r,
         s,
-        arbitrary_x,
-        arbitrary_y,
     );
     let zkr = crate::zkr::get_zkr("ecdsa_verify_32.zkr", BIGINT_PO2)?;
     let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_32, zkr)?;
@@ -317,7 +304,7 @@ fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
 
 // #[test]
 // fn prove_and_verify_ecdsa_verify_256() -> Result<()> {
-//     let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s, arbitrary_x, arbitrary_y] =
+//     let [base_pt_x, base_pt_y, pub_key_x, pub_key_y, msg_hash, r, s] =
 //         golden_values().try_into().unwrap();
 //     let claim = crate::ecdsa_verify::claim(
 //         &ECDSA_VERIFY_256,
@@ -328,8 +315,6 @@ fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
 //         msg_hash,
 //         r,
 //         s,
-//         arbitrary_x,
-//         arbitrary_y,
 //     );
 //     let zkr = crate::zkr::get_zkr("ecdsa_verify_256.zkr", BIGINT_PO2)?;
 //     let receipt = prove::<sha::Impl>(&[&claim], &ECDSA_VERIFY_256, zkr)?;
