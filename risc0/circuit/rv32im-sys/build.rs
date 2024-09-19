@@ -66,8 +66,8 @@ fn build_cuda_kernels() {
             "kernels/cuda/kernels.h",
             "kernels/cuda/layout.inc.cu",
         ])
-        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
+        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_rv32im_cuda");
 }
