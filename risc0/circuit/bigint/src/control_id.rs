@@ -117,9 +117,9 @@ pub const ECDSA_VERIFY_32_CONTROL_ID: Digest =
 pub const ECDSA_VERIFY_32_CONTROL_ROOT: Digest =
     digest!("265f9361aabd974eeda2493fc2fa2b67e47e1e56e82d5722056110218e8ee970");
 
-pub const EC_ADD_RZ8TEST1_CONTROL_ID: Digest =
+pub const EC_ADD_RZ8TEST_CONTROL_ID: Digest =
     digest!("3e49b0741ef5b049ea19b462b660ed714d69612e45fadb60327e3972f1563009");
-pub const EC_ADD_RZ8TEST1_CONTROL_ROOT: Digest =
+pub const EC_ADD_RZ8TEST_CONTROL_ROOT: Digest =
     digest!("9b19373eb9704207c5b8f118b3ccad09b5a6bf607d9f3d5abf848d3f2889c80e");
 
 pub const EC_ADD_SECP256K1_CONTROL_ID: Digest =
@@ -127,9 +127,9 @@ pub const EC_ADD_SECP256K1_CONTROL_ID: Digest =
 pub const EC_ADD_SECP256K1_CONTROL_ROOT: Digest =
     digest!("ba52d22246c7c5307498c6183cf9512f8a1e205589e2a46a23d01b73e024b529");
 
-pub const EC_DOUB_RZ8TEST1_CONTROL_ID: Digest =
+pub const EC_DOUB_RZ8TEST_CONTROL_ID: Digest =
     digest!("1f7120464fe21d3ce400ff318079e85394661267ce06a01070be113dc3e7516d");
-pub const EC_DOUB_RZ8TEST1_CONTROL_ROOT: Digest =
+pub const EC_DOUB_RZ8TEST_CONTROL_ROOT: Digest =
     digest!("a06ac142a65efa3f1e3bd7161bcf41304be53913e7065c01cec1c31006447821");
 
 pub const EC_DOUB_SECP256K1_CONTROL_ID: Digest =
@@ -137,9 +137,9 @@ pub const EC_DOUB_SECP256K1_CONTROL_ID: Digest =
 pub const EC_DOUB_SECP256K1_CONTROL_ROOT: Digest =
     digest!("24d66c2f3a3e914b694d2e4515f75369795f32324037425ee5242f1ff6a28f31");
 
-pub const EC_MUL_RZ8TEST1_CONTROL_ID: Digest =
+pub const EC_MUL_RZ8TEST_CONTROL_ID: Digest =
     digest!("118c8c56176b0102ae89485b6642a61e19377619894dd17771a94007261bd43e");
-pub const EC_MUL_RZ8TEST1_CONTROL_ROOT: Digest =
+pub const EC_MUL_RZ8TEST_CONTROL_ROOT: Digest =
     digest!("ba0d93097ab61a66075552231f507d537c0efb506c41416bd98ecf61ac720e12");
 
 pub const EC_MUL_SECP256K1_CONTROL_ID: Digest =
@@ -147,9 +147,9 @@ pub const EC_MUL_SECP256K1_CONTROL_ID: Digest =
 pub const EC_MUL_SECP256K1_CONTROL_ROOT: Digest =
     digest!("bd0b3f15ddd719239cf25600fa99a43be5cb5c6858b33d69400cb049ad08cf3c");
 
-pub const EC_NEG_RZ8TEST1_CONTROL_ID: Digest =
+pub const EC_NEG_RZ8TEST_CONTROL_ID: Digest =
     digest!("bc8fd97360bb286bc468c320c435cb283c6f2400528b6a738865302da8417741");
-pub const EC_NEG_RZ8TEST1_CONTROL_ROOT: Digest =
+pub const EC_NEG_RZ8TEST_CONTROL_ROOT: Digest =
     digest!("1e92f00315ff353ce874d0711d3e3e3a5d13f368c254165e8dccb572e3c2d93a");
 
 pub const EC_NEG_SECP256K1_CONTROL_ID: Digest =
@@ -157,9 +157,9 @@ pub const EC_NEG_SECP256K1_CONTROL_ID: Digest =
 pub const EC_NEG_SECP256K1_CONTROL_ROOT: Digest =
     digest!("6a57de42c3e336197f4ae46b183b1b57cba8090d4939a50c4dca3f0fdae7bb73");
 
-pub const EC_SUB_RZ8TEST1_CONTROL_ID: Digest =
+pub const EC_SUB_RZ8TEST_CONTROL_ID: Digest =
     digest!("54c2b4477749ea17aa64a51150e99202ca6afc2ae7457050cc4eca5edb78fd40");
-pub const EC_SUB_RZ8TEST1_CONTROL_ROOT: Digest =
+pub const EC_SUB_RZ8TEST_CONTROL_ROOT: Digest =
     digest!("db54be0189f02e5cdcf65a7502961600e8874f6b2f23f4378d550d73b492860b");
 
 pub const EC_SUB_SECP256K1_CONTROL_ID: Digest =
@@ -167,9 +167,9 @@ pub const EC_SUB_SECP256K1_CONTROL_ID: Digest =
 pub const EC_SUB_SECP256K1_CONTROL_ROOT: Digest =
     digest!("c3c90b60f6cd790a9b410312834f66560e3ea324292bae543f4934613966564a");
 
-pub const EC_PTS_EQ_RZ8TEST1_CONTROL_ID: Digest =
+pub const EC_PTS_EQ_RZ8TEST_CONTROL_ID: Digest =
     digest!("23716c007eb3245bf1ca6244de8f4d090c99500cf8d2f42e9e96d763e1eff31c");
-pub const EC_PTS_EQ_RZ8TEST1_CONTROL_ROOT: Digest =
+pub const EC_PTS_EQ_RZ8TEST_CONTROL_ROOT: Digest =
     digest!("765de037db9ec4171e4d5c76e3935f0a3de2f575a7ce645c57c354212825c365");
 
 pub const EC_PTS_EQ_SECP256K1_CONTROL_ID: Digest =

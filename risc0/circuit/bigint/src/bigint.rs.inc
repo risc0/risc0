@@ -6376,7 +6376,7 @@ pub fn ecdsa_verify_32(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x700, x700, 1), 34, 1)?;
     return Ok(());
 }
-pub fn ec_add_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_add_rz8test(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_1 = bigint_const!(ctx, 179);
     let x2: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
@@ -6584,7 +6584,7 @@ pub fn ec_add_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x23, x7, 32), 34, 1)?;
     return Ok(());
 }
-pub fn ec_doub_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_doub_rz8test(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_1 = bigint_const!(ctx, 1);
     let x2: BytePoly_1 = bigint_const!(ctx, 179);
@@ -6713,7 +6713,7 @@ pub fn ec_doub_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x22, x6, 32), 34, 1)?;
     return Ok(());
 }
-pub fn ec_mul_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_mul_rz8test(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_1 = bigint_const!(ctx, 179);
     let x2: BytePoly_1 = bigint_const!(ctx, 2);
@@ -64422,7 +64422,7 @@ pub fn ec_mul_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x10507, x9, 32), 34, 1)?;
     return Ok(());
 }
-pub fn ec_neg_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_neg_rz8test(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 179);
     let x1: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
     let x2: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
@@ -64445,7 +64445,7 @@ pub fn ec_neg_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(bigint_sub!(x0, x2, 32), x4, 32), 34, 1)?;
     return Ok(());
 }
-pub fn ec_sub_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_sub_rz8test(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_const!(ctx, 1);
     let x1: BytePoly_1 = bigint_const!(ctx, 179);
     let x2: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
@@ -64653,7 +64653,7 @@ pub fn ec_sub_secp256k1(ctx: &mut BigIntContext) -> Result<()> {
     eqz(ctx, &bigint_sub!(x23, x7, 32), 34, 1)?;
     return Ok(());
 }
-pub fn ec_pts_eq_rz8test1(ctx: &mut BigIntContext) -> Result<()> {
+pub fn ec_pts_eq_rz8test(ctx: &mut BigIntContext) -> Result<()> {
     let x0: BytePoly_1 = bigint_def!(ctx, 1, 0, 1);
     let x1: BytePoly_1 = bigint_def!(ctx, 1, 1, 1);
     let x2: BytePoly_1 = bigint_def!(ctx, 1, 2, 1);
@@ -106809,7 +106809,7 @@ bigint_witness_info!(/*bits=*/32, /*label=*/3, /*public=*/ true, /*min_bits=*/0)
 bigint_witness_info!(/*bits=*/33, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/33, /*label=*/5, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/33, /*label=*/6, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_add_rz8test1, /*iters=*/1,
+bigint_program_info! {ec_add_rz8test, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -106823,7 +106823,7 @@ bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/5, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_doub_rz8test1, /*iters=*/1,
+bigint_program_info! {ec_doub_rz8test, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -106833,7 +106833,7 @@ bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_mul_rz8test1, /*iters=*/1,
+bigint_program_info! {ec_mul_rz8test, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -106845,7 +106845,7 @@ bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/4, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_neg_rz8test1, /*iters=*/1,
+bigint_program_info! {ec_neg_rz8test, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -106855,7 +106855,7 @@ bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_sub_rz8test1, /*iters=*/1,
+bigint_program_info! {ec_sub_rz8test, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -106869,7 +106869,7 @@ bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/4, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/5, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_info! {ec_pts_eq_rz8test1, /*iters=*/1,
+bigint_program_info! {ec_pts_eq_rz8test, /*iters=*/1,
 bigint_witness_info!(/*bits=*/8, /*label=*/0, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/8, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
@@ -106915,4 +106915,4 @@ bigint_witness_info!(/*bits=*/256, /*label=*/0, /*public=*/ true, /*min_bits=*/0
 bigint_witness_info!(/*bits=*/256, /*label=*/1, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/2, /*public=*/ true, /*min_bits=*/0),
 bigint_witness_info!(/*bits=*/256, /*label=*/3, /*public=*/ true, /*min_bits=*/0)}
-bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, nondet_inv_test_8, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128, ecdsa_verify_8, ecdsa_verify_32, ec_add_rz8test1, ec_add_secp256k1, ec_doub_rz8test1, ec_doub_secp256k1, ec_mul_rz8test1, ec_mul_secp256k1, ec_neg_rz8test1, ec_neg_secp256k1, ec_sub_rz8test1, ec_sub_secp256k1, ec_pts_eq_rz8test1, ec_pts_eq_secp256k1, rep_ec_add_secp256k1_r5, rep_ec_add_secp256k1_r10, rep_ec_add_secp256k1_r256, rep_ec_doub_secp256k1_r5, rep_ec_doub_secp256k1_r10, rep_ec_doub_secp256k1_r256}
+bigint_program_list! {rsa_256_x1, rsa_256_x2, rsa_3072_x15, nondet_inv_test_8, const_add_test_8, const_add_alt_test_16, const_mul_test_8, add_test_8, add_test_16, add_test_128, const_one_test_8, const_twobyte_test_16, sub_test_8, sub_test_128, mul_test_8, mul_test_128, reduce_test_8, reduce_test_128, ecdsa_verify_8, ecdsa_verify_32, ec_add_rz8test, ec_add_secp256k1, ec_doub_rz8test, ec_doub_secp256k1, ec_mul_rz8test, ec_mul_secp256k1, ec_neg_rz8test, ec_neg_secp256k1, ec_sub_rz8test, ec_sub_secp256k1, ec_pts_eq_rz8test, ec_pts_eq_secp256k1, rep_ec_add_secp256k1_r5, rep_ec_add_secp256k1_r10, rep_ec_add_secp256k1_r256, rep_ec_doub_secp256k1_r5, rep_ec_doub_secp256k1_r10, rep_ec_doub_secp256k1_r256}

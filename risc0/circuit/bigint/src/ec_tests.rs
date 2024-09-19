@@ -44,7 +44,7 @@ use test_log::test;
 // name(zkr, in_values, public_witness, private_witness, constant_witness, golden_z)
 bigint_tests! {
     ec_add_test_8(
-        ec_add_rz8test1,
+        ec_add_rz8test,
         [
             "00",   // lhs_x:        0
             "26",   // lhs_y:       38
@@ -63,7 +63,7 @@ bigint_tests! {
     ),
     // This is `ec_add_test_8` with LHS & RHS swapped
     ec_add_test_8_reverse(
-        ec_add_rz8test1,
+        ec_add_rz8test,
         [
             "01",   // lhs_x:        1
             "70",   // lhs_y:      112
@@ -82,7 +82,7 @@ bigint_tests! {
         [57720872, 1358901605, 1880726009, 1745985109]
     ),
     ec_sub_test_8(
-        ec_sub_rz8test1,
+        ec_sub_rz8test,
         [
             "97", // lhs_x:      151
             "ac", // lhs_y:      172
@@ -103,7 +103,7 @@ bigint_tests! {
         [1361827893, 1544582164, 1574616391, 1372930459]
     ),
     ec_doub_test_8(
-        ec_doub_rz8test1,
+        ec_doub_rz8test,
         [
             "37",   // lhs_x:       55
             "90",   // lhs_y:      144
@@ -121,7 +121,7 @@ bigint_tests! {
         [1190259367, 1384309291, 214804156, 1381364702]
     ),
     ec_neg_test_8(
-        ec_neg_rz8test1,
+        ec_neg_rz8test,
         [
             "14", // inp_x:       20
             "83", // inp_y:      131
@@ -134,7 +134,7 @@ bigint_tests! {
         [1955270777, 359504056, 1693947437, 583995072]
     ),
     ec_pts_eq_test_8(
-        ec_pts_eq_rz8test1,
+        ec_pts_eq_rz8test,
         [
             "1e", // lhs_x:      30
             "1b", // lhs_y:      27
@@ -151,7 +151,7 @@ bigint_tests! {
 // name(zkr, in_values, golden_z)
 bigint_short_tests! {
     ec_aff_mul113_test_8(  // TODO: All the mul tests need a rename
-        ec_mul_rz8test1,
+        ec_mul_rz8test,
         [
             "9d",   // inp_x:      157
             "22",   // inp_y:       34
@@ -162,7 +162,7 @@ bigint_short_tests! {
         [346372436, 1604795053, 31129203, 246390035]
     ),
     ec_aff_mul2_test_32(
-        ec_mul_rz8test1,
+        ec_mul_rz8test,
         [
             "37",   // inp_x:       55
             "90",   // inp_y:      144
