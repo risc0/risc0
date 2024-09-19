@@ -18,9 +18,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
@@ -32,7 +33,9 @@ use crate::{
         },
         server::session::NullSegmentRef,
     },
-    prove_zkr, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
+    prove_zkr,
+    recursion::identity_p254,
+    Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
     ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
     VerifierContext,
 };
@@ -297,6 +300,7 @@ impl Server {
                 self.on_identity_p254(conn, request)
             }
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
+            pb::api::server_request::Kind::Verify(request) => self.on_verify(conn, request),
             pb::api::server_request::Kind::ProveZkr(request) => self.on_prove_zkr(conn, request),
         }
     }
@@ -544,7 +548,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -582,7 +586,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -633,7 +637,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -643,14 +647,11 @@ impl Server {
         request: pb::api::IdentityP254Request,
     ) -> Result<()> {
         fn inner(request: pb::api::IdentityP254Request) -> Result<pb::api::IdentityP254Reply> {
-            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
             let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
             let succinct_receipt: SuccinctReceipt<ReceiptClaim> =
                 bincode::deserialize(&receipt_bytes)?;
 
-            let prover = get_prover_server(&opts)?;
-            let receipt = prover.identity_p254(&succinct_receipt)?;
-
+            let receipt = identity_p254(&succinct_receipt)?;
             let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
@@ -676,7 +677,7 @@ impl Server {
             )),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -716,7 +717,27 @@ impl Server {
             )),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_verify(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::VerifyRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::VerifyRequest) -> Result<()> {
+            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
+            let receipt: Receipt =
+                bincode::deserialize(&receipt_bytes).context("deserialize receipt")?;
+            let image_id: Digest = request.image_id.ok_or(malformed_err())?.try_into()?;
+            receipt
+                .verify(image_id)
+                .map_err(|err| anyhow!("verify failed: {err}"))
+        }
+
+        let msg: pb::api::GenericReply = inner(request).into();
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 }
