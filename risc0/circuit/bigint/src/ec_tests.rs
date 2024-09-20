@@ -13,7 +13,8 @@
 // limitations under the License.
 
 use crate::test_harness::{
-    bigint_short_tests, bigint_should_fail_tests, bigint_tests, test_witgen, test_zkr, witness_test_data,
+    bigint_short_tests, bigint_should_fail_tests, bigint_tests, test_witgen, test_zkr,
+    witness_test_data,
 };
 use crate::{BigIntClaim, BigIntContext, BIGINT_PO2};
 use anyhow::Result;
@@ -250,27 +251,63 @@ bigint_short_tests! {
     ),
 }
 
-bigint_should_fail_tests!{
+bigint_should_fail_tests! {
     // Shouldn't be able to multiply by zero
-    ec_aff_mul0_8(
-        ec_mul_rz8test,
+    ec_aff_mul0(
+        ec_mul_freely_rz8test,
         [
             "ac",   // inp_x:      172
             "3c",   // inp_y:       60
             "00",   // scale:        0
-            "ac",   // expected_x: 172
-            "3c",   // expected_y:  60
         ]
     ),
     // Shouldn't be able to multiply by the prime (b/c it's congruent to 0)
-    ec_aff_mul_prime_8(
-        ec_mul_rz8test,
+    ec_aff_mul_prime(
+        ec_mul_freely_rz8test,
         [
             "ac",   // inp_x:      172
             "3c",   // inp_y:       60
             "b3",   // scale:      179
-            "ac",   // expected_x: 172
-            "3c",   // expected_y:  60
+        ]
+    ),
+    // Shouldn't be able to add P + P
+    ec_aff_add_self(
+        ec_add_freely_rz8test,
+        [
+            "ac",   // lhs_x:      172
+            "3c",   // lhs_y:       60
+            "ac",   // rhs_x:      172
+            "3c",   // rhs_y:       60
+        ]
+    ),
+    // Shouldn't be able to add P + -P
+    ec_aff_add_neg(
+        ec_add_freely_rz8test,
+        [
+            "ac",   // lhs_x:      172
+            "3c",   // lhs_y:       60
+            "ac",   // rhs_x:      172
+            "77",   // rhs_y:      119
+        ]
+    ),
+    // Shouldn't be able to subtract P - P
+    ec_aff_sub_self(
+        ec_sub_freely_rz8test,
+        [
+            "ac",   // lhs_x:      172
+            "3c",   // lhs_y:       60
+            "ac",   // rhs_x:      172
+            "3c",   // rhs_y:       60
+        ]
+    ),
+    // Shouldn't be able to subtract P - -P
+    ec_aff_sub_neg(
+        ec_sub_freely_rz8test,
+        [
+            "ac",   // lhs_x:      172
+            "3c",   // lhs_y:       60
+            "ac",   // rhs_x:      172
+            "77",   // rhs_y:      119
         ]
     ),
     // ec_add_test_256(

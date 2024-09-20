@@ -125,7 +125,6 @@ macro_rules! bigint_short_tests {
 }
 
 // Tests that input values which should cause failures do cause failures
-// TODO: Not yet functional
 macro_rules! bigint_should_fail_tests {
     ($($name:ident($zkr:ident, $in:expr),)*) => {
         $(
