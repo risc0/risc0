@@ -262,28 +262,17 @@ bigint_should_fail_tests!{
             "3c",   // expected_y:  60
         ]
     ),
-    // // This one should fail to fail -- And does!
-    // ec_aff_mul113_8(
-    //     ec_mul_rz8test,
-    //     [
-    //         "9d",   // inp_x:      157
-    //         "22",   // inp_y:       34
-    //         "71",   // scale:      113
-    //         "74",   // expected_x: 116
-    //         "a7",   // expected_y: 167
-    //     ]
-    // ),
-    // ec_aff_mul2_test_32(
-    //     ec_mul_rz8test,
-    //     [
-    //         "37",   // inp_x:       55
-    //         "90",   // inp_y:      144
-    //         "02",   // scale:        2
-    //         "97",   // expected_x: 151
-    //         "ac",   // expected_y: 172
-    //     ],
-    //     [346372436, 1604795053, 31129203, 246390035]
-    // ),
+    // Shouldn't be able to multiply by the prime (b/c it's congruent to 0)
+    ec_aff_mul_prime_8(
+        ec_mul_rz8test,
+        [
+            "ac",   // inp_x:      172
+            "3c",   // inp_y:       60
+            "b3",   // scale:      179
+            "ac",   // expected_x: 172
+            "3c",   // expected_y:  60
+        ]
+    ),
     // ec_add_test_256(
     //     ec_add_secp256k1,
     //     [
