@@ -127,29 +127,26 @@ macro_rules! bigint_short_tests {
 // Tests that input values which should cause failures do cause failures
 // TODO: Not yet functional
 macro_rules! bigint_should_fail_tests {
-    ($($name:ident($zkr:ident, $in:expr, $z:expr),)*) => {
+    ($($name:ident($zkr:ident, $in:expr),)*) => {
         $(
             paste::paste! {
                 fn [<$name _values>]() -> Vec<BigUint> {
                     $in.into_iter().map($crate::test_harness::from_hex).collect()
                 }
 
-                fn [<$name _context>]() -> anyhow::Result<BigIntContext> {
-                    let mut ctx = BigIntContext::from_values([<$name _values>]());
-                    $crate::generated::$zkr(&mut ctx)?;
-                    Ok(ctx)
+                fn [<$name _filename>]() -> &'static str {
+                    concat!(stringify!($zkr), ".zkr")
                 }
 
-                // fn [<$name _filename>]() -> &'static str {
-                //     concat!(stringify!($zkr), ".zkr")
-                // }
 
                 #[test]
-                fn [<$name _zkr>]() -> () {
-                    [<$name _context>]().expect_err("Expected valid contex (or should this error?");
-                    // test_zkr([<$name _context>]().expect("Expected valid context"), [<$name _filename>]()).expect_err(&format!(
-                    //     "Expected failure to prove"
-                    // ));
+                #[should_panic(expected = "Invalid carry computation")]
+                fn [<$name _prove_fails>]() -> () {
+                    use $crate::generated::[<$zkr:snake:upper>];
+                    let claim = BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
+                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2).unwrap();
+                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr).unwrap();
+                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt).unwrap();
                 }
             }
         )*

@@ -252,40 +252,33 @@ bigint_short_tests! {
 
 bigint_should_fail_tests!{
     // Shouldn't be able to multiply by zero
-    ec_aff_mul0_test_8_fails(
-        ec_mul_rz8test1,
+    ec_aff_mul0_8(
+        ec_mul_rz8test,
         [
             "ac",   // inp_x:      172
             "3c",   // inp_y:       60
             "00",   // scale:        0
-            "07",   // arb_x:        7
-            "02",   // arb_y:        2
             "ac",   // expected_x: 172
             "3c",   // expected_y:  60
-        ],
-        [346372436, 1604795053, 31129203, 246390035]
+        ]
     ),
-    // ec_aff_mul113_test_8(
-    //     ec_mul_rz8test1,
+    // // This one should fail to fail -- And does!
+    // ec_aff_mul113_8(
+    //     ec_mul_rz8test,
     //     [
     //         "9d",   // inp_x:      157
     //         "22",   // inp_y:       34
     //         "71",   // scale:      113
-    //         "07",   // arb_x:        7
-    //         "02",   // arb_y:        2
     //         "74",   // expected_x: 116
     //         "a7",   // expected_y: 167
-    //     ],
-    //     [346372436, 1604795053, 31129203, 246390035]
+    //     ]
     // ),
     // ec_aff_mul2_test_32(
-    //     ec_mul_rz8test1,
+    //     ec_mul_rz8test,
     //     [
     //         "37",   // inp_x:       55
     //         "90",   // inp_y:      144
     //         "02",   // scale:        2
-    //         "07",   // arb_x:        7
-    //         "b1",   // arb_y:      177
     //         "97",   // expected_x: 151
     //         "ac",   // expected_y: 172
     //     ],
