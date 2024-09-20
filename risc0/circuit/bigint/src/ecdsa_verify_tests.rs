@@ -74,7 +74,7 @@ fn run_bigint_32() -> Result<BigIntContext> {
 
 #[test]
 fn test_zkr() -> anyhow::Result<()> {
-    // TODO: Should we use the shared code?
+    // TODO: Switch over to the test_harness.rs code
     let ctx = run_bigint()?;
 
     let hash_suite = Poseidon2HashSuite::new_suite();
@@ -156,11 +156,9 @@ fn prove_and_verify_ecdsa_verify() -> Result<()> {
     Ok(())
 }
 
-// TODO: The larger ones
-
 #[test]
 fn test_zkr_32() -> anyhow::Result<()> {
-    // TODO: Should we use the shared code?
+    // TODO: Switch over to the test_harness.rs code
     let ctx = run_bigint_32()?;
 
     let hash_suite = Poseidon2HashSuite::new_suite();
@@ -242,7 +240,7 @@ fn prove_and_verify_ecdsa_verify_32() -> Result<()> {
 
 // #[test]
 // fn test_zkr_256() -> anyhow::Result<()> {
-//     // TODO: Should we use the shared code?
+//     // TODO: Switch over to the test_harness.rs code
 //     let ctx = run_bigint_256()?;
 
 //     let hash_suite = Poseidon2HashSuite::new_suite();

@@ -21,7 +21,7 @@ pub use crate::generated::ECDSA_VERIFY_32;
 pub use crate::generated::ECDSA_VERIFY_8;
 // pub use crate::generated::ECDSA_VERIFY_256;
 
-/// Construct a bigint claim of an ECDSA Verification  // TODO: From here
+/// Construct a bigint claim of an ECDSA Verification
 pub fn claim(
     prog_info: &BigIntProgram,
     base_pt_x: BigUint,

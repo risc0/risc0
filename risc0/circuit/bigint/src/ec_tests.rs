@@ -26,22 +26,6 @@ use risc0_zkp::field::{
 };
 use test_log::test;
 
-// fn ec_aff_sub_test_golden_values() -> Vec<BigUint> {
-//     // TODO: These specific values yield an A - (-A), which should give a failure
-//     // TODO: Add a test to ensure they do?
-//     Vec::from([
-//         from_hex("0b"), // prime:      11
-//         from_hex("05"), // curve_a:     5
-//         from_hex("01"), // curve_b:     1
-//         from_hex("07"), // lhs_x:       7
-//         from_hex("04"), // lhs_y:       4
-//         from_hex("07"), // rhs_x:       7
-//         from_hex("07"), // rhs_y:       7
-//         from_hex("06"), // expected_x:  6
-//         from_hex("04"), // expected_y:  4
-//     ])
-// }
-
 // name(zkr, in_values, public_witness, private_witness, constant_witness, golden_z)
 bigint_tests! {
     ec_add_test_8(
@@ -162,7 +146,7 @@ bigint_tests! {
 
 // name(zkr, in_values, golden_z)
 bigint_short_tests! {
-    ec_aff_mul113_test_8(  // TODO: All the mul tests need a rename
+    ec_mul113_test_8(
         ec_mul_rz8test,
         [
             "9d",   // inp_x:      157
@@ -173,7 +157,7 @@ bigint_short_tests! {
         ],
         [346372436, 1604795053, 31129203, 246390035]
     ),
-    ec_aff_mul2_test_32(
+    ec_mul2_test_32(
         ec_mul_rz8test,
         [
             "37",   // inp_x:       55
@@ -238,7 +222,7 @@ bigint_short_tests! {
         ],
         [171553196, 1884525848, 1964417951, 1602581249]
     ),
-    ec_aff_mul47_test_256(
+    ec_mul47_test_256(
         ec_mul_secp256k1,
         [
             "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",   // inp_x
@@ -253,7 +237,7 @@ bigint_short_tests! {
 
 bigint_should_fail_tests! {
     // Shouldn't be able to multiply by zero
-    ec_aff_mul0(
+    ec_mul0(
         ec_mul_freely_rz8test,
         [
             "ac",   // inp_x:      172
@@ -262,7 +246,7 @@ bigint_should_fail_tests! {
         ]
     ),
     // Shouldn't be able to multiply by the prime (b/c it's congruent to 0)
-    ec_aff_mul_prime(
+    ec_mul_prime(
         ec_mul_freely_rz8test,
         [
             "ac",   // inp_x:      172
@@ -271,7 +255,7 @@ bigint_should_fail_tests! {
         ]
     ),
     // Shouldn't be able to add P + P
-    ec_aff_add_self(
+    ec_add_self(
         ec_add_freely_rz8test,
         [
             "ac",   // lhs_x:      172
@@ -281,7 +265,7 @@ bigint_should_fail_tests! {
         ]
     ),
     // Shouldn't be able to add P + -P
-    ec_aff_add_neg(
+    ec_add_neg(
         ec_add_freely_rz8test,
         [
             "ac",   // lhs_x:      172
@@ -291,7 +275,7 @@ bigint_should_fail_tests! {
         ]
     ),
     // Shouldn't be able to subtract P - P
-    ec_aff_sub_self(
+    ec_sub_self(
         ec_sub_freely_rz8test,
         [
             "ac",   // lhs_x:      172
@@ -301,7 +285,7 @@ bigint_should_fail_tests! {
         ]
     ),
     // Shouldn't be able to subtract P - -P
-    ec_aff_sub_neg(
+    ec_sub_neg(
         ec_sub_freely_rz8test,
         [
             "ac",   // lhs_x:      172
@@ -310,71 +294,4 @@ bigint_should_fail_tests! {
             "77",   // rhs_y:      119
         ]
     ),
-    // ec_add_test_256(
-    //     ec_add_secp256k1,
-    //     [
-    //         "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",   // lhs_x
-    //         "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",   // lhs_y
-    //         "0f66dc33e335abc9a7c06f71ad2c0db65d5ac4b6f46d2dad9465e6a4ac04dc3f",   // rhs_x
-    //         "83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c",   // rhs_y
-    //         "a901b0dbe8ab292d280d6b36858947854faad0a4dd0da7e2d4ad0ff53db079e0",   // expected_x
-    //         "3f27e7e1834f1a61af6f04dc61e7ae64716bc5e0a6b063b301d0e60e47298a9d",   // expected_y
-    //     ],
-    //     [346372436, 1604795053, 31129203, 246390035]
-    // ),
-    // ec_sub_test_256(
-    //     ec_sub_secp256k1,
-    //     [
-    //         "a901b0dbe8ab292d280d6b36858947854faad0a4dd0da7e2d4ad0ff53db079e0", // lhs_x
-    //         "3f27e7e1834f1a61af6f04dc61e7ae64716bc5e0a6b063b301d0e60e47298a9d", // lhs_y
-    //         "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", // rhs_x
-    //         "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", // rhs_y
-    //         "0f66dc33e335abc9a7c06f71ad2c0db65d5ac4b6f46d2dad9465e6a4ac04dc3f", // expected_x
-    //         "83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c", // expected_y
-    //     ],
-    //     [1361827893, 1544582164, 1574616391, 1372930459]
-    // ),
-    // ec_doub_test_256(
-    //     ec_doub_secp256k1,
-    //     [
-    //         "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",   // lhs_x
-    //         "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",   // lhs_y
-    //         "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",   // expected_x
-    //         "1ae168fea63dc339a3c58419466ceaeef7f632653266d0e1236431a950cfe52a",   // expected_y
-    //     ],
-    //     [1739853020, 772298456, 1646252721, 890649739]
-    // ),
-    // ec_neg_test_256(
-    //     ec_neg_secp256k1,
-    //     [
-    //         "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", // inp_x
-    //         "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", // inp_y
-    //         "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", // expected_x
-    //         "b7c52588d95c3b9aa25b0403f1eef75702e84bb7597aabe663b82f6f04ef2777", // expected_y
-    //     ],
-    //     [1955270777, 359504056, 1693947437, 583995072]
-    // ),
-    // ec_pts_eq_test_256(
-    //     ec_pts_eq_secp256k1,
-    //     [
-    //         "1e", // lhs_x:      30
-    //         "1b", // lhs_y:      27
-    //         "1e", // rhs_x:      30
-    //         "1b", // rhs_y:      27
-    //     ],
-    //     [171553196, 1884525848, 1964417951, 1602581249]
-    // ),
-    // ec_aff_mul47_test_256(
-    //     ec_mul_secp256k1,
-    //     [
-    //         "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",   // inp_x
-    //         "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",   // inp_y
-    //         "2f",   // scale:      47
-    //         "0f66dc33e335abc9a7c06f71ad2c0db65d5ac4b6f46d2dad9465e6a4ac04dc3f",   // arb_x
-    //         "83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c",   // arb_y
-    //         "77f230936ee88cbbd73df930d64702ef881d811e0e1498e2f1c13eb1fc345d74",   // expected_x
-    //         "958ef42a7886b6400a08266e9ba1b37896c95330d97077cbbe8eb3c7671c60d6",   // expected_y
-    //     ],
-    //     [346372436, 1604795053, 31129203, 246390035]
-    // ),
 }
