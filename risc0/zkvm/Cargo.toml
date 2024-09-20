@@ -104,7 +104,7 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
 # NOTE: cuda and metal are excluded because their build scripts require external tools.
-features = ["client", "prove", "getrandom", "std"]
+features = ["client", "prove", "getrandom", "std", "unstable"]
 
 [features]
 client = [
