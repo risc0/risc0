@@ -4,15 +4,14 @@ import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
 import {
-  Credenza,
-  CredenzaBody,
-  CredenzaClose,
-  CredenzaContent,
-  CredenzaFooter,
-  CredenzaHeader,
-  CredenzaTitle,
-  CredenzaTrigger,
-} from "@risc0/ui/credenza";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@risc0/ui/dialog";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
@@ -96,8 +95,8 @@ export const cratesIoValidationTableColumns = [
       const resultString: string = originalString.substring(methodNameIndex + 1);
 
       return (
-        <Credenza>
-          <CredenzaTrigger asChild>
+        <Dialog>
+          <DialogTrigger asChild>
             <Badge
               title={info.getValue()}
               variant="secondary"
@@ -114,14 +113,13 @@ export const cratesIoValidationTableColumns = [
                 View Build Errors
               </Button>
             </Badge>
-          </CredenzaTrigger>
+          </DialogTrigger>
 
-          <CredenzaContent className="dark max-h-full max-w-screen-3xl text-white">
-            <CredenzaHeader>
-              <CredenzaTitle>Build Errors for {info.row.original.name}</CredenzaTitle>
-            </CredenzaHeader>
-            <CredenzaBody
-              // @ts-expect-error
+          <DialogContent className="dark max-h-full max-w-screen-3xl text-white">
+            <DialogHeader>
+              <DialogTitle>Build Errors for {info.row.original.name}</DialogTitle>
+            </DialogHeader>
+            <div
               style={{ colorScheme: "dark" }}
               className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit"
             >
@@ -150,14 +148,14 @@ export const cratesIoValidationTableColumns = [
                   </pre>
                 )}
               </Highlight>
-            </CredenzaBody>
-            <CredenzaFooter className="flex sm:hidden">
-              <CredenzaClose asChild>
+            </div>
+            <DialogFooter className="flex sm:hidden">
+              <DialogClose asChild>
                 <Button variant="ghost">Close</Button>
-              </CredenzaClose>
-            </CredenzaFooter>
-          </CredenzaContent>
-        </Credenza>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       );
     },
   }),
