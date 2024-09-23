@@ -4,6 +4,10 @@
 
 TBD
 
+## [v1.1.1 (2024-09-23)](https://github.com/risc0/risc0/releases/tag/v1.1.1)
+
+Support wider range of client/server use cases.
+
 ## [v1.1.0 (2024-09-09)](https://github.com/risc0/risc0/releases/tag/v1.1.0)
 
 ### 🔥 Performance Improvements
