@@ -245,13 +245,13 @@ bigint_should_fail_tests! {
             "00",   // scale:        0
         ]
     ),
-    // Shouldn't be able to multiply by the prime (b/c it's congruent to 0)
-    ec_mul_prime(
+    // Shouldn't be able to multiply by the order (b/c you get 0)
+    ec_mul_order(
         ec_mul_freely_rz8test,
         [
             "ac",   // inp_x:      172
             "3c",   // inp_y:       60
-            "b3",   // scale:      179
+            "c7",   // scale:      199
         ]
     ),
     // Shouldn't be able to add P + P
