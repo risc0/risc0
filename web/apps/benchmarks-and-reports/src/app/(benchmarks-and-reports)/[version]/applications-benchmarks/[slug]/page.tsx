@@ -37,7 +37,7 @@ export function generateMetadata({
     openGraph: {
       images: [
         {
-          url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+          url: `https://reports.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
             APPLICATIONS_BENCHMARKS_DESCRIPTION,
           )}`,
         },

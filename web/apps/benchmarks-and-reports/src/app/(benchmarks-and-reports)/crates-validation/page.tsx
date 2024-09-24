@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: `https://benchmarks.risczero.com/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
+        url: `https://reports.risczero.com/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
           CRATES_VALIDATION_DESCRIPTION,
         )}`,
       },

@@ -54,7 +54,7 @@ the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the
 appropriate feature flag.
 
 [cycle count]: /terminology#clock-cycles
-[datasheet]: https://benchmarks.risczero.com/release-1.0/datasheet
+[datasheet]: https://reports.risczero.com/release-1.0/datasheet
 [execution]: /terminology#execute
 [install]: ./install.md
 [prover]: /terminology#prover
