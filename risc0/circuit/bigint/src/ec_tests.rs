@@ -154,8 +154,7 @@ bigint_short_tests! {
             "71",   // scale:      113
             "74",   // expected_x: 116
             "a7",   // expected_y: 167
-        ],
-        [346372436, 1604795053, 31129203, 246390035]
+        ]
     ),
     ec_mul2_test_32(
         ec_mul_rz8test,
@@ -165,8 +164,7 @@ bigint_short_tests! {
             "02",   // scale:        2
             "97",   // expected_x: 151
             "ac",   // expected_y: 172
-        ],
-        [346372436, 1604795053, 31129203, 246390035]
+        ]
     ),
     ec_add_test_256(
         ec_add_secp256k1,
@@ -177,8 +175,7 @@ bigint_short_tests! {
             "83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c",   // rhs_y
             "a901b0dbe8ab292d280d6b36858947854faad0a4dd0da7e2d4ad0ff53db079e0",   // expected_x
             "3f27e7e1834f1a61af6f04dc61e7ae64716bc5e0a6b063b301d0e60e47298a9d",   // expected_y
-        ],
-        [346372436, 1604795053, 31129203, 246390035]
+        ]
     ),
     ec_sub_test_256(
         ec_sub_secp256k1,
@@ -189,8 +186,7 @@ bigint_short_tests! {
             "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", // rhs_y
             "0f66dc33e335abc9a7c06f71ad2c0db65d5ac4b6f46d2dad9465e6a4ac04dc3f", // expected_x
             "83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c", // expected_y
-        ],
-        [1361827893, 1544582164, 1574616391, 1372930459]
+        ]
     ),
     ec_doub_test_256(
         ec_doub_secp256k1,
@@ -199,8 +195,7 @@ bigint_short_tests! {
             "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",   // lhs_y
             "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",   // expected_x
             "1ae168fea63dc339a3c58419466ceaeef7f632653266d0e1236431a950cfe52a",   // expected_y
-        ],
-        [1739853020, 772298456, 1646252721, 890649739]
+        ]
     ),
     ec_neg_test_256(
         ec_neg_secp256k1,
@@ -209,8 +204,7 @@ bigint_short_tests! {
             "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", // inp_y
             "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", // expected_x
             "b7c52588d95c3b9aa25b0403f1eef75702e84bb7597aabe663b82f6f04ef2777", // expected_y
-        ],
-        [1955270777, 359504056, 1693947437, 583995072]
+        ]
     ),
     ec_pts_eq_test_256(
         ec_pts_eq_secp256k1,
@@ -219,8 +213,7 @@ bigint_short_tests! {
             "1b", // lhs_y:      27
             "1e", // rhs_x:      30
             "1b", // rhs_y:      27
-        ],
-        [171553196, 1884525848, 1964417951, 1602581249]
+        ]
     ),
     ec_mul47_test_256(
         ec_mul_secp256k1,
@@ -230,8 +223,7 @@ bigint_short_tests! {
             "2f",   // scale:      47
             "77f230936ee88cbbd73df930d64702ef881d811e0e1498e2f1c13eb1fc345d74",   // expected_x
             "958ef42a7886b6400a08266e9ba1b37896c95330d97077cbbe8eb3c7671c60d6",   // expected_y
-        ],
-        [346372436, 1604795053, 31129203, 246390035]
+        ]
     ),
 }
 

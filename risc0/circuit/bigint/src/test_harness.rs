@@ -88,7 +88,7 @@ macro_rules! bigint_tests {
 
 // Testing that witgen produces expected "golden" values for the public, private, and constant witnesses is only occasionally helpful and is quite tedious to generate golden values for, especially on the longer tests. This test macro omits the witgen test.
 macro_rules! bigint_short_tests {
-    ($($name:ident($zkr:ident, $in:expr, $z:expr),)*) => {
+    ($($name:ident($zkr:ident, $in:expr),)*) => {
         $(
             paste::paste! {
                 fn [<$name _values>]() -> Vec<BigUint> {
@@ -124,7 +124,7 @@ macro_rules! bigint_short_tests {
     }
 }
 
-// Tests that input values which should cause failures do cause failures
+// Tests that input values which should cause constraint failures do so
 macro_rules! bigint_should_fail_tests {
     ($($name:ident($zkr:ident, $in:expr),)*) => {
         $(
