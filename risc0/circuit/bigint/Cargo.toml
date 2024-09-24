@@ -41,9 +41,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 default = ["prove"]
-# Enables ZKR registration to actually generate proofs.
-prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
 # Omits control_ids.rs, and instead uses all zeros for control ids.
 # This is needed for the 'make_control_ids' binary to compile if any
 # new bigint programs are added.
 make_control_ids = []
+# Enables ZKR registration to actually generate proofs.
+prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
