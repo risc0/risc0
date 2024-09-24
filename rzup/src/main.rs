@@ -66,6 +66,7 @@ enum RzupSubcmd {
         /// Name of the toolchain or extension to install
         name: Option<String>,
         /// Version tag of the toolchain or extension to install
+        #[arg(short, long)]
         version: Option<String>,
         /// Force the installation, ignoring existing installations and downloads
         #[arg(short, long)]
