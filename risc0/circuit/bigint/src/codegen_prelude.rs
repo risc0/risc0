@@ -81,7 +81,7 @@ pub fn eqz(
     Ok(())
 }
 
-pub fn bigint_make_const<'a, const N: usize>(
+pub fn bigint_make_const<const N: usize>(
     ctx: &mut BigIntContext,
     coeffs: [i32; N],
 ) -> [i32; N] {

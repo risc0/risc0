@@ -120,30 +120,30 @@ pub fn eval_constraint(
     carry_polys.resize(carry_bytes, vec![0; val.len()]);
 
     let mut carry: i32 = 0;
-    for i in 0..val.len() {
-        carry = (val[i] + carry) / 256;
+    for (pos, cur_val) in val.iter().enumerate() {
+        carry = (cur_val + carry) / 256;
         let carry_u = carry + carry_offset as i32;
-        carry_polys[0][i] = carry_u & 0xFF;
+        carry_polys[0][pos] = carry_u & 0xFF;
         if carry_bytes > 1 {
-            carry_polys[1][i] = (carry_u >> 8) & 0xff;
+            carry_polys[1][pos] = (carry_u >> 8) & 0xff;
         }
         if carry_bytes > 2 {
-            carry_polys[2][i] = (carry_u >> 16) & 0xff;
-            carry_polys[3][i] = ((carry_u >> 16) & 0xff) * 4;
+            carry_polys[2][pos] = (carry_u >> 16) & 0xff;
+            carry_polys[3][pos] = ((carry_u >> 16) & 0xff) * 4;
         }
     }
 
     // Verify carry computation
     let mut big_carry = vec![0; val.len()];
-    for i in 0..val.len() {
-        big_carry[i] = carry_polys[0][i];
+    for (pos, cur_big_carry) in big_carry.iter_mut().enumerate() {
+        *cur_big_carry = carry_polys[0][pos];
         if carry_bytes > 1 {
-            big_carry[i] += 256 * carry_polys[1][i];
+            *cur_big_carry += 256 * carry_polys[1][pos];
         }
         if carry_bytes > 2 {
-            big_carry[i] += 65536 * carry_polys[2][i];
+            *cur_big_carry += 65536 * carry_polys[2][pos];
         }
-        big_carry[i] -= carry_offset as i32;
+        *cur_big_carry -= carry_offset as i32;
     }
 
     for i in 0..val.len() {
@@ -220,8 +220,8 @@ pub fn to_biguint(bp: impl AsRef<[i32]>) -> BigUint {
     let mut out = BigInt::default();
     let mut mul = BigInt::from(1usize);
     let coeff_mul = BigInt::from(1usize << BITS_PER_COEFF);
-    for i in 0..bp.len() {
-        out += &mul * bp[i];
+    for coeff in bp {
+        out += &mul * coeff;
         mul *= &coeff_mul;
     }
     out.to_biguint().expect("Unable to make unsigned bigint")
