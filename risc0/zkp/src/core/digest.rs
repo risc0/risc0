@@ -73,21 +73,20 @@ impl Digest {
     /// Construct a digest from a array of bytes in a const context.
     /// Outside of const context, `Digest::from` is recommended.
     pub const fn from_bytes(bytes: [u8; DIGEST_BYTES]) -> Self {
-        let mut digest: Digest = Digest::ZERO;
-        let mut i: usize = 0;
+        let mut digest = [0u32; DIGEST_WORDS];
+        let mut i = 0;
         while i < DIGEST_WORDS {
-            let mut j = 0;
             let mut word = 0u32;
+            let mut j = 0;
             while j < WORD_SIZE {
                 word <<= 8;
                 word |= bytes[i * WORD_SIZE + j] as u32;
                 j += 1;
             }
-            word = u32::from_be(word);
-            digest.0[i] = word;
+            digest[i] = u32::from_be(word);
             i += 1;
         }
-        digest
+        Digest::new(digest)
     }
 
     /// Returns a reference to the [Digest] as a slice of words.
