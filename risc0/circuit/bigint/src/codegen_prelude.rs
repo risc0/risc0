@@ -81,10 +81,7 @@ pub fn eqz(
     Ok(())
 }
 
-pub fn bigint_make_const<const N: usize>(
-    ctx: &mut BigIntContext,
-    coeffs: [i32; N],
-) -> [i32; N] {
+pub fn bigint_make_const<const N: usize>(ctx: &mut BigIntContext, coeffs: [i32; N]) -> [i32; N] {
     ctx.constant_witness.push(coeffs.to_vec());
     coeffs
 }
