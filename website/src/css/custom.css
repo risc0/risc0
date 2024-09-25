@@ -69,6 +69,11 @@ main {
   padding-bottom: 8rem;
 }
 
+.navbar {
+  box-shadow: none;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
 [data-theme="dark"] .label-container,
 [data-theme="dark"] .navbar__logo {
   filter: invert(1);
@@ -76,6 +81,7 @@ main {
 
 footer {
   text-align: right;
+  border-top: 1px solid var(--ifm-toc-border-color);
 }
 
 footer .container {
