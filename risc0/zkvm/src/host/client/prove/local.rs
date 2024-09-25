@@ -66,10 +66,12 @@ impl Executor for LocalProver {
             });
             Ok(Box::new(NullSegmentRef))
         })?;
+        let receipt_claim = session.claim()?;
         Ok(SessionInfo {
             segments,
             journal: session.journal.unwrap_or_default(),
             exit_code: session.exit_code,
+            receipt_claim,
         })
     }
 }

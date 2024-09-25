@@ -39,6 +39,7 @@ fn build_cpu_kernels() {
             "cxx/step_verify_bytes.cpp",
             "cxx/step_verify_mem.cpp",
         ])
+        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .compile("circuit");
 }
 
