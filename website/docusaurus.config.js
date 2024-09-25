@@ -193,9 +193,27 @@ export default async function createConfigAsync() {
           ],
         },
         footer: {
-          style: "dark",
-          links: [{}],
-          copyright: `Copyright © ${new Date().getFullYear()} RISC Zero, Inc. Built with Docusaurus.`,
+          logo: {
+            alt: "RISC Zero",
+            src: "img/logo.svg",
+            href: "https://risczero.com",
+            height: 42,
+          },
+          links: [
+            {
+              label: "Blog",
+              href: "https://www.risczero.com/blog",
+            },
+            {
+              label: "GitHub",
+              href: "https://github.com/risc0",
+            },
+            {
+              label: "Reports & Benchmarks",
+              href: "https://reports.risczero.com",
+            },
+          ],
+          copyright: `©${new Date().getFullYear()} RISC Zero`,
         },
         prism: {
           additionalLanguages: ["bash", "rust", "toml"],

@@ -65,6 +65,14 @@
   background-color: var(--ifm-hover-overlay);
 }
 
+main {
+  padding-bottom: 6rem;
+}
+
+[data-theme="dark"] footer img {
+  filter: invert(1);
+}
+
 [data-theme="dark"] .label-container,
 [data-theme="dark"] .navbar__logo {
   filter: invert(1);
