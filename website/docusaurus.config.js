@@ -201,16 +201,44 @@ export default async function createConfigAsync() {
           },
           links: [
             {
-              label: "Blog",
-              href: "https://www.risczero.com/blog",
+              items: [
+                {
+                  label: "Blog",
+                  href: "https://www.risczero.com/blog",
+                },
+                {
+                  label: "Careers",
+                  href: "https://jobs.ashbyhq.com/RiscZero",
+                },
+                {
+                  label: "Reports & Benchmarks",
+                  href: "https://reports.risczero.com",
+                },
+                {
+                  label: "Bug Bounties",
+                  href: "https://hackenproof.com/company/risc-zero/programs",
+                },
+              ],
             },
             {
-              label: "GitHub",
-              href: "https://github.com/risc0",
-            },
-            {
-              label: "Reports & Benchmarks",
-              href: "https://reports.risczero.com",
+              items: [
+                {
+                  label: "GitHub",
+                  href: "https://github.com/risc0",
+                },
+                {
+                  label: "Discord",
+                  href: "https://discord.com/invite/risczero",
+                },
+                {
+                  label: "X",
+                  href: "https://x.com/RiscZero",
+                },
+                {
+                  label: "YouTube",
+                  href: "https://www.youtube.com/@risczero",
+                },
+              ],
             },
           ],
           copyright: `©${new Date().getFullYear()} RISC Zero`,
