@@ -13,7 +13,7 @@ curl -fsSL https://bun.sh/install | bash
 
 ## Apps 👾
 
-- [`benchmarks-and-reports`](./apps/benchmarks-and-reports) → [LIVE PROD URL](https://benchmarks.risczero.com)
+- [`benchmarks-and-reports`](./apps/benchmarks-and-reports) → [LIVE PROD URL](https://reports.risczero.com)
 
 ## Packages 📦
 
