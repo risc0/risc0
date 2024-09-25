@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "NODE_NO_WARNINGS=1 next build",
-    "build:analyze": "NODE_NO_WARNINGS=1 ANALYZE=true next build",
-    "dev": "NODE_NO_WARNINGS=1 next dev --turbo",
-    "start": "NODE_NO_WARNINGS=1 next start",
+    "analyze": "ANALYZE=true next build",
+    "build": "next build",
+    "dev": "next dev --turbo",
+    "start": "next start",
     "test": "bun test spec",
     "typecheck": "tsc"
   },

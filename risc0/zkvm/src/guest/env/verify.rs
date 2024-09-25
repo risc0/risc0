@@ -65,12 +65,13 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
     Ok(())
 }
 
-/// Verify that there exists a valid receipt with the specified [crate::ReceiptClaim].
+/// Verify that there exists a valid receipt with the specified [ReceiptClaim][crate::ReceiptClaim].
 ///
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
-/// [crate::ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
-/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
-/// potentially distinct guests can be combined into one. This feature is know as [composition].
+/// [ReceiptClaim][crate::ReceiptClaim]. Any party verifying the receipt produced by this execution
+/// can then be sure that the receipt verified by this call is also valid. In this way, multiple
+/// receipts from  potentially distinct guests can be combined into one. This feature is known as
+/// [composition].
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
