@@ -32,12 +32,12 @@ export function generateMetadata({
   )[0];
 
   return {
-    title: `${slugLabel ? `${slugLabel} | ` : ""}Applications Benchmark`,
+    title: `${slugLabel ? `${slugLabel} ` : ""}Applications Benchmark`,
     description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
     openGraph: {
       images: [
         {
-          url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+          url: `https://reports.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
             APPLICATIONS_BENCHMARKS_DESCRIPTION,
           )}`,
         },
@@ -56,7 +56,7 @@ export default function ApplicationsBenchmarksPage({
 }) {
   return (
     <Tabs className="mt-6" defaultValue={params.slug}>
-      <TabsList>
+      <TabsList className="flex flex-wrap justify-start">
         {Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version]).map((filename, index) => (
           <Link
             tabIndex={-1}
