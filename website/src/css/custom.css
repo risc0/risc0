@@ -79,12 +79,12 @@ main {
   filter: invert(1);
 }
 
-footer {
+.footer {
   text-align: right;
   border-top: 1px solid var(--ifm-toc-border-color);
 }
 
-footer .container {
+.footer .container {
   display: flex;
   justify-content: space-between;
   flex-direction: row-reverse;
