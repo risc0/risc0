@@ -101,7 +101,7 @@ export default async function createConfigAsync() {
             { from: "/tech_faq", to: "/faq" },
             {
               from: "/test1",
-              to: "/test2",
+              to: "/faq",
             },
           ],
         },
