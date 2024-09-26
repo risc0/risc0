@@ -74,7 +74,7 @@ Read the [article](https://risczero.com/news/zeth-release).
 
 [`zkVM Quick Start`]: ./quickstart.md
 [alloy]: https://github.com/alloy-rs
-[Bonsai]: ../bonsai/
+[Bonsai]: ../bonsai
 [ELF binary]: /terminology#elf-binary
 [ethers]: https://github.com/ethers-io/ethers.js
 [executor]: /terminology#executor

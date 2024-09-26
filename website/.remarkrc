@@ -13,6 +13,7 @@
     "remark-frontmatter",
     "remark-gfm",
     "remark-directive",
+    "remark-remove-url-trailing-slash",
     "remark-math",
     "./remark-append-md.js",
     [

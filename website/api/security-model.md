@@ -98,11 +98,11 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-[10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
 [05/20/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/circuits/hexens_v1c_stark2snark_20240520.pdf
 [06/05/2024↗]: https://github.com/risc0/rz-security/blob/main/audits/contracts/hexens_verifiercontract_20240605.pdf
+[10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
-[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
+[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [deterministically]: /terminology#deterministic-builds
