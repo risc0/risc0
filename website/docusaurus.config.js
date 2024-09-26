@@ -97,10 +97,13 @@ export default async function createConfigAsync() {
             }
             return undefined;
           },
-          redirects: [{ from: "/tech_faq", to: "/faq" }, {
-            from: "/test1",
-            to: "/test2",
-          }],
+          redirects: [
+            { from: "/tech_faq", to: "/faq" },
+            {
+              from: "/test1",
+              to: "/test2",
+            },
+          ],
         },
       ],
     ],
