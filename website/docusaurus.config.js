@@ -77,7 +77,9 @@ export default async function createConfigAsync() {
         "@docusaurus/plugin-client-redirects",
         {
           createRedirects(existingPath) {
-            if (existingPath.includes("/api/generating-proofs/remote-proving")) {
+            if (
+              existingPath.includes("/api/generating-proofs/remote-proving")
+            ) {
               return [
                 existingPath.replace(
                   "/api/generating-proofs/remote-proving",
@@ -100,9 +102,7 @@ export default async function createConfigAsync() {
 
             return undefined;
           },
-          redirects: [
-            { from: "/tech_faq", to: "/faq" },
-          ],
+          redirects: [{ from: "/tech_faq", to: "/faq" }],
         },
       ],
     ],
