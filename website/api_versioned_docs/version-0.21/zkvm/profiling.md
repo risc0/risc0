@@ -110,4 +110,4 @@ web interface.
 [install]: ./install.md
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [pprof]: https://github.com/google/pprof
-[profiler]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+[profiler]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
