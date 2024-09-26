@@ -109,7 +109,6 @@ features = ["client", "prove", "getrandom", "std", "unstable"]
 [features]
 client = [
   "dep:bincode",
-  "dep:bonsai-sdk",
   "dep:bytes",
   "dep:lazy-regex",
   "dep:risc0-build",
@@ -117,6 +116,7 @@ client = [
   "dep:tempfile",
   "std",
 ]
+bonsai = ["dep:bonsai-sdk"]
 cuda = [
   "prove",
   "risc0-circuit-recursion/cuda",
