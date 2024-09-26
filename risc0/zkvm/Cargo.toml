@@ -123,7 +123,7 @@ cuda = [
   "risc0-circuit-rv32im/cuda",
   "risc0-zkp/cuda",
 ]
-default = ["client"]
+default = ["client", "bonsai"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
 # to ensure accurate cycle and segment counts. Tests that have been gated on
