@@ -19,6 +19,8 @@ EXCEPTIONS = [
     # allow link to risc0-ethereum before versioning started to match with 1.0
     "github.com/risc0/risc0-ethereum/blob/release-0.7",
     "github.com/risc0/risc0-ethereum/blob/release-0.10",
+    # allow links to v1.1.0-rc.3, which is referenced as a deployed version of contracts.
+    "github.com/risc0/risc0-ethereum/tree/v1.1.0-rc.3/contracts/"
 ]
 
 REPOS = [

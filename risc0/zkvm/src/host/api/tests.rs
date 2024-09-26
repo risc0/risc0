@@ -403,7 +403,7 @@ fn coprocessor_handler() {
 
     let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
     let env = ExecutorEnv::builder()
-        .coprocessor_callback(coprocessor.clone())
+        .coprocessor_callback_ref(coprocessor.clone())
         .write(&spec)
         .unwrap()
         .build()

@@ -414,8 +414,15 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Add a callback for coprocessor requests.
     #[stability::unstable]
-    pub fn coprocessor_callback(&mut self, handler: CoprocessorCallbackRef<'a>) -> &mut Self {
-        self.inner.coprocessor = Some(handler);
+    pub fn coprocessor_callback(&mut self, callback: impl CoprocessorCallback + 'a) -> &mut Self {
+        self.inner.coprocessor = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Add a callback for coprocessor requests.
+    #[stability::unstable]
+    pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
+        self.inner.coprocessor = Some(callback);
         self
     }
 }

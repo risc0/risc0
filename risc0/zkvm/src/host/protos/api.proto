@@ -15,7 +15,8 @@ message ServerRequest {
     IdentityP254Request identity_p254 = 6;
     ResolveRequest resolve = 7;
     CompressRequest compress = 8;
-    ProveZkrRequest prove_zkr = 9;
+    VerifyRequest verify = 9;
+    ProveZkrRequest prove_zkr = 10;
   }
 }
 
@@ -164,6 +165,11 @@ message CompressResult {
   Asset receipt = 1;
 }
 
+message VerifyRequest {
+  Asset receipt = 1;
+  base.Digest image_id = 2;
+}
+
 message ExecutorEnv {
   Asset binary = 1;
   map<string, string> env_vars = 2;
@@ -206,6 +212,7 @@ message SessionInfo {
   uint32 segments = 1;
   bytes journal = 2;
   base.ExitCode exit_code = 3;
+  Asset receipt_claim = 4;
 }
 
 message SegmentInfo {
@@ -346,6 +353,7 @@ service Server {
   rpc join(JoinRequest) returns (JoinReply);
   rpc resolve(ResolveRequest) returns (ResolveReply);
   rpc compress(CompressRequest) returns (CompressReply);
+  rpc verify(VerifyRequest) returns (GenericReply);
 }
 
 service ExecuteCallback {

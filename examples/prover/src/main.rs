@@ -72,7 +72,7 @@ fn prover_example() {
 
     let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
     let env = ExecutorEnv::builder()
-        .coprocessor_callback(coprocessor.clone())
+        .coprocessor_callback_ref(coprocessor.clone())
         .write(&claims)
         .unwrap()
         // Use a low segment size to generate more jobs in this example.
@@ -122,7 +122,7 @@ fn prover_example() {
         .unwrap();
     let assumptions = output.assumptions.as_value().unwrap();
 
-    let coprocessor = RefCell::borrow(&coprocessor);
+    let coprocessor = coprocessor.borrow();
     let mut succinct_receipt = conditional_receipt.clone();
     for assumption in assumptions.iter() {
         let assumption = assumption.as_value().unwrap();
@@ -143,7 +143,8 @@ fn prover_example() {
         InnerReceipt::Succinct(succinct_receipt),
         session.journal.bytes.clone(),
     );
-    receipt.verify(RSA_ID).unwrap();
+    let asset = receipt.try_into().unwrap();
+    client.verify(asset, RSA_ID).unwrap();
     println!("Receipt verified!");
 }
 
