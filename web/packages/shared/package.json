@@ -1,10 +1,10 @@
 {
-  "name": "shared",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "bun test spec",
-    "typecheck": "tsc --noEmit"
-  }
+	"name": "shared",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "vitest run --silent",
+		"typecheck": "tsc --noEmit"
+	}
 }
