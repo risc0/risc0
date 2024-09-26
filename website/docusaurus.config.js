@@ -5,7 +5,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 import katex from "rehype-katex";
 import math from "remark-math";
 import rustCode from "./src/remark/rust.js";
-
+import api_versions from "./api_versions.json";
 const baseUrl = process.env.BASE_URL ?? "/";
 
 export default async function createConfigAsync() {
@@ -88,9 +88,19 @@ export default async function createConfigAsync() {
                 ),
               ];
             }
+
             if (path.includes("/api/zkvm")) {
               return [path.replace("/api/zkvm", "/zkvm")];
             }
+
+            if (path.includes(`/api/${api_versions[0]}`)) {
+              return [path.replace(`/api/${api_versions[0]}`, `/api`)];
+            }
+
+            if (path.includes(`/api/cohan`)) {
+              return [path.replace(`/api/cohan`, `/cohan2`)];
+            }
+
             return undefined;
           },
           redirects: [{ from: "/tech_faq", to: "/faq" }],
@@ -124,12 +134,12 @@ export default async function createConfigAsync() {
           logo: {
             alt: "RISC Zero",
             src: "img/logo.svg",
-            href: "https://risczero.com",
+            href: "/api",
           },
           items: [
             {
               position: "left",
-              label: "Introduction",
+              label: "Documentation",
               to: "/api",
             },
             {
