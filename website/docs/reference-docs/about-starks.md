@@ -22,13 +22,13 @@ We recommend the following external references on STARKs:
 
 - [Extreme Integrity in Decentralized World](https://medium.com/@eli_1210/extreme-integrity-in-decentralized-world-a56da4c730ea)
 - [Cambrian Explosion of Crypto Proofs](https://medium.com/starkware/the-cambrian-explosion-of-crypto-proofs-7ac080ac9aed)
-- [STARKs vs. SNARKS (Consensys, 2021)](https://consensys.net/blog/blockchain-explained/zero-knowledge-proofs-starks-vs-snarks/)
+- [STARKs vs. SNARKS (Consensys, 2021)](https://consensys.net/blog/blockchain-explained/zero-knowledge-proofs-starks-vs-snarks)
 
 ### More Technical
 
-- [Anatomy of a Stark](https://aszepieniec.github.io/stark-anatomy/) (developer focused)
+- [Anatomy of a Stark](https://aszepieniec.github.io/stark-anatomy) (developer focused)
 - [The Starkmath series](https://medium.com/tag/stark-math)
-- [STARK 101](https://starkware.co/stark-101/) (developer focused)
+- [STARK 101](https://starkware.co/stark-101) (developer focused)
 - [Vitalik's STARK series](https://vitalik.eth.limo/general/2017/11/09/starks_part_1.html)
 
 ### Most Technical
