@@ -76,33 +76,32 @@ export default async function createConfigAsync() {
       [
         "@docusaurus/plugin-client-redirects",
         {
-          createRedirects(path) {
-            if (path.includes("/api/generating-proofs/remote-proving")) {
+          createRedirects(existingPath) {
+            if (existingPath.includes("/api/generating-proofs/remote-proving")) {
               return [
-                path.replace(
+                existingPath.replace(
                   "/api/generating-proofs/remote-proving",
                   "/bonsai",
                 ),
-                path.replace(
+                existingPath.replace(
                   "/api/generating-proofs/remote-proving",
                   "/bonsai/quickstart",
                 ),
               ];
             }
-            if (path.includes("/api/zkvm")) {
-              return [path.replace("/api/zkvm", "/zkvm")];
+
+            if (existingPath.includes("/api/zkvm")) {
+              return [existingPath.replace("/api/zkvm", "/zkvm")];
             }
-            if (path.includes(`/api/${apiVersions[0]}`)) {
-              return [path.replace(`/api/${apiVersions[0]}`, `/api`)];
+
+            if (existingPath.includes(`/api`)) {
+              return [existingPath.replace(`/api`, `/api/${apiVersions[0]}`)];
             }
+
             return undefined;
           },
           redirects: [
             { from: "/tech_faq", to: "/faq" },
-            {
-              from: "/test1",
-              to: "/faq",
-            },
           ],
         },
       ],
