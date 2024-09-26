@@ -152,7 +152,7 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 Thanks for reading! If you have questions or feedback, we'd love to hear from you on Discord or Twitter.
 
-[acceleration]: /api/zkvm/acceleration/
+[acceleration]: /api/zkvm/acceleration
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
 [ethSTARK]: https://eprint.iacr.org/2021/582.pdf
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
