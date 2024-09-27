@@ -61,11 +61,7 @@ lto = true
 
 # Always optimize; otherwise tests take excessively long.
 [profile.dev]
-debug = 0
 opt-level = 3
-
-[profile.test]
-debug = 0
 
 [profile.release]
 lto = true
