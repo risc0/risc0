@@ -48,6 +48,7 @@ impl Syscall for SysKeccak {
             let mut out_buf = vec![0u8; to_guest.len() * WORD_SIZE];
             hasher.finalize(&mut out_buf);
             bytemuck::cast_slice_mut(to_guest).clone_from_slice(out_buf.as_slice());
+            self.0.clear();
             Ok((0, 0))
         } else {
             Err(anyhow::anyhow!("Unsupported keccak mode {}", mode))

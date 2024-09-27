@@ -474,8 +474,8 @@ pub fn keccak_update(input: &[u8]) {
 }
 
 /// TODO
-pub fn keccak_finalize(output: &mut [u32; DIGEST_WORDS]) {
+pub fn keccak_finalize(output: &mut [u8]) {
     unsafe {
-        sys_read_keccak(output);
+        sys_read_keccak(output.as_ptr() as *mut [u32; DIGEST_WORDS]);
     }
 }
