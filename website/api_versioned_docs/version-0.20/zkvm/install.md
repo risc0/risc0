@@ -48,4 +48,4 @@ To update your installation:
 
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[rustup]: https://rustup.rs/
+[rustup]: https://rustup.rs

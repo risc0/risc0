@@ -55,7 +55,7 @@ a {
 }
 
 .link {
-  @apply hover:text-primary dark:no-underline underline;
+  @apply hover:text-primary underline;
 }
 
 /* Chartjs */
