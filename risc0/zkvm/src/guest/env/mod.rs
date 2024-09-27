@@ -84,7 +84,7 @@ use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
         self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
-        syscall_2, SyscallName,
+        sys_read_keccak, sys_write_keccak, syscall_2, SyscallName, DIGEST_WORDS,
     },
     WORD_SIZE,
 };
@@ -464,4 +464,18 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
     read_slice(core::slice::from_mut(&mut len));
     let reader = std::io::BufReader::with_capacity(len as usize, stdin());
     T::deserialize(&mut crate::serde::Deserializer::new(reader))
+}
+
+/// TODO
+pub fn keccak_update(input: &[u8]) {
+    unsafe {
+        sys_write_keccak(input.as_ptr(), input.len());
+    }
+}
+
+/// TODO
+pub fn keccak_finalize(output: &mut [u32; DIGEST_WORDS]) {
+    unsafe {
+        sys_read_keccak(output);
+    }
 }

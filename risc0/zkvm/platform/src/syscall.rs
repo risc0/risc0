@@ -96,6 +96,11 @@ pub mod bigint {
     pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
 }
 
+pub mod keccak {
+    pub const READ: u32 = 0;
+    pub const WRITE: u32 = 1;
+}
+
 /// A UTF-8 NUL-terminated name of a syscall with static lifetime.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
@@ -136,6 +141,7 @@ pub mod nr {
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
+    declare_syscall!(pub SYS_KECCAK);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
@@ -893,4 +899,42 @@ pub unsafe extern "C" fn sys_prove_zkr(
         const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
+}
+
+/// # Safety
+/// pass keccak data to host - should be invoked during `hasher.update(...)`
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_write_keccak(write_ptr: *const u8, nbytes: usize) {
+    // maybe use "fd" as an ID for concurrent case?
+    let mut nbytes_remain = nbytes;
+    let mut write_ptr = write_ptr;
+    while nbytes_remain > 0 {
+        let nbytes = min(nbytes_remain, MAX_BUF_BYTES);
+        syscall_3(
+            nr::SYS_KECCAK,
+            null_mut(),
+            0,
+            keccak::WRITE,
+            write_ptr as u32,
+            nbytes as u32,
+        );
+        write_ptr = write_ptr.add(nbytes);
+        nbytes_remain -= nbytes;
+    }
+}
+
+/// # Safety
+/// pass kecak pass keccak hash to guest - should be invoked during `hasher.finalize(...)`
+#[inline(always)]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub unsafe extern "C" fn sys_read_keccak(out_state: *mut [u32; DIGEST_WORDS]) {
+    syscall_3(
+        nr::SYS_KECCAK,
+        out_state as *mut u32,
+        DIGEST_WORDS,
+        keccak::READ,
+        0,
+        0,
+    );
 }

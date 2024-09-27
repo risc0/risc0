@@ -4230,6 +4230,7 @@ dependencies = [
  "tar",
  "tempfile",
  "test-log",
+ "tiny-keccak",
  "tracing",
  "tracing-forest",
  "tracing-subscriber 0.3.18",

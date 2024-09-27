@@ -1187,6 +1187,7 @@ dependencies = [
  "serde",
  "sha2",
  "stability",
+ "tiny-keccak 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "tracing",
 ]
 
@@ -1216,6 +1217,7 @@ dependencies = [
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",
  "rsa",
+ "tiny-keccak 2.0.2",
 ]
 
 [[package]]
@@ -1511,6 +1513,23 @@ checksum = "8b9ef9bad013ada3808854ceac7b46812a6465ba368859a37e2100283d2d719c"
 dependencies = [
  "cfg-if",
  "once_cell",
+]
+
+[[package]]
+name = "tiny-keccak"
+version = "2.0.2"
+dependencies = [
+ "crunchy",
+ "risc0-zkvm",
+]
+
+[[package]]
+name = "tiny-keccak"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
+dependencies = [
+ "crunchy",
 ]
 
 [[package]]

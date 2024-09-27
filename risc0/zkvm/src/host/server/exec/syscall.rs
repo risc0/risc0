@@ -15,6 +15,7 @@
 //! Handlers for two-way private I/O between host and guest.
 
 mod fork;
+mod keccak;
 mod pipe;
 mod prove_zkr;
 mod verify;
@@ -29,8 +30,9 @@ use risc0_zkvm_platform::{
     fileno,
     syscall::{
         nr::{
-            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_LOG, SYS_PANIC,
-            SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_KECCAK, SYS_LOG,
+            SYS_PANIC, SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY,
+            SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName, DIGEST_BYTES,
@@ -47,7 +49,9 @@ use crate::{
     Assumption, AssumptionReceipt, ExecutorEnv,
 };
 
-use self::{fork::SysFork, pipe::SysPipe, prove_zkr::SysProveZkr, verify::SysVerify};
+use self::{
+    fork::SysFork, keccak::SysKeccak, pipe::SysPipe, prove_zkr::SysProveZkr, verify::SysVerify,
+};
 
 /// A host-side implementation of a system call.
 pub(crate) trait Syscall {
@@ -133,6 +137,7 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
             .with_syscall(SYS_FORK, SysFork)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
+            .with_syscall(SYS_KECCAK, SysKeccak::default())
             .with_syscall(SYS_LOG, SysLog)
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_PIPE, SysPipe::default())

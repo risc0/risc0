@@ -45,6 +45,8 @@ use risc0_zkvm_platform::{
     },
     PAGE_SIZE,
 };
+use tiny_keccak::Hasher;
+use tiny_keccak::Keccak;
 
 risc0_zkvm::entry!(main);
 
@@ -429,6 +431,29 @@ fn main() {
             }
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::Keccak => {
+            let mut hasher = Keccak::v256();
+            let mut output = [0u8; 32];
+            let expected = [
+                71, 23, 50, 133, 168, 215, 52, 30, 94, 151, 47, 198, 119, 40, 99, 132, 248, 2, 248,
+                239, 66, 165, 236, 95, 3, 187, 250, 37, 76, 176, 31, 173,
+            ];
+
+            hasher.update(b"hello");
+            hasher.update(b" ");
+            hasher.update(b"world");
+            hasher.finalize(&mut output);
+
+            assert_eq!(&expected, &output);
+
+            env::keccak_update(b"hello");
+            env::keccak_update(b" ");
+            env::keccak_update(b"world");
+            let mut output = [0u32; 8];
+            env::keccak_finalize(&mut output);
+
+            assert_eq!(&expected, bytemuck::cast_slice(&output));
         }
     }
 }
