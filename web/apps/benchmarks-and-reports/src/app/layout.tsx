@@ -1,4 +1,3 @@
-import "@risc0/ui/styles/globals.css";
 import "shared/styles/styles.css";
 
 import { cn } from "@risc0/ui/cn";

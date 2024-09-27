@@ -33,7 +33,7 @@ in our [Crate Validation Report][crate-validation].
 [from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
 [install-rust]: https://www.rust-lang.org/tools/install
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
-[Rust]: https://www.rust-lang.org/
+[Rust]: https://www.rust-lang.org
 [rust-book]: https://doc.rust-lang.org/book
 [rust-libraries]: https://github.com/risc0/risc0#rust-libraries
 [zkvm-overview]: ./zkvm-overview.md
