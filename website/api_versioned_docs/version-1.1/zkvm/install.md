@@ -51,5 +51,5 @@ After you update your installation, be sure to update your project's RISC Zero c
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [release tag]: https://github.com/risc0/risc0/releases
-[Rust]: https://www.rust-lang.org/
-[rustup]: https://rustup.rs/
+[Rust]: https://www.rust-lang.org
+[rustup]: https://rustup.rs

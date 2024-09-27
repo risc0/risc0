@@ -67,7 +67,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 [about-zkvm]: /api/zkvm
 [Bonsai]: https://bonsai.xyz
 [composite receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.CompositeReceipt.html
-[dev-mode]: /api/generating-proofs/dev-mode/
+[dev-mode]: /api/generating-proofs/dev-mode
 [fake receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/enum.InnerReceipt.html#variant.Fake
 [GitHub]: https://github.com/risc0/risc0
 [Groth16]: /terminology#groth16
@@ -78,7 +78,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 [news]: https://risczero.com/news
 [open-source]: https://risczero.com/news/open-source
 [proof composition]: /terminology#composition
-[quickstart]: /api/zkvm/quickstart/
+[quickstart]: /api/zkvm/quickstart
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [Receipt::verify()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [ReceiptClaim]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptClaim.html

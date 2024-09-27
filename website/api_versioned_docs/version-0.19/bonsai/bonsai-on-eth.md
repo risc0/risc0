@@ -78,7 +78,7 @@ You may also want to check out our [Bonsai Quick Start](quickstart.md) page and/
 [`RiscZeroGroth16Verifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/groth16/RiscZeroGroth16Verifier.sol
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 [Bonsai Relay SDK]: https://docs.rs/crate/bonsai-ethereum-relay/latest
-[Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
+[Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk
 [described above]: #bonsai-relay
 [Groth16 SNARK]: https://www.risczero.com/news/on-chain-verification
 [guest program]: /terminology#guest-program
