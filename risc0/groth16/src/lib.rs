@@ -112,6 +112,7 @@ pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
 }
 
 /// Deserialize an element over the G1 group from bytes in big-endian format
+#[stability::unstable]
 pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
     if elem.len() != 2 {
         return Err(anyhow!("Malformed G1 field element"));
@@ -127,6 +128,7 @@ pub fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
 }
 
 /// Deserialize an element over the G2 group from bytes in big-endian format
+#[stability::unstable]
 pub fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
     if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
         return Err(anyhow!("Malformed G2 field element"));

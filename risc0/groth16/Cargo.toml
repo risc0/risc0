@@ -8,6 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+stability = "0.2"
 anyhow = { version = "1.0", default-features = false }
 ark-bn254 = { version = "0.4" }
 ark-ec = { version = "0.4" }
