@@ -158,7 +158,7 @@ impl Verifier {
 
 /// Verifying key for Groth16 proofs.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Fr(#[serde(with = "serde_ark")] pub ark_bn254::Fr);
+pub struct Fr(#[serde(with = "serde_ark")] pub(crate) ark_bn254::Fr);
 
 impl Fr {
     #[stability::unstable]
@@ -185,7 +185,7 @@ impl Digestible for Fr {
 
 /// Verifying key for Groth16 proofs.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct VerifyingKey(#[serde(with = "serde_ark")] pub ark_groth16::VerifyingKey<Bn254>);
+pub struct VerifyingKey(#[serde(with = "serde_ark")] pub(crate) ark_groth16::VerifyingKey<Bn254>);
 
 /// Hash a point on G1 or G2 by hashing the concatenated big-endian representation of (x, y).
 fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
