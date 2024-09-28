@@ -14,10 +14,10 @@
 
 use risc0_circuit_rv32im_sys::ffi::{RawMemoryTransaction, RawPreflightCycle, RawPreflightTrace};
 use risc0_core::scope;
-use risc0_zkp::field::baby_bear::BabyBearElem;
+use risc0_zkp::{field::baby_bear::BabyBearElem, layout::Reg};
 
 use crate::{
-    layout::{DataReg, LAYOUT},
+    layout::DATA_LAYOUT,
     prove::emu::{
         addr::{ByteAddr, WordAddr},
         mux::{Major, TopMux},
@@ -55,11 +55,11 @@ impl<'a> Injector<'a> {
         }
     }
 
-    fn get_idx(&self, reg: &DataReg) -> usize {
+    fn get_idx(&self, reg: &Reg) -> usize {
         reg.offset * self.steps + self.cycle - 1
     }
 
-    fn add(&mut self, reg: &DataReg, value: u32) {
+    fn add(&mut self, reg: &Reg, value: u32) {
         self.offsets.push(self.get_idx(reg) as u32);
         self.values.push(value.into());
     }
@@ -69,7 +69,7 @@ impl<'a> Injector<'a> {
         let bytes = pc.0.to_le_bytes();
         let bot2 = bytes[3] & 0b11;
         let top2 = bytes[3] >> 2 & 0b11;
-        let pc = LAYOUT.mux.body.pc;
+        let pc = DATA_LAYOUT.mux.body.pc;
         self.add(pc.bytes[0], bytes[0] as u32);
         self.add(pc.bytes[1], bytes[1] as u32);
         self.add(pc.bytes[2], bytes[2] as u32);
@@ -78,18 +78,18 @@ impl<'a> Injector<'a> {
     }
 
     fn set_user_mode(&mut self) {
-        let user_mode = LAYOUT.mux.body.user_mode;
+        let user_mode = DATA_LAYOUT.mux.body.user_mode;
         self.add(user_mode, 0);
     }
 
     fn set_next_major(&mut self, major: Major) {
-        let next_major = LAYOUT.mux.body.next_major;
+        let next_major = DATA_LAYOUT.mux.body.next_major;
         self.add(next_major, major.as_u32());
     }
 
     fn set_halt(&mut self, sys_exit_code: u8, user_exit_code: u8, write_addr: WordAddr) {
-        let major_select = LAYOUT.mux.body.major_select;
-        let halt_cycle = LAYOUT.mux.body.major_mux;
+        let major_select = DATA_LAYOUT.mux.body.major_select;
+        let halt_cycle = DATA_LAYOUT.mux.body.major_mux;
         self.add(major_select[Major::ECall as usize], 0);
         self.add(major_select[Major::PageFault as usize], 0);
         self.add(major_select[Major::Halt as usize], 1);
