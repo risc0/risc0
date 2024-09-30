@@ -16,7 +16,9 @@ use crate::test_harness::{
     bigint_short_tests, bigint_should_fail_tests, bigint_tests, from_hex, test_witgen, test_zkr,
     witness_test_data,
 };
-use crate::{BigIntClaim, BigIntContext, BIGINT_PO2, ec::EC_MUL_SECP256K1, prove, verify, zkr::get_zkr};
+use crate::{
+    ec::EC_MUL_SECP256K1, prove, verify, zkr::get_zkr, BigIntClaim, BigIntContext, BIGINT_PO2,
+};
 use anyhow::Result;
 use num_bigint::BigUint;
 use risc0_zkp::core::hash::sha;
@@ -30,7 +32,7 @@ fn golden_ec_mul_values() -> Vec<BigUint> {
     vec![
         from_hex("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
         from_hex("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"),
-        from_hex("2f"),   // 47
+        from_hex("2f"), // 47
         from_hex("77f230936ee88cbbd73df930d64702ef881d811e0e1498e2f1c13eb1fc345d74"),
         from_hex("958ef42a7886b6400a08266e9ba1b37896c95330d97077cbbe8eb3c7671c60d6"),
     ]
