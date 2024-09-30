@@ -14,6 +14,7 @@
 
 pub mod byte_poly;
 mod codegen_prelude;
+pub mod ec;
 pub mod rsa;
 #[cfg(feature = "prove")]
 pub mod zkr;
