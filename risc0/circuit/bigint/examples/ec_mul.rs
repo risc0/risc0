@@ -39,7 +39,10 @@ fn main() {
         .build()
         .unwrap();
 
-    let session = ExecutorImpl::from_elf(env, EC_MUL_ELF).unwrap().run().unwrap();
+    let session = ExecutorImpl::from_elf(env, EC_MUL_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
     assert_eq!(session.segments.len(), 1);
 }
 
