@@ -23,5 +23,5 @@ fn main() {
         .into_iter()
         .map(|[x, y, s, u, v]| ec::mul_claim(&ec::EC_MUL_SECP256K1, x, y, s, u, v))
         .collect();
-    risc0_circuit_bigint::prove(&ec::EC_MUL_SECP256K1, &claims).expect("Unable to compose with RSA");
+    risc0_circuit_bigint::prove(&ec::EC_MUL_SECP256K1, &claims).expect("Unable to compose with EC Mul");
 }
