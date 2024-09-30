@@ -33,11 +33,7 @@ constexpr size_t kStepModeSeqReverse = 2;
 
 namespace {
 
-using CodeReg = size_t;
-using OutReg = size_t;
-using DataReg = size_t;
-using MixReg = size_t;
-using AccumReg = size_t;
+using Reg = size_t;
 
 #include "layout.cu.inc"
 
@@ -271,7 +267,7 @@ __global__ void inject_backs_ram(MachineContext* ctx, uint32_t steps, uint32_t c
     assert(idx != 0);
 
     const RamArgumentRow& back1 = ctx->ramRows[idx - 1];
-    constexpr auto header = kLayout.mux.body.header;
+    constexpr auto header = kDataLayout.mux.body.header;
     constexpr auto a = header.element;
     constexpr auto v = header.verifier;
     data[a.addr * steps + cycle - 1] = back1.addr;                 // a->addr

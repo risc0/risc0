@@ -17,113 +17,32 @@
 use alloc::{collections::BTreeMap, string::String, vec::Vec};
 #[cfg(not(feature = "std"))]
 use alloc::{format, string::ToString};
-use core::fmt::{Debug, Formatter, Write};
-
 use anyhow::Result;
+use core::fmt::{Debug, Formatter, Write};
 pub use paste::paste;
+use risc0_core::field::Elem;
 
-#[macro_export]
-/// Defines a buffer in a circuit that could have layout information.  $ident
-/// should be the camelcase name of the buffer, and $elem should be the type of
-/// element in the buffer, e.g. BabyBearElem.  $elem must implement Debug, and
-/// must be comparable to $elem::ZERO.
-macro_rules! layout_buffer {
-    ($ident:ident, $elem:ty) => {
-        $crate::layout::paste! {
-            pub struct [<$ident:camel Reg>] {
-                pub offset: usize,
-            }
-
-            impl core::convert::From<usize> for [<$ident:camel Reg>] {
-                fn from(offset: usize) -> Self { Self{offset} }
-            }
-
-           impl $crate::layout::Component for [<$ident:camel Reg>] {
-               fn walk<V: $crate::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-                   v.visit_reg(stringify!($ident), self.offset)
-               }
-               fn ty_name(&self) -> &'static str { "reg" }
-           }
-
-            #[derive(Clone, Copy)]
-            pub struct [<$ident:camel Buffer>]<'a> (
-                pub &'a[$elem],
-           );
-
-           impl<'a> core::convert::From<&'a [$elem]> for [<$ident:camel Buffer>]<'a> {
-               fn from(buf: &'a [$elem]) -> Self {
-                   Self(buf)
-               }
-           }
-
-           impl<'a> $crate::layout::Buffer for [<$ident:camel Buffer>]<'a> {
-               type Reg = [<$ident:camel Reg>];
-               type Elem = $elem;
-
-               fn tree<'b, C: $crate::layout::Component>(&'b self, component: &'b C) -> $crate::layout::Tree<Self, C> {
-                   $crate::layout::Tree{buf: self, component}
-               }
-
-               fn name(&self) -> &'static str {
-                   stringify!($ident)
-               }
-
-               fn get(&self, reg: &Self::Reg) -> core::option::Option<&$elem> {
-                   if reg.offset > self.0.len() {
-                       None
-                   } else {
-                       let val = &self.0[reg.offset];
-                       if *val == $elem::ZERO {
-                           None
-                       } else {
-                           Some(val)
-                       }
-                   }
-               }
-
-               fn get_u64(&self, reg: &Self::Reg) -> u64 {
-                   u64::from(self.0[reg.offset])
-               }
-           }
-        }};
+/// A reference to a register in a layout
+pub struct Reg {
+    pub offset: usize,
 }
 
-/// A circuit execution trace buffer, which we can read laid out components
-/// from.
-pub trait Buffer: Sized {
-    /// The type of element stored in this buffer.
-    type Elem: Debug;
-
-    /// A register in this buffer, convertible from an offset.
-    type Reg: From<usize>;
-
-    /// Returns the component tree rooted at the given component.
-    fn tree<'a, C: Component>(&'a self, component: &'a C) -> Tree<'a, Self, C>;
-
-    /// Returns the argument name of this buffer.
-    fn name(&self) -> &'static str;
-
-    /// Retrieve an element from this buffer.
-    fn get(&self, reg: &Self::Reg) -> Option<&Self::Elem>;
-
-    /// Retrieve an element from this buffer and convert it to a u64
-    fn get_u64(&self, reg: &Self::Reg) -> u64;
-
-    /// Retrieve an element from this buffer and convert it to a u32
-    fn get_u32(&self, reg: &Self::Reg) -> u32 {
-        self.get_u64(reg) as u32
+impl Component for Reg {
+    fn walk<V: Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_reg(self.offset)
+    }
+    fn ty_name(&self) -> &'static str {
+        "reg"
     }
 }
 
 /// A component within a circuit execution trace buffer.  Users should
 /// not use this directly; it is only "pub" so it can be used by the
-/// layout_buffer macro.
+/// generated layout code.
 #[doc(hidden)]
 pub trait Component {
     fn walk<V: Visitor>(&self, v: &mut V) -> core::fmt::Result;
-    fn ty_name(&self) -> &'static str {
-        "array"
-    }
+    fn ty_name(&self) -> &'static str;
 }
 
 impl<C: Component, const N: usize> Component for [&C; N] {
@@ -134,29 +53,44 @@ impl<C: Component, const N: usize> Component for [&C; N] {
         }
         Ok(())
     }
+    fn ty_name(&self) -> &'static str {
+        "array"
+    }
 }
 
-/// A visitor that visits components in a component tree.  Users
-/// should not use this directly; it is only "pub" so it can be used
-/// by the layout_buffer macro.
+/// A visitor that visits components in a component tree. Users should
+/// not use this directly; it is only "pub" so it can be used by the
+/// generated layout code.
 #[doc(hidden)]
 pub trait Visitor {
     fn visit_component(&mut self, name: &str, component: &impl Component) -> core::fmt::Result;
-    fn visit_reg(&mut self, buf_name: &'static str, offset: usize) -> core::fmt::Result;
+    fn visit_reg(&mut self, offset: usize) -> core::fmt::Result;
 }
 
-/// Represents the section of a component tree that's present in a buffer.
-pub struct Tree<'a, B: Buffer, C: Component> {
-    // Fields only marked "pub" so they can be used by the layout_buffer! macro.
-    #[doc(hidden)]
-    pub buf: &'a B,
-    #[doc(hidden)]
+/// Represents a section of a component tree that's present in a buffer.
+#[derive(Clone, Copy)]
+pub struct Tree<'a, E: Elem + Into<u32>, C: Component> {
+    pub buf: &'a [E],
     pub component: &'a C,
 }
 
-impl<'a, B: Buffer, C: Component> Tree<'a, B, C> {
-    /// Interprets the contents of this tree as a list of u64s.
-    pub fn get_u64s(&self) -> Result<Vec<u64>> {
+impl<'a, E: Elem + Into<u32>, C: Component> Tree<'a, E, C> {
+    /// Returns the component tree rooted at the given component.
+    pub fn new(buf: &'a [E], component: &'a C) -> Self {
+        Tree { buf, component }
+    }
+
+    /// Descends into a subtree.  The given function should return the
+    /// requested layout based when passed this tree's layout.
+    pub fn map<SUBC: Component>(&self, f: impl FnOnce(&'a C) -> &'a SUBC) -> Tree<'a, E, SUBC> {
+        Tree {
+            buf: self.buf,
+            component: f(self.component),
+        }
+    }
+
+    /// Interprets the contents of this tree as a list of u32s.
+    pub fn get_u32s(&self) -> Result<Vec<u32>> {
         let mut gather = TreeGather::new(self.buf);
         self.component
             .walk(&mut gather)
@@ -166,7 +100,7 @@ impl<'a, B: Buffer, C: Component> Tree<'a, B, C> {
 
     /// Interprets the contents of this tree as a list of bytes.
     pub fn get_bytes(&self) -> Result<Vec<u8>> {
-        self.get_u64s()?
+        self.get_u32s()?
             .into_iter()
             .map(|val| u8::try_from(val).map_err(anyhow::Error::msg))
             .collect()
@@ -174,7 +108,7 @@ impl<'a, B: Buffer, C: Component> Tree<'a, B, C> {
 
     /// Returns the contents of this tree as a u32; elements are expected to be
     /// 4 bytes.
-    pub fn get_u32(&self) -> Result<u32> {
+    pub fn get_u32_from_bytes(&self) -> Result<u32> {
         Ok(u32::from_le_bytes(
             self.get_bytes()?
                 .as_slice()
@@ -182,9 +116,26 @@ impl<'a, B: Buffer, C: Component> Tree<'a, B, C> {
                 .map_err(anyhow::Error::msg)?,
         ))
     }
+
+    /// Returns the contents of this tree, which should have a single element, as a u32.
+    pub fn get_u32_from_elem(&self) -> Result<u32> {
+        let u32s = self.get_u32s()?;
+        assert_eq!(u32s.len(), 1, "Expecting only a single u32 in {:?}", self);
+        Ok(u32s[0])
+    }
 }
 
-impl<'a, B: Buffer, C: Component> Debug for Tree<'a, B, C> {
+/// Retrieves the given register from a buffer and returns it as a field element
+pub fn get_elem<'a, E>(buf: &'a [E], reg: &Reg) -> &'a E {
+    buf.get(reg.offset).expect("Invalid offset in layout")
+}
+
+/// Retrieves the given register from a buffer and interprets it as a u32
+pub fn get_u32<E: Copy + Into<u32>>(buf: &[E], reg: &Reg) -> u32 {
+    (*get_elem(buf, reg)).into()
+}
+
+impl<'a, E: Elem + Into<u32>, C: Component> Debug for Tree<'a, E, C> {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         let mut p = TreePrinter::new(self.buf, Vec::new(), "top");
         self.component.walk(&mut p)?;
@@ -197,16 +148,16 @@ impl<'a, B: Buffer, C: Component> Debug for Tree<'a, B, C> {
 
 // Collects a tree dump as a set of lines.  Lists identical sections as a
 // reference to the first one seen.
-struct TreePrinter<'a, B: Buffer> {
-    buf: &'a B,
+struct TreePrinter<'a, E: Elem> {
+    buf: &'a [E],
     lines: Vec<String>,
     item_count: usize,
     seen: BTreeMap<Vec<String>, String>,
     path: Vec<&'a str>,
 }
 
-impl<'a, B: Buffer> TreePrinter<'a, B> {
-    fn new(buf: &'a B, mut path: Vec<&'a str>, name: &'a str) -> Self {
+impl<'a, E: Elem> TreePrinter<'a, E> {
+    fn new(buf: &'a [E], mut path: Vec<&'a str>, name: &'a str) -> Self {
         path.push(name);
         TreePrinter {
             buf,
@@ -218,7 +169,7 @@ impl<'a, B: Buffer> TreePrinter<'a, B> {
     }
 }
 
-impl<'a, B: Buffer> Visitor for TreePrinter<'a, B> {
+impl<'a, E: Elem + Into<u32>> Visitor for TreePrinter<'a, E> {
     fn visit_component(&mut self, name: &str, component: &impl Component) -> core::fmt::Result {
         match component.ty_name() {
             "U32Reg" => {
@@ -280,25 +231,23 @@ impl<'a, B: Buffer> Visitor for TreePrinter<'a, B> {
         Ok(())
     }
 
-    fn visit_reg(&mut self, buf_name: &'static str, offset: usize) -> core::fmt::Result {
-        if buf_name == self.buf.name() {
-            if let Some(val) = self.buf.get(&B::Reg::from(offset)) {
-                self.lines.push(format!("{:?}", val));
-                self.item_count += 1;
-            }
+    fn visit_reg(&mut self, offset: usize) -> core::fmt::Result {
+        if let Some(val) = self.buf.get(offset) {
+            self.lines.push(format!("{:?}", val));
+            self.item_count += 1;
         }
         Ok(())
     }
 }
 
-// Gathers all the registers in a tree as u64s.
-struct TreeGather<'a, B: Buffer> {
-    buf: &'a B,
-    vals: Vec<u64>,
+// Gathers all the registers in a tree as u32s.
+struct TreeGather<'a, E: Elem> {
+    buf: &'a [E],
+    vals: Vec<u32>,
 }
 
-impl<'a, B: Buffer> TreeGather<'a, B> {
-    fn new(buf: &'a B) -> Self {
+impl<'a, E: Elem> TreeGather<'a, E> {
+    fn new(buf: &'a [E]) -> Self {
         Self {
             buf,
             vals: Vec::new(),
@@ -306,13 +255,13 @@ impl<'a, B: Buffer> TreeGather<'a, B> {
     }
 }
 
-impl<'a, B: Buffer> Visitor for TreeGather<'a, B> {
+impl<'a, E: Elem + Into<u32>> Visitor for TreeGather<'a, E> {
     fn visit_component(&mut self, _name: &str, component: &impl Component) -> core::fmt::Result {
         component.walk(self)
     }
-    fn visit_reg(&mut self, buf_name: &'static str, offset: usize) -> core::fmt::Result {
-        if buf_name == self.buf.name() {
-            self.vals.push(self.buf.get_u64(&B::Reg::from(offset)))
+    fn visit_reg(&mut self, offset: usize) -> core::fmt::Result {
+        if let Some(val) = self.buf.get(offset) {
+            self.vals.push((*val).into())
         }
         Ok(())
     }
