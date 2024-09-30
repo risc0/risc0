@@ -81,7 +81,7 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 [April 2022]: https://www.risczero.com/news/announce
 [Bonsai]: bonsai/bonsai-overview.md
 [continuations]: https://risczero.com/news/continuations
-[docs.rs]: https://docs.rs/risc0-zkvm/0.19/
+[docs.rs]: https://docs.rs/risc0-zkvm/0.19
 [ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.19/examples/ecdsa
 [JSON]: https://github.com/risc0/risc0/tree/release-0.19/examples/json
 [our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals

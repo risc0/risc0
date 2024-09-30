@@ -100,7 +100,7 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
-[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
+[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [deterministically]: /terminology#deterministic-builds
