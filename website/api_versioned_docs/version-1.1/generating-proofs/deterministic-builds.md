@@ -30,9 +30,9 @@ fn main() {
 ```
 
 [cargo-risczero-crates-page]: https://crates.io/crates/cargo-risczero
-[rustdocs-DockerOptions]: https://docs.rs/risc0-build/latest/risc0_build/struct.DockerOptions.html
-[rustdocs-embed_methods_with_options]: https://docs.rs/risc0-build/latest/risc0_build/fn.embed_methods_with_options.html
-[rustdocs-GuestOptions]: https://docs.rs/risc0-build/latest/risc0_build/struct.GuestOptions.html
+[rustdocs-DockerOptions]: https://docs.rs/risc0-build/1.1/risc0_build/struct.DockerOptions.html
+[rustdocs-embed_methods_with_options]: https://docs.rs/risc0-build/1.1/risc0_build/fn.embed_methods_with_options.html
+[rustdocs-GuestOptions]: https://docs.rs/risc0-build/1.1/risc0_build/struct.GuestOptions.html
 [term-deterministic-builds]: /terminology#deterministic-builds
 [term-guest-program]: /terminology#guest-program
 [term-image-id]: /terminology#image-id
