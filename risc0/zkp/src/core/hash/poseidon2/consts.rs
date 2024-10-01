@@ -23,9 +23,14 @@ macro_rules! baby_bear_array {
 // TODO: Document
 #[doc(hidden)]
 pub const CELLS: usize = 24;
+
+#[doc(hidden)]
 pub const ROUNDS_HALF_FULL: usize = 4;
+
+#[doc(hidden)]
 pub const ROUNDS_PARTIAL: usize = 21;
 
+#[doc(hidden)]
 pub const ROUND_CONSTANTS: &[Elem] = &baby_bear_array![
     0x0FA20C37, 0x0795BB97, 0x12C60B9C, 0x0EABD88E, 0x096485CA, 0x07093527, 0x1B1D4E50, 0x30A01ACE,
     0x3BD86F5A, 0x69AF7C28, 0x3F94775F, 0x731560E8, 0x465A0ECD, 0x574EF807, 0x62FD4870, 0x52CCFE44,
@@ -144,17 +149,17 @@ pub const _M_EXT: &[Elem] = &baby_bear_array![
     4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 2, 2, 8, 12,
 ];
 
-// Standardizing on the same coefficients as https://github.com/HorizenLabs/poseidon2.git
-// (as used in its plain implementation of Poseidon2 for BabyBear)
-//
-// These parameters are have been confirmed to pass the algorithms given in Grassi, Rechberger, and
-// Schofnegger's paper "Proving Resistance Against Infinitely Long Subspace Trails: How to Choose
-// the Linear Layer" by running a version of the code provided with the paper adapted to include
-// these parameters in what's tested.
-//
-// The full matrix can be constructed by as follows:
-// - Initialize a matrix with all 1s.
-// - Add these values along the diagonal.
+/// Standardizing on the same coefficients as https://github.com/HorizenLabs/poseidon2.git
+/// (as used in its plain implementation of Poseidon2 for BabyBear)
+///
+/// These parameters are have been confirmed to pass the algorithms given in Grassi, Rechberger, and
+/// Schofnegger's paper "Proving Resistance Against Infinitely Long Subspace Trails: How to Choose
+/// the Linear Layer" by running a version of the code provided with the paper adapted to include
+/// these parameters in what's tested.
+///
+/// The full matrix can be constructed by as follows:
+/// - Initialize a matrix with all 1s.
+/// - Add these values along the diagonal.
 pub const M_INT_DIAG_HZN: &[Elem] = &baby_bear_array![
     0x409133f0, 0x1667a8a1, 0x06a6c7b6, 0x6f53160e, 0x273b11d1, 0x03176c5d, 0x72f9bbf9, 0x73ceba91,
     0x5cdef81d, 0x01393285, 0x46daee06, 0x065d7ba6, 0x52d72d6f, 0x05dd05e0, 0x3bab4b63, 0x6ada3842,
