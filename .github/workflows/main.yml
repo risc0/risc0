@@ -55,6 +55,7 @@ jobs:
               - Cargo.toml
               - rust-toolchain.toml
               - Cargo.lock
+              - rzup/**
             browser:
               - *base
               - examples/browser-verify/**
