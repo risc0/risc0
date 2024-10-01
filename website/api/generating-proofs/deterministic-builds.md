@@ -30,6 +30,6 @@ fn main() {
 ```
 
 [cargo-risczero-rust-docs]: https://docs.rs/crate/cargo-risczero/latest
-[term-deterministic-builds]: terminology#deterministic-builds
-[term-guest-program]: terminology#guest-program
-[term-image-id]: terminology#image-id
+[term-deterministic-builds]: /terminology#deterministic-builds
+[term-guest-program]: /terminology#guest-program
+[term-image-id]: /terminology#image-id
