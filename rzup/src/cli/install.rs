@@ -26,23 +26,37 @@ pub struct InstallOpts {
 }
 
 pub async fn handler(opts: InstallOpts) -> Result<()> {
-    if opts.name.is_none() {
-        // Install all default
-        Toolchain::Rust.install(None, opts.force).await?;
-        Toolchain::Cpp.install(None, opts.force).await?;
-        Extension::CargoRiscZero.install(None, opts.force).await?;
-    } else {
-        let name = opts.name.unwrap();
-        let version = opts.version.as_deref();
-        if let Ok(toolchain) = name.parse::<Toolchain>() {
-            toolchain.install(version, opts.force).await?
-        } else if let Ok(extension) = name.parse::<Extension>() {
-            extension.install(version, opts.force).await?
-        } else {
-            return Err(anyhow!(
-                "invalid value '{}' for '<install>...' \n\nFor more information try '--help'.",
-                name
-            ));
+    match (opts.name.as_deref(), opts.version.as_deref()) {
+        (None, None) => {
+            // Install latest versions of everything
+            Toolchain::Rust.install(None, opts.force).await?;
+            Toolchain::Cpp.install(None, opts.force).await?;
+            Extension::CargoRiscZero.install(None, opts.force).await?;
+        }
+        (None, Some(version)) => {
+            // Install cargo-risczero with specified version (e.g. rzup install v1.0.5), and default toolchains
+            Toolchain::Rust.install(None, opts.force).await?;
+            Toolchain::Cpp.install(None, opts.force).await?;
+            Extension::CargoRiscZero
+                .install(Some(version), opts.force)
+                .await?;
+        }
+        (Some(name), Some(version)) => {
+            if let Ok(toolchain) = name.parse::<Toolchain>() {
+                toolchain.install(Some(version), opts.force).await?
+            } else if let Ok(extension) = name.parse::<Extension>() {
+                extension.install(Some(version), opts.force).await?
+            } else {
+                return Err(anyhow!(
+                    "invalid value '{}' for '<install>...' \n\nFor more information try '--help'.",
+                    name
+                ));
+            }
+        }
+        (Some(name), None) => {
+            if let Ok(toolchain) = name.parse::<Toolchain>() {
+                toolchain.install(None, opts.force).await?;
+            }
         }
     }
     Ok(())
