@@ -88,17 +88,20 @@ implementations. Refer to the [pprof docs][pprof] for more information about the
 web interface.
 :::
 
-[^1]:
-    Here "sampling" is in quotes because the profiler actually captures the call
+[^1]: Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
+
     <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
+
     - It would be cost prohibitive to do so for all but quite short program
       executions.
     - Introducing such heavy profiling would actually alter the performance
       characteristics in significant ways.
+
     <!-- -->
+
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
