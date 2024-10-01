@@ -1,6 +1,6 @@
 # Deterministic Guest Program Builds
 
-In the context of RISC Zero application development, [Deterministic builds][term-deterministic-builds] are necessary to ensure a clear linkage between the source code for the [guest program][term-guest-program] and the resulting [Image ID][term-image-id].
+In the context of RISC Zero application development, [deterministic builds][term-deterministic-builds] are necessary to ensure a clear linkage between the source code for the [guest program][term-guest-program] and the resulting [Image ID][term-image-id].
 
 <!-- TODO: link to issue -->
 
