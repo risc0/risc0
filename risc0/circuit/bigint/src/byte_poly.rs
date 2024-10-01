@@ -104,8 +104,7 @@ impl BytePoly {
         // circuit regardless.
         let lhs = BigUint::from(self);
         let rhs = BigUint::from(rhs.borrow());
-        let exp = rhs.clone() - 2u8;
-        let result = lhs.modpow(&exp, &rhs);
+        let result = lhs.modinv(&rhs);
         trace!("inv({lhs}, [mod] {rhs}) = {result}");
         Self::from_biguint(result, coeffs)
     }
