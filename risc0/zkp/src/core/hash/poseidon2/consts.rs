@@ -121,12 +121,12 @@ pub const ROUND_CONSTANTS: &[Elem] = &baby_bear_array![
     0x5311BBD0, 0x4DAE58D8, 0x30401CEA, 0x09AFA575, 0x4B3D5B42, 0x63AC0B37, 0x5FE5BB14, 0x5244E9D4,
 ];
 
-// External matrix output by the Sage script in https://github.com/HorizenLabs/poseidon2.git
-// External matrix chosen as per the recommendation in the original Poseidon2
-// paper 6x6 M4
-//
-// These parameters are not used.  See the definition of M_EXT_MONTGOMERY for
-// further details.
+/// External matrix output by the Sage script in <https://github.com/HorizenLabs/poseidon2.git>
+/// External matrix chosen as per the recommendation in the original Poseidon2
+/// paper 6x6 M4
+///
+/// These parameters are not used.  See the definition of M_EXT_MONTGOMERY for
+/// further details.
 pub const _M_EXT: &[Elem] = &baby_bear_array![
     10, 14, 2, 6, 5, 7, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3, 8, 12, 2, 2, 4, 6, 1,
     1, 4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 1, 1, 2, 6, 10, 14, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3,
@@ -149,7 +149,7 @@ pub const _M_EXT: &[Elem] = &baby_bear_array![
     4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 2, 2, 8, 12,
 ];
 
-/// Standardizing on the same coefficients as https://github.com/HorizenLabs/poseidon2.git
+/// Standardizing on the same coefficients as <https://github.com/HorizenLabs/poseidon2.git>
 /// (as used in its plain implementation of Poseidon2 for BabyBear)
 ///
 /// These parameters are have been confirmed to pass the algorithms given in Grassi, Rechberger, and
