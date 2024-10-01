@@ -11,7 +11,7 @@ name = "make_control_ids"
 
 [dependencies]
 anyhow = "1.0"
-bytemuck = "1.16.1"
+bytemuck = "1.18.0"
 hex = "0.4"
 num-bigint = { version = "0.4", default-features = false }
 num-integer = "0.1"
