@@ -1,34 +1,39 @@
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@risc0/ui/command";
-import { joinWords } from "@risc0/ui/utils/join-words";
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useUrlHash } from "shared/client/hooks/use-url-hash";
 import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 
 export function BenchmarksList({
   charts,
-  selectedPlatform,
 }: {
   charts: { name: string; dataSet: Map<string, FormattedDataSetEntry[]> }[];
-  selectedPlatform: string;
 }) {
-  return (
-    <Command className="border">
-      <CommandInput className="capitalize" placeholder={`${joinWords(selectedPlatform)} Benchmarks`} />
-      <CommandList className="max-h-[calc(100dvh-19.5rem)] overscroll-contain">
-        <CommandEmpty>No Results</CommandEmpty>
-        {charts.flatMap((chart) =>
-          chart.name === selectedPlatform
-            ? [
-                <CommandGroup key={chart.name}>
-                  {[...chart.dataSet.keys()].map((benchmark) => (
-                    <Link tabIndex={-1} key={`${chart.name}-${benchmark}`} scroll href={`#${chart.name}-${benchmark}`}>
-                      <CommandItem className="cursor-pointer">{benchmark}</CommandItem>
-                    </Link>
-                  ))}
-                </CommandGroup>,
-              ]
-            : [],
-        )}
-      </CommandList>
-    </Command>
+  const pathname = usePathname();
+  const selectedBench = pathname.split("/").pop() ?? "";
+  const urlHash = useUrlHash();
+
+  return charts.flatMap((chart) =>
+    chart.name === selectedBench
+      ? [
+          <div className="rounded-md border p-1" key={chart.name}>
+            {[...chart.dataSet.keys()].map((benchmark) => {
+              return (
+                <Link
+                  tabIndex={-1}
+                  key={`${chart.name}-${benchmark}`}
+                  scroll
+                  aria-selected={`${chart.name}-${benchmark}` === urlHash}
+                  href={`#${chart.name}-${benchmark}`}
+                  className="flex select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent aria-selected:bg-accent aria-selected:text-accent-foreground"
+                >
+                  {benchmark}
+                </Link>
+              );
+            })}
+          </div>,
+        ]
+      : [],
   );
 }

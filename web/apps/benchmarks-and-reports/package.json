@@ -1,17 +1,18 @@
 {
-  "name": "benchmarks-and-reports",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "next build",
-    "build:analyze": "ANALYZE=true next build",
-    "dev": "next dev --turbo",
-    "start": "next start",
-    "test": "bun test spec",
-    "typecheck": "tsc"
-  },
-  "dependencies": {
-    "shared": "*"
-  }
+	"name": "benchmarks-and-reports",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"analyze": "ANALYZE=true next build",
+		"build": "next build",
+		"build:analyze": "ANALYZE=true next build",
+		"dev": "next dev --turbo",
+		"start": "next start",
+		"test": "vitest run --silent --passWithNoTests",
+		"typecheck": "tsc"
+	},
+	"dependencies": {
+		"shared": "*"
+	}
 }

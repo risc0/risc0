@@ -14,13 +14,6 @@
 
 #![allow(dead_code)]
 
-use risc0_zkp::{
-    field::{baby_bear::BabyBearElem, Elem},
-    layout_buffer,
-};
-
-layout_buffer!(code, BabyBearElem);
-layout_buffer!(data, BabyBearElem);
-layout_buffer!(out, BabyBearElem);
+use risc0_zkp::layout::Reg;
 
 include! {"layout.rs.inc"}

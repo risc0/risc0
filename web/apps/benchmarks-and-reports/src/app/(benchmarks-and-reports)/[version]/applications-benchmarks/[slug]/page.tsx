@@ -32,12 +32,12 @@ export function generateMetadata({
   )[0];
 
   return {
-    title: `${slugLabel ? `${slugLabel} | ` : ""}Applications Benchmark`,
+    title: `${slugLabel ? `${slugLabel} ` : ""}Applications Benchmark`,
     description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
     openGraph: {
       images: [
         {
-          url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+          url: `https://reports.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
             APPLICATIONS_BENCHMARKS_DESCRIPTION,
           )}`,
         },

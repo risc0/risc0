@@ -50,11 +50,7 @@ constexpr size_t kVerifyMemHaltKind = 2;
 
 namespace {
 
-using CodeReg = size_t;
-using OutReg = size_t;
-using DataReg = size_t;
-using MixReg = size_t;
-using AccumReg = size_t;
+using Reg = size_t;
 
 #include "layout.cpp.inc"
 
@@ -138,7 +134,7 @@ void inject_backs_ram(MachineContext* ctx, size_t steps, size_t cycle, Fp* data)
     }
 
     const RamArgumentRow& back1 = ctx->ramRows[idx - 1];
-    constexpr auto header = kLayout.mux.body.header;
+    constexpr auto header = kDataLayout.mux.body.header;
     constexpr auto a = header.element;
     constexpr auto v = header.verifier;
     data[a.addr * steps + cycle - 1] = back1.addr;                 // a->addr

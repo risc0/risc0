@@ -15,7 +15,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    layout::{CodeReg, RecursionMicroInst, LAYOUT},
+    layout::{RecursionMicroInstLayout, CODE_LAYOUT},
     micro_op, Externs, CHECKED_COEFFS_PER_POLY,
 };
 use anyhow::{bail, Result};
@@ -27,6 +27,7 @@ use risc0_zkp::{
         sha::SHA256_INIT,
     },
     field::Elem,
+    layout,
 };
 use sha2::digest::generic_array::GenericArray;
 use tracing::trace;
@@ -87,17 +88,17 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         self.split_points.push(ctx.cycle);
 
         trace!("top[{}]: {code:?}", ctx.cycle);
-        if self.get(code, LAYOUT.code.select.macro_ops) == Fp::ONE {
+        if self.get(code, CODE_LAYOUT.code.select.macro_ops) == Fp::ONE {
             self.set_macro(ctx, code)?
         }
-        if self.get(code, LAYOUT.code.select.micro_ops) == Fp::ONE {
+        if self.get(code, CODE_LAYOUT.code.select.micro_ops) == Fp::ONE {
             self.set_micros(ctx, code)?
         }
-        if self.get(code, LAYOUT.code.select.checked_bytes) == Fp::ONE {
+        if self.get(code, CODE_LAYOUT.code.select.checked_bytes) == Fp::ONE {
             self.set_checked_bytes(ctx, code)?
         }
-        if self.get(code, LAYOUT.code.select.poseidon2_load) == Fp::ONE {
-            let inst = LAYOUT.code.inst.poseidon2_load;
+        if self.get(code, CODE_LAYOUT.code.select.poseidon2_load) == Fp::ONE {
+            let inst = CODE_LAYOUT.code.inst.poseidon2_load;
             let do_mont = self.get(code, inst.do_mont).as_u32();
             let prep_full = self.get(code, inst.prep_full).as_u32();
             let keep_state = self.get(code, inst.keep_state).as_u32();
@@ -133,22 +134,22 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             }
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon2_full) == Fp::ONE {
+        if self.get(code, CODE_LAYOUT.code.select.poseidon2_full) == Fp::ONE {
             trace!("Poseidon2 full");
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon2_partial) == Fp::ONE {
+        if self.get(code, CODE_LAYOUT.code.select.poseidon2_partial) == Fp::ONE {
             trace!("Poseidon2 partial");
             poseidon2_mix(&mut self.poseidon2_state);
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon2_store) == Fp::ONE {
-            let inst = LAYOUT.code.inst.poseidon2_store;
+        if self.get(code, CODE_LAYOUT.code.select.poseidon2_store) == Fp::ONE {
+            let inst = CODE_LAYOUT.code.inst.poseidon2_store;
             let do_mont = self.get(code, inst.do_mont).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
             trace!("Poseidon2 store, group = {}, doMont = {}", group, do_mont);
-            let write_addr = self.get(code, LAYOUT.code.write_addr).as_u32() as usize;
+            let write_addr = self.get(code, CODE_LAYOUT.code.write_addr).as_u32() as usize;
             for i in 0..8 {
                 let addr = Fp::new((write_addr + i) as u32);
                 let mut store = self.poseidon2_state[group * 8 + i];
@@ -166,7 +167,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
     }
 
     fn set_checked_bytes(&mut self, ctx: &CircuitStepContext, code: &[Fp]) -> Result<()> {
-        let inst = LAYOUT.code.inst.checked_bytes;
+        let inst = CODE_LAYOUT.code.inst.checked_bytes;
         let prep_full = self.get(code, inst.prep_full).as_u32();
         let keep_coeffs = self.get(code, inst.keep_coeffs).as_u32();
         let keep_upper_state = self.get(code, inst.keep_upper_state).as_u32();
@@ -184,7 +185,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         let eval_pt_addr = self.get(code, inst.eval_point);
         trace!("Checked bytes: eval_pt={eval_pt_addr:?} prep_full = {prep_full} keep_coeffs = {keep_coeffs} keep_upper_state = {keep_upper_state}");
 
-        let write_addr = self.get(code, LAYOUT.code.write_addr);
+        let write_addr = self.get(code, CODE_LAYOUT.code.write_addr);
         let mut evaluated = FpExt::ZERO;
         let eval_pt_pows = self
             .eval_pts
@@ -234,16 +235,16 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         }
     }
 
-    fn get(&self, code: &[Fp], reg: &CodeReg) -> Fp {
+    fn get(&self, code: &[Fp], reg: &layout::Reg) -> Fp {
         code[reg.offset]
     }
 
     fn set_macro(&mut self, ctx: &CircuitStepContext, code: &[Fp]) -> Result<()> {
-        let macro_ops = LAYOUT.code.inst.macro_ops;
+        let macro_ops = CODE_LAYOUT.code.inst.macro_ops;
         let opcode = macro_ops.opcode;
         let arg: [Fp; 3] = core::array::from_fn(|i| self.get(code, macro_ops.operand[i]));
         let u32arg: [u32; 3] = core::array::from_fn(|i| arg[i].into());
-        let write_addr = self.get(code, LAYOUT.code.write_addr);
+        let write_addr = self.get(code, CODE_LAYOUT.code.write_addr);
 
         trace!("write_addr = {write_addr:?}");
 
@@ -371,14 +372,14 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
     }
 
     fn set_micros(&mut self, ctx: &CircuitStepContext, code: &[Fp]) -> Result<()> {
-        let write_addr = self.get(code, LAYOUT.code.write_addr);
+        let write_addr = self.get(code, CODE_LAYOUT.code.write_addr);
         trace!("micros -> wom[{write_addr:?}]");
         for i in 0..3 {
             self.set_micro(
                 ctx,
                 code,
                 write_addr + Fp::new(i as u32),
-                LAYOUT.code.inst.micro_ops[i],
+                CODE_LAYOUT.code.inst.micro_ops[i],
             )?;
         }
         Ok(())
@@ -389,7 +390,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         ctx: &CircuitStepContext,
         code: &[Fp],
         write_addr: Fp,
-        inst: &RecursionMicroInst,
+        inst: &RecursionMicroInstLayout,
     ) -> Result<()> {
         let opcode = u32::from(self.get(code, inst.opcode));
         let arg: [Fp; 3] = core::array::from_fn(|i| self.get(code, inst.operand[i]));

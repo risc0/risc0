@@ -81,7 +81,7 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 [April 2022]: https://www.risczero.com/news/announce
 [Bonsai]: bonsai/bonsai-overview.md
 [continuations]: https://risczero.com/news/continuations
-[docs.rs]: https://docs.rs/risc0-zkvm/0.18/
+[docs.rs]: https://docs.rs/risc0-zkvm/0.18
 [ECDSA signature verification]: https://github.com/risc0/risc0/tree/release-0.18/examples/ecdsa
 [JSON]: https://github.com/risc0/risc0/tree/release-0.18/examples/json
 [our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals
@@ -95,4 +95,4 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 [ZK Checkmate]: https://github.com/risc0/risc0/tree/release-0.18/examples/chess
 [zk coprocessors]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [ZK Proof of Exploit]: https://risczero.com/news/zkpoex
-[zkVM]: ./zkvm/
+[zkVM]: ./zkvm
