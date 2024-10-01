@@ -97,11 +97,6 @@ impl BytePoly {
     }
 
     pub fn nondet_inv<Rhs: Borrow<BytePoly>>(&self, rhs: Rhs, coeffs: usize) -> BytePoly {
-        // Computes the inverse of LHS mod RHS via the `inv = lhs^{rhs - 2} % rhs` algorithm
-        // Note that this assumes `rhs` is prime. For non-prime `rhs`, this algorithm can
-        // fail (compute an incorrect inverse). Note that this is not a soundness problem, as
-        // this is a nondet and the correctness of the inversion must be checked inside the
-        // circuit regardless.
         let lhs = BigUint::from(self);
         let rhs = BigUint::from(rhs.borrow());
         let result = lhs.modinv(&rhs);
