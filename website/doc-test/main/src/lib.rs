@@ -13,8 +13,3 @@
 // limitations under the License.
 
 include!(concat!(env!("OUT_DIR"), "/doctests.rs"));
-
-#[cfg(test)]
-mod tests {
-    // Any additional test setup can go here
-}
