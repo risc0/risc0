@@ -4,8 +4,8 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import katex from "rehype-katex";
 import math from "remark-math";
-import rustCode from "./src/remark/rust.js";
 import apiVersions from "./api_versions.json";
+import rustCode from "./src/remark/rust.js";
 
 const baseUrl = process.env.BASE_URL ?? "/";
 
@@ -96,8 +96,8 @@ export default async function createConfigAsync() {
               return [existingPath.replace("/api/zkvm", "/zkvm")];
             }
 
-            if (existingPath.includes(`/api`)) {
-              return [existingPath.replace(`/api`, `/api/${apiVersions[0]}`)];
+            if (existingPath.includes("/api")) {
+              return [existingPath.replace("/api", `/api/${apiVersions[0]}`)];
             }
 
             return undefined;
