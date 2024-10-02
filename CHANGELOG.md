@@ -4,6 +4,13 @@
 
 TBD
 
+## [v1.1.2 (2024-10-02)](https://github.com/risc0/risc0/releases/tag/v1.1.2)
+
+### 🛠 Fixes
+
+* Allow static mut references in specific places
+* Update reqwest and downloader
+
 ## [v1.1.1 (2024-09-23)](https://github.com/risc0/risc0/releases/tag/v1.1.1)
 
 Support wider range of client/server use cases.
