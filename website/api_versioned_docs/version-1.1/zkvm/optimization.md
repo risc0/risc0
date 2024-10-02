@@ -202,7 +202,7 @@ takes the same number of operations as paging-in, so for the first time any
 given page is written to in a segment, it is marked as "dirty". At the end
 of segment execution, every dirty page must be "paged-out" at a cost of 1094 to
 5130 cycles. An exception to this rule is the last segment, where no paging out
-occurrs, since there will be no continuation from the last segment.
+occurs, since there will be no continuation from the last segment.
 
 **A page-in or page-out operation takes between 1094 and 5130 cycles; 1130
 cycles on average.**

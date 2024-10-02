@@ -4,8 +4,8 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import katex from "rehype-katex";
 import math from "remark-math";
-import rustCode from "./src/remark/rust.js";
 import apiVersions from "./api_versions.json";
+import rustCode from "./src/remark/rust.js";
 
 const baseUrl = process.env.BASE_URL ?? "/";
 
@@ -77,18 +77,10 @@ export default async function createConfigAsync() {
         "@docusaurus/plugin-client-redirects",
         {
           createRedirects(existingPath) {
-            if (
-              existingPath.includes("/api/generating-proofs/remote-proving")
-            ) {
+            if (existingPath.includes("/api/generating-proofs/remote-proving")) {
               return [
-                existingPath.replace(
-                  "/api/generating-proofs/remote-proving",
-                  "/bonsai",
-                ),
-                existingPath.replace(
-                  "/api/generating-proofs/remote-proving",
-                  "/bonsai/quickstart",
-                ),
+                existingPath.replace("/api/generating-proofs/remote-proving", "/bonsai"),
+                existingPath.replace("/api/generating-proofs/remote-proving", "/bonsai/quickstart"),
               ];
             }
 
@@ -96,8 +88,8 @@ export default async function createConfigAsync() {
               return [existingPath.replace("/api/zkvm", "/zkvm")];
             }
 
-            if (existingPath.includes(`/api`)) {
-              return [existingPath.replace(`/api`, `/api/${apiVersions[0]}`)];
+            if (existingPath.includes("/api")) {
+              return [existingPath.replace("/api", `/api/${apiVersions[0]}`)];
             }
 
             return undefined;
@@ -111,8 +103,7 @@ export default async function createConfigAsync() {
       {
         href: "https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css",
         type: "text/css",
-        integrity:
-          "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
+        integrity: "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
         crossorigin: "anonymous",
       },
     ],
