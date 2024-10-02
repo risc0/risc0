@@ -58,6 +58,25 @@ fn main() {
     fs::write(&out, level.to_string()).unwrap();
 }
 
+
+fn remove_footnotes(content: &str) -> String {
+    let mut result = String::new();
+    let mut in_footnote = false;
+
+    for line in content.lines() {
+        if line.starts_with("[^") {
+            in_footnote = true;
+        } else if in_footnote && line.trim().is_empty() {
+            in_footnote = false;
+        } else if !in_footnote {
+            result.push_str(line);
+            result.push('\n');
+        }
+    }
+
+    result
+}
+
 impl Level {
     fn new() -> Level {
         Level {
@@ -110,12 +129,13 @@ impl Level {
                 .unwrap()
                 .replace("-", "_");
 
+            let content = fs::read_to_string(file).unwrap();
+            let content_without_footnotes = remove_footnotes(&content);
+
             self.write_space(dst, level);
-            write!(dst, "#[doc = include_str!(\"{}\")]\n", file.display())?;
+            write!(dst, "#[doc = r#\"{}\"#]\n", content_without_footnotes)?;
             self.write_space(dst, level);
             write!(dst, "pub fn {}_md() {{}}\n", stem)?;
-            // write!(dst, "doc_comment!(include_str!(\"{}\"));\n",
-            // file.display())?;
         }
 
         Ok(())
@@ -127,3 +147,4 @@ impl Level {
         }
     }
 }
+
