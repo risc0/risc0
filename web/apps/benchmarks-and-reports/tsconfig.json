@@ -1,12 +1,12 @@
 {
-  "extends": "@risc0/ui/config/tsconfig.base.json",
-  "compilerOptions": {
-    /* Path Aliases */
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./src/*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.js"],
-  "exclude": ["node_modules"]
+	"extends": "@risc0/ui/config/tsconfig.base.json",
+	"compilerOptions": {
+		/* Path Aliases */
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"]
+		}
+	},
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+	"exclude": ["node_modules"]
 }

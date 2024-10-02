@@ -3,7 +3,15 @@
 import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@risc0/ui/dialog";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
@@ -92,14 +100,14 @@ export const cratesIoValidationTableColumns = [
             <Badge
               title={info.getValue()}
               variant="secondary"
-              className="relative line-clamp-5 max-w-lg cursor-pointer font-mono text-[10px] md:max-w-max"
+              className="relative line-clamp-5 max-w-lg cursor-pointer border-none font-mono text-[10px] md:max-w-max"
             >
               <pre>{resultString}</pre>
 
               <Button
                 size="sm"
                 variant="outline"
-                className="absolute bottom-1 left-1 text-destructive"
+                className="absolute bottom-1 left-1 text-[10px] text-destructive"
                 startIcon={<EyeIcon />}
               >
                 View Build Errors
@@ -108,7 +116,9 @@ export const cratesIoValidationTableColumns = [
           </DialogTrigger>
 
           <DialogContent className="dark max-h-full max-w-screen-3xl text-white">
-            <DialogTitle>Build Errors for {info.row.original.name}</DialogTitle>
+            <DialogHeader>
+              <DialogTitle>Build Errors for {info.row.original.name}</DialogTitle>
+            </DialogHeader>
             <div
               style={{ colorScheme: "dark" }}
               className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit"
@@ -139,6 +149,11 @@ export const cratesIoValidationTableColumns = [
                 )}
               </Highlight>
             </div>
+            <DialogFooter className="flex sm:hidden">
+              <DialogClose asChild>
+                <Button variant="ghost">Close</Button>
+              </DialogClose>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       );

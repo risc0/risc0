@@ -19,5 +19,5 @@ export async function fetchCratesValidationResults({
     throw error || new Error("Failed to fetch");
   }
 
-  return await response.json();
+  return (await response.json()) as CratesIoValidationTableSchema[];
 }

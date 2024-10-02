@@ -9,7 +9,7 @@ import type { DatasheetTableSchema } from "./datasheet-table-schema";
 export async function DatasheetContent({ version }: { version: Version }) {
   const urls = Object.keys(DATASHEET_FILENAMES_TO_TITLES[version]);
   const dataPromises = urls.map((url) => fetchDatasheet({ version, url }));
-  const data: DatasheetTableSchema[][] = await all(dataPromises);
+  const data = (await all(dataPromises)) as DatasheetTableSchema[][];
 
   return data.map((dataArray, index) => (
     <DatasheetTable

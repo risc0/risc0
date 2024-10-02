@@ -5,47 +5,47 @@ import { fetchBenchmarks } from "../_actions/fetch-benchmarks";
 import { Benchmarks } from "../_components/benchmarks";
 
 export async function generateStaticParams() {
-  const data = await fetchBenchmarks();
-  const slugs = Object.keys(data.entries);
+	const data = await fetchBenchmarks();
+	const slugs = Object.keys(data.entries);
 
-  return slugs.map((slug) => ({ slug: [slug] }));
+	return slugs.map((slug) => ({ slug: [slug] }));
 }
 
 export function generateMetadata({
-  params,
+	params,
 }: {
-  params: {
-    slug: string;
-  };
+	params: {
+		slug: string;
+	};
 }) {
-  if (!params.slug[0]) {
-    return;
-  }
+	if (!params.slug[0]) {
+		return;
+	}
 
-  const title = joinWords(params.slug[0])
-    .split(" ")
-    .map((word) => upperFirst(word))
-    .join(" ");
+	const title = joinWords(params.slug[0])
+		.split(" ")
+		.map((word) => upperFirst(word))
+		.join(" ");
 
-  return {
-    title: `${title ? `${title} ` : ""}Benchmarks`,
-    description: BENCHMARKS_DESCRIPTION,
-    openGraph: {
-      images: [
-        {
-          url: `https://reports.risczero.com/api/og?title=Benchmarks&description=${encodeURIComponent(
-            BENCHMARKS_DESCRIPTION,
-          )}`,
-        },
-      ],
-    },
-  };
+	return {
+		title: `${title ? `${title} ` : ""}Benchmarks`,
+		description: BENCHMARKS_DESCRIPTION,
+		openGraph: {
+			images: [
+				{
+					url: `https://reports.risczero.com/api/og?title=Benchmarks&description=${encodeURIComponent(
+						BENCHMARKS_DESCRIPTION,
+					)}`,
+				},
+			],
+		},
+	};
 }
 
 export default function BenchmarksPage() {
-  return (
-    <div className="container max-w-screen-3xl">
-      <Benchmarks />
-    </div>
-  );
+	return (
+		<div className="container max-w-screen-3xl">
+			<Benchmarks />
+		</div>
+	);
 }
