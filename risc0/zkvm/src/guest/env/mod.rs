@@ -119,7 +119,9 @@ static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 /// Initialize globals before program main
 pub(crate) fn init() {
     unsafe {
+        #[allow(static_mut_refs)]
         HASHER.set(Sha256::new()).unwrap();
+        #[allow(static_mut_refs)]
         syscall::sys_rand(
             MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
             MEMORY_IMAGE_ENTROPY.len(),
@@ -130,8 +132,10 @@ pub(crate) fn init() {
 /// Finalize execution
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
+        #[allow(static_mut_refs)]
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
+        #[allow(static_mut_refs)]
         let output = Output {
             journal: MaybePruned::Pruned(journal_digest),
             assumptions: MaybePruned::Pruned(ASSUMPTIONS_DIGEST.digest()),
@@ -400,6 +404,7 @@ pub fn stderr() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
 /// Return a writer for the JOURNAL.
 pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     FdWriter::new(fileno::JOURNAL, |bytes| {
+        #[allow(static_mut_refs)]
         unsafe { HASHER.get_mut().unwrap_unchecked().update(bytes) };
     })
 }
