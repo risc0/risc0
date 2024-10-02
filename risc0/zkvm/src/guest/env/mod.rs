@@ -405,7 +405,9 @@ pub fn stderr() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
 pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     FdWriter::new(fileno::JOURNAL, |bytes| {
         #[allow(static_mut_refs)]
-        unsafe { HASHER.get_mut().unwrap_unchecked().update(bytes) };
+        unsafe {
+            HASHER.get_mut().unwrap_unchecked().update(bytes)
+        };
     })
 }
 
