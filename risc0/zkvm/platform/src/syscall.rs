@@ -97,8 +97,10 @@ pub mod bigint {
 }
 
 pub mod keccak {
-    pub const READ: u32 = 0;
-    pub const WRITE: u32 = 1;
+    pub const SQUEEZE: u32 = 0;
+    pub const ABSORB: u32 = 1;
+    pub const OPEN: u32 = 2;
+    pub const CLOSE: u32 = 3;
 }
 
 /// A UTF-8 NUL-terminated name of a syscall with static lifetime.
@@ -905,19 +907,20 @@ pub unsafe extern "C" fn sys_prove_zkr(
 /// pass keccak data to host - should be invoked during `hasher.update(...)`
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_write_keccak(write_ptr: *const u8, nbytes: usize) {
+pub unsafe extern "C" fn sys_keccak_absorb(keccak_fd: u32, write_ptr: *const u8, nbytes: usize) {
     // maybe use "fd" as an ID for concurrent case?
     let mut nbytes_remain = nbytes;
     let mut write_ptr = write_ptr;
     while nbytes_remain > 0 {
         let nbytes = min(nbytes_remain, MAX_BUF_BYTES);
-        syscall_3(
+        syscall_4(
             nr::SYS_KECCAK,
             null_mut(),
             0,
-            keccak::WRITE,
+            keccak::ABSORB,
             write_ptr as u32,
             nbytes as u32,
+            keccak_fd,
         );
         write_ptr = write_ptr.add(nbytes);
         nbytes_remain -= nbytes;
@@ -928,13 +931,58 @@ pub unsafe extern "C" fn sys_write_keccak(write_ptr: *const u8, nbytes: usize) {
 /// pass kecak pass keccak hash to guest - should be invoked during `hasher.finalize(...)`
 #[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe extern "C" fn sys_read_keccak(out_state: *mut [u32; DIGEST_WORDS]) {
-    syscall_3(
+pub unsafe extern "C" fn sys_keccak_squeeze(keccak_fd: u32, out_state: *mut [u32; DIGEST_WORDS]) {
+    syscall_4(
         nr::SYS_KECCAK,
         out_state as *mut u32,
         DIGEST_WORDS,
-        keccak::READ,
+        keccak::SQUEEZE,
         0,
         0,
+        keccak_fd,
     );
+}
+
+/// # Safety
+///
+/// create a new instance of a keccak hasher on the host. should be invoked during `Hasher::new()`
+///
+/// # Return Value
+///
+/// On success, zero is returned.  On error, -1 is returned, and `keccakfd` is
+/// left unchanged.
+///
+/// `keccak_fd` must be aligned, dereferenceable, and have capacity for 1 u32
+/// values. note: maybe put a place for delim?
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_keccak_open(keccak_fd: *mut u32) -> i32 {
+    let Return(a0, _) = syscall_4(nr::SYS_KECCAK, keccak_fd, 1, keccak::OPEN, 0, 0, 0);
+    a0 as i32
+}
+
+/// # Safety
+///
+/// delete an existing instance of a keccak hasher on the host. should be invoked during `Hasher::drop()`
+///
+/// # Return Value
+///
+/// On success, zero is returned.  On error, -1 is returned, and `pipefd` is
+/// left unchanged.
+///
+/// `keccak_fd` must be aligned, dereferenceable, and have capacity for 1 u32
+/// values. note: maybe put a place for delim?
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_keccak_close(keccak_fd: u32) -> i32 {
+    let Return(a0, _) = syscall_4(
+        nr::SYS_KECCAK,
+        null_mut(),
+        0,
+        keccak::CLOSE,
+        0,
+        0,
+        keccak_fd,
+    );
+    a0 as i32
 }
