@@ -21,6 +21,7 @@ use std::{
 };
 
 use glob::glob;
+use regex::Regex;
 
 #[derive(Debug)]
 struct Level {
@@ -58,25 +59,6 @@ fn main() {
     fs::write(&out, level.to_string()).unwrap();
 }
 
-
-fn remove_footnotes(content: &str) -> String {
-    let mut result = String::new();
-    let mut in_footnote = false;
-
-    for line in content.lines() {
-        if line.starts_with("[^") {
-            in_footnote = true;
-        } else if in_footnote && line.trim().is_empty() {
-            in_footnote = false;
-        } else if !in_footnote {
-            result.push_str(line);
-            result.push('\n');
-        }
-    }
-
-    result
-}
-
 impl Level {
     fn new() -> Level {
         Level {
@@ -106,10 +88,10 @@ impl Level {
     fn write_into(&self, dst: &mut String, name: &str, level: usize) -> fmt::Result {
         self.write_space(dst, level);
         let name = name.replace("-", "_").replace(".", "_");
-        write!(dst, "pub mod {name} {{\n",)?;
+        writeln!(dst, "pub mod {name} {{")?;
         self.write_inner(dst, level + 1)?;
         self.write_space(dst, level);
-        write!(dst, "}}\n")?;
+        writeln!(dst, "}}")?;
 
         Ok(())
     }
@@ -129,13 +111,13 @@ impl Level {
                 .unwrap()
                 .replace("-", "_");
 
-            let content = fs::read_to_string(file).unwrap();
-            let content_without_footnotes = remove_footnotes(&content);
+            let content = fs::read_to_string(file).expect("Failed to read file");
+            let processed_content = self.remove_footnotes(&content);
 
             self.write_space(dst, level);
-            write!(dst, "#[doc = r#\"{}\"#]\n", content_without_footnotes)?;
+            writeln!(dst, "#[doc = r#\"{}\"#]", processed_content)?;
             self.write_space(dst, level);
-            write!(dst, "pub fn {}_md() {{}}\n", stem)?;
+            writeln!(dst, "pub fn {}_md() {{}}", stem)?;
         }
 
         Ok(())
@@ -146,5 +128,22 @@ impl Level {
             dst.push_str("    ");
         }
     }
-}
 
+    fn remove_footnotes(&self, content: &str) -> String {
+        // Remove footnote references
+        let reference_regex = Regex::new(r"\[\^.+?\]").unwrap();
+        let without_references = reference_regex.replace_all(content, "");
+
+        // Remove footnote definitions and their content
+        let definition_regex = Regex::new(r"(?ms)^\[\^.+?\]:.+?(?:\n\n|\z)").unwrap();
+        let without_definitions = definition_regex.replace_all(&without_references, "");
+
+        // Remove any remaining numbered list items that start with "It"
+        let numbered_list_regex = Regex::new(r"(?m)^\s*\d+\.\s+It.+$(\n(?:\s+.+$)*)*").unwrap();
+        let without_numbered_lists = numbered_list_regex.replace_all(&without_definitions, "");
+
+        // Remove any consecutive blank lines
+        let blank_lines_regex = Regex::new(r"\n{3,}").unwrap();
+        blank_lines_regex.replace_all(&without_numbered_lists, "\n\n").into_owned()
+    }
+}
