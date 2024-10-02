@@ -83,8 +83,8 @@ use core::cell::OnceCell;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_keccak_absorb,
-        sys_keccak_squeeze, sys_log, sys_pause, syscall_2, SyscallName, DIGEST_WORDS,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
+        syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -464,18 +464,4 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
     read_slice(core::slice::from_mut(&mut len));
     let reader = std::io::BufReader::with_capacity(len as usize, stdin());
     T::deserialize(&mut crate::serde::Deserializer::new(reader))
-}
-
-/// TODO
-pub fn keccak_update(input: &[u8]) {
-    unsafe {
-        sys_keccak_absorb(input.as_ptr(), input.len());
-    }
-}
-
-/// TODO
-pub fn keccak_finalize(output: &mut [u8]) {
-    unsafe {
-        sys_keccak_squeeze(output.as_ptr() as *mut [u32; DIGEST_WORDS]);
-    }
 }

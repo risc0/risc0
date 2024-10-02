@@ -14,6 +14,7 @@
 
 use anyhow::bail;
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
+use risc0_zkvm_platform::syscall::keccak::{ABSORB, CLOSE, OPEN, SQUEEZE};
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4, REG_A5, REG_A6};
 use risc0_zkvm_platform::WORD_SIZE;
 use std::collections::BTreeMap;
@@ -37,48 +38,77 @@ impl Syscall for SysKeccak {
         to_guest: &mut [u32],
     ) -> anyhow::Result<(u32, u32)> {
         let mode = ctx.load_register(REG_A3);
-        let fd = ctx.load_register(REG_A6);
 
-        if mode == risc0_zkvm_platform::syscall::keccak::ABSORB {
-            // This writes raw data to be hashed. Invoked during `hasher.update(data)` in cryptographic hashing crates in the guest.
-            let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
-            let buf_len = ctx.load_register(REG_A5);
-            tracing::debug!("SYS_KECCAK: write {buf_len} bytes");
-            let mut from_guest = ctx.load_region(buf_ptr, buf_len)?;
-            let data = match self.hasher_data.get_mut(&0) {
-                Some(data) => data,
-                None => bail!("unknown keccak fd: {}", 0),
-            };
-            data.append(&mut from_guest);
-            Ok((0, 0))
-        } else if mode == risc0_zkvm_platform::syscall::keccak::SQUEEZE {
-            // read the keccak hash. Invoked during `hasher.finalize(output)` in cryptographic hashing crates in the guest.
-            tracing::debug!("SYS_KECCAK: read");
-            let mut hasher = Keccak::v256();
-            let data = match self.hasher_data.get(&0) {
-                Some(data) => data,
-                None => bail!("unknown keccak fd: {}", 0),
-            };
-            hasher.update(data);
-            let mut out_buf = vec![0u8; to_guest.len() * WORD_SIZE];
-            hasher.finalize(&mut out_buf);
-            bytemuck::cast_slice_mut(to_guest).clone_from_slice(out_buf.as_slice());
-            Ok((0, 0))
-        } else if mode == risc0_zkvm_platform::syscall::keccak::OPEN {
-            let key = self.next_id;
-            if self.hasher_data.contains_key(&key) {
-                bail!("hasher ID {key} already exists")
-            }
-            self.hasher_data.insert(key, vec![]);
-            self.next_id += 1;
-            Ok((key, 0))
-        } else if mode == risc0_zkvm_platform::syscall::keccak::CLOSE {
-            match self.hasher_data.remove(&fd) {
-                Some(_) => Ok((0, 0)),
-                None => bail!("hasher ID {fd} does not exist, cannot close"),
-            }
+        if mode == ABSORB {
+            self.absorb(ctx)
+        } else if mode == SQUEEZE {
+            self.squeeze(ctx, to_guest)
+        } else if mode == OPEN {
+            self.open()
+        } else if mode == CLOSE {
+            self.close(ctx)
         } else {
             Err(anyhow::anyhow!("Unsupported keccak mode {}", mode))
         }
+    }
+}
+
+impl SysKeccak {
+    fn open(&mut self) -> anyhow::Result<(u32, u32)> {
+        if self.hasher_data.len() == u32::MAX as usize {
+            bail!("max number of hashers reached");
+        }
+        let key = self.next_id;
+        if self.hasher_data.contains_key(&key) {
+            bail!("hasher ID {key} already exists")
+        }
+        self.hasher_data.insert(key, vec![]);
+        self.next_id += 1;
+        Ok((0, 0))
+    }
+
+    fn close(&mut self, ctx: &mut dyn SyscallContext) -> anyhow::Result<(u32, u32)> {
+        let fd = ctx.load_register(REG_A6);
+        match self.hasher_data.remove(&fd) {
+            Some(_) => Ok((0, 0)),
+            None => bail!("hasher ID {fd} does not exist, cannot close"),
+        }
+    }
+
+    // This writes raw data to be hashed. Invoked during `hasher.update(data)` in cryptographic hashing crates in the guest.
+    fn absorb(&mut self, ctx: &mut dyn SyscallContext) -> anyhow::Result<(u32, u32)> {
+        let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
+        let buf_len = ctx.load_register(REG_A5);
+        tracing::debug!("SYS_KECCAK: absorb {buf_len} bytes");
+        let mut from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+        let fd = ctx.load_register(REG_A6);
+        let data = match self.hasher_data.get_mut(&fd) {
+            Some(data) => data,
+            None => bail!("unknown keccak fd: {}", 0),
+        };
+        data.append(&mut from_guest);
+        Ok((0, 0))
+    }
+
+    // read the keccak hash. Invoked during `hasher.finalize(output)` in cryptographic hashing crates in the guest.
+    fn squeeze(
+        &mut self,
+        ctx: &mut dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> anyhow::Result<(u32, u32)> {
+        tracing::debug!("SYS_KECCAK: squeeze");
+        let mut hasher = Keccak::v256();
+
+        let fd = ctx.load_register(REG_A6);
+        let data = match self.hasher_data.get(&fd) {
+            Some(data) => data,
+            None => bail!("unknown keccak fd: {}", fd),
+        };
+        hasher.update(data);
+        let mut out_buf = vec![0u8; to_guest.len() * WORD_SIZE];
+        hasher.finalize(&mut out_buf);
+        bytemuck::cast_slice_mut(to_guest).clone_from_slice(out_buf.as_slice());
+        Ok((0, 0))
     }
 }

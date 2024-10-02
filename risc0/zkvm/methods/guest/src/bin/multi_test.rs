@@ -32,7 +32,7 @@ use risc0_zkvm::{
         env::{self, FdReader, FdWriter, Read as _, Write as _},
         memory_barrier, sha,
     },
-    sha::{Digest, Sha256},
+    sha::{Digest, Sha256, DIGEST_WORDS},
     Assumption, ReceiptClaim,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
@@ -40,13 +40,25 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr, sys_read,
-        sys_read_words, sys_write,
+        bigint,
+        sys_bigint,
+        sys_exit,
+        sys_fork, //sys_keccak_absorb, sys_keccak_close,
+        sys_keccak_absorb,
+        sys_keccak_open,
+        sys_keccak_squeeze,
+        /* sys_keccak_squeeze,*/ sys_log,
+        sys_pipe,
+        sys_prove_zkr,
+        sys_read,
+        sys_read_words,
+        sys_write,
+        DIGEST_BYTES,
     },
     PAGE_SIZE,
 };
-use tiny_keccak::Hasher;
-use tiny_keccak::Keccak;
+//use tiny_keccak::Hasher;
+//use tiny_keccak::Keccak;
 
 risc0_zkvm::entry!(main);
 
@@ -438,22 +450,17 @@ fn main() {
                 239, 66, 165, 236, 95, 3, 187, 250, 37, 76, 176, 31, 173,
             ];
 
-            env::keccak_update(b"hello");
-            env::keccak_update(b" ");
-            env::keccak_update(b"world");
-            let mut output = [0u8; 32];
-            env::keccak_finalize(&mut output);
+            let mut keccak_fd: u32 = 0;
+            let status = unsafe { sys_keccak_open(&mut keccak_fd as *mut u32) };
+            assert_eq!(status, 0);
+            assert_eq!(keccak_fd, 0);
 
-            assert_eq!(&expected, &output);
+            unsafe { sys_keccak_absorb(keccak_fd, b"hello" as *const u8, b"hello".len()) };
+            unsafe { sys_keccak_absorb(keccak_fd, b" " as *const u8, b" ".len()) };
+            unsafe { sys_keccak_absorb(keccak_fd, b"world" as *const u8, b"world".len()) };
 
-            let mut output = [0u8; 32];
-
-            let mut hasher = Keccak::v256();
-            hasher.update(b"hello");
-            hasher.update(b" ");
-            hasher.update(b"world");
-            hasher.finalize(&mut output);
-
+            let output = [0u8; DIGEST_BYTES];
+            unsafe { sys_keccak_squeeze(keccak_fd, output.as_ptr() as *mut [u32; DIGEST_WORDS]) }
             assert_eq!(&expected, &output);
         }
     }
