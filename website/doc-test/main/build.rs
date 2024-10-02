@@ -141,7 +141,9 @@ impl Level {
 
         // Remove any consecutive blank lines
         let blank_lines_regex = Regex::new(r"\n{3,}").unwrap();
-        blank_lines_regex.replace_all(&without_numbered_lists, "\n\n").into_owned()
+        blank_lines_regex
+            .replace_all(&without_numbered_lists, "\n\n")
+            .into_owned()
     }
 
     fn write_space(&self, dst: &mut String, level: usize) {
