@@ -99,7 +99,7 @@ impl BytePoly {
     pub fn nondet_inv<Rhs: Borrow<BytePoly>>(&self, rhs: Rhs, coeffs: usize) -> BytePoly {
         let lhs = BigUint::from(self);
         let rhs = BigUint::from(rhs.borrow());
-        let result = lhs.modinv(&rhs);
+        let result = lhs.modinv(&rhs).expect("Can't divide by zero");
         trace!("inv({lhs}, [mod] {rhs}) = {result}");
         Self::from_biguint(result, coeffs)
     }
