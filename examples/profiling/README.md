@@ -40,7 +40,7 @@ To visualize the profile using `pprof`, run:
 go tool pprof -http=127.0.0.1:8000 profile.pb
 ```
 
-Then navigate to <http://localhost:8000> in your browser.
+Then navigate to [http://localhost:8000](http://localhost:8000) in your browser.
 
 You can find much more information about how to use `pprof` in the [official pprof documentation].
 
@@ -54,7 +54,7 @@ There are three different Fibonacci sequence calculation methods provided in thi
 
 The guest code reads the number of iterations from the host, computes the Fibonacci number using all the above methods, and finally commits the answer back to the host.
 
-Below is the example [flamegraph] you will see by opening <http://localhost:8000/ui/flamegraph>, after running the [steps above](#usage).
+Below is the example [flamegraph] you will see by opening [http://localhost:8000/ui/flamegraph](http://localhost:8000/ui/flamegraph), after running the [steps above](#usage).
 
 ![flamegraph of Fibonacci profiling example](./profiling_flamegraph.png)
 
@@ -64,24 +64,21 @@ This can be helpful in understanding the efficiency of various algorithms and th
 Use the pprof web interface to compare the performance of the 3 Fibonacci implementations.
 Refer to the [pprof docs] for more information about the web interface.
 
-[^1]: Here "sampling" is in quotes because the profiler actually captures the call
+[^1]:
+    Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-
     <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-
     - It would be cost prohibitive to do so for all but quite short program
       executions.
     - Introducing such heavy profiling would actually alter the performance
       characteristics in significant ways.
-
     <!-- -->
-
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
-    
+
 [cycle count]: https://dev.risczero.com/terminology#clock-cycles
 [examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html

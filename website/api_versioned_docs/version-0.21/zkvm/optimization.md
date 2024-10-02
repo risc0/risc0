@@ -473,14 +473,10 @@ below.
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
 
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-
-    <!-- -->
+    1. It would be cost prohibitive to do so for all but quite short program
+       executions.
+    2. Introducing such heavy profiling would actually alter the performance
+       characteristics in significant ways.
 
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
