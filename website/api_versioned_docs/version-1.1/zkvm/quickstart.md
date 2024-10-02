@@ -30,12 +30,6 @@ Run `rzup` to install the RISC Zero toolchain and `cargo-risczero`.
 rzup install
 ```
 
-> Note: To install a specific version instead of using the latest stable
-> version, use `rzup --version <version>`, where the `<version>` is a [release
-> tag](https://github.com/risc0/risc0/releases).
->
-> The version used must match the `risc0-zkvm` version from your guest and host.
-
 ## 2. Create a New Project
 
 The `cargo-risczero` tool takes `--guest-name` parameter, a [guest] program that

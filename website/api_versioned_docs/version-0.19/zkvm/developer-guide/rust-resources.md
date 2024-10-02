@@ -30,7 +30,7 @@ You can see the latest results in our [Crate Validation Report].
 [Crate Validation Report]: https://reports.risczero.com/crates-validation
 [other Rust crates]: https://github.com/risc0/risc0#rust-libraries
 [RISC Zero zkVM]: ../zkvm-overview.md
-[Rust]: https://www.rust-lang.org/
+[Rust]: https://www.rust-lang.org
 [Rust Book]: https://doc.rust-lang.org/book
 [Rust Installation]: https://www.rust-lang.org/tools/install
 [zkVM application]: ../zkvm-overview.md

@@ -39,4 +39,4 @@ To update your installation:
 [`cargo risczero`]: https://docs.rs/cargo-risczero/0.18.0/cargo_risczero/index.html
 [`install` command]: https://docs.rs/cargo-risczero/0.18.0/cargo_risczero/index.html#install
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[rustup]: https://rustup.rs/
+[rustup]: https://rustup.rs

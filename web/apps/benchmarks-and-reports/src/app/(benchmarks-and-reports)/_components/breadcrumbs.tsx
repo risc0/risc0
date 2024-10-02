@@ -18,7 +18,7 @@ import { Fragment } from "react";
 import type { Version } from "~/types/version";
 
 // Routes you don't want to show up in the breadcrumb
-const HIDDEN_BREADCRUMB_ROUTES = ["applications-benchmarks"];
+const HIDDEN_BREADCRUMB_ROUTES = ["applications-benchmarks", "benchmarks"];
 
 export function Breadcrumbs() {
   const pathname = usePathname();

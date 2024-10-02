@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { all } from "radash";
 import type { Version } from "~/types/version";
 import { fetchDatasheet } from "../_actions/fetch-datasheet";
