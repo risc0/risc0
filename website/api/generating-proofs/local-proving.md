@@ -21,7 +21,7 @@ The Groth16 prover currently _only_ works on x86 architecture, and so Apple Sili
 You can find out more info in the relevant issues [#1520] and [#1749].
 :::
 
-> TIP: In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs].
+> TIP: In cases where memory is constrained (i.e. less than 10 GB is available), it may be necessary to change the [segment size limit][segment-limit-docs].
 > You can find information about expected memory consumption on our [benchmarks page][datasheet].
 
 > NOTE: When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.
@@ -73,8 +73,8 @@ No options need to be configured to take advantage of acceleration through the u
 
 [#1520]: https://github.com/risc0/risc0/issues/1520
 [#1749]: https://github.com/risc0/risc0/issues/1749
+[apple-metal]: https://developer.apple.com/metal
 [Bonsai]: ./remote-proving.md
-[apple-metal]: https://developer.apple.com/metal/
 [datasheet]: https://benchmarks.risczero.com/main/datasheet
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [open-source]: https://risczero.com/news/open-source

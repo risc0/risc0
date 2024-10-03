@@ -1,5 +1,5 @@
 [package]
-name = "rsa"
+name = "risc0-circuit-bigint-test-methods"
 version = "0.1.0"
 edition = "2021"
 

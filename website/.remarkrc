@@ -1,59 +1,30 @@
 {
-  "settings": {
-    "bullet": "-",
-    "emphasis": "_",
-    "rule": "-",
-    "resourceLink": true,
-    "tightDefinitions": true
-  },
-  "plugins": [
-    "remark-preset-lint-consistent",
-    "remark-preset-lint-recommended",
-    "remark-preset-lint-markdown-style-guide",
-    "remark-frontmatter",
-    "remark-gfm",
-    "remark-directive",
-    "remark-math",
-    "./remark-append-md.js",
-    [
-      "remark-lint-no-emphasis-as-heading",
-      false
-    ],
-    [
-      "remark-lint-no-shortcut-reference-link",
-      false
-    ],
-    [
-      "remark-lint-maximum-line-length",
-      false
-    ],
-    [
-      "remark-lint-definition-case",
-      false
-    ],
-    [
-      "remark-lint-heading-increment",
-      false
-    ],
-    [
-      "remark-lint-list-item-spacing",
-      false
-    ],
-    [
-      "remark-lint-no-heading-punctuation",
-      false
-    ],
-    [
-      "remark-lint-ordered-list-marker-value",
-      false
-    ],
-    [
-      "remark-lint-maximum-heading-length",
-      false
-    ],
-    [
-      "remark-lint-emphasis-marker",
-      "_"
-    ]
-  ]
+	"settings": {
+		"bullet": "-",
+		"emphasis": "_",
+		"rule": "-",
+		"resourceLink": true,
+		"tightDefinitions": true
+	},
+	"plugins": [
+		"remark-preset-lint-consistent",
+		"remark-preset-lint-recommended",
+		"remark-preset-lint-markdown-style-guide",
+		"remark-frontmatter",
+		"remark-gfm",
+		"remark-directive",
+		"remark-remove-url-trailing-slash",
+		"remark-math",
+		"./remark-append-md.js",
+		["remark-lint-no-emphasis-as-heading", false],
+		["remark-lint-no-shortcut-reference-link", false],
+		["remark-lint-maximum-line-length", false],
+		["remark-lint-definition-case", false],
+		["remark-lint-heading-increment", false],
+		["remark-lint-list-item-spacing", false],
+		["remark-lint-no-heading-punctuation", false],
+		["remark-lint-ordered-list-marker-value", false],
+		["remark-lint-maximum-heading-length", false],
+		["remark-lint-emphasis-marker", "_"]
+	]
 }

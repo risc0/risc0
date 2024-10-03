@@ -18,11 +18,15 @@ use core::fmt::Debug;
 use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
-use risc0_circuit_rv32im::{layout, CircuitImpl, CIRCUIT};
+use risc0_circuit_rv32im::{
+    layout::{SystemStateLayout, OUT_LAYOUT},
+    CircuitImpl, CIRCUIT,
+};
+use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
-    layout::Buffer,
+    layout,
     verify::VerificationError,
 };
 use serde::{Deserialize, Serialize};
@@ -193,17 +197,16 @@ impl Default for SegmentReceiptVerifierParameters {
     }
 }
 
-fn decode_system_state_from_io(
-    io: layout::OutBuffer,
-    sys_state: &layout::SystemState,
+fn decode_system_state_from_io<E: Elem + Into<u32>>(
+    sys_state: layout::Tree<E, SystemStateLayout>,
 ) -> Result<SystemState, VerificationError> {
-    let bytes: Vec<u8> = io
-        .tree(sys_state.image_id)
+    let bytes: Vec<u8> = sys_state
+        .map(|c| c.image_id)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
-    let pc = io
-        .tree(sys_state.pc)
-        .get_u32()
+    let pc = sys_state
+        .map(|c| c.pc)
+        .get_u32_from_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
     Ok(SystemState { pc, merkle_root })
@@ -212,26 +215,31 @@ fn decode_system_state_from_io(
 pub(crate) fn decode_receipt_claim_from_seal(
     seal: &[u32],
 ) -> Result<ReceiptClaim, VerificationError> {
-    let elems = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
-    let io = layout::OutBuffer(elems);
-    let body = layout::LAYOUT.mux.body;
-    let pre = decode_system_state_from_io(io, body.global.pre)?;
-    let post = decode_system_state_from_io(io, body.global.post)?;
+    let io: &[BabyBearElem] = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
+    let global = layout::Tree::new(io, OUT_LAYOUT);
+    let pre = decode_system_state_from_io(global.map(|c| c.pre))?;
+    let post = decode_system_state_from_io(global.map(|c| c.post))?;
 
-    let input_bytes: Vec<u8> = io
-        .tree(body.global.input)
+    let input_bytes: Vec<u8> = global
+        .map(|c| c.input)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
 
-    let output_bytes: Vec<u8> = io
-        .tree(body.global.output)
+    let output_bytes: Vec<u8> = global
+        .map(|c| c.output)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let output = Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
 
-    let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
-    let user_exit = io.get_u64(body.global.user_exit_code) as u32;
+    let sys_exit = global
+        .map(|c| c.sys_exit_code)
+        .get_u32_from_elem()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let user_exit = global
+        .map(|c| c.user_exit_code)
+        .get_u32_from_elem()
+        .or(Err(VerificationError::ReceiptFormatError))?;
     let exit_code =
         ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
 

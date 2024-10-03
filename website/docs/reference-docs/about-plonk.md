@@ -34,7 +34,7 @@ For general references, we recommend the following:
 ### Moderately Technical
 
 - [ZK Study Club on PLONK](https://www.youtube.com/watch?v=NqrVcDuQ8hM)
-- ZK Whiteboard sessions on [PLONK](https://zkhack.dev/whiteboard/module-five/) and on [lookup arguments](https://zkhack.dev/whiteboard/module-six/)
+- ZK Whiteboard sessions on [PLONK](https://zkhack.dev/whiteboard/module-five) and on [lookup arguments](https://zkhack.dev/whiteboard/module-six)
 - [PLOOKUP presentation at zkSummit](https://www.youtube.com/watch?v=Vdlc1CmRYRY)
 - [Ariel Gabizon explains grand product arguments](https://hackmd.io/@relgabizon/ByFgSDA7D)
 

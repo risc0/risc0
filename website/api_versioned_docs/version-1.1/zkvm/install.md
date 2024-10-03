@@ -21,9 +21,9 @@ The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] 
 
 Running `rzup` will install the latest version of the RISC Zero toolchain.
 
-For a specific version, use `rzup install --version <version>`, where the `<version>` is a [release tag].
+For a specific version, use `rzup install cargo-risczero <version>`, where the `<version>` is a [release tag] (e.g `v1.1.1`).
 
-See `rzup --help` for more options. You can find out more about `rzup` [here](https://github.com/risc0/risc0/tree/release-1.1/rzup).
+See `rzup --help` for more options. You can find out more about `rzup` [here][rzup-repo].
 
 ### Manual Installation and installation for all other systems (e.g. x86-64 macOS, arm64 Linux)
 
@@ -51,5 +51,6 @@ After you update your installation, be sure to update your project's RISC Zero c
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [release tag]: https://github.com/risc0/risc0/releases
-[Rust]: https://www.rust-lang.org/
-[rustup]: https://rustup.rs/
+[Rust]: https://www.rust-lang.org
+[rustup]: https://rustup.rs
+[rzup-repo]: https://github.com/risc0/risc0/tree/release-1.1/rzup
