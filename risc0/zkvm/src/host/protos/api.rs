@@ -2,7 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerRequest {
-    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
+    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
 /// Nested message and enum types in `ServerRequest`.
@@ -27,6 +27,8 @@ pub mod server_request {
         #[prost(message, tag = "8")]
         Compress(super::CompressRequest),
         #[prost(message, tag = "9")]
+        Verify(super::VerifyRequest),
+        #[prost(message, tag = "10")]
         ProveZkr(super::ProveZkrRequest),
     }
 }
@@ -308,6 +310,14 @@ pub mod compress_reply {
 pub struct CompressResult {
     #[prost(message, optional, tag = "1")]
     pub receipt: ::core::option::Option<Asset>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyRequest {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
+    #[prost(message, optional, tag = "2")]
+    pub image_id: ::core::option::Option<super::base::Digest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

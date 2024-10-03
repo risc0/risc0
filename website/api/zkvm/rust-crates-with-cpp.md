@@ -52,6 +52,6 @@ to work with any guest rust toolchain. We will provide more information on
 versioning and compatibility in the future.
 
 [BLST]: https://github.com/supranational/blst
-[install]: ./install.md#install
-[risc0-gh-issues]: https://github.com/risc0/risc0/issues/
+[install]: ./install.md
+[risc0-gh-issues]: https://github.com/risc0/risc0/issues
 [zkvm_spec]: ./zkvm-specification.md#the-zkvm-execution-model

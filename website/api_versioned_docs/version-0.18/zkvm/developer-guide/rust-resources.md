@@ -29,9 +29,9 @@ You can see the latest results in our [Crate Validation Report].
 [`risc0-zkvm` crate]: https://docs.rs/risc0-zkvm
 [Crate Validation Report]: https://reports.risczero.com/crates-validation
 [other Rust crates]: https://github.com/risc0/risc0#rust-libraries
-[RISC Zero zkVM]: ../
-[Rust]: https://www.rust-lang.org/
-[Rust Book]: https://doc.rust-lang.org/book/
+[RISC Zero zkVM]: ..
+[Rust]: https://www.rust-lang.org
+[Rust Book]: https://doc.rust-lang.org/book
 [Rust Installation]: https://www.rust-lang.org/tools/install
-[zkVM application]: ../
-[zkVM applications]: ../
+[zkVM application]: ..
+[zkVM applications]: ..
