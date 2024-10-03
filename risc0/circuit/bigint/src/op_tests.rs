@@ -22,61 +22,9 @@ use risc0_zkp::field::{
 use test_log::test;
 
 use crate::{
-    test_harness::{test_witgen, test_zkr, witness_test_data},
+    test_harness::{bigint_tests, test_witgen, test_zkr, witness_test_data},
     BigIntClaim, BigIntContext, BIGINT_PO2,
 };
-
-macro_rules! bigint_tests {
-    ($($name:ident($zkr:ident, $in:expr, $pub:expr, $priv:expr, $const:expr, $z:expr),)*) => {
-        $(
-            paste::paste! {
-                fn [<$name _values>]() -> Vec<BigUint> {
-                    $in.into_iter().map($crate::test_harness::from_hex).collect()
-                }
-
-                fn [<$name _context>]() -> anyhow::Result<BigIntContext> {
-                    let mut ctx = BigIntContext::from_values([<$name _values>]());
-                    $crate::generated::$zkr(&mut ctx)?;
-                    Ok(ctx)
-                }
-
-                #[test]
-                fn [<$name _witgen>]() -> anyhow::Result<()> {
-                    let z = BabyBearExtElem::from_subelems(
-                        $z.into_iter().map(BabyBearElem::from_u64)
-                    );
-
-                    test_witgen(
-                        [<$name _context>]()?,
-                        witness_test_data(&$pub),
-                        witness_test_data(&$priv),
-                        witness_test_data(&$const),
-                        z,
-                    )
-                }
-
-                fn [<$name _filename>]() -> &'static str {
-                    concat!(stringify!($zkr), ".zkr")
-                }
-
-                #[test]
-                fn [<$name _zkr>]() -> anyhow::Result<()> {
-                    test_zkr([<$name _context>]()?, [<$name _filename>]())
-                }
-
-                #[test]
-                fn [<$name _prove>]() -> Result<()> {
-                    use $crate::generated::[<$zkr:snake:upper>];
-                    let claim = BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
-                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2)?;
-                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr)?;
-                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt)?;
-                    Ok(())
-                }
-            }
-        )*
-    }
-}
 
 // name(zkr, in_values, public_witness, private_witness, constant_witness, golden_z)
 bigint_tests! {
