@@ -764,6 +764,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "glob",
+ "regex",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "serde",

@@ -26,7 +26,6 @@ use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use test_log::test;
 
 use crate::{
-    byte_poly::BytePoly,
     prove,
     rsa::RSA_256_X2,
     test_harness::{from_hex, test_witgen, test_zkr, witness_test_data},
@@ -54,11 +53,11 @@ fn golden_z() -> BabyBearExtElem {
     )
 }
 
-fn golden_constant_witness() -> Vec<BytePoly> {
+fn golden_constant_witness() -> Vec<Vec<i32>> {
     witness_test_data(&[])
 }
 
-fn golden_public_witness() -> Vec<BytePoly> {
+fn golden_public_witness() -> Vec<Vec<i32>> {
     witness_test_data(&[
         "d5a4ac48576db8e59dfedf426cb5dc7396e3afb94d826a913cb7c0cfaaf9989c",
         "773618a789b723aed99d491bd6a483f998d9728c5ebbce76c85c9a806c1167de",
@@ -66,7 +65,7 @@ fn golden_public_witness() -> Vec<BytePoly> {
     ])
 }
 
-fn golden_private_witness() -> Vec<BytePoly> {
+fn golden_private_witness() -> Vec<Vec<i32>> {
     witness_test_data(&[
         "daba7f9e422e98ce0e2c194e9e24fb08f6375bceb4ea4a158520c33d7b2fdc3b0100",
   "ef4b74f54a1f24c99c152a56b7bcf650d512b33bc88b206f47e8555fa081f87e",
