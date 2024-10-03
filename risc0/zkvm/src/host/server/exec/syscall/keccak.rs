@@ -27,7 +27,7 @@ use super::{Syscall, SyscallContext};
 #[derive(Clone, Default)]
 pub(crate) struct SysKeccak {
     next_id: u32,
-    hasher_data: BTreeMap<u32, Vec<u8>>,
+    hasher_data: BTreeMap<u32, (u8, Vec<u8>)>,
 }
 
 impl Syscall for SysKeccak {
@@ -44,7 +44,7 @@ impl Syscall for SysKeccak {
         } else if mode == SQUEEZE {
             self.squeeze(ctx, to_guest)
         } else if mode == OPEN {
-            self.open()
+            self.open(ctx)
         } else if mode == CLOSE {
             self.close(ctx)
         } else {
@@ -54,7 +54,7 @@ impl Syscall for SysKeccak {
 }
 
 impl SysKeccak {
-    fn open(&mut self) -> anyhow::Result<(u32, u32)> {
+    fn open(&mut self, ctx: &mut dyn SyscallContext) -> anyhow::Result<(u32, u32)> {
         if self.hasher_data.len() == u32::MAX as usize {
             bail!("max number of hashers reached");
         }
@@ -62,7 +62,13 @@ impl SysKeccak {
         if self.hasher_data.contains_key(&key) {
             bail!("hasher ID {key} already exists")
         }
-        self.hasher_data.insert(key, vec![]);
+
+        let hasher_type = ctx.load_register(REG_A4);
+        if hasher_type != 0x01 {
+            // TODO: allow sha3
+            bail!("unsupported hasher delimitor {hasher_type:#x}")
+        }
+        self.hasher_data.insert(key, (hasher_type as u8, vec![]));
         self.next_id += 1;
         Ok((0, 0))
     }
@@ -83,8 +89,9 @@ impl SysKeccak {
         let mut from_guest = ctx.load_region(buf_ptr, buf_len)?;
 
         let fd = ctx.load_register(REG_A6);
+
         let data = match self.hasher_data.get_mut(&fd) {
-            Some(data) => data,
+            Some((_, data)) => data,
             None => bail!("unknown keccak fd: {}", 0),
         };
         data.append(&mut from_guest);
@@ -102,7 +109,10 @@ impl SysKeccak {
 
         let fd = ctx.load_register(REG_A6);
         let data = match self.hasher_data.get(&fd) {
-            Some(data) => data,
+            Some((0x01, data)) => data,
+            Some((hasher_type, _)) => {
+                bail!("unsupported hasher type with delimitor: {:#x}", hasher_type)
+            }
             None => bail!("unknown keccak fd: {}", fd),
         };
         hasher.update(data);

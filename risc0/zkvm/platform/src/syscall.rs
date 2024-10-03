@@ -957,7 +957,7 @@ pub unsafe extern "C" fn sys_keccak_squeeze(keccak_fd: u32, out_state: *mut [u32
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
 pub unsafe extern "C" fn sys_keccak_open(keccak_fd: *mut u32) -> i32 {
-    let Return(a0, _) = syscall_4(nr::SYS_KECCAK, keccak_fd, 1, keccak::OPEN, 0, 0, 0);
+    let Return(a0, _) = syscall_4(nr::SYS_KECCAK, keccak_fd, 1, keccak::OPEN, 0x1, 0, 0);
     a0 as i32
 }
 
