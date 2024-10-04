@@ -832,9 +832,6 @@ impl pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
                 })
             }
-            pb::api::asset_request::Kind::Redis(_) => Ok(Self {
-                kind: Some(pb::api::asset::Kind::Redis(bytes.into())),
-            }),
         }
     }
 }

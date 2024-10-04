@@ -18,7 +18,6 @@
 use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use anyhow::{ensure, Result};
-use redis::{Client, Commands, Connection};
 use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
 use serde::{Deserialize, Serialize};
@@ -322,37 +321,5 @@ impl FileSegmentRef {
             path,
             _dir: dir.clone(),
         })
-    }
-}
-
-pub struct RedisSegmentRef {
-    connection: Connection,
-    key: String,
-}
-
-/// Redis TTL for keys
-pub const REDIS_TTL: u64 = 28800;
-
-impl RedisSegmentRef {
-    /// Construct a [RedisSegmentRef]
-    ///
-    /// This builds a RedisSegmentRef that stores `segment` in a redis pool.
-    pub fn new(segment: &Segment, redis_url: &str) -> Result<Self> {
-        let client = Client::open(redis_url)?;
-        let mut connection = client.get_connection()?;
-        let value = bincode::serialize(segment).unwrap();
-        connection.set_ex(segment.index, value, REDIS_TTL)?;
-        Ok(Self {
-            connection,
-            key: segment.index.to_string(),
-        })
-    }
-}
-
-impl SegmentRef for RedisSegmentRef {
-    fn resolve(&self) -> Result<Segment> {
-        let bytes: Vec<u8> = self.connection.get(&self.key)?;
-        let segment: Segment = bincode::deserialize(&bytes)?;
-        Ok(segment)
     }
 }

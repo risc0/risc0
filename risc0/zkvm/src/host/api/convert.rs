@@ -52,7 +52,6 @@ impl TryFrom<AssetRequest> for pb::api::AssetRequest {
                 AssetRequest::Path(path) => {
                     pb::api::asset_request::Kind::Path(path_to_string(path)?)
                 }
-                AssetRequest::Redis(redis_url) => pb::api::asset_request::Kind::Redis(redis_url),
             }),
         })
     }
@@ -66,7 +65,6 @@ impl TryFrom<Asset> for pb::api::Asset {
             kind: match value {
                 Asset::Inline(bytes) => Some(pb::api::asset::Kind::Inline(bytes.into())),
                 Asset::Path(path) => Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
-                Asset::Redis(bytes) => Some(pb::api::asset::Kind::Redis(bytes.into())),
             },
         })
     }
@@ -106,7 +104,6 @@ impl TryFrom<pb::api::Asset> for Asset {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::api::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
-            pb::api::asset::Kind::Redis(bytes) => Asset::Redis(bytes.into()),
         })
     }
 }
