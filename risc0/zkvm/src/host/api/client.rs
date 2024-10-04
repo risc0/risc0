@@ -17,7 +17,6 @@ use std::path::Path;
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
-use redis::Commands;
 use risc0_zkp::core::digest::Digest;
 
 use super::{
@@ -621,156 +620,61 @@ impl Client {
         let mut segment_callback = segment_callback;
         let mut segments = Vec::new();
 
-        let option_redis_url = env.env_vars.get("REDIS_URL");
-        let option_redis_key = env.env_vars.get("REDIS_KEY");
-        let option_redis_ttl = env.env_vars.get("REDIS_TTL");
+        loop {
+            let reply: pb::api::ServerReply = conn.recv()?;
+            // tracing::trace!("rx: {reply:?}");
 
-        if let (Some(url), Some(key), Some(ttl)) =
-            (option_redis_url, option_redis_key, option_redis_ttl)
-        {
-            let ttl = ttl.parse::<u64>().unwrap();
-            let client = redis::Client::open(url.to_string()).unwrap();
-            let mut connection = client.clone().get_connection().unwrap();
-            loop {
-                let reply: pb::api::ServerReply = conn.recv()?;
-                // tracing::trace!("rx: {reply:?}");
-
-                match reply.kind.ok_or(malformed_err())? {
-                    pb::api::server_reply::Kind::Ok(request) => {
-                        match request.kind.ok_or(malformed_err())? {
-                            pb::api::client_callback::Kind::Io(io) => {
-                                let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                                // tracing::trace!("tx: {msg:?}");
-                                conn.send(msg)?;
-                            }
-                            pb::api::client_callback::Kind::SegmentDone(segment) => {
-                                let reply: pb::api::GenericReply = segment
-                                    .segment
-                                    .map_or_else(
-                                        || Err(malformed_err()),
-                                        |segment| {
-                                            let asset: Asset = segment
-                                                .segment
-                                                .ok_or(malformed_err())?
-                                                .try_into()?;
-                                            let info = SegmentInfo {
-                                                po2: segment.po2,
-                                                cycles: segment.cycles,
-                                            };
-                                            segments.push(info.clone());
-
-                                            // push the segment to redis
-                                            let asset_bytes: Vec<u8> = asset
-                                                .as_bytes()
-                                                .expect("Failed to convert asset to bytes")
-                                                .into();
-                                            let value = bincode::serialize(&asset_bytes).unwrap();
-                                            let segment_key = format!("{}:{}", key, segments.len());
-                                            connection
-                                                .set_ex::<std::string::String, Vec<u8>, u64>(
-                                                    segment_key,
-                                                    value,
-                                                    ttl,
-                                                )
-                                                .unwrap();
-
-                                            segment_callback(info, asset)
-                                        },
-                                    )
-                                    .into();
-                                // tracing::trace!("tx: {reply:?}");
-                                conn.send(reply)?;
-                            }
-                            pb::api::client_callback::Kind::SessionDone(session) => {
-                                return match session.session {
-                                    Some(session) => Ok(SessionInfo {
-                                        segments,
-                                        journal: Journal::new(session.journal),
-                                        exit_code: session
-                                            .exit_code
-                                            .ok_or(malformed_err())?
-                                            .try_into()?,
-                                        receipt_claim: pb::core::ReceiptClaim::decode(
-                                            session
-                                                .receipt_claim
-                                                .ok_or(malformed_err())?
-                                                .as_bytes()?,
-                                        )?
+            match reply.kind.ok_or(malformed_err())? {
+                pb::api::server_reply::Kind::Ok(request) => {
+                    match request.kind.ok_or(malformed_err())? {
+                        pb::api::client_callback::Kind::Io(io) => {
+                            let msg: pb::api::OnIoReply = self.on_io(env, io).into();
+                            // tracing::trace!("tx: {msg:?}");
+                            conn.send(msg)?;
+                        }
+                        pb::api::client_callback::Kind::SegmentDone(segment) => {
+                            let reply: pb::api::GenericReply = segment
+                                .segment
+                                .map_or_else(
+                                    || Err(malformed_err()),
+                                    |segment| {
+                                        let asset =
+                                            segment.segment.ok_or(malformed_err())?.try_into()?;
+                                        let info = SegmentInfo {
+                                            po2: segment.po2,
+                                            cycles: segment.cycles,
+                                        };
+                                        segments.push(info.clone());
+                                        segment_callback(info, asset)
+                                    },
+                                )
+                                .into();
+                            // tracing::trace!("tx: {reply:?}");
+                            conn.send(reply)?;
+                        }
+                        pb::api::client_callback::Kind::SessionDone(session) => {
+                            return match session.session {
+                                Some(session) => Ok(SessionInfo {
+                                    segments,
+                                    journal: Journal::new(session.journal),
+                                    exit_code: session
+                                        .exit_code
+                                        .ok_or(malformed_err())?
                                         .try_into()?,
-                                    }),
-                                    None => Err(malformed_err()),
-                                }
-                            }
-                            pb::api::client_callback::Kind::ProveDone(_) => {
-                                return Err(anyhow!("Illegal client callback"))
+                                    receipt_claim: pb::core::ReceiptClaim::decode(
+                                        session.receipt_claim.ok_or(malformed_err())?.as_bytes()?,
+                                    )?
+                                    .try_into()?,
+                                }),
+                                None => Err(malformed_err()),
                             }
                         }
-                    }
-                    pb::api::server_reply::Kind::Error(err) => return Err(err.into()),
-                }
-            }
-        } else {
-            loop {
-                let reply: pb::api::ServerReply = conn.recv()?;
-                // tracing::trace!("rx: {reply:?}");
-
-                match reply.kind.ok_or(malformed_err())? {
-                    pb::api::server_reply::Kind::Ok(request) => {
-                        match request.kind.ok_or(malformed_err())? {
-                            pb::api::client_callback::Kind::Io(io) => {
-                                let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                                // tracing::trace!("tx: {msg:?}");
-                                conn.send(msg)?;
-                            }
-                            pb::api::client_callback::Kind::SegmentDone(segment) => {
-                                let reply: pb::api::GenericReply = segment
-                                    .segment
-                                    .map_or_else(
-                                        || Err(malformed_err()),
-                                        |segment| {
-                                            let asset = segment
-                                                .segment
-                                                .ok_or(malformed_err())?
-                                                .try_into()?;
-                                            let info = SegmentInfo {
-                                                po2: segment.po2,
-                                                cycles: segment.cycles,
-                                            };
-                                            segments.push(info.clone());
-                                            segment_callback(info, asset)
-                                        },
-                                    )
-                                    .into();
-                                // tracing::trace!("tx: {reply:?}");
-                                conn.send(reply)?;
-                            }
-                            pb::api::client_callback::Kind::SessionDone(session) => {
-                                return match session.session {
-                                    Some(session) => Ok(SessionInfo {
-                                        segments,
-                                        journal: Journal::new(session.journal),
-                                        exit_code: session
-                                            .exit_code
-                                            .ok_or(malformed_err())?
-                                            .try_into()?,
-                                        receipt_claim: pb::core::ReceiptClaim::decode(
-                                            session
-                                                .receipt_claim
-                                                .ok_or(malformed_err())?
-                                                .as_bytes()?,
-                                        )?
-                                        .try_into()?,
-                                    }),
-                                    None => Err(malformed_err()),
-                                }
-                            }
-                            pb::api::client_callback::Kind::ProveDone(_) => {
-                                return Err(anyhow!("Illegal client callback"))
-                            }
+                        pb::api::client_callback::Kind::ProveDone(_) => {
+                            return Err(anyhow!("Illegal client callback"))
                         }
                     }
-                    pb::api::server_reply::Kind::Error(err) => return Err(err.into()),
                 }
+                pb::api::server_reply::Kind::Error(err) => return Err(err.into()),
             }
         }
     }
