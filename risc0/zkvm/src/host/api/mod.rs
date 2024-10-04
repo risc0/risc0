@@ -329,7 +329,7 @@ fn malformed_err() -> anyhow::Error {
 }
 
 impl pb::api::Asset {
-    async fn as_bytes(&self) -> Result<Bytes> {
+    fn as_bytes(&self) -> Result<Bytes> {
         let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
@@ -403,7 +403,7 @@ pub struct SegmentInfo {
 
 impl Asset {
     /// Return the bytes for this asset.
-    pub async fn as_bytes(&self) -> Result<Bytes> {
+    pub fn as_bytes(&self) -> Result<Bytes> {
         Ok(match self {
             Asset::Inline(bytes) => bytes.clone(),
             Asset::Path(path) => std::fs::read(path)?.into(),
