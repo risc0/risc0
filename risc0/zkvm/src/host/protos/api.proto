@@ -230,6 +230,7 @@ message Asset {
   oneof kind {
     bytes inline = 1;
     string path = 2;
+    bytes redis = 3;
   }
 }
 
@@ -237,6 +238,7 @@ message AssetRequest {
   oneof kind {
     google.protobuf.Empty inline = 1;
     string path = 2;
+    google.protobuf.Empty redis = 3;
   }
 }
 

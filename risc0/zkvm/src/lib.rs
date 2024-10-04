@@ -108,8 +108,8 @@ pub use {
             exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
-                FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
-                SimpleSegmentRef,
+                FileSegmentRef, NullSegmentRef, RedisSegmentRef, Segment, SegmentRef, Session,
+                SessionEvents, SimpleSegmentRef,
             },
         },
     },

@@ -109,6 +109,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) pprof_out: Option<PathBuf>,
     pub(crate) input_digest: Option<Digest>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
+    pub(crate) redis_url: Option<String>,
 }
 
 impl<'a> ExecutorEnv<'a> {

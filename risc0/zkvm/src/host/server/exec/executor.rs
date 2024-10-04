@@ -29,8 +29,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::client::env::SegmentPath, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment,
-    SegmentRef, Session,
+    host::client::env::SegmentPath, Assumptions, ExecutorEnv, FileSegmentRef, Output,
+    RedisSegmentRef, Segment, SegmentRef, Session,
 };
 
 use super::{
@@ -108,12 +108,21 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
-        if self.env.segment_path.is_none() {
-            self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
-        }
+        match self.env.redis_url {
+            None => {
+                if self.env.segment_path.is_none() {
+                    self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
+                }
 
-        let path = self.env.segment_path.clone().unwrap();
-        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
+                let path = self.env.segment_path.clone().unwrap();
+                self.run_with_callback(|segment| {
+                    Ok(Box::new(FileSegmentRef::new(&segment, &path)?))
+                })
+            }
+            Some(redis_url) => self.run_with_callback(|segment| {
+                Ok(Box::new(RedisSegmentRef::new(&segment, &redis_url)?))
+            }),
+        }
     }
 
     /// Run the executor until [crate::ExitCode::Halted] or
