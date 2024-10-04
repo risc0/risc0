@@ -20,7 +20,11 @@ use risc0_binfmt::SystemState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
+use super::{
+    malformed_err, path_to_string,
+    pb::{self, api::RedisRequest},
+    Asset, AssetRequest,
+};
 use crate::{
     host::client::env::ProveZkrRequest,
     receipt::{
@@ -51,6 +55,9 @@ impl TryFrom<AssetRequest> for pb::api::AssetRequest {
                 AssetRequest::Inline => pb::api::asset_request::Kind::Inline(()),
                 AssetRequest::Path(path) => {
                     pb::api::asset_request::Kind::Path(path_to_string(path)?)
+                }
+                AssetRequest::Redis(url, key, ttl) => {
+                    pb::api::asset_request::Kind::Redis(RedisRequest { url, key, ttl })
                 }
             }),
         })
@@ -104,6 +111,22 @@ impl TryFrom<pb::api::Asset> for Asset {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::api::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
+        })
+    }
+}
+
+impl TryFrom<pb::api::AssetRequest> for AssetRequest {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::api::AssetRequest) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::api::asset_request::Kind::Inline(()) => AssetRequest::Inline,
+            pb::api::asset_request::Kind::Path(path) => {
+                AssetRequest::Path(std::path::PathBuf::from(path))
+            }
+            pb::api::asset_request::Kind::Redis(redis) => {
+                AssetRequest::Redis(redis.url, redis.key, redis.ttl)
+            }
         })
     }
 }

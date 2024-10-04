@@ -433,8 +433,18 @@ pub mod asset {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RedisRequest {
+    #[prost(string, tag = "1")]
+    pub url: String,
+    #[prost(string, tag = "2")]
+    pub key: String,
+    #[prost(uint64, tag = "3")]
+    pub ttl: u64,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AssetRequest {
-    #[prost(oneof = "asset_request::Kind", tags = "1, 2")]
+    #[prost(oneof = "asset_request::Kind", tags = "1, 2, 3")]
     pub kind: ::core::option::Option<asset_request::Kind>,
 }
 /// Nested message and enum types in `AssetRequest`.
@@ -446,6 +456,8 @@ pub mod asset_request {
         Inline(()),
         #[prost(string, tag = "2")]
         Path(::prost::alloc::string::String),
+        #[prost(message, tag = "3")]
+        Redis(super::RedisRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

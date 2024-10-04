@@ -356,6 +356,9 @@ pub enum AssetRequest {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    Redis(String, String, u64),
 }
 
 /// Provides information about the result of execution.
