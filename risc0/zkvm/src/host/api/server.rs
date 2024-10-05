@@ -21,6 +21,7 @@ use std::{
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use redis::Commands;
 use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -332,16 +333,21 @@ impl Server {
                 exec.run_with_callback(|segment| {
                     let segment_bytes = bincode::serialize(&segment)?;
                     let segment_key = format!("{}:{}", key, segment.index);
-                    redis::Commands::set_ex::<std::string::String, Vec<u8>, u64>(
-                        &mut connection,
-                        segment_key,
-                        segment_bytes,
-                        ttl,
-                    )?;
+                    connection.set_ex(segment_key.clone(), segment_bytes, ttl)?;
+
+                    let bytes = segment_key.as_bytes().to_owned();
+                    let asset = pb::api::Asset::from_bytes(&segments_out, bytes.into(), "")?;
+                    let segment = Some(pb::api::SegmentInfo {
+                        index: segment.index,
+                        po2: segment.inner.po2 as u32,
+                        cycles: segment.inner.insn_cycles as u32,
+                        segment: Some(asset),
+                    });
+
                     let msg = pb::api::ServerReply {
                         kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                             kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                                pb::api::OnSegmentDone { segment: None },
+                                pb::api::OnSegmentDone { segment },
                             )),
                         })),
                     };
@@ -869,6 +875,7 @@ impl pb::api::Asset {
                 })
             }
             pb::api::asset_request::Kind::Redis(_) => Ok(Self {
+                // bytes is is just the request key as bytes
                 kind: Some(pb::api::asset::Kind::Inline(bytes.into())),
             }),
         }

@@ -633,27 +633,22 @@ impl Client {
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(segment) => {
-                            let reply: pb::api::GenericReply = match segment.clone().segment {
-                                Some(_) => segment
-                                    .segment
-                                    .map_or_else(
-                                        || Err(malformed_err()),
-                                        |segment| {
-                                            let asset = segment
-                                                .segment
-                                                .ok_or(malformed_err())?
-                                                .try_into()?;
-                                            let info = SegmentInfo {
-                                                po2: segment.po2,
-                                                cycles: segment.cycles,
-                                            };
-                                            segments.push(info.clone());
-                                            segment_callback(info, asset)
-                                        },
-                                    )
-                                    .into(),
-                                None => pb::api::GenericReply { kind: None },
-                            };
+                            let reply: pb::api::GenericReply = segment
+                                .segment
+                                .map_or_else(
+                                    || Err(malformed_err()),
+                                    |segment| {
+                                        let asset =
+                                            segment.segment.ok_or(malformed_err())?.try_into()?;
+                                        let info = SegmentInfo {
+                                            po2: segment.po2,
+                                            cycles: segment.cycles,
+                                        };
+                                        segments.push(info.clone());
+                                        segment_callback(info, asset)
+                                    },
+                                )
+                                .into();
                             // tracing::trace!("tx: {reply:?}");
                             conn.send(reply)?;
                         }
