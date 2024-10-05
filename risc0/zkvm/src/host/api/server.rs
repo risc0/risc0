@@ -332,16 +332,25 @@ impl Server {
                 let mut connection = client.get_connection()?;
                 exec.run_with_callback(|segment| {
                     let segment_bytes = bincode::serialize(&segment)?;
+                    let redis_asset: Vec<u8> = pb::api::Asset::from_bytes(
+                        &segments_out,
+                        segment_bytes.into(),
+                        format!("segment-{}", segment.index),
+                    )?
+                    .as_bytes()?
+                    .into();
                     let segment_key = format!("{}:{}", key, segment.index);
-                    connection.set_ex(segment_key.clone(), segment_bytes, ttl)?;
+                    connection.set_ex(segment_key.clone(), redis_asset, ttl)?;
 
+                    // this returns the redis key as the asset of the segment
+                    // TODO: epxlore cleaner/better ways to approach this
                     let bytes = segment_key.as_bytes().to_owned();
-                    let asset = pb::api::Asset::from_bytes(&segments_out, bytes.into(), "")?;
+                    let return_asset = pb::api::Asset::from_bytes(&segments_out, bytes.into(), "")?;
                     let segment = Some(pb::api::SegmentInfo {
                         index: segment.index,
                         po2: segment.inner.po2 as u32,
                         cycles: segment.inner.insn_cycles as u32,
-                        segment: Some(asset),
+                        segment: Some(return_asset),
                     });
 
                     let msg = pb::api::ServerReply {

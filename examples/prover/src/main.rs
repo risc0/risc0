@@ -80,13 +80,15 @@ fn prover_example() {
         .build()
         .unwrap();
 
+    let redis_url = String::from("redis://localhost:6379/");
+    let redis_key = String::from("key");
     let client = ApiClient::from_env().unwrap();
     let mut segment_idx = 0;
     let session = client
         .execute(
             &env,
             Asset::Inline(RSA_ELF.into()),
-            AssetRequest::Inline,
+            AssetRequest::Redis(redis_url, redis_key, 200),
             |info, segment| {
                 println!("{info:?}");
                 planner.enqueue_segment(segment_idx).unwrap();
