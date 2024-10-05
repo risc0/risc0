@@ -24,6 +24,7 @@ use alloc::{
     format, vec,
 };
 use core::arch::asm;
+use tiny_keccak::{Hasher, Keccak};
 
 use getrandom::getrandom;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
@@ -462,6 +463,19 @@ fn main() {
             let output = [0u8; DIGEST_BYTES];
             unsafe { sys_keccak_squeeze(keccak_fd, output.as_ptr() as *mut [u32; DIGEST_WORDS]) }
             assert_eq!(&expected, &output);
+
+            // run the hasher multiple times to ensure that each hasher instance generating the expected hash.
+            for _ in 0..3 {
+                let mut hasher = Keccak::v256();
+
+                hasher.update(b"hello");
+                hasher.update(b" ");
+                hasher.update(b"world");
+                let mut output = [0u8; DIGEST_BYTES];
+                hasher.finalize(&mut output);
+
+                assert_eq!(&expected, &output);
+            }
         }
     }
 }

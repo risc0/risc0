@@ -44,7 +44,7 @@ impl Syscall for SysKeccak {
         } else if mode == SQUEEZE {
             self.squeeze(ctx, to_guest)
         } else if mode == OPEN {
-            self.open(ctx)
+            self.open(ctx, to_guest)
         } else if mode == CLOSE {
             self.close(ctx)
         } else {
@@ -54,7 +54,12 @@ impl Syscall for SysKeccak {
 }
 
 impl SysKeccak {
-    fn open(&mut self, ctx: &mut dyn SyscallContext) -> anyhow::Result<(u32, u32)> {
+    fn open(
+        &mut self,
+        ctx: &mut dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> anyhow::Result<(u32, u32)> {
+        tracing::debug!("SYS_KECCAK: open fd {}", self.next_id);
         if self.hasher_data.len() == u32::MAX as usize {
             bail!("max number of hashers reached");
         }
@@ -69,6 +74,7 @@ impl SysKeccak {
             bail!("unsupported hasher delimitor {hasher_type:#x}")
         }
         self.hasher_data.insert(key, (hasher_type as u8, vec![]));
+        to_guest[0] = self.next_id;
         self.next_id += 1;
         Ok((0, 0))
     }
@@ -85,10 +91,10 @@ impl SysKeccak {
     fn absorb(&mut self, ctx: &mut dyn SyscallContext) -> anyhow::Result<(u32, u32)> {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A4));
         let buf_len = ctx.load_register(REG_A5);
-        tracing::debug!("SYS_KECCAK: absorb {buf_len} bytes");
         let mut from_guest = ctx.load_region(buf_ptr, buf_len)?;
 
         let fd = ctx.load_register(REG_A6);
+        tracing::debug!("SYS_KECCAK: absorb {buf_len} bytes to fd {fd}");
 
         let data = match self.hasher_data.get_mut(&fd) {
             Some((_, data)) => data,
