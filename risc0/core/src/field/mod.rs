@@ -177,6 +177,7 @@ pub trait ExtElem:
     + ops::SubAssign
     + cmp::PartialEq
     + cmp::Eq
+    where Self::SubElem: ops::Mul<Self, Output = Self>
 {
     /// An element of the base field
     ///

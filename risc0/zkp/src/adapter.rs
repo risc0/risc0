@@ -196,6 +196,7 @@ pub enum PolyExtStep {
     True,
     AndEqz(Var, Var),
     AndCond(Var, Var, Var),
+    Shift,
 }
 
 impl PolyExtStep {
@@ -226,6 +227,16 @@ impl PolyExtStep {
             }
             PolyExtStep::Mul(x1, x2) => {
                 fp_vars.push(fp_vars[*x1] * fp_vars[*x2]);
+            }
+            PolyExtStep::Shift => {
+                // Return [0, 1, ...] to allow construction of
+                // values in the extension field
+                fp_vars.push(F::ExtElem::from_subelems(
+                    [F::Elem::ZERO, F::Elem::ONE]
+                        .into_iter()
+                        .chain(std::iter::repeat(F::Elem::ZERO))
+                        .take(F::ExtElem::EXT_SIZE),
+                ));
             }
             PolyExtStep::True => {
                 mix_vars.push(MixState {
