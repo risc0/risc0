@@ -22,7 +22,10 @@ use core::ops;
 
 use bytemuck::{Pod, Zeroable};
 
-use crate::field::{self, Elem as FieldElem};
+use crate::field::{
+    self, implement_commuting_field_operation, implement_field_operation_base,
+    implement_promoting_field_operation, Elem as FieldElem, ExtElem as FieldExtElem,
+};
 
 /// The Goldilocks class is an element of the finite field F_p, where P is the
 /// prime number 2^64 - 2^32 + 1. Here we implement integer
@@ -206,15 +209,6 @@ impl Elem {
     }
 }
 
-impl ops::Add for Elem {
-    type Output = Self;
-
-    /// Addition for Goldilocks field [Elem]
-    fn add(self, rhs: Self) -> Self {
-        Elem(add(self.0, rhs.0))
-    }
-}
-
 impl ops::AddAssign for Elem {
     /// Simple addition case for Goldilocks field [Elem]
     fn add_assign(&mut self, rhs: Self) {
@@ -222,28 +216,10 @@ impl ops::AddAssign for Elem {
     }
 }
 
-impl ops::Sub for Elem {
-    type Output = Self;
-
-    /// Subtraction for Goldilocks field [Elem]
-    fn sub(self, rhs: Self) -> Self {
-        Elem(sub(self.0, rhs.0))
-    }
-}
-
 impl ops::SubAssign for Elem {
     /// Simple subtraction case for Goldilocks field [Elem]
     fn sub_assign(&mut self, rhs: Self) {
         self.0 = sub(self.0, rhs.0)
-    }
-}
-
-impl ops::Mul for Elem {
-    type Output = Self;
-
-    /// Multiplication for Goldilocks field [Elem]
-    fn mul(self, rhs: Self) -> Self {
-        Elem(mul(self.0, rhs.0))
     }
 }
 
@@ -490,33 +466,12 @@ impl ExtElem {
     }
 }
 
-impl ops::Add for ExtElem {
-    type Output = Self;
-    /// Addition for Goldilocks [ExtElem]
-    fn add(self, rhs: Self) -> Self {
-        let mut lhs = self;
-        lhs += rhs;
-        lhs
-    }
-}
-
 impl ops::AddAssign for ExtElem {
     /// Simple addition case for Goldilocks [ExtElem]
     fn add_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] += rhs.0[i];
         }
-    }
-}
-
-impl ops::Sub for ExtElem {
-    type Output = Self;
-
-    /// Subtraction for Goldilocks [ExtElem]
-    fn sub(self, rhs: Self) -> Self {
-        let mut lhs = self;
-        lhs -= rhs;
-        lhs
     }
 }
 
@@ -529,30 +484,12 @@ impl ops::SubAssign for ExtElem {
     }
 }
 
-impl ops::Mul<Elem> for ExtElem {
-    type Output = Self;
-    /// Multiplication for [ExtElem]
-    fn mul(self, rhs: Elem) -> Self {
-        let mut lhs = self;
-        lhs *= rhs;
-        lhs
-    }
-}
-
 impl ops::MulAssign<Elem> for ExtElem {
     /// Simple multiplication case for Goldilocks [ExtElem]
     fn mul_assign(&mut self, rhs: Elem) {
         for i in 0..self.0.len() {
             self.0[i] *= rhs;
         }
-    }
-}
-
-impl ops::Mul<ExtElem> for Elem {
-    type Output = ExtElem;
-    /// Multiplication of [Elem] by Goldilocks [ExtElem]
-    fn mul(self, rhs: ExtElem) -> ExtElem {
-        rhs * self
     }
 }
 
@@ -570,15 +507,9 @@ impl ops::MulAssign for ExtElem {
     }
 }
 
-impl ops::Mul for ExtElem {
-    type Output = ExtElem;
-    /// Multiplication for Goldilocks [ExtElem]
-    fn mul(self, rhs: ExtElem) -> ExtElem {
-        let mut lhs = self;
-        lhs *= rhs;
-        lhs
-    }
-}
+implement_promoting_field_operation! {Elem, ExtElem, Add, AddAssign, add, add_assign}
+implement_commuting_field_operation! {Elem, ExtElem, Mul, MulAssign, mul, mul_assign}
+implement_promoting_field_operation! {Elem, ExtElem, Sub, SubAssign, sub, sub_assign}
 
 impl ops::Neg for ExtElem {
     type Output = Self;
@@ -618,6 +549,11 @@ mod tests {
     #[test]
     pub fn field_ops() {
         field::tests::test_field_ops::<Elem>(P);
+    }
+
+    #[test]
+    pub fn ext_field_ops() {
+        field::tests::test_ext_field_ops::<ExtElem>();
     }
 
     #[test]

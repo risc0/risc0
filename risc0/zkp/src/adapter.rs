@@ -29,7 +29,7 @@ pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
 pub const REGISTER_GROUP_DATA: usize = 2;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct MixState<EE: ExtElem> {
     pub tot: EE,
     pub mul: EE,
@@ -186,6 +186,7 @@ pub struct PolyExtStepDef {
     pub ret: Var,
 }
 
+#[derive(Debug)]
 pub enum PolyExtStep {
     Const(u32),
     Get(usize),
@@ -196,6 +197,7 @@ pub enum PolyExtStep {
     True,
     AndEqz(Var, Var),
     AndCond(Var, Var, Var),
+    Shift,
 }
 
 impl PolyExtStep {
@@ -210,45 +212,74 @@ impl PolyExtStep {
         match self {
             PolyExtStep::Const(value) => {
                 let elem = F::Elem::from_u64(*value as u64);
+                tracing::trace!("[{}] {self:?} -> {elem:?}", fp_vars.len());
                 fp_vars.push(F::ExtElem::from_subfield(&elem));
             }
             PolyExtStep::Get(tap) => {
-                fp_vars.push(u[*tap]);
+                let val = u[*tap];
+                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                fp_vars.push(val);
             }
             PolyExtStep::GetGlobal(base, offset) => {
-                fp_vars.push(F::ExtElem::from_subfield(&args[*base][*offset]));
+                let val = F::ExtElem::from_subfield(&args[*base][*offset]);
+                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                fp_vars.push(val);
             }
             PolyExtStep::Add(x1, x2) => {
-                fp_vars.push(fp_vars[*x1] + fp_vars[*x2]);
+                let val = fp_vars[*x1] + fp_vars[*x2];
+                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                fp_vars.push(val);
             }
             PolyExtStep::Sub(x1, x2) => {
-                fp_vars.push(fp_vars[*x1] - fp_vars[*x2]);
+                let val = fp_vars[*x1] - fp_vars[*x2];
+                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                fp_vars.push(val);
             }
             PolyExtStep::Mul(x1, x2) => {
-                fp_vars.push(fp_vars[*x1] * fp_vars[*x2]);
+                let val = fp_vars[*x1] * fp_vars[*x2];
+                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                fp_vars.push(val);
+            }
+            PolyExtStep::Shift => {
+                // Return [0, 1, ...] to allow construction of
+                // values in the extension field
+                let val = F::ExtElem::from_subelems(
+                    [F::Elem::ZERO, F::Elem::ONE]
+                        .into_iter()
+                        .chain(core::iter::repeat(F::Elem::ZERO))
+                        .take(F::ExtElem::EXT_SIZE),
+                );
+                tracing::trace!("[{}] {self:?} -> {val:?}", mix_vars.len());
+                fp_vars.push(val);
             }
             PolyExtStep::True => {
-                mix_vars.push(MixState {
+                let mix_val = MixState {
                     tot: F::ExtElem::ZERO,
                     mul: F::ExtElem::ONE,
-                });
+                };
+                tracing::trace!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
+                mix_vars.push(mix_val);
             }
             PolyExtStep::AndEqz(x, val) => {
                 let x = mix_vars[*x];
                 let val = fp_vars[*val];
-                mix_vars.push(MixState {
+                let mix_val = MixState {
                     tot: x.tot + x.mul * val,
                     mul: x.mul * *mix,
-                });
+                };
+                tracing::trace!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
+                mix_vars.push(mix_val);
             }
             PolyExtStep::AndCond(x, cond, inner) => {
                 let x = mix_vars[*x];
                 let cond = fp_vars[*cond];
                 let inner = mix_vars[*inner];
-                mix_vars.push(MixState {
+                let mix_val = MixState {
                     tot: x.tot + cond * inner.tot * x.mul,
                     mul: x.mul * inner.mul,
-                });
+                };
+                tracing::trace!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
+                mix_vars.push(mix_val);
             }
         }
     }
