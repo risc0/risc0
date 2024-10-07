@@ -20,11 +20,7 @@ use risc0_binfmt::SystemState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
-use super::{
-    malformed_err, path_to_string,
-    pb::{self, api::RedisRequest},
-    Asset, AssetRequest,
-};
+use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     host::client::env::ProveZkrRequest,
     receipt::{
@@ -57,7 +53,7 @@ impl TryFrom<AssetRequest> for pb::api::AssetRequest {
                     pb::api::asset_request::Kind::Path(path_to_string(path)?)
                 }
                 AssetRequest::Redis(url, key, ttl) => {
-                    pb::api::asset_request::Kind::Redis(RedisRequest { url, key, ttl })
+                    pb::api::asset_request::Kind::Redis(pb::api::RedisRequest { url, key, ttl })
                 }
             }),
         })

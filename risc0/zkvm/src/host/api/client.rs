@@ -619,7 +619,6 @@ impl Client {
     {
         let mut segment_callback = segment_callback;
         let mut segments = Vec::new();
-
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
             // tracing::trace!("rx: {reply:?}");

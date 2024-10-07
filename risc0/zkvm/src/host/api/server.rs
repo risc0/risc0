@@ -884,7 +884,6 @@ impl pb::api::Asset {
                 })
             }
             pb::api::asset_request::Kind::Redis(_) => Ok(Self {
-                // bytes is is just the request key as bytes
                 kind: Some(pb::api::asset::Kind::Inline(bytes.into())),
             }),
         }
