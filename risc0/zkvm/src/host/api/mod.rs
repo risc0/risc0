@@ -358,6 +358,7 @@ pub enum AssetRequest {
     Path(PathBuf),
 
     /// The asset is written to redis.
+    #[cfg(feature = "redis")]
     Redis(String, String, u64),
 }
 

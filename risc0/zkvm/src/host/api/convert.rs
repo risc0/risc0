@@ -52,8 +52,9 @@ impl TryFrom<AssetRequest> for pb::api::AssetRequest {
                 AssetRequest::Path(path) => {
                     pb::api::asset_request::Kind::Path(path_to_string(path)?)
                 }
+                #[cfg(feature = "redis")]
                 AssetRequest::Redis(url, key, ttl) => {
-                    pb::api::asset_request::Kind::Redis(pb::api::RedisRequest { url, key, ttl })
+                    pb::api::asset_request::Kind::Redis(pb::api::RedisParams { url, key, ttl })
                 }
             }),
         })
@@ -120,6 +121,7 @@ impl TryFrom<pb::api::AssetRequest> for AssetRequest {
             pb::api::asset_request::Kind::Path(path) => {
                 AssetRequest::Path(std::path::PathBuf::from(path))
             }
+            #[cfg(feature = "redis")]
             pb::api::asset_request::Kind::Redis(redis) => {
                 AssetRequest::Redis(redis.url, redis.key, redis.ttl)
             }

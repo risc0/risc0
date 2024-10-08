@@ -21,6 +21,7 @@ use std::{
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+#[cfg(feature = "redis")]
 use redis::Commands;
 use risc0_zkp::core::digest::Digest;
 
@@ -324,56 +325,56 @@ impl Server {
             let bytes = binary.as_bytes()?;
             let mut exec = ExecutorImpl::from_elf(env, &bytes)?;
 
-            // use redis if available
-            let session = if let AssetRequest::Redis(url, key, ttl) =
-                AssetRequest::try_from(segments_out.clone())?
-            {
-                let client = redis::Client::open(url)?;
-                let mut connection = client.get_connection()?;
-                exec.run_with_callback(|segment| {
-                    let segment_bytes = bincode::serialize(&segment)?;
-                    let redis_asset: Vec<u8> = pb::api::Asset::from_bytes(
-                        &segments_out,
-                        segment_bytes.into(),
-                        format!("segment-{}", segment.index),
-                    )?
-                    .as_bytes()?
-                    .into();
-                    let segment_key = format!("{}:{}", key, segment.index);
-                    connection.set_ex(segment_key.clone(), redis_asset, ttl)?;
+            let session = match AssetRequest::try_from(segments_out.clone())? {
+                #[cfg(feature = "redis")]
+                AssetRequest::Redis(url, key, ttl) => {
+                    let client = redis::Client::open(url)?;
+                    let mut connection = client.get_connection()?;
+                    exec.run_with_callback(|segment| {
+                        let segment_bytes = bincode::serialize(&segment)?;
+                        let redis_asset: Vec<u8> = pb::api::Asset::from_bytes(
+                            &segments_out,
+                            segment_bytes.into(),
+                            format!("segment-{}", segment.index),
+                        )?
+                        .as_bytes()?
+                        .into();
+                        let segment_key = format!("{}:{}", key, segment.index);
+                        connection.set_ex(segment_key.clone(), redis_asset, ttl)?;
 
-                    // this returns the redis key as the asset of the segment
-                    // TODO: epxlore cleaner/better ways to approach this
-                    let bytes = segment_key.as_bytes().to_owned();
-                    let return_asset = pb::api::Asset::from_bytes(&segments_out, bytes.into(), "")?;
-                    let segment = Some(pb::api::SegmentInfo {
-                        index: segment.index,
-                        po2: segment.inner.po2 as u32,
-                        cycles: segment.inner.insn_cycles as u32,
-                        segment: Some(return_asset),
-                    });
+                        // this returns the redis key as the asset of the segment
+                        // TODO: epxlore cleaner/better ways to approach this
+                        let bytes = segment_key.as_bytes().to_owned();
+                        let return_asset =
+                            pb::api::Asset::from_bytes(&segments_out, bytes.into(), "")?;
+                        let segment = Some(pb::api::SegmentInfo {
+                            index: segment.index,
+                            po2: segment.inner.po2 as u32,
+                            cycles: segment.inner.insn_cycles as u32,
+                            segment: Some(return_asset),
+                        });
 
-                    let msg = pb::api::ServerReply {
-                        kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                            kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                                pb::api::OnSegmentDone { segment },
-                            )),
-                        })),
-                    };
-                    tracing::trace!("tx: {msg:?}");
-                    conn.send(msg)?;
+                        let msg = pb::api::ServerReply {
+                            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                                kind: Some(pb::api::client_callback::Kind::SegmentDone(
+                                    pb::api::OnSegmentDone { segment },
+                                )),
+                            })),
+                        };
+                        tracing::trace!("tx: {msg:?}");
+                        conn.send(msg)?;
 
-                    let reply: pb::api::GenericReply = conn.recv()?;
-                    tracing::trace!("rx: {reply:?}");
-                    let kind = reply.kind.ok_or(malformed_err())?;
-                    if let pb::api::generic_reply::Kind::Error(err) = kind {
-                        bail!(err)
-                    }
+                        let reply: pb::api::GenericReply = conn.recv()?;
+                        tracing::trace!("rx: {reply:?}");
+                        let kind = reply.kind.ok_or(malformed_err())?;
+                        if let pb::api::generic_reply::Kind::Error(err) = kind {
+                            bail!(err)
+                        }
 
-                    Ok(Box::new(NullSegmentRef))
-                })?
-            } else {
-                exec.run_with_callback(|segment| {
+                        Ok(Box::new(NullSegmentRef))
+                    })?
+                }
+                _ => exec.run_with_callback(|segment| {
                     let segment_bytes = bincode::serialize(&segment)?;
                     let asset = pb::api::Asset::from_bytes(
                         &segments_out,
@@ -405,7 +406,7 @@ impl Server {
                     }
 
                     Ok(Box::new(NullSegmentRef))
-                })?
+                })?,
             };
 
             let receipt_claim = session.claim()?;
@@ -883,6 +884,7 @@ impl pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
                 })
             }
+            #[cfg(feature = "redis")]
             pb::api::asset_request::Kind::Redis(_) => Ok(Self {
                 kind: Some(pb::api::asset::Kind::Inline(bytes.into())),
             }),

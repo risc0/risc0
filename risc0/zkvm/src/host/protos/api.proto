@@ -226,7 +226,7 @@ message ProveSegmentResult {
   Asset receipt = 1;
 }
 
-message RedisRequest {
+message RedisParams {
   string url = 1;
   string key = 2;
   uint64 ttl = 3;
@@ -243,7 +243,7 @@ message AssetRequest {
   oneof kind {
     google.protobuf.Empty inline = 1;
     string path = 2;
-    RedisRequest redis = 3;
+    RedisParams redis = 3;
   }
 }
 

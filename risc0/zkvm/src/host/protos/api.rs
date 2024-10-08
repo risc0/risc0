@@ -433,7 +433,7 @@ pub mod asset {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RedisRequest {
+pub struct RedisParams {
     #[prost(string, tag = "1")]
     pub url: String,
     #[prost(string, tag = "2")]
@@ -456,8 +456,9 @@ pub mod asset_request {
         Inline(()),
         #[prost(string, tag = "2")]
         Path(::prost::alloc::string::String),
+        #[cfg(feature = "redis")]
         #[prost(message, tag = "3")]
-        Redis(super::RedisRequest),
+        Redis(super::RedisParams),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
