@@ -16,7 +16,7 @@ use std::{collections::HashMap, ffi::c_void, rc::Rc};
 
 use anyhow::{bail, Result};
 use metal::{ComputePipelineDescriptor, MTLResourceOptions, MTLResourceUsage};
-use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
+use risc0_circuit_rv32im_sys::ffi::{risc0_circuit_rv32im_cpu_witgen, RawPreflightTrace};
 use risc0_core::{
     field::{
         baby_bear::{BabyBearElem, BabyBearExtElem},
@@ -24,7 +24,7 @@ use risc0_core::{
     },
     scope,
 };
-use risc0_sys::CppError;
+use risc0_sys::wrap_ffi;
 use risc0_zkp::{
     core::log2_ceil,
     field::Elem as _,
@@ -87,19 +87,7 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
         // TODO: call metal kernels for witgen.
         // For now we use the CPU implementation.
 
-        extern "C" {
-            fn risc0_circuit_rv32im_cpu_witgen(
-                mode: u32,
-                trace: *const RawPreflightTrace,
-                steps: u32,
-                count: u32,
-                ctrl: *const BabyBearElem,
-                io: *const BabyBearElem,
-                data: *const BabyBearElem,
-            ) -> CppError;
-        }
-
-        unsafe {
+        wrap_ffi(|| unsafe {
             risc0_circuit_rv32im_cpu_witgen(
                 mode as u32,
                 trace,
@@ -109,8 +97,8 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
                 io.as_ptr() as *const BabyBearElem,
                 data.as_ptr() as *const BabyBearElem,
             )
-            .unwrap();
-        }
+        })
+        .unwrap()
     }
 }
 
