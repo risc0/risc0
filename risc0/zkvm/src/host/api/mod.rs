@@ -333,6 +333,8 @@ impl pb::api::Asset {
         let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
+            #[cfg(feature = "redis")]
+            pb::api::asset::Kind::Redis(bytes) => bytes.clone(),
         };
         Ok(bytes.into())
     }
@@ -346,6 +348,10 @@ pub enum Asset {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    #[cfg(feature = "redis")]
+    Redis(Bytes),
 }
 
 /// Determines the format of an asset request.
@@ -404,6 +410,8 @@ impl Asset {
         Ok(match self {
             Asset::Inline(bytes) => bytes.clone(),
             Asset::Path(path) => std::fs::read(path)?.into(),
+            #[cfg(feature = "redis")]
+            Asset::Redis(bytes) => bytes.clone(),
         })
     }
 }

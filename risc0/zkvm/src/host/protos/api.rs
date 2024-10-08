@@ -417,7 +417,7 @@ pub struct ProveSegmentResult {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Asset {
-    #[prost(oneof = "asset::Kind", tags = "1, 2")]
+    #[prost(oneof = "asset::Kind", tags = "1, 2, 3")]
     pub kind: ::core::option::Option<asset::Kind>,
 }
 /// Nested message and enum types in `Asset`.
@@ -429,6 +429,9 @@ pub mod asset {
         Inline(::prost::alloc::vec::Vec<u8>),
         #[prost(string, tag = "2")]
         Path(::prost::alloc::string::String),
+        #[cfg(feature = "redis")]
+        #[prost(bytes, tag = "3")]
+        Redis(::prost::alloc::vec::Vec<u8>),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

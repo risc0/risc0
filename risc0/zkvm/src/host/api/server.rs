@@ -886,7 +886,7 @@ impl pb::api::Asset {
             }
             #[cfg(feature = "redis")]
             pb::api::asset_request::Kind::Redis(_) => Ok(Self {
-                kind: Some(pb::api::asset::Kind::Inline(bytes.into())),
+                kind: Some(pb::api::asset::Kind::Redis(bytes.into())),
             }),
         }
     }

@@ -69,6 +69,8 @@ impl TryFrom<Asset> for pb::api::Asset {
             kind: match value {
                 Asset::Inline(bytes) => Some(pb::api::asset::Kind::Inline(bytes.into())),
                 Asset::Path(path) => Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
+                #[cfg(feature = "redis")]
+                Asset::Redis(bytes) => Some(pb::api::asset::Kind::Redis(bytes.into())),
             },
         })
     }
@@ -108,6 +110,8 @@ impl TryFrom<pb::api::Asset> for Asset {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::api::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
+            #[cfg(feature = "redis")]
+            pb::api::asset::Kind::Redis(bytes) => Asset::Redis(bytes.into()),
         })
     }
 }
