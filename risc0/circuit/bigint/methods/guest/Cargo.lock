@@ -789,6 +789,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-bigint-test-methods"
+version = "0.1.0"
+dependencies = [
+ "num-bigint",
+ "risc0-circuit-bigint",
+ "risc0-zkvm",
+]
+
+[[package]]
 name = "risc0-circuit-recursion"
 version = "1.2.0-alpha.1"
 dependencies = [
@@ -905,15 +914,6 @@ checksum = "b4382d3af3a4ebdae7f64ba6edd9114fff92c89808004c4943b393377a25d001"
 dependencies = [
  "downcast-rs",
  "paste",
-]
-
-[[package]]
-name = "rsa"
-version = "0.1.0"
-dependencies = [
- "num-bigint",
- "risc0-circuit-bigint",
- "risc0-zkvm",
 ]
 
 [[package]]

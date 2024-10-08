@@ -22,17 +22,7 @@
   },
   "biome.rename": true,
   "biome.enabled": true,
-  "cSpell.words": [
-    "Groth",
-    "Holesky",
-    "Sepolia",
-    "Zeroable",
-    "bytemuck",
-    "canonicalize",
-    "posix",
-    "repr",
-    "risczero",
-  ],
+  "cSpell.words": ["Groth", "Holesky", "Sepolia", "Zeroable", "bytemuck", "canonicalize", "posix", "repr", "risczero"],
   "files.eol": "\n",
   "git.ignoreLimitWarning": true,
   "files.associations": {
@@ -59,28 +49,13 @@
     "initializer_list": "cpp"
   },
   "tailwindCSS.experimental.classRegex": [
-    [
-      "cva\\(([^)]*)\\)",
-      "[\"'`]([^\"'`]*).*?[\"'`]"
-    ],
-    [
-      "cn\\(([^)]*)\\)",
-      "[\"'`]([^\"'`]*).*?[\"'`]"
-    ],
-    [
-      "cx\\(([^)]*)\\)",
-      "(?:'|\"|`)([^']*)(?:'|\"|`)"
-    ],
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
     "twc\\.[^`]+`([^`]*)`",
     "twc\\(.*?\\).*?`([^`]*)",
-    [
-      "twc\\.[^`]+\\(([^)]*)\\)",
-      "(?:'|\"|`)([^']*)(?:'|\"|`)"
-    ],
-    [
-      "twc\\(.*?\\).*?\\(([^)]*)\\)",
-      "(?:'|\"|`)([^']*)(?:'|\"|`)"
-    ]
+    ["twc\\.[^`]+\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["twc\\(.*?\\).*?\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
   "rust-analyzer.showUnlinkedFileNotification": false,
   "rust-analyzer.linkedProjects": [
@@ -98,8 +73,6 @@
     "CARGO_TARGET_DIR": "target/analyzer"
   },
   "rust-analyzer.check.command": "clippy",
-  "rust-analyzer.check.extraArgs": [
-    "--target-dir=target/analyzer"
-  ],
+  "rust-analyzer.check.extraArgs": ["--target-dir=target/analyzer"],
   "biome.lspBin": "web/node_modules/.bin/biome"
 }

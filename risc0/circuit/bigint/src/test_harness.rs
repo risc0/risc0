@@ -23,7 +23,7 @@ use risc0_zkp::{
 };
 use tracing::trace;
 
-use crate::{BigIntContext, BytePoly};
+use crate::{byte_poly, BigIntContext};
 
 impl BigIntContext {
     pub(crate) fn from_values(in_values: Vec<BigUint>) -> Self {
@@ -34,11 +34,133 @@ impl BigIntContext {
     }
 }
 
+macro_rules! bigint_tests {
+    ($($name:ident($zkr:ident, $in:expr, $pub:expr, $priv:expr, $const:expr, $z:expr),)*) => {
+        $(
+            paste::paste! {
+                fn [<$name _values>]() -> Vec<BigUint> {
+                    $in.into_iter().map($crate::test_harness::from_hex).collect()
+                }
+
+                fn [<$name _context>]() -> anyhow::Result<BigIntContext> {
+                    let mut ctx = BigIntContext::from_values([<$name _values>]());
+                    $crate::generated::$zkr(&mut ctx)?;
+                    Ok(ctx)
+                }
+
+                #[test]
+                fn [<$name _witgen>]() -> anyhow::Result<()> {
+                    let z = BabyBearExtElem::from_subelems(
+                        $z.into_iter().map(BabyBearElem::from_u64)
+                    );
+
+                    test_witgen(
+                        [<$name _context>]()?,
+                        witness_test_data(&$pub),
+                        witness_test_data(&$priv),
+                        witness_test_data(&$const),
+                        z,
+                    )
+                }
+
+                fn [<$name _filename>]() -> &'static str {
+                    concat!(stringify!($zkr), ".zkr")
+                }
+
+                #[test]
+                fn [<$name _zkr>]() -> anyhow::Result<()> {
+                    test_zkr([<$name _context>]()?, [<$name _filename>]())
+                }
+
+                #[test]
+                fn [<$name _prove>]() -> Result<()> {
+                    use $crate::generated::[<$zkr:snake:upper>];
+                    let claim = BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
+                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2)?;
+                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr)?;
+                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt)?;
+                    Ok(())
+                }
+            }
+        )*
+    }
+}
+
+// Testing that witgen produces expected "golden" values for the public, private, and constant witnesses is only occasionally helpful and is quite tedious to generate golden values for, especially on the longer tests. This test macro omits the witgen test.
+macro_rules! bigint_short_tests {
+    ($($name:ident($zkr:ident, $in:expr),)*) => {
+        $(
+            paste::paste! {
+                fn [<$name _values>]() -> Vec<BigUint> {
+                    $in.into_iter().map($crate::test_harness::from_hex).collect()
+                }
+
+                fn [<$name _context>]() -> anyhow::Result<BigIntContext> {
+                    let mut ctx = BigIntContext::from_values([<$name _values>]());
+                    $crate::generated::$zkr(&mut ctx)?;
+                    Ok(ctx)
+                }
+
+                fn [<$name _filename>]() -> &'static str {
+                    concat!(stringify!($zkr), ".zkr")
+                }
+
+                #[test]
+                fn [<$name _zkr>]() -> anyhow::Result<()> {
+                    test_zkr([<$name _context>]()?, [<$name _filename>]())
+                }
+
+                #[test]
+                fn [<$name _prove>]() -> Result<()> {
+                    use $crate::generated::[<$zkr:snake:upper>];
+                    let claim = BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
+                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2)?;
+                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr)?;
+                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt)?;
+                    Ok(())
+                }
+            }
+        )*
+    }
+}
+
+// Tests that input values which should cause constraint failures do so
+macro_rules! bigint_should_fail_tests {
+    ($($name:ident($zkr:ident, $in:expr),)*) => {
+        $(
+            paste::paste! {
+                fn [<$name _values>]() -> Vec<BigUint> {
+                    $in.into_iter().map($crate::test_harness::from_hex).collect()
+                }
+
+                fn [<$name _filename>]() -> &'static str {
+                    concat!(stringify!($zkr), ".zkr")
+                }
+
+
+                #[test]
+                #[should_panic(expected = "Invalid carry computation")]
+                fn [<$name _prove_fails>]() -> () {
+                    use $crate::generated::[<$zkr:snake:upper>];
+                    let claim = BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
+                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), BIGINT_PO2).unwrap();
+                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr).unwrap();
+                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt).unwrap();
+                }
+            }
+        )*
+    }
+}
+
+pub(crate) use bigint_short_tests;
+pub(crate) use bigint_should_fail_tests;
+pub(crate) use bigint_tests;
+
 pub(crate) fn test_witgen(
     ctx: BigIntContext,
-    pub_wit: Vec<BytePoly>,
-    priv_wit: Vec<BytePoly>,
-    const_wit: Vec<BytePoly>,
+    pub_wit: Vec<Vec<i32>>,
+    priv_wit: Vec<Vec<i32>>,
+    const_wit: Vec<Vec<i32>>,
     gold_z: BabyBearExtElem,
 ) -> Result<()> {
     assert_eq!(ctx.public_witness, pub_wit);
@@ -47,9 +169,9 @@ pub(crate) fn test_witgen(
 
     let hash_suite = Poseidon2HashSuite::new_suite();
 
-    let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+    let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
     trace!("public_digest: {public_digest}");
-    let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+    let private_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
     trace!("private_digest: {private_digest}");
     let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
     trace!("folded: {folded}");
@@ -89,8 +211,8 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
         }
     }
 
-    let public_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
-    let private_digest = BytePoly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+    let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+    let private_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
     let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
 
     let mut rng = hash_suite.rng.new_rng();
@@ -123,8 +245,8 @@ pub(crate) fn test_zkr(ctx: BigIntContext, zkr_name: &str) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn witness_test_data(data: &[&str]) -> Vec<BytePoly> {
-    data.iter().map(|d| BytePoly::from_hex(d)).collect()
+pub(crate) fn witness_test_data(data: &[&str]) -> Vec<Vec<i32>> {
+    data.iter().map(|d| byte_poly::from_hex(d)).collect()
 }
 
 pub(crate) fn from_hex(s: &str) -> BigUint {

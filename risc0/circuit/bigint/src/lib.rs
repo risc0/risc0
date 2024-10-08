@@ -14,6 +14,7 @@
 
 pub mod byte_poly;
 mod codegen_prelude;
+pub mod ec;
 pub mod rsa;
 #[cfg(feature = "prove")]
 pub mod zkr;
@@ -32,6 +33,8 @@ pub use guest::*;
 pub(crate) mod control_id;
 
 #[cfg(test)]
+mod ec_tests;
+#[cfg(test)]
 mod op_tests;
 #[cfg(test)]
 #[cfg(feature = "prove")]
@@ -41,6 +44,7 @@ mod test_harness;
 
 pub(crate) mod generated {
     #![allow(dead_code)]
+    #![allow(non_camel_case_types)]
     #![allow(clippy::all)]
 
     use crate::codegen_prelude::*;
@@ -50,7 +54,7 @@ pub(crate) mod generated {
 use std::borrow::Borrow;
 
 use anyhow::{ensure, Context, Result};
-use byte_poly::{BytePoly, BITS_PER_COEFF};
+use byte_poly::BITS_PER_COEFF;
 use num_bigint::BigUint;
 use risc0_binfmt::{tagged_list, Digestible};
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
@@ -67,9 +71,9 @@ const CLAIM_LIST_TAG: &str = "risc0.BigIntClaims";
 pub struct BigIntContext {
     pub in_values: Vec<BigUint>,
 
-    pub constant_witness: Vec<BytePoly>,
-    pub public_witness: Vec<BytePoly>,
-    pub private_witness: Vec<BytePoly>,
+    pub constant_witness: Vec<Vec<i32>>,
+    pub public_witness: Vec<Vec<i32>>,
+    pub private_witness: Vec<Vec<i32>>,
 }
 
 /// Information about a big integer included in a bigint witness.
@@ -104,11 +108,11 @@ pub struct BigIntProgram<'a> {
 
 #[derive(Debug, Clone)]
 pub struct BigIntClaim {
-    pub public_witness: Vec<BytePoly>,
+    pub public_witness: Vec<Vec<i32>>,
 }
 
 impl BigIntClaim {
-    pub fn new(public_witness: Vec<BytePoly>) -> Self {
+    pub fn new(public_witness: Vec<Vec<i32>>) -> Self {
         BigIntClaim { public_witness }
     }
 
@@ -117,10 +121,10 @@ impl BigIntClaim {
         biguints: &[impl ToOwned<Owned = BigUint>],
     ) -> Self {
         assert_eq!(biguints.len(), prog_info.witness_info.len());
-        let public_witness: Vec<BytePoly> = biguints
+        let public_witness: Vec<Vec<i32>> = biguints
             .iter()
             .zip(prog_info.witness_info.iter())
-            .map(|(val, wit_info)| BytePoly::from_biguint(val.to_owned(), wit_info.coeffs()))
+            .map(|(val, wit_info)| byte_poly::from_biguint(val.to_owned(), wit_info.coeffs()))
             .collect();
         BigIntClaim { public_witness }
     }
@@ -131,7 +135,7 @@ impl Digestible for BigIntClaim {
         let mut u32s: Vec<u32> = Vec::new();
 
         for wit in self.public_witness.iter() {
-            u32s.extend(wit.clone().into_padded_u32s())
+            u32s.extend(byte_poly::into_padded_u32s(wit))
         }
 
         tracing::trace!("digest of {} u32s: {:x?}", u32s.len(), u32s);
