@@ -26,6 +26,9 @@ pub static SHOW_HELP: &str = r"Discussion:
     If there are multiple toolchains installed then all installed
     toolchains are listed as well.";
 
+pub static LIST_HELP: &str = r"Discussion:
+    Lists available toolchains and extensions.";
+
 pub static UPDATE_HELP: &str = r"Discussion:
     With no toolchain or extension specified, the `update` command
     updates each of the installed toolchains from the release channels.

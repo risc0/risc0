@@ -60,6 +60,14 @@ enum RzupSubcmd {
         #[command(subcommand)]
         subcmd: Option<cli::show::ShowSubcmd>,
     },
+    /// List available toolchains and extensions.
+    #[command(after_help = cli::help::LIST_HELP)]
+    List {
+        /// List all available toolchains and extensions, including those not
+        /// installed
+        #[arg(short, long)]
+        all: bool,
+    },
     /// Install toolchains or extensions
     #[command(after_help = cli::help::INSTALL_HELP)]
     Install {
@@ -149,6 +157,7 @@ async fn run() -> Result<()> {
 
     match subcmd {
         RzupSubcmd::Show { subcmd } => cli::show::handler(subcmd),
+        RzupSubcmd::List { all } => cli::list::handler(all),
         RzupSubcmd::Install {
             name,
             version,
