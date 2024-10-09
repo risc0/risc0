@@ -11,5 +11,6 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
-default = ["redis"]
+default = []
 redis = ["risc0-zkvm/redis"]
+prove = ["risc0-zkvm/prove"]

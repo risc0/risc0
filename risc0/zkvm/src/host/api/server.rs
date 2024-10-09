@@ -806,7 +806,10 @@ impl pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
                 })
             }
-            pb::api::asset_request::Kind::Redis(_) => bail!("from_bytes not supported for redis"),
+            pb::api::asset_request::Kind::Redis(_) => {
+                tracing::error!("It's likely that r0vm is not installed with the redis feature");
+                bail!("from_bytes not supported for redis")
+            }
         }
     }
 }

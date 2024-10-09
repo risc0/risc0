@@ -12,37 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use fibonacci_methods::FIBONACCI_ELF;
-use risc0_zkvm::{ApiClient, Asset, AssetRequest, ExecutorEnv, RedisParams};
-
-/// r0vm must to be installed with the redis feature:
+/// r0vm must to be installed with the redis feature for this example to work with redis:
 /// `cargo install --force --path risc0/r0vm --features redis`
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
-    let iterations: u32 = 100000000;
-    let url = String::from("redis://localhost:6379/");
-    let key = String::from("key");
-    let ttl = 180;
-    let client = ApiClient::from_env().unwrap();
-    let env = ExecutorEnv::builder().write(&iterations)?.build()?;
-    let timer = std::time::SystemTime::now();
-    let session = client.execute(
-        &env,
-        Asset::Inline(FIBONACCI_ELF.into()),
-        AssetRequest::Redis(RedisParams { url, key, ttl }),
-        |_info, _segment| {
-            let Asset::Redis(_) = _segment else {
-                anyhow::bail!("wrong asset request type")
-            };
-            Ok(())
-        },
-    )?;
+    let _iterations: u32 = 10000000;
 
-    let perf = (session.cycles() as f64 / timer.elapsed()?.as_secs_f64()) / 1_000_000.0;
-    println!("{:?} Mhz, {} segments", perf, session.segments.len());
+    #[cfg(feature = "redis")]
+    if cfg!(feature = "redis") {
+        use risc0_zkvm::{ApiClient, Asset, AssetRequest, ExecutorEnv, RedisParams};
+
+        let url = String::from("redis://localhost:6379/");
+        let key = String::from("key");
+        let ttl = 180;
+        let client = ApiClient::from_env().unwrap();
+        let env = ExecutorEnv::builder().write(&_iterations)?.build()?;
+        let timer = std::time::SystemTime::now();
+        let session = client.execute(
+            &env,
+            Asset::Inline(fibonacci_methods::FIBONACCI_ELF.into()),
+            AssetRequest::Redis(RedisParams { url, key, ttl }),
+            |_info, _segment| {
+                let Asset::Redis(_) = _segment else {
+                    anyhow::bail!("wrong asset request type")
+                };
+                Ok(())
+            },
+        )?;
+
+        let perf = (session.cycles() as f64 / timer.elapsed()?.as_secs_f64()) / 1_000_000.0;
+        println!(
+            "redis executor: {:?} Mhz, {} segments",
+            perf,
+            session.segments.len()
+        );
+    }
+
+    #[cfg(feature = "prove")]
+    if cfg!(feature = "prove") {
+        let env = risc0_zkvm::ExecutorEnv::builder()
+            .write(&_iterations)?
+            .build()?;
+        let exec = risc0_zkvm::default_executor();
+        let timer = std::time::SystemTime::now();
+        let session = exec.execute(env, fibonacci_methods::FIBONACCI_ELF)?;
+
+        let perf = (session.cycles() as f64 / timer.elapsed()?.as_secs_f64()) / 1_000_000.0;
+        println!(
+            "default_executor: {:?} Mhz, {} segments",
+            perf,
+            session.segments.len()
+        );
+    }
 
     Ok(())
 }
