@@ -34,3 +34,6 @@ debug = 1
 
 [package.metadata.release]
 release = false
+
+[features]
+redis = []
