@@ -325,8 +325,10 @@ pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars:
-        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    pub env_vars: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]
@@ -416,6 +418,16 @@ pub struct ProveSegmentResult {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RedisParams {
+    #[prost(string, tag = "1")]
+    pub url: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub key: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "3")]
+    pub ttl: u64,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Asset {
     #[prost(oneof = "asset::Kind", tags = "1, 2, 3")]
     pub kind: ::core::option::Option<asset::Kind>,
@@ -429,20 +441,9 @@ pub mod asset {
         Inline(::prost::alloc::vec::Vec<u8>),
         #[prost(string, tag = "2")]
         Path(::prost::alloc::string::String),
-        #[cfg(feature = "redis")]
-        #[prost(bytes, tag = "3")]
-        Redis(::prost::alloc::vec::Vec<u8>),
+        #[prost(string, tag = "3")]
+        Redis(::prost::alloc::string::String),
     }
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RedisParams {
-    #[prost(string, tag = "1")]
-    pub url: String,
-    #[prost(string, tag = "2")]
-    pub key: String,
-    #[prost(uint64, tag = "3")]
-    pub ttl: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -459,7 +460,6 @@ pub mod asset_request {
         Inline(()),
         #[prost(string, tag = "2")]
         Path(::prost::alloc::string::String),
-        #[cfg(feature = "redis")]
         #[prost(message, tag = "3")]
         Redis(super::RedisParams),
     }

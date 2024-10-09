@@ -327,9 +327,7 @@ impl Server {
 
             let session = match AssetRequest::try_from(segments_out.clone())? {
                 #[cfg(feature = "redis")]
-                AssetRequest::Redis(url, key, ttl) => {
-                    execute_redis(conn, &mut exec, &segments_out, url, key, ttl)?
-                }
+                AssetRequest::Redis(params) => execute_redis(conn, &mut exec, params)?,
                 _ => execute_default(conn, &mut exec, &segments_out)?,
             };
 
@@ -808,10 +806,7 @@ impl pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
                 })
             }
-            #[cfg(feature = "redis")]
-            pb::api::asset_request::Kind::Redis(_) => Ok(Self {
-                kind: Some(pb::api::asset::Kind::Redis(bytes.into())),
-            }),
+            pb::api::asset_request::Kind::Redis(_) => bail!("from_bytes not supported for redis"),
         }
     }
 }
@@ -835,26 +830,23 @@ fn check_client_version(client: &semver::Version, server: &semver::Version) -> b
 fn execute_redis(
     conn: &mut ConnectionWrapper,
     exec: &mut ExecutorImpl,
-    segments_out: &pb::api::AssetRequest,
-    url: String,
-    key: String,
-    ttl: u64,
+    params: super::RedisParams,
 ) -> Result<crate::Session> {
-    let client = redis::Client::open(url)?;
+    let client = redis::Client::open(params.url)?;
     let mut connection = client.get_connection()?;
     exec.run_with_callback(|segment| {
         let segment_bytes = bincode::serialize(&segment)?;
-        let segment_key = format!("{}:{}", key, segment.index);
-        connection.set_ex(segment_key.clone(), segment_bytes, ttl)?;
+        let segment_key = format!("{}:{}", params.key, segment.index);
+        connection.set_ex(segment_key.clone(), segment_bytes, params.ttl)?;
 
         // this returns the redis key as the asset of the segment
-        let bytes = segment_key.as_bytes().to_owned();
-        let return_asset = pb::api::Asset::from_bytes(segments_out, bytes.into(), "")?;
         let segment = Some(pb::api::SegmentInfo {
             index: segment.index,
             po2: segment.inner.po2 as u32,
             cycles: segment.inner.insn_cycles as u32,
-            segment: Some(return_asset),
+            segment: Some(pb::api::Asset {
+                kind: Some(pb::api::asset::Kind::Redis(segment_key)),
+            }),
         });
 
         let msg = pb::api::ServerReply {

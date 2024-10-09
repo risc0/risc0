@@ -236,7 +236,7 @@ message Asset {
   oneof kind {
     bytes inline = 1;
     string path = 2;
-    bytes redis = 3;
+    string redis = 3;
   }
 }
 

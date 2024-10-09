@@ -20,7 +20,7 @@ use risc0_binfmt::SystemState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
+use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
     host::client::env::ProveZkrRequest,
     receipt::{
@@ -52,9 +52,12 @@ impl TryFrom<AssetRequest> for pb::api::AssetRequest {
                 AssetRequest::Path(path) => {
                     pb::api::asset_request::Kind::Path(path_to_string(path)?)
                 }
-                #[cfg(feature = "redis")]
-                AssetRequest::Redis(url, key, ttl) => {
-                    pb::api::asset_request::Kind::Redis(pb::api::RedisParams { url, key, ttl })
+                AssetRequest::Redis(params) => {
+                    pb::api::asset_request::Kind::Redis(pb::api::RedisParams {
+                        url: params.url,
+                        key: params.key,
+                        ttl: params.ttl,
+                    })
                 }
             }),
         })
@@ -69,8 +72,7 @@ impl TryFrom<Asset> for pb::api::Asset {
             kind: match value {
                 Asset::Inline(bytes) => Some(pb::api::asset::Kind::Inline(bytes.into())),
                 Asset::Path(path) => Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
-                #[cfg(feature = "redis")]
-                Asset::Redis(bytes) => Some(pb::api::asset::Kind::Redis(bytes.into())),
+                Asset::Redis(key) => Some(pb::api::asset::Kind::Redis(key)),
             },
         })
     }
@@ -110,8 +112,7 @@ impl TryFrom<pb::api::Asset> for Asset {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::api::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
-            #[cfg(feature = "redis")]
-            pb::api::asset::Kind::Redis(bytes) => Asset::Redis(bytes.into()),
+            pb::api::asset::Kind::Redis(key) => Asset::Redis(key),
         })
     }
 }
@@ -125,10 +126,11 @@ impl TryFrom<pb::api::AssetRequest> for AssetRequest {
             pb::api::asset_request::Kind::Path(path) => {
                 AssetRequest::Path(std::path::PathBuf::from(path))
             }
-            #[cfg(feature = "redis")]
-            pb::api::asset_request::Kind::Redis(redis) => {
-                AssetRequest::Redis(redis.url, redis.key, redis.ttl)
-            }
+            pb::api::asset_request::Kind::Redis(params) => AssetRequest::Redis(RedisParams {
+                url: params.url,
+                key: params.key,
+                ttl: params.ttl,
+            }),
         })
     }
 }
