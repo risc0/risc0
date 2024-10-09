@@ -12,30 +12,54 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 
-use crate::utils::{find_installed_extensions, find_installed_toolchains};
+use crate::utils::{
+    find_installed_extensions, find_installed_toolchains, list_cargo_risczero_versions,
+    list_cpp_toolchain_versions, list_rust_toolchain_versions,
+};
 
-pub fn handler(all: bool) -> Result<()> {
+pub async fn handler(all: bool) -> Result<()> {
     match all {
-        true => {
-            // not implemented
-            Err(anyhow!("Not implemented"))
-        }
-        false => {
-            eprintln!("Installed Extensions");
-            let extensions = find_installed_extensions()?;
-            for extension in extensions {
-                eprintln!("  {}", extension.file_name().unwrap().to_string_lossy());
-            }
-
-            eprintln!("\nInstalled Toolchains");
-            let toolchains = find_installed_toolchains()?;
-            for toolchain in toolchains {
-                eprintln!("  {}", toolchain);
-            }
-
-            Ok(())
-        }
+        true => list_all().await,
+        false => list_installed(),
     }
+}
+
+fn list_installed() -> Result<()> {
+    eprintln!("Installed Extensions");
+    let extensions = find_installed_extensions()?;
+    for extension in extensions {
+        eprintln!("  {}", extension.file_name().unwrap().to_string_lossy());
+    }
+
+    eprintln!("\nInstalled Toolchains");
+    let toolchains = find_installed_toolchains()?;
+    for toolchain in toolchains {
+        eprintln!("  {}", toolchain);
+    }
+
+    Ok(())
+}
+
+async fn list_all() -> Result<()> {
+    eprintln!("Available versions for `cargo-risczero`");
+    let versions = list_cargo_risczero_versions().await?;
+    for version in versions {
+        eprintln!("  {}", version);
+    }
+
+    eprintln!("\nAvailable versions for `rust-toolchain`");
+    let versions = list_rust_toolchain_versions().await?;
+    for version in versions {
+        eprintln!("  {}", version);
+    }
+
+    eprintln!("\nAvailable versions for `cpp-toolchain`");
+    let versions = list_cpp_toolchain_versions().await?;
+    for version in versions {
+        eprintln!("  {}", version);
+    }
+
+    Ok(())
 }

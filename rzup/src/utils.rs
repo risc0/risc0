@@ -359,6 +359,36 @@ async fn check_cpp_toolchain_updates() -> Result<UpdateInfo, RzupError> {
     })
 }
 
+/// Gets a list of all available versions for the `cargo-risczero` extension.
+pub async fn list_cargo_risczero_versions() -> Result<Vec<String>, RzupError> {
+    let release_infos = Extension::CargoRiscZero.list_release_infos().await?;
+    let release_tags = release_infos
+        .iter()
+        .map(|info| info.tag_name.clone())
+        .collect();
+    Ok(release_tags)
+}
+
+/// Gets a list of all available versions for the `rust` toolchain.
+pub async fn list_rust_toolchain_versions() -> Result<Vec<String>, RzupError> {
+    let release_infos = Toolchain::Rust.list_release_infos().await?;
+    let release_tags = release_infos
+        .iter()
+        .map(|info| info.tag_name.clone())
+        .collect();
+    Ok(release_tags)
+}
+
+/// Gets a list of all available versions for the `cpp` toolchain.
+pub async fn list_cpp_toolchain_versions() -> Result<Vec<String>, RzupError> {
+    let release_infos = Toolchain::Cpp.list_release_infos().await?;
+    let release_tags = release_infos
+        .iter()
+        .map(|info| info.tag_name.clone())
+        .collect();
+    Ok(release_tags)
+}
+
 /// Checks for updates for the active toolchains and extensions and returns a list of update information.
 pub async fn get_updatable_active() -> Result<Vec<UpdateInfo>, RzupError> {
     let mut updates = Vec::new();

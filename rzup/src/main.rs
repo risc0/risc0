@@ -157,7 +157,7 @@ async fn run() -> Result<()> {
 
     match subcmd {
         RzupSubcmd::Show { subcmd } => cli::show::handler(subcmd),
-        RzupSubcmd::List { all } => cli::list::handler(all),
+        RzupSubcmd::List { all } => cli::list::handler(all).await,
         RzupSubcmd::Install {
             name,
             version,
