@@ -480,11 +480,20 @@ fn main() {
         MultiTestSpec::KeccakShaDigest => {
             //let data = hex!("010000000000000054686520717569636B2062726F776E20666F78206A756D7073206F76657220746865206C617A7920646F672E0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080578951e24efd62a3d63a86f7cd19aaa53c898fe287d2552133220370240b572d0000000000000000");
 
-            const limit: usize = 1000;
-            let data = [0u8; limit]; // 1kb buffer
-            let block_count_offset = 0;
-            let mut data_offset = 8;
-            let digest = sha::Impl::hash_bytes(&data);
+            let data = b"The quick brown fox jumps over the lazy dog.";
+            let mut hasher = Keccak::v256();
+            hasher.update(data);
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.finalize(&mut output);
+
+            let digest = unsafe {
+                env::KECCAK_BATCHER.write_data(data).unwrap();
+                let padding = &hex!("0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080");
+                env::KECCAK_BATCHER.write_data(padding).unwrap();
+                env::KECCAK_BATCHER.write_hash(&output).unwrap();
+                env::KECCAK_BATCHER.finalize().unwrap()
+            };
+
             assert_eq!(
                 digest.as_bytes(),
                 hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")

@@ -171,7 +171,7 @@ impl KeccakBatcher {
     ///
     /// the amount of raw data written to the
     pub fn write_hash(&mut self, input: &[u8]) -> Result<()> {
-        let data_length = self.data_offset - self.block_count_offset + Self::BLOCK_COUNT_BYTES;
+        let data_length = self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES);
         // at this point, it is expected that the data written is a multiple of
         // the block count.
         if data_length % Self::BLOCK_BYTES != 0 {
@@ -200,7 +200,7 @@ impl KeccakBatcher {
             .copy_from_slice(&[0u8; Self::BLOCK_COUNT_BYTES]);
         Ok(
             *<sha::Impl as risc0_zkp::core::hash::sha::Sha256>::hash_bytes(
-                &self.input_transcript[0..self.block_count_offset + Self::BLOCK_BYTES],
+                &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
             ),
         )
     }
