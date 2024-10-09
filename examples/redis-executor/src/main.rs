@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// r0vm must to be installed with the redis feature for this example to work with redis:
-/// `cargo install --force --path risc0/r0vm --features redis`
+/// This example assumes that:
+/// - there's a redis instance running on `redis://localhost:6379/`
+/// - r0vm is installed with the `redis` feature: `cargo install --force --path risc0/r0vm --features redis`
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
-    let _iterations: u32 = 10000000;
+    let _iterations: u32 = 100000000;
 
     #[cfg(feature = "redis")]
     if cfg!(feature = "redis") {
@@ -53,10 +54,10 @@ fn main() -> anyhow::Result<()> {
 
     #[cfg(feature = "prove")]
     if cfg!(feature = "prove") {
-        let env = risc0_zkvm::ExecutorEnv::builder()
-            .write(&_iterations)?
-            .build()?;
-        let exec = risc0_zkvm::default_executor();
+        use risc0_zkvm::{default_executor, ExecutorEnv};
+
+        let env = ExecutorEnv::builder().write(&_iterations)?.build()?;
+        let exec = default_executor();
         let timer = std::time::SystemTime::now();
         let session = exec.execute(env, fibonacci_methods::FIBONACCI_ELF)?;
 
