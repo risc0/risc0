@@ -4268,6 +4268,7 @@ dependencies = [
  "sha2",
  "stability",
  "tempfile",
+ "tiny-keccak",
  "tracing",
  "typetag",
 ]

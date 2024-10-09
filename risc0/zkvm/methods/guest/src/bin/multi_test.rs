@@ -24,15 +24,16 @@ use alloc::{
     format, vec,
 };
 use core::arch::asm;
+use tiny_keccak::{Hasher, Keccak};
 
 use getrandom::getrandom;
-use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
+use risc0_zkp::core::{digest::hex, hash::sha::testutil::test_sha_impl};
 use risc0_zkvm::{
     guest::{
         env::{self, FdReader, FdWriter, Read as _, Write as _},
         memory_barrier, sha,
     },
-    sha::{Digest, Sha256},
+    sha::{Digest, Sha256, DIGEST_WORDS},
     Assumption, ReceiptClaim,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
@@ -40,11 +41,25 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr, sys_read,
-        sys_read_words, sys_write,
+        bigint,
+        sys_bigint,
+        sys_exit,
+        sys_fork, //sys_keccak_absorb, sys_keccak_close,
+        sys_keccak_absorb,
+        sys_keccak_open,
+        sys_keccak_squeeze,
+        /* sys_keccak_squeeze,*/ sys_log,
+        sys_pipe,
+        sys_prove_zkr,
+        sys_read,
+        sys_read_words,
+        sys_write,
+        DIGEST_BYTES,
     },
     PAGE_SIZE,
 };
+//use tiny_keccak::Hasher;
+//use tiny_keccak::Keccak;
 
 risc0_zkvm::entry!(main);
 
@@ -429,6 +444,60 @@ fn main() {
             }
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::Keccak => {
+            let expected = [
+                71, 23, 50, 133, 168, 215, 52, 30, 94, 151, 47, 198, 119, 40, 99, 132, 248, 2, 248,
+                239, 66, 165, 236, 95, 3, 187, 250, 37, 76, 176, 31, 173,
+            ];
+
+            let mut keccak_fd: u32 = 0;
+            let status = unsafe { sys_keccak_open(&mut keccak_fd as *mut u32) };
+            assert_eq!(status, 0);
+            assert_eq!(keccak_fd, 0);
+
+            unsafe { sys_keccak_absorb(keccak_fd, b"hello" as *const u8, b"hello".len()) };
+            unsafe { sys_keccak_absorb(keccak_fd, b" " as *const u8, b" ".len()) };
+            unsafe { sys_keccak_absorb(keccak_fd, b"world" as *const u8, b"world".len()) };
+
+            let output = [0u8; DIGEST_BYTES];
+            unsafe { sys_keccak_squeeze(keccak_fd, output.as_ptr() as *mut [u32; DIGEST_WORDS]) }
+            assert_eq!(&expected, &output);
+
+            // run the hasher multiple times to ensure that each hasher instance generating the expected hash.
+            for _ in 0..3 {
+                let mut hasher = Keccak::v256();
+
+                hasher.update(b"hello");
+                hasher.update(b" ");
+                hasher.update(b"world");
+                let mut output = [0u8; DIGEST_BYTES];
+                hasher.finalize(&mut output);
+
+                assert_eq!(&expected, &output);
+            }
+        }
+        MultiTestSpec::KeccakShaDigest => {
+            //let data = hex!("010000000000000054686520717569636B2062726F776E20666F78206A756D7073206F76657220746865206C617A7920646F672E0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080578951e24efd62a3d63a86f7cd19aaa53c898fe287d2552133220370240b572d0000000000000000");
+
+            let data = b"The quick brown fox jumps over the lazy dog.";
+            let mut hasher = Keccak::v256();
+            hasher.update(data);
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.finalize(&mut output);
+
+            let digest = unsafe {
+                env::KECCAK_BATCHER.write_data(data).unwrap();
+                let padding = &hex!("0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080");
+                env::KECCAK_BATCHER.write_data(padding).unwrap();
+                env::KECCAK_BATCHER.write_hash(&output).unwrap();
+                env::KECCAK_BATCHER.finalize().unwrap()
+            };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
+            );
         }
     }
 }
