@@ -138,7 +138,6 @@ export default async function createConfigAsync() {
 		themeConfig:
 			/** @type {import('@docusaurus/preset-classic').ThemeConfig} */
 			({
-				image: "img/logo.svg",
 				metadata: [
 					{ name: "twitter:card", content: "summary_large_image" },
 					{ name: "og:type", content: "website" },
