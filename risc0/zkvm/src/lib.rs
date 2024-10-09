@@ -127,7 +127,8 @@ pub use self::host::client::prove::bonsai::BonsaiProver;
 pub use {
     self::host::{
         api::{
-            client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo,
+            client::Client as ApiClient, Asset, AssetRequest, Connector, RedisParams, SegmentInfo,
+            SessionInfo,
         },
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
@@ -139,10 +140,6 @@ pub use {
     },
     risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
-
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "redis")]
-pub use self::host::api::RedisParams;
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
