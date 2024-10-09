@@ -78,20 +78,24 @@ use alloc::{
     vec,
 };
 
+use anyhow::{bail, Result};
 use bytemuck::Pod;
 use core::cell::OnceCell;
+use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
         self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
-        syscall_2, SyscallName,
+        syscall_2, SyscallName, DIGEST_BYTES,
     },
     WORD_SIZE,
 };
 use serde::{de::DeserializeOwned, Serialize};
+use sha2::Digest;
 
 use crate::{
     sha::{
+        self,
         rust_crypto::{Digest as _, Sha256},
         Digest, Digestible,
     },
@@ -115,6 +119,94 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 /// the total memory image has at least 128 bits of entropy, preventing
 /// information leakage through the post-state digest.
 static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
+
+/// A region of memory used to record the input transcript for the keccak accelerator.
+/// As hashers call the update and finalize functions,
+pub static mut KECCAK_INPUT_TRANSCRIPT: [u8; KECCAK_LIMIT] = [0u8; KECCAK_LIMIT];
+const KECCAK_LIMIT: usize = 1000;
+
+/// TODO
+pub static mut KECCAK_BLOCK_COUNT_OFFSET: usize = 0;
+
+/// TODO
+pub static mut KECCAK_DATA_OFFSET: usize = 8;
+
+/// Keccak is proven in batches.
+pub struct KeccakBatcher {
+    input_transcript: [u8; KECCAK_LIMIT],
+    block_count_offset: usize,
+    data_offset: usize,
+}
+
+impl Default for KeccakBatcher {
+    /// create a new instance of a batcher with an input transcript region
+    fn default() -> Self {
+        Self {
+            input_transcript: [0u8; KECCAK_LIMIT],
+            block_count_offset: 0,
+            data_offset: Self::BLOCK_COUNT_BYTES,
+        }
+    }
+}
+
+impl KeccakBatcher {
+    const BLOCK_COUNT_BYTES: usize = 8;
+    const BLOCK_BYTES: usize = 136;
+
+    /// write data to the input transcript.
+    ///
+    /// This is meant to be used by lower-level functions within keccak crates.
+    /// Many keccak crates will write raw data and padding to a 1600 bit buffer
+    /// often called the "state". All data and padding written to the state
+    /// should be passed to this function.
+    pub fn write_data(&mut self, input: &[u8]) -> Result<()> {
+        if self.data_offset + input.len() > KECCAK_LIMIT {
+            bail!("keccak input limit exceeded")
+        }
+
+        self.input_transcript[self.data_offset..self.data_offset + input.len()]
+            .copy_from_slice(input);
+        self.data_offset += input.len();
+
+        Ok(())
+    }
+
+    /// write keccak hash to the transcript, updating the block count.
+    ///
+    /// the amount of raw data written to the
+    pub fn write_hash(&mut self, input: &[u8]) -> Result<()> {
+        let data_length = self.data_offset - self.block_count_offset + Self::BLOCK_COUNT_BYTES;
+        // at this point, it is expected that the data written is a multiple of
+        // the block count.
+        if data_length % BLOCK_BYTES != 0 {
+            bail!(
+                "keccak data was not padded properly. Expected a multiple of {BLOCK_BYTES}, got {data_length} bytes"
+            );
+        }
+
+        let block_count = data_length / BLOCK_BYTES;
+        self.write_data(input)?;
+        self.input_transcript[self.block_count_offset] = block_count;
+        self.block_count_offset = self.data_offset;
+        self.data_offset += Self::BLOCK_COUNT_BYTES;
+        Ok(())
+    }
+
+    /// get the digest of the input transcript
+    pub fn finalize(&mut self) -> Result<&[u8; DIGEST_BYTES]> {
+        if self.data_offset + Self::BLOCK_COUNT_BYTES > KECCAK_LIMIT {
+            bail!("keccak input limit exceeded")
+        }
+
+        self.input_transcript
+            [self.block_count_offset..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
+            .copy_from_slice(&[0u8; Self::BLOCK_COUNT_BYTES]);
+
+        Ok(sha::Impl::hash_bytes(
+            self.input_transcript[0..self.block_count_offset + BLOCK_BYTES],
+        ))
+    }
+}
 
 /// Initialize globals before program main
 pub(crate) fn init() {

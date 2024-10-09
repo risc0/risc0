@@ -1034,7 +1034,7 @@ fn run_unconstrained() -> Result<()> {
 
 #[test]
 fn run_keccak() {
-    let spec = MultiTestSpec::Keccak;
+    let spec = MultiTestSpec::KeccakShaDigest;
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()

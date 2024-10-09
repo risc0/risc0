@@ -27,7 +27,7 @@ use core::arch::asm;
 use tiny_keccak::{Hasher, Keccak};
 
 use getrandom::getrandom;
-use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
+use risc0_zkp::core::{digest::hex, hash::sha::testutil::test_sha_impl};
 use risc0_zkvm::{
     guest::{
         env::{self, FdReader, FdWriter, Read as _, Write as _},
@@ -476,6 +476,18 @@ fn main() {
 
                 assert_eq!(&expected, &output);
             }
+        }
+        MultiTestSpec::KeccakShaDigest => {
+            //let data = hex!("010000000000000054686520717569636B2062726F776E20666F78206A756D7073206F76657220746865206C617A7920646F672E0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080578951e24efd62a3d63a86f7cd19aaa53c898fe287d2552133220370240b572d0000000000000000");
+            const limit: usize = 1000;
+            let data = [0u8; limit]; // 1kb buffer
+            let block_count_offset = 0;
+            let mut data_offset = 8;
+            let digest = sha::Impl::hash_bytes(&data);
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
+            );
         }
     }
 }
