@@ -244,7 +244,7 @@ pub fn sub_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>)
 pub fn mul_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>) -> [i32; N] {
     let lhs = lhs.as_ref();
     let rhs = rhs.as_ref();
-    assert_eq!(N, lhs.len() + rhs.len());
+    assert_eq!(N, lhs.len() + rhs.len() - 1);
     let mut out = [0; N];
     for (i, a) in lhs.iter().enumerate() {
         for (j, b) in rhs.iter().enumerate() {
