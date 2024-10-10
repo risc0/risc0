@@ -33,6 +33,7 @@ release = false
 test_feature1 = []
 test_feature2 = []
 test_feature3 = []
+redis = []
 
 [[bin]]
 name = "test_required_features"
