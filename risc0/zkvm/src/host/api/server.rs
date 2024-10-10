@@ -839,18 +839,8 @@ fn execute_redis(
     let mut connection = client.get_connection()?;
     exec.run_with_callback(|segment| {
         let segment_bytes = bincode::serialize(&segment)?;
-        let asset_bytes: Vec<u8> = pb::api::Asset::from_bytes(
-            &pb::api::AssetRequest {
-                kind: Some(pb::api::asset_request::Kind::Inline(())),
-            },
-            segment_bytes.into(),
-            format!("segment-{}", segment.index),
-        )?
-        .as_bytes()
-        .expect("Failed to convert asset to bytes")
-        .into();
         let segment_key = format!("{}:{}", params.key, segment.index);
-        connection.set_ex(segment_key.clone(), asset_bytes, params.ttl)?;
+        connection.set_ex(segment_key.clone(), segment_bytes, params.ttl)?;
 
         // this returns the redis key as the asset of the segment
         let segment = Some(pb::api::SegmentInfo {
