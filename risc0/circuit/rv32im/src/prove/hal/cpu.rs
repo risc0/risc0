@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use anyhow::{bail, Result};
 use rayon::prelude::*;
-use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
+use risc0_circuit_rv32im_sys::ffi::{risc0_circuit_rv32im_cpu_witgen, RawPreflightTrace};
 use risc0_core::{
     field::{
         baby_bear::{BabyBearElem, BabyBearExtElem},
@@ -24,7 +24,7 @@ use risc0_core::{
     },
     scope,
 };
-use risc0_sys::CppError;
+use risc0_sys::wrap_ffi;
 use risc0_zkp::{
     adapter::PolyFp,
     core::{
@@ -69,18 +69,7 @@ impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
     ) {
         scope!("cpu_witgen");
         tracing::debug!("witgen: {steps}, {count}");
-        extern "C" {
-            fn risc0_circuit_rv32im_cpu_witgen(
-                mode: u32,
-                trace: *const RawPreflightTrace,
-                steps: u32,
-                count: u32,
-                ctrl: *const BabyBearElem,
-                io: *const BabyBearElem,
-                data: *const BabyBearElem,
-            ) -> CppError;
-        }
-        unsafe {
+        wrap_ffi(|| unsafe {
             risc0_circuit_rv32im_cpu_witgen(
                 mode as u32,
                 trace,
@@ -90,8 +79,8 @@ impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
                 io.as_slice().as_ptr(),
                 data.as_slice().as_ptr(),
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 }
 

@@ -23,7 +23,7 @@ pub mod testutil;
 use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
 use risc0_zkp::hal::Hal;
 
-#[derive(PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub(crate) enum StepMode {
     Parallel,
     SeqForward,
