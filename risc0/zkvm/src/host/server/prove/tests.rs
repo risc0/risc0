@@ -1034,7 +1034,17 @@ fn run_unconstrained() -> Result<()> {
 
 #[test]
 fn run_keccak() {
-    let spec = MultiTestSpec::KeccakShaDigest;
+    let spec = MultiTestSpec::KeccakShaDigest1;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+
+    let spec = MultiTestSpec::KeccakShaDigest2;
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()

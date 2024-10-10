@@ -477,9 +477,8 @@ fn main() {
                 assert_eq!(&expected, &output);
             }
         }
-        MultiTestSpec::KeccakShaDigest => {
-            //let data = hex!("010000000000000054686520717569636B2062726F776E20666F78206A756D7073206F76657220746865206C617A7920646F672E0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080578951e24efd62a3d63a86f7cd19aaa53c898fe287d2552133220370240b572d0000000000000000");
-
+        MultiTestSpec::KeccakShaDigest1 => {
+            // test_keccak_01.txt
             let data = b"The quick brown fox jumps over the lazy dog.";
             let mut hasher = Keccak::v256();
             hasher.update(data);
@@ -497,6 +496,47 @@ fn main() {
             assert_eq!(
                 digest.as_bytes(),
                 hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
+            );
+        }
+        MultiTestSpec::KeccakShaDigest2 => {
+            // test_keccak_02.txt
+            let data1 = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
+            let mut hasher = Keccak::v256();
+            hasher.update(data1);
+            let mut output1 = [0u8; DIGEST_BYTES];
+            hasher.finalize(&mut output1);
+            assert_eq!(
+                output1,
+                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+            );
+
+            let data2 = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
+            let mut hasher = Keccak::v256();
+            hasher.update(data2);
+            let mut output2 = [0u8; DIGEST_BYTES];
+            hasher.finalize(&mut output2);
+            assert_eq!(
+                output2,
+                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+            );
+
+            let digest = unsafe {
+                env::KECCAK_BATCHER.write_data(data1).unwrap();
+                let padding1 = &hex!("010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080");
+                env::KECCAK_BATCHER.write_data(padding1).unwrap();
+                env::KECCAK_BATCHER.write_hash(&output1).unwrap();
+
+                env::KECCAK_BATCHER.write_data(data2).unwrap();
+                let padding2 = &hex!("0100000000000080");
+                env::KECCAK_BATCHER.write_data(padding2).unwrap();
+                env::KECCAK_BATCHER.write_hash(&output2).unwrap();
+
+                env::KECCAK_BATCHER.finalize().unwrap()
+            };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
             );
         }
     }

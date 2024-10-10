@@ -145,7 +145,7 @@ impl Default for KeccakBatcher {
 }
 
 impl KeccakBatcher {
-    const KECCAK_LIMIT: usize = 1000;
+    const KECCAK_LIMIT: usize = 10000;
     const BLOCK_COUNT_BYTES: usize = 8;
     const BLOCK_BYTES: usize = 136;
 
@@ -181,6 +181,9 @@ impl KeccakBatcher {
         }
 
         let block_count = (data_length / Self::BLOCK_BYTES) as u8; // TODO: error handling...
+        let msg = alloc::format!("block count: {block_count}");
+        self::log(&msg);
+
         self.write_data(input)?;
         self.input_transcript[self.block_count_offset] = block_count;
         self.block_count_offset = self.data_offset; // TODO: write zeros to the block count region
@@ -203,6 +206,12 @@ impl KeccakBatcher {
                 &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
             ),
         )
+    }
+
+    /// testing only: get the transcript
+    #[cfg(test)]
+    pub fn transcript(&self) -> &[u8] {
+        &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
     }
 }
 

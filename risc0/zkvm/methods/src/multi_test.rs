@@ -116,7 +116,8 @@ pub enum MultiTestSpec {
         control_root: Digest,
     },
     Keccak,
-    KeccakShaDigest,
+    KeccakShaDigest1,
+    KeccakShaDigest2,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
