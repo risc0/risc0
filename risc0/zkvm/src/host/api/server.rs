@@ -327,9 +327,7 @@ impl Server {
 
             let session = match AssetRequest::try_from(segments_out.clone())? {
                 #[cfg(feature = "redis")]
-                AssetRequest::Redis(params) => {
-                    execute_redis(conn, &mut exec, &segments_out, params)?
-                }
+                AssetRequest::Redis(params) => execute_redis(conn, &mut exec, params)?,
                 _ => execute_default(conn, &mut exec, &segments_out)?,
             };
 
@@ -835,22 +833,22 @@ fn check_client_version(client: &semver::Version, server: &semver::Version) -> b
 fn execute_redis(
     conn: &mut ConnectionWrapper,
     exec: &mut ExecutorImpl,
-    segments_out: &pb::api::AssetRequest,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
     let client = redis::Client::open(params.url)?;
     let mut connection = client.get_connection()?;
     exec.run_with_callback(|segment| {
         let segment_bytes = bincode::serialize(&segment)?;
-        let asset = pb::api::Asset::from_bytes(
-            segments_out,
+        let asset_bytes: Vec<u8> = pb::api::Asset::from_bytes(
+            &pb::api::AssetRequest {
+                kind: Some(pb::api::asset_request::Kind::Inline(())),
+            },
             segment_bytes.into(),
             format!("segment-{}", segment.index),
-        )?;
-        let asset_bytes: Vec<u8> = asset
-            .as_bytes()
-            .expect("Failed to convert asset to bytes")
-            .into();
+        )?
+        .as_bytes()
+        .expect("Failed to convert asset to bytes")
+        .into();
         let segment_key = format!("{}:{}", params.key, segment.index);
         connection.set_ex(segment_key.clone(), asset_bytes, params.ttl)?;
 
