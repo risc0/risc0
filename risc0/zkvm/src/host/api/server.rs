@@ -21,8 +21,6 @@ use std::{
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
-#[cfg(feature = "redis")]
-use redis::Commands;
 use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -835,12 +833,27 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    let client = redis::Client::open(params.url)?;
-    let mut connection = client.get_connection()?;
-    exec.run_with_callback(|segment| {
+    let (sender, receiver) = kanal::unbounded();
+    let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
+        let client = redis::Client::open(params.url)
+            .map_err(anyhow::Error::new)
+            .unwrap();
+        let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
+        while let Ok((segment_key, segment_bytes)) = receiver.recv() {
+            redis::cmd("SETEX")
+                .arg(segment_key)
+                .arg(params.ttl)
+                .arg(segment_bytes)
+                .exec(&mut connection)
+                .map_err(anyhow::Error::new)
+                .unwrap();
+        }
+    });
+
+    let session = exec.run_with_callback(|segment| {
         let segment_bytes = bincode::serialize(&segment)?;
         let segment_key = format!("{}:{}", params.key, segment.index);
-        connection.set_ex(segment_key.clone(), segment_bytes, params.ttl)?;
+        sender.send((segment_key.clone(), segment_bytes))?;
 
         // this returns the redis key as the asset of the segment
         let segment = Some(pb::api::SegmentInfo {
@@ -870,7 +883,13 @@ fn execute_redis(
         }
 
         Ok(Box::new(NullSegmentRef))
-    })
+    });
+
+    drop(sender);
+
+    join_handle.join().expect("redis task failure");
+
+    session
 }
 
 fn execute_default(

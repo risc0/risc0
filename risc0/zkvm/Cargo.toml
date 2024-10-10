@@ -62,6 +62,7 @@ bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.6", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
+kanal = { version = "0.1.0-pre8", default-features = false, optional = true }
 lazy-regex = { version = "3.3", optional = true }
 prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
@@ -161,7 +162,7 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
-redis = ["dep:redis"]
+redis = ["dep:redis", "dep:kanal"]
 std = [
   "anyhow/std",
   "hex/std",
