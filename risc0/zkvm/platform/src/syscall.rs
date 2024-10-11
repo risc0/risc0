@@ -639,6 +639,10 @@ pub unsafe extern "C" fn sys_getenv(
     varname: *const u8,
     varname_len: usize,
 ) -> usize {
+    if cfg!(not(feature = "sys-getenv")) {
+        const MSG: &[u8] = "sys_getenv is disabled".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
     let Return(a0, _) = syscall_2(
         nr::SYS_GETENV,
         out_words,
@@ -659,6 +663,10 @@ pub unsafe extern "C" fn sys_getenv(
 /// data being returned. Returned data is entirely in the control of the host.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_argc() -> usize {
+    if cfg!(not(feature = "sys-arg")) {
+        const MSG: &[u8] = "sys_argc is disabled".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
     let Return(a0, _) = unsafe { syscall_0(nr::SYS_ARGC, null_mut(), 0) };
     a0 as usize
 }
@@ -686,6 +694,10 @@ pub unsafe extern "C" fn sys_argv(
     out_nwords: usize,
     arg_index: usize,
 ) -> usize {
+    if cfg!(not(feature = "sys-arg")) {
+        const MSG: &[u8] = "sys_argv is disabled".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
     let Return(a0, _) = syscall_1(nr::SYS_ARGV, out_words, out_nwords, arg_index as u32);
     a0 as usize
 }
