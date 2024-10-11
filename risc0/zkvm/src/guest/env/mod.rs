@@ -205,8 +205,8 @@ impl KeccakBatcher {
         }
 
         let block_count = (data_length / Self::BLOCK_BYTES) as u8; // TODO: error handling...
-        let msg = alloc::format!("block count: {block_count}");
-        self::log(&msg);
+
+        //self::log(alloc::format!("block count: {block_count}"));
 
         self.write_data(input)?;
         self.input_transcript[self.block_count_offset] = block_count;
