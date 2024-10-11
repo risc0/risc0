@@ -167,11 +167,35 @@ impl KeccakBatcher {
         Ok(())
     }
 
+    /// write padding to the input transcript.
+    ///
+    /// Pad the raw input with the delimitor, 0x00 bytes, and a 0x80 byte. This
+    /// will pad the raw data upto the current block boundary.
+    pub fn write_padding(&mut self) -> Result<()> {
+        self.write_data(&[0x01])?;
+        let data_length = self.current_data_length();
+        let remaining_bytes = Self::BLOCK_BYTES - (data_length % Self::BLOCK_BYTES);
+        if self.data_offset + remaining_bytes > Self::KECCAK_LIMIT {
+            bail!("keccak input limit exceeded")
+        }
+        let zeroes = vec![0u8; remaining_bytes - 1];
+
+        self.write_data(&zeroes)?;
+        self.write_data(&[0x80])?;
+        if self.current_data_length() % Self::BLOCK_BYTES != 0 {
+            bail!(
+                "keccak data was not padded properly. Expected a multiple of {} bytes, got {data_length} bytes", Self::BLOCK_BYTES
+            );
+        }
+
+        Ok(())
+    }
+
     /// write keccak hash to the transcript, updating the block count.
     ///
     /// the amount of raw data written to the
     pub fn write_hash(&mut self, input: &[u8]) -> Result<()> {
-        let data_length = self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES);
+        let data_length = self.current_data_length();
         // at this point, it is expected that the data written is a multiple of
         // the block count.
         if data_length % Self::BLOCK_BYTES != 0 {
@@ -206,6 +230,10 @@ impl KeccakBatcher {
                 &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
             ),
         )
+    }
+
+    fn current_data_length(&self) -> usize {
+        self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES)
     }
 
     /// testing only: get the transcript
