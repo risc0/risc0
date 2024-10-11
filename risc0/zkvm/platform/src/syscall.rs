@@ -663,7 +663,7 @@ pub unsafe extern "C" fn sys_getenv(
 /// data being returned. Returned data is entirely in the control of the host.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_argc() -> usize {
-    if cfg!(not(feature = "sys-arg")) {
+    if cfg!(not(feature = "sys-args")) {
         const MSG: &[u8] = "sys_argc is disabled".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
@@ -694,7 +694,7 @@ pub unsafe extern "C" fn sys_argv(
     out_nwords: usize,
     arg_index: usize,
 ) -> usize {
-    if cfg!(not(feature = "sys-arg")) {
+    if cfg!(not(feature = "sys-args")) {
         const MSG: &[u8] = "sys_argv is disabled".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }

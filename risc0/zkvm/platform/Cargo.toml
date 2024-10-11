@@ -54,5 +54,5 @@ rust-runtime = ["export-libm", "export-syscalls"]
 # Enable the sys_getenv syscall.
 sys-getenv = []
 # Enable the sys_argc and sys_argv syscalls.
-sys-arg = []
+sys-args = []
 unstable = []
