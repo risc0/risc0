@@ -162,7 +162,7 @@ mod tests {
         let close_msg = polling_station.freeze().unwrap();
         let ballot_msg6 = polling_station.submit(&ballot6).unwrap();
 
-        assert_eq!(polling_station.state.count, 2);
+        assert_eq!(polling_station.state.count, 1);
 
         let init_state = init_msg.verify_and_get_commit();
         let ballot_commit1 = ballot_msg1.verify_and_get_commit();

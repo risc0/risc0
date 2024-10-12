@@ -26,16 +26,27 @@ pub struct VotingMachineState {
 
 impl VotingMachineState {
     pub fn vote(&mut self, voter: u32, vote_yes: bool) -> bool {
-        let mut vote_counted = false;
-        let voter_mask = 1 << voter;
-        if self.polls_open && 0 == self.voter_bitfield & voter_mask {
-            self.voter_bitfield |= voter_mask;
-            if vote_yes {
-                self.count += 1;
-            }
-            vote_counted = true
+        if !self.polls_open {
+            return false;
         }
-        vote_counted
+
+        let voter_mask = 1u32 << voter;
+        let has_voted = self.voter_bitfield & voter_mask != 0;
+
+        // If the voter has already voted the same way, do nothing
+        if vote_yes == has_voted {
+            return false;
+        }
+
+        // Flip the vote and update the count when the voter changes their vote
+        self.voter_bitfield ^= voter_mask;
+        self.count = if vote_yes {
+            self.count + 1
+        } else {
+            self.count - 1
+        };
+
+        true
     }
 }
 
