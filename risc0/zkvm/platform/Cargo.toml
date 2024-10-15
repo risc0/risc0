@@ -13,7 +13,7 @@ stability = "0.2"
 # This crate should have as few dependencies as possible so it can be
 # used as many places as possible to share the platform definitions.
 [target.'cfg(target_os = "zkvm")'.dependencies]
-bytemuck = { version = "1.13", optional = true }
+bytemuck = { version = "1.19", optional = true }
 critical-section = { version = "1.1.2", optional = true }
 embedded-alloc = { version = "0.6.0", features = [
   "allocator_api",
