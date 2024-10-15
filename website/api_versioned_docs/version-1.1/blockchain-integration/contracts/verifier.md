@@ -215,7 +215,7 @@ You can find detailed information in the [version management design][version-man
 [estop-84532-etherscan]: https://sepolia.basescan.org/address/0xB369b4dd27FBfb59921d3A4a3D23AC2fc32FB908#code
 [estop-421614-etherscan]: https://sepolia.arbiscan.io/address/0x5E36f0D56741013d864d8FEb5950AB0E7Eff9Ab1#code
 [estop-11155111-etherscan]: https://sepolia.etherscan.io/address/0x7a028d6f0BD603Ad2a47e3a3B1E504C0D6234877#code
-[estop-src]: https://github.com/risc0/risc0-ethereum/blob/v1.1.0/contracts/src/RiscZeroVerifierEmergencyStop.sol
+[estop-src]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/src/RiscZeroVerifierEmergencyStop.sol
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/1.1/risc0_zkvm/struct.Groth16Receipt.html

@@ -55,4 +55,4 @@ For users who prefer manual installation or those who use systems such as x86-64
 [release tag]: https://github.com/risc0/risc0/releases
 [Rust]: https://www.rust-lang.org
 [rustup]: https://rustup.rs
-[rzup-repo]: https://github.com/risc0/risc0/tree/main/rzup
+[rzup-repo]: https://github.com/risc0/risc0/tree/release-1.1/rzup
