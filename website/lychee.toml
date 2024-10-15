@@ -6,6 +6,10 @@ max_redirects = 10
 max_retries = 3
 
 exclude = [
-  # rate limited
-  "https://epubs.siam.org/doi/10.1137/0108018",
+  # rate limited & forbidden 403
+  "siam.org",
+  "basescan.org",
+  "arbiscan.io",
+  "theblock.co",
+  "hackenproof.com",
 ]

@@ -6,7 +6,7 @@ These instructions guide you through installing or updating RISC Zero tools to b
 
 The RISC Zero zkVM requires [Rust]. If you don't already have Rust and [rustup] installed, start by [installing Rust and rustup][install-rust]. Please follow the recommended Rust installation instructions using [rustup], as RISC Zero specifically depends on the [rustup] tool.
 
-## Use the `rzup` installer
+## Using `rzup`
 
 :::warning
 Only compatible with x86-64 Linux and arm64 macOS
@@ -24,19 +24,22 @@ All other architectures must [install manually](#manual-install)
    rzup install
    ```
 
-Running `rzup` will install the latest version of the RISC Zero toolchain.
+Running `rzup` will install the [latest version][release tag] of the RISC Zero toolchain.
+
+See `rzup --help` for more options. You can find out more about `rzup` [here][rzup-repo].
 
 ### Version Management
 
-To update your installation:
+:::info
+Your project's RISC Zero crates _must match_ the installed tooling best managed by [rzup](#use-the-rzup-installer).
+Be sure to match all `Cargo.toml` files with the version of the installation.
 
-1. Run `rzup update` to update the RISC Zero toolchain to the latest [release tag] version.
+Check your presently installed version number displayed by `cargo risczero --version`.
+:::
 
-After you update your installation, be sure to update your project's RISC Zero crates. To do this, you must update all RISC Zero dependencies in your project's host and guest `Cargo.toml` files. In most projects, this is done by updating the host and guest `risc0-zkvm` crate and the `risc0-build` build dependency. They should be updated to use the version number displayed by `cargo risczero --version`.
+Run `rzup update` to update the RISC Zero toolchain to the [latest version][release tag].
 
 For a specific version, use `rzup install cargo-risczero <version>`, where the `<version>` is a [release tag] (e.g `v1.1.1`).
-
-See `rzup --help` for more options. You can find out more about `rzup` [here][rzup-repo].
 
 ## Manual Install
 
