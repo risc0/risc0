@@ -24,7 +24,7 @@ use risc0_core::{
     },
     scope,
 };
-use risc0_sys::wrap_ffi;
+use risc0_sys::ffi_wrap;
 use risc0_zkp::{
     core::log2_ceil,
     field::Elem as _,
@@ -87,7 +87,7 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
         // TODO: call metal kernels for witgen.
         // For now we use the CPU implementation.
 
-        wrap_ffi(|| unsafe {
+        ffi_wrap(|| unsafe {
             risc0_circuit_rv32im_cpu_witgen(
                 mode as u32,
                 trace,

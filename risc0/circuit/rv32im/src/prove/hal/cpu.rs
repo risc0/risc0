@@ -24,7 +24,7 @@ use risc0_core::{
     },
     scope,
 };
-use risc0_sys::wrap_ffi;
+use risc0_sys::ffi_wrap;
 use risc0_zkp::{
     adapter::PolyFp,
     core::{
@@ -69,7 +69,7 @@ impl CircuitWitnessGenerator<CpuHal<BabyBear>> for CpuCircuitHal {
     ) {
         scope!("cpu_witgen");
         tracing::debug!("witgen: {steps}, {count}");
-        wrap_ffi(|| unsafe {
+        ffi_wrap(|| unsafe {
             risc0_circuit_rv32im_cpu_witgen(
                 mode as u32,
                 trace,
