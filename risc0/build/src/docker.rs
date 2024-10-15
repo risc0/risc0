@@ -154,7 +154,7 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-2")
+        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-3")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -162,6 +162,11 @@ fn create_dockerfile(
         .env(&[("CARGO_TARGET_DIR", "target")])
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
+        .env(&[(
+            "CC",
+            "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
+        )])
+        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
         .run(&fetch_cmd)
         .run(&build_cmd);
 
