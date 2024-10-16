@@ -27,6 +27,11 @@ pub const RSA_256_X2_CONTROL_ID: Digest =
 pub const RSA_256_X2_CONTROL_ROOT: Digest =
     digest!("f34d7d2cf2da97453d5f337682c81a00cf159552aae5c65be8f41e11fdb43504");
 
+pub const RSA_3072_X1_CONTROL_ID: Digest =
+    digest!("c09ea91b14fd07053137c8082473b060aaf5a13ba91299605d5f58105b56f947");
+pub const RSA_3072_X1_CONTROL_ROOT: Digest =
+    digest!("7f6b32295c39bb2638ffbb3e8ef9a40891bdfd349b642965ad5b3e0e38b63c5a");
+
 pub const RSA_3072_X15_CONTROL_ID: Digest =
     digest!("d9142365cc8f841d61d6e46e6277120f9152f1213b49f26e7cd6d14fff39792b");
 pub const RSA_3072_X15_CONTROL_ROOT: Digest =
