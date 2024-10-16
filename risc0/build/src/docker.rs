@@ -160,13 +160,13 @@ fn create_dockerfile(
         .env(manifest_env)
         .env(rustflags_env)
         .env(&[("CARGO_TARGET_DIR", "target")])
-        // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
-        // doesn't change.
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
         )])
         .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
+        // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
+        // doesn't change.
         .run(&fetch_cmd)
         .run(&build_cmd);
 
