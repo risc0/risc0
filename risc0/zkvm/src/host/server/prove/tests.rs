@@ -1032,6 +1032,29 @@ fn run_unconstrained() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn run_keccak() {
+    let spec = MultiTestSpec::KeccakShaDigest1;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+
+    let spec = MultiTestSpec::KeccakShaDigest2;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+}
+
 mod soundness {
     use risc0_circuit_rv32im::{prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2, CIRCUIT};
     use risc0_zkp::{
