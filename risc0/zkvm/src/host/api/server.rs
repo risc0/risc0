@@ -833,13 +833,16 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    let (sender, receiver) = kanal::unbounded();
+    let (sender, receiver) = kanal::bounded(100); // same size as bonsai
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
             .unwrap();
         let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
         while let Ok((segment_key, segment_bytes)) = receiver.recv() {
+            let segment_bytes = bincode::serialize(&segment_bytes)
+                .map_err(anyhow::Error::new)
+                .unwrap();
             redis::cmd("SETEX")
                 .arg(segment_key)
                 .arg(params.ttl)
@@ -851,9 +854,8 @@ fn execute_redis(
     });
 
     let session = exec.run_with_callback(|segment| {
-        let segment_bytes = bincode::serialize(&segment)?;
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key.clone(), segment_bytes))?;
+        sender.send((segment_key.clone(), segment.clone()))?;
 
         // this returns the redis key as the asset of the segment
         let segment = Some(pb::api::SegmentInfo {
