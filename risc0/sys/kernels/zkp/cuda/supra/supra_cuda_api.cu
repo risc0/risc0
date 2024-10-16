@@ -7,6 +7,7 @@
 #endif
 
 #include "calc_prefix_operation.cuh"
+#include "poly_divide.cuh"
 #include "poseidon_baby_bear/poseidon2.cu"
 
 extern "C" RustError::by_value
@@ -99,6 +100,70 @@ sppark_calc_prefix_operation(Fp4* in_elems, uint32_t count, Operation op) {
                       (size_t)count);
 
     gpu.DtoH(in_elems, d_elems, count);
+
+    gpu.sync();
+  } catch (const cuda_error& e) {
+    gpu.sync();
+    return RustError{e.code(), e.what()};
+  }
+
+  return RustError{cudaSuccess};
+}
+
+extern "C" RustError::by_value
+poly_divide(fr4_t* polynomial, size_t poly_sz, fr4_t* remainder, const fr4_t* pow) {
+  const gpu_t& gpu = select_gpu();
+  uint32_t sm_count = gpu.sm_count();
+  uint32_t sm_ceil = round_to_next_power_of_2(sm_count);
+
+  const uint32_t divisor_degree = DIVISOR_DEGREE;
+  const uint32_t block_sz = DIV_BLOCK_SZ;
+  uint32_t nwarps_red = sm_ceil < WARP_SZ ? sm_ceil : WARP_SZ;
+  uint32_t nwarps_sm = sm_ceil < WARP_SZ ? 1 : sm_ceil / WARP_SZ;
+
+  uint32_t shared_powers_size = 3 * WARP_SZ / 2 + nwarps_red + nwarps_sm / 2;
+
+  size_t shared_sz = sizeof(fr4_t) * ((block_sz / WARP_SZ) + shared_powers_size);
+
+  size_t nthreads = sm_count * block_sz;
+  size_t nloops = (poly_sz - divisor_degree + nthreads - 1) / nthreads;
+
+  assert(block_sz >= sm_ceil);
+
+  try {
+    event_t sync_event;
+
+    dev_ptr_t<fr4_t> d_mem(2 * sm_ceil + 2 * divisor_degree + poly_sz + block_sz + 1, gpu[0]);
+    fr4_t* d_acc = &d_mem[0];
+    fr4_t* d_prev_acc = &d_mem[sm_ceil];
+    fr4_t* d_polynomial = &d_prev_acc[2 * divisor_degree];
+    fr4_t(*_d_z_powers)[DIV_BLOCK_SZ] =
+        reinterpret_cast<decltype(_d_z_powers)>(&d_polynomial[poly_sz]);
+
+    sync_event.record(gpu[0]);
+
+    generate_z_powers<<<1, block_sz, 0, gpu[0]>>>(_d_z_powers, pow[0], sm_ceil);
+
+    sync_event.wait(gpu);
+    sync_event.record(gpu[0]);
+
+    gpu.HtoD(d_polynomial, polynomial, poly_sz);
+    gpu.bzero(d_acc, sm_ceil + 2 * divisor_degree);
+
+    sync_event.wait(gpu);
+
+    const fr4_t(*d_z_powers)[DIV_BLOCK_SZ] = _d_z_powers;
+    gpu.launch_coop(div_by_x_minus_z,
+                    {sm_count, block_sz, shared_sz},
+                    d_polynomial,
+                    d_acc,
+                    d_prev_acc,
+                    poly_sz,
+                    nloops,
+                    d_z_powers);
+
+    gpu.DtoH(remainder, &d_polynomial[0], 1);
+    gpu.DtoH(polynomial, &d_polynomial[1], poly_sz - 1);
 
     gpu.sync();
   } catch (const cuda_error& e) {

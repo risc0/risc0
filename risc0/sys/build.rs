@@ -60,9 +60,13 @@ fn build_cuda_kernels() {
             "kernels/zkp/cuda/kernels.h",
             "kernels/zkp/cuda/mix.cu",
             "kernels/zkp/cuda/ntt.cu",
-            "kernels/zkp/cuda/poseidon2.cu",
             "kernels/zkp/cuda/sha.cu",
             "kernels/zkp/cuda/sha256.h",
+            "kernels/zkp/cuda/supra/fp.h",
+            "kernels/zkp/cuda/supra/calc_prefix_operation.cuh",
+            "kernels/zkp/cuda/supra/poly_divide.cuh",
+            "kernels/zkp/cuda/supra/poseidon_baby_bear/poseidon2.cu",
+            "kernels/zkp/cuda/supra/poseidon_baby_bear/poseidon2_constants.cuh",
         ])
         .flag("-DFEATURE_BABY_BEAR")
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
