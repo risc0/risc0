@@ -163,7 +163,7 @@ fn create_dockerfile(
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .env(&[(
-            "CC",
+            "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
         )])
         .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
