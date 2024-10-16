@@ -1077,13 +1077,13 @@ dependencies = [
 [[package]]
 name = "risc0-binfmt"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "anyhow",
  "borsh",
  "elf",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
+ "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
  "serde",
  "tracing",
 ]
@@ -1121,14 +1121,14 @@ dependencies = [
 [[package]]
 name = "risc0-circuit-recursion"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "anyhow",
  "bytemuck",
  "hex",
  "metal",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
+ "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
  "tracing",
 ]
 
@@ -1149,14 +1149,14 @@ dependencies = [
 [[package]]
 name = "risc0-circuit-rv32im"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "anyhow",
  "metal",
- "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
+ "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
  "serde",
  "tracing",
 ]
@@ -1172,7 +1172,7 @@ dependencies = [
 [[package]]
 name = "risc0-core"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -1199,7 +1199,7 @@ dependencies = [
 [[package]]
 name = "risc0-groth16"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1209,8 +1209,8 @@ dependencies = [
  "bytemuck",
  "hex",
  "num-bigint",
- "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
+ "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
  "serde",
 ]
 
@@ -1239,7 +1239,7 @@ dependencies = [
 [[package]]
 name = "risc0-zkp"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1252,8 +1252,8 @@ dependencies = [
  "metal",
  "paste",
  "rand_core",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
+ "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
  "serde",
  "sha2",
  "tracing",
@@ -1287,20 +1287,20 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
  "getrandom",
  "hex",
- "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-circuit-recursion 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-circuit-rv32im 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-groth16 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
+ "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-circuit-recursion 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-circuit-rv32im 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-groth16 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
  "rrs-lib",
  "semver",
  "serde",
@@ -1336,7 +1336,7 @@ dependencies = [
  "risc0-zkvm-methods",
  "risc0-zkvm-platform 1.2.0-alpha.1",
  "rsa",
- "tiny-keccak 2.0.2 (git+https://github.com/risc0/tiny-keccak.git?branch=erik/risc0)",
+ "tiny-keccak 2.0.2",
 ]
 
 [[package]]
@@ -1352,7 +1352,7 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing#842cccf589ec31d60dcb99701afd94730e2b9143"
+source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -1648,20 +1648,19 @@ dependencies = [
 [[package]]
 name = "tiny-keccak"
 version = "2.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
 dependencies = [
  "crunchy",
+ "risc0-zkvm 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
 ]
 
 [[package]]
 name = "tiny-keccak"
 version = "2.0.2"
-source = "git+https://github.com/risc0/tiny-keccak.git?branch=erik/risc0#f465df2b4e12aabdf6354bd9731c0399c238b138"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
 dependencies = [
  "crunchy",
- "risc0-zkvm 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?branch=erik/keccak-plumbing)",
 ]
 
 [[package]]
