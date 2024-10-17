@@ -1068,22 +1068,8 @@ dependencies = [
  "anyhow",
  "borsh",
  "elf",
- "risc0-zkp 1.2.0-alpha.1",
- "risc0-zkvm-platform 1.2.0-alpha.1",
- "serde",
- "tracing",
-]
-
-[[package]]
-name = "risc0-binfmt"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
-dependencies = [
- "anyhow",
- "borsh",
- "elf",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
  "serde",
  "tracing",
 ]
@@ -1097,9 +1083,9 @@ dependencies = [
  "dirs",
  "docker-generate",
  "hex",
- "risc0-binfmt 1.2.0-alpha.1",
- "risc0-zkp 1.2.0-alpha.1",
- "risc0-zkvm-platform 1.2.0-alpha.1",
+ "risc0-binfmt",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
  "serde",
  "serde_json",
  "tempfile",
@@ -1113,22 +1099,8 @@ dependencies = [
  "bytemuck",
  "hex",
  "metal",
- "risc0-core 1.2.0-alpha.1",
- "risc0-zkp 1.2.0-alpha.1",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-recursion"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
-dependencies = [
- "anyhow",
- "bytemuck",
- "hex",
- "metal",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-core",
+ "risc0-zkp",
  "tracing",
 ]
 
@@ -1138,25 +1110,10 @@ version = "1.2.0-alpha.1"
 dependencies = [
  "anyhow",
  "metal",
- "risc0-binfmt 1.2.0-alpha.1",
- "risc0-core 1.2.0-alpha.1",
- "risc0-zkp 1.2.0-alpha.1",
- "risc0-zkvm-platform 1.2.0-alpha.1",
- "serde",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
-dependencies = [
- "anyhow",
- "metal",
- "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-binfmt",
+ "risc0-core",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
  "serde",
  "tracing",
 ]
@@ -1164,15 +1121,6 @@ dependencies = [
 [[package]]
 name = "risc0-core"
 version = "1.2.0-alpha.1"
-dependencies = [
- "bytemuck",
- "rand_core",
-]
-
-[[package]]
-name = "risc0-core"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -1191,26 +1139,8 @@ dependencies = [
  "hex",
  "num-bigint",
  "num-traits",
- "risc0-binfmt 1.2.0-alpha.1",
- "risc0-zkp 1.2.0-alpha.1",
- "serde",
-]
-
-[[package]]
-name = "risc0-groth16"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
-dependencies = [
- "anyhow",
- "ark-bn254",
- "ark-ec",
- "ark-groth16",
- "ark-serialize",
- "bytemuck",
- "hex",
- "num-bigint",
- "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-binfmt",
+ "risc0-zkp",
  "serde",
 ]
 
@@ -1229,31 +1159,8 @@ dependencies = [
  "metal",
  "paste",
  "rand_core",
- "risc0-core 1.2.0-alpha.1",
- "risc0-zkvm-platform 1.2.0-alpha.1",
- "serde",
- "sha2",
- "tracing",
-]
-
-[[package]]
-name = "risc0-zkp"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
-dependencies = [
- "anyhow",
- "blake2",
- "borsh",
- "bytemuck",
- "cfg-if",
- "digest",
- "hex",
- "hex-literal",
- "metal",
- "paste",
- "rand_core",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-core",
+ "risc0-zkvm-platform",
  "serde",
  "sha2",
  "tracing",
@@ -1268,39 +1175,13 @@ dependencies = [
  "bytemuck",
  "getrandom",
  "hex",
- "risc0-binfmt 1.2.0-alpha.1",
- "risc0-circuit-recursion 1.2.0-alpha.1",
- "risc0-circuit-rv32im 1.2.0-alpha.1",
- "risc0-core 1.2.0-alpha.1",
- "risc0-groth16 1.2.0-alpha.1",
- "risc0-zkp 1.2.0-alpha.1",
- "risc0-zkvm-platform 1.2.0-alpha.1",
- "rrs-lib",
- "semver",
- "serde",
- "sha2",
- "stability",
- "tiny-keccak 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "tracing",
-]
-
-[[package]]
-name = "risc0-zkvm"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
-dependencies = [
- "anyhow",
- "borsh",
- "bytemuck",
- "getrandom",
- "hex",
- "risc0-binfmt 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-circuit-recursion 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-circuit-rv32im 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-core 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-groth16 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkp 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-binfmt",
+ "risc0-circuit-recursion",
+ "risc0-circuit-rv32im",
+ "risc0-core",
+ "risc0-groth16",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
  "rrs-lib",
  "semver",
  "serde",
@@ -1318,8 +1199,8 @@ dependencies = [
  "ciborium",
  "postcard",
  "risc0-build",
- "risc0-zkvm 1.2.0-alpha.1",
- "risc0-zkvm-platform 1.2.0-alpha.1",
+ "risc0-zkvm",
+ "risc0-zkvm-platform",
  "rmp-serde",
  "serde",
  "tracing-subscriber 0.3.18",
@@ -1331,10 +1212,10 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "getrandom",
- "risc0-zkp 1.2.0-alpha.1",
- "risc0-zkvm 1.2.0-alpha.1",
+ "risc0-zkp",
+ "risc0-zkvm",
  "risc0-zkvm-methods",
- "risc0-zkvm-platform 1.2.0-alpha.1",
+ "risc0-zkvm-platform",
  "rsa",
  "tiny-keccak 2.0.2",
 ]
@@ -1342,17 +1223,6 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "1.2.0-alpha.1"
-dependencies = [
- "bytemuck",
- "getrandom",
- "libm",
- "stability",
-]
-
-[[package]]
-name = "risc0-zkvm-platform"
-version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e#8b23b688e344d447c02cf608f66fd1f42756210e"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -1650,8 +1520,8 @@ name = "tiny-keccak"
 version = "2.0.2"
 dependencies = [
  "crunchy",
- "risc0-zkvm 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
- "risc0-zkvm-platform 1.2.0-alpha.1 (git+https://github.com/risc0/risc0.git?rev=8b23b688e344d447c02cf608f66fd1f42756210e)",
+ "risc0-zkvm",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
