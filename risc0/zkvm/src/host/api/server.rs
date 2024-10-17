@@ -833,63 +833,56 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    let (sender, receiver) = kanal::bounded(100); // same size as bonsai
+    let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(100); // same size as bonsai
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
             .unwrap();
         let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
-        let mut avg_redis_time: Vec<f64> = vec![];
-        while let Ok((segment_key, segment_bytes)) = receiver.recv() {
-            let segment_bytes = bincode::serialize(&segment_bytes)
+        while let Ok((segment_key, segment, mut conn)) = receiver.recv() {
+            let segment_bytes = bincode::serialize(&segment)
                 .map_err(anyhow::Error::new)
                 .unwrap();
-            let timer = std::time::SystemTime::now();
             redis::cmd("SETEX")
-                .arg(segment_key)
+                .arg(segment_key.clone())
                 .arg(params.ttl)
                 .arg(segment_bytes)
                 .exec(&mut connection)
                 .map_err(anyhow::Error::new)
                 .unwrap();
-            avg_redis_time.push(timer.elapsed().unwrap().as_secs_f64());
-        }
 
-        let avg_redis_time =
-            avg_redis_time.clone().iter().sum::<f64>() / avg_redis_time.len() as f64;
-        tracing::debug!("Average time to add a segment to redis: {avg_redis_time} seconds");
+            // this returns the redis key as the asset of the segment
+            let segment = Some(pb::api::SegmentInfo {
+                index: segment.index,
+                po2: segment.inner.po2 as u32,
+                cycles: segment.inner.insn_cycles as u32,
+                segment: Some(pb::api::Asset {
+                    kind: Some(pb::api::asset::Kind::Redis(segment_key)),
+                }),
+            });
+
+            let msg = pb::api::ServerReply {
+                kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                    kind: Some(pb::api::client_callback::Kind::SegmentDone(
+                        pb::api::OnSegmentDone { segment },
+                    )),
+                })),
+            };
+            tracing::trace!("tx: {msg:?}");
+            conn.send(msg).unwrap();
+
+            let reply: pb::api::GenericReply = conn.recv().unwrap();
+            tracing::trace!("rx: {reply:?}");
+            let kind = reply.kind.ok_or(malformed_err()).unwrap();
+            if let pb::api::generic_reply::Kind::Error(err) = kind {
+                panic!("{:?}", err)
+            }
+        }
     });
 
     let session = exec.run_with_callback(|segment| {
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key.clone(), segment.clone()))?;
-
-        // this returns the redis key as the asset of the segment
-        let segment = Some(pb::api::SegmentInfo {
-            index: segment.index,
-            po2: segment.inner.po2 as u32,
-            cycles: segment.inner.insn_cycles as u32,
-            segment: Some(pb::api::Asset {
-                kind: Some(pb::api::asset::Kind::Redis(segment_key)),
-            }),
-        });
-
-        let msg = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                    pb::api::OnSegmentDone { segment },
-                )),
-            })),
-        };
-        tracing::trace!("tx: {msg:?}");
-        conn.send(msg)?;
-
-        let reply: pb::api::GenericReply = conn.recv()?;
-        tracing::trace!("rx: {reply:?}");
-        let kind = reply.kind.ok_or(malformed_err())?;
-        if let pb::api::generic_reply::Kind::Error(err) = kind {
-            bail!(err)
-        }
+        sender.send((segment_key.clone(), segment, conn.try_clone()?))?;
 
         Ok(Box::new(NullSegmentRef))
     });
