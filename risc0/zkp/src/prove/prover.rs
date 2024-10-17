@@ -19,7 +19,7 @@ use risc0_core::{
 };
 
 use crate::{
-    core::poly::{poly_divide, poly_interpolate},
+    core::poly::poly_interpolate,
     hal::{Buffer, CircuitHal, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,
@@ -46,6 +46,39 @@ fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H
     #[cfg(not(feature = "circuit_debug"))]
     hal.zk_shift(&coeffs, count);
     coeffs
+}
+
+#[cfg(feature = "cuda")]
+fn poly_divide_supra<H: Hal>(polynomial: &mut [H::ExtElem], pow: H::ExtElem) -> H::ExtElem {
+    use core::ffi::c_void;
+
+    extern "C" {
+        pub fn poly_divide(
+            d_polynomial: *mut c_void,
+            poly_size: usize,
+            d_out: *mut c_void,
+            d_pow: *const c_void,
+        ) -> risc0_sys::cuda::SpparkError;
+    }
+
+    let mut remainder = H::ExtElem::ZERO;
+    let poly_size = polynomial.len();
+
+    let err = unsafe {
+        poly_divide(
+            polynomial.as_mut_ptr() as *mut c_void,
+            poly_size,
+            &mut remainder as *mut _ as *mut c_void,
+            &pow as *const _ as *const c_void,
+        )
+    };
+
+    polynomial[poly_size - 1] = H::ExtElem::ZERO;
+
+    if err.code != 0 {
+        panic!("Failure during poly_divide: {err}");
+    }
+    remainder
 }
 
 impl<'a, H: Hal> Prover<'a, H> {
@@ -335,8 +368,18 @@ impl<'a, H: Hal> Prover<'a, H> {
                         .zip(0..combo_count)
                         .for_each(|(combo, i)| {
                             for back in self.taps.get_combo(i).slice() {
+                                #[cfg(feature = "cuda")]
                                 assert_eq!(
-                                    poly_divide(combo, z * back_one.pow((*back).into())),
+                                    poly_divide_supra::<H>(combo, z * back_one.pow((*back).into())),
+                                    H::ExtElem::ZERO
+                                );
+
+                                #[cfg(not(feature = "cuda"))]
+                                assert_eq!(
+                                    crate::core::poly::poly_divide(
+                                        combo,
+                                        z * back_one.pow((*back).into())
+                                    ),
                                     H::ExtElem::ZERO
                                 );
                             }
@@ -346,7 +389,15 @@ impl<'a, H: Hal> Prover<'a, H> {
                     // Divide check polys by z^EXT_SIZE
                     let slice = &mut combos
                         [combo_count * self.cycles..combo_count * self.cycles + self.cycles];
-                    assert_eq!(poly_divide(slice, z_pow), H::ExtElem::ZERO);
+
+                    #[cfg(feature = "cuda")]
+                    assert_eq!(poly_divide_supra::<H>(slice, z_pow), H::ExtElem::ZERO);
+
+                    #[cfg(not(feature = "cuda"))]
+                    assert_eq!(
+                        crate::core::poly::poly_divide(slice, z_pow),
+                        H::ExtElem::ZERO
+                    );
                 });
             });
         });
