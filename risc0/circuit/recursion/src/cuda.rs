@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use cust::{memory::GpuBuffer as _, prelude::*};
 use risc0_core::scope;
-use risc0_sys::{cuda::SpparkError, CppError};
+use risc0_sys::{cuda::SpparkError, ffi_wrap};
 use risc0_zkp::{
     core::log2_ceil,
     field::{
@@ -105,10 +105,10 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 po2: u32,
                 domain: u32,
                 poly_mix_pows: *const u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_circuit_recursion_cuda_eval_check(
                 check.as_device_ptr(),
                 ctrl.as_device_ptr(),
@@ -121,8 +121,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 domain as u32,
                 poly_mix_pows.as_ptr(),
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn accumulate(
@@ -148,10 +148,10 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                     wom: DevicePointer<DeviceExtElem>,
                     steps: u32,
                     count: u32,
-                ) -> CppError;
+                ) -> *const std::os::raw::c_char;
             }
 
-            unsafe {
+            ffi_wrap(|| unsafe {
                 risc0_circuit_recursion_cuda_step_compute_accum(
                     ctrl.as_device_ptr(),
                     data.as_device_ptr(),
@@ -160,8 +160,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                     steps as u32,
                     count as u32,
                 )
-                .unwrap();
-            }
+            })
+            .unwrap();
         });
 
         scope!("prefix_products", {
@@ -195,10 +195,10 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                     accum: DevicePointer<u8>,
                     steps: u32,
                     count: u32,
-                ) -> CppError;
+                ) -> *const std::os::raw::c_char;
             }
 
-            unsafe {
+            ffi_wrap(|| unsafe {
                 risc0_circuit_recursion_cuda_step_verify_accum(
                     ctrl.as_device_ptr(),
                     data.as_device_ptr(),
@@ -208,8 +208,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                     steps as u32,
                     count as u32,
                 )
-                .unwrap();
-            }
+            })
+            .unwrap();
         });
 
         scope!("zeroize", {
