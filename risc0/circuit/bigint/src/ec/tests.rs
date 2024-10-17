@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::test_harness::{
-    bigint_short_tests, bigint_should_fail_tests, bigint_tests, from_hex, test_witgen, test_zkr,
-    witness_test_data,
-};
-use crate::{
-    ec::EC_MUL_SECP256K1, prove, verify, zkr::get_zkr, BigIntClaim, BigIntContext, BIGINT_PO2,
-};
-use anyhow::Result;
 use num_bigint::BigUint;
 use risc0_zkp::core::hash::sha;
-use risc0_zkp::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem,
-};
 use test_log::test;
+
+use crate::{
+    ec::EC_MUL_SECP256K1,
+    prove,
+    testutil::{bigint_short_tests, bigint_should_fail_tests, bigint_tests, from_hex},
+    verify,
+    zkr::get_zkr,
+    BIGINT_PO2,
+};
 
 fn golden_ec_mul_values() -> Vec<BigUint> {
     vec![
