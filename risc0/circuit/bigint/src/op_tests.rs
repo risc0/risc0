@@ -12,19 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use num_bigint::BigUint;
-use risc0_zkp::core::hash::sha;
-use risc0_zkp::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem,
-};
-use test_log::test;
-
-use crate::{
-    test_harness::{bigint_tests, test_witgen, test_zkr, witness_test_data},
-    BigIntClaim, BigIntContext, BIGINT_PO2,
-};
+use crate::testutil::bigint_tests;
 
 // name(zkr, in_values, public_witness, private_witness, constant_witness, golden_z)
 bigint_tests! {

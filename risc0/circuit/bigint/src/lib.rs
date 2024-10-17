@@ -14,33 +14,18 @@
 
 pub mod byte_poly;
 mod codegen_prelude;
-pub mod ec;
-pub mod rsa;
-#[cfg(feature = "prove")]
-pub mod zkr;
-
-#[cfg(not(target_os = "zkvm"))]
-mod host;
-#[cfg(not(target_os = "zkvm"))]
-pub use host::*;
-
-#[cfg(target_os = "zkvm")]
-mod guest;
-#[cfg(target_os = "zkvm")]
-pub use guest::*;
-
 #[cfg(not(feature = "make_control_ids"))]
 pub(crate) mod control_id;
-
-#[cfg(test)]
-mod ec_tests;
+pub mod ec;
+#[cfg(not(target_os = "zkvm"))]
+mod host;
 #[cfg(test)]
 mod op_tests;
+pub mod rsa;
 #[cfg(test)]
+mod testutil;
 #[cfg(feature = "prove")]
-mod rsa_tests;
-#[cfg(test)]
-mod test_harness;
+pub mod zkr;
 
 pub(crate) mod generated {
     #![allow(dead_code)]
@@ -54,13 +39,27 @@ pub(crate) mod generated {
 use std::borrow::Borrow;
 
 use anyhow::{ensure, Context, Result};
-use byte_poly::BITS_PER_COEFF;
 use num_bigint::BigUint;
 use risc0_binfmt::{tagged_list, Digestible};
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
-use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
+use risc0_zkp::{
+    core::{
+        digest::Digest,
+        hash::{poseidon2::Poseidon2HashSuite, sha::Sha256},
+    },
+    field::Elem as _,
+};
 
+use self::byte_poly::BITS_PER_COEFF;
+
+#[cfg(not(target_os = "zkvm"))]
+pub use host::*;
+#[cfg(target_os = "zkvm")]
+mod guest;
 pub use generated::PROGRAMS;
+
+#[cfg(target_os = "zkvm")]
+pub use guest::*;
 
 // PO2 to use to execute bigint ZKRs.
 pub const BIGINT_PO2: usize = 18;
@@ -116,15 +115,12 @@ impl BigIntClaim {
         BigIntClaim { public_witness }
     }
 
-    pub fn from_biguints(
-        prog_info: &BigIntProgram,
-        biguints: &[impl ToOwned<Owned = BigUint>],
-    ) -> Self {
+    pub fn from_biguints(prog_info: &BigIntProgram, biguints: &[impl Borrow<BigUint>]) -> Self {
         assert_eq!(biguints.len(), prog_info.witness_info.len());
         let public_witness: Vec<Vec<i32>> = biguints
             .iter()
             .zip(prog_info.witness_info.iter())
-            .map(|(val, wit_info)| byte_poly::from_biguint(val.to_owned(), wit_info.coeffs()))
+            .map(|(val, wit_info)| byte_poly::from_biguint(val.borrow(), wit_info.coeffs()))
             .collect();
         BigIntClaim { public_witness }
     }
@@ -188,4 +184,70 @@ pub(crate) fn pad_claim_list<'a>(
             .context("At least one claim must be specified in a list of claims")?,
     );
     Ok(claim_refs)
+}
+
+pub fn generate_proof_input(
+    claims: &[impl Borrow<BigIntClaim>],
+    prog: &BigIntProgram,
+) -> Result<Vec<u32>> {
+    let mut input: Vec<u32> = Vec::new();
+    input.extend(prog.control_root.as_words());
+
+    let hash_suite = Poseidon2HashSuite::new_suite();
+    let mut rng = hash_suite.rng.new_rng();
+
+    for claim in pad_claim_list(prog, claims)? {
+        tracing::debug!("claim: {claim:?}");
+        let mut ctx = BigIntContext {
+            in_values: claim
+                .public_witness
+                .iter()
+                .map(Vec::as_slice)
+                .map(byte_poly::to_biguint)
+                .collect(),
+            ..Default::default()
+        };
+
+        (prog.unconstrained_eval_fn)(&mut ctx)?;
+
+        let mut all_coeffs: Vec<u32> = Vec::new();
+        for witness in ctx
+            .constant_witness
+            .iter()
+            .chain(ctx.public_witness.iter())
+            .chain(ctx.private_witness.iter())
+        {
+            for chunk in witness.chunks(CHECKED_COEFFS_PER_POLY) {
+                let mut bytes: Vec<u8> = chunk
+                    .iter()
+                    .map(|b| u8::try_from(*b).expect("Byte out of range in witness coeffs"))
+                    .collect();
+                while bytes.len() < CHECKED_COEFFS_PER_POLY {
+                    bytes.push(0);
+                }
+
+                for word in bytes.chunks(4) {
+                    all_coeffs.push(u32::from_le_bytes(
+                        word.try_into().expect("Partial word present in witness?"),
+                    ));
+                }
+            }
+        }
+
+        let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+        let private_digest =
+            byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+        let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
+        tracing::trace!("folded: {folded}");
+
+        // Calculate the evaluation point Z
+        rng.mix(&folded);
+        let z = rng.random_ext_elem();
+
+        tracing::trace!("evaluation point: {z:?}");
+        input.extend(z.to_u32_words());
+        input.extend(all_coeffs);
+    }
+
+    Ok(input)
 }

@@ -17,20 +17,17 @@ use std::borrow::Borrow;
 use anyhow::Result;
 use num_bigint::BigUint;
 use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_ID};
-use risc0_zkp::core::hash::sha;
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use test_log::test;
 
 use crate::{
     rsa::RSA_256_X2,
-    test_harness::{bigint_short_tests, from_hex, test_zkr},
+    testutil::{bigint_short_tests, from_hex},
     zkr::register_zkrs,
-    BigIntClaim, BigIntContext, BIGINT_PO2,
 };
 
 // "golden" values are the values from running the C++ version:
 // bazelisk run //zirgen/Dialect/BigInt/IR/test:test -- --test
-
 fn golden_values() -> Vec<BigUint> {
     vec![
         from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5"),
