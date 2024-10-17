@@ -3874,6 +3874,7 @@ version = "1.2.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "criterion",
  "hex",
  "num-bigint 0.4.6",
  "num-integer",
