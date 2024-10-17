@@ -839,10 +839,12 @@ fn execute_redis(
             .map_err(anyhow::Error::new)
             .unwrap();
         let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
+        let mut avg_redis_time: Vec<f64> = vec![];
         while let Ok((segment_key, segment_bytes)) = receiver.recv() {
             let segment_bytes = bincode::serialize(&segment_bytes)
                 .map_err(anyhow::Error::new)
                 .unwrap();
+            let timer = std::time::SystemTime::now();
             redis::cmd("SETEX")
                 .arg(segment_key)
                 .arg(params.ttl)
@@ -850,7 +852,12 @@ fn execute_redis(
                 .exec(&mut connection)
                 .map_err(anyhow::Error::new)
                 .unwrap();
+            avg_redis_time.push(timer.elapsed().unwrap().as_secs_f64());
         }
+
+        let avg_redis_time =
+            avg_redis_time.clone().iter().sum::<f64>() / avg_redis_time.len() as f64;
+        tracing::debug!("Average time to add a segment to redis: {avg_redis_time} seconds");
     });
 
     let session = exec.run_with_callback(|segment| {
