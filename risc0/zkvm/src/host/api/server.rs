@@ -835,14 +835,22 @@ fn execute_redis(
 ) -> Result<crate::Session> {
     let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(100); // same size as bonsai
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
+        let mut avg_serialize: Vec<f64> = vec![];
+        let mut avg_redis: Vec<f64> = vec![];
+        let mut avg_msg: Vec<f64> = vec![];
+        let thread_timer = std::time::Instant::now();
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
             .unwrap();
         let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
         while let Ok((segment_key, segment, mut conn)) = receiver.recv() {
+            let serialize_timer = std::time::Instant::now();
             let segment_bytes = bincode::serialize(&segment)
                 .map_err(anyhow::Error::new)
                 .unwrap();
+            avg_serialize.push(serialize_timer.clone().elapsed().as_secs_f64());
+
+            let redis_timer = std::time::Instant::now();
             redis::cmd("SETEX")
                 .arg(segment_key.clone())
                 .arg(params.ttl)
@@ -850,7 +858,9 @@ fn execute_redis(
                 .exec(&mut connection)
                 .map_err(anyhow::Error::new)
                 .unwrap();
+            avg_redis.push(redis_timer.elapsed().as_secs_f64());
 
+            let msg_timer = std::time::Instant::now();
             // this returns the redis key as the asset of the segment
             let segment = Some(pb::api::SegmentInfo {
                 index: segment.index,
@@ -877,15 +887,41 @@ fn execute_redis(
             if let pb::api::generic_reply::Kind::Error(err) = kind {
                 panic!("{:?}", err)
             }
+            avg_msg.push(msg_timer.elapsed().as_secs_f64());
         }
+
+        tracing::debug!(
+            "Total redis/msg thread time: {} s",
+            thread_timer.elapsed().as_secs()
+        );
+        let avg_serialize =
+            (avg_serialize.clone().iter().sum::<f64>() / avg_serialize.len() as f64) * 1_000_000.0;
+        let avg_redis =
+            (avg_redis.clone().iter().sum::<f64>() / avg_redis.len() as f64) * 1_000_000.0;
+        let avg_msg = (avg_msg.clone().iter().sum::<f64>() / avg_msg.len() as f64) * 1_000_000.0;
+        tracing::debug!("Average serialize time: {avg_serialize} us");
+        tracing::debug!("Average Redis time: {avg_redis} us");
+        tracing::debug!("Average Msg time: {avg_msg} us");
     });
 
+    let mut avg_callback: Vec<f64> = vec![];
+    let total_callback_timer = std::time::Instant::now();
     let session = exec.run_with_callback(|segment| {
+        let callback_timer = std::time::Instant::now();
         let segment_key = format!("{}:{}", params.key, segment.index);
         sender.send((segment_key.clone(), segment, conn.try_clone()?))?;
-
+        avg_callback.push(callback_timer.elapsed().as_secs_f64());
         Ok(Box::new(NullSegmentRef))
     });
+
+    tracing::debug!(
+        "Total callback time: {} s",
+        total_callback_timer.elapsed().as_secs()
+    );
+
+    let avg_callback: f64 =
+        (avg_callback.clone().iter().sum::<f64>() / avg_callback.len() as f64) * 1_000_000.0;
+    tracing::debug!("Average callabck time: {avg_callback} us");
 
     drop(sender);
 
