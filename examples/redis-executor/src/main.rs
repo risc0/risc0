@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// This example assumes that:
-/// - there's a redis instance running on `redis://localhost:6379/`
-/// - r0vm is installed with the `redis` feature: `cargo install --force --path risc0/r0vm --features redis`
+/// This example assumes that you ran the following:
+/// - `docker run --name redis -p 6379:6379 -d redis`
+/// - `cargo install --force --path risc0/r0vm --features redis`
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
         let ttl = 180;
         let client = ApiClient::from_env().unwrap();
         let env = ExecutorEnv::builder().write(&_iterations)?.build()?;
-        let timer = std::time::SystemTime::now();
+        let timer = std::time::Instant::now();
         let session = client.execute(
             &env,
             Asset::Inline(fibonacci_methods::FIBONACCI_ELF.into()),
@@ -44,10 +44,11 @@ fn main() -> anyhow::Result<()> {
             },
         )?;
 
-        let perf = (session.cycles() as f64 / timer.elapsed()?.as_secs_f64()) / 1_000_000.0;
+        let elapsed = timer.elapsed();
+        let perf = (session.cycles() as f64 / elapsed.as_secs_f64()) / 1_000_000.0;
+        println!("It took {} seconds", elapsed.as_secs());
         println!(
-            "redis executor: {:?} Mhz, {} segments",
-            perf,
+            "redis executor: {perf} Mhz, {} segments",
             session.segments.len()
         );
     }
@@ -58,13 +59,13 @@ fn main() -> anyhow::Result<()> {
 
         let env = ExecutorEnv::builder().write(&_iterations)?.build()?;
         let exec = default_executor();
-        let timer = std::time::SystemTime::now();
+        let timer = std::time::Instant::now();
         let session = exec.execute(env, fibonacci_methods::FIBONACCI_ELF)?;
 
-        let perf = (session.cycles() as f64 / timer.elapsed()?.as_secs_f64()) / 1_000_000.0;
+        let elapsed = timer.elapsed();
+        let perf = (session.cycles() as f64 / elapsed.as_secs_f64()) / 1_000_000.0;
         println!(
-            "default_executor: {:?} Mhz, {} segments",
-            perf,
+            "default_executor: {perf} Mhz, {} segments",
             session.segments.len()
         );
     }
