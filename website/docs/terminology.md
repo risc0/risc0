@@ -278,7 +278,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [executor]: #executor
 [Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Executor.html
 [Groth16 Circuit]: #groth16-circuit
-[guest]: #guest-program
+[guest]: #guest
 [guest program]: #guest-program
 [host]: #host
 [imageID]: #image-id
