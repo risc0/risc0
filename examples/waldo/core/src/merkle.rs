@@ -77,21 +77,23 @@ where
 {
     pub fn vector_oracle_callback(
         &self,
-    ) -> impl Fn(risc0_zkvm::Bytes) -> risc0_zkvm::Result<risc0_zkvm::Bytes> + '_ {
+    ) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn std::error::Error>> + '_ {
         |data| {
             // TODO: Using bincode here, but it would likely be better on the guest side to
             // use the risc0 serde crate. I should try to use one of
             // those (again).
             let index: usize = bincode::deserialize::<u32>(&data)
-                .unwrap()
+                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?
                 .try_into()
-                .unwrap();
+                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+    
 
             let value = &self.elements()[index];
             let proof = self.prove(index);
 
             assert!(proof.verify(&self.root(), value));
-            Ok(bincode::serialize(&(value, proof)).unwrap().into())
+            bincode::serialize(&(value, proof))
+            .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
         }
     }
 }
