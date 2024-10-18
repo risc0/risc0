@@ -628,13 +628,8 @@ impl Client {
     {
         let mut segment_callback = segment_callback;
         let mut segments = Vec::new();
-        let mut avg_rcv_time: Vec<f64> = vec![];
-        let mut avg_segment_time: Vec<f64> = vec![];
         loop {
-            let recv_timer = std::time::Instant::now();
             let reply: pb::api::ServerReply = conn.recv()?;
-            avg_rcv_time.push(recv_timer.elapsed().as_secs_f64());
-            let segment_timer = std::time::Instant::now();
             // tracing::trace!("rx: {reply:?}");
 
             match reply.kind.ok_or(malformed_err())? {
@@ -646,7 +641,6 @@ impl Client {
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(segment) => {
-                            avg_segment_time.push(segment_timer.elapsed().as_secs_f64());
                             let reply: pb::api::GenericReply = segment
                                 .segment
                                 .map_or_else(
@@ -667,14 +661,6 @@ impl Client {
                             conn.send(reply)?;
                         }
                         pb::api::client_callback::Kind::SessionDone(session) => {
-                            let avg_rcv_time = (avg_rcv_time.clone().iter().sum::<f64>()
-                                / avg_rcv_time.len() as f64)
-                                * 1_000.0;
-                            tracing::info!("Average rcv() time: {avg_rcv_time} ms");
-                            let avg_segment_time = (avg_segment_time.clone().iter().sum::<f64>()
-                                / avg_segment_time.len() as f64)
-                                * 1_000_000.0;
-                            tracing::info!("Average Segment time: {avg_segment_time} us");
                             return match session.session {
                                 Some(session) => Ok(SessionInfo {
                                     segments,

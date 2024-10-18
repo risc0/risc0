@@ -835,22 +835,17 @@ fn execute_redis(
 ) -> Result<crate::Session> {
     let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(100); // same size as bonsai
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        let mut avg_serialize: Vec<f64> = vec![];
-        let mut avg_redis: Vec<f64> = vec![];
-        let mut avg_msg: Vec<f64> = vec![];
-        let thread_timer = std::time::Instant::now();
+        let mut while_loop_times: Vec<u128> = vec![];
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
             .unwrap();
         let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
         while let Ok((segment_key, segment, mut conn)) = receiver.recv() {
-            let serialize_timer = std::time::Instant::now();
+            let while_loop_timer = std::time::Instant::now();
             let segment_bytes = bincode::serialize(&segment)
                 .map_err(anyhow::Error::new)
                 .unwrap();
-            avg_serialize.push(serialize_timer.clone().elapsed().as_secs_f64());
 
-            let redis_timer = std::time::Instant::now();
             redis::cmd("SETEX")
                 .arg(segment_key.clone())
                 .arg(params.ttl)
@@ -858,9 +853,7 @@ fn execute_redis(
                 .exec(&mut connection)
                 .map_err(anyhow::Error::new)
                 .unwrap();
-            avg_redis.push(redis_timer.elapsed().as_secs_f64());
 
-            let msg_timer = std::time::Instant::now();
             // this returns the redis key as the asset of the segment
             let segment = Some(pb::api::SegmentInfo {
                 index: segment.index,
@@ -887,30 +880,26 @@ fn execute_redis(
             if let pb::api::generic_reply::Kind::Error(err) = kind {
                 panic!("{:?}", err)
             }
-            avg_msg.push(msg_timer.elapsed().as_secs_f64());
+            while_loop_times.push(while_loop_timer.elapsed().as_micros());
         }
 
-        tracing::info!(
-            "Total redis/msg thread time: {} s",
-            thread_timer.elapsed().as_secs()
-        );
-        let avg_serialize =
-            (avg_serialize.clone().iter().sum::<f64>() / avg_serialize.len() as f64) * 1_000_000.0;
-        let avg_redis =
-            (avg_redis.clone().iter().sum::<f64>() / avg_redis.len() as f64) * 1_000_000.0;
-        let avg_msg = (avg_msg.clone().iter().sum::<f64>() / avg_msg.len() as f64) * 1_000_000.0;
-        tracing::info!("Average serialize time: {avg_serialize} us");
-        tracing::info!("Average Redis time: {avg_redis} us");
-        tracing::info!("Average Msg time: {avg_msg} us");
+        let values = while_loop_times.iter();
+        let avg_while_loop =
+            (values.clone().sum::<u128>() as f64 / while_loop_times.len() as f64) * 1_000_000.0;
+        let min_while_loop = values.clone().min().unwrap();
+        let max_while_loop = values.max().unwrap();
+        tracing::info!("Average while loop time: {avg_while_loop} us");
+        tracing::info!("Min while loop time: {min_while_loop} us");
+        tracing::info!("Max while loop time: {max_while_loop} us");
     });
 
-    let mut avg_callback: Vec<f64> = vec![];
+    let mut avg_callback: Vec<u128> = vec![];
     let total_callback_timer = std::time::Instant::now();
     let session = exec.run_with_callback(|segment| {
         let callback_timer = std::time::Instant::now();
         let segment_key = format!("{}:{}", params.key, segment.index);
         sender.send((segment_key.clone(), segment, conn.try_clone()?))?;
-        avg_callback.push(callback_timer.elapsed().as_secs_f64());
+        avg_callback.push(callback_timer.elapsed().as_micros());
         Ok(Box::new(NullSegmentRef))
     });
 
@@ -918,10 +907,14 @@ fn execute_redis(
         "Total callback time: {} s",
         total_callback_timer.elapsed().as_secs()
     );
-
-    let avg_callback: f64 =
-        (avg_callback.clone().iter().sum::<f64>() / avg_callback.len() as f64) * 1_000_000.0;
-    tracing::info!("Average callabck time: {avg_callback} us");
+    let values = avg_callback.iter();
+    let avg_callback =
+        (values.clone().sum::<u128>() as f64 / avg_callback.len() as f64) * 1_000_000.0;
+    let min_callback = values.clone().min().unwrap();
+    let max_callback = values.max().unwrap();
+    tracing::info!("Average callback time: {avg_callback} us");
+    tracing::info!("Min callback time: {min_callback} us");
+    tracing::info!("Max callback time: {max_callback} us");
 
     drop(sender);
 
