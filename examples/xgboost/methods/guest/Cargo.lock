@@ -1137,6 +1137,7 @@ version = "0.1.0"
 dependencies = [
  "forust-ml",
  "risc0-zkvm",
+ "risc0-zkvm-platform",
  "rmp-serde",
 ]
 
