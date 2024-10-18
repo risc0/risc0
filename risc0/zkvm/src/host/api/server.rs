@@ -880,21 +880,20 @@ fn execute_redis(
             if let pb::api::generic_reply::Kind::Error(err) = kind {
                 panic!("{:?}", err)
             }
-            while_loop_times.push(while_loop_timer.elapsed().as_micros());
+            while_loop_times.push(while_loop_timer.elapsed().as_nanos());
         }
 
         let values = while_loop_times.iter();
         let avg_while_loop =
-            (values.clone().sum::<u128>() as f64 / while_loop_times.len() as f64) * 1_000_000.0;
-        let min_while_loop = values.clone().min().unwrap();
-        let max_while_loop = values.max().unwrap();
-        tracing::info!("Average while loop time: {avg_while_loop} us");
-        tracing::info!("Min while loop time: {min_while_loop} us");
-        tracing::info!("Max while loop time: {max_while_loop} us");
+            (values.clone().sum::<u128>() / while_loop_times.len() as u128) as f64 / 1_000_000.0;
+        let min_while_loop = (values.clone().min().unwrap() / 1_000) as f64 / 1_000.0;
+        let max_while_loop = (values.max().unwrap() / 1_000) as f64 / 1_000.0;
+        tracing::info!("Average while loop time: {avg_while_loop} ms");
+        tracing::info!("Min while loop time: {min_while_loop} ms");
+        tracing::info!("Max while loop time: {max_while_loop} ms");
     });
 
     let mut avg_callback: Vec<u128> = Vec::with_capacity(1500);
-    let total_callback_timer = std::time::Instant::now();
     let session = exec.run_with_callback(|segment| {
         if segment.index % 50 == 0 {
             tracing::info!("{}", sender.len());
@@ -902,22 +901,18 @@ fn execute_redis(
         let callback_timer = std::time::Instant::now();
         let segment_key = format!("{}:{}", params.key, segment.index);
         sender.send((segment_key.clone(), segment, conn.try_clone()?))?;
-        avg_callback.push(callback_timer.elapsed().as_micros());
+        avg_callback.push(callback_timer.elapsed().as_nanos());
         Ok(Box::new(NullSegmentRef))
     });
 
-    tracing::info!(
-        "Total callback time: {} s",
-        total_callback_timer.elapsed().as_secs()
-    );
     let values = avg_callback.iter();
     let avg_callback =
-        (values.clone().sum::<u128>() as f64 / avg_callback.len() as f64) * 1_000_000.0;
-    let min_callback = values.clone().min().unwrap();
-    let max_callback = values.max().unwrap();
-    tracing::info!("Average callback time: {avg_callback} us");
-    tracing::info!("Min callback time: {min_callback} us");
-    tracing::info!("Max callback time: {max_callback} us");
+        (values.clone().sum::<u128>() / avg_callback.len() as u128) as f64 / 1_000_000.0;
+    let min_callback = (values.clone().min().unwrap() / 1_000) as f64 / 1_000.0;
+    let max_callback = (values.max().unwrap() / 1_000) as f64 / 1_000.0;
+    tracing::info!("Average callback time: {avg_callback} ms");
+    tracing::info!("Min callback time: {min_callback} ms");
+    tracing::info!("Max callback time: {max_callback} ms");
 
     drop(sender);
 

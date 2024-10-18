@@ -140,18 +140,8 @@ impl Client {
             )),
         };
         // tracing::trace!("tx: {request:?}");
-        let timer = std::time::Instant::now();
         conn.send(request)?;
-        tracing::info!(
-            "It took {} ms to send a request to server",
-            timer.elapsed().as_millis()
-        );
-        let timer = std::time::Instant::now();
         let result = self.execute_handler(segment_callback, &mut conn, env);
-        tracing::info!(
-            "It took {} ms to get a response from server",
-            timer.elapsed().as_millis()
-        );
 
         let code = conn.close()?;
         if code != 0 {
