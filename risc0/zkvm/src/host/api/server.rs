@@ -890,7 +890,7 @@ fn execute_redis(
             avg_msg.push(msg_timer.elapsed().as_secs_f64());
         }
 
-        tracing::debug!(
+        tracing::info!(
             "Total redis/msg thread time: {} s",
             thread_timer.elapsed().as_secs()
         );
@@ -899,9 +899,9 @@ fn execute_redis(
         let avg_redis =
             (avg_redis.clone().iter().sum::<f64>() / avg_redis.len() as f64) * 1_000_000.0;
         let avg_msg = (avg_msg.clone().iter().sum::<f64>() / avg_msg.len() as f64) * 1_000_000.0;
-        tracing::debug!("Average serialize time: {avg_serialize} us");
-        tracing::debug!("Average Redis time: {avg_redis} us");
-        tracing::debug!("Average Msg time: {avg_msg} us");
+        tracing::info!("Average serialize time: {avg_serialize} us");
+        tracing::info!("Average Redis time: {avg_redis} us");
+        tracing::info!("Average Msg time: {avg_msg} us");
     });
 
     let mut avg_callback: Vec<f64> = vec![];
@@ -914,14 +914,14 @@ fn execute_redis(
         Ok(Box::new(NullSegmentRef))
     });
 
-    tracing::debug!(
+    tracing::info!(
         "Total callback time: {} s",
         total_callback_timer.elapsed().as_secs()
     );
 
     let avg_callback: f64 =
         (avg_callback.clone().iter().sum::<f64>() / avg_callback.len() as f64) * 1_000_000.0;
-    tracing::debug!("Average callabck time: {avg_callback} us");
+    tracing::info!("Average callabck time: {avg_callback} us");
 
     drop(sender);
 
