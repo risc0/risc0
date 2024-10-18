@@ -35,8 +35,8 @@ use crate::{
     },
     prove_zkr,
     recursion::identity_p254,
-    Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
-    ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
+    AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
+    Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
     VerifierContext,
 };
 
@@ -323,39 +323,11 @@ impl Server {
             let bytes = binary.as_bytes()?;
             let mut exec = ExecutorImpl::from_elf(env, &bytes)?;
 
-            let session = exec.run_with_callback(|segment| {
-                let segment_bytes = bincode::serialize(&segment)?;
-                let asset = pb::api::Asset::from_bytes(
-                    &segments_out,
-                    segment_bytes.into(),
-                    format!("segment-{}", segment.index),
-                )?;
-                let msg = pb::api::ServerReply {
-                    kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                        kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                            pb::api::OnSegmentDone {
-                                segment: Some(pb::api::SegmentInfo {
-                                    index: segment.index,
-                                    po2: segment.inner.po2 as u32,
-                                    cycles: segment.inner.insn_cycles as u32,
-                                    segment: Some(asset),
-                                }),
-                            },
-                        )),
-                    })),
-                };
-                tracing::trace!("tx: {msg:?}");
-                conn.send(msg)?;
-
-                let reply: pb::api::GenericReply = conn.recv()?;
-                tracing::trace!("rx: {reply:?}");
-                let kind = reply.kind.ok_or(malformed_err())?;
-                if let pb::api::generic_reply::Kind::Error(err) = kind {
-                    bail!(err)
-                }
-
-                Ok(Box::new(NullSegmentRef))
-            })?;
+            let session = match AssetRequest::try_from(segments_out.clone())? {
+                #[cfg(feature = "redis")]
+                AssetRequest::Redis(params) => execute_redis(conn, &mut exec, params)?,
+                _ => execute_default(conn, &mut exec, &segments_out)?,
+            };
 
             let receipt_claim = session.claim()?;
             Ok(pb::api::ServerReply {
@@ -832,6 +804,10 @@ impl pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
                 })
             }
+            pb::api::asset_request::Kind::Redis(_) => {
+                tracing::error!("It's likely that r0vm is not installed with the redis feature");
+                bail!("from_bytes not supported for redis")
+            }
         }
     }
 }
@@ -849,6 +825,140 @@ fn check_client_version(client: &semver::Version, server: &semver::Version) -> b
     } else {
         client == server
     }
+}
+
+#[cfg(feature = "redis")]
+fn execute_redis(
+    conn: &mut ConnectionWrapper,
+    exec: &mut ExecutorImpl,
+    params: super::RedisParams,
+) -> Result<crate::Session> {
+    let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(100); // same size as bonsai
+    let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
+        let mut while_loop_times: Vec<u128> = Vec::with_capacity(1500);
+        let client = redis::Client::open(params.url)
+            .map_err(anyhow::Error::new)
+            .unwrap();
+        let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
+        while let Ok((segment_key, segment, mut conn)) = receiver.recv() {
+            let while_loop_timer = std::time::Instant::now();
+            let segment_bytes = bincode::serialize(&segment)
+                .map_err(anyhow::Error::new)
+                .unwrap();
+
+            redis::cmd("SETEX")
+                .arg(segment_key.clone())
+                .arg(params.ttl)
+                .arg(segment_bytes)
+                .exec(&mut connection)
+                .map_err(anyhow::Error::new)
+                .unwrap();
+
+            // this returns the redis key as the asset of the segment
+            let segment = Some(pb::api::SegmentInfo {
+                index: segment.index,
+                po2: segment.inner.po2 as u32,
+                cycles: segment.inner.insn_cycles as u32,
+                segment: Some(pb::api::Asset {
+                    kind: Some(pb::api::asset::Kind::Redis(segment_key)),
+                }),
+            });
+
+            let msg = pb::api::ServerReply {
+                kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                    kind: Some(pb::api::client_callback::Kind::SegmentDone(
+                        pb::api::OnSegmentDone { segment },
+                    )),
+                })),
+            };
+            tracing::trace!("tx: {msg:?}");
+            conn.send(msg).unwrap();
+
+            let reply: pb::api::GenericReply = conn.recv().unwrap();
+            tracing::trace!("rx: {reply:?}");
+            let kind = reply.kind.ok_or(malformed_err()).unwrap();
+            if let pb::api::generic_reply::Kind::Error(err) = kind {
+                panic!("{:?}", err)
+            }
+            while_loop_times.push(while_loop_timer.elapsed().as_nanos());
+        }
+
+        let values = while_loop_times.iter();
+        let avg_while_loop =
+            (values.clone().sum::<u128>() / while_loop_times.len() as u128) as f64 / 1_000_000.0;
+        let min_while_loop = (values.clone().min().unwrap() / 1_000) as f64 / 1_000.0;
+        let max_while_loop = (values.max().unwrap() / 1_000) as f64 / 1_000.0;
+        tracing::info!("Average while loop time: {avg_while_loop} ms");
+        tracing::info!("Min while loop time: {min_while_loop} ms");
+        tracing::info!("Max while loop time: {max_while_loop} ms");
+    });
+
+    let mut avg_callback: Vec<u128> = Vec::with_capacity(1500);
+    let session = exec.run_with_callback(|segment| {
+        if segment.index % 50 == 0 {
+            tracing::info!("{}", sender.len());
+        }
+        let callback_timer = std::time::Instant::now();
+        let segment_key = format!("{}:{}", params.key, segment.index);
+        sender.send((segment_key.clone(), segment, conn.try_clone()?))?;
+        avg_callback.push(callback_timer.elapsed().as_nanos());
+        Ok(Box::new(NullSegmentRef))
+    });
+
+    let values = avg_callback.iter();
+    let avg_callback =
+        (values.clone().sum::<u128>() / avg_callback.len() as u128) as f64 / 1_000_000.0;
+    let min_callback = (values.clone().min().unwrap() / 1_000) as f64 / 1_000.0;
+    let max_callback = (values.max().unwrap() / 1_000) as f64 / 1_000.0;
+    tracing::info!("Average callback time: {avg_callback} ms");
+    tracing::info!("Min callback time: {min_callback} ms");
+    tracing::info!("Max callback time: {max_callback} ms");
+
+    drop(sender);
+
+    join_handle.join().expect("redis task failure");
+
+    session
+}
+
+fn execute_default(
+    conn: &mut ConnectionWrapper,
+    exec: &mut ExecutorImpl,
+    segments_out: &pb::api::AssetRequest,
+) -> Result<crate::Session> {
+    exec.run_with_callback(|segment| {
+        let segment_bytes = bincode::serialize(&segment)?;
+        let asset = pb::api::Asset::from_bytes(
+            segments_out,
+            segment_bytes.into(),
+            format!("segment-{}", segment.index),
+        )?;
+        let segment = Some(pb::api::SegmentInfo {
+            index: segment.index,
+            po2: segment.inner.po2 as u32,
+            cycles: segment.inner.insn_cycles as u32,
+            segment: Some(asset),
+        });
+
+        let msg = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::SegmentDone(
+                    pb::api::OnSegmentDone { segment },
+                )),
+            })),
+        };
+        tracing::trace!("tx: {msg:?}");
+        conn.send(msg)?;
+
+        let reply: pb::api::GenericReply = conn.recv()?;
+        tracing::trace!("rx: {reply:?}");
+        let kind = reply.kind.ok_or(malformed_err())?;
+        if let pb::api::generic_reply::Kind::Error(err) = kind {
+            bail!(err)
+        }
+
+        Ok(Box::new(NullSegmentRef))
+    })
 }
 
 #[cfg(test)]

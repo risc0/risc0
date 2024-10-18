@@ -141,7 +141,6 @@ impl Client {
         };
         // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
-
         let result = self.execute_handler(segment_callback, &mut conn, env);
 
         let code = conn.close()?;
@@ -666,7 +665,7 @@ impl Client {
                                     .try_into()?,
                                 }),
                                 None => Err(malformed_err()),
-                            }
+                            };
                         }
                         pb::api::client_callback::Kind::ProveDone(_) => {
                             return Err(anyhow!("Illegal client callback"))
