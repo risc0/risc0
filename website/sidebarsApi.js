@@ -134,6 +134,11 @@ export default {
           label: "Remote Proving",
           id: "generating-proofs/remote-proving",
         },
+        {
+          type: "doc",
+          label: "Deterministic Builds",
+          id: "generating-proofs/deterministic-builds",
+        },
       ],
     },
     {
