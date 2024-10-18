@@ -835,7 +835,7 @@ fn execute_redis(
 ) -> Result<crate::Session> {
     let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(100); // same size as bonsai
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        let mut while_loop_times: Vec<u128> = vec![];
+        let mut while_loop_times: Vec<u128> = Vec::with_capacity(1500);
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
             .unwrap();
@@ -893,9 +893,12 @@ fn execute_redis(
         tracing::info!("Max while loop time: {max_while_loop} us");
     });
 
-    let mut avg_callback: Vec<u128> = vec![];
+    let mut avg_callback: Vec<u128> = Vec::with_capacity(1500);
     let total_callback_timer = std::time::Instant::now();
     let session = exec.run_with_callback(|segment| {
+        if segment.index % 50 == 0 {
+            tracing::info!("{}", sender.len());
+        }
         let callback_timer = std::time::Instant::now();
         let segment_key = format!("{}:{}", params.key, segment.index);
         sender.send((segment_key.clone(), segment, conn.try_clone()?))?;
