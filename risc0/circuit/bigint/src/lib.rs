@@ -14,33 +14,22 @@
 
 pub mod byte_poly;
 mod codegen_prelude;
+#[cfg(not(feature = "make_control_ids"))]
+pub(crate) mod control_id;
+pub mod ec;
+#[cfg(not(target_os = "zkvm"))]
+mod host;
+#[cfg(test)]
+mod op_tests;
 pub mod rsa;
+#[cfg(test)]
+mod testutil;
 #[cfg(feature = "prove")]
 pub mod zkr;
 
-#[cfg(not(target_os = "zkvm"))]
-mod host;
-#[cfg(not(target_os = "zkvm"))]
-pub use host::*;
-
-#[cfg(target_os = "zkvm")]
-mod guest;
-#[cfg(target_os = "zkvm")]
-pub use guest::*;
-
-#[cfg(not(feature = "make_control_ids"))]
-pub(crate) mod control_id;
-
-#[cfg(test)]
-mod op_tests;
-#[cfg(test)]
-#[cfg(feature = "prove")]
-mod rsa_tests;
-#[cfg(test)]
-mod test_harness;
-
 pub(crate) mod generated {
     #![allow(dead_code)]
+    #![allow(non_camel_case_types)]
     #![allow(clippy::all)]
 
     use crate::codegen_prelude::*;
@@ -50,13 +39,27 @@ pub(crate) mod generated {
 use std::borrow::Borrow;
 
 use anyhow::{ensure, Context, Result};
-use byte_poly::{BytePoly, BITS_PER_COEFF};
 use num_bigint::BigUint;
 use risc0_binfmt::{tagged_list, Digestible};
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
-use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
+use risc0_zkp::{
+    core::{
+        digest::Digest,
+        hash::{poseidon2::Poseidon2HashSuite, sha::Sha256},
+    },
+    field::Elem as _,
+};
 
+use self::byte_poly::BITS_PER_COEFF;
+
+#[cfg(not(target_os = "zkvm"))]
+pub use host::*;
+#[cfg(target_os = "zkvm")]
+mod guest;
 pub use generated::PROGRAMS;
+
+#[cfg(target_os = "zkvm")]
+pub use guest::*;
 
 // PO2 to use to execute bigint ZKRs.
 pub const BIGINT_PO2: usize = 18;
@@ -67,9 +70,9 @@ const CLAIM_LIST_TAG: &str = "risc0.BigIntClaims";
 pub struct BigIntContext {
     pub in_values: Vec<BigUint>,
 
-    pub constant_witness: Vec<BytePoly>,
-    pub public_witness: Vec<BytePoly>,
-    pub private_witness: Vec<BytePoly>,
+    pub constant_witness: Vec<Vec<i32>>,
+    pub public_witness: Vec<Vec<i32>>,
+    pub private_witness: Vec<Vec<i32>>,
 }
 
 /// Information about a big integer included in a bigint witness.
@@ -104,23 +107,20 @@ pub struct BigIntProgram<'a> {
 
 #[derive(Debug, Clone)]
 pub struct BigIntClaim {
-    pub public_witness: Vec<BytePoly>,
+    pub public_witness: Vec<Vec<i32>>,
 }
 
 impl BigIntClaim {
-    pub fn new(public_witness: Vec<BytePoly>) -> Self {
+    pub fn new(public_witness: Vec<Vec<i32>>) -> Self {
         BigIntClaim { public_witness }
     }
 
-    pub fn from_biguints(
-        prog_info: &BigIntProgram,
-        biguints: &[impl ToOwned<Owned = BigUint>],
-    ) -> Self {
+    pub fn from_biguints(prog_info: &BigIntProgram, biguints: &[impl Borrow<BigUint>]) -> Self {
         assert_eq!(biguints.len(), prog_info.witness_info.len());
-        let public_witness: Vec<BytePoly> = biguints
+        let public_witness: Vec<Vec<i32>> = biguints
             .iter()
             .zip(prog_info.witness_info.iter())
-            .map(|(val, wit_info)| BytePoly::from_biguint(val.to_owned(), wit_info.coeffs()))
+            .map(|(val, wit_info)| byte_poly::from_biguint(val.borrow(), wit_info.coeffs()))
             .collect();
         BigIntClaim { public_witness }
     }
@@ -131,7 +131,7 @@ impl Digestible for BigIntClaim {
         let mut u32s: Vec<u32> = Vec::new();
 
         for wit in self.public_witness.iter() {
-            u32s.extend(wit.clone().into_padded_u32s())
+            u32s.extend(byte_poly::into_padded_u32s(wit))
         }
 
         tracing::trace!("digest of {} u32s: {:x?}", u32s.len(), u32s);
@@ -184,4 +184,70 @@ pub(crate) fn pad_claim_list<'a>(
             .context("At least one claim must be specified in a list of claims")?,
     );
     Ok(claim_refs)
+}
+
+pub fn generate_proof_input(
+    claims: &[impl Borrow<BigIntClaim>],
+    prog: &BigIntProgram,
+) -> Result<Vec<u32>> {
+    let mut input: Vec<u32> = Vec::new();
+    input.extend(prog.control_root.as_words());
+
+    let hash_suite = Poseidon2HashSuite::new_suite();
+    let mut rng = hash_suite.rng.new_rng();
+
+    for claim in pad_claim_list(prog, claims)? {
+        tracing::debug!("claim: {claim:?}");
+        let mut ctx = BigIntContext {
+            in_values: claim
+                .public_witness
+                .iter()
+                .map(Vec::as_slice)
+                .map(byte_poly::to_biguint)
+                .collect(),
+            ..Default::default()
+        };
+
+        (prog.unconstrained_eval_fn)(&mut ctx)?;
+
+        let mut all_coeffs: Vec<u32> = Vec::new();
+        for witness in ctx
+            .constant_witness
+            .iter()
+            .chain(ctx.public_witness.iter())
+            .chain(ctx.private_witness.iter())
+        {
+            for chunk in witness.chunks(CHECKED_COEFFS_PER_POLY) {
+                let mut bytes: Vec<u8> = chunk
+                    .iter()
+                    .map(|b| u8::try_from(*b).expect("Byte out of range in witness coeffs"))
+                    .collect();
+                while bytes.len() < CHECKED_COEFFS_PER_POLY {
+                    bytes.push(0);
+                }
+
+                for word in bytes.chunks(4) {
+                    all_coeffs.push(u32::from_le_bytes(
+                        word.try_into().expect("Partial word present in witness?"),
+                    ));
+                }
+            }
+        }
+
+        let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
+        let private_digest =
+            byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
+        let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
+        tracing::trace!("folded: {folded}");
+
+        // Calculate the evaluation point Z
+        rng.mix(&folded);
+        let z = rng.random_ext_elem();
+
+        tracing::trace!("evaluation point: {z:?}");
+        input.extend(z.to_u32_words());
+        input.extend(all_coeffs);
+    }
+
+    Ok(input)
 }
