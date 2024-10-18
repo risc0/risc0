@@ -657,7 +657,7 @@ pub unsafe extern "C" fn sys_getenv(
             const MSG_1: &[u8] = "sys_getenv not enabaled for var".as_bytes();
             unsafe { sys_log(MSG_1.as_ptr(), MSG_1.len()) };
             unsafe { sys_log(varname, varname_len) };
-            const MSG_2: &[u8] = "sys_getenv is disabled".as_bytes();
+            const MSG_2: &[u8] = "sys_getenv is disabled; can be enabled with the sys-getenv feature flag on risc0-zkvm-platform".as_bytes();
             unsafe { sys_panic(MSG_2.as_ptr(), MSG_2.len()) };
         }
     }
@@ -682,7 +682,7 @@ pub unsafe extern "C" fn sys_getenv(
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_argc() -> usize {
     if cfg!(not(feature = "sys-args")) {
-        const MSG: &[u8] = "sys_argc is disabled".as_bytes();
+        const MSG: &[u8] = "sys_argc is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
     let Return(a0, _) = unsafe { syscall_0(nr::SYS_ARGC, null_mut(), 0) };
@@ -713,7 +713,7 @@ pub unsafe extern "C" fn sys_argv(
     arg_index: usize,
 ) -> usize {
     if cfg!(not(feature = "sys-args")) {
-        const MSG: &[u8] = "sys_argv is disabled".as_bytes();
+        const MSG: &[u8] = "sys_argv is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
     let Return(a0, _) = syscall_1(nr::SYS_ARGV, out_words, out_nwords, arg_index as u32);
