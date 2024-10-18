@@ -46,7 +46,7 @@ You can log the cycle count and other performance info for your zkVM Guest progr
 [external-bonsai-pay]: https://www.risczero.com/blog/bonsai-pay
 [external-bonsai-rest-api]: https://api.bonsai.xyz/swagger-ui
 [external-bonsai-sdk]: https://crates.io/crates/bonsai-sdk
-[external-default-prover-fn]: https://docs.rs/risc0-zkvm/1.1/risc0_zkvm/fn.default_prover.html
+[external-default-prover-fn]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/fn.default_prover.html
 [external-foundry-template]: https://github.com/risc0/risc0-foundry-template/blob/main/README.md
 [external-governance-showcase]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance#readme
 [external-zeth]: https://www.risczero.com/blog/zeth-release
