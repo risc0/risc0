@@ -11,8 +11,9 @@ If you already have an API key, you can request proofs from Bonsai in any of the
 - Set the environment variables `BONSAI_API_KEY=<YOUR_API_KEY>` and `BONSAI_API_URL=<BONSAI_URL>` when running your program.
 
   If you are using [`default_prover()`][external-default-prover-fn] in your [host code][docs-host-code], setting these variables will automatically send your proving jobs to Bonsai.
-  
+
 - via the **[Bonsai SDK][external-bonsai-sdk]** (for accessing Bonsai from Rust)
+
 - via the **[Bonsai REST API][external-bonsai-rest-api]** (for building your own client or accessing Bonsai directly)
 
 If you don't have an API key, you can [request access][external-bonsai-apply].
@@ -39,7 +40,7 @@ You can request your individual limits using the [user/quotas][external-api-user
 You can log the cycle count and other performance info for your zkVM Guest program by following [these instructions][docs-executor-statistics].
 
 [docs-executor-statistics]: ../zkvm/quickstart.md#executor-statistics
-[docs-host-code]: ../zkvm/host-code-101#a-very-simple-host
+[docs-host-code]: ../zkvm/host-code-101.md#a-very-simple-host
 [docs-zkVM]: ../zkvm/zkvm-overview.md
 [email-devrel]: mailto:devrel@risczero.com
 [external-api-user-quotas]: https://api.bonsai.xyz/swagger-ui#/user/route_user_quota
