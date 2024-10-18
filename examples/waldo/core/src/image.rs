@@ -129,7 +129,7 @@ impl<const N: u32> ImageMerkleTree<N> {
     #[cfg(not(target_os = "zkvm"))]
     pub fn vector_oracle_callback(
         &self,
-    ) -> impl Fn(risc0_zkvm::Bytes) -> risc0_zkvm::Result<risc0_zkvm::Bytes> + '_ {
+    ) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn std::error::Error>> + '_ {
         self.0.vector_oracle_callback()
     }
 }
