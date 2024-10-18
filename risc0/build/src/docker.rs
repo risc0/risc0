@@ -154,12 +154,17 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-2")
+        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-3")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
         .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[(
+            "CC_riscv32im_risc0_zkvm_elf",
+            "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
+        )])
+        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)

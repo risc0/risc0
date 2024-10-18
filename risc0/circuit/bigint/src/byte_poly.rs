@@ -25,9 +25,8 @@
 use std::cmp::max;
 
 use hex::FromHex;
-use num_bigint::{BigInt, BigUint};
+use num_bigint::BigUint;
 use num_integer::Integer;
-use num_traits::identities::Zero;
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
 use risc0_core::field::{Elem, Field};
 use risc0_zkp::{core::digest::Digest, core::hash::HashFn};
@@ -42,29 +41,27 @@ pub fn dump(bp: impl AsRef<[i32]>) -> String {
     format!("{} ({:?})", to_biguint(bp), bp)
 }
 
-fn fill_from_bigint(mut val: BigUint, mut dest: &mut [i32]) {
-    let mul = BigUint::from(1usize << BITS_PER_COEFF);
-    while !val.is_zero() {
-        let (term, remain);
-        (term, dest) = dest
-            .split_first_mut()
-            .expect("bigint value exceeds size of byte poly");
-        (val, remain) = val.div_rem(&mul);
-        *term = remain
-            .try_into()
-            .expect("Unable to convert coefficient from bigint");
-    }
+fn fill_from_bigint(val: &BigUint, dest: &mut [i32]) {
+    let u32s = val.iter_u32_digits();
+    assert!(
+        u32s.len() / 4 <= dest.len(),
+        "bigint value exceeds size of byte poly"
+    );
+
+    u32s.flat_map(u32::to_le_bytes)
+        .zip(dest.iter_mut())
+        .for_each(|(src, dst)| *dst = src as i32);
 }
 
-pub fn from_biguint(val: BigUint, coeffs: usize) -> Vec<i32> {
+pub fn from_biguint(val: &BigUint, coeffs: usize) -> Vec<i32> {
     let mut out = vec![0; coeffs];
     fill_from_bigint(val, &mut out);
     out
 }
 
-pub fn from_biguint_fixed<const N: usize>(val: BigUint) -> [i32; N] {
+pub fn from_biguint_fixed<const N: usize>(val: impl std::borrow::Borrow<BigUint>) -> [i32; N] {
     let mut out = [0i32; N];
-    fill_from_bigint(val, &mut out);
+    fill_from_bigint(val.borrow(), &mut out);
     out
 }
 
@@ -217,14 +214,23 @@ pub fn into_padded_u32s(bp: impl AsRef<[i32]>) -> Vec<u32> {
 
 pub fn to_biguint(bp: impl AsRef<[i32]>) -> BigUint {
     let bp = bp.as_ref();
-    let mut out = BigInt::default();
-    let mut mul = BigInt::from(1usize);
-    let coeff_mul = BigInt::from(1usize << BITS_PER_COEFF);
-    for coeff in bp {
-        out += &mul * coeff;
-        mul *= &coeff_mul;
+
+    let mut u8s = Vec::<u8>::with_capacity(bp.len());
+    let mut carry: i32 = 0;
+    for b in bp.iter() {
+        let term = b + carry;
+        u8s.push((term & 0xFF) as u8);
+        carry = term >> 8;
     }
-    out.to_biguint().expect("Unable to make unsigned bigint")
+
+    assert!(carry >= 0, "Final carry {carry} must not be negative");
+
+    while carry != 0 {
+        u8s.push((carry & 0xFF) as u8);
+        carry >>= 8;
+    }
+
+    BigUint::from_bytes_le(&u8s)
 }
 
 pub fn add_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>) -> [i32; N] {

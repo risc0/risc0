@@ -28,7 +28,7 @@ use test_log::test;
 use crate::{
     prove,
     rsa::RSA_256_X2,
-    test_harness::{from_hex, test_witgen, test_zkr, witness_test_data},
+    testutil::{from_hex, test_witgen, test_zkr, witness_test_data},
     verify,
     zkr::{get_zkr, register_zkrs},
     BigIntContext, BIGINT_PO2,
@@ -36,7 +36,6 @@ use crate::{
 
 // "golden" values are the values from running the C++ version:
 // bazelisk run //zirgen/Dialect/BigInt/IR/test:test -- --test
-
 fn golden_values() -> Vec<BigUint> {
     vec![
         from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5"),
