@@ -7,31 +7,31 @@ import { redirectIfWrongVersion } from "../../_utils/redirect-if-wrong-version";
 import { ApplicationsBenchmarksCommitHashButton } from "./_components/applications-benchmarks-commit-hash-button";
 
 export default async function ApplicationsBenchmarksLayout(
-	props: PropsWithChildren<{
-		params: Promise<{
-			version: Version;
-		}>;
-	}>,
+  props: PropsWithChildren<{
+    params: Promise<{
+      version: Version;
+    }>;
+  }>,
 ) {
-	const params = await props.params;
+  const params = await props.params;
 
-	redirectIfWrongVersion(params.version);
+  redirectIfWrongVersion(params.version);
 
-	return (
-		<div className="container max-w-screen-3xl">
-			<div className="flex items-center justify-between gap-8">
-				<h1 className="text-2xl">Applications Benchmarks</h1>
+  return (
+    <div className="container max-w-screen-3xl">
+      <div className="flex items-center justify-between gap-8">
+        <h1 className="text-2xl">Applications Benchmarks</h1>
 
-				<Suspense fallback={<SuspenseLoader />}>
-					<ApplicationsBenchmarksCommitHashButton version={params.version} />
-				</Suspense>
-			</div>
+        <Suspense fallback={<SuspenseLoader />}>
+          <ApplicationsBenchmarksCommitHashButton version={params.version} />
+        </Suspense>
+      </div>
 
-			<Separator className="mt-2" />
+      <Separator className="mt-2" />
 
-			{props.children}
+      {props.children}
 
-			<FooterAscii text="Applications Benchmarks" />
-		</div>
-	);
+      <FooterAscii text="Applications Benchmarks" />
+    </div>
+  );
 }
