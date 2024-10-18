@@ -9,11 +9,8 @@ To get a taste of what you can do with Bonsai, check out [Zeth][external-zeth], 
 If you already have an API key, you can request proofs from Bonsai in any of the following ways:
 
 - Set the environment variables `BONSAI_API_KEY=<YOUR_API_KEY>` and `BONSAI_API_URL=<BONSAI_URL>` when running your program.
-
   If you are using [`default_prover()`][external-default-prover-fn] in your [host code][docs-host-code], setting these variables will automatically send your proving jobs to Bonsai.
-
 - via the **[Bonsai SDK][external-bonsai-sdk]** (for accessing Bonsai from Rust)
-
 - via the **[Bonsai REST API][external-bonsai-rest-api]** (for building your own client or accessing Bonsai directly)
 
 If you don't have an API key, you can [request access][external-bonsai-apply].
@@ -48,7 +45,6 @@ You can log the cycle count and other performance info for your zkVM Guest progr
 [external-bonsai-pay]: https://www.risczero.com/blog/bonsai-pay
 [external-bonsai-rest-api]: https://api.bonsai.xyz/swagger-ui
 [external-bonsai-sdk]: https://crates.io/crates/bonsai-sdk
-[external-cargo-risczero]: https://crates.io/crates/cargo-risczero
 [external-default-prover-fn]: https://docs.rs/risc0-zkvm/1.1/risc0_zkvm/fn.default_prover.html
 [external-foundry-template]: https://github.com/risc0/risc0-foundry-template/blob/main/README.md
 [external-governance-showcase]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance#readme
