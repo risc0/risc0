@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
-fibonacci-methods = { path = "../profiling/methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
+sample-guest-methods = { path = "./methods" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]

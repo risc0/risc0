@@ -833,15 +833,17 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(100); // same size as bonsai
+    let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {
+        Ok(val_str) => val_str.parse::<usize>().unwrap_or(100),
+        Err(_) => 100,
+    };
+    let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(channel_size);
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        let mut while_loop_times: Vec<u128> = Vec::with_capacity(1500);
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
             .unwrap();
         let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
         while let Ok((segment_key, segment, mut conn)) = receiver.recv() {
-            let while_loop_timer = std::time::Instant::now();
             let segment_bytes = bincode::serialize(&segment)
                 .map_err(anyhow::Error::new)
                 .unwrap();
@@ -880,39 +882,14 @@ fn execute_redis(
             if let pb::api::generic_reply::Kind::Error(err) = kind {
                 panic!("{:?}", err)
             }
-            while_loop_times.push(while_loop_timer.elapsed().as_nanos());
         }
-
-        let values = while_loop_times.iter();
-        let avg_while_loop =
-            (values.clone().sum::<u128>() / while_loop_times.len() as u128) as f64 / 1_000_000.0;
-        let min_while_loop = (values.clone().min().unwrap() / 1_000) as f64 / 1_000.0;
-        let max_while_loop = (values.max().unwrap() / 1_000) as f64 / 1_000.0;
-        tracing::info!("Average while loop time: {avg_while_loop} ms");
-        tracing::info!("Min while loop time: {min_while_loop} ms");
-        tracing::info!("Max while loop time: {max_while_loop} ms");
     });
 
-    let mut avg_callback: Vec<u128> = Vec::with_capacity(1500);
     let session = exec.run_with_callback(|segment| {
-        if segment.index % 50 == 0 {
-            tracing::info!("{}", sender.len());
-        }
-        let callback_timer = std::time::Instant::now();
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key.clone(), segment, conn.try_clone()?))?;
-        avg_callback.push(callback_timer.elapsed().as_nanos());
+        sender.send((segment_key, segment, conn.try_clone()?))?;
         Ok(Box::new(NullSegmentRef))
     });
-
-    let values = avg_callback.iter();
-    let avg_callback =
-        (values.clone().sum::<u128>() / avg_callback.len() as u128) as f64 / 1_000_000.0;
-    let min_callback = (values.clone().min().unwrap() / 1_000) as f64 / 1_000.0;
-    let max_callback = (values.max().unwrap() / 1_000) as f64 / 1_000.0;
-    tracing::info!("Average callback time: {avg_callback} ms");
-    tracing::info!("Min callback time: {min_callback} ms");
-    tracing::info!("Max callback time: {max_callback} ms");
 
     drop(sender);
 
