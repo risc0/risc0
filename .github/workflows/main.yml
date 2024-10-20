@@ -335,7 +335,7 @@ jobs:
         working-directory: examples/profiling
       - run: sccache --show-stats
 
-  # test-crates:
+  # test-crates:#
   #   if: needs.changes.outputs.test-crates == 'true'
   #   needs: changes
   #   runs-on: [self-hosted, prod, Linux, cpu]
