@@ -23,7 +23,7 @@ use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use risc0_core::{
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        ExtElem, RootsOfUnity,
+        Elem, ExtElem, RootsOfUnity,
     },
     scope,
 };
@@ -884,6 +884,84 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 io[i] *= io[i - 1];
             }
         });
+    }
+
+    fn finalize_combos(
+        &self,
+        combos: &Self::Buffer<Self::ExtElem>,
+        coeff_u: &[Self::ExtElem],
+        combo_count: usize,
+        cycles: usize,
+        reg_sizes: &[u32],
+        reg_combo_ids: &[u32],
+        mix: &Self::ExtElem,
+    ) {
+        let coeff_u = self.copy_from_extelem("coeff_u", coeff_u);
+        let combo_count = combo_count as u32;
+        let cycles = cycles as u32;
+        let regs_count = reg_sizes.len() as u32;
+        let reg_sizes = self.copy_from_u32("reg_sizes", reg_sizes);
+        let reg_combo_ids = self.copy_from_u32("reg_combo_ids", reg_combo_ids);
+        let mix = self.copy_from_extelem("mix", &[*mix]);
+
+        extern "C" {
+            fn risc0_zkp_cuda_finalize_combos(
+                combos: DevicePointer<u8>,
+                coeff_u: DevicePointer<u8>,
+                combo_count: u32,
+                cycles: u32,
+                regs_count: u32,
+                reg_sizes: DevicePointer<u8>,
+                reg_combo_ids: DevicePointer<u8>,
+                checkSize: u32,
+                mix: DevicePointer<u8>,
+            ) -> CppError;
+        }
+
+        unsafe {
+            risc0_zkp_cuda_finalize_combos(
+                combos.as_device_ptr(),
+                coeff_u.as_device_ptr(),
+                combo_count,
+                cycles,
+                regs_count,
+                reg_sizes.as_device_ptr(),
+                reg_combo_ids.as_device_ptr(),
+                Self::CHECK_SIZE as u32,
+                mix.as_device_ptr(),
+            )
+            .unwrap();
+        }
+    }
+
+    fn poly_divide(
+        &self,
+        polynomial: &Self::Buffer<Self::ExtElem>,
+        pow: Self::ExtElem,
+    ) -> Self::ExtElem {
+        let mut remainder = Self::ExtElem::ZERO;
+        let poly_size = polynomial.size();
+        let pow = pow.to_u32_words();
+
+        extern "C" {
+            pub fn supra_poly_divide(
+                polynomial: DevicePointer<u8>,
+                poly_size: usize,
+                remainder: *mut u32,
+                pow: *const u32,
+            ) -> CppError;
+        }
+
+        unsafe {
+            supra_poly_divide(
+                polynomial.as_device_ptr(),
+                poly_size,
+                &mut remainder as *mut _ as *mut u32,
+                pow.as_ptr(),
+            )
+        };
+
+        remainder
     }
 }
 

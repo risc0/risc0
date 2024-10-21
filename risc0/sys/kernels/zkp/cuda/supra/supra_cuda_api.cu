@@ -7,6 +7,7 @@
 #endif
 
 #include "calc_prefix_operation.cuh"
+#include "poly_divide.cuh"
 #include "poseidon_baby_bear/poseidon2.cu"
 
 extern "C" RustError::by_value
@@ -107,4 +108,41 @@ sppark_calc_prefix_operation(Fp4* in_elems, uint32_t count, Operation op) {
   }
 
   return RustError{cudaSuccess};
+}
+
+extern "C" const char*
+supra_poly_divide(fr4_t d_inout[], size_t len, fr4_t* remainder, const fr4_t& pow) {
+  const gpu_t& gpu = select_gpu();
+
+  try {
+    uint32_t gridDim = gpu.sm_count();
+    const uint32_t blockDim = DIV_BLOCK_SZ;
+
+    if (gridDim > blockDim) {
+      gridDim = blockDim;
+    }
+
+    size_t blocks = (len + blockDim - 1) / blockDim;
+    if (gridDim > blocks) {
+      gridDim = blocks;
+    }
+
+    if (gridDim < 3) {
+      gridDim = 1;
+    }
+
+    size_t sharedSz = sizeof(fr_t) * max(blockDim / WARP_SZ, gridDim);
+    sharedSz += sizeof(fr_t) * WARP_SZ;
+
+    gpu.launch_coop(
+        d_div_by_x_minus_z<fr4_t, true>, {gridDim, blockDim, sharedSz}, d_inout, len, pow);
+    gpu.DtoH(remainder, &d_inout[len - 1], 1);
+
+    gpu.sync();
+  } catch (const std::runtime_error& err) {
+    gpu.sync();
+    return strdup(err.what());
+  }
+
+  return nullptr;
 }

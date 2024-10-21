@@ -413,6 +413,14 @@ where
         );
         into.assert_eq();
     }
+
+    fn poly_divide(&self, p: &Self::Buffer<Self::ExtElem>, z: Self::ExtElem) -> Self::ExtElem {
+        let remainder_lhs = self.lhs.poly_divide(&p.lhs, z);
+        let remainder_rhs = self.rhs.poly_divide(&p.rhs, z);
+        assert_eq!(remainder_lhs, remainder_rhs);
+        p.assert_eq();
+        remainder_lhs
+    }
 }
 
 pub struct DualCircuitHal<F, LH, RH, LC, RC>

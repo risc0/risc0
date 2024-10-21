@@ -68,3 +68,13 @@ __global__ void scatter(Fp* into,
 __global__ void sha_rows(ShaDigest* out, const Fp* matrix, uint32_t count, uint32_t colSize);
 
 __global__ void sha_fold(ShaDigest* out, const ShaDigest* in, uint32_t count);
+
+__global__ void finalize_combos(FpExt* combos,
+                                const FpExt* coeffU,
+                                const uint32_t regsCount,
+                                const uint32_t* regSizes,
+                                const uint32_t* regComboIds,
+                                const uint32_t cycles,
+                                const FpExt* mix,
+                                const uint32_t checkSize,
+                                const uint32_t comboCount);
