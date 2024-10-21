@@ -29,6 +29,9 @@ use risc0_zkvm::{
 };
 use serde::{Deserialize, Serialize};
 
+#[cfg(not(target_os = "zkvm"))]
+use anyhow::{anyhow, Error};
+
 declare_syscall!(
     /// RISC0 syscall for providing oracle access to a vector committed to by the host.
     pub SYS_VECTOR_ORACLE);
@@ -75,25 +78,22 @@ impl<Element> MerkleTree<Element>
 where
     Element: Hashable<ShaHasher> + Serialize,
 {
-    pub fn vector_oracle_callback(
-        &self,
-    ) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn std::error::Error>> + '_ {
+    pub fn vector_oracle_callback(&self) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Error> + '_ {
         |data| {
             // TODO: Using bincode here, but it would likely be better on the guest side to
             // use the risc0 serde crate. I should try to use one of
             // those (again).
             let index: usize = bincode::deserialize::<u32>(&data)
-                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?
+                .map_err(|e| anyhow!("Failed to deserialize index: {}", e))?
                 .try_into()
-                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
-    
+                .map_err(|e| anyhow!("Failed to convert index to usize: {}", e))?;
 
             let value = &self.elements()[index];
             let proof = self.prove(index);
 
             assert!(proof.verify(&self.root(), value));
             bincode::serialize(&(value, proof))
-            .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+                .map_err(|e| anyhow!("Failed to serialize value and proof: {}", e))
         }
     }
 }

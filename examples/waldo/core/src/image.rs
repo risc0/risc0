@@ -15,6 +15,9 @@
 use image::{DynamicImage, GrayImage, Rgb, RgbImage};
 use serde::{Deserialize, Serialize};
 
+#[cfg(not(target_os = "zkvm"))]
+use anyhow::Error;
+
 use crate::merkle::{MerkleTree, Node};
 
 /// Recommended default chunk size to use in the ImageMerkleTree and
@@ -127,9 +130,7 @@ impl<const N: u32> ImageMerkleTree<N> {
     }
 
     #[cfg(not(target_os = "zkvm"))]
-    pub fn vector_oracle_callback(
-        &self,
-    ) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn std::error::Error>> + '_ {
+    pub fn vector_oracle_callback(&self) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Error> + '_ {
         self.0.vector_oracle_callback()
     }
 }

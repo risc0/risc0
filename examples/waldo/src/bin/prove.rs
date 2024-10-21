@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{default_prover, Bytes, ExecutorEnv};
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
@@ -117,7 +117,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     // vector oracle data from the Merkle tree.
     let env = ExecutorEnv::builder()
         .write(&input)?
-        .io_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback())
+        .io_callback(SYS_VECTOR_ORACLE, |input: Bytes| {
+            let callback = img_merkle_tree.vector_oracle_callback();
+            callback(input.to_vec()).map(Bytes::from)
+        })
         .build()
         .unwrap();
 
