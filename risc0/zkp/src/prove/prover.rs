@@ -328,7 +328,6 @@ impl<'a, H: Hal> Prover<'a, H> {
                         let remainder = self
                             .hal
                             .poly_divide(&combo_slice, z * back_one.pow(back.into()));
-                        // tracing::debug!("remainder: {_remainder:?}");
                         assert_eq!(remainder, H::ExtElem::ZERO);
                     }
                 }

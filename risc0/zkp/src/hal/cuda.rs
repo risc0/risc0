@@ -917,10 +917,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 reg_combo_ids: DevicePointer<u8>,
                 checkSize: u32,
                 mix: DevicePointer<u8>,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_finalize_combos(
                 combos.as_device_ptr(),
                 coeff_u.as_device_ptr(),
@@ -932,8 +932,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 Self::CHECK_SIZE as u32,
                 mix.as_device_ptr(),
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn poly_divide(
@@ -951,17 +951,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 poly_size: usize,
                 remainder: *mut u32,
                 pow: *const u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             supra_poly_divide(
                 polynomial.as_device_ptr(),
                 poly_size,
                 &mut remainder as *mut _ as *mut u32,
                 pow.as_ptr(),
             )
-        };
+        })
+        .unwrap();
 
         remainder
     }

@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(feature = "cuda")]
+pub mod cuda;
+
 use std::ffi::CStr;
 
 use anyhow::{anyhow, Result};
 
-#[cfg(feature = "cuda")]
-pub mod cuda;
+#[deprecated]
+pub struct CppError;
 
-pub fn ffi_wrap<F>(inner: F) -> Result<()>
+pub fn ffi_wrap<F>(mut inner: F) -> Result<()>
 where
-    F: Fn() -> *const std::os::raw::c_char,
+    F: FnMut() -> *const std::os::raw::c_char,
 {
     extern "C" {
         fn free(str: *const std::os::raw::c_char);
