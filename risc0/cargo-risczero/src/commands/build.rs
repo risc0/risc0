@@ -198,12 +198,19 @@ impl BuildCommand {
 
             for test in tests {
                 eprintln!("Running test in guest: {test} {test_args:?}");
-                let env = ExecutorEnv::builder()
+                let mut builder = ExecutorEnv::builder();
+                builder
                     // Add the test elf path as arg 0, the POSIX program name
                     .args(&[test.clone()])
                     .args(&test_args)
-                    .env_var("RUST_TEST_NOCAPTURE", "1")
-                    .build()?;
+                    .env_var("RUST_TEST_NOCAPTURE", "1");
+
+                // Forward all environment variables set on this process.
+                for (key, val) in std::env::vars().into_iter() {
+                    builder.env_var(&key, &val);
+                }
+
+                let env = builder.build()?;
 
                 let exec = default_executor();
                 let session = exec.execute(env, &fs::read(test)?)?;

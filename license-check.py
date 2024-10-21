@@ -32,6 +32,7 @@ SKIP_DIRS = [
     str(Path.cwd()) + "/risc0/sys/cxx/vendor",
     str(Path.cwd()) + "/risc0/zkvm/src/host/protos",
     str(Path.cwd()) + "/risc0/zkvm/src/host/server/exec",
+    str(Path.cwd()) + "/risc0/cargo-risczero/tests/test_crate",
 ]
 
 
