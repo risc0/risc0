@@ -6,6 +6,10 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[[bench]]
+name = "bigint"
+harness = false
+
 [[bin]]
 name = "make_control_ids"
 required-features = ["make_control_ids"]
@@ -31,6 +35,7 @@ tracing = "0.1.40"
 zip = { version = "2.0", default-features = false, features = ["deflate"] }
 
 [dev-dependencies]
+criterion = "0.5"
 num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
 pretty_assertions = "1.4"
 test-log = { version = "0.2", features = ["trace"] }

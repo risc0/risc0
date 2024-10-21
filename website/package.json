@@ -32,6 +32,7 @@
     ]
   },
   "dependencies": {
+    "@acid-info/docusaurus-og": "1.0.0-alpha.131",
     "@docusaurus/core": "3.4.0",
     "@docusaurus/module-type-aliases": "3.4.0",
     "@docusaurus/plugin-client-redirects": "3.4.0",
@@ -62,5 +63,5 @@
     "remark-toc": "9.0.0",
     "remark-wiki-link": "2.0.1"
   },
-  "packageManager": "bun@1.1.29"
+  "packageManager": "bun@1.1.30"
 }
