@@ -12,36 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::ffi::CStr;
+
+use anyhow::{anyhow, Result};
+
 #[cfg(feature = "cuda")]
 pub mod cuda;
 
-#[repr(C)]
-pub struct CppError {
-    msg: *const std::os::raw::c_char,
-}
-
-impl Drop for CppError {
-    fn drop(&mut self) {
-        extern "C" {
-            fn free(str: *const std::os::raw::c_char);
-        }
-        unsafe { free(self.msg) };
+pub fn ffi_wrap<F>(inner: F) -> Result<()>
+where
+    F: Fn() -> *const std::os::raw::c_char,
+{
+    extern "C" {
+        fn free(str: *const std::os::raw::c_char);
     }
-}
 
-impl Default for CppError {
-    fn default() -> Self {
-        Self {
-            msg: std::ptr::null(),
-        }
-    }
-}
-
-impl CppError {
-    pub fn unwrap(self) {
-        if !self.msg.is_null() {
-            let c_str = unsafe { std::ffi::CStr::from_ptr(self.msg) };
-            panic!("{}", c_str.to_str().unwrap_or("unknown error"));
-        }
+    let c_ptr = inner();
+    if c_ptr.is_null() {
+        Ok(())
+    } else {
+        let what = unsafe {
+            let msg = CStr::from_ptr(c_ptr)
+                .to_str()
+                .unwrap_or("Invalid error msg pointer")
+                .to_string();
+            free(c_ptr);
+            msg
+        };
+        Err(anyhow!(what))
     }
 }
