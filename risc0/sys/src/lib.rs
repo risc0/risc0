@@ -19,8 +19,36 @@ use std::ffi::CStr;
 
 use anyhow::{anyhow, Result};
 
-#[deprecated]
-pub struct CppError;
+#[repr(C)]
+pub struct CppError {
+    msg: *const std::os::raw::c_char,
+}
+
+impl Drop for CppError {
+    fn drop(&mut self) {
+        extern "C" {
+            fn free(str: *const std::os::raw::c_char);
+        }
+        unsafe { free(self.msg) };
+    }
+}
+
+impl Default for CppError {
+    fn default() -> Self {
+        Self {
+            msg: std::ptr::null(),
+        }
+    }
+}
+
+impl CppError {
+    pub fn unwrap(self) {
+        if !self.msg.is_null() {
+            let c_str = unsafe { std::ffi::CStr::from_ptr(self.msg) };
+            panic!("{}", c_str.to_str().unwrap_or("unknown error"));
+        }
+    }
+}
 
 pub fn ffi_wrap<F>(mut inner: F) -> Result<()>
 where
