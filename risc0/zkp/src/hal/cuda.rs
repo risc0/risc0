@@ -945,24 +945,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let poly_size = polynomial.size();
         let pow = pow.to_u32_words();
 
-        extern "C" {
-            pub fn supra_poly_divide(
-                polynomial: DevicePointer<u8>,
-                poly_size: usize,
-                remainder: *mut u32,
-                pow: *const u32,
-            ) -> *const std::os::raw::c_char;
-        }
-
-        ffi_wrap(|| unsafe {
+        let err = unsafe {
             supra_poly_divide(
                 polynomial.as_device_ptr(),
                 poly_size,
                 &mut remainder as *mut _ as *mut u32,
                 pow.as_ptr(),
             )
-        })
-        .unwrap();
+        };
+
+        if err.code != 0 {
+            panic!("Failure during supra_poly_divide: {err}");
+        }
 
         remainder
     }

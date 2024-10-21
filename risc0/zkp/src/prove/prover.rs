@@ -310,15 +310,17 @@ impl<'a, H: Hal> Prover<'a, H> {
             let reg_sizes: Vec<_> = self.taps.regs().map(|x| x.size() as u32).collect();
             let reg_combo_ids: Vec<_> = self.taps.regs().map(|x| x.combo_id() as u32).collect();
 
-            self.hal.finalize_combos(
-                &combos,
-                &coeff_u,
-                combo_count,
-                self.cycles,
-                &reg_sizes,
-                &reg_combo_ids,
-                &mix,
-            );
+            scope!("finalize_combos", {
+                self.hal.finalize_combos(
+                    &combos,
+                    &coeff_u,
+                    combo_count,
+                    self.cycles,
+                    &reg_sizes,
+                    &reg_combo_ids,
+                    &mix,
+                );
+            });
 
             scope!("poly_divide", {
                 // Divide each element by (x - Z * back1^back) for each back

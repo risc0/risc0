@@ -110,8 +110,8 @@ sppark_calc_prefix_operation(Fp4* in_elems, uint32_t count, Operation op) {
   return RustError{cudaSuccess};
 }
 
-extern "C" const char*
-supra_poly_divide(fr4_t d_inout[], size_t len, fr4_t* remainder, const fr4_t& pow) {
+extern "C" RustError::by_value
+supra_poly_divide(Fp4 d_inout[], size_t len, Fp4* remainder, const Fp4& pow) {
   const gpu_t& gpu = select_gpu();
 
   try {
@@ -131,18 +131,18 @@ supra_poly_divide(fr4_t d_inout[], size_t len, fr4_t* remainder, const fr4_t& po
       gridDim = 1;
     }
 
-    size_t sharedSz = sizeof(fr_t) * max(blockDim / WARP_SZ, gridDim);
-    sharedSz += sizeof(fr_t) * WARP_SZ;
+    size_t sharedSz = sizeof(Fp4) * max(blockDim / WARP_SZ, gridDim);
+    sharedSz += sizeof(Fp4) * WARP_SZ;
 
     gpu.launch_coop(
-        d_div_by_x_minus_z<fr4_t, true>, {gridDim, blockDim, sharedSz}, d_inout, len, pow);
+        d_div_by_x_minus_z<Fp4, true>, {gridDim, blockDim, sharedSz}, d_inout, len, pow);
     gpu.DtoH(remainder, &d_inout[len - 1], 1);
 
     gpu.sync();
-  } catch (const std::runtime_error& err) {
+  } catch (const cuda_error& e) {
     gpu.sync();
-    return strdup(err.what());
+    return RustError{e.code(), e.what()};
   }
 
-  return nullptr;
+  return RustError{cudaSuccess};
 }
