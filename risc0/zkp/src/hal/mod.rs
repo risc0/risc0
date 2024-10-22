@@ -26,7 +26,10 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
+use risc0_core::{
+    field::{Elem, ExtElem, Field, RootsOfUnity},
+    scope,
+};
 
 use crate::{
     core::{digest::Digest, hash::HashSuite},
@@ -194,6 +197,64 @@ pub trait Hal {
     );
 
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>);
+
+    #[allow(clippy::too_many_arguments)]
+    fn combos_prepare(
+        &self,
+        combos: &Self::Buffer<Self::ExtElem>,
+        coeff_u: &[Self::ExtElem],
+        combo_count: usize,
+        cycles: usize,
+        reg_sizes: &[u32],
+        reg_combo_ids: &[u32],
+        mix: &Self::ExtElem,
+    ) {
+        combos.view_mut(|combos| {
+            scope!("combos_prepare", {
+                let mut cur_pos = 0;
+                let mut cur = Self::ExtElem::ONE;
+                // Subtract the U coeffs from the combos
+                for (reg_size, reg_combo_id) in reg_sizes.iter().zip(reg_combo_ids) {
+                    let reg_size = *reg_size as usize;
+                    let reg_combo_id = *reg_combo_id as usize;
+                    for i in 0..reg_size {
+                        combos[cycles * reg_combo_id + i] -= cur * coeff_u[cur_pos + i];
+                    }
+                    cur *= *mix;
+                    cur_pos += reg_size;
+                }
+                // Subtract the final 'check' coefficients
+                for _ in 0..Self::CHECK_SIZE {
+                    combos[cycles * combo_count] -= cur * coeff_u[cur_pos];
+                    cur_pos += 1;
+                    cur *= *mix;
+                }
+            });
+        });
+    }
+
+    fn combos_divide(
+        &self,
+        combos: &Self::Buffer<Self::ExtElem>,
+        chunks: Vec<(usize, Vec<Self::ExtElem>)>,
+        cycles: usize,
+    ) {
+        use rayon::prelude::*;
+
+        scope!("combos_divide");
+
+        combos.view_mut(|combos| {
+            combos
+                .par_chunks_exact_mut(cycles)
+                .zip(chunks)
+                .for_each(|(combo_slice, (i, pows))| {
+                    for pow in pows {
+                        let remainder = crate::core::poly::poly_divide(combo_slice, pow);
+                        assert_eq!(remainder, Self::ExtElem::ZERO, "i: {i}");
+                    }
+                });
+        });
+    }
 }
 
 pub trait CircuitHal<H: Hal> {

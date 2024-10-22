@@ -60,7 +60,7 @@ tracing = { version = "0.1", default-features = false, features = [
 addr2line = { version = "0.22", features = ["rustc-demangle"], optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
-bytes = { version = "1.6", features = ["serde"], optional = true }
+bytes = { version = "1.7", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 kanal = { version = "0.1.0-pre8", default-features = false, optional = true }
 lazy-regex = { version = "3.3", optional = true }
@@ -146,7 +146,6 @@ prove = [
   "client",
   "dep:addr2line",
   "dep:bincode",
-  "dep:bytes",
   "dep:elf",
   "dep:lazy-regex",
   "dep:prost",
