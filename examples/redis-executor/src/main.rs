@@ -20,13 +20,13 @@ fn main() -> anyhow::Result<()> {
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
-    let _iterations: u64 = 200000;
+    let _iterations: u64 = 20000;
 
     #[cfg(feature = "redis")]
     if cfg!(feature = "redis") {
         use risc0_zkvm::{ApiClient, Asset, AssetRequest, ExecutorEnv, RedisParams};
 
-        let url = String::from("redis://localhost:6379/");
+        let url = String::from("redis://127.0.0.1:6379/");
         let key = String::from("key");
         let ttl = 180;
         let client = ApiClient::from_env().unwrap();
@@ -56,10 +56,7 @@ fn main() -> anyhow::Result<()> {
     if !cfg!(feature = "redis") {
         use risc0_zkvm::{default_executor, ExecutorEnv};
 
-        let env = ExecutorEnv::builder()
-            .segment_limit_po2(21)
-            .write(&_iterations)?
-            .build()?;
+        let env = ExecutorEnv::builder().write(&_iterations)?.build()?;
         let exec = default_executor();
         let timer = std::time::Instant::now();
         let session = exec.execute(env, sample_guest_methods::METHOD_NAME_ELF)?;

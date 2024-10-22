@@ -141,6 +141,7 @@ impl Client {
         };
         // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
+
         let result = self.execute_handler(segment_callback, &mut conn, env);
 
         let code = conn.close()?;

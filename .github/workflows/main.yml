@@ -286,11 +286,6 @@ jobs:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
-    services:
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
     strategy:
       fail-fast: false
       matrix:
@@ -331,11 +326,14 @@ jobs:
       - name: test in dev mode
         run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE --workspace --exclude prover-example
         working-directory: examples
+      - uses: shogo82148/actions-setup-redis@v1
+        with:
+          redis-version: "7.2"
+      - name: test redis-executor example
+        run: cargo run --locked -F $FEATURE -F redis -p redis-executor
+        working-directory: examples
       - name: test prover example
         run: cargo test --locked -F $FEATURE -p prover-example
-      - name: test redis-executor example
-        run: cargo test --locked -F $FEATURE -F redis -p redis-executor
-        working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
