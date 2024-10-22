@@ -18,8 +18,6 @@ use merkle_light::{
     hash::{Algorithm, Hashable},
     merkle, proof,
 };
-#[cfg(target_os = "zkvm")]
-use risc0_zkvm::guest;
 use risc0_zkvm::{
     declare_syscall,
     sha::{
@@ -31,7 +29,8 @@ use serde::{Deserialize, Serialize};
 
 declare_syscall!(
     /// RISC0 syscall for providing oracle access to a vector committed to by the host.
-    pub SYS_VECTOR_ORACLE);
+    pub SYS_VECTOR_ORACLE
+);
 
 /// Node type used in the Merkle tree. Simply an alias for a SHA-256  digest.
 pub type Node = Digest;
@@ -286,7 +285,7 @@ where
     // efficient in) the guest.
     pub fn get(&self, index: usize) -> Element {
         let (value, proof): (Element, Proof<Element>) =
-            bincode::deserialize(guest::env::send_recv_slice(
+            bincode::deserialize(risc0_zkvm::guest::env::send_recv_slice(
                 SYS_VECTOR_ORACLE,
                 // Cast the index to u32 since usize is an architecture dependent type.
                 &bincode::serialize(&(u32::try_from(index).unwrap())).unwrap(),
