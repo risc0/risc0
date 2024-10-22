@@ -286,6 +286,11 @@ jobs:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    services:
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
     strategy:
       fail-fast: false
       matrix:
@@ -319,7 +324,7 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
-      - run: cargo build --release -p risc0-r0vm -F $FEATURE
+      - run: cargo build --release -p risc0-r0vm -F $FEATURE -F redis
       - name: build
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
@@ -328,6 +333,8 @@ jobs:
         working-directory: examples
       - name: test prover example
         run: cargo test --locked -F $FEATURE -p prover-example
+      - name: test redis-executor example
+        run: cargo test --locked -F $FEATURE -F redis -p redis-executor
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
