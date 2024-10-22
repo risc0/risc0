@@ -29,6 +29,3 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
 rstest = "0.18"
-
-[features]
-redis = []

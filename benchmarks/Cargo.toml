@@ -33,7 +33,6 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 cuda = ["risc0-zkvm/cuda"]
 default = []
 prove = ["risc0-zkvm/prove"]
-redis = []
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]

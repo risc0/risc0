@@ -47,7 +47,6 @@ fn main() -> anyhow::Result<()> {
         let elapsed = timer.elapsed();
         let total_cycles: u64 = session.segments.iter().map(|s| 1 << u64::from(s.po2)).sum();
         let perf = (total_cycles as f64 / elapsed.as_secs_f64()) / 1_000_000.0;
-        println!("It took {} seconds", elapsed.as_secs());
         println!(
             "redis executor: {perf} Mhz, {} segments",
             session.segments.len()

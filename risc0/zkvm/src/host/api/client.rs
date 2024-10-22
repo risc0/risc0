@@ -665,7 +665,7 @@ impl Client {
                                     .try_into()?,
                                 }),
                                 None => Err(malformed_err()),
-                            };
+                            }
                         }
                         pb::api::client_callback::Kind::ProveDone(_) => {
                             return Err(anyhow!("Illegal client callback"))
