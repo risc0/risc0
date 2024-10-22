@@ -199,7 +199,7 @@ pub trait Hal {
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>);
 
     #[allow(clippy::too_many_arguments)]
-    fn finalize_combos(
+    fn combos_prepare(
         &self,
         combos: &Self::Buffer<Self::ExtElem>,
         coeff_u: &[Self::ExtElem],
@@ -210,7 +210,7 @@ pub trait Hal {
         mix: &Self::ExtElem,
     ) {
         combos.view_mut(|combos| {
-            scope!("part1", {
+            scope!("combos_prepare", {
                 let mut cur_pos = 0;
                 let mut cur = Self::ExtElem::ONE;
                 // Subtract the U coeffs from the combos
@@ -233,12 +233,27 @@ pub trait Hal {
         });
     }
 
-    fn poly_divide(&self, p: &Self::Buffer<Self::ExtElem>, z: Self::ExtElem) -> Self::ExtElem {
-        let mut remainder = Self::ExtElem::ZERO;
-        p.view_mut(|p| {
-            remainder = crate::core::poly::poly_divide(p, z);
+    fn combos_divide(
+        &self,
+        combos: &Self::Buffer<Self::ExtElem>,
+        chunks: Vec<(usize, Vec<Self::ExtElem>)>,
+        cycles: usize,
+    ) {
+        use rayon::prelude::*;
+
+        scope!("combos_divide");
+
+        combos.view_mut(|combos| {
+            combos
+                .par_chunks_exact_mut(cycles)
+                .zip(chunks)
+                .for_each(|(combo_slice, (i, pows))| {
+                    for pow in pows {
+                        let remainder = crate::core::poly::poly_divide(combo_slice, pow);
+                        assert_eq!(remainder, Self::ExtElem::ZERO, "i: {i}");
+                    }
+                });
         });
-        remainder
     }
 }
 

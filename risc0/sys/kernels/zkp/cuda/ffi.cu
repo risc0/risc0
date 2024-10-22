@@ -121,25 +121,20 @@ const char* risc0_zkp_cuda_sha_fold(ShaDigest* output, const ShaDigest* input, u
   return launchKernel(sha_fold, count, 0, output, input, count);
 }
 
-const char* risc0_zkp_cuda_finalize_combos(FpExt* combos,
-                                           const FpExt* coeffU,
-                                           const uint32_t comboCount,
-                                           const uint32_t cycles,
-                                           const uint32_t regsCount,
-                                           const uint32_t* regSizes,
-                                           const uint32_t* regComboIds,
-                                           const uint32_t checkSize,
-                                           const FpExt* mix) {
+const char* risc0_zkp_cuda_combos_prepare(FpExt* combos,
+                                          const FpExt* coeffU,
+                                          const uint32_t comboCount,
+                                          const uint32_t cycles,
+                                          const uint32_t regsCount,
+                                          const uint32_t* regSizes,
+                                          const uint32_t* regComboIds,
+                                          const uint32_t checkSize,
+                                          const FpExt* mix) {
 
   try {
     CudaStream stream;
-    LaunchConfig cfg = getSimpleConfig(comboCount);
-
-    {
-      nvtx3::scoped_range range("finalize_combos");
-      finalize_combos<<<1, 1, 0, stream>>>(
-          combos, coeffU, regsCount, regSizes, regComboIds, cycles, mix, checkSize, comboCount);
-    }
+    combos_prepare<<<1, 1, 0, stream>>>(
+        combos, coeffU, regsCount, regSizes, regComboIds, cycles, mix, checkSize, comboCount);
   } catch (const std::runtime_error& err) {
     return strdup(err.what());
   }

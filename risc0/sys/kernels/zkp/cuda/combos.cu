@@ -14,15 +14,15 @@
 
 #include "fpext.h"
 
-__global__ void finalize_combos(FpExt* combos,
-                                const FpExt* coeffU,
-                                const uint32_t regsCount,
-                                const uint32_t* regSizes,
-                                const uint32_t* regComboIds,
-                                const uint32_t cycles,
-                                const FpExt* mix,
-                                const uint32_t checkSize,
-                                const uint32_t comboCount) {
+__global__ void combos_prepare(FpExt* combos,
+                               const FpExt* coeffU,
+                               const uint32_t regsCount,
+                               const uint32_t* regSizes,
+                               const uint32_t* regComboIds,
+                               const uint32_t cycles,
+                               const FpExt* mix,
+                               const uint32_t checkSize,
+                               const uint32_t comboCount) {
   uint gid = blockIdx.x * blockDim.x + threadIdx.x;
   if (gid > 1) {
     return;

@@ -369,6 +369,31 @@ impl<CH: CudaHash> CudaHal<CH> {
         hal.hash = Some(hash);
         hal
     }
+
+    fn poly_divide(
+        &self,
+        polynomial: &Self::Buffer<Self::ExtElem>,
+        pow: Self::ExtElem,
+    ) -> Self::ExtElem {
+        let mut remainder = Self::ExtElem::ZERO;
+        let poly_size = polynomial.size();
+        let pow = pow.to_u32_words();
+
+        let err = unsafe {
+            supra_poly_divide(
+                polynomial.as_device_ptr(),
+                poly_size,
+                &mut remainder as *mut _ as *mut u32,
+                pow.as_ptr(),
+            )
+        };
+
+        if err.code != 0 {
+            panic!("Failure during supra_poly_divide: {err}");
+        }
+
+        remainder
+    }
 }
 
 impl<CH: CudaHash> Hal for CudaHal<CH> {
@@ -888,7 +913,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         });
     }
 
-    fn finalize_combos(
+    fn combos_prepare(
         &self,
         combos: &Self::Buffer<Self::ExtElem>,
         coeff_u: &[Self::ExtElem],
@@ -907,7 +932,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let mix = self.copy_from_extelem("mix", &[*mix]);
 
         extern "C" {
-            fn risc0_zkp_cuda_finalize_combos(
+            fn risc0_zkp_cuda_combos_prepare(
                 combos: DevicePointer<u8>,
                 coeff_u: DevicePointer<u8>,
                 combo_count: u32,
@@ -921,7 +946,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         }
 
         ffi_wrap(|| unsafe {
-            risc0_zkp_cuda_finalize_combos(
+            risc0_zkp_cuda_combos_prepare(
                 combos.as_device_ptr(),
                 coeff_u.as_device_ptr(),
                 combo_count,
@@ -936,29 +961,19 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         .unwrap();
     }
 
-    fn poly_divide(
+    fn combos_divide(
         &self,
-        polynomial: &Self::Buffer<Self::ExtElem>,
-        pow: Self::ExtElem,
-    ) -> Self::ExtElem {
-        let mut remainder = Self::ExtElem::ZERO;
-        let poly_size = polynomial.size();
-        let pow = pow.to_u32_words();
-
-        let err = unsafe {
-            supra_poly_divide(
-                polynomial.as_device_ptr(),
-                poly_size,
-                &mut remainder as *mut _ as *mut u32,
-                pow.as_ptr(),
-            )
-        };
-
-        if err.code != 0 {
-            panic!("Failure during supra_poly_divide: {err}");
+        combos: &Self::Buffer<Self::ExtElem>,
+        chunks: Vec<(usize, Vec<Self::ExtElem>)>,
+        cycles: usize,
+    ) {
+        scope!("combos_divide");
+        for (i, pows) in chunks {
+            for pow in pows {
+                let remainder = self.poly_divide(combo_slice, pow);
+                assert_eq!(remainder, Self::ExtElem::ZERO, "i: {i}");
+            }
         }
-
-        remainder
     }
 }
 

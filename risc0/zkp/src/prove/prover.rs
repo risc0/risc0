@@ -310,8 +310,8 @@ impl<'a, H: Hal> Prover<'a, H> {
             let reg_sizes: Vec<_> = self.taps.regs().map(|x| x.size() as u32).collect();
             let reg_combo_ids: Vec<_> = self.taps.regs().map(|x| x.combo_id() as u32).collect();
 
-            scope!("finalize_combos", {
-                self.hal.finalize_combos(
+            scope!("prepare", {
+                self.hal.combos_prepare(
                     &combos,
                     &coeff_u,
                     combo_count,
@@ -322,22 +322,22 @@ impl<'a, H: Hal> Prover<'a, H> {
                 );
             });
 
-            scope!("poly_divide", {
+            scope!("divide", {
+                let mut chunks = vec![];
+
                 // Divide each element by (x - Z * back1^back) for each back
                 for i in 0..combo_count {
+                    let mut pows = vec![];
                     for &back in self.taps.get_combo(i).slice() {
-                        let combo_slice = combos.slice(i * self.cycles, self.cycles);
-                        let remainder = self
-                            .hal
-                            .poly_divide(&combo_slice, z * back_one.pow(back.into()));
-                        assert_eq!(remainder, H::ExtElem::ZERO);
+                        pows.push(z * back_one.pow(back.into()));
                     }
+                    chunks.push((i, pows));
                 }
 
                 // Divide check polys by z^EXT_SIZE
-                let combo_slice = combos.slice(combo_count * self.cycles, self.cycles);
-                let remainder = self.hal.poly_divide(&combo_slice, z_pow);
-                assert_eq!(remainder, H::ExtElem::ZERO);
+                chunks.push((combo_count, vec![z_pow]));
+
+                self.hal.combos_divide(&combos, chunks, self.cycles);
             });
         });
 
