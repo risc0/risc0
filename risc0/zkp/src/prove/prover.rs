@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use rayon::prelude::*;
 use risc0_core::{
     field::{Elem, ExtElem, RootsOfUnity},
     scope, scope_with,
 };
 
 use crate::{
-    core::poly::{poly_divide, poly_interpolate},
+    core::poly::poly_interpolate,
     hal::{Buffer, CircuitHal, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,
@@ -307,47 +306,38 @@ impl<'a, H: Hal> Prover<'a, H> {
             );
         });
 
-        // Load the near final coefficients back to the CPU
         scope!("load_combos", {
-            combos.view_mut(|combos| {
-                scope!("part1", {
-                    let mut cur_pos = 0;
-                    let mut cur = H::ExtElem::ONE;
-                    // Subtract the U coeffs from the combos
-                    for reg in self.taps.regs() {
-                        for i in 0..reg.size() {
-                            combos[self.cycles * reg.combo_id() + i] -= cur * coeff_u[cur_pos + i];
-                        }
-                        cur *= mix;
-                        cur_pos += reg.size();
-                    }
-                    // Subtract the final 'check' coefficients
-                    for _ in 0..H::CHECK_SIZE {
-                        combos[self.cycles * combo_count] -= cur * coeff_u[cur_pos];
-                        cur_pos += 1;
-                        cur *= mix;
-                    }
-                });
+            let reg_sizes: Vec<_> = self.taps.regs().map(|x| x.size() as u32).collect();
+            let reg_combo_ids: Vec<_> = self.taps.regs().map(|x| x.combo_id() as u32).collect();
+
+            scope!("prepare", {
+                self.hal.combos_prepare(
+                    &combos,
+                    &coeff_u,
+                    combo_count,
+                    self.cycles,
+                    &reg_sizes,
+                    &reg_combo_ids,
+                    &mix,
+                );
+            });
+
+            scope!("divide", {
+                let mut chunks = vec![];
+
                 // Divide each element by (x - Z * back1^back) for each back
-                scope!("part2", {
-                    combos
-                        .par_chunks_exact_mut(self.cycles)
-                        .zip(0..combo_count)
-                        .for_each(|(combo, i)| {
-                            for back in self.taps.get_combo(i).slice() {
-                                assert_eq!(
-                                    poly_divide(combo, z * back_one.pow((*back).into())),
-                                    H::ExtElem::ZERO
-                                );
-                            }
-                        });
-                });
-                scope!("part3", {
-                    // Divide check polys by z^EXT_SIZE
-                    let slice = &mut combos
-                        [combo_count * self.cycles..combo_count * self.cycles + self.cycles];
-                    assert_eq!(poly_divide(slice, z_pow), H::ExtElem::ZERO);
-                });
+                for i in 0..combo_count {
+                    let mut pows = vec![];
+                    for &back in self.taps.get_combo(i).slice() {
+                        pows.push(z * back_one.pow(back.into()));
+                    }
+                    chunks.push((i, pows));
+                }
+
+                // Divide check polys by z^EXT_SIZE
+                chunks.push((combo_count, vec![z_pow]));
+
+                self.hal.combos_divide(&combos, chunks, self.cycles);
             });
         });
 

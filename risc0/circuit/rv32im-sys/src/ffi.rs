@@ -66,6 +66,16 @@ extern "C" {
 
     pub fn risc0_circuit_string_free(str: *const RawString);
 
+    pub fn risc0_circuit_rv32im_cpu_witgen(
+        mode: u32,
+        trace: *const RawPreflightTrace,
+        steps: u32,
+        count: u32,
+        ctrl: *const BabyBearElem,
+        io: *const BabyBearElem,
+        data: *const BabyBearElem,
+    ) -> *const std::os::raw::c_char;
+
     pub fn risc0_circuit_rv32im_accum_context_alloc(steps: usize) -> *const RawAccumContext;
 
     pub fn risc0_circuit_rv32im_accum_context_free(ctx: *const RawAccumContext);

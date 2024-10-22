@@ -62,13 +62,13 @@ impl CircuitImpl {
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
-        self.wrap_ffi(|err| unsafe {
+        self.ffi_wrap(|err| unsafe {
             risc0_circuit_rv32im_step_compute_accum(err, ctx.0, steps, cycle, args.as_ptr())
         })
     }
 
     pub fn calc_prefix_products(&self, ctx: &SyncAccumContext) -> Result<()> {
-        self.wrap_ffi(|err| unsafe { risc0_circuit_rv32im_calc_prefix_products(err, ctx.0) })
+        self.ffi_wrap(|err| unsafe { risc0_circuit_rv32im_calc_prefix_products(err, ctx.0) })
     }
 
     pub fn par_step_verify_accum(
@@ -79,12 +79,12 @@ impl CircuitImpl {
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<()> {
         let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
-        self.wrap_ffi(|err| unsafe {
+        self.ffi_wrap(|err| unsafe {
             risc0_circuit_rv32im_step_verify_accum(err, ctx.0, steps, cycle, args.as_ptr())
         })
     }
 
-    fn wrap_ffi<R, F: Fn(*mut RawError) -> R>(&self, inner: F) -> Result<R> {
+    fn ffi_wrap<R, F: Fn(*mut RawError) -> R>(&self, inner: F) -> Result<R> {
         let mut err = RawError::default();
         let result = inner(&mut err);
         if err.msg.is_null() {
