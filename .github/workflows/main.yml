@@ -285,7 +285,7 @@ jobs:
   examples:
     if: needs.changes.outputs.examples == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, docker, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
@@ -302,6 +302,11 @@ jobs:
             arch: ARM64
             feature: default
             device: apple_m2_pro
+    services:
+      redis:
+        image: ${{ ( matrix.os != 'macOS' ) && 'redis:latest' || '' }}
+        ports:
+          - 6379:6379
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -326,10 +331,8 @@ jobs:
       - name: test in dev mode
         run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE --workspace --exclude prover-example
         working-directory: examples
-      - uses: shogo82148/actions-setup-redis@v1
-        with:
-          redis-version: "7.2"
       - name: test redis-executor example
+        if: matrix.os != 'macOS'
         run: cargo run --locked -F $FEATURE -F redis -p redis-executor
         working-directory: examples
       - name: test prover example
