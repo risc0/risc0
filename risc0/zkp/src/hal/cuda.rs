@@ -372,10 +372,10 @@ impl<CH: CudaHash> CudaHal<CH> {
 
     fn poly_divide(
         &self,
-        polynomial: &Self::Buffer<Self::ExtElem>,
-        pow: Self::ExtElem,
-    ) -> Self::ExtElem {
-        let mut remainder = Self::ExtElem::ZERO;
+        polynomial: &BufferImpl<BabyBearExtElem>,
+        pow: BabyBearExtElem,
+    ) -> BabyBearExtElem {
+        let mut remainder = BabyBearExtElem::ZERO;
         let poly_size = polynomial.size();
         let pow = pow.to_u32_words();
 
@@ -969,8 +969,9 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     ) {
         scope!("combos_divide");
         for (i, pows) in chunks {
+            let combo_slice = combos.slice(i * cycles, cycles);
             for pow in pows {
-                let remainder = self.poly_divide(combo_slice, pow);
+                let remainder = self.poly_divide(&combo_slice, pow);
                 assert_eq!(remainder, Self::ExtElem::ZERO, "i: {i}");
             }
         }
