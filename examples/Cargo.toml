@@ -16,8 +16,6 @@ members = [
   "hello-world",
   "json",
   "json/core",
-  "jwt-validator",
-  "jwt-validator/core",
   "password-checker",
   "password-checker/core",
   "profiling",
