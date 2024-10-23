@@ -145,7 +145,7 @@ impl Default for KeccakBatcher {
 }
 
 impl KeccakBatcher {
-    const KECCAK_LIMIT: usize = 10000;
+    const KECCAK_LIMIT: usize = 100_000_000;
     const BLOCK_COUNT_BYTES: usize = 8;
     const BLOCK_BYTES: usize = 136;
 
@@ -163,6 +163,10 @@ impl KeccakBatcher {
         self.input_transcript[self.data_offset..self.data_offset + input.len()]
             .copy_from_slice(input);
         self.data_offset += input.len();
+        //        self::log(&alloc::format!(
+        //            "write data: current data offset: {}",
+        //            self.data_offset
+        //        ));
 
         Ok(())
     }
@@ -206,12 +210,14 @@ impl KeccakBatcher {
 
         let block_count = (data_length / Self::BLOCK_BYTES) as u8; // TODO: error handling...
 
-        //self::log(alloc::format!("block count: {block_count}"));
-
         self.write_data(input)?;
         self.input_transcript[self.block_count_offset] = block_count;
         self.block_count_offset = self.data_offset; // TODO: write zeros to the block count region
         self.data_offset += Self::BLOCK_COUNT_BYTES;
+        //        self::log(&alloc::format!(
+        //            "write hash: current data offset: {}",
+        //            self.data_offset
+        //        ));
         Ok(())
     }
 
@@ -225,6 +231,10 @@ impl KeccakBatcher {
         self.input_transcript
             [self.block_count_offset..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
             .copy_from_slice(&[0u8; Self::BLOCK_COUNT_BYTES]);
+        self::log(&alloc::format!(
+            "finalize: input transcript size: {}",
+            self.block_count_offset + Self::BLOCK_COUNT_BYTES,
+        ));
         Ok(
             *<sha::Impl as risc0_zkp::core::hash::sha::Sha256>::hash_bytes(
                 &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
@@ -236,7 +246,6 @@ impl KeccakBatcher {
         self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES)
     }
 
-    /// testing only: get the transcript
     #[cfg(test)]
     pub fn transcript(&self) -> &[u8] {
         &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
@@ -262,6 +271,7 @@ pub(crate) fn init() {
 /// Finalize execution
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
+        let _ = KECCAK_BATCHER.finalize().unwrap();
         #[allow(static_mut_refs)]
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();

@@ -1521,7 +1521,6 @@ version = "2.0.2"
 dependencies = [
  "crunchy",
  "risc0-zkvm",
- "risc0-zkvm-platform",
 ]
 
 [[package]]

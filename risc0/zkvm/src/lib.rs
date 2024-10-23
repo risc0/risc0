@@ -83,15 +83,20 @@ pub mod sha;
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use host::recursion;
 
+pub use self::receipt_claim::{
+    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim, Unknown,
+};
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
-
-pub use self::receipt_claim::{
-    Assumption, Assumptions, Input, MaybePruned, Output, PrunedValueError, ReceiptClaim, Unknown,
+#[cfg(target_os = "zkvm")]
+pub use risc0_zkvm_platform::syscall::{
+    sys_keccak_absorb, sys_keccak_close, sys_keccak_open, sys_keccak_squeeze,
+};
+pub use risc0_zkvm_platform::{
+    align_up, declare_syscall, memory::GUEST_MAX_MEM, syscall::DIGEST_WORDS, PAGE_SIZE,
 };
 
 #[cfg(not(target_os = "zkvm"))]
