@@ -8,3 +8,8 @@ edition = "2021"
 [dependencies]
 jwt-core = { path = "../../core/" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+
+[patch.crates-io]
+# TODO: jwt-compact patching shouldn't be needed long-term, it's just for requesting the "std" feature from `rsa`
+jwt-compact = { path = "/Users/tzerrell/code/jwt-compact" }   # Base: * 1074d2f (tag: v0.8.0) Bump crate version to 0.8.0 (#160)
+rsa = { path = "/Users/tzerrell/code/RustCrypto/RSA" }        # Base: * | a801f53 (tag: v0.9.6) v0.9.6 (#397)
