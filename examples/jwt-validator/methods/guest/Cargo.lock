@@ -1016,6 +1016,7 @@ dependencies = [
  "bytemuck",
  "hex",
  "num-bigint",
+ "num-bigint-dig",
  "num-integer",
  "num-traits",
  "paste",

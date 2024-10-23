@@ -17,6 +17,8 @@
 mod tests;
 
 use num_bigint::BigUint;
+#[cfg(feature = "bigint-dig-shim")]
+use num_bigint_dig::BigUint as BigUintDig;
 
 use crate::{BigIntClaim, BigIntProgram};
 
@@ -25,5 +27,16 @@ pub use crate::generated::{RSA_256_X1, RSA_256_X2, RSA_3072_X1, RSA_3072_X15};
 
 /// Construct a bigint claim that (S^e = M (mod N)), where e = 65537.
 pub fn claim(prog_info: &BigIntProgram, n: BigUint, s: BigUint, m: BigUint) -> BigIntClaim {
+    BigIntClaim::from_biguints(prog_info, &[n, s, m])
+}
+
+/// Construct a bigint claim that (S^e = M (mod N)), where e = 65537, using num-bigint-dig
+#[cfg(feature = "bigint-dig-shim")]
+pub fn claim_dig(prog_info: &BigIntProgram, n: &BigUintDig, s: &BigUintDig, m: &BigUintDig) -> BigIntClaim {
+    // TODO: Investigate how expensive this shim is
+    let n = BigUint::from_bytes_le(&n.to_bytes_le());
+    let s = BigUint::from_bytes_le(&s.to_bytes_le());
+    let m = BigUint::from_bytes_le(&m.to_bytes_le());
+
     BigIntClaim::from_biguints(prog_info, &[n, s, m])
 }
