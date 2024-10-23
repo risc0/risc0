@@ -132,7 +132,7 @@ impl Toolchain {
         let release_info = self.release_info(tag).await?;
         let Some(asset) = release_info.assets.get(&target) else {
             return Err(
-                RzupError::Other(format!("No asset found for target: {:?}", target)).into(),
+                RzupError::Other(format!("No asset found for target: {:?}\n📝 It's likely you need to manually install the toolchain following these instructions:\nhttps://dev.risczero.com/api/zkvm/install#manual-installation-and-installation-for-all-other-systems-eg-x86-64-macos-arm64-linux", target)).into(),
             );
         };
 
