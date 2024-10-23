@@ -52,6 +52,14 @@ RISC Zero deploys and manages the `RiscZeroVerifierRouter` contract listed below
 This contract will have verifiers added for each release of the zkVM, and will have verifiers removed in the case of security vulnerabilities.
 You can find detailed information in the [version management design][version-management], including information about how to manage your own copy of the smart contracts, if your application requires it.
 
+## Verification Cost
+
+SNARK verification via the `verifyProof` function on the [RISCZeroGroth16Verifier][RISCZeroGroth16Verifier] contract costs around 215k gas on all EVM chains. However, you'll notice that a transaction calling `verify()` via the [RiscZeroVerifierRouter](#verifer-router) costs [~316k gas][verify-sepolia-etherscan]. 
+
+This 100k gas overhead comes mostly from storage loads, jumping contracts, input validation and integrity checks across  multiple contract calls starting from [RiscZeroVerifierRouter](#verifer-router). Based on the first 4 bytes of the seal, the router contract [looks up][function-getVerifier] the matching verifier implementation for the next contract call. This contract call is via the [RiscZeroVerifierEmergencyStop][RiscZeroVerifierEmergencyStop] contract as part of the [emergency stop mechanism][emergency-stop-mechanism]; the overhead here comes from loading state for safety checks, and to route the call to the correct verifier contract address where `verifyProof()` can be called directly.
+
+The [proof composition API][proof-composition] allows for efficiently verifying proofs inside the guest program allowing for effective amortization of this overhead cost.
+
 ### Contract Addresses
 
 :::info
@@ -62,13 +70,19 @@ You can use the [deployed contracts for a released version][doc-released-contrac
 <!-- TODO: Move this example into risc0-ethereum such that it will be under the same version management -->
 
 [doc-released-contracts]: /api/blockchain-integration/contracts/verifier#contract-addresses
+[emergency-stop-mechanism]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/version-management-design.md#emergency-stop
 [EvenNumber.sol]: https://github.com/risc0/risc0-foundry-template/blob/main/contracts/EvenNumber.sol#L46-L52
 [foundry-template]: https://github.com/risc0/risc0-foundry-template
+[function-getVerifier]: https://github.com/risc0/risc0-ethereum/blob/6132e946a142cea6f53f325e8fd0c175ad0ec283/contracts/src/RiscZeroVerifierRouter.sol#L74
 [Groth16Receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html
 [IRiscZeroVerifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
+[proof-composition]: /api/zkvm/composition
+[RISCZeroGroth16Verifier]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[RiscZeroVerifierEmergencyStop]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/RiscZeroVerifierEmergencyStop.sol
 [term-image-id]: /terminology#image-id
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm
+[verify-sepolia-etherscan]: https://sepolia.etherscan.io/tx/0x28803b006ac64c08d386676abf34d8ba6232173b28f09ddd4f0c253e37904f91/advanced
 [version-management]: https://github.com/risc0/risc0-ethereum/blob/release-1.1/contracts/version-management-design.md
