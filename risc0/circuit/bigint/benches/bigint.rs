@@ -17,7 +17,7 @@ use num_bigint::BigUint;
 use num_traits::Num as _;
 use risc0_circuit_bigint::{ec, generate_proof_input, rsa, BigIntProgram};
 
-criterion_group!(benches, bench_rsa, bench_ec_mul);
+criterion_group!(benches, bench_rsa);
 criterion_main!(benches);
 
 fn from_hex(s: &str) -> BigUint {
@@ -41,21 +41,4 @@ fn bench_rsa(c: &mut Criterion) {
     do_rsa(c, rsa::RSA_256_X1);
     do_rsa(c, rsa::RSA_256_X2);
     do_rsa(c, rsa::RSA_3072_X15);
-}
-
-fn bench_ec_mul(c: &mut Criterion) {
-    let prog: BigIntProgram = ec::EC_MUL_SECP256K1;
-    let [x, y, s, u, v] = [
-        from_hex("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),
-        from_hex("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"),
-        from_hex("2f"), // 47
-        from_hex("77f230936ee88cbbd73df930d64702ef881d811e0e1498e2f1c13eb1fc345d74"),
-        from_hex("958ef42a7886b6400a08266e9ba1b37896c95330d97077cbbe8eb3c7671c60d6"),
-    ];
-    let claim = ec::mul_claim(&prog, x, y, s, u, v);
-    c.bench_function("ec_mul_secp256k1", |b| {
-        b.iter(|| {
-            generate_proof_input(&[&claim], &prog).unwrap();
-        })
-    });
 }
