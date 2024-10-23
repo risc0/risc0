@@ -144,7 +144,6 @@ prove = [
   "client",
   "dep:addr2line",
   "dep:bincode",
-  "dep:bytes",
   "dep:elf",
   "dep:lazy-regex",
   "dep:prost",
