@@ -15,7 +15,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use num_bigint::BigUint;
 use num_traits::Num as _;
-use risc0_circuit_bigint::{ec, generate_proof_input, rsa, BigIntProgram};
+use risc0_circuit_bigint::{generate_proof_input, rsa, BigIntProgram};
 
 criterion_group!(benches, bench_rsa);
 criterion_main!(benches);
