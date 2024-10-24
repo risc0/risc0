@@ -14,7 +14,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { type ReactNode, useState } from "react";
+import { Children, type ReactNode, isValidElement, useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
 
@@ -57,8 +57,12 @@ export function DatasheetTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const titleString = Children.toArray(title)
+    .map((child) => (isValidElement(child) ? child.props.children : child))
+    .join("");
+
   return (
-    <div className="space-y-4">
+    <div id={titleString.toLowerCase().split(" ").join("_").replaceAll(".", "")} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="truncate text-xl">{title}</h2>
         <TableToolbar table={table} />
