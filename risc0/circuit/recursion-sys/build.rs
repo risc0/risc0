@@ -70,5 +70,5 @@ fn build_metal_kernels() {
 
     KernelBuild::new(KernelType::Metal)
         .files(src_paths)
-        .compile("risc0_recursion_metal");
+        .compile("metal_kernel");
 }

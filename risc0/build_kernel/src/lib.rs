@@ -172,6 +172,7 @@ impl KernelBuild {
         println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_SCCACHE_RECACHE");
 
         for inc_dir in self.inc_dirs.iter() {
             for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
@@ -426,6 +427,9 @@ fn maybe_sccache(inner: &str) -> Command {
         let mut cmd = Command::new(sccache);
         cmd.arg(inner);
         cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
+        if env::var("RISC0_CUDA_SCCACHE_RECACHE").is_ok() {
+            cmd.env("SCCACHE_RECACHE", "1");
+        }
         cmd
     } else {
         println!(

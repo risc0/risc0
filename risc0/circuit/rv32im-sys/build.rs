@@ -90,5 +90,5 @@ fn build_metal_kernels() {
             "kernels/metal/extern.h",
             "kernels/metal/kernels.h",
         ])
-        .compile("risc0_rv32im_metal");
+        .compile("metal_kernel");
 }

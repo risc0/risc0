@@ -63,6 +63,7 @@ runs:
         echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> $GITHUB_ENV
         echo "CXX=sccache clang++" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+        echo "RISC0_CUDA_SCCACHE_RECACHE=1" >> $GITHUB_ENV
       shell: bash
 
     - if: >
