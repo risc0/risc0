@@ -833,7 +833,7 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    use redis::Commands;
+    use redis::{Commands, SetExpiry, SetOptions};
 
     let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {
         Ok(val_str) => val_str.parse::<usize>().unwrap_or(100),
@@ -850,39 +850,16 @@ fn execute_redis(
             let segment_bytes = bincode::serialize(&segment)
                 .map_err(anyhow::Error::new)
                 .unwrap();
-            let opts =
-                redis::SetOptions::default().with_expiration(redis::SetExpiry::EX(params.ttl));
+            let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
             let _: () = connection
                 .set_options(segment_key.clone(), segment_bytes, opts)
                 .map_err(anyhow::Error::new)
                 .unwrap();
 
-            // this returns the redis key as the asset of the segment
-            let segment = Some(pb::api::SegmentInfo {
-                index: segment.index,
-                po2: segment.inner.po2 as u32,
-                cycles: segment.inner.insn_cycles as u32,
-                segment: Some(pb::api::Asset {
-                    kind: Some(pb::api::asset::Kind::Redis(segment_key)),
-                }),
-            });
-
-            let msg = pb::api::ServerReply {
-                kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                    kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                        pb::api::OnSegmentDone { segment },
-                    )),
-                })),
+            let asset = pb::api::Asset {
+                kind: Some(pb::api::asset::Kind::Redis(segment_key)),
             };
-            tracing::trace!("tx: {msg:?}");
-            connection_copy.send(msg).unwrap();
-
-            let reply: pb::api::GenericReply = connection_copy.recv().unwrap();
-            tracing::trace!("rx: {reply:?}");
-            let kind = reply.kind.ok_or(malformed_err()).unwrap();
-            if let pb::api::generic_reply::Kind::Error(err) = kind {
-                panic!("{:?}", err)
-            }
+            send_segment_done_msg(&mut connection_copy, segment, Some(asset)).unwrap();
         }
     });
 
@@ -911,32 +888,40 @@ fn execute_default(
             segment_bytes.into(),
             format!("segment-{}", segment.index),
         )?;
-        let segment = Some(pb::api::SegmentInfo {
-            index: segment.index,
-            po2: segment.inner.po2 as u32,
-            cycles: segment.inner.insn_cycles as u32,
-            segment: Some(asset),
-        });
-
-        let msg = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                    pb::api::OnSegmentDone { segment },
-                )),
-            })),
-        };
-        tracing::trace!("tx: {msg:?}");
-        conn.send(msg)?;
-
-        let reply: pb::api::GenericReply = conn.recv()?;
-        tracing::trace!("rx: {reply:?}");
-        let kind = reply.kind.ok_or(malformed_err())?;
-        if let pb::api::generic_reply::Kind::Error(err) = kind {
-            bail!(err)
-        }
-
+        send_segment_done_msg(conn, segment, Some(asset))?;
         Ok(Box::new(NullSegmentRef))
     })
+}
+
+fn send_segment_done_msg(
+    conn: &mut ConnectionWrapper,
+    segment: Segment,
+    some_asset: Option<pb::api::Asset>,
+) -> Result<()> {
+    let segment = Some(pb::api::SegmentInfo {
+        index: segment.index,
+        po2: segment.inner.po2 as u32,
+        cycles: segment.inner.insn_cycles as u32,
+        segment: some_asset,
+    });
+
+    let msg = pb::api::ServerReply {
+        kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+            kind: Some(pb::api::client_callback::Kind::SegmentDone(
+                pb::api::OnSegmentDone { segment },
+            )),
+        })),
+    };
+    tracing::trace!("tx: {msg:?}");
+    conn.send(msg)?;
+
+    let reply: pb::api::GenericReply = conn.recv()?;
+    tracing::trace!("rx: {reply:?}");
+    let kind = reply.kind.ok_or(malformed_err())?;
+    if let pb::api::generic_reply::Kind::Error(err) = kind {
+        bail!(err)
+    }
+    Ok(())
 }
 
 #[cfg(test)]
