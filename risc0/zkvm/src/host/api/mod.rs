@@ -62,11 +62,11 @@ pub trait Connection {
     fn stream(&self) -> &TcpStream;
     fn close(&mut self) -> Result<i32>;
     #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection>>;
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>>;
 }
 
 pub struct ConnectionWrapper {
-    inner: Box<dyn Connection>,
+    inner: Box<dyn Connection + Send>,
     buf: Vec<u8>,
 }
 
@@ -90,7 +90,7 @@ impl RootMessage for pb::api::CompressRequest {}
 impl RootMessage for pb::api::CompressReply {}
 
 impl ConnectionWrapper {
-    fn new(inner: Box<dyn Connection>) -> Self {
+    fn new(inner: Box<dyn Connection + Send>) -> Self {
         Self {
             inner,
             buf: Vec::new(),
@@ -297,7 +297,7 @@ impl Connection for ParentProcessConnection {
     }
 
     #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
         unimplemented!()
     }
 }
@@ -319,7 +319,7 @@ impl Connection for TcpConnection {
         Ok(0)
     }
 
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
         Ok(Box::new(Self::new(self.stream.try_clone()?)))
     }
 }

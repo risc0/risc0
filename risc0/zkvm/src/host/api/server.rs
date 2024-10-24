@@ -833,26 +833,27 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
+    use redis::Commands;
+
     let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {
         Ok(val_str) => val_str.parse::<usize>().unwrap_or(100),
         Err(_) => 100,
     };
-    let (sender, receiver) = kanal::bounded::<(String, Segment, ConnectionWrapper)>(channel_size);
+    let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
+    let mut connection_copy = conn.try_clone()?;
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
             .unwrap();
         let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
-        while let Ok((segment_key, segment, mut conn)) = receiver.recv() {
+        while let Ok((segment_key, segment)) = receiver.recv() {
             let segment_bytes = bincode::serialize(&segment)
                 .map_err(anyhow::Error::new)
                 .unwrap();
-
-            redis::cmd("SETEX")
-                .arg(segment_key.clone())
-                .arg(params.ttl)
-                .arg(segment_bytes)
-                .exec(&mut connection)
+            let opts =
+                redis::SetOptions::default().with_expiration(redis::SetExpiry::EX(params.ttl));
+            let _: () = connection
+                .set_options(segment_key.clone(), segment_bytes, opts)
                 .map_err(anyhow::Error::new)
                 .unwrap();
 
@@ -874,9 +875,9 @@ fn execute_redis(
                 })),
             };
             tracing::trace!("tx: {msg:?}");
-            conn.send(msg).unwrap();
+            connection_copy.send(msg).unwrap();
 
-            let reply: pb::api::GenericReply = conn.recv().unwrap();
+            let reply: pb::api::GenericReply = connection_copy.recv().unwrap();
             tracing::trace!("rx: {reply:?}");
             let kind = reply.kind.ok_or(malformed_err()).unwrap();
             if let pb::api::generic_reply::Kind::Error(err) = kind {
@@ -887,7 +888,7 @@ fn execute_redis(
 
     let session = exec.run_with_callback(|segment| {
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key, segment, conn.try_clone()?))?;
+        sender.send((segment_key, segment))?;
         Ok(Box::new(NullSegmentRef))
     });
 

@@ -24,7 +24,6 @@ members = [
   "prorata",
   "prorata/core",
   "prover",
-  "redis-executor",
   "sha",
   "smartcore-ml",
   "voting-machine",

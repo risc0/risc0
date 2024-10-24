@@ -62,7 +62,6 @@ bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.7", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
-kanal = { version = "0.1.0-pre8", default-features = false, optional = true }
 lazy-regex = { version = "3.3", optional = true }
 prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
@@ -79,9 +78,11 @@ bincode = "1.3"
 chrono = { version = "0.4", default-features = false, features = ["serde"] }
 ciborium = "0.2"
 clap = { version = "4.5", features = ["derive"] }
+mini-redis = { version = "0.4.1", default-features = false }
 postcard = { version = "1.0", features = ["alloc"] }
 rand = "0.8"
 rmp-serde = "1.3"
+tokio = { version = "1.41.0", default-features = false, features = ["macros"] }
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -161,7 +162,7 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
-redis = ["dep:redis", "dep:kanal"]
+redis = ["dep:redis"]
 std = [
   "anyhow/std",
   "hex/std",
