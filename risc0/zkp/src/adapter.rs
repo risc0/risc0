@@ -29,6 +29,17 @@ pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
 pub const REGISTER_GROUP_DATA: usize = 2;
 
+// If true, enable tracing of adapter internals.
+const ADAPTER_TRACE_ENABLED: bool = false;
+
+macro_rules! trace_if_enabled {
+    ($($args:tt)*) => {
+        if ADAPTER_TRACE_ENABLED {
+            tracing::trace!($($args)*)
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct MixState<EE: ExtElem> {
     pub tot: EE,
@@ -212,32 +223,32 @@ impl PolyExtStep {
         match self {
             PolyExtStep::Const(value) => {
                 let elem = F::Elem::from_u64(*value as u64);
-                tracing::trace!("[{}] {self:?} -> {elem:?}", fp_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {elem:?}", fp_vars.len());
                 fp_vars.push(F::ExtElem::from_subfield(&elem));
             }
             PolyExtStep::Get(tap) => {
                 let val = u[*tap];
-                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
                 fp_vars.push(val);
             }
             PolyExtStep::GetGlobal(base, offset) => {
                 let val = F::ExtElem::from_subfield(&args[*base][*offset]);
-                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
                 fp_vars.push(val);
             }
             PolyExtStep::Add(x1, x2) => {
                 let val = fp_vars[*x1] + fp_vars[*x2];
-                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
                 fp_vars.push(val);
             }
             PolyExtStep::Sub(x1, x2) => {
                 let val = fp_vars[*x1] - fp_vars[*x2];
-                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
                 fp_vars.push(val);
             }
             PolyExtStep::Mul(x1, x2) => {
                 let val = fp_vars[*x1] * fp_vars[*x2];
-                tracing::trace!("[{}] {self:?} -> {val:?}", fp_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {val:?}", fp_vars.len());
                 fp_vars.push(val);
             }
             PolyExtStep::Shift => {
@@ -249,7 +260,7 @@ impl PolyExtStep {
                         .chain(core::iter::repeat(F::Elem::ZERO))
                         .take(F::ExtElem::EXT_SIZE),
                 );
-                tracing::trace!("[{}] {self:?} -> {val:?}", mix_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {val:?}", mix_vars.len());
                 fp_vars.push(val);
             }
             PolyExtStep::True => {
@@ -257,7 +268,7 @@ impl PolyExtStep {
                     tot: F::ExtElem::ZERO,
                     mul: F::ExtElem::ONE,
                 };
-                tracing::trace!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
                 mix_vars.push(mix_val);
             }
             PolyExtStep::AndEqz(x, val) => {
@@ -267,7 +278,7 @@ impl PolyExtStep {
                     tot: x.tot + x.mul * val,
                     mul: x.mul * *mix,
                 };
-                tracing::trace!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
                 mix_vars.push(mix_val);
             }
             PolyExtStep::AndCond(x, cond, inner) => {
@@ -278,7 +289,7 @@ impl PolyExtStep {
                     tot: x.tot + cond * inner.tot * x.mul,
                     mul: x.mul * inner.mul,
                 };
-                tracing::trace!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
+                trace_if_enabled!("[{}] {self:?} -> {mix_val:?}", mix_vars.len());
                 mix_vars.push(mix_val);
             }
         }
