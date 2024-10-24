@@ -40,7 +40,7 @@ fn build_cpu_kernels() {
             "cxx/step_verify_mem.cpp",
         ])
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .compile("circuit");
+        .compile("risc0_recursion_cpu");
 }
 
 fn build_cuda_kernels() {
@@ -70,5 +70,5 @@ fn build_metal_kernels() {
 
     KernelBuild::new(KernelType::Metal)
         .files(src_paths)
-        .compile("metal_kernel");
+        .compile("risc0_recursion_metal");
 }

@@ -43,7 +43,7 @@ fn build_cpu_kernels() {
         ])
         .deps(glob::glob("cxx/*.h").unwrap().map(|x| x.unwrap()))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .compile("circuit");
+        .compile("risc0_rv32im_cpu");
 }
 
 fn build_cuda_kernels() {
@@ -90,5 +90,5 @@ fn build_metal_kernels() {
             "kernels/metal/extern.h",
             "kernels/metal/kernels.h",
         ])
-        .compile("metal_kernel");
+        .compile("risc0_rv32im_metal");
 }
