@@ -127,7 +127,8 @@ pub use self::host::client::prove::bonsai::BonsaiProver;
 pub use {
     self::host::{
         api::{
-            client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo,
+            client::Client as ApiClient, Asset, AssetRequest, Connector, RedisParams, SegmentInfo,
+            SessionInfo,
         },
         client::{
             env::{ExecutorEnv, ExecutorEnvBuilder},
