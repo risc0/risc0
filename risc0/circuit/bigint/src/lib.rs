@@ -16,7 +16,6 @@ pub mod byte_poly;
 mod codegen_prelude;
 #[cfg(not(feature = "make_control_ids"))]
 pub(crate) mod control_id;
-pub mod ec;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
 #[cfg(test)]
