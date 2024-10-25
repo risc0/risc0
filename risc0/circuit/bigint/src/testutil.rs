@@ -131,36 +131,7 @@ macro_rules! bigint_short_tests {
     }
 }
 
-// Tests that input values which should cause constraint failures do so
-macro_rules! bigint_should_fail_tests {
-    ($($name:ident($zkr:ident, $in:expr),)*) => {
-        $(
-            paste::paste! {
-                fn [<$name _values>]() -> Vec<num_bigint::BigUint> {
-                    $in.into_iter().map($crate::testutil::from_hex).collect()
-                }
-
-                fn [<$name _filename>]() -> &'static str {
-                    concat!(stringify!($zkr), ".zkr")
-                }
-
-                #[test]
-                #[should_panic(expected = "Invalid carry computation")]
-                fn [<$name _prove_fails>]() -> () {
-                    use risc0_zkp::core::hash::sha;
-                    use $crate::generated::[<$zkr:snake:upper>];
-
-                    let claim = $crate::BigIntClaim::from_biguints(&[<$zkr:snake:upper>], &[<$name _values>]());
-                    let zkr = $crate::zkr::get_zkr([<$name _filename>](), $crate::BIGINT_PO2).unwrap();
-                    let receipt = $crate::prove::<sha::Impl>(&[&claim], &[<$zkr:snake:upper>], zkr).unwrap();
-                    crate::verify::<sha::Impl>(&[<$zkr:snake:upper>], &[&claim], &receipt).unwrap();
-                }
-            }
-        )*
-    }
-}
-
-pub(crate) use {bigint_short_tests, bigint_should_fail_tests, bigint_tests};
+pub(crate) use {bigint_short_tests, bigint_tests};
 
 pub(crate) fn test_witgen(
     ctx: BigIntContext,
