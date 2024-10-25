@@ -20,7 +20,7 @@ use risc0_binfmt::SystemState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
+use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
     receipt::{
         merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
@@ -51,6 +51,13 @@ impl TryFrom<AssetRequest> for pb::api::AssetRequest {
                 AssetRequest::Path(path) => {
                     pb::api::asset_request::Kind::Path(path_to_string(path)?)
                 }
+                AssetRequest::Redis(params) => {
+                    pb::api::asset_request::Kind::Redis(pb::api::RedisParams {
+                        url: params.url,
+                        key: params.key,
+                        ttl: params.ttl,
+                    })
+                }
             }),
         })
     }
@@ -64,6 +71,7 @@ impl TryFrom<Asset> for pb::api::Asset {
             kind: match value {
                 Asset::Inline(bytes) => Some(pb::api::asset::Kind::Inline(bytes.into())),
                 Asset::Path(path) => Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
+                Asset::Redis(key) => Some(pb::api::asset::Kind::Redis(key)),
             },
         })
     }
@@ -103,6 +111,25 @@ impl TryFrom<pb::api::Asset> for Asset {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::api::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
+            pb::api::asset::Kind::Redis(key) => Asset::Redis(key),
+        })
+    }
+}
+
+impl TryFrom<pb::api::AssetRequest> for AssetRequest {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::api::AssetRequest) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::api::asset_request::Kind::Inline(()) => AssetRequest::Inline,
+            pb::api::asset_request::Kind::Path(path) => {
+                AssetRequest::Path(std::path::PathBuf::from(path))
+            }
+            pb::api::asset_request::Kind::Redis(params) => AssetRequest::Redis(RedisParams {
+                url: params.url,
+                key: params.key,
+                ttl: params.ttl,
+            }),
         })
     }
 }

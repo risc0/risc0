@@ -90,6 +90,25 @@ impl TestClient {
         })
     }
 
+    #[cfg(feature = "redis")]
+    fn execute_redis(
+        &mut self,
+        env: ExecutorEnv<'_>,
+        binary: Asset,
+        params: super::RedisParams,
+    ) -> SessionInfo {
+        with_server(self.addr, || {
+            let segments_out = AssetRequest::Redis(params);
+            self.client
+                .execute(&env, binary, segments_out, |_info, asset| {
+                    let Asset::Redis(_key) = asset else {
+                        anyhow::bail!("wrong asset type");
+                    };
+                    Ok(())
+                })
+        })
+    }
+
     fn prove(&self, env: &ExecutorEnv<'_>, opts: &ProverOpts, binary: Asset) -> Receipt {
         with_server(self.addr, || self.client.prove(env, opts, binary)).receipt
     }
