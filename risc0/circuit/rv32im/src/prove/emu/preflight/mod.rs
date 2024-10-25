@@ -30,7 +30,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     syscall::{
-        bigint, ecall, halt,
+        bigint, ecall, halt, rsa,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         IO_CHUNK_WORDS,
     },
@@ -577,6 +577,48 @@ impl Preflight {
 
         self.pc += WORD_SIZE;
         Ok(true)
+    }
+
+    fn ecall_rsa(&mut self) -> Result<bool> {
+        let cycle = self.trace.body.cycles.len();
+        // TODO: I guess I load the effectively unused registers here?
+        self.load_register(REG_T0)?;
+        self.load_register(REG_A3)?;
+        self.load_register(REG_A4)?;
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));  // TODO: I guess?
+
+        let out_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
+        let base_ptr = ByteAddr(self.load_register(REG_A1)?).waddr();
+        let mod_ptr = ByteAddr(self.load_register(REG_A2)?).waddr();
+        tracing::debug!("rsa(out: {out_ptr:?}, base: {base_ptr:?}, mod {mod_ptr:?}");
+        self.peek_rsa(REG_A0)?;
+        self.peek_rsa(REG_A1)?;
+        self.peek_rsa(REG_A2)?;
+        self.add_cycle(false, TopMux::Body(Major::RSA, 0));
+
+        let mut output = [0u32; rsa::WIDTH_WORDS];
+        let mut base = [0u32; rsa::WIDTH_WORDS];
+        let mut modulus = [0u32; rsa::WIDTH_WORDS];
+
+        let ptrs = [(base_ptr, &mut base), (mod_ptr, &mut modulus)];
+
+        // Load inputs.
+        for (ptr, arr) in ptrs {
+            for i in 0..2 {
+                let offset = i * RSA_IO_SIZE;
+                for j in 0..RSA_IO_SIZE {
+                    let word = self.load_u32(ptr + offset + j)?;
+                    arr[offset + j] = word.to_le();
+                }
+                self.peek_rsa(REG_A1)?;
+                self.peek_rsa(REG_A2)?;
+                self.add_cycle(false, TopMux::Body(Major::RSA, 0));
+            }
+        }
+
+        // TODO
+        let base = BigUint::from_le_bytes(base);
+        let modulus = BigUint::from_le_bytes(modulus);
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
