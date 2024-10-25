@@ -13,9 +13,6 @@ EXTENSIONS = [
 EXCEPTIONS = [
     # allow refs to trusted setup ceremony assets
     "d4e427283027c28b38b8eda1562e8e0e68d1b0e2",
-    # allow references to the governance example from prior versions.
-    # Related issue https://github.com/risc0/risc0-ethereum/issues/1
-    "bonsai/examples/governance",
     # allow link to risc0-ethereum before versioning started to match with 1.0
     "github.com/risc0/risc0-ethereum/blob/release-0.7",
     "github.com/risc0/risc0-ethereum/blob/release-0.10",
