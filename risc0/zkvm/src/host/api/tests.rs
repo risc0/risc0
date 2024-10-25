@@ -90,6 +90,25 @@ impl TestClient {
         })
     }
 
+    #[cfg(feature = "redis")]
+    fn execute_redis(
+        &mut self,
+        env: ExecutorEnv<'_>,
+        binary: Asset,
+        params: super::RedisParams,
+    ) -> SessionInfo {
+        with_server(self.addr, || {
+            let segments_out = AssetRequest::Redis(params);
+            self.client
+                .execute(&env, binary, segments_out, |_info, asset| {
+                    let Asset::Redis(_key) = asset else {
+                        anyhow::bail!("wrong asset type");
+                    };
+                    Ok(())
+                })
+        })
+    }
+
     fn prove(&self, env: &ExecutorEnv<'_>, opts: &ProverOpts, binary: Asset) -> Receipt {
         with_server(self.addr, || self.client.prove(&env, opts, binary)).receipt
     }
@@ -339,4 +358,34 @@ fn guest_error_forwarding() {
         .unwrap();
     let binary = Asset::Inline(MULTI_TEST_ELF.into());
     TestClient::new().execute(env, binary);
+}
+
+#[tokio::test]
+#[cfg(feature = "redis")]
+async fn redis_asset() {
+    let url = "127.0.0.1:6379";
+    let listener = tokio::net::TcpListener::bind(url)
+        .await
+        .expect("failed to bind to port 6379");
+
+    let _ = mini_redis::server::run(
+        listener,
+        tokio::task::spawn_blocking(move || {
+            let redis_params = super::RedisParams {
+                url: format!("redis://{url}"),
+                key: "key".to_string(),
+                ttl: 180,
+            };
+
+            let binary = Asset::Inline(MULTI_TEST_ELF.into());
+            let env = ExecutorEnv::builder()
+                .write(&MultiTestSpec::DoNothing)
+                .unwrap()
+                .build()
+                .unwrap();
+            let mut client = TestClient::new();
+            let _session_info = client.execute_redis(env, binary, redis_params);
+        }),
+    )
+    .await;
 }
