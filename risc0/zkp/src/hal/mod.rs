@@ -32,7 +32,7 @@ use risc0_core::{
 };
 
 use crate::{
-    core::{digest::Digest, hash::HashSuite},
+    core::{digest::Digest, hash::HashSuite, poly::poly_divide},
     INV_RATE,
 };
 
@@ -249,7 +249,7 @@ pub trait Hal {
                 .zip(chunks)
                 .for_each(|(combo_slice, (i, pows))| {
                     for pow in pows {
-                        let remainder = crate::core::poly::poly_divide(combo_slice, pow);
+                        let remainder = poly_divide(combo_slice, pow);
                         assert_eq!(remainder, Self::ExtElem::ZERO, "i: {i}");
                     }
                 });
