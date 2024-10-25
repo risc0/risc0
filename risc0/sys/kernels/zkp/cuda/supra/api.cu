@@ -1,13 +1,11 @@
+#include <ff/baby_bear.hpp>
 #include <util/exception.cuh>
 #include <util/gpu_t.cuh>
 #include <util/rusterror.h>
 
-#ifdef FEATURE_BABY_BEAR
-#include <ff/baby_bear.hpp>
-#endif
-
 #include "calc_prefix_operation.cuh"
-#include "poseidon_baby_bear/poseidon2.cu"
+#include "poly_divide.cuh"
+#include "poseidon2.cuh"
 
 extern "C" RustError::by_value
 sppark_poseidon2_fold(poseidon_out_t* d_out, const poseidon_in_t* d_in, size_t num_hashes) {
