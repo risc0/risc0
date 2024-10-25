@@ -26,7 +26,10 @@ use core::{
 
 use bytemuck::{CheckedBitPattern, NoUninit, Zeroable};
 
-use crate::field::{self, Elem as FieldElem};
+use crate::field::{
+    self, implement_commuting_field_operation, implement_field_operation_base,
+    implement_promoting_field_operation, Elem as FieldElem, ExtElem as FieldExtElem,
+};
 
 /// Definition of this field for operations that operate on the baby
 /// bear field and its 4th degree extension.
@@ -222,51 +225,24 @@ impl Elem {
     }
 }
 
-impl ops::Add for Elem {
-    type Output = Self;
-
-    /// Addition for Baby Bear [Elem]
-    fn add(self, rhs: Self) -> Self {
-        Elem(add(self.ensure_valid().0, rhs.ensure_valid().0))
-    }
-}
-
 impl ops::AddAssign for Elem {
     /// Simple addition case for Baby Bear [Elem]
     fn add_assign(&mut self, rhs: Self) {
-        self.0 = add(self.ensure_valid().0, rhs.ensure_valid().0)
-    }
-}
-
-impl ops::Sub for Elem {
-    type Output = Self;
-
-    /// Subtraction for Baby Bear [Elem]
-    fn sub(self, rhs: Self) -> Self {
-        Elem(sub(self.ensure_valid().0, rhs.ensure_valid().0))
+        self.0 = add(self.ensure_valid().0, rhs.ensure_valid().0);
     }
 }
 
 impl ops::SubAssign for Elem {
     /// Simple subtraction case for Baby Bear [Elem]
     fn sub_assign(&mut self, rhs: Self) {
-        self.0 = sub(self.ensure_valid().0, rhs.ensure_valid().0)
+        self.0 = sub(self.ensure_valid().0, rhs.ensure_valid().0);
     }
 }
 
-impl ops::Mul for Elem {
-    type Output = Self;
-
-    /// Multiplication for Baby Bear [Elem]
-    fn mul(self, rhs: Self) -> Self {
-        Elem(mul(self.ensure_valid().0, rhs.ensure_valid().0))
-    }
-}
-
-impl ops::MulAssign for Elem {
+impl ops::MulAssign<Self> for Elem {
     /// Simple multiplication case for Baby Bear [Elem]
     fn mul_assign(&mut self, rhs: Self) {
-        self.0 = mul(self.ensure_valid().0, rhs.ensure_valid().0)
+        self.0 = mul(self.ensure_valid().0, rhs.ensure_valid().0);
     }
 }
 
@@ -619,18 +595,7 @@ impl ExtElem {
     }
 }
 
-impl ops::Add for ExtElem {
-    type Output = Self;
-
-    /// Addition for Baby Bear [ExtElem]
-    fn add(self, rhs: Self) -> Self {
-        let mut lhs = self;
-        lhs += rhs;
-        lhs
-    }
-}
-
-impl ops::AddAssign for ExtElem {
+impl ops::AddAssign<Self> for ExtElem {
     /// Simple addition case for Baby Bear [ExtElem]
     fn add_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
@@ -639,18 +604,7 @@ impl ops::AddAssign for ExtElem {
     }
 }
 
-impl ops::Sub for ExtElem {
-    type Output = Self;
-
-    /// Subtraction for Baby Bear [ExtElem]
-    fn sub(self, rhs: Self) -> Self {
-        let mut lhs = self;
-        lhs -= rhs;
-        lhs
-    }
-}
-
-impl ops::SubAssign for ExtElem {
+impl ops::SubAssign<Self> for ExtElem {
     /// Simple subtraction case for Baby Bear [ExtElem]
     fn sub_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
@@ -663,29 +617,7 @@ impl ops::MulAssign<Elem> for ExtElem {
     /// Simple multiplication case by a
     /// Baby Bear [Elem]
     fn mul_assign(&mut self, rhs: Elem) {
-        for i in 0..self.0.len() {
-            self.0[i] *= rhs;
-        }
-    }
-}
-
-impl ops::Mul<Elem> for ExtElem {
-    type Output = Self;
-
-    /// Multiplication by a Baby Bear [Elem]
-    fn mul(self, rhs: Elem) -> Self {
-        let mut lhs = self;
-        lhs *= rhs;
-        lhs
-    }
-}
-
-impl ops::Mul<ExtElem> for Elem {
-    type Output = ExtElem;
-
-    /// Multiplication for a subfield [Elem] by an [ExtElem]
-    fn mul(self, rhs: ExtElem) -> ExtElem {
-        rhs * self
+        *self *= ExtElem::from(rhs);
     }
 }
 
@@ -695,7 +627,7 @@ impl ops::Mul<ExtElem> for Elem {
 // multiplied by `-beta`. We could write this as a double loops with
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.
-impl ops::MulAssign for ExtElem {
+impl ops::MulAssign<Self> for ExtElem {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
@@ -710,16 +642,9 @@ impl ops::MulAssign for ExtElem {
     }
 }
 
-impl ops::Mul for ExtElem {
-    type Output = ExtElem;
-
-    #[inline(always)]
-    fn mul(self, rhs: ExtElem) -> ExtElem {
-        let mut lhs = self;
-        lhs *= rhs;
-        lhs
-    }
-}
+implement_promoting_field_operation! {Elem, ExtElem, Add, AddAssign, add, add_assign}
+implement_commuting_field_operation! {Elem, ExtElem, Mul, MulAssign, mul, mul_assign}
+implement_promoting_field_operation! {Elem, ExtElem, Sub, SubAssign, sub, sub_assign}
 
 impl ops::Neg for ExtElem {
     type Output = Self;
@@ -758,6 +683,11 @@ mod tests {
     #[test]
     pub fn field_ops() {
         field::tests::test_field_ops::<Elem>(P_U64);
+    }
+
+    #[test]
+    pub fn ext_field_ops() {
+        field::tests::test_ext_field_ops::<ExtElem>();
     }
 
     #[test]
