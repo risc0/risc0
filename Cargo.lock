@@ -4454,6 +4454,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "sha2",
+ "stability",
  "test-log",
  "tracing",
  "tracing-subscriber 0.3.19",

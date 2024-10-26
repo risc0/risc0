@@ -839,6 +839,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stability",
  "tracing",
 ]
 
