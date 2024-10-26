@@ -33,28 +33,30 @@ pub trait Field {
 
 /// Subfield elements that can be compared, copied, and operated
 /// on via multiplication, addition, and subtraction
-pub trait Elem:
-    ops::Mul<Output = Self>
-    + ops::MulAssign
-    + ops::Add<Output = Self>
-    + ops::AddAssign
-    + ops::Neg
-    + ops::Sub<Output = Self>
-    + ops::SubAssign
-    + cmp::PartialEq
-    + cmp::Eq
-    + core::clone::Clone
-    + core::marker::Copy
-    + Sized
-    + bytemuck::NoUninit
-    + bytemuck::CheckedBitPattern
-    + core::default::Default
+pub trait Elem: 'static
     + Clone
     + Copy
     + Send
     + Sync
     + Debug
-    + 'static
+    + Sized
+    + ops::Neg<Output = Self>
+    + ops::SubAssign
+    + cmp::PartialEq
+    + cmp::Eq
+    + core::clone::Clone
+    + core::marker::Copy
+    + bytemuck::NoUninit
+    + bytemuck::CheckedBitPattern
+    + core::default::Default
+    // Operators for Elem (op) Elem -> Elem
+    + ops::Add<Self, Output = Self>
+    + ops::Sub<Self, Output = Self>
+    + ops::Mul<Self, Output = Self>
+    // Operators for Elem (op)= Elem
+    + ops::AddAssign<Self>
+    + ops::SubAssign<Self>
+    + ops::MulAssign<Self>
 {
     /// Invalid, a value that is not a member of the field.  This
     /// should only be used with the "is_valid" or "unwrap_or_zero"
@@ -164,25 +166,31 @@ pub trait Elem:
 /// Represents an element of an extension field. This extension field is
 /// associated with a base field (sometimes called "subfield") whose element
 /// type is given by the generic type parameter.
-pub trait ExtElem:
-    Elem
-    + ops::Add<Output = Self>
-    + ops::AddAssign
+pub trait ExtElem : Elem
+    + From<Self::SubElem>
     + ops::Neg<Output = Self>
-    + ops::Mul<Self, Output = Self>
-    + ops::Mul<Self::SubElem, Output = Self>
-    + ops::MulAssign<Self>
-    + ops::MulAssign<Self::SubElem>
-    + ops::Sub<Output = Self>
-    + ops::SubAssign
     + cmp::PartialEq
     + cmp::Eq
+
+    // Operators for ExtElem (op) Elem -> ExtElem
+    + ops::Add<Self::SubElem, Output = Self>
+    + ops::Sub<Self::SubElem, Output = Self>
+    + ops::Mul<Self::SubElem, Output = Self>
+
+    // Operators for ExtElem (op)= Elem
+    + ops::AddAssign<Self::SubElem>
+    + ops::SubAssign<Self::SubElem>
+    + ops::MulAssign<Self::SubElem>
 {
     /// An element of the base field
     ///
     /// This type represents an element of the base field (sometimes called
     /// "subfield") of this extension field.
-    type SubElem: Elem;
+    type SubElem: Elem
+        // Operators for Elem (op) ExtElem -> ExtElem
+        + ops::Add<Self, Output = Self>
+        + ops::Sub<Self, Output = Self>
+        + ops::Mul<Self, Output = Self>;
 
     /// The degree of the field extension
     ///
@@ -267,7 +275,7 @@ mod tests {
 
     use rand::Rng;
 
-    use super::{Elem, RootsOfUnity};
+    use super::{Elem, ExtElem, RootsOfUnity};
 
     pub fn test_roots_of_unity<F: Elem + RootsOfUnity + Debug>() {
         let mut cur: Option<F> = None;
@@ -341,5 +349,63 @@ mod tests {
             let actual = super::map_pow(base, exps);
             assert_eq!(expected, actual);
         }
+    }
+
+    /// Make sure extension field operations are consistent, no matter
+    /// what order they use, and whether they promote from base
+    /// elements or not.
+    pub fn test_ext_field_ops<E: ExtElem>() {
+        let mut r = rand::thread_rng();
+        let x = E::random(&mut r);
+        let y = E::random(&mut r);
+
+        let mut e = x;
+
+        // Promote E to the extended field.
+        let promote = |e| E::from(e);
+
+        // Addition and subtraction operations between two ExtElems
+        e += y;
+        assert_eq!(e, x + y);
+        assert_eq!(e, y + x);
+        assert_eq!(x, e - y);
+        assert_eq!(-x, y - e);
+        e -= y;
+        assert_eq!(e, x);
+
+        // Multiplication and inverse operations between two ExtElems
+        e *= y;
+        assert_eq!(e, x * y);
+        assert_eq!(e, y * x);
+        assert_eq!(x, e * y.inv());
+        assert_eq!(x.inv(), y * e.inv());
+        e *= y.inv();
+        assert_eq!(e, x);
+
+        // Addition and subtraction between an ExtElem and a base element
+        let b = E::SubElem::random(&mut r);
+        e += b;
+        assert_eq!(e, x + b);
+        assert_eq!(e, b + x);
+        assert_eq!(e, x + promote(b));
+        assert_eq!(x, e - promote(b));
+        assert_eq!(x, e - b);
+        assert_eq!(-x, b - e);
+        assert_eq!(-x, promote(b) - e);
+        e -= b;
+        assert_eq!(e, x);
+
+        // Multiplication and inverse operations between an ExtElem and a base element
+        e *= b;
+        assert_eq!(e, x * b);
+        assert_eq!(e, b * x);
+        assert_eq!(e, x * promote(b));
+        assert_eq!(x, e * b.inv());
+        assert_eq!(x, b.inv() * e);
+        assert_eq!(x, e * promote(b.inv()));
+        assert_eq!(x, e * promote(b).inv());
+        assert_eq!(x.inv(), b * e.inv());
+        e *= b.inv();
+        assert_eq!(e, x);
     }
 }
