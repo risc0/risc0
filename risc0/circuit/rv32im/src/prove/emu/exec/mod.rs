@@ -712,6 +712,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
+            ecall::RSA => self.ecall_rsa(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }

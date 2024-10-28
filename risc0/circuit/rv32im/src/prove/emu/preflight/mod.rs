@@ -580,8 +580,20 @@ impl Preflight {
         Ok(true)
     }
 
+    // TODO: Confirm ported correctly from BigInt
+    fn peek_rsa(&mut self, idx: usize) -> Result<()> {
+        let ptr = ByteAddr(self.load_register(idx)?).waddr();
+        for i in 0..rsa::WIDTH_WORDS {
+            self.load_u32(ptr + i)?;
+        }
+        Ok(())
+    }
+
     fn ecall_rsa(&mut self) -> Result<bool> {
+        const RSA_IO_SIZE: usize = 4;  // TODO: Is this an appropriate value?
+
         let cycle = self.trace.body.cycles.len();
+        tracing::debug!("[{cycle}] ecall_rsa");
         // TODO: I guess I load the effectively unused registers here?
         self.load_register(REG_T0)?;
         self.load_register(REG_A3)?;
@@ -604,7 +616,8 @@ impl Preflight {
 
         // Load inputs.
         for (ptr, arr) in ptrs {
-            for i in 0..2 {
+            // TODO: How many loops? Is this right?
+            for i in 0..rsa::WIDTH_WORDS / RSA_IO_SIZE {
                 let offset = i * RSA_IO_SIZE;
                 for j in 0..RSA_IO_SIZE {
                     let word = self.load_u32(ptr + offset + j)?;
@@ -616,18 +629,40 @@ impl Preflight {
             }
         }
 
-        let base = BigUint::from_bytes_le(base.map(|elem| elem.to_le_bytes()).flatten());
-        let modulus = BigUint::from_bytes_le(modulus.map(|elem| elem.to_le_bytes()).flatten());
+        // let base = BigUint::from_bytes_le(base.map(|elem| elem.to_le_bytes()).flatten());
+        // let modulus = BigUint::from_bytes_le(modulus.map(|elem| elem.to_le_bytes()).flatten());
+        // TODO: This code should be replaced with the `flatten` code above once `flatten` is stable
+        let base_words = base.map(|elem| elem.to_le_bytes());
+        let mut base = Vec::<u8>::new();  // TODO: Clean up style
+        for word in base_words {
+            for byte in word {
+                base.push(byte);
+            }
+        }
+        let base = BigUint::from_bytes_le(&base);
+        let modulus_words = modulus.map(|elem| elem.to_le_bytes());
+        let mut modulus = Vec::<u8>::new();  // TODO: Clean up style
+        for word in modulus_words {
+            for byte in word {
+                modulus.push(byte);
+            }
+        }
+        let modulus = BigUint::from_bytes_le(&modulus);
 
         // Compute RSA output
         let output = base.modpow(&BigUint::from(rsa::RSA_EXPONENT), &modulus);
 
-        tracing::debug!("base: {base:?}, modulus: {modulus:?}, output: {output:?}}");
+        tracing::debug!("base: {base:?}, modulus: {modulus:?}, output: {output:?}");
 
         // TODO: Adapted from BigInt ECall. Correctly?
         // Store result.
-        let output: [u32; rsa::WIDTH_WORDS] = <[u32; rsa::WIDTH_WORDS]>::try_from(output.to_u32_digits())?;
-        for i in 0..2 {
+        // TODO: Why can't I just use the ? operator?
+        let output: [u32; rsa::WIDTH_WORDS] = match output.to_u32_digits().try_into() {
+            Ok(arr) => arr,
+            Err(err) => panic!("TODO: Error {err:?}"),
+        };
+        // TODO: How many loops? Is this right?
+        for i in 0..rsa::WIDTH_WORDS / RSA_IO_SIZE {
             self.peek_rsa(REG_A1)?;
             self.peek_rsa(REG_A2)?;
 
@@ -769,6 +804,7 @@ impl EmuContext for Preflight {
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
+            ecall::RSA => self.ecall_rsa(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }

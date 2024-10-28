@@ -47,6 +47,7 @@ pub enum Major {
     BigInt,
     Halt,
     MuxSize,
+    RSA,  // TODO: Ok?
 }
 
 impl Major {
