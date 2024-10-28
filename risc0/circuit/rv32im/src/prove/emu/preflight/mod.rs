@@ -20,6 +20,7 @@ use std::collections::VecDeque;
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_debug::Dbg;
+use num_bigint::BigUint;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
@@ -596,7 +597,6 @@ impl Preflight {
         self.peek_rsa(REG_A2)?;
         self.add_cycle(false, TopMux::Body(Major::RSA, 0));
 
-        let mut output = [0u32; rsa::WIDTH_WORDS];
         let mut base = [0u32; rsa::WIDTH_WORDS];
         let mut modulus = [0u32; rsa::WIDTH_WORDS];
 
@@ -616,9 +616,32 @@ impl Preflight {
             }
         }
 
-        // TODO
-        let base = BigUint::from_le_bytes(base);
-        let modulus = BigUint::from_le_bytes(modulus);
+        let base = BigUint::from_bytes_le(base.map(|elem| elem.to_le_bytes()).flatten());
+        let modulus = BigUint::from_bytes_le(modulus.map(|elem| elem.to_le_bytes()).flatten());
+
+        // Compute RSA output
+        let output = base.modpow(&BigUint::from(rsa::RSA_EXPONENT), &modulus);
+
+        tracing::debug!("base: {base:?}, modulus: {modulus:?}, output: {output:?}}");
+
+        // TODO: Adapted from BigInt ECall. Correctly?
+        // Store result.
+        let output: [u32; rsa::WIDTH_WORDS] = <[u32; rsa::WIDTH_WORDS]>::try_from(output.to_u32_digits())?;
+        for i in 0..2 {
+            self.peek_rsa(REG_A1)?;
+            self.peek_rsa(REG_A2)?;
+
+            let offset = i * RSA_IO_SIZE;
+            for j in 0..RSA_IO_SIZE {
+                let word = output[offset + j].to_le();
+                self.store_u32(out_ptr + offset + j, word)?;
+            }
+
+            self.add_cycle(false, TopMux::Body(Major::RSA, 0));
+        }
+
+        self.pc += WORD_SIZE;  // TODO: Is this right?
+        Ok(true)
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
