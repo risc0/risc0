@@ -60,8 +60,8 @@ impl SysKeccak {
         to_guest: &mut [u32],
     ) -> anyhow::Result<(u32, u32)> {
         tracing::debug!("SYS_KECCAK: open fd {}", self.next_id);
-        if self.hasher_data.len() == u32::MAX as usize {
-            bail!("max number of hashers reached");
+        if self.next_id == 1 {
+            bail!("opening multiple hashers at the same time is currently unsupported")
         }
         let key = self.next_id;
         if self.hasher_data.contains_key(&key) {
@@ -82,7 +82,10 @@ impl SysKeccak {
     fn close(&mut self, ctx: &mut dyn SyscallContext) -> anyhow::Result<(u32, u32)> {
         let fd = ctx.load_register(REG_A6);
         match self.hasher_data.remove(&fd) {
-            Some(_) => Ok((0, 0)),
+            Some(_) => {
+                self.next_id -= 1;
+                Ok((0, 0))
+            }
             None => bail!("hasher ID {fd} does not exist, cannot close"),
         }
     }

@@ -212,7 +212,7 @@ impl KeccakBatcher {
 
         self.write_data(input)?;
         self.input_transcript[self.block_count_offset] = block_count;
-        self::log(&format!("block count: {block_count}"));
+        self::log(&alloc::format!("block count: {block_count}"));
 
         self.block_count_offset = self.data_offset; // TODO: write zeros to the block count region
         self.data_offset += Self::BLOCK_COUNT_BYTES;

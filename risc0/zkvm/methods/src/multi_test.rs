@@ -118,6 +118,7 @@ pub enum MultiTestSpec {
     Keccak,
     KeccakShaDigest1,
     KeccakShaDigest2,
+    PanicConcurrentKeccak,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

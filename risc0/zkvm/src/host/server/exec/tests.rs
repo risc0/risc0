@@ -876,6 +876,19 @@ fn getrandom_panic() {
 }
 
 #[test]
+#[should_panic(expected = "WARNING: `getrandom()` called from guest.")]
+fn concurrent_keccak_panic() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::PanicConcurrentKeccak)
+        .build()
+        .unwrap();
+    let _session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn slice_io() {
     let run = |slice: &[u8]| {
         let env = ExecutorEnv::builder()

@@ -520,5 +520,35 @@ fn main() {
                 hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
             );
         }
+        MultiTestSpec::PanicConcurrentKeccak => {
+            // test_keccak_02.txt
+            let data1 = b"commander";
+            let mut hasher1 = Keccak::v256();
+
+            let data2 = b"rodrick";
+            let mut hasher2 = Keccak::v256();
+
+            hasher1.update(data1);
+            let mut output1 = [0u8; DIGEST_BYTES];
+            hasher1.finalize(&mut output1);
+            assert_eq!(
+                output1,
+                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+            );
+
+            hasher2.update(data2);
+            let mut output2 = [0u8; DIGEST_BYTES];
+            hasher2.finalize(&mut output2);
+            assert_eq!(
+                output2,
+                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+            );
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize().unwrap() };
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
+            );
+        }
     }
 }
