@@ -2,7 +2,9 @@
 
 In the context of RISC Zero application development, [deterministic builds][term-deterministic-builds] are necessary to ensure a clear linkage between the source code for the [guest program][term-guest-program] and the resulting [Image ID][term-image-id].
 
-<!-- TODO: link to issue -->
+:::info
+For more details on why Docker is required among more Rust and `cargo` issues related to this, see [Make ELF binaries build deterministically (#116)](https://github.com/risc0/risc0/issues/116)
+:::
 
 Deterministic builds are made possible by running the `rustc` compiler inside a Docker container.
 
