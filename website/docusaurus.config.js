@@ -58,6 +58,16 @@ export default async function createConfigAsync() {
 
     plugins: [
       [
+        "@acid-info/docusaurus-og",
+        {
+          path: "./preview-images", // relative to the build directory
+          imageRenderers: {
+            "docusaurus-plugin-content-docs": require("./src/og/og-renderer")
+              .renderer,
+          },
+        },
+      ],
+      [
         "@docusaurus/plugin-content-docs",
         {
           id: "api",
@@ -128,7 +138,11 @@ export default async function createConfigAsync() {
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({
-        image: "img/logo.svg",
+        metadata: [
+          { name: "twitter:card", content: "summary_large_image" },
+          { name: "og:type", content: "website" },
+          { name: "og:logo", content: "img/logo.svg" },
+        ],
         navbar: {
           logo: {
             alt: "RISC Zero",

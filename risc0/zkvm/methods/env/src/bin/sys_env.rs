@@ -12,16 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use num_bigint::BigUint;
-use risc0_circuit_bigint::ec;
-use risc0_zkvm::guest::env;
+#![no_main]
+
+risc0_zkvm::guest::entry!(main);
 
 fn main() {
-    // Read EC Mul input values
-    let input: Vec<[BigUint; 5]> = env::read();
-    let claims: Vec<_> = input
-        .into_iter()
-        .map(|[x, y, s, u, v]| ec::mul_claim(&ec::EC_MUL_SECP256K1, x, y, s, u, v))
-        .collect();
-    risc0_circuit_bigint::prove(&ec::EC_MUL_SECP256K1, &claims).expect("Unable to compose with EC Mul");
+    // Should panic, as sys_getenv is disabled at build-time.
+    std::env::var("FOO").ok();
 }

@@ -12,23 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use num_bigint::BigUint;
+#![no_main]
 
-use crate::{BigIntClaim, BigIntProgram};
+risc0_zkvm::guest::entry!(main);
 
-// Re-export program info
-pub use crate::generated::EC_MUL_SECP256K1;
-
-/// Construct a bigint claim that `s * (x, y) = (u, v)` on secp256k1
-///
-/// Specifically, for (x, y) already known to be an affine point on secp256k1 in affine coordinates
-pub fn mul_claim(
-    prog_info: &BigIntProgram,
-    x: BigUint,
-    y: BigUint,
-    s: BigUint,
-    u: BigUint,
-    v: BigUint,
-) -> BigIntClaim {
-    BigIntClaim::from_biguints(prog_info, &[x, y, s, u, v])
+fn main() {
+    // Should panic, as sys_argc and sys_argv are disabled at build-time.
+    std::env::args().len();
 }

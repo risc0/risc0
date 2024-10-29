@@ -15,97 +15,34 @@
 use std::{borrow::Borrow, collections::VecDeque};
 
 use anyhow::{bail, Result};
-use risc0_binfmt::{read_sha_halfs, Digestible};
+use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{
     prove::RecursionReceipt,
     prove::{Program, Prover},
-    CHECKED_COEFFS_PER_POLY,
 };
-use risc0_core::field::Elem;
 use risc0_zkp::{
     adapter::CircuitInfo,
     core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite, hash::sha::Sha256},
     field::baby_bear::BabyBearElem,
     verify::VerificationError,
 };
-use tracing::{debug, trace};
 
-use crate::{
-    byte_poly, claim_list_digest, pad_claim_list, BigIntClaim, BigIntContext, BigIntProgram,
-};
+use crate::{claim_list_digest, generate_proof_input, BigIntClaim, BigIntProgram};
 
 pub fn prove<S: Sha256>(
     claims: &[impl Borrow<BigIntClaim>],
     prog: &BigIntProgram,
     zkr: Program,
 ) -> Result<RecursionReceipt> {
+    let input = generate_proof_input(claims, prog)?;
+
     let mut prover = Prover::new(zkr, "poseidon2");
-    prover.add_input(prog.control_root.as_words());
+    prover.add_input(&input);
 
-    let hash_suite = Poseidon2HashSuite::new_suite();
-    let mut rng = hash_suite.rng.new_rng();
-
-    for claim in pad_claim_list(prog, claims)? {
-        debug!("claim: {claim:?}");
-        let mut ctx = BigIntContext {
-            in_values: claim
-                .public_witness
-                .iter()
-                .map(Vec::as_slice)
-                .map(byte_poly::to_biguint)
-                .collect(),
-            ..Default::default()
-        };
-
-        let claim_digest = claim.digest::<S>();
-        trace!("claim_digest: {claim_digest:?}");
-
-        (prog.unconstrained_eval_fn)(&mut ctx)?;
-
-        let mut all_coeffs: Vec<u32> = Vec::new();
-        for witness in ctx
-            .constant_witness
-            .iter()
-            .chain(ctx.public_witness.iter())
-            .chain(ctx.private_witness.iter())
-        {
-            for chunk in witness.chunks(CHECKED_COEFFS_PER_POLY) {
-                let mut bytes: Vec<u8> = chunk
-                    .iter()
-                    .map(|b| u8::try_from(*b).expect("Byte out of range in witness coeffs"))
-                    .collect();
-                while bytes.len() < CHECKED_COEFFS_PER_POLY {
-                    bytes.push(0);
-                }
-
-                for word in bytes.chunks(4) {
-                    all_coeffs.push(u32::from_le_bytes(
-                        word.try_into().expect("Partial word present in witness?"),
-                    ));
-                }
-            }
-        }
-
-        let public_digest = byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.public_witness, 1);
-        let private_digest =
-            byte_poly::compute_digest(&*hash_suite.hashfn, &ctx.private_witness, 3);
-        let folded = hash_suite.hashfn.hash_pair(&public_digest, &private_digest);
-        trace!("folded: {folded}");
-
-        // Calculate the evaluation point Z
-        rng.mix(&folded);
-        let z = rng.random_ext_elem();
-
-        trace!("evaluation point: {z:?}");
-
-        prover.add_input(&z.to_u32_words());
-        prover.add_input(&all_coeffs);
-    }
-
-    trace!("Running prover");
+    tracing::trace!("Running prover");
     let receipt = prover.run()?;
 
-    trace!("bigint proved successfully");
+    tracing::trace!("bigint proved successfully");
     Ok(receipt)
 }
 
@@ -116,9 +53,9 @@ pub fn verify<S: Sha256>(
     claims: &[impl Borrow<BigIntClaim>],
     receipt: &RecursionReceipt,
 ) -> Result<()> {
-    trace!("bigint verify {} claims", claims.len());
+    tracing::trace!("bigint verify {} claims", claims.len());
     let claim_digest = claim_list_digest::<S>(prog, claims)?;
-    trace!("claim_digest: {claim_digest:?}");
+    tracing::trace!("claim_digest: {claim_digest:?}");
 
     let hash_suite = Poseidon2HashSuite::new_suite();
 
@@ -130,7 +67,7 @@ pub fn verify<S: Sha256>(
             if *receipt_control_id == prog.control_id {
                 Ok(())
             } else {
-                debug!(
+                tracing::debug!(
                     "Expecting control id {}, got {receipt_control_id} (po2 = {receipt_po2}",
                     prog.control_id
                 );
