@@ -202,7 +202,7 @@ takes the same number of operations as paging-in, so for the first time any
 given page is written to in a segment, it is marked as "dirty". At the end
 of segment execution, every dirty page must be "paged-out" at a cost of 1094 to
 5130 cycles. An exception to this rule is the last segment, where no paging out
-occurrs, since there will be no continuation from the last segment.
+occurs, since there will be no continuation from the last segment.
 
 **A page-in or page-out operation takes between 1094 and 5130 cycles; 1130
 cycles on average.**
@@ -471,17 +471,16 @@ below.
 
 ---
 
-[^1]:
-    Here "sampling" is in quotes because the profiler actually captures the call
+[^1]: Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-    <!-- -->
+
+    1. It would be cost prohibitive to do so for all but quite short program
+       executions.
+    2. Introducing such heavy profiling would actually alter the performance
+       characteristics in significant ways.
+
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
@@ -529,7 +528,7 @@ below.
 [RISC-V operations]: https://marks.page/riscv
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
+[snippet-bonsai-governance]: https://github.com/risc0/risc0-ethereum/blob/main/examples/governance/methods/guest/src/bin/finalize_votes.rs#L86-L87
 [snippet-password-checker]: https://github.com/risc0/risc0/blob/main/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
 [waldo-merkle]: https://github.com/risc0/risc0/blob/main/examples/waldo/core/src/merkle.rs

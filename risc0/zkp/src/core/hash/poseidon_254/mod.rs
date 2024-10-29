@@ -13,7 +13,7 @@
 // limitations under the License.
 
 //! An implementation of Poseidon targeting the Snark friendly field with a
-//! security of 128 bits.
+//! security of 127 bits.
 
 mod consts;
 

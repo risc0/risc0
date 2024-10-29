@@ -112,6 +112,28 @@ struct FpExt {
     return result;
   }
 
+  constexpr FpExt operator+=(Fp rhs) {
+    elems[0] += rhs;
+    return *this;
+  }
+
+  constexpr FpExt operator+(Fp rhs) const {
+    FpExt result = *this;
+    result += rhs;
+    return result;
+  }
+
+  constexpr FpExt operator-=(Fp rhs) {
+    elems[0] -= rhs;
+    return *this;
+  }
+
+  constexpr FpExt operator-(Fp rhs) const {
+    FpExt result = *this;
+    result -= rhs;
+    return result;
+  }
+
   // Now we get to the interesting case of multiplication.  Basically, multiply out the polynomial
   // representations, and then reduce module x^4 - B, which means powers >= 4 get shifted back 4 and
   // multiplied by -beta.  We could write this as a double loops with some if's and hope it gets
@@ -150,6 +172,16 @@ struct FpExt {
 /// Overload for case where LHS is Fp (RHS case is handled as a method)
 constexpr inline FpExt operator*(Fp a, FpExt b) {
   return b * a;
+}
+
+// Commutate the two arguments
+constexpr inline FpExt operator+(Fp a, FpExt b) {
+  return b + a;
+}
+
+// Promote a to FpExt, then add.
+constexpr inline FpExt operator-(Fp a, FpExt b) {
+  return a + (-b);
 }
 
 /// Raise an FpExt to a power

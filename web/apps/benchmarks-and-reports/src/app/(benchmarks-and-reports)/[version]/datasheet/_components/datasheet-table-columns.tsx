@@ -20,6 +20,13 @@ export const datasheetTableColumns = [
     cell: (info) => <div className="truncate font-mono">{info.getValue() ?? "-"}</div>,
   }),
   {
+    accessorKey: "throughput",
+    header: ({ column }) => <TableColumnHeader column={column} title="Speed" />,
+    cell: ({ row }) => (
+      <div className="truncate font-mono">{formatHz(row.getValue("throughput") ?? row.getValue("speed")) ?? "-"}</div>
+    ),
+  },
+  {
     accessorKey: "total_cycles",
     header: ({ column }) => <TableColumnHeader column={column} title="Cycles" />,
     cell: ({ row }) => (
@@ -40,11 +47,4 @@ export const datasheetTableColumns = [
     header: ({ column }) => <TableColumnHeader column={column} title="Seal" />,
     cell: (info) => <div className="truncate font-mono">{formatBytes(info.getValue()) ?? "-"}</div>,
   }),
-  {
-    accessorKey: "throughput",
-    header: ({ column }) => <TableColumnHeader column={column} title="Speed" />,
-    cell: ({ row }) => (
-      <div className="truncate font-mono">{formatHz(row.getValue("throughput") ?? row.getValue("speed")) ?? "-"}</div>
-    ),
-  },
 ] as ColumnDef<DatasheetTableSchema, unknown>[];
