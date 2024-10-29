@@ -9,7 +9,7 @@ module.exports = function remarkAppendMd() {
   return function transformer(tree, file) {
     const baseDir = path.dirname(file.path);
 
-    tree.children.forEach((node) => {
+    for (const node of tree.children) {
       if (node.type === "definition") {
         const parsedUrl = url.parse(node.url);
 
@@ -28,7 +28,7 @@ module.exports = function remarkAppendMd() {
               fullPath = path.resolve(baseDir, urlPath);
             }
 
-            const mdPath = fullPath + ".md";
+            const mdPath = `${fullPath}.md`;
 
             if (fs.existsSync(mdPath) && fs.statSync(mdPath).isFile()) {
               newPath += ".md";
@@ -37,7 +37,7 @@ module.exports = function remarkAppendMd() {
 
           // Reattach the fragment if it exists
           if (fragment) {
-            newPath += "#" + fragment;
+            newPath += `#${fragment}`;
           }
 
           // Reconstruct the URL
@@ -49,6 +49,6 @@ module.exports = function remarkAppendMd() {
           });
         }
       }
-    });
+    }
   };
 };

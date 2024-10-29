@@ -16,6 +16,9 @@
 #include "fp.h"
 #include "fpext.h"
 #include "kernels.h"
+
+#include "vendor/nvtx3/nvtx3.hpp"
+
 #include <cstdint>
 
 extern "C" {
@@ -116,6 +119,26 @@ risc0_zkp_cuda_sha_rows(ShaDigest* output, const Fp* matrix, uint32_t rowSize, u
 
 const char* risc0_zkp_cuda_sha_fold(ShaDigest* output, const ShaDigest* input, uint32_t count) {
   return launchKernel(sha_fold, count, 0, output, input, count);
+}
+
+const char* risc0_zkp_cuda_combos_prepare(FpExt* combos,
+                                          const FpExt* coeffU,
+                                          const uint32_t comboCount,
+                                          const uint32_t cycles,
+                                          const uint32_t regsCount,
+                                          const uint32_t* regSizes,
+                                          const uint32_t* regComboIds,
+                                          const uint32_t checkSize,
+                                          const FpExt* mix) {
+
+  try {
+    CudaStream stream;
+    combos_prepare<<<1, 1, 0, stream>>>(
+        combos, coeffU, regsCount, regSizes, regComboIds, cycles, mix, checkSize, comboCount);
+  } catch (const std::runtime_error& err) {
+    return strdup(err.what());
+  }
+  return nullptr;
 }
 
 } // extern "C"

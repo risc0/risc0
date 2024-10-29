@@ -33,7 +33,7 @@ extern_bigintQuotient(device void* ctx, uint32_t cycle, const constant char* ext
   // Division of two little-endian positive byte-limbed bigints. a = q * b + r.
   // Assumes a and b are both normalized with limbs in range [0, 255].
   // Asserts if the quotient overflows kByteWidth. Overflows will not happen if the
-  // numberator, a, is the result of a multiplication of two numbers less than the denomintor.
+  // numberator, a, is the result of a multiplication of two numbers less than the denominator.
   // The BigInt arithmetic circuit does not accept larger quotients.
   // Returns only the quotient value q as the BigInt circuit does not use the r value.
 

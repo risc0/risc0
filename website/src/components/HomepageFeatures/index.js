@@ -1,5 +1,5 @@
-import React from "react";
 import clsx from "clsx";
+import React from "react";
 import styles from "./styles.module.css";
 
 const FeatureList = [
@@ -45,7 +45,7 @@ function Feature({ png, title, description }) {
       <div className="text--center">
         <img className={styles.featurePng} src={png} />
       </div>
-      <div className="text--center padding-horiz--md">
+      <div className="padding-horiz--md text--center">
         <h3>{title}</h3>
         <p>{description}</p>
       </div>

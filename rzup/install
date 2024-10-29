@@ -102,6 +102,7 @@ main() {
           echo
           echo "export PATH=\"\$PATH:$RZUP_BIN_DIR\""
       } >> "$PROFILE"
+      source "$PROFILE"
   else
       info "rzup found in PATH"
   fi

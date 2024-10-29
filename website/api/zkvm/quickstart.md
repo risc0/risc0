@@ -30,12 +30,6 @@ Run `rzup` to install the RISC Zero toolchain and `cargo-risczero`.
 rzup install
 ```
 
-> Note: To install a specific version instead of using the latest stable
-> version, use `rzup --version <version>`, where the `<version>` is a [release
-> tag](https://github.com/risc0/risc0/releases).
->
-> The version used must match the `risc0-zkvm` version from your guest and host.
-
 ## 2. Create a New Project
 
 The `cargo-risczero` tool takes `--guest-name` parameter, a [guest] program that
@@ -88,7 +82,7 @@ it will be significantly faster than running proofs locally. You can [request ac
 
 To gain insights into your application's performance, you can obtain executor
 statistics by setting the `RUST_LOG` environment variable to
-`"[executor]=info"`.
+`info`.
 
 Setting this filter will print statistics about the execution before proof
 generation, so you can understand how computationally expensive your application
@@ -96,7 +90,7 @@ is. Since the statistics concern only the executor phase, it is recommended to
 run your application in dev-mode to avoid the overhead of proof generation:
 
 ```bash
-RISC0_DEV_MODE=1 RUST_LOG="[executor]=info" cargo run --release
+RISC0_DEV_MODE=1 RUST_LOG=info cargo run --release
 ```
 
 The statistics include:

@@ -21,7 +21,7 @@ The Groth16 prover currently _only_ works on x86 architecture, and so Apple Sili
 You can find out more info in the relevant issues [#1520] and [#1749].
 :::
 
-> TIP: In cases where memory is constrained (i.e. less than 10 GB is availble), it may be necessary to change the [segment size limit][segment-limit-docs].
+> TIP: In cases where memory is constrained (i.e. less than 10 GB is available), it may be necessary to change the [segment size limit][segment-limit-docs].
 > You can find information about expected memory consumption on our [benchmarks page][datasheet].
 
 > NOTE: When run for the first time, the GPU (e.g. Metal or CUDA) kernels may need to be JIT compiled.

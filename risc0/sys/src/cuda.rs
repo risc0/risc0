@@ -57,4 +57,11 @@ extern "C" {
         count: u32,
         col_size: u32,
     ) -> sppark::Error;
+
+    pub fn supra_poly_divide(
+        polynomial: DevicePointer<u8>,
+        poly_size: usize,
+        remainder: *mut u32,
+        pow: *const u32,
+    ) -> sppark::Error;
 }

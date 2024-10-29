@@ -160,6 +160,13 @@ impl Verifier {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Fr(#[serde(with = "serde_ark")] pub(crate) ark_bn254::Fr);
 
+impl Fr {
+    #[stability::unstable]
+    pub fn ark_fr(&self) -> ark_bn254::Fr {
+        self.0
+    }
+}
+
 impl Digestible for Fr {
     /// Compute a tagged hash of the [Fr] value.
     fn digest<S: Sha256>(&self) -> Digest {
@@ -189,6 +196,13 @@ fn hash_point<S: Sha256>(p: impl AffineRepr) -> Digest {
     x.serialize_uncompressed(&mut buffer).unwrap();
     buffer.reverse();
     *S::hash_bytes(&buffer)
+}
+
+impl VerifyingKey {
+    #[stability::unstable]
+    pub fn ark_verifying_key(&self) -> ark_groth16::VerifyingKey<Bn254> {
+        self.0.clone()
+    }
 }
 
 impl Digestible for VerifyingKey {

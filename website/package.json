@@ -32,6 +32,7 @@
     ]
   },
   "dependencies": {
+    "@acid-info/docusaurus-og": "1.0.0-alpha.131",
     "@docusaurus/core": "3.4.0",
     "@docusaurus/module-type-aliases": "3.4.0",
     "@docusaurus/plugin-client-redirects": "3.4.0",
@@ -47,6 +48,7 @@
   "devDependencies": {
     "@docusaurus/types": "3.5.2",
     "prettier": "3.3.3",
+    "remark": "15.0.1",
     "remark-cli": "12.0.1",
     "remark-inline-links": "7.0.0",
     "remark-lint-heading-capitalization": "1.2.0",
@@ -61,5 +63,5 @@
     "remark-toc": "9.0.0",
     "remark-wiki-link": "2.0.1"
   },
-  "packageManager": "bun@1.1.29"
+  "packageManager": "bun@1.1.30"
 }

@@ -26,10 +26,13 @@ use risc0_core::field::{
     Elem, ExtElem,
 };
 
-use self::consts::{M_INT_DIAG_HZN, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS};
-pub use self::{consts::CELLS, rng::Poseidon2Rng};
 use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::{Digest, DIGEST_WORDS};
+
+pub use self::{
+    consts::{CELLS, M_INT_DIAG_HZN, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS},
+    rng::Poseidon2Rng,
+};
 
 /// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
 pub const CELLS_RATE: usize = 16;
@@ -160,7 +163,6 @@ fn multiply_by_m_ext(cells: &mut [BabyBearElem; CELLS]) {
         ];
         let out = multiply_by_4x4_circulant(&chunk_array);
         for j in 0..4 {
-            // let to_add = BabyBearElem::new_raw(1) * out[j];
             tmp_sums[j] += out[j];
             cells[i * 4 + j] += out[j];
         }

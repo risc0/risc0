@@ -6,6 +6,8 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 forust-ml = "0.4.2"
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+# forust-ml uses rayon which expects to read RAYON_NUM_THREADS from the environment, so sys-getenv is enabled.
+risc0-zkvm-platform = { path = "../../../../risc0/zkvm/platform", default-features = false, features = ["sys-getenv"] }
 rmp-serde = "1.1.2"

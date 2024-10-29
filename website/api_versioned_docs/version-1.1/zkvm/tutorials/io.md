@@ -77,7 +77,7 @@ It is good practice to use the standard functions first, switching to the
 to save on [cycles][term-cycles].
 Since both approaches can be used concomitantly, moving from one to another
 shouldn't be a problem.
-We have a [more detailed explanation][docs-guest-code-optmization] on guest code
+We have a [more detailed explanation][docs-guest-code-optimization] on guest code
 optimization if you want to learn more about this topic.
 
 ## Sending _Private_ Data from the Guest
@@ -277,7 +277,7 @@ reference if you wish.
 Happy coding!
 
 [article-composition]: https://www.risczero.com/blog/proof-composition
-[docs-guest-code-optmization]: ../optimization.md#when-reading-data-as-raw-bytes-use-envread_slice
+[docs-guest-code-optimization]: ../optimization.md#when-reading-data-as-raw-bytes-use-envread_slice
 [docs-hello-world]: ./hello-world.md
 [docs-remote-proving]: ../../generating-proofs/remote-proving.md
 [example-chess]: https://github.com/risc0/risc0/tree/release-1.1/examples/chess

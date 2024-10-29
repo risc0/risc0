@@ -127,7 +127,7 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
     let control_root =
         format!(r#"bytes32 public constant CONTROL_ROOT = hex"{ALLOWED_CONTROL_ROOT}";"#);
     let mut bn254_control_id = BN254_IDENTITY_CONTROL_ID;
-    // NOTE: The solidity verifier interprets it as a uint256 and expects the oppisite byte order.
+    // NOTE: The solidity verifier interprets it as a uint256 and expects the opposite byte order.
     bn254_control_id.as_mut_bytes().reverse();
     let bn254_control_id = format!(
         r#"// NOTE: This has the opposite byte order to the value in the risc0 repository.{}bytes32 public constant BN254_CONTROL_ID = hex"{}";"#,

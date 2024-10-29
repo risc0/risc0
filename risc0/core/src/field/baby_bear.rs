@@ -639,6 +639,35 @@ impl ops::AddAssign for ExtElem {
     }
 }
 
+impl ops::Add<Elem> for ExtElem {
+    type Output = Self;
+
+    /// Addition for Baby Bear [Elem]
+    fn add(self, rhs: Elem) -> Self {
+        let mut lhs = self;
+        lhs += rhs;
+        lhs
+    }
+}
+
+impl ops::Add<ExtElem> for Elem {
+    type Output = ExtElem;
+
+    /// Addition for Baby Bear [Elem]
+    fn add(self, rhs: ExtElem) -> ExtElem {
+        let mut lhs = ExtElem::from(self);
+        lhs += rhs;
+        lhs
+    }
+}
+
+impl ops::AddAssign<Elem> for ExtElem {
+    /// Promoting addition case for BabyBear [Elem]
+    fn add_assign(&mut self, rhs: Elem) {
+        self.0[0] += rhs;
+    }
+}
+
 impl ops::Sub for ExtElem {
     type Output = Self;
 
@@ -656,6 +685,35 @@ impl ops::SubAssign for ExtElem {
         for i in 0..self.0.len() {
             self.0[i] -= rhs.0[i];
         }
+    }
+}
+
+impl ops::Sub<Elem> for ExtElem {
+    type Output = Self;
+
+    /// Subtraction for Baby Bear [ExtElem]
+    fn sub(self, rhs: Elem) -> Self {
+        let mut lhs = self;
+        lhs -= rhs;
+        lhs
+    }
+}
+
+impl ops::Sub<ExtElem> for Elem {
+    type Output = ExtElem;
+
+    /// Subtraction for Baby Bear [ExtElem]
+    fn sub(self, rhs: ExtElem) -> ExtElem {
+        let mut lhs = ExtElem::from(self);
+        lhs -= rhs;
+        lhs
+    }
+}
+
+impl ops::SubAssign<Elem> for ExtElem {
+    /// Promoting subtraction case for BabyBear [Elem]
+    fn sub_assign(&mut self, rhs: Elem) {
+        self.0[0] -= rhs;
     }
 }
 
@@ -758,6 +816,11 @@ mod tests {
     #[test]
     pub fn field_ops() {
         field::tests::test_field_ops::<Elem>(P_U64);
+    }
+
+    #[test]
+    pub fn ext_field_ops() {
+        field::tests::test_ext_field_ops::<ExtElem>();
     }
 
     #[test]

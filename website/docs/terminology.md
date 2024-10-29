@@ -81,6 +81,10 @@ In the context of RISC Zero application development, deterministic builds are ne
 
 To access deterministic builds for your zkVM application, use [`cargo risczero build`]. Deterministic builds are made possible by running the `rustc` compiler inside a Docker container.
 
+:::info
+For further information, see the [deterministic guest builds](/api/generating-proofs/deterministic-builds) page.
+:::
+
 ### ELF Binary
 
 The executable format for the [RISC-V] instruction set.

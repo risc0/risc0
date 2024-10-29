@@ -19,7 +19,7 @@ ecosystem, the zkVM has made it possible for developers to quickly build
 meaningful ZK applications, with no background in advanced mathematics or
 cryptography.
 
-We've built a number of applications and primitives showcasing these capabilies, including:
+We've built a number of applications and primitives showcasing these capabilities, including:
 
 - **[Zeth]**: prove the correct construction of an entire Ethereum block or an entire Optimism block
 - **[Bonsai Pay]**: send Ethereum to someone's gmail address
