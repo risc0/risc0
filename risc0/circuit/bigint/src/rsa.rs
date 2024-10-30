@@ -16,9 +16,11 @@
 #[cfg(feature = "prove")]
 mod tests;
 
+use anyhow::{bail, Result};
 use num_bigint::BigUint;
 #[cfg(feature = "bigint-dig-shim")]
 use num_bigint_dig::BigUint as BigUintDig;
+use risc0_zkvm_platform::syscall::sys_rsa;
 
 use crate::{BigIntClaim, BigIntProgram};
 
@@ -41,22 +43,49 @@ pub fn claim_dig(prog_info: &BigIntProgram, n: &BigUintDig, s: &BigUintDig, m: &
     BigIntClaim::from_biguints(prog_info, &[n, s, m])
 }
 
+// TODO: Better name
+/// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
+#[cfg(not(feature = "bigint-dig-shim"))]
+pub fn compute_claim(n: &BigUint, s: &BigUint) -> Result<[BigUint; 3]> {
+    compute_claim_inner(n.to_u32_digits(), s.to_u32_digits())
+}
+
+
 
 // TODO: Better name
 /// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
+///
+/// Note that the output uses the `num_bigint` (non-Dig) library, as it will need to interface with
+/// the RISC Zero claims
 #[cfg(feature = "bigint-dig-shim")]
-pub fn claim_dig(prog_info: &BigIntProgram, n: &BigUintDig, s: &BigUintDig) -> Result<BigIntClaim> {
+pub fn compute_claim(n: &BigUintDig, s: &BigUintDig) -> Result<[BigUint; 3]> {
+    let mut n_vec = Vec::<u32>::new();
+    for word in n.to_bytes_le().chunks(4) {
+        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
+        n_vec.push(u32::from_le_bytes(word));
+    }
+    let mut s_vec = Vec::<u32>::new();
+    for word in s.to_bytes_le().chunks(4) {
+        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
+        s_vec.push(u32::from_le_bytes(word));
+    }
+    compute_claim_inner(n_vec, s_vec)
+}
+
+
+// TODO: Better name
+/// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
+pub fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint; 3]> {
     // TODO: Investigate how expensive this shim is
-    let mut n = n.to_u32_digits();
-    let mut s = s.to_u32_digits();
     // TODO: don't use magic number 96
-    if (n.len() > 96 || s.len() > 96) {
-        return Err("TODO: Message for oversized inputs");
+    if n.len() > 96 || s.len() > 96 {
+        bail!("TODO: Message for oversized inputs");
     }
     n.resize(96, 0);
     s.resize(96, 0);
-    let n: [u32; 96] = n.try_into()?;
-    let s: [u32; 96] = s.try_into()?;
+    let n: [u32; 96] = (*n).try_into().expect("TODO: can this be ?");
+    let s: [u32; 96] = (*s).try_into().expect("TODO: can this be ?");
+    // TODO: I think we have to be in the guest and so I think the endianness work in this function is overdone; review and clean up
     n.map(|elem| elem.to_le());
     s.map(|elem| elem.to_le());
     // TODO: Nicer way to provide an empty output buffer?
@@ -66,39 +95,33 @@ pub fn claim_dig(prog_info: &BigIntProgram, n: &BigUintDig, s: &BigUintDig) -> R
     unsafe {
         sys_rsa(&mut m, &s, &n);
     }
-
-            let n = BigUint::from_bytes_le(&n.to_bytes_le());
-            let s = BigUint::from_bytes_le(&s.to_bytes_le());
-
-                let n_claim = n.clone();
-                let s_claim = s.clone();
-                // let m = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
-                // println!("The bitwidth of n is {}", n.bits());
-                let mut n = n.to_u32_digits();  // Ugh `mut` what a hack TODO
-                n.resize(96, 0); // TODO: need more care
-                let n: [u32; 96] = n.try_into().expect("modulus should fit in 96 32-bit words");
-                let mut s = s.to_u32_digits();  // Ugh `mut` what a hack TODO
-                s.resize(96, 0); // TODO: need more care
-                let s: [u32; 96] = s.try_into().expect("base should fit in 96 32-bit words");
-                // TODO: Feels a bit hacky
-                const fn zero() -> u32 {
-                    0
-                }
-                let mut m = [zero(); 96];  // TODO: Feels a bit hacky
-                unsafe {
-                    sys_rsa(&mut m, &s, &n);  // TODO: Actually manage the 3 inputs (first is buffer for output) and call
-                }
-                // let m_claim = BigUint::from_bytes_le(m.map(|elem| elem.to_le_bytes()).flatten());
-                // TODO: This code should be replaced with the `flatten` code above once `flatten` is stable
-                let m_words = m.map(|elem| elem.to_le_bytes());
-                let mut m_claim = Vec::<u8>::new();  // TODO: Clean up style
-                for word in m_words {
-                    for byte in word {
-                        m_claim.push(byte);
-                    }
-                }
-                let m_claim = BigUint::from_bytes_le(&m_claim);
-                let claims = vec![[n_claim, s_claim, m_claim]];
-
-    BigIntClaim::from_biguints(prog_info, &[n, s, m])
+    // let m_claim = BigUint::from_bytes_le(m.map(|elem| elem.to_le_bytes()).flatten());
+    // let s_claim = BigUint::from_bytes_le(s.map(|elem| elem.to_le_bytes()).flatten());
+    // let n_claim = BigUint::from_bytes_le(n.map(|elem| elem.to_le_bytes()).flatten());
+    // TODO: This code should be replaced with the `flatten` code above once `flatten` is stable
+    let m_words = m.map(|elem| elem.to_le_bytes());
+    let mut m_claim = Vec::<u8>::new();  // TODO: Clean up style
+    for word in m_words {
+        for byte in word {
+            m_claim.push(byte);
+        }
+    }
+    let m_claim = BigUint::from_bytes_le(&m_claim);
+    let s_words = s.map(|elem| elem.to_le_bytes());
+    let mut s_claim = Vec::<u8>::new();  // TODO: Clean up style
+    for word in s_words {
+        for byte in word {
+            s_claim.push(byte);
+        }
+    }
+    let s_claim = BigUint::from_bytes_le(&s_claim);
+    let n_words = n.map(|elem| elem.to_le_bytes());
+    let mut n_claim = Vec::<u8>::new();  // TODO: Clean up style
+    for word in n_words {
+        for byte in word {
+            n_claim.push(byte);
+        }
+    }
+    let n_claim = BigUint::from_bytes_le(&n_claim);
+    Ok([n_claim, s_claim, m_claim])
 }
