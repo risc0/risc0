@@ -26,7 +26,6 @@ pub mod ecall {
     pub const BIGINT: u32 = 4;
     pub const USER: u32 = 5;
     pub const MACHINE: u32 = 5;
-    pub const RSA: u32 = 6;
 }
 
 pub mod halt {
@@ -358,22 +357,14 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
 /// # Safety
 ///
 /// TODO: Once implemented write up reqs e.g. about alignment, dereferenceability
-#[inline(always)]
+/// `recv_buf`, `in_base`, and `in_modulus` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_rsa(
-    output: *mut [u32; rsa::WIDTH_WORDS],
+    recv_buf: *mut [u32; rsa::WIDTH_WORDS],
     in_base: *const [u32; rsa::WIDTH_WORDS],
     in_modulus: *const [u32; rsa::WIDTH_WORDS],
 ) {
-    // TODO: Should really be an ecall_2 but that doesn't exist yet
-    ecall_4(  // TODO: or ... syscall? Investigate...
-        ecall::RSA,
-        output as u32,
-        in_base as u32,
-        in_modulus as u32,
-        1,  // TODO: This is useless, but including for now for smaller diff
-        1,  // TODO: This is useless, but including for now for smaller diff
-    )
+    syscall_2(nr::SYS_RSA, recv_buf as *mut u32, rsa::WIDTH_WORDS, in_base as u32, in_modulus as u32);
 }
 
 /// # Safety

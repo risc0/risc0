@@ -775,6 +775,8 @@ dependencies = [
  "bytemuck",
  "getrandom",
  "hex",
+ "num-bigint",
+ "num-traits",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",

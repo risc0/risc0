@@ -23,6 +23,8 @@ use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
+use num_bigint::BigUint;
+use num_traits::ops::bytes::ToBytes;
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{
@@ -30,9 +32,10 @@ use risc0_zkvm_platform::{
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_LOG, SYS_PANIC,
-            SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_PIPE, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_RSA, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
+        rsa,
         SyscallName, DIGEST_BYTES,
     },
     WORD_SIZE,
@@ -139,6 +142,7 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_PROVE_ZKR, SysProveZkr)
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_READ, SysRead)
+            .with_syscall(SYS_RSA, SysRSA)
             .with_syscall(SYS_VERIFY_INTEGRITY, SysVerify)
             .with_syscall(SYS_WRITE, SysWrite);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
@@ -236,6 +240,45 @@ impl Syscall for SysRandom {
         Ok((0, 0))
     }
 }
+
+pub(crate) struct SysRSA;
+impl Syscall for SysRSA {
+    fn syscall(  // TODO: Wrong variables
+        &mut self,
+        _syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        // TODO: Wrong code
+        assert!(WORD_SIZE == 4);  // The inputs on the other side of this syscall assume u32 words
+        tracing::debug!("SYS_RSA");
+        let base_ptr = ByteAddr(ctx.load_register(REG_A3));
+        let modulus_ptr = ByteAddr(ctx.load_register(REG_A4));
+        // TODO: WIDTH_BYTES type
+        let base = ctx.load_region(base_ptr, rsa::WIDTH_BYTES.try_into()?)?;
+        let modulus = ctx.load_region(modulus_ptr, rsa::WIDTH_BYTES.try_into()?)?;
+        // let mut result = vec![0u8; rsa::WIDTH_BYTES];   // TODO: This indirection may be unnecessary
+        // TODO: Calculate result here
+        let base = BigUint::from_bytes_le(&base);
+        let modulus = BigUint::from_bytes_le(&modulus);
+        let result = base.modpow(&BigUint::from(rsa::RSA_EXPONENT), &modulus);
+        let mut result = result.to_le_bytes();
+        assert!(result.len() <= rsa::WIDTH_BYTES);
+        result.resize(rsa::WIDTH_BYTES, 0);
+        // TODO: End of result calc section
+        bytemuck::cast_slice_mut(to_guest).clone_from_slice(result.as_slice());   // TODO: This indirection may be unnecessary
+        Ok((0, 0))
+    }
+}
+
+
+
+
+
+
+
+
+
 
 #[derive(Clone)]
 pub(crate) struct Args(pub Vec<String>);

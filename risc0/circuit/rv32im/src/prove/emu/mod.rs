@@ -31,9 +31,6 @@ const SHA_LOAD: usize = DIGEST_WORDS * 2;
 const SHA_MAIN_MIX: usize = 48;
 const SHA_MAIN_FINI: usize = 4;
 
-/// Number of cycles required to complete an RSA operation.
-const RSA_CYCLES: usize = 108;  // TODO: I'm not sure this is right
-
 /// Number of cycles required to complete a BigInt operation.
 const BIGINT_CYCLES: usize = 9;
 

@@ -19,8 +19,6 @@ use std::{array, cell::RefCell, collections::BTreeSet, mem, rc::Rc};
 
 use anyhow::{bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
-use num_bigint::BigUint;
-use num_traits::ops::bytes::ToBytes;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -34,7 +32,7 @@ use risc0_zkvm_platform::{
     align_up,
     memory::{is_guest_memory, GUEST_MAX_MEM},
     syscall::{
-        bigint, ecall, halt, rsa,
+        bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_MAX, REG_T0},
         IO_CHUNK_WORDS,
     },
@@ -46,7 +44,7 @@ use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    BIGINT_CYCLES, RSA_CYCLES, SYSTEM_START,
+    BIGINT_CYCLES, SYSTEM_START,
 };
 use crate::{
     prove::{
@@ -491,71 +489,6 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(true)
     }
 
-    fn ecall_rsa(&mut self) -> Result<bool> {
-        let null0 = self.load_register(REG_A3)?;
-        let null1 = self.load_register(REG_A4)?;
-        let out_ptr = self.load_guest_addr_from_register(REG_A0)?;
-        let base_ptr = self.load_guest_addr_from_register(REG_A1)?;
-        let mod_ptr = self.load_guest_addr_from_register(REG_A2)?;
-
-        // TODO: Can we share some of this code with the `ecall_bigint` version?
-        let mut load_rsa_le_bytes = |ptr: ByteAddr| -> Result<[u8; rsa::WIDTH_BYTES]> {
-            let mut arr = [0u32; rsa::WIDTH_WORDS];
-            for (i, word) in arr.iter_mut().enumerate() {
-                *word = self
-                    .load_u32_from_guest(ptr + (i * WORD_SIZE) as u32)?
-                    .to_le();
-            }
-            // TODO: guess I have to manually convert
-            // Ok(arr.map(|elem| elem.to_le_bytes()).flatten().try_into()?)
-            // TODO: This code should be replaced with the `flatten` code above once `flatten` is stable
-            let mut result = Vec::new();
-            // for (i, word) in arr.map(|elem| elem.to_le_bytes()).iter().enumerate() {
-            for word in arr.map(|elem| elem.to_le_bytes()).iter() {
-                for byte in word {
-                    result.push(*byte);
-                }
-                // for j in 0..4 {
-
-                //     let idx = 4 * i + j;
-                //     assert!(idx < rsa::WIDTH_BYTES);
-                //     result[idx] = word[j];
-                // }
-            }
-            assert!(result.len() == rsa::WIDTH_BYTES);
-            // Ok(<[u8; rsa::WIDTH_BYTES]>::try_from(&result)?)
-            let result: &[u8] = &result;  // TODO: Why do I need to do this separately?
-            Ok(<[u8; rsa::WIDTH_BYTES]>::try_from(result)?)
-            // Ok(result)
-            // Ok(bytemuck::cast::<_, [u8; rsa::WIDTH_BYTES]>(arr))
-        };
-
-        if null0 != 1 || null1 != 1 {
-            bail!("ecall_rsa: null0 and null1 must be set to 0");
-        }
-
-        // Load inputs
-        let base = BigUint::from_bytes_le(&load_rsa_le_bytes(base_ptr)?);
-        let modulus = BigUint::from_bytes_le(&load_rsa_le_bytes(mod_ptr)?);
-
-        // Compute modular exponentiation (to the 65537th power)
-        let result = base.modpow(&BigUint::from(rsa::RSA_EXPONENT), &modulus);
-
-        // Store result.
-        let mut result = result.to_le_bytes();
-        assert!(result.len() <= rsa::WIDTH_BYTES);
-        // If the result happens to be small, extend* with leading zeros to the full width
-        // (*Extend because this is little-endian)
-        result.resize(rsa::WIDTH_BYTES, 0);
-        self.store_region_into_guest(out_ptr, &result)?;
-
-        // TODO: Are these right?
-        self.pending.cycles += RSA_CYCLES;
-        self.pending.pc = self.pc + WORD_SIZE;
-
-        Ok(true)
-    }
-
     fn ecall_bigint(&mut self) -> Result<bool> {
         let op = self.load_register(REG_A1)?;
         let z_ptr = self.load_guest_addr_from_register(REG_A0)?;
@@ -712,7 +645,6 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
-            ecall::RSA => self.ecall_rsa(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }

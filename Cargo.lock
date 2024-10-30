@@ -4139,6 +4139,8 @@ dependencies = [
  "hotbench",
  "human-repr",
  "lazy-regex",
+ "num-bigint 0.4.6",
+ "num-traits",
  "postcard",
  "prost 0.13.1",
  "puffin",
