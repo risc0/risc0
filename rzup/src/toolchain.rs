@@ -188,7 +188,7 @@ impl Toolchain {
             let results = downloader.download(&[dl])?;
 
             if let Some(Err(e)) = results.first() {
-                return Err(anyhow::anyhow!("Download failed: {}", e));
+                return Err(RzupError::Other(format!("Failed to download asset: {:?}", e)).into());
             }
 
             Ok(())
