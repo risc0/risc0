@@ -22,7 +22,7 @@ use num_bigint::BigUint;
 #[cfg(feature = "bigint-dig-shim")]
 use num_bigint_dig::BigUint as BigUintDig;
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
-use risc0_zkvm_platform::syscall::sys_rsa;
+use risc0_zkvm_platform::{syscall::{rsa::WIDTH_WORDS, sys_rsa}, WORD_SIZE};
 
 use crate::{BigIntClaim, BigIntProgram};
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
@@ -85,17 +85,16 @@ pub fn modpow_65537(n: &BigUintDig, s: &BigUintDig) -> Result<BigUintDig> {
 /// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint; 3]> {
-    // TODO: don't use magic number 96
-    if n.len() > 96 || s.len() > 96 {
+    assert!(WORD_SIZE == 4);
+    if n.len() > WIDTH_WORDS || s.len() > WIDTH_WORDS {
         bail!("TODO: Message for oversized inputs");
     }
-    n.resize(96, 0);
-    s.resize(96, 0);
-    let n: [u32; 96] = (*n).try_into().expect("TODO: can this be ?");
-    let s: [u32; 96] = (*s).try_into().expect("TODO: can this be ?");
-    // TODO: Nicer way to provide an empty output buffer?
+    n.resize(WIDTH_WORDS, 0);
+    s.resize(WIDTH_WORDS, 0);
+    let n: [u32; WIDTH_WORDS] = (*n).try_into().expect("TODO: can this be ?");
+    let s: [u32; WIDTH_WORDS] = (*s).try_into().expect("TODO: can this be ?");
     const fn zero() -> u32 { 0 }
-    let mut m = [zero(); 96];
+    let mut m = [zero(); WIDTH_WORDS];
     // Safety: inputs are aligned and deferenceable
     unsafe {
         sys_rsa(&mut m, &s, &n);
