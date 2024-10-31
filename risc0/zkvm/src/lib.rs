@@ -91,13 +91,7 @@ pub use anyhow::Result;
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-#[cfg(target_os = "zkvm")]
-pub use risc0_zkvm_platform::syscall::{
-    sys_keccak_absorb, sys_keccak_close, sys_keccak_open, sys_keccak_squeeze,
-};
-pub use risc0_zkvm_platform::{
-    align_up, declare_syscall, memory::GUEST_MAX_MEM, syscall::DIGEST_WORDS, PAGE_SIZE,
-};
+pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]

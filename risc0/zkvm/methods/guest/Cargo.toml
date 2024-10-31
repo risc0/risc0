@@ -23,8 +23,7 @@ risc0-zkvm-methods = { path = ".." }
 risc0-zkvm-platform = { path = "../../platform", features = ["unstable"] }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }
 # note: branch named is used instead of rev as temporary measure to facilitate testing
-tiny-keccak = { path = "../../../../../tiny-keccak", features = ["keccak"] }
-#tiny-keccak = { git = "https://github.com/risc0/tiny-keccak.git", branch = "erik/risc0", features = ["keccak"] }
+# tiny-keccak = { path = "../../../../../tiny-keccak", features = ["keccak"] }
 
 [profile.release]
 lto = true
