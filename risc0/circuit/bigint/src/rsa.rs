@@ -16,10 +16,12 @@
 #[cfg(feature = "prove")]
 mod tests;
 
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use anyhow::{bail, Result};
 use num_bigint::BigUint;
 #[cfg(feature = "bigint-dig-shim")]
 use num_bigint_dig::BigUint as BigUintDig;
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use risc0_zkvm_platform::syscall::sys_rsa;
 
 use crate::{BigIntClaim, BigIntProgram};
@@ -81,8 +83,8 @@ pub fn modpow_65537(n: &BigUintDig, s: &BigUintDig) -> Result<BigUintDig> {
 
 // TODO: Better name
 /// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
-pub fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint; 3]> {
-    // TODO: Investigate how expensive this shim is
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint; 3]> {
     // TODO: don't use magic number 96
     if n.len() > 96 || s.len() > 96 {
         bail!("TODO: Message for oversized inputs");
@@ -91,13 +93,10 @@ pub fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint;
     s.resize(96, 0);
     let n: [u32; 96] = (*n).try_into().expect("TODO: can this be ?");
     let s: [u32; 96] = (*s).try_into().expect("TODO: can this be ?");
-    // TODO: I think we have to be in the guest and so I think the endianness work in this function is overdone; review and clean up
-    n.map(|elem| elem.to_le());
-    s.map(|elem| elem.to_le());
     // TODO: Nicer way to provide an empty output buffer?
     const fn zero() -> u32 { 0 }
     let mut m = [zero(); 96];
-    // TODO: Write up the unsafe
+    // Safety: inputs are aligned and deferenceable
     unsafe {
         sys_rsa(&mut m, &s, &n);
     }

@@ -75,7 +75,7 @@ pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
 pub mod rsa {
-    pub const RSA_EXPONENT: usize = 65537;  // TODO: Or a bigint?
+    pub const RSA_EXPONENT: usize = 65537;
     pub const WIDTH_BITS: usize = 3072;
     pub const WIDTH_BYTES: usize = WIDTH_BITS / 8;
     pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
@@ -356,7 +356,6 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
 
 /// # Safety
 ///
-/// TODO: Once implemented write up reqs e.g. about alignment, dereferenceability
 /// `recv_buf`, `in_base`, and `in_modulus` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_rsa(
