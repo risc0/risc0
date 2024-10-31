@@ -58,8 +58,6 @@ pub fn modpow_65537(n: &BigUint, s: &BigUint) -> Result<BigUint> {
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(feature = "bigint-dig-shim")]
 pub fn modpow_65537(n: &BigUintDig, s: &BigUintDig) -> Result<BigUintDig> {
-    // TODO: clean up to escalate error
-    // let claims = compute_claim(n, s).expect("TODO");
     let mut n_vec = Vec::<u32>::new();
     for word in n.to_bytes_le().chunks(4) {
         let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
@@ -70,7 +68,7 @@ pub fn modpow_65537(n: &BigUintDig, s: &BigUintDig) -> Result<BigUintDig> {
         let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
         s_vec.push(u32::from_le_bytes(word));
     }
-    let claims = compute_claim_inner(n_vec, s_vec).expect("TODO");
+    let claims = compute_claim_inner(n_vec, s_vec)?;
     // TODO: wild hacks, clean up
     let expected = BigUintDig::from_bytes_le(&claims[2].to_bytes_le());
     let claims = [claims[0].clone(), claims[1].clone(), claims[2].clone()];
