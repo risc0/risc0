@@ -91,8 +91,8 @@ fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint; 3]>
     }
     n.resize(WIDTH_WORDS, 0);
     s.resize(WIDTH_WORDS, 0);
-    let n: [u32; WIDTH_WORDS] = (*n).try_into().expect("TODO: can this be ?");
-    let s: [u32; WIDTH_WORDS] = (*s).try_into().expect("TODO: can this be ?");
+    let n: [u32; WIDTH_WORDS] = (*n).try_into()?;
+    let s: [u32; WIDTH_WORDS] = (*s).try_into()?;
     const fn zero() -> u32 { 0 }
     let mut m = [zero(); WIDTH_WORDS];
     // Safety: inputs are aligned and deferenceable
