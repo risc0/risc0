@@ -80,8 +80,6 @@ pub fn modpow_65537(n: &BigUintDig, s: &BigUintDig) -> Result<BigUintDig> {
     return Ok(expected);
 }
 
-
-// TODO: Better name
 /// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint; 3]> {
