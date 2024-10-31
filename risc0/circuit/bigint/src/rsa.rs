@@ -36,48 +36,6 @@ pub fn claim(prog_info: &BigIntProgram, n: BigUint, s: BigUint, m: BigUint) -> B
     BigIntClaim::from_biguints(prog_info, &[n, s, m])
 }
 
-/// Construct a bigint claim that (S^e = M (mod N)), where e = 65537, using num-bigint-dig
-#[cfg(feature = "bigint-dig-shim")]
-pub fn claim_dig(prog_info: &BigIntProgram, n: &BigUintDig, s: &BigUintDig, m: &BigUintDig) -> BigIntClaim {
-    // TODO: Investigate how expensive this shim is
-    let n = BigUint::from_bytes_le(&n.to_bytes_le());
-    let s = BigUint::from_bytes_le(&s.to_bytes_le());
-    let m = BigUint::from_bytes_le(&m.to_bytes_le());
-
-    BigIntClaim::from_biguints(prog_info, &[n, s, m])
-}
-
-// TODO: Better name
-/// Compute M = S^e (mod N), where e = 65537, using num-bigint, and return the `claim` to prove this
-#[cfg(not(feature = "bigint-dig-shim"))]
-pub fn compute_claim(n: &BigUint, s: &BigUint) -> Result<[BigUint; 3]> {
-    compute_claim_inner(n.to_u32_digits(), s.to_u32_digits())
-}
-
-
-
-// TODO: Better name
-/// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
-///
-/// Note that the output uses the `num_bigint` (non-Dig) library, as it will need to interface with
-/// the RISC Zero claims
-#[cfg(feature = "bigint-dig-shim")]
-pub fn compute_claim(n: &BigUintDig, s: &BigUintDig) -> Result<[BigUint; 3]> {
-    let mut n_vec = Vec::<u32>::new();
-    for word in n.to_bytes_le().chunks(4) {
-        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
-        n_vec.push(u32::from_le_bytes(word));
-    }
-    let mut s_vec = Vec::<u32>::new();
-    for word in s.to_bytes_le().chunks(4) {
-        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
-        s_vec.push(u32::from_le_bytes(word));
-    }
-    compute_claim_inner(n_vec, s_vec)
-}
-
-
-
 /// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(not(feature = "bigint-dig-shim"))]
