@@ -19,6 +19,7 @@ use risc0_circuit_bigint_test_methods::RSA_ELF;
 use risc0_zkvm::{ExecutorEnv, ExecutorImpl};
 
 fn main() {
+    // TODO: Make an example using the RSA syscall
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
