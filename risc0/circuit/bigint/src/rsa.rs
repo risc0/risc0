@@ -23,6 +23,10 @@ use num_bigint_dig::BigUint as BigUintDig;
 use risc0_zkvm_platform::syscall::sys_rsa;
 
 use crate::{BigIntClaim, BigIntProgram};
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+use crate::prove;
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+use risc0_zkvm::guest::env;
 
 // Re-export program info
 pub use crate::generated::{RSA_256_X1, RSA_256_X2, RSA_3072_X1, RSA_3072_X15};
@@ -44,7 +48,7 @@ pub fn claim_dig(prog_info: &BigIntProgram, n: &BigUintDig, s: &BigUintDig, m: &
 }
 
 // TODO: Better name
-/// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
+/// Compute M = S^e (mod N), where e = 65537, using num-bigint, and return the `claim` to prove this
 #[cfg(not(feature = "bigint-dig-shim"))]
 pub fn compute_claim(n: &BigUint, s: &BigUint) -> Result<[BigUint; 3]> {
     compute_claim_inner(n.to_u32_digits(), s.to_u32_digits())
@@ -70,6 +74,50 @@ pub fn compute_claim(n: &BigUintDig, s: &BigUintDig) -> Result<[BigUint; 3]> {
         s_vec.push(u32::from_le_bytes(word));
     }
     compute_claim_inner(n_vec, s_vec)
+}
+
+
+
+/// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[cfg(not(feature = "bigint-dig-shim"))]
+pub fn modpow_65537(n: &BigUint, s: &BigUint) -> Result<BigUint> {
+    // TODO: Untested!
+    // TODO: clean up to escalate error
+    let claims = compute_claim_inner(n.to_u32_digits(), s.to_u32_digits()).expect("TODO");
+    // TODO: wild hacks, clean up
+    let expected = BigUint::from_bytes_le(&claims[2].to_bytes_le());
+    let claims = [claims[0].clone(), claims[1].clone(), claims[2].clone()];
+    let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
+    prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
+    env::log("[TODO] `rsa_encrypt` ending");
+    return Ok(expected);
+}
+
+/// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[cfg(feature = "bigint-dig-shim")]
+pub fn modpow_65537(n: &BigUintDig, s: &BigUintDig) -> Result<BigUintDig> {
+    // TODO: clean up to escalate error
+    // let claims = compute_claim(n, s).expect("TODO");
+    let mut n_vec = Vec::<u32>::new();
+    for word in n.to_bytes_le().chunks(4) {
+        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
+        n_vec.push(u32::from_le_bytes(word));
+    }
+    let mut s_vec = Vec::<u32>::new();
+    for word in s.to_bytes_le().chunks(4) {
+        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
+        s_vec.push(u32::from_le_bytes(word));
+    }
+    let claims = compute_claim_inner(n_vec, s_vec).expect("TODO");
+    // TODO: wild hacks, clean up
+    let expected = BigUintDig::from_bytes_le(&claims[2].to_bytes_le());
+    let claims = [claims[0].clone(), claims[1].clone(), claims[2].clone()];
+    let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
+    prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
+    env::log("[TODO] `rsa_encrypt` ending");
+    return Ok(expected);
 }
 
 
