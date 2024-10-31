@@ -20,6 +20,7 @@ use anyhow::{bail, Result};
 use num_bigint::BigUint;
 #[cfg(feature = "bigint-dig-shim")]
 use num_bigint_dig::BigUint as BigUintDig;
+use risc0_zkvm::guest::env;  // TODO: Don't need long-term
 use risc0_zkvm_platform::syscall::sys_rsa;
 
 use crate::{BigIntClaim, BigIntProgram};
@@ -59,6 +60,7 @@ pub fn compute_claim(n: &BigUint, s: &BigUint) -> Result<[BigUint; 3]> {
 /// the RISC Zero claims
 #[cfg(feature = "bigint-dig-shim")]
 pub fn compute_claim(n: &BigUintDig, s: &BigUintDig) -> Result<[BigUint; 3]> {
+    env::log("rsa::compute_claim w/ bigint-dig-shim");  // TODO: Don't need long-term
     let mut n_vec = Vec::<u32>::new();
     for word in n.to_bytes_le().chunks(4) {
         let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
@@ -76,6 +78,7 @@ pub fn compute_claim(n: &BigUintDig, s: &BigUintDig) -> Result<[BigUint; 3]> {
 // TODO: Better name
 /// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
 pub fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint; 3]> {
+    env::log("rsa::compute_claim_inner");  // TODO: Don't need long-term
     // TODO: Investigate how expensive this shim is
     // TODO: don't use magic number 96
     if n.len() > 96 || s.len() > 96 {
@@ -123,5 +126,6 @@ pub fn compute_claim_inner(mut n: Vec<u32>, mut s: Vec<u32>) -> Result<[BigUint;
         }
     }
     let n_claim = BigUint::from_bytes_le(&n_claim);
+    env::log("rsa::compute_claim_inner ending");  // TODO: Don't need long-term
     Ok([n_claim, s_claim, m_claim])
 }
