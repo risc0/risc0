@@ -4043,8 +4043,6 @@ dependencies = [
  "derive-debug",
  "lazy-regex",
  "metal",
- "num-bigint 0.4.6",
- "num-traits",
  "rand",
  "rayon",
  "risc0-binfmt",

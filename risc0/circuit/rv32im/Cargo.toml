@@ -32,8 +32,6 @@ crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
 derive-debug = { version = "0.1", optional = true }
 lazy-regex = { version = "3.3", optional = true }
-num-bigint = { version = "0.4", default-features = false, optional = true }  # TODO: Here is right?
-num-traits = { version = "0.2", default-features = false, optional = true }  # TODO: Here is right?
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
@@ -61,8 +59,6 @@ prove = [
   "dep:crypto-bigint",
   "dep:derive-debug",
   "dep:lazy-regex",
-  "dep:num-bigint",
-  "dep:num-traits",
   "dep:rand",
   "dep:rayon",
   "dep:risc0-circuit-rv32im-sys",
