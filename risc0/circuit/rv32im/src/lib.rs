@@ -15,6 +15,7 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub mod bytecode;
 pub mod control_id;
 mod info;
 pub mod layout;
@@ -23,7 +24,6 @@ pub mod poly_ext;
 pub mod prove;
 mod taps;
 pub mod trace;
-pub mod bytecode;
 
 use risc0_zkp::{
     adapter::{CircuitCoreDef, TapsProvider},

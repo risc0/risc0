@@ -24,11 +24,7 @@ pub struct Witness {
     pub private: Vec<BigUint>,
 }
 
-fn operands<'p>(
-    op: &bibc::Op,
-    op_index: usize,
-    regs: &'p [BigUint],
-) -> (&'p BigUint, &'p BigUint) {
+fn operands<'p>(op: &bibc::Op, op_index: usize, regs: &'p [BigUint]) -> (&'p BigUint, &'p BigUint) {
     assert!(op.operand_a < op_index);
     assert!(op.operand_b < op_index);
     (&regs[op.operand_a], &regs[op.operand_b])
