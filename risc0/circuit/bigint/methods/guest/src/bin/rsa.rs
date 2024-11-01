@@ -17,7 +17,7 @@ use risc0_circuit_bigint::rsa;
 use risc0_zkvm::guest::env;
 
 fn main() {
-    // Read RSA input values
+    // Computes and proves the result of modpow with exponent of 65537
     let input: Vec<[BigUint; 2]> = env::read();
     let result: Vec<BigUint> = input
         .into_iter()

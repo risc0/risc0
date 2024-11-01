@@ -41,6 +41,7 @@ fn main() {
 
     let session = ExecutorImpl::from_elf(env, RSA_VERIFY_ELF).unwrap().run().unwrap();
     assert_eq!(session.segments.len(), 1);
+    println!("Example signature verified");
 }
 
 fn from_hex(s: &str) -> BigUint {
