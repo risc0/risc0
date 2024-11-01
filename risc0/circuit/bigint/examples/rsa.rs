@@ -45,7 +45,7 @@ fn main() {
     let prove_info = prover.prove(env, RSA_ELF).unwrap();
     assert_eq!(prove_info.stats.segments, 1);
 
-    let result: Vec<BigUint> = prove_info.receipt.journal.decode().expect("TODO");
+    let result: Vec<BigUint> = prove_info.receipt.journal.decode().unwrap();
     let expected = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
     assert_eq!(result[0], expected);
     println!("RSA example produces expected result");

@@ -40,8 +40,7 @@ pub fn claim(prog_info: &BigIntProgram, n: BigUint, s: BigUint, m: BigUint) -> B
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(not(feature = "bigint-dig-shim"))]
 pub fn modpow_65537(n: &BigUint, s: &BigUint) -> Result<BigUint> {
-    // TODO: clean up to escalate error
-    let claims = compute_claim_inner(n.to_u32_digits(), s.to_u32_digits()).expect("TODO");
+    let claims = compute_claim_inner(n.to_u32_digits(), s.to_u32_digits())?;
     let result = claims[2].clone();
     let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
     prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
