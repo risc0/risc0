@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use num_traits::FromPrimitive;
+use std;
 use std::io::{Error, Read, Seek};
 
 use super::bibc;
