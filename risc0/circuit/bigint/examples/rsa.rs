@@ -30,10 +30,10 @@ fn main() {
 
     register_zkrs();
 
-    // We compute the modpow of `sgn` to 65537 mod `modulus`, commit it to the journal, and compare to `msg`
-    let n = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
-    let m = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
-    let inputs = vec![[n, m]];
+    // We compute the modpow of `base` to 65537 mod `modulus`, commit it to the journal, and compare to `expected`
+    let modulus = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
+    let base = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
+    let inputs = vec![[modulus, base]];
 
     let env = ExecutorEnv::builder()
         .write(&inputs)
