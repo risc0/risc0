@@ -23,6 +23,7 @@ pub mod poly_ext;
 pub mod prove;
 mod taps;
 pub mod trace;
+pub mod bibc;
 
 use risc0_zkp::{
     adapter::{CircuitCoreDef, TapsProvider},
