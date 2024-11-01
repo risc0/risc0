@@ -21,7 +21,7 @@ fn main() {
     let input: Vec<[BigUint; 2]> = env::read();
     let result: Vec<BigUint> = input
         .into_iter()
-        .map(|[n, s]| rsa::modpow_65537(&n, &s).expect("TODO"))
+        .map(|[n, s]| rsa::modpow_65537(&n, &s).unwrap())
         .collect();
     env::commit(&result);
 }

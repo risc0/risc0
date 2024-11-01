@@ -42,7 +42,6 @@ pub fn claim(prog_info: &BigIntProgram, n: BigUint, s: BigUint, m: BigUint) -> B
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(not(feature = "bigint-dig-shim"))]
 pub fn modpow_65537(n: &BigUint, s: &BigUint) -> Result<BigUint> {
-    // TODO: Untested!
     // TODO: clean up to escalate error
     let claims = compute_claim_inner(n.to_u32_digits(), s.to_u32_digits()).expect("TODO");
     // TODO: wild hacks, clean up

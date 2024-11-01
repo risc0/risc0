@@ -19,17 +19,20 @@ use risc0_circuit_bigint_test_methods::RSA_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
-    // TODO: Make an example using the RSA syscall
+    // Note: This example is for demonstration purposes and is not for production use
+    // If you want something with production features, look into our fork of the RustCrypto RSA repo
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
     register_zkrs();
 
-    // Parameters for a message `m` with signature `s` under the RSA public key modulus `n`.  TODO
-    let n = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
-    let s = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
-    let inputs = vec![[n, s]];
+    // Parameters for a message `msg` with signature `sgn` under the RSA public key `modulus`.
+    // We compute the modpow of `sgn` to 65537 mod `modulus`, commit it to the journal, and compare to `msg`
+    let modulus = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
+    let sgn = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
+    let msg = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
+    let inputs = vec![[modulus, sgn]];
 
     let env = ExecutorEnv::builder()
         .write(&inputs)
@@ -38,12 +41,12 @@ fn main() {
         .unwrap();
 
     let prover = default_prover();
-    let prove_info = prover.prove(env, RSA_ELF).expect("TODO");
+    let prove_info = prover.prove(env, RSA_ELF).unwrap();
     assert_eq!(prove_info.stats.segments, 1);
 
-    let result: Vec<BigUint> = prove_info.receipt.journal.decode().expect("TODO");
-    let m = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
-    assert_eq!(result[0], m);
+    let result: Vec<BigUint> = prove_info.receipt.journal.decode().unwrap();
+    assert_eq!(result[0], msg);
+    println!("Example signature verified");
 }
 
 fn from_hex(s: &str) -> BigUint {
