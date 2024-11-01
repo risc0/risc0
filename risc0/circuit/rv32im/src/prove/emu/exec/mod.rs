@@ -539,6 +539,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(true)
     }
 
+    fn ecall_bigint2(&mut self) -> Result<bool> {
+        todo!()
+    }
+
     fn check_guest_addr(addr: ByteAddr) -> Result<ByteAddr> {
         if !is_guest_memory(addr.0) {
             bail!("{addr:?} is an invalid guest address");
@@ -645,6 +649,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
+            ecall::BIGINT2 => self.ecall_bigint2(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }

@@ -23,7 +23,57 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum MultiTestSpec {
+    AlignedAlloc,
+    AllocZeroed,
+    BigInt {
+        x: [u32; bigint::WIDTH_WORDS],
+        y: [u32; bigint::WIDTH_WORDS],
+        modulus: [u32; bigint::WIDTH_WORDS],
+    },
+    BusyLoop {
+        /// Busy loop until the guest has run for at least this number of cycles
+        cycles: u64,
+    },
     DoNothing,
+    DoRandom,
+    Echo {
+        bytes: Vec<u8>,
+    },
+    EchoStdout {
+        nbytes: u32,
+        fd: u32,
+    },
+    EchoWords {
+        fd: u32,
+        nwords: u32,
+    },
+    EventTrace,
+    Fault,
+    Halt(u8),
+    LibM,
+    Oom,
+    OutOfBounds,
+    OutOfBoundsEcall,
+    Panic,
+    PauseResume(u8),
+    Profiler,
+    ReadWriteMem {
+        /// Tuples of (address, value). Zero means read the value and
+        /// output it; nonzero means write that value.
+        values: Vec<(u32, u32)>,
+    },
+    RsaCompat,
+    RunUnconstrained {
+        // True to actually call run_unconstrained, false to run the busy loop directly as a control.
+        unconstrained: bool,
+        // Number of guest cycles to use, including startup.
+        cycles: u64,
+    },
+    SysBigint2,
+    Syscall {
+        count: u32,
+    },
+    SyscallWords,
     ShaConforms,
     ShaCycleCount,
     ShaDigest {
@@ -33,23 +83,22 @@ pub enum MultiTestSpec {
         data: Vec<u8>,
         num_iter: u32,
     },
-    EventTrace,
-    Profiler,
-    Panic,
-    Fault,
-    Halt(u8),
-    PauseResume(u8),
-    ReadWriteMem {
-        /// Tuples of (address, value). Zero means read the value and
-        /// output it; nonzero means write that value.
-        values: Vec<(u32, u32)>,
-    },
-    Syscall {
-        count: u32,
-    },
-    SyscallWords,
-    DoRandom,
+    SysFork,
+    SysForkFork,
+    SysForkJournalPanic,
     SysInput(Digest),
+    SysLogInvalidAddr,
+    SysProveZkr {
+        // Control id of ZKR to execute
+        control_id: Digest,
+        // Input to provide to ZKR execution
+        input: Vec<u32>,
+        // Claim digest and control root to provide to
+        // verify_assumption to make sure that the proof from the ZKR
+        // gets added to our assumptions.
+        claim_digest: Digest,
+        control_root: Digest,
+    },
     SysRead {
         // Buffer to read to
         buf: Vec<u8>,
@@ -66,55 +115,7 @@ pub enum MultiTestSpec {
         // Assumption: Field is serialized to avoid circular dependency issues.
         assumption_words: Vec<u32>,
     },
-    Echo {
-        bytes: Vec<u8>,
-    },
-    EchoStdout {
-        nbytes: u32,
-        fd: u32,
-    },
-    EchoWords {
-        fd: u32,
-        nwords: u32,
-    },
-    BigInt {
-        x: [u32; bigint::WIDTH_WORDS],
-        y: [u32; bigint::WIDTH_WORDS],
-        modulus: [u32; bigint::WIDTH_WORDS],
-    },
-    BusyLoop {
-        /// Busy loop until the guest has run for at least this number of cycles
-        cycles: u64,
-    },
-    LibM,
-    Oom,
-    OutOfBounds,
-    OutOfBoundsEcall,
-    RsaCompat,
-    SysLogInvalidAddr,
     TooManySha,
-    AlignedAlloc,
-    AllocZeroed,
-    SysFork,
-    SysForkFork,
-    SysForkJournalPanic,
-    RunUnconstrained {
-        // True to actually call run_unconstrained, false to run the busy loop directly as a control.
-        unconstrained: bool,
-        // Number of guest cycles to use, including startup.
-        cycles: u64,
-    },
-    SysProveZkr {
-        // Control id of ZKR to execute
-        control_id: Digest,
-        // Input to provide to ZKR execution
-        input: Vec<u32>,
-        // Claim digest and control root to provide to
-        // verify_assumption to make sure that the proof from the ZKR
-        // gets added to our assumptions.
-        claim_digest: Digest,
-        control_root: Digest,
-    },
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

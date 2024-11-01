@@ -25,7 +25,7 @@ pub mod ecall {
     pub const SHA: u32 = 3;
     pub const BIGINT: u32 = 4;
     pub const USER: u32 = 5;
-    pub const MACHINE: u32 = 5;
+    pub const BIGINT2: u32 = 6;
 }
 
 pub mod halt {
@@ -922,5 +922,55 @@ pub unsafe extern "C" fn sys_prove_zkr(
     if a0 != 0 {
         const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+}
+
+#[repr(C)]
+pub struct BigIntBlobHeader {
+    nondet_program_size: u32,
+    verify_program_size: u32,
+    consts_size: u32,
+    temp_size: u32,
+}
+
+/// Invoke a bigint2 program.
+///
+/// # Safety
+///
+/// `header` and `a0` must be aligned and dereferenceable.
+#[inline(always)]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+#[stability::unstable]
+pub unsafe extern "C" fn sys_bigint2(blob: *const u32, a1: *const u32) {
+    let header = blob as *const BigIntBlobHeader;
+    let nondet_program_ptr = (header.add(1)) as *const u32;
+    let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);
+    let consts_ptr = verify_program_ptr.add((*header).verify_program_size as usize);
+    let temp_space = (*header).consts_size as usize >> 2;
+
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!(
+            "sub sp, sp, {temp_space}",
+            "ecall",
+            "add sp, sp, {temp_space}",
+            temp_space = in(reg) temp_space,
+            in("t0") ecall::BIGINT2,
+            in("t1") nondet_program_ptr,
+            in("t2") verify_program_ptr,
+            in("t3") consts_ptr,
+            in("a1") a1,
+        )
+    };
+    #[cfg(not(target_os = "zkvm"))]
+    {
+        core::hint::black_box((
+            nondet_program_ptr,
+            verify_program_ptr,
+            consts_ptr,
+            temp_space,
+            a1,
+        ));
+        unimplemented!()
     }
 }
