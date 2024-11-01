@@ -18,10 +18,10 @@ use risc0_zkvm::guest::env;
 
 fn main() {
     // Read RSA input values
-    let input: Vec<[BigUint; 3]> = env::read();
-    let claims: Vec<_> = input
+    let input: Vec<[BigUint; 2]> = env::read();
+    let result: Vec<BigUint> = input
         .into_iter()
-        .map(|[n, s, m]| rsa::claim(&rsa::RSA_256_X2, n, s, m))
+        .map(|[n, s]| rsa::modpow_65537(&n, &s).expect("TODO"))
         .collect();
-    risc0_circuit_bigint::prove(&rsa::RSA_256_X2, &claims).expect("Unable to compose with RSA");
+    env::commit(&result);
 }
