@@ -27,8 +27,6 @@ use risc0_zkvm_platform::{syscall::{rsa::WIDTH_WORDS, sys_rsa}, WORD_SIZE};
 use crate::{BigIntClaim, BigIntProgram};
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use crate::prove;
-#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
-use risc0_zkvm::guest::env;
 
 // Re-export program info
 pub use crate::generated::{RSA_256_X1, RSA_256_X2, RSA_3072_X1, RSA_3072_X15};
@@ -44,13 +42,10 @@ pub fn claim(prog_info: &BigIntProgram, n: BigUint, s: BigUint, m: BigUint) -> B
 pub fn modpow_65537(n: &BigUint, s: &BigUint) -> Result<BigUint> {
     // TODO: clean up to escalate error
     let claims = compute_claim_inner(n.to_u32_digits(), s.to_u32_digits()).expect("TODO");
-    // TODO: wild hacks, clean up
-    let expected = BigUint::from_bytes_le(&claims[2].to_bytes_le());
-    let claims = [claims[0].clone(), claims[1].clone(), claims[2].clone()];
+    let result = claims[2].clone();
     let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
     prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
-    env::log("[TODO] `rsa_encrypt` ending");
-    return Ok(expected);
+    return Ok(result);
 }
 
 /// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
@@ -68,13 +63,10 @@ pub fn modpow_65537(n: &BigUintDig, s: &BigUintDig) -> Result<BigUintDig> {
         s_vec.push(u32::from_le_bytes(word));
     }
     let claims = compute_claim_inner(n_vec, s_vec)?;
-    // TODO: wild hacks, clean up
-    let expected = BigUintDig::from_bytes_le(&claims[2].to_bytes_le());
-    let claims = [claims[0].clone(), claims[1].clone(), claims[2].clone()];
+    let result = BigUintDig::from_bytes_le(&claims[2].to_bytes_le()).clone();
     let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
     prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
-    env::log("[TODO] `rsa_encrypt` ending");
-    return Ok(expected);
+    return Ok(result);
 }
 
 /// Compute M = S^e (mod N), where e = 65537, using num-bigint-dig, and return the `claim` to prove this
