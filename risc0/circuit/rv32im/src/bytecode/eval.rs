@@ -101,7 +101,7 @@ pub fn eval(in_func: &Program, inputs: &[BigUint]) -> Witness {
             OpCode::Inv => {
                 let (lhs, rhs) = operands(op, op_index, &regs);
                 let exp = rhs.clone() - 2u8;
-                let value = lhs.modpow(&exp, &rhs);
+                let value = lhs.modpow(&exp, rhs);
                 regs[op_index] = value.clone();
                 wit.private.push(value);
             }

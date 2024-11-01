@@ -14,7 +14,6 @@
 
 use num_traits::FromPrimitive;
 use std::io::{Error, Read, Seek};
-//use num_integer::Integer;
 
 use super::bibc;
 
