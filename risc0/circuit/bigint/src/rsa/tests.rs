@@ -16,7 +16,7 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 use num_bigint::BigUint;
-use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_ID};
+use risc0_circuit_bigint_test_methods::{RSA_VERIFY_ELF, RSA_VERIFY_ID};
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use test_log::test;
 
@@ -68,7 +68,7 @@ fn run_guest_compose(claims: &[impl Borrow<[BigUint; 3]>]) -> Result<()> {
     let prover = get_prover_server(&ProverOpts::fast())?;
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, RSA_ELF)?.receipt;
+    let receipt = prover.prove(env, RSA_VERIFY_ELF)?.receipt;
 
     // Make sure this receipt actually depends on the assumption;
     // otherwise this test might give a false negative.
@@ -80,7 +80,7 @@ fn run_guest_compose(claims: &[impl Borrow<[BigUint; 3]>]) -> Result<()> {
         .is_empty());
 
     // Make sure the receipt verifies OK
-    receipt.verify(RSA_ID)?;
+    receipt.verify(RSA_VERIFY_ID)?;
 
     Ok(())
 }

@@ -15,40 +15,32 @@
 use num_bigint::BigUint;
 use num_traits::Num as _;
 use risc0_circuit_bigint::zkr::register_zkrs;
-use risc0_circuit_bigint_test_methods::RSA_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_circuit_bigint_test_methods::RSA_VERIFY_ELF;
+use risc0_zkvm::{ExecutorEnv, ExecutorImpl};
 
 fn main() {
-    // Note: This example is for demonstration purposes and is not for production use
-    // If you want something with production features, look into our fork of the RustCrypto RSA repo
-    //
-    // This example computes an RSA exponentiation, i.e., computes m^65537 (mod n). It does not
-    // require you to know the answer ahead of time -- it will compute it and commit it
+    // This example verifies an RSA signature. It assumes you "already know the answer", i.e., you
+    // have all three of the message, signature, and modulus.
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
     register_zkrs();
 
-    // We compute the modpow of `sgn` to 65537 mod `modulus`, commit it to the journal, and compare to `msg`
+    // Parameters for a message `m` with signature `s` under the RSA public key modulus `n`.
     let n = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
-    let m = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
-    let inputs = vec![[n, m]];
+    let s = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
+    let m = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
+    let claims = vec![[n, s, m]];
 
     let env = ExecutorEnv::builder()
-        .write(&inputs)
+        .write(&claims)
         .unwrap()
         .build()
         .unwrap();
 
-    let prover = default_prover();
-    let prove_info = prover.prove(env, RSA_ELF).unwrap();
-    assert_eq!(prove_info.stats.segments, 1);
-
-    let result: Vec<BigUint> = prove_info.receipt.journal.decode().expect("TODO");
-    let expected = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
-    assert_eq!(result[0], expected);
-    println!("Example signature verified");
+    let session = ExecutorImpl::from_elf(env, RSA_VERIFY_ELF).unwrap().run().unwrap();
+    assert_eq!(session.segments.len(), 1);
 }
 
 fn from_hex(s: &str) -> BigUint {
