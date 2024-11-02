@@ -136,6 +136,7 @@ pub mod nr {
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
+    declare_syscall!(pub SYS_KECCAK);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
@@ -923,4 +924,23 @@ pub unsafe extern "C" fn sys_prove_zkr(
         const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
+}
+
+/// get a keccak hash from the host with the given input data - should be invoked during `hasher.finalize(...)`
+///
+/// # Safety
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_keccak(
+    input_ptr: *const u8,
+    len: usize,
+    out_state: *mut [u32; DIGEST_WORDS],
+) {
+    syscall_2(
+        nr::SYS_KECCAK,
+        out_state as *mut u32,
+        DIGEST_WORDS,
+        input_ptr as u32,
+        len as u32,
+    );
 }

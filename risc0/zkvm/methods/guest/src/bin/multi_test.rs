@@ -40,8 +40,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr, sys_read,
-        sys_read_words, sys_write,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
+        sys_read, sys_read_words, sys_write, DIGEST_BYTES, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
@@ -429,6 +429,48 @@ fn main() {
             }
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::SysKeccak => {
+            let expected: [u8; DIGEST_BYTES] = [
+                71, 23, 50, 133, 168, 215, 52, 30, 94, 151, 47, 198, 119, 40, 99, 132, 248, 2, 248,
+                239, 66, 165, 236, 95, 3, 187, 250, 37, 76, 176, 31, 173,
+            ];
+            let output = [0u8; DIGEST_BYTES];
+            let data = b"hello world";
+            unsafe {
+                sys_keccak(
+                    data as *const u8,
+                    data.len(),
+                    output.as_ptr() as *mut [u32; DIGEST_WORDS],
+                )
+            };
+            assert_eq!(&expected, &output);
+
+            // test_keccak_01.txt
+            let test_data_01 = b"The quick brown fox jumps over the lazy dog.";
+            let output1 = [0u8; DIGEST_BYTES];
+
+            unsafe {
+                sys_keccak(
+                    test_data_01 as *const u8,
+                    test_data_01.len(),
+                    output1.as_ptr() as *mut [u32; DIGEST_WORDS],
+                )
+            };
+
+            let digest = unsafe {
+                env::KECCAK_BATCHER
+                    .write_keccak_entry(test_data_01, &output1)
+                    .unwrap();
+                env::KECCAK_BATCHER.finalize().unwrap()
+            };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex_literal::hex!(
+                    "b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7"
+                )
+            );
         }
     }
 }

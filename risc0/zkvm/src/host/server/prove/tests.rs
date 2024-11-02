@@ -144,6 +144,19 @@ fn sha_iter() {
 }
 
 #[test]
+fn run_keccak() {
+    let spec = MultiTestSpec::SysKeccak;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {

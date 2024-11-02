@@ -4268,6 +4268,7 @@ dependencies = [
  "semver",
  "serde",
  "sha2",
+ "sha3",
  "stability",
  "tempfile",
  "tracing",

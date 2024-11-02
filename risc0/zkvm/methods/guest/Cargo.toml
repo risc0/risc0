@@ -19,6 +19,7 @@ risc0-zkvm = { path = "../..", default-features = false, features = [
   "getrandom",
   "std",
 ] }
+hex-literal = "0.4"
 risc0-zkvm-methods = { path = ".." }
 risc0-zkvm-platform = { path = "../../platform", features = ["unstable"] }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }

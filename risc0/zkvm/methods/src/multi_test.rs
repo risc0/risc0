@@ -115,6 +115,7 @@ pub enum MultiTestSpec {
         claim_digest: Digest,
         control_root: Digest,
     },
+    SysKeccak,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
