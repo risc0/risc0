@@ -9,6 +9,10 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+num-bigint = { version = "0.4", optional = true, default-features = false }
+num-derive = { version = "0.2", optional = true }
+num-integer = { version = "0.1", optional = true }
+num-traits = { version = "0.2", optional = true }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -59,6 +63,10 @@ prove = [
   "dep:crypto-bigint",
   "dep:derive-debug",
   "dep:lazy-regex",
+  "dep:num-bigint",
+  "dep:num-derive",
+  "dep:num-integer",
+  "dep:num-traits",
   "dep:rand",
   "dep:rayon",
   "dep:risc0-circuit-rv32im-sys",
