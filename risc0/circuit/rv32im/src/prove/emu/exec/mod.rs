@@ -15,6 +15,7 @@
 #[cfg(test)]
 mod tests;
 
+use core::hint::black_box;
 use std::{array, cell::RefCell, collections::BTreeSet, mem, rc::Rc};
 
 use anyhow::{bail, ensure, Result};
@@ -31,11 +32,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     align_up,
     memory::{is_guest_memory, GUEST_MAX_MEM},
-    syscall::{
-        bigint, ecall, halt,
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_MAX, REG_T0},
-        IO_CHUNK_WORDS,
-    },
+    syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     PAGE_SIZE, WORD_SIZE,
 };
 use sha2::digest::generic_array::GenericArray;
@@ -540,7 +537,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_bigint2(&mut self) -> Result<bool> {
-        todo!()
+        let nondet_program_ptr = self.load_guest_addr_from_register(REG_T1)?;
+        // let verify_program_ptr = self.load_guest_addr_from_register(REG_T2)?;
+        // let consts_ptr = self.load_guest_addr_from_register(REG_T1)?;
+        let operand1 = self.load_guest_addr_from_register(REG_A1)?;
+
+        black_box((nondet_program_ptr, operand1));
+
+        todo!("call bibc")
     }
 
     fn check_guest_addr(addr: ByteAddr) -> Result<ByteAddr> {

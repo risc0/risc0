@@ -272,7 +272,9 @@ fn bigint_accel() {
 }
 
 #[test]
-fn sys_bigint2() {}
+fn sys_bigint2() {
+    run_test(MultiTestSpec::SysBigInt2);
+}
 
 #[test]
 fn env_stdio() {

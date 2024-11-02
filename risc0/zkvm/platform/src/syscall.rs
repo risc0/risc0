@@ -946,7 +946,7 @@ pub unsafe extern "C" fn sys_bigint2(blob: *const u32, a1: *const u32) {
     let nondet_program_ptr = (header.add(1)) as *const u32;
     let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);
     let consts_ptr = verify_program_ptr.add((*header).verify_program_size as usize);
-    let temp_space = (*header).consts_size as usize >> 2;
+    let temp_space = ((*header).consts_size as usize) << 2;
 
     #[cfg(target_os = "zkvm")]
     unsafe {

@@ -430,7 +430,7 @@ fn main() {
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
         }
-        MultiTestSpec::SysBigint2 => unsafe {
+        MultiTestSpec::SysBigInt2 => {
             let blob: &[u32] = &[
                 0x00000130, 0x00000079, 0x00000010, 0x00000040, 0x63626962, 0x00000001, 0x00000000,
                 0x00000019, 0x00000006, 0x0000002b, 0x00000001, 0x00000000, 0x000000ff, 0x00000000,
@@ -502,7 +502,9 @@ fn main() {
                 0x79BE667E, 0xFB10D4B8, 0x9C47D08F, 0xA6855419, 0xFD17B448, 0x0E1108A8, 0x5DA4FBFC,
                 0x26A3C465, 0x483ADA77,
             ];
-            sys_bigint2(blob.as_ptr(), point_g.as_ptr());
-        },
+            unsafe {
+                sys_bigint2(blob.as_ptr(), point_g.as_ptr());
+            }
+        }
     }
 }
