@@ -9,6 +9,10 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+num-traits = { version = "0.2", optional = true }
+num-derive = { version = "0.2", optional = true }
+num-bigint = { version = "0.4", optional = true, default-features = false }
+num-integer = { version = "0.1", optional = true }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -32,10 +36,6 @@ crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
 derive-debug = { version = "0.1", optional = true }
 lazy-regex = { version = "3.3", optional = true }
-num-traits = "0.2"
-num-derive = "0.2"
-num-bigint = { version = "0.4", default-features = false }
-num-integer = "0.1"
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
@@ -63,6 +63,10 @@ prove = [
   "dep:crypto-bigint",
   "dep:derive-debug",
   "dep:lazy-regex",
+  "dep:num-traits",
+  "dep:num-derive",
+  "dep:num-bigint",
+  "dep:num-integer",
   "dep:rand",
   "dep:rayon",
   "dep:risc0-circuit-rv32im-sys",
