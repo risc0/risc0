@@ -24,7 +24,7 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
 use num_bigint::BigUint;
-use risc0_circuit_bigint_test_methods::{RSA_VERIFY_ELF, RSA_VERIFY_ID};
+use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_ID};
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
     ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
@@ -85,7 +85,7 @@ fn prover_example() {
     let session = client
         .execute(
             &env,
-            Asset::Inline(RSA_VERIFY_ELF.into()),
+            Asset::Inline(RSA_ELF.into()),
             AssetRequest::Inline,
             |info, segment| {
                 println!("{info:?}");
@@ -144,7 +144,7 @@ fn prover_example() {
         session.journal.bytes.clone(),
     );
     let asset = receipt.try_into().unwrap();
-    client.verify(asset, RSA_VERIFY_ID).unwrap();
+    client.verify(asset, RSA_ID).unwrap();
     println!("Receipt verified!");
 }
 
