@@ -927,10 +927,10 @@ pub unsafe extern "C" fn sys_prove_zkr(
 
 #[repr(C)]
 pub struct BigIntBlobHeader {
-    nondet_program_size: u32,
-    verify_program_size: u32,
-    consts_size: u32,
-    temp_size: u32,
+    pub nondet_program_size: u32,
+    pub verify_program_size: u32,
+    pub consts_size: u32,
+    pub temp_size: u32,
 }
 
 /// Invoke a bigint2 program.

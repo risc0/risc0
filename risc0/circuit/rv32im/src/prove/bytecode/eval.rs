@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::bibc;
-use bibc::OpCode;
-use bibc::Program;
 use num_bigint::BigUint;
+
+use super::bibc;
 
 #[derive(Default)]
 pub struct Witness {
@@ -35,18 +34,18 @@ fn operand_a<'p>(op: &bibc::Op, op_index: usize, regs: &'p [BigUint]) -> &'p Big
     &regs[op.operand_a]
 }
 
-pub fn eval(in_func: &Program, inputs: &[BigUint]) -> Witness {
+pub fn eval(in_func: &bibc::Program, inputs: &[BigUint]) -> Witness {
     let mut wit: Witness = Default::default();
     let mut regs = vec![BigUint::ZERO; in_func.ops.len()];
     for op_index in 0..in_func.ops.len() {
         let op = &in_func.ops[op_index];
         match op.code {
-            OpCode::Eqz => {
+            bibc::OpCode::Eqz => {
                 let value = operand_a(op, op_index, &regs);
                 assert_eq!(*value, BigUint::ZERO, "failed zero check");
                 wit.private.push(value.clone());
             }
-            OpCode::Def => {
+            bibc::OpCode::Def => {
                 let wire = &in_func.inputs[op.operand_a];
                 let value = &inputs[wire.label as usize];
                 regs[op_index] = value.clone();
@@ -57,7 +56,7 @@ pub fn eval(in_func: &Program, inputs: &[BigUint]) -> Witness {
                 }
                 .push(value.clone());
             }
-            OpCode::Con => {
+            bibc::OpCode::Con => {
                 let offset = op.operand_a;
                 let words = op.operand_b;
                 let mut value = BigUint::from(0_u64);
@@ -70,33 +69,33 @@ pub fn eval(in_func: &Program, inputs: &[BigUint]) -> Witness {
                 regs[op_index] = value.clone();
                 wit.constant.push(value);
             }
-            OpCode::Add => {
+            bibc::OpCode::Add => {
                 let (lhs, rhs) = operands(op, op_index, &regs);
                 regs[op_index] = lhs + rhs;
             }
-            OpCode::Sub => {
+            bibc::OpCode::Sub => {
                 let (lhs, rhs) = operands(op, op_index, &regs);
                 regs[op_index] = lhs - rhs;
             }
-            OpCode::Mul => {
+            bibc::OpCode::Mul => {
                 let (lhs, rhs) = operands(op, op_index, &regs);
                 regs[op_index] = lhs * rhs;
             }
-            OpCode::Rem => {
+            bibc::OpCode::Rem => {
                 let (lhs, rhs) = operands(op, op_index, &regs);
                 let value = lhs % rhs;
                 regs[op_index] = value.clone();
                 wit.private.push(value);
             }
-            OpCode::Quo => {
+            bibc::OpCode::Quo => {
                 let (lhs, rhs) = operands(op, op_index, &regs);
                 let value = lhs / rhs;
                 regs[op_index] = value.clone();
                 wit.private.push(value);
             }
-            OpCode::Inv => {
+            bibc::OpCode::Inv => {
                 let (lhs, rhs) = operands(op, op_index, &regs);
-                let exp = rhs.clone() - 2u8;
+                let exp = rhs - 2u8;
                 let value = lhs.modpow(&exp, rhs);
                 regs[op_index] = value.clone();
                 wit.private.push(value);

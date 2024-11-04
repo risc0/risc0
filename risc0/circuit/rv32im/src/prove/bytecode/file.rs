@@ -12,52 +12,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::io::Read;
+
+use anyhow::Result;
 use num_traits::FromPrimitive;
-use std;
-use std::io::{Error, Read, Seek};
 
 use super::bibc;
 
-fn read_u16<R: Read + Seek>(stream: &mut R) -> Result<u16, Error> {
+fn read_u16<R: Read>(stream: &mut R) -> Result<u16> {
     let mut bytes = [0u8; 2];
     stream.read_exact(&mut bytes)?;
     Ok(u16::from_le_bytes(bytes))
 }
 
-fn read_u32<R: Read + Seek>(stream: &mut R) -> Result<u32, Error> {
+fn read_u32<R: Read>(stream: &mut R) -> Result<u32> {
     let mut bytes = [0u8; 4];
     stream.read_exact(&mut bytes)?;
     Ok(u32::from_le_bytes(bytes))
 }
 
-fn read_u64<R: Read + Seek>(stream: &mut R) -> Result<u64, Error> {
+fn read_u64<R: Read>(stream: &mut R) -> Result<u64> {
     let mut bytes = [0u8; 8];
     stream.read_exact(&mut bytes)?;
     Ok(u64::from_le_bytes(bytes))
 }
 
-fn read_input<R: Read + Seek>(mut stream: &mut R) -> Result<bibc::Input, Error> {
+fn read_input<R: Read>(stream: &mut R) -> Result<bibc::Input> {
     let ret = bibc::Input {
-        label: read_u64(&mut stream)?,
-        bit_width: read_u32(&mut stream)?,
-        min_bits: read_u16(&mut stream)?,
-        is_public: read_u16(&mut stream)? != 0,
+        label: read_u64(stream)?,
+        bit_width: read_u32(stream)?,
+        min_bits: read_u16(stream)?,
+        is_public: read_u16(stream)? != 0,
     };
     Ok(ret)
 }
 
-fn read_type<R: Read + Seek>(mut stream: &mut R) -> Result<bibc::Type, Error> {
+fn read_type<R: Read>(stream: &mut R) -> Result<bibc::Type> {
     let ret = bibc::Type {
-        coeffs: read_u64(&mut stream)?,
-        max_pos: read_u64(&mut stream)?,
-        max_neg: read_u64(&mut stream)?,
-        min_bits: read_u64(&mut stream)?,
+        coeffs: read_u64(stream)?,
+        max_pos: read_u64(stream)?,
+        max_neg: read_u64(stream)?,
+        min_bits: read_u64(stream)?,
     };
     Ok(ret)
 }
 
-fn read_op<R: Read + Seek>(mut stream: &mut R) -> Result<bibc::Op, Error> {
-    let bits = read_u64(&mut stream)?;
+fn read_op<R: Read>(stream: &mut R) -> Result<bibc::Op> {
+    let bits = read_u64(stream)?;
     let opcode = FromPrimitive::from_u32((bits & 0x0F) as u32);
     assert!(opcode.is_some());
     let ret = bibc::Op {
@@ -69,17 +70,17 @@ fn read_op<R: Read + Seek>(mut stream: &mut R) -> Result<bibc::Op, Error> {
     Ok(ret)
 }
 
-pub fn read_program<R: Read + Seek>(mut stream: &mut R) -> Result<bibc::Program, Error> {
+pub fn read_program<R: Read>(stream: &mut R) -> Result<bibc::Program> {
     // Read the header. Validate magic number and version.
     let mut magic = [0u8; 4];
     stream.read_exact(&mut magic)?;
     assert!(magic == [0x62, 0x69, 0x62, 0x63]);
-    let version = read_u32(&mut stream)?;
+    let version = read_u32(stream)?;
     assert!(version == 1);
-    let num_inputs = read_u32(&mut stream)? as usize;
-    let num_types = read_u32(&mut stream)? as usize;
-    let num_constants = read_u32(&mut stream)? as usize;
-    let num_ops = read_u32(&mut stream)? as usize;
+    let num_inputs = read_u32(stream)? as usize;
+    let num_types = read_u32(stream)? as usize;
+    let num_constants = read_u32(stream)? as usize;
+    let num_ops = read_u32(stream)? as usize;
     // Allocate storage for the program sections, then read each one.
     let mut result = bibc::Program {
         inputs: Vec::<bibc::Input>::with_capacity(num_inputs),
@@ -88,16 +89,16 @@ pub fn read_program<R: Read + Seek>(mut stream: &mut R) -> Result<bibc::Program,
         ops: Vec::<bibc::Op>::with_capacity(num_ops),
     };
     for _ in 0..num_inputs {
-        result.inputs.push(read_input(&mut stream)?);
+        result.inputs.push(read_input(stream)?);
     }
     for _ in 0..num_types {
-        result.types.push(read_type(&mut stream)?);
+        result.types.push(read_type(stream)?);
     }
     for _ in 0..num_constants {
-        result.constants.push(read_u64(&mut stream)?);
+        result.constants.push(read_u64(stream)?);
     }
     for _ in 0..num_ops {
-        result.ops.push(read_op(&mut stream)?);
+        result.ops.push(read_op(stream)?);
     }
     Ok(result)
 }
