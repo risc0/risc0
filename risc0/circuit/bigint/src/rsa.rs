@@ -101,7 +101,7 @@ fn compute_claim_inner(mut modulus: Vec<u32>, mut base: Vec<u32>) -> Result<[Big
     // let modulus_claim = BigUint::from_bytes_le(modulus.map(|elem| elem.to_le_bytes()).flatten());
     // TODO: This code should be replaced with the `flatten` code above once `flatten` is stable
     let result_words = result.map(|elem| elem.to_le_bytes());
-    let mut result_claim = Vec::<u8>::new();  // TODO: Clean up style
+    let mut result_claim = Vec::<u8>::new();
     for word in result_words {
         for byte in word {
             result_claim.push(byte);
@@ -109,7 +109,7 @@ fn compute_claim_inner(mut modulus: Vec<u32>, mut base: Vec<u32>) -> Result<[Big
     }
     let result_claim = BigUint::from_bytes_le(&result_claim);
     let base_words = base.map(|elem| elem.to_le_bytes());
-    let mut base_claim = Vec::<u8>::new();  // TODO: Clean up style
+    let mut base_claim = Vec::<u8>::new();
     for word in base_words {
         for byte in word {
             base_claim.push(byte);
@@ -117,7 +117,7 @@ fn compute_claim_inner(mut modulus: Vec<u32>, mut base: Vec<u32>) -> Result<[Big
     }
     let base_claim = BigUint::from_bytes_le(&base_claim);
     let modulus_words = modulus.map(|elem| elem.to_le_bytes());
-    let mut modulus_claim = Vec::<u8>::new();  // TODO: Clean up style
+    let mut modulus_claim = Vec::<u8>::new();
     for word in modulus_words {
         for byte in word {
             modulus_claim.push(byte);
