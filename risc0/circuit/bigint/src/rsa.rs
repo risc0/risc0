@@ -19,6 +19,7 @@ mod tests;
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use anyhow::{bail, Result};
 use num_bigint::BigUint;
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(feature = "bigint-dig-shim")]
 use num_bigint_dig::BigUint as BigUintDig;
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
