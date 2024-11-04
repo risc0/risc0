@@ -134,10 +134,10 @@ fn guest_compose_corrupted() {
 fn guest_compute() {
     // Test using small inputs based on Fermat's Little Theorem
     // (Since 65537 is prime, a = modpow_65537(a, 65537) for any 0 <= a < 65537)
-    let modulus = from_hex("010001");  // 65537
     let base = from_hex("47");  // arbitrary (but less than 65537)
+    let modulus = from_hex("010001");  // 65537
     let expected_result = base.clone();
-    let inputs = vec![[modulus, base]];
+    let inputs = vec![[base, modulus]];
     let env = ExecutorEnv::builder()
         .write(&inputs)
         .unwrap()

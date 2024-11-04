@@ -44,7 +44,7 @@ pub fn claim(prog_info: &BigIntProgram, modulus: BigUint, base: BigUint, result:
 /// `S` is the `base`, `N` is the `modulus`, and the result `M` is returned
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(not(feature = "bigint-dig-shim"))]
-pub fn modpow_65537(modulus: &BigUint, base: &BigUint) -> Result<BigUint> {
+pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
     let claims = compute_claim_inner(modulus.to_u32_digits(), base.to_u32_digits())?;
     let result = claims[2].clone();
     let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
@@ -57,7 +57,7 @@ pub fn modpow_65537(modulus: &BigUint, base: &BigUint) -> Result<BigUint> {
 /// `S` is the `base`, `N` is the `modulus`, and the result `M` is returned
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(feature = "bigint-dig-shim")]
-pub fn modpow_65537(modulus: &BigUintDig, base: &BigUintDig) -> Result<BigUintDig> {
+pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDig> {
     let mut modulus_vec = Vec::<u32>::new();
     for word in modulus.to_bytes_le().chunks(4) {
         let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
