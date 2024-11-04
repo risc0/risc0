@@ -363,7 +363,13 @@ pub unsafe extern "C" fn sys_rsa(
     in_base: *const [u32; rsa::WIDTH_WORDS],
     in_modulus: *const [u32; rsa::WIDTH_WORDS],
 ) {
-    syscall_2(nr::SYS_RSA, recv_buf as *mut u32, rsa::WIDTH_WORDS, in_base as u32, in_modulus as u32);
+    syscall_2(
+        nr::SYS_RSA,
+        recv_buf as *mut u32,
+        rsa::WIDTH_WORDS,
+        in_base as u32,
+        in_modulus as u32,
+    );
 }
 
 /// # Safety

@@ -23,11 +23,14 @@ use num_bigint::BigUint;
 #[cfg(feature = "bigint-dig-shim")]
 use num_bigint_dig::BigUint as BigUintDig;
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
-use risc0_zkvm_platform::{syscall::{rsa::WIDTH_BITS, rsa::WIDTH_WORDS, sys_rsa}, WORD_SIZE};
+use risc0_zkvm_platform::{
+    syscall::{rsa::WIDTH_BITS, rsa::WIDTH_WORDS, sys_rsa},
+    WORD_SIZE,
+};
 
-use crate::{BigIntClaim, BigIntProgram};
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use crate::prove;
+use crate::{BigIntClaim, BigIntProgram};
 
 // Re-export program info
 pub use crate::generated::{RSA_256_X1, RSA_256_X2, RSA_3072_X1, RSA_3072_X15};
@@ -35,7 +38,12 @@ pub use crate::generated::{RSA_256_X1, RSA_256_X2, RSA_3072_X1, RSA_3072_X15};
 /// Construct a bigint claim that (S^e = M (mod N)), where e = 65537.
 ///
 /// `S` is the `base``, `N` is the `modulus`, and `M` is the `result`
-pub fn claim(prog_info: &BigIntProgram, modulus: BigUint, base: BigUint, result: BigUint) -> BigIntClaim {
+pub fn claim(
+    prog_info: &BigIntProgram,
+    modulus: BigUint,
+    base: BigUint,
+    result: BigUint,
+) -> BigIntClaim {
     BigIntClaim::from_biguints(prog_info, &[modulus, base, result])
 }
 
@@ -60,12 +68,12 @@ pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
 pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDig> {
     let mut base_vec = Vec::<u32>::new();
     for word in base.to_bytes_le().chunks(4) {
-        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
+        let word: [u8; 4] = word.try_into()?; // TODO: What about the "first byte (only) is zero case?"
         base_vec.push(u32::from_le_bytes(word));
     }
     let mut modulus_vec = Vec::<u32>::new();
     for word in modulus.to_bytes_le().chunks(4) {
-        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
+        let word: [u8; 4] = word.try_into()?; // TODO: What about the "first byte (only) is zero case?"
         modulus_vec.push(u32::from_le_bytes(word));
     }
     let claims = compute_claim_inner(base_vec, modulus_vec)?;
@@ -91,7 +99,9 @@ fn compute_claim_inner(mut base: Vec<u32>, mut modulus: Vec<u32>) -> Result<[Big
     base.resize(WIDTH_WORDS, 0);
     let modulus: [u32; WIDTH_WORDS] = (*modulus).try_into()?;
     let base: [u32; WIDTH_WORDS] = (*base).try_into()?;
-    const fn zero() -> u32 { 0 }
+    const fn zero() -> u32 {
+        0
+    }
     let mut result = [zero(); WIDTH_WORDS];
     // Safety: inputs are aligned and dereferenceable
     unsafe {

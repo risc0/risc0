@@ -16,7 +16,10 @@ use anyhow::Result;
 use num_bigint::BigUint;
 use num_traits::ops::bytes::ToBytes;
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_zkvm_platform::syscall::{reg_abi::{REG_A3, REG_A4}, rsa};
+use risc0_zkvm_platform::syscall::{
+    reg_abi::{REG_A3, REG_A4},
+    rsa,
+};
 use risc0_zkvm_platform::WORD_SIZE;
 
 use super::{Syscall, SyscallContext};
@@ -29,7 +32,7 @@ impl Syscall for SysRSA {
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        assert!(WORD_SIZE == 4);  // The inputs on the other side of this syscall assume u32 words
+        assert!(WORD_SIZE == 4); // The inputs on the other side of this syscall assume u32 words
         tracing::debug!("SYS_RSA");
         // Load inputs into BigUint
         let base_ptr = ByteAddr(ctx.load_register(REG_A3));
