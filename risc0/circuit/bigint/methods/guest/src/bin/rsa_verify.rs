@@ -17,11 +17,11 @@ use risc0_circuit_bigint::rsa;
 use risc0_zkvm::guest::env;
 
 fn main() {
-    // Verifies an RSA signature (message `m`, signature `s`, public key modulus `n`)
+    // Verifies an RSA signature (message `msg`, signature `sig`, public key modulus `modulus`)
     let input: Vec<[BigUint; 3]> = env::read();
     let claims: Vec<_> = input
         .into_iter()
-        .map(|[n, s, m]| rsa::claim(&rsa::RSA_256_X2, n, s, m))
+        .map(|[modulus, sig, msg]| rsa::claim(&rsa::RSA_256_X2, modulus, sig, msg))
         .collect();
     risc0_circuit_bigint::prove(&rsa::RSA_256_X2, &claims).expect("Unable to compose with RSA");
 }

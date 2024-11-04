@@ -27,11 +27,11 @@ fn main() {
 
     register_zkrs();
 
-    // Parameters for a message `m` with signature `s` under the RSA public key modulus `n`.
-    let n = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
-    let s = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
-    let m = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
-    let claims = vec![[n, s, m]];
+    // Parameters for a message `msg` with signature `sig` under the RSA public key modulus `modulus`.
+    let modulus = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
+    let sig = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
+    let msg = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
+    let claims = vec![[modulus, sig, msg]];
 
     let env = ExecutorEnv::builder()
         .write(&claims)
