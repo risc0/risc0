@@ -79,7 +79,7 @@ pub fn modpow_65537(modulus: &BigUintDig, base: &BigUintDig) -> Result<BigUintDi
 ///
 /// `S` is the `base` and `N` is the `modulus`.
 ///
-/// The return value has the claim inputs expected by the RSA accelerator, in the expected order, which is TODO
+/// The return value has the claim inputs expected by the RSA accelerator, in the expected order, which is [modulus, base, result]
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 fn compute_claim_inner(mut modulus: Vec<u32>, mut base: Vec<u32>) -> Result<[BigUint; 3]> {
     // TODO: Better variable names
@@ -93,7 +93,7 @@ fn compute_claim_inner(mut modulus: Vec<u32>, mut base: Vec<u32>) -> Result<[Big
     let base: [u32; WIDTH_WORDS] = (*base).try_into()?;
     const fn zero() -> u32 { 0 }
     let mut result = [zero(); WIDTH_WORDS];
-    // Safety: inputs are aligned and deferenceable
+    // Safety: inputs are aligned and dereferenceable
     unsafe {
         sys_rsa(&mut result, &base, &modulus);
     }
