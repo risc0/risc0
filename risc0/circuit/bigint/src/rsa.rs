@@ -45,7 +45,7 @@ pub fn claim(prog_info: &BigIntProgram, modulus: BigUint, base: BigUint, result:
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(not(feature = "bigint-dig-shim"))]
 pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
-    let claims = compute_claim_inner(modulus.to_u32_digits(), base.to_u32_digits())?;
+    let claims = compute_claim_inner(base.to_u32_digits(), modulus.to_u32_digits())?;
     let result = claims[2].clone();
     let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
     prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
@@ -58,17 +58,17 @@ pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(feature = "bigint-dig-shim")]
 pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDig> {
-    let mut modulus_vec = Vec::<u32>::new();
-    for word in modulus.to_bytes_le().chunks(4) {
-        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
-        modulus_vec.push(u32::from_le_bytes(word));
-    }
     let mut base_vec = Vec::<u32>::new();
     for word in base.to_bytes_le().chunks(4) {
         let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
         base_vec.push(u32::from_le_bytes(word));
     }
-    let claims = compute_claim_inner(modulus_vec, base_vec)?;
+    let mut modulus_vec = Vec::<u32>::new();
+    for word in modulus.to_bytes_le().chunks(4) {
+        let word: [u8; 4] = word.try_into()?;  // TODO: What about the "first byte (only) is zero case?"
+        modulus_vec.push(u32::from_le_bytes(word));
+    }
+    let claims = compute_claim_inner(base_vec, modulus_vec)?;
     let result = BigUintDig::from_bytes_le(&claims[2].to_bytes_le()).clone();
     let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
     prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
@@ -81,7 +81,7 @@ pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDi
 ///
 /// The return value has the claim inputs expected by the RSA accelerator, in the expected order, which is [modulus, base, result]
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
-fn compute_claim_inner(mut modulus: Vec<u32>, mut base: Vec<u32>) -> Result<[BigUint; 3]> {
+fn compute_claim_inner(mut base: Vec<u32>, mut modulus: Vec<u32>) -> Result<[BigUint; 3]> {
     // TODO: Better variable names
     assert!(WORD_SIZE == 4);
     if modulus.len() > WIDTH_WORDS || base.len() > WIDTH_WORDS {
