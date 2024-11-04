@@ -16,7 +16,7 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 use num_bigint::BigUint;
-use risc0_circuit_bigint_test_methods::{RSA_VERIFY_ELF, RSA_VERIFY_ID};
+use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_VERIFY_ELF, RSA_VERIFY_ID};
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use test_log::test;
 
@@ -127,4 +127,31 @@ fn guest_compose_corrupted() {
             "Expected zkr verification failure when corrupting RSA value #{idx}"
         ));
     }
+}
+
+// Makes sure the RSA `modpow_65537` accelerator can run in the guest
+#[test]
+fn guest_compute() {
+    // Test using small inputs based on Fermat's Little Theorem
+    // (Since 65537 is prime, a = modpow_65537(a, 65537) for any 0 <= a < 65537)
+    let modulus = from_hex("010001");  // 65537
+    let base = from_hex("47");  // arbitrary (but less than 65537)
+    let expected_result = base.clone();
+    let inputs = vec![[modulus, base]];
+    let env = ExecutorEnv::builder()
+        .write(&inputs)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    register_zkrs();
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let result: Vec<BigUint> = prover.prove(env, RSA_ELF)
+        .unwrap()
+        .receipt
+        .journal
+        .decode()
+        .unwrap();
+    assert_eq!(result[0], expected_result);
 }
