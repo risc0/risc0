@@ -231,6 +231,7 @@ jobs:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      SCCACHE_RECACHE: 1
     steps:
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
