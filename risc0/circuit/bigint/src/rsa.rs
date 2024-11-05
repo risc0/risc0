@@ -66,14 +66,24 @@ pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(feature = "bigint-dig-shim")]
 pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDig> {
+    // Ensure inputs fill an even number of words
+    let mut base = base.to_bytes_le();
+    if base.len() % 4 != 0 {
+        base.resize(base.len() + (4 - (base.len() % 4)), 0);
+    }
+    let mut modulus = modulus.to_bytes_le();
+    if modulus.len() % 4 != 0 {
+        modulus.resize(modulus.len() + (4 - (modulus.len() % 4)), 0);
+    }
+    // Convert inputs to Vecs of u32s
     let mut base_vec = Vec::<u32>::new();
-    for word in base.to_bytes_le().chunks(4) {
-        let word: [u8; 4] = word.try_into()?; // TODO: What about the "first byte (only) is zero case?"
+    for word in base.chunks(4) {
+        let word: [u8; 4] = word.try_into()?;
         base_vec.push(u32::from_le_bytes(word));
     }
     let mut modulus_vec = Vec::<u32>::new();
-    for word in modulus.to_bytes_le().chunks(4) {
-        let word: [u8; 4] = word.try_into()?; // TODO: What about the "first byte (only) is zero case?"
+    for word in modulus.chunks(4) {
+        let word: [u8; 4] = word.try_into()?;
         modulus_vec.push(u32::from_le_bytes(word));
     }
     let claims = compute_claim_inner(base_vec, modulus_vec)?;
