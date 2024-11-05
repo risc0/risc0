@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 jwt-core = { path = "../../core/" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+
+[patch.crates-io]
+# TODO: Make a permanent `rsa` patch
+rsa = { path = "/Users/tzerrell/code/RustCrypto/RSA" }        # Base: * | a801f53 (tag: v0.9.6) v0.9.6 (#397)
