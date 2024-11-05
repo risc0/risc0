@@ -24,8 +24,8 @@ use crate::zkr::register_zkrs;
 fn guest_compute_dig() {
     // Test using small inputs based on Fermat's Little Theorem
     // (Since 65537 is prime, a = modpow_65537(a, 65537) for any 0 <= a < 65537)
-    let base = BigUint::new(vec!(0x47)); // arbitrary (but less than 65537)
-    let modulus = BigUint::new(vec!(0x010001)); // 65537
+    let base = BigUint::new(vec![0x47]); // arbitrary (but less than 65537)
+    let modulus = BigUint::new(vec![0x010001]); // 65537
     let expected_result = base.clone();
     let inputs = vec![[base, modulus]];
     let env = ExecutorEnv::builder()
