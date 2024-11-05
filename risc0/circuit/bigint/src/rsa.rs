@@ -105,7 +105,6 @@ pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDi
 /// The return value has the claim inputs expected by the RSA accelerator, in the expected order, which is [modulus, base, result]
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 fn compute_claim_inner(mut base: Vec<u32>, mut modulus: Vec<u32>) -> Result<[BigUint; 3]> {
-    // TODO: Better variable names
     assert!(WORD_SIZE == 4);
     if modulus.len() > WIDTH_WORDS || base.len() > WIDTH_WORDS {
         bail!("RSA acceleration supports up to {} bits, but received {} u32s for the modulus and {} u32s for the base.", WIDTH_BITS, modulus.len(), base.len());
