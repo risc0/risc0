@@ -47,7 +47,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 # Compatibility code for libraries based on num-bigint-dig
-bigint-dig-shim = [ "dep:num-bigint-dig" ]
+bigint-dig-shim = ["dep:num-bigint-dig"]
 default = ["prove"]
 # Omits control_ids.rs, and instead uses all zeros for control ids.
 # This is needed for the 'make_control_ids' binary to compile if any
