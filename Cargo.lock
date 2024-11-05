@@ -3128,6 +3128,7 @@ dependencies = [
  "num-integer",
  "num-iter",
  "num-traits",
+ "serde",
  "smallvec",
 ]
 

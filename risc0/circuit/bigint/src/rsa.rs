@@ -16,6 +16,11 @@
 #[cfg(feature = "prove")]
 mod tests;
 
+#[cfg(test)]
+#[cfg(feature = "prove")]
+#[cfg(feature = "bigint-dig-shim")]
+mod tests_dig;
+
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use anyhow::{bail, Result};
 use num_bigint::BigUint;
