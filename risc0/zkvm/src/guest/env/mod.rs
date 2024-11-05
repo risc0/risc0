@@ -84,16 +84,14 @@ use core::cell::OnceCell;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
-        syscall_2, SyscallName,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause, sys_keccak,
+        syscall_2, SyscallName, DIGEST_BYTES, DIGEST_WORDS
     },
     WORD_SIZE,
 };
 use serde::{de::DeserializeOwned, Serialize};
-
 use crate::{
     sha::{
-        self,
         rust_crypto::{Digest as _, Sha256},
         Digest, Digestible,
     },
@@ -575,6 +573,7 @@ impl KeccakBatcher {
 
     /// get the digest of the input transcript
     pub fn finalize(&mut self) -> Result<Digest> {
+        use risc0_zkp::core::hash::sha::Sha256;
         // todo: return correct slice with size
         if self.data_offset + Self::BLOCK_COUNT_BYTES > Self::KECCAK_LIMIT {
             bail!("keccak input limit exceeded")
@@ -587,11 +586,14 @@ impl KeccakBatcher {
             "finalize: input transcript size: {}",
             self.block_count_offset + Self::BLOCK_COUNT_BYTES,
         ));
-        Ok(
-            *<sha::Impl as risc0_zkp::core::hash::sha::Sha256>::hash_bytes(
-                &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
-            ),
-        )
+        let transcript_digest = crate::sha::Impl::hash_bytes(&self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES]);
+        self.reset();
+        Ok(*transcript_digest)
+    }
+
+    fn reset(&mut self) {
+        self.block_count_offset = 0;
+        self.data_offset = Self::BLOCK_COUNT_BYTES;
     }
 
     fn current_data_length(&self) -> usize {
@@ -602,6 +604,21 @@ impl KeccakBatcher {
     pub fn transcript(&self) -> &[u8] {
         &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
     }
+}
+
+/// take an input, and delim and returns a host-generated keccak hash.
+pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
+    let nondet_digest = [0u8; DIGEST_BYTES];
+    unsafe {
+        sys_keccak(
+                    input.as_ptr() as *const u8,
+                    input.len(),
+                    nondet_digest.as_ptr() as *mut [u32; DIGEST_WORDS],
+        );
+        KECCAK_BATCHER.write_keccak_entry(input, &nondet_digest).unwrap();
+    };
+
+    Ok(nondet_digest)
 }
 
 /// TODO
