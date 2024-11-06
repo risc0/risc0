@@ -23,23 +23,21 @@ use num_traits::FromPrimitive;
 #[derive(Debug)]
 pub struct Type {
     pub coeffs: u64,
-    pub max_pos: u64,
-    pub max_neg: u64,
-    pub min_bits: u64,
+    _max_pos: u64,
+    _max_neg: u64,
+    _min_bits: u64,
 }
 
 #[derive(Debug)]
 pub struct Input {
-    pub label: u64,
-    pub bit_width: u32,
-    pub min_bits: u16,
-    pub is_public: bool,
+    _label: u64,
+    _bit_width: u32,
+    _min_bits: u16,
+    _is_public: bool,
 }
 
 #[derive(Debug, FromPrimitive)]
 pub enum OpCode {
-    Eqz = 0x0,   // unary: value
-    Def = 0x1,   // unary: input index
     Const = 0x2, // unary: constant index
     Load = 0x3,  // unary: constant index
     Store = 0x4, // unary: constant index
@@ -96,10 +94,10 @@ impl Op {
 impl Input {
     pub fn decode<R: Read>(stream: &mut R) -> Result<Self> {
         Ok(Self {
-            label: stream.read_u64::<LittleEndian>()?,
-            bit_width: stream.read_u32::<LittleEndian>()?,
-            min_bits: stream.read_u16::<LittleEndian>()?,
-            is_public: stream.read_u16::<LittleEndian>()? != 0,
+            _label: stream.read_u64::<LittleEndian>()?,
+            _bit_width: stream.read_u32::<LittleEndian>()?,
+            _min_bits: stream.read_u16::<LittleEndian>()?,
+            _is_public: stream.read_u16::<LittleEndian>()? != 0,
         })
     }
 }
@@ -108,9 +106,9 @@ impl Type {
     pub fn decode<R: Read>(stream: &mut R) -> Result<Self> {
         Ok(Self {
             coeffs: stream.read_u64::<LittleEndian>()?,
-            max_pos: stream.read_u64::<LittleEndian>()?,
-            max_neg: stream.read_u64::<LittleEndian>()?,
-            min_bits: stream.read_u64::<LittleEndian>()?,
+            _max_pos: stream.read_u64::<LittleEndian>()?,
+            _max_neg: stream.read_u64::<LittleEndian>()?,
+            _min_bits: stream.read_u64::<LittleEndian>()?,
         })
     }
 }
@@ -157,13 +155,6 @@ impl Program {
         for (op_index, op) in self.ops.iter().enumerate() {
             // tracing::debug!("[{op_index}]: {op:?}");
             match op.code {
-                OpCode::Eqz => {
-                    let value = operand_a(op, op_index, &regs);
-                    assert_eq!(*value, BigUint::ZERO, "failed zero check");
-                }
-                OpCode::Def => {
-                    unimplemented!()
-                }
                 OpCode::Const => {
                     let offset = op.a;
                     let words = op.b;
@@ -226,9 +217,4 @@ fn operands<'p>(op: &Op, op_index: usize, regs: &'p [BigUint]) -> (&'p BigUint, 
     assert!(op.a < op_index);
     assert!(op.b < op_index);
     (&regs[op.a], &regs[op.b])
-}
-
-fn operand_a<'p>(op: &Op, op_index: usize, regs: &'p [BigUint]) -> &'p BigUint {
-    assert!(op.a < op_index);
-    &regs[op.a]
 }
