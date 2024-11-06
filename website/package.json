@@ -1,67 +1,64 @@
 {
-  "name": "risc-zero-developer-website",
-  "version": "0.0.0",
-  "private": true,
-  "description": "RISC Zero Documentation, Education Hub, and Resources",
-  "overrides": {
-    "mdast-util-to-string": "^4.0.0"
-  },
-  "scripts": {
-    "build": "docusaurus build",
-    "check-link-versions": "python ./link-version-check.py",
-    "check-markdown": "remark . --quiet --frail",
-    "clear": "docusaurus clear",
-    "deploy": "docusaurus deploy",
-    "fmt": "prettier . --write",
-    "fmt-markdown": "remark . --output --use sort-definitions --use remark-lint-match-punctuation --use remark-lint-no-url-trailing-slash",
-    "lint": "prettier . --check && python ./link-version-check.py && remark . --quiet --frail",
-    "serve": "docusaurus serve",
-    "start": "docusaurus start"
-  },
-  "browserslist": {
-    "production": [
-      ">0.5%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "dependencies": {
-    "@acid-info/docusaurus-og": "1.0.0-alpha.131",
-    "@docusaurus/core": "3.6.0",
-    "@docusaurus/faster": "3.6.0",
-    "@docusaurus/module-type-aliases": "3.6.0",
-    "@docusaurus/plugin-client-redirects": "3.6.0",
-    "@docusaurus/preset-classic": "3.6.0",
-    "@docusaurus/theme-mermaid": "3.6.0",
-    "@mdx-js/react": "3.1.0",
-    "clsx": "1.2.1",
-    "prism-react-renderer": "2.4.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "rehype-katex": "7.0.1"
-  },
-  "devDependencies": {
-    "@docusaurus/types": "3.6.0",
-    "prettier": "3.3.3",
-    "remark": "15.0.1",
-    "remark-cli": "12.0.1",
-    "remark-inline-links": "7.0.0",
-    "remark-lint-heading-capitalization": "1.2.0",
-    "remark-lint-match-punctuation": "0.2.1",
-    "remark-lint-no-url-trailing-slash": "3.0.1",
-    "remark-math": "6.0.0",
-    "remark-preset-lint-consistent": "6.0.0",
-    "remark-preset-lint-markdown-style-guide": "6.0.0",
-    "remark-preset-lint-recommended": "7.0.0",
-    "remark-remove-url-trailing-slash": "2.0.0",
-    "remark-sort-definitions": "2.0.0",
-    "remark-toc": "9.0.0",
-    "remark-wiki-link": "2.0.1"
-  },
-  "packageManager": "bun@1.1.34"
+	"name": "risc-zero-developer-website",
+	"version": "0.0.0",
+	"private": true,
+	"description": "RISC Zero Documentation, Education Hub, and Resources",
+	"overrides": {
+		"mdast-util-to-string": "^4.0.0",
+		"github-slugger": "^1.5.0"
+	},
+	"scripts": {
+		"build": "docusaurus build",
+		"check-link-versions": "python ./link-version-check.py",
+		"check-markdown": "remark . --quiet --frail",
+		"clear": "docusaurus clear",
+		"deploy": "docusaurus deploy",
+		"fmt": "prettier . --write",
+		"fmt-markdown": "remark . --output --use sort-definitions --use remark-lint-match-punctuation --use remark-lint-no-url-trailing-slash",
+		"lint": "prettier . --check && python ./link-version-check.py && remark . --quiet --frail",
+		"serve": "docusaurus serve",
+		"start": "docusaurus start"
+	},
+	"browserslist": {
+		"production": [">0.5%", "not dead", "not op_mini all"],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"dependencies": {
+		"@acid-info/docusaurus-og": "1.0.0-alpha.131",
+		"@docusaurus/core": "3.6.0",
+		"@docusaurus/faster": "3.6.0",
+		"@docusaurus/module-type-aliases": "3.6.0",
+		"@docusaurus/plugin-client-redirects": "3.6.0",
+		"@docusaurus/preset-classic": "3.6.0",
+		"@docusaurus/theme-mermaid": "3.6.0",
+		"@mdx-js/react": "3.1.0",
+		"clsx": "1.2.1",
+		"prism-react-renderer": "2.4.0",
+		"react": "18.3.1",
+		"react-dom": "18.3.1",
+		"rehype-katex": "7.0.1"
+	},
+	"devDependencies": {
+		"@docusaurus/types": "3.6.0",
+		"prettier": "3.3.3",
+		"remark": "15.0.1",
+		"remark-cli": "12.0.1",
+		"remark-inline-links": "7.0.0",
+		"remark-lint-heading-capitalization": "1.2.0",
+		"remark-lint-match-punctuation": "0.2.1",
+		"remark-lint-no-url-trailing-slash": "3.0.1",
+		"remark-math": "6.0.0",
+		"remark-preset-lint-consistent": "6.0.0",
+		"remark-preset-lint-markdown-style-guide": "6.0.0",
+		"remark-preset-lint-recommended": "7.0.0",
+		"remark-remove-url-trailing-slash": "2.0.0",
+		"remark-sort-definitions": "2.0.0",
+		"remark-toc": "9.0.0",
+		"remark-wiki-link": "2.0.1"
+	},
+	"packageManager": "bun@1.1.34"
 }
