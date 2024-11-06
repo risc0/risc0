@@ -121,33 +121,11 @@ fn compute_claim_inner(mut base: Vec<u32>, mut modulus: Vec<u32>) -> Result<[Big
     unsafe {
         sys_rsa(&mut result, &base, &modulus);
     }
-    // let result_claim = BigUint::from_bytes_le(result.map(|elem| elem.to_le_bytes()).flatten());
-    // let base_claim = BigUint::from_bytes_le(base.map(|elem| elem.to_le_bytes()).flatten());
-    // let modulus_claim = BigUint::from_bytes_le(modulus.map(|elem| elem.to_le_bytes()).flatten());
-    // TODO: This code should be replaced with the `flatten` code above once `flatten` is stable
-    let result_words = result.map(|elem| elem.to_le_bytes());
-    let mut result_claim = Vec::<u8>::new();
-    for word in result_words {
-        for byte in word {
-            result_claim.push(byte);
-        }
-    }
-    let result_claim = BigUint::from_bytes_le(&result_claim);
-    let base_words = base.map(|elem| elem.to_le_bytes());
-    let mut base_claim = Vec::<u8>::new();
-    for word in base_words {
-        for byte in word {
-            base_claim.push(byte);
-        }
-    }
-    let base_claim = BigUint::from_bytes_le(&base_claim);
-    let modulus_words = modulus.map(|elem| elem.to_le_bytes());
-    let mut modulus_claim = Vec::<u8>::new();
-    for word in modulus_words {
-        for byte in word {
-            modulus_claim.push(byte);
-        }
-    }
-    let modulus_claim = BigUint::from_bytes_le(&modulus_claim);
-    Ok([modulus_claim, base_claim, result_claim])
+    let result = result.iter().flat_map(|elem| elem.to_le_bytes()).collect::<Vec<u8>>();
+    let result = BigUint::from_bytes_le(&result);
+    let base = base.iter().flat_map(|elem| elem.to_le_bytes()).collect::<Vec<u8>>();
+    let base = BigUint::from_bytes_le(&base);
+    let modulus = modulus.iter().flat_map(|elem| elem.to_le_bytes()).collect::<Vec<u8>>();
+    let modulus = BigUint::from_bytes_le(&modulus);
+    Ok([modulus, base, result])
 }
