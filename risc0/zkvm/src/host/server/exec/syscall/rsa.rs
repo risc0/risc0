@@ -35,12 +35,12 @@ impl Syscall for SysRSA {
         // Load inputs into BigUint
         let base_ptr = ByteAddr(ctx.load_register(REG_A3));
         let modulus_ptr = ByteAddr(ctx.load_register(REG_A4));
-        let base = ctx.load_region(base_ptr, rsa::WIDTH_BYTES.try_into()?)?;
+        let base = ctx.load_region(base_ptr, rsa::WIDTH_BYTES as u32)?;
         let modulus = ctx.load_region(modulus_ptr, rsa::WIDTH_BYTES.try_into()?)?;
         let base = BigUint::from_bytes_le(&base);
         let modulus = BigUint::from_bytes_le(&modulus);
         // Compute result
-        let result = base.modpow(&BigUint::from(rsa::RSA_EXPONENT), &modulus);
+        let result = base.modpow(&rsa::RSA_EXPONENT.into(), &modulus);
         // `to_guest` should be exactly WIDTH_BYTES, so get the size right then copy into there
         let mut result = result.to_le_bytes();
         // modpow shouldn't return higher than modulus, which fits in WIDTH_BYTES

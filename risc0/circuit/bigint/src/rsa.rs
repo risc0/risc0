@@ -81,7 +81,7 @@ pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDi
         modulus.resize(modulus.len() + (4 - (modulus.len() % 4)), 0);
     }
     // Convert inputs to Vecs of u32s
-    let mut base_vec = Vec::<u32>::new();
+    let mut base_vec = Vec::new();
     for word in base.chunks(4) {
         let word: [u8; 4] = word.try_into()?;
         base_vec.push(u32::from_le_bytes(word));
