@@ -23,11 +23,11 @@ use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use risc0_core::{
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        ExtElem, RootsOfUnity,
+        Elem, ExtElem, RootsOfUnity,
     },
     scope,
 };
-use risc0_sys::{cuda::*, CppError};
+use risc0_sys::{cuda::*, ffi_wrap};
 
 use super::{tracker, Buffer, Hal};
 use crate::{
@@ -99,12 +99,10 @@ impl CudaHash for CudaHashSha256 {
                 output: DevicePointer<u8>,
                 input: DevicePointer<u8>,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
-            risc0_zkp_cuda_sha_fold(output, input, output_size as u32).unwrap();
-        }
+        ffi_wrap(|| unsafe { risc0_zkp_cuda_sha_fold(output, input, output_size as u32) }).unwrap();
     }
 
     fn hash_rows(&self, output: &BufferImpl<Digest>, matrix: &BufferImpl<BabyBearElem>) {
@@ -118,18 +116,18 @@ impl CudaHash for CudaHashSha256 {
                 matrix: DevicePointer<u8>,
                 row_size: u32,
                 col_size: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_sha_rows(
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
                 row_size as u32,
                 col_size as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
@@ -371,6 +369,31 @@ impl<CH: CudaHash> CudaHal<CH> {
         hal.hash = Some(hash);
         hal
     }
+
+    fn poly_divide(
+        &self,
+        polynomial: &BufferImpl<BabyBearExtElem>,
+        pow: BabyBearExtElem,
+    ) -> BabyBearExtElem {
+        let mut remainder = BabyBearExtElem::ZERO;
+        let poly_size = polynomial.size();
+        let pow = pow.to_u32_words();
+
+        let err = unsafe {
+            supra_poly_divide(
+                polynomial.as_device_ptr(),
+                poly_size,
+                &mut remainder as *mut _ as *mut u32,
+                pow.as_ptr(),
+            )
+        };
+
+        if err.code != 0 {
+            panic!("Failure during supra_poly_divide: {err}");
+        }
+
+        remainder
+    }
 }
 
 impl<CH: CudaHash> Hal for CudaHal<CH> {
@@ -518,13 +541,13 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 io: DevicePointer<u8>,
                 bits: u32,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_batch_bit_reverse(io.as_device_ptr(), bits as u32, io_size as u32)
-                .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn batch_evaluate_any(
@@ -557,10 +580,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 shared_size: u32,
                 kernel_count: u32,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_batch_evaluate_any(
                 out.as_device_ptr(),
                 coeffs.as_device_ptr(),
@@ -570,8 +593,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 kernel_count as u32,
                 count as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn gather_sample(
@@ -589,10 +612,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 idx: u32,
                 size: u32,
                 stride: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_gather_sample(
                 dst.as_device_ptr(),
                 src.as_device_ptr(),
@@ -600,8 +623,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 size as u32,
                 stride as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn has_unified_memory(&self) -> bool {
@@ -646,10 +669,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 mix: DevicePointer<u8>,
                 input_size: u32,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_mix_poly_coeffs(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
@@ -659,8 +682,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 input_size as u32,
                 count as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn eltwise_add_elem(
@@ -679,18 +702,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 x: DevicePointer<u8>,
                 y: DevicePointer<u8>,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_add_fp(
                 output.as_device_ptr(),
                 input1.as_device_ptr(),
                 input2.as_device_ptr(),
                 count as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn eltwise_sum_extelem(
@@ -709,18 +732,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 input: DevicePointer<u8>,
                 to_add: u32,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_sum_fpext(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 to_add as u32,
                 count as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn eltwise_copy_elem(
@@ -736,27 +759,31 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 output: DevicePointer<u8>,
                 input: DevicePointer<u8>,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_copy_fp(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 count as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn eltwise_zeroize_elem(&self, elems: &Self::Buffer<Self::Elem>) {
         extern "C" {
-            fn risc0_zkp_cuda_eltwise_zeroize_fp(elems: DevicePointer<u8>, count: u32) -> CppError;
+            fn risc0_zkp_cuda_eltwise_zeroize_fp(
+                elems: DevicePointer<u8>,
+                count: u32,
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
-            risc0_zkp_cuda_eltwise_zeroize_fp(elems.as_device_ptr(), elems.size() as u32).unwrap();
-        }
+        ffi_wrap(|| unsafe {
+            risc0_zkp_cuda_eltwise_zeroize_fp(elems.as_device_ptr(), elems.size() as u32)
+        })
+        .unwrap();
     }
 
     fn scatter(
@@ -778,10 +805,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 offsets: DevicePointer<u8>,
                 values: DevicePointer<u8>,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_scatter(
                 into.as_device_ptr(),
                 index.as_device_ptr(),
@@ -789,8 +816,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 values.as_device_ptr(),
                 count as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn eltwise_copy_elem_slice(
@@ -816,10 +843,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 from_stride: u32,
                 into_offset: u32,
                 into_stride: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_eltwise_copy_fp_region(
                 into.as_device_ptr(),
                 from.as_device_ptr(),
@@ -830,8 +857,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 into_offset as u32,
                 into_stride as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn fri_fold(
@@ -851,18 +878,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 input: DevicePointer<u8>,
                 mix: DevicePointer<u8>,
                 count: u32,
-            ) -> CppError;
+            ) -> *const std::os::raw::c_char;
         }
 
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_zkp_cuda_fri_fold(
                 output.as_device_ptr(),
                 input.as_device_ptr(),
                 mix.as_device_ptr(),
                 count as u32,
             )
-            .unwrap();
-        }
+        })
+        .unwrap();
     }
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {
@@ -884,6 +911,70 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 io[i] *= io[i - 1];
             }
         });
+    }
+
+    fn combos_prepare(
+        &self,
+        combos: &Self::Buffer<Self::ExtElem>,
+        coeff_u: &[Self::ExtElem],
+        combo_count: usize,
+        cycles: usize,
+        reg_sizes: &[u32],
+        reg_combo_ids: &[u32],
+        mix: &Self::ExtElem,
+    ) {
+        let coeff_u = self.copy_from_extelem("coeff_u", coeff_u);
+        let combo_count = combo_count as u32;
+        let cycles = cycles as u32;
+        let regs_count = reg_sizes.len() as u32;
+        let reg_sizes = self.copy_from_u32("reg_sizes", reg_sizes);
+        let reg_combo_ids = self.copy_from_u32("reg_combo_ids", reg_combo_ids);
+        let mix = self.copy_from_extelem("mix", &[*mix]);
+
+        extern "C" {
+            fn risc0_zkp_cuda_combos_prepare(
+                combos: DevicePointer<u8>,
+                coeff_u: DevicePointer<u8>,
+                combo_count: u32,
+                cycles: u32,
+                regs_count: u32,
+                reg_sizes: DevicePointer<u8>,
+                reg_combo_ids: DevicePointer<u8>,
+                checkSize: u32,
+                mix: DevicePointer<u8>,
+            ) -> *const std::os::raw::c_char;
+        }
+
+        ffi_wrap(|| unsafe {
+            risc0_zkp_cuda_combos_prepare(
+                combos.as_device_ptr(),
+                coeff_u.as_device_ptr(),
+                combo_count,
+                cycles,
+                regs_count,
+                reg_sizes.as_device_ptr(),
+                reg_combo_ids.as_device_ptr(),
+                Self::CHECK_SIZE as u32,
+                mix.as_device_ptr(),
+            )
+        })
+        .unwrap();
+    }
+
+    fn combos_divide(
+        &self,
+        combos: &Self::Buffer<Self::ExtElem>,
+        chunks: Vec<(usize, Vec<Self::ExtElem>)>,
+        cycles: usize,
+    ) {
+        scope!("combos_divide");
+        for (i, pows) in chunks {
+            let combo_slice = combos.slice(i * cycles, cycles);
+            for pow in pows {
+                let remainder = self.poly_divide(&combo_slice, pow);
+                assert_eq!(remainder, Self::ExtElem::ZERO, "i: {i}");
+            }
+        }
     }
 }
 
