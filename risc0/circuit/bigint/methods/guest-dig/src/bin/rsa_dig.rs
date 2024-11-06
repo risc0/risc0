@@ -18,10 +18,10 @@ use risc0_zkvm::guest::env;
 
 fn main() {
     // Computes and proves the result of modpow with exponent of 65537
-    let input: Vec<[BigUint; 2]> = env::read();
+    let input: Vec<(BigUint, BigUint)> = env::read();
     let result: Vec<BigUint> = input
         .into_iter()
-        .map(|[base, modulus]| rsa::modpow_65537(&base, &modulus).unwrap())
+        .map(|(base, modulus)| rsa::modpow_65537(&base, &modulus).unwrap())
         .collect();
     env::commit(&result);
 }

@@ -17,11 +17,11 @@ use risc0_circuit_bigint::rsa;
 use risc0_zkvm::guest::env;
 
 fn main() {
-    // Computes and proves the result of modpow with exponent of 65537
-    let input: Vec<[BigUint; 2]> = env::read();
-    let result: Vec<BigUint> = input
+    // Verifies an RSA signature (message `msg`, signature `sig`, public key modulus `modulus`)
+    let input: Vec<[BigUint; 3]> = env::read();
+    let claims: Vec<_> = input
         .into_iter()
-        .map(|[base, modulus]| rsa::modpow_65537(&base, &modulus).unwrap())
+        .map(|[modulus, sig, msg]| rsa::claim(&rsa::RSA_256_X2, modulus, sig, msg))
         .collect();
-    env::commit(&result);
+    risc0_circuit_bigint::prove(&rsa::RSA_256_X2, &claims).expect("Unable to compose with RSA");
 }
