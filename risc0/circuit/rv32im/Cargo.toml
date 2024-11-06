@@ -26,11 +26,12 @@ metal = { workspace = true }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 bytemuck = { version = "1.13", optional = true }
+byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
 crossbeam = { version = "0.8", optional = true }
 crypto-bigint = { version = "0.5", default-features = false, optional = true }
 cust = { version = "0.3", optional = true }
-derive-debug = { version = "0.1", optional = true }
+derive_more = { version = "1.0", features = ["debug"], optional = true }
 lazy-regex = { version = "3.3", optional = true }
 num-bigint = { version = "0.4", optional = true, default-features = false }
 num-derive = { version = "0.4", optional = true }
@@ -58,10 +59,11 @@ default = ["prove"]
 metal = ["prove"]
 prove = [
   "dep:bytemuck",
+  "dep:byteorder",
   "dep:cfg-if",
   "dep:crossbeam",
   "dep:crypto-bigint",
-  "dep:derive-debug",
+  "dep:derive_more",
   "dep:lazy-regex",
   "dep:num-bigint",
   "dep:num-derive",

@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod bibc;
 #[cfg(test)]
 mod tests;
 
-use core::hint::black_box;
 use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
 use anyhow::{bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use num_bigint::BigUint;
-use num_traits::FromPrimitive;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -34,11 +33,12 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     align_up,
     memory::{is_guest_memory, GUEST_MAX_MEM},
-    syscall::{bigint, ecall, halt, reg_abi::*, BigIntBlobHeader, IO_CHUNK_WORDS},
+    syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     PAGE_SIZE, WORD_SIZE,
 };
 use sha2::digest::generic_array::GenericArray;
 
+use self::bibc::BigIntIO;
 use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
@@ -47,7 +47,6 @@ use super::{
 };
 use crate::{
     prove::{
-        bytecode,
         emu::sha_cycles,
         engine::loader::{FINI_CYCLES, INIT_CYCLES},
         segment::{Segment, SyscallRecord},
@@ -540,29 +539,18 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 
     fn ecall_bigint2(&mut self) -> Result<bool> {
-        // const HEADER_SIZE: usize = std::mem::size_of::<BigIntBlobHeader>();
-
         let blob_ptr = self.load_guest_addr_from_register(REG_A0)?.waddr();
         let nondet_program_ptr = self.load_guest_addr_from_register(REG_T1)?;
-        // let verify_program_ptr = self.load_guest_addr_from_register(REG_T2)?;
-        // let consts_ptr = self.load_guest_addr_from_register(REG_T1)?;
-        // let operand1 = self.load_guest_addr_from_register(REG_A1)?;
+        let nondet_program_size = self.load_u32_from_guest((blob_ptr + 0u32).baddr())?;
 
-        let header = BigIntBlobHeader {
-            nondet_program_size: self.load_u32_from_guest((blob_ptr + 0u32).baddr())?,
-            verify_program_size: self.load_u32_from_guest((blob_ptr + 1u32).baddr())?,
-            consts_size: self.load_u32_from_guest((blob_ptr + 2u32).baddr())?,
-            temp_size: self.load_u32_from_guest((blob_ptr + 3u32).baddr())?,
-        };
-
-        let program_bytes =
-            self.load_region_from_guest(nondet_program_ptr, header.nondet_program_size)?;
+        let program_bytes = self
+            .load_region_from_guest(nondet_program_ptr, nondet_program_size * WORD_SIZE as u32)?;
         let mut cursor = Cursor::new(program_bytes);
-        let program = bytecode::file::read_program(&mut cursor)?;
-        let inputs = [BigUint::from_u32(0).unwrap()];
-        let witness = bytecode::eval::eval(&program, &inputs);
+        let program = bibc::Program::decode(&mut cursor)?;
+        program.eval(self)?;
 
-        black_box(witness);
+        self.pending.cycles += BIGINT_CYCLES; // FIXME
+        self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
     }
@@ -672,6 +660,24 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn raw_store_memory(&mut self, addr: WordAddr, data: u32) -> Result<()> {
         // tracing::trace!("store_mem({:?}, 0x{data:08x})", addr.baddr());
         self.pager.store(addr, data)
+    }
+}
+
+#[allow(unused)]
+impl<'a, 'b, S: Syscall> BigIntIO for Executor<'a, 'b, S> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count}");
+        let reg = self.load_register(arena as usize)?;
+        let addr = ByteAddr(reg + offset * 16);
+        let bytes = self.load_region_from_guest(addr, count)?;
+        Ok(BigUint::from_bytes_le(&bytes))
+    }
+
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value}");
+        let reg = self.load_register(arena as usize)?;
+        let addr = ByteAddr(reg + offset * 16);
+        self.store_region_into_guest(addr, &value.to_bytes_le())
     }
 }
 
