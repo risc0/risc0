@@ -4222,6 +4222,7 @@ dependencies = [
 name = "risc0-sys"
 version = "1.1.2"
 dependencies = [
+ "anyhow",
  "cc",
  "cust",
  "risc0-build-kernel",
