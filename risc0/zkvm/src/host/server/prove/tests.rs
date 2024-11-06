@@ -154,6 +154,17 @@ fn run_keccak() {
     let opts = ProverOpts::succinct();
     let prover = get_prover_server(&opts).unwrap();
     prover.prove(env, MULTI_TEST_ELF).unwrap();
+
+    let spec = MultiTestSpec::TinyKeccak;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+
 }
 
 #[test]

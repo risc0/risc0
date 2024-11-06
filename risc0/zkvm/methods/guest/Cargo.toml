@@ -23,6 +23,7 @@ hex-literal = "0.4"
 risc0-zkvm-methods = { path = ".." }
 risc0-zkvm-platform = { path = "../../platform", features = ["unstable"] }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }
+tiny-keccak = { path = "../../../../../tiny-keccak", features = ["keccak"] }
 
 [profile.release]
 lto = true

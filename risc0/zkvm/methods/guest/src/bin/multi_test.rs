@@ -46,6 +46,8 @@ use risc0_zkvm_platform::{
     },
     PAGE_SIZE,
 };
+use tiny_keccak::Hasher;
+use tiny_keccak::Keccak;
 
 risc0_zkvm::entry!(main);
 
@@ -471,6 +473,53 @@ fn main() {
 
             let data2 = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
             let output2 = env::keccak_digest(data2, 0x1).unwrap();
+            assert_eq!(
+                output2,
+                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+            );
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize() };
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
+            );
+        }
+        MultiTestSpec::TinyKeccak => {
+
+            // test_keccak_01.txt
+            let mut hasher = Keccak::v256();
+            let test_data_01 = b"The quick brown fox jumps over the lazy dog.";
+            hasher.update(test_data_01);
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.finalize(output.as_mut_slice());
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize() };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex_literal::hex!(
+                    "b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7"
+                )
+            );
+
+            // test_keccak_02.txt
+            let data1 = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
+            let mut hasher1 = Keccak::v256();
+            let mut output1 = [0u8; DIGEST_BYTES];
+            hasher1.update(data1);
+
+            let data2 = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
+            let mut hasher2 = Keccak::v256();
+            let mut output2 = [0u8; DIGEST_BYTES];
+            hasher2.update(data2);
+
+            hasher1.finalize(&mut output1);
+            assert_eq!(
+                output1,
+                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+            );
+
+            hasher2.finalize(&mut output2);
             assert_eq!(
                 output2,
                 hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
