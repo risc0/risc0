@@ -78,18 +78,6 @@ use alloc::{
     vec,
 };
 
-use anyhow::{bail, Result};
-use bytemuck::Pod;
-use core::cell::OnceCell;
-use risc0_zkvm_platform::{
-    align_up, fileno,
-    syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause, sys_keccak,
-        syscall_2, SyscallName, DIGEST_BYTES, DIGEST_WORDS
-    },
-    WORD_SIZE,
-};
-use serde::{de::DeserializeOwned, Serialize};
 use crate::{
     sha::{
         rust_crypto::{Digest as _, Sha256},
@@ -97,6 +85,18 @@ use crate::{
     },
     Assumptions, MaybePruned, Output,
 };
+use anyhow::Result;
+use bytemuck::Pod;
+use core::cell::OnceCell;
+use risc0_zkvm_platform::{
+    align_up, fileno,
+    syscall::{
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_keccak, sys_log,
+        sys_pause, syscall_2, SyscallName, DIGEST_BYTES, DIGEST_WORDS,
+    },
+    WORD_SIZE,
+};
+use serde::{de::DeserializeOwned, Serialize};
 
 pub use self::{
     read::{FdReader, Read},
@@ -480,14 +480,6 @@ pub struct KeccakBatcher {
     data_offset: usize,
 }
 
-const fn batcher() -> KeccakBatcher {
-    KeccakBatcher {
-        input_transcript: [0u8; KeccakBatcher::KECCAK_LIMIT],
-        block_count_offset: 0,
-        data_offset: KeccakBatcher::BLOCK_COUNT_BYTES,
-    }
-}
-
 impl Default for KeccakBatcher {
     /// create a new instance of a batcher with an input transcript region
     fn default() -> Self {
@@ -510,11 +502,7 @@ impl KeccakBatcher {
     /// Many keccak crates will write raw data and padding to a 1600 bit buffer
     /// often called the "state". All data and padding written to the state
     /// should be passed to this function.
-    pub fn write_data(&mut self, input: &[u8]) -> Result<()> {
-        if self.data_offset + input.len() > Self::KECCAK_LIMIT {
-            bail!("keccak input limit exceeded")
-        }
-
+    fn write_data(&mut self, input: &[u8]) -> Result<()> {
         self.input_transcript[self.data_offset..self.data_offset + input.len()]
             .copy_from_slice(input);
         self.data_offset += input.len();
@@ -539,11 +527,6 @@ impl KeccakBatcher {
 
         self.write_data(&zeroes)?;
         self.write_data(&[0x80])?;
-        if self.current_data_length() % Self::BLOCK_BYTES != 0 {
-            bail!(
-                "keccak data was not padded properly. Expected a multiple of {} bytes, got {data_length} bytes", Self::BLOCK_BYTES
-            );
-        }
 
         Ok(())
     }
@@ -574,10 +557,6 @@ impl KeccakBatcher {
     /// get the digest of the input transcript
     pub fn finalize(&mut self) -> Result<Digest> {
         use risc0_zkp::core::hash::sha::Sha256;
-        // todo: return correct slice with size
-        if self.data_offset + Self::BLOCK_COUNT_BYTES > Self::KECCAK_LIMIT {
-            bail!("keccak input limit exceeded")
-        }
 
         self.input_transcript
             [self.block_count_offset..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
@@ -586,7 +565,9 @@ impl KeccakBatcher {
             "finalize: input transcript size: {}",
             self.block_count_offset + Self::BLOCK_COUNT_BYTES,
         ));
-        let transcript_digest = crate::sha::Impl::hash_bytes(&self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES]);
+        let transcript_digest = crate::sha::Impl::hash_bytes(
+            &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
+        );
         self.reset();
         Ok(*transcript_digest)
     }
@@ -599,11 +580,6 @@ impl KeccakBatcher {
     fn current_data_length(&self) -> usize {
         self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES)
     }
-
-    #[cfg(test)]
-    pub fn transcript(&self) -> &[u8] {
-        &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
-    }
 }
 
 /// take an input, and delim and returns a host-generated keccak hash.
@@ -611,15 +587,21 @@ pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
     let nondet_digest = [0u8; DIGEST_BYTES];
     unsafe {
         sys_keccak(
-                    input.as_ptr() as *const u8,
-                    input.len(),
-                    nondet_digest.as_ptr() as *mut [u32; DIGEST_WORDS],
+            input.as_ptr() as *const u8,
+            input.len(),
+            nondet_digest.as_ptr() as *mut [u32; DIGEST_WORDS],
         );
-        KECCAK_BATCHER.write_keccak_entry(input, &nondet_digest).unwrap();
+        KECCAK_BATCHER
+            .write_keccak_entry(input, &nondet_digest)
+            .unwrap();
     };
 
     Ok(nondet_digest)
 }
 
 /// TODO
-pub static mut KECCAK_BATCHER: KeccakBatcher = batcher();
+pub static mut KECCAK_BATCHER: KeccakBatcher = KeccakBatcher {
+    input_transcript: [0u8; KeccakBatcher::KECCAK_LIMIT],
+    block_count_offset: 0,
+    data_offset: KeccakBatcher::BLOCK_COUNT_BYTES,
+};
