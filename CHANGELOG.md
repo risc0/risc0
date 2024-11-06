@@ -2,7 +2,17 @@
 
 ## Next (upcoming release)
 
-TBD
+### Fixes
+
+### 🚨 Breaking Changes
+
+* Environment syscalls `sys_getenv`, `sys_argc` and `sys_argv` are disabled by
+  default, with the option to enable them via a feature flag on the
+  `risc0-zkvm-platform` crate. In host programs, environment variables and
+  arguments are generally considered trusted. In contrast, the guest does not
+  trust the host, which leads to risk that code designed for running on the
+  host may result in insecure behavior when run in the guest. Disabling
+  environment variables and args by default mitigates this risk.
 
 ## [v1.1.2 (2024-10-02)](https://github.com/risc0/risc0/releases/tag/v1.1.2)
 
