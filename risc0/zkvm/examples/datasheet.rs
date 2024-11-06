@@ -444,7 +444,7 @@ impl Datasheet {
 
         let ram = tracker().lock().unwrap().peak as u64;
         let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
-        let seal = info.receipt.inner.groth16().unwrap().seal_size() as u64;
+        let seal = info.receipt.inner.groth16().unwrap().seal.len() as u64;
 
         self.results.push(PerformanceData {
             name: "groth16".into(),
