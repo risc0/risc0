@@ -36,14 +36,12 @@ export default async function createConfigAsync() {
 
     future: {
       experimental_faster: {
-        swcJsLoader: (process.env.DOCUSAURUS_FASTER ?? "true") === "true",
-        swcJsMinimizer: (process.env.DOCUSAURUS_FASTER ?? "true") === "true",
+        swcJsLoader: true,
+        swcJsMinimizer: true,
         swcHtmlMinimizer: false, // doesn't work with @acid-info/docusaurus-og
-        lightningCssMinimizer:
-          (process.env.DOCUSAURUS_FASTER ?? "true") === "true",
-        rspackBundler: (process.env.DOCUSAURUS_FASTER ?? "true") === "true",
-        mdxCrossCompilerCache:
-          (process.env.DOCUSAURUS_FASTER ?? "true") === "true",
+        lightningCssMinimizer: true,
+        rspackBundler: true,
+        mdxCrossCompilerCache: true,
       },
     },
 
