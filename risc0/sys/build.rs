@@ -21,17 +21,15 @@ use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    println!(
-        "cargo:cxx_root={}",
-        manifest_dir.join("cxx").to_string_lossy()
-    );
+    let cxx_root = manifest_dir.join("cxx");
+    println!("cargo:cxx_root={}", cxx_root.to_string_lossy());
 
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
         println!(
             "cargo:cuda_root={}",
             manifest_dir.join("kernels/zkp/cuda").to_string_lossy()
         );
-        build_cuda_kernels();
+        build_cuda_kernels(&cxx_root);
     }
 
     if env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios") {
@@ -43,7 +41,7 @@ fn main() {
     }
 }
 
-fn build_cuda_kernels() {
+fn build_cuda_kernels(cxx_root: &Path) {
     KernelBuild::new(KernelType::Cuda)
         .files([
             "kernels/zkp/cuda/combos.cu",
@@ -68,6 +66,7 @@ fn build_cuda_kernels() {
             "kernels/zkp/cuda/supra/poseidon2_constants.cuh",
         ])
         .flag("-DFEATURE_BABY_BEAR")
+        .include(cxx_root)
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_zkp_cuda");
 }

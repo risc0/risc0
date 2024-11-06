@@ -40,8 +40,8 @@ fn main() {
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
-                features: vec![],
-                use_docker,
+                use_docker: use_docker.clone(),
+                ..Default::default()
             },
         ),
         (
@@ -54,8 +54,8 @@ fn main() {
         (
             "risc0-zkvm-methods-cpp-crates",
             GuestOptions {
-                features: vec![],
-                use_docker: None,
+                use_docker,
+                ..Default::default()
             },
         ),
     ]);

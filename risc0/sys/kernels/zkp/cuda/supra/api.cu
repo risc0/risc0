@@ -106,3 +106,40 @@ sppark_calc_prefix_operation(Fp4* in_elems, uint32_t count, Operation op) {
 
   return RustError{cudaSuccess};
 }
+
+extern "C" RustError::by_value
+supra_poly_divide(Fp4 d_inout[], size_t len, Fp4* remainder, const Fp4& pow) {
+  const gpu_t& gpu = select_gpu();
+
+  try {
+    uint32_t gridDim = gpu.sm_count();
+    const uint32_t blockDim = DIV_BLOCK_SZ;
+
+    if (gridDim > blockDim) {
+      gridDim = blockDim;
+    }
+
+    size_t blocks = (len + blockDim - 1) / blockDim;
+    if (gridDim > blocks) {
+      gridDim = blocks;
+    }
+
+    if (gridDim < 3) {
+      gridDim = 1;
+    }
+
+    size_t sharedSz = sizeof(Fp4) * max(blockDim / WARP_SZ, gridDim);
+    sharedSz += sizeof(Fp4) * WARP_SZ;
+
+    gpu.launch_coop(
+        d_div_by_x_minus_z<Fp4, true>, {gridDim, blockDim, sharedSz}, d_inout, len, pow);
+    gpu.DtoH(remainder, &d_inout[len - 1], 1);
+
+    gpu.sync();
+  } catch (const cuda_error& e) {
+    gpu.sync();
+    return RustError{e.code(), e.what()};
+  }
+
+  return RustError{cudaSuccess};
+}

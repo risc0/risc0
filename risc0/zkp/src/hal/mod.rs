@@ -26,7 +26,10 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
+use risc0_core::{
+    field::{Elem, ExtElem, Field, RootsOfUnity},
+    scope,
+};
 
 use crate::{
     core::{digest::Digest, hash::HashSuite, poly::poly_divide},
