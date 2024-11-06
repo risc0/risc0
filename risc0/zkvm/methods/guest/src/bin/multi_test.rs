@@ -451,7 +451,7 @@ fn main() {
             let test_data_01 = b"The quick brown fox jumps over the lazy dog.";
             let _output1 = env::keccak_digest(test_data_01, 0x1).unwrap();
 
-            let digest = unsafe { env::KECCAK_BATCHER.finalize().unwrap() };
+            let digest = unsafe { env::KECCAK_BATCHER.finalize() };
 
             assert_eq!(
                 digest.as_bytes(),
@@ -476,7 +476,7 @@ fn main() {
                 hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
             );
 
-            let digest = unsafe { env::KECCAK_BATCHER.finalize().unwrap() };
+            let digest = unsafe { env::KECCAK_BATCHER.finalize() };
             assert_eq!(
                 digest.as_bytes(),
                 hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")

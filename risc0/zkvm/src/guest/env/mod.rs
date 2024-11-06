@@ -495,6 +495,7 @@ impl KeccakBatcher {
     const KECCAK_LIMIT: usize = 100_000;
     const BLOCK_COUNT_BYTES: usize = 8;
     const BLOCK_BYTES: usize = 136;
+    const FINAL_PADDING_BYTES: usize = 8;
 
     /// write data to the input transcript.
     ///
@@ -535,6 +536,12 @@ impl KeccakBatcher {
     ///
     /// the amount of raw data written to the
     pub fn write_keccak_entry(&mut self, input: &[u8], hash: &[u8; 32]) -> Result<()> {
+        // if this entry does not fit in the remaining space, create a new claim and reset the batcher.
+        let padding_bytes = Self::BLOCK_BYTES - (input.len() % Self::BLOCK_BYTES);
+        if self.data_offset + input.len() + padding_bytes + DIGEST_BYTES + Self::FINAL_PADDING_BYTES > Self::KECCAK_LIMIT {
+            self.finalize();
+        }
+
         self.write_data(input)?;
         self.write_padding()?;
 
@@ -555,7 +562,7 @@ impl KeccakBatcher {
     }
 
     /// get the digest of the input transcript
-    pub fn finalize(&mut self) -> Result<Digest> {
+    pub fn finalize(&mut self) -> Digest {
         use risc0_zkp::core::hash::sha::Sha256;
 
         self.input_transcript
@@ -568,8 +575,10 @@ impl KeccakBatcher {
         let transcript_digest = crate::sha::Impl::hash_bytes(
             &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
         );
+        // TODO: add assumption, send transcript
+        // crate::guest::env::verify_assumption(*transcript_digest, Digest::default()).unwrap();
         self.reset();
-        Ok(*transcript_digest)
+        *transcript_digest
     }
 
     fn reset(&mut self) {
