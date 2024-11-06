@@ -4213,7 +4213,6 @@ dependencies = [
  "metal",
  "num-bigint 0.4.6",
  "num-derive",
- "num-integer",
  "num-traits",
  "rand",
  "rayon",

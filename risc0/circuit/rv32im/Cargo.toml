@@ -35,7 +35,6 @@ derive_more = { version = "1.0", features = ["debug"], optional = true }
 lazy-regex = { version = "3.3", optional = true }
 num-bigint = { version = "0.4", optional = true, default-features = false }
 num-derive = { version = "0.4", optional = true }
-num-integer = { version = "0.1", optional = true }
 num-traits = { version = "0.2", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -67,7 +66,6 @@ prove = [
   "dep:lazy-regex",
   "dep:num-bigint",
   "dep:num-derive",
-  "dep:num-integer",
   "dep:num-traits",
   "dep:rand",
   "dep:rayon",
