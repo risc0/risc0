@@ -121,11 +121,20 @@ fn compute_claim_inner(mut base: Vec<u32>, mut modulus: Vec<u32>) -> Result<[Big
     unsafe {
         sys_rsa(&mut result, &base, &modulus);
     }
-    let result = result.iter().flat_map(|elem| elem.to_le_bytes()).collect::<Vec<u8>>();
+    let result = result
+        .iter()
+        .flat_map(|elem| elem.to_le_bytes())
+        .collect::<Vec<u8>>();
     let result = BigUint::from_bytes_le(&result);
-    let base = base.iter().flat_map(|elem| elem.to_le_bytes()).collect::<Vec<u8>>();
+    let base = base
+        .iter()
+        .flat_map(|elem| elem.to_le_bytes())
+        .collect::<Vec<u8>>();
     let base = BigUint::from_bytes_le(&base);
-    let modulus = modulus.iter().flat_map(|elem| elem.to_le_bytes()).collect::<Vec<u8>>();
+    let modulus = modulus
+        .iter()
+        .flat_map(|elem| elem.to_le_bytes())
+        .collect::<Vec<u8>>();
     let modulus = BigUint::from_bytes_le(&modulus);
     Ok([modulus, base, result])
 }
