@@ -8,7 +8,8 @@ edition = "2021"
 [dependencies]
 jwt-core = { path = "core" }
 jwt-methods = { path = "methods" }
-risc0-zkvm = { path = "../../risc0/zkvm" }
+# risc0-zkvm = { path = "../../risc0/zkvm" }
+risc0-zkvm = { git = "https://github.com/risc0/risc0" }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
