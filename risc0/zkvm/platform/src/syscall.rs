@@ -357,6 +357,7 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
 /// # Safety
 ///
 /// `recv_buf`, `in_base`, and `in_modulus` must be aligned and dereferenceable.
+#[stability::unstable]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_rsa(
     recv_buf: *mut [u32; rsa::WIDTH_WORDS],
