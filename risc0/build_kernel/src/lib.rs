@@ -21,7 +21,6 @@ use std::{
 use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 use tempfile::tempdir_in;
-use which::which;
 
 const METAL_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/metal/fp.h")),
@@ -160,6 +159,8 @@ impl KernelBuild {
     }
 
     fn compile_cuda(&mut self, output: &str) {
+        const DEFAULT_OPT_LEVEL: usize = 3;
+
         fn enable_debug(output: &str) -> bool {
             if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
                 return debug.contains(output);
@@ -171,6 +172,7 @@ impl KernelBuild {
         println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_SCCACHE_RECACHE");
 
         for inc_dir in self.inc_dirs.iter() {
             for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
@@ -184,7 +186,7 @@ impl KernelBuild {
         let files: Vec<_> = self
             .files
             .iter()
-            .map(|x| (x.as_path(), 3usize))
+            .map(|x| (x.as_path(), DEFAULT_OPT_LEVEL))
             .chain(self.files_opt.iter().map(|(x, y)| (x.as_path(), *y)))
             .collect();
         let obj_paths: Vec<_> = files
@@ -195,20 +197,12 @@ impl KernelBuild {
                     fs::create_dir_all(parent).unwrap();
                 }
 
-                let sccache = which("sccache");
-                let mut cmd = if let Ok(sccache) = sccache {
-                    let mut cmd = Command::new(sccache);
-                    cmd.arg("nvcc");
-                    cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
-                    cmd
-                } else {
-                    println!("cargo:warning=It is highly recommended to install sccache when building CUDA kernels.");
-                    Command::new("nvcc")
-                };
-
+                let mut cmd = maybe_sccache("nvcc");
                 cmd.arg("-c");
 
-                if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
+                if env::var_os("NVCC_PREPEND_FLAGS").is_none()
+                    && env::var_os("NVCC_APPEND_FLAGS").is_none()
+                {
                     cmd.arg("-arch=native");
                 }
 
@@ -226,7 +220,7 @@ impl KernelBuild {
                     cmd.arg("-I").arg(inc_dir);
                 }
 
-                for flag in self.flags.iter(){
+                for flag in self.flags.iter() {
                     cmd.arg(flag);
                 }
 
@@ -254,7 +248,7 @@ impl KernelBuild {
         }
 
         let mut cmd = Command::new("ar");
-        cmd.arg("crs");
+        cmd.arg("rs");
         cmd.arg(&out_path);
         cmd.args(&obj_paths);
         cmd.arg(&dlink);
@@ -424,5 +418,23 @@ impl Hasher {
 
     pub fn finalize(self) -> String {
         hex::encode(self.sha.finalize())
+    }
+}
+
+fn maybe_sccache(inner: &str) -> Command {
+    let sccache = which::which("sccache");
+    if let Ok(sccache) = sccache {
+        let mut cmd = Command::new(sccache);
+        cmd.arg(inner);
+        cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
+        if env::var("RISC0_CUDA_SCCACHE_RECACHE").is_ok() {
+            cmd.env("SCCACHE_RECACHE", "1");
+        }
+        cmd
+    } else {
+        println!(
+            "cargo:warning=It is highly recommended to install sccache when building CUDA kernels."
+        );
+        Command::new(inner)
     }
 }

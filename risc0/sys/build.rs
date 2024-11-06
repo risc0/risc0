@@ -44,28 +44,26 @@ fn main() {
 fn build_cuda_kernels(cxx_root: &Path) {
     KernelBuild::new(KernelType::Cuda)
         .files([
-            "kernels/zkp/cuda/all.cu",
             "kernels/zkp/cuda/combos.cu",
+            "kernels/zkp/cuda/eltwise.cu",
             "kernels/zkp/cuda/ffi.cu",
-            "kernels/zkp/cuda/supra_ntt_api.cu",
-            "kernels/zkp/cuda/supra/supra_cuda_api.cu",
+            "kernels/zkp/cuda/kernels.cu",
+            "kernels/zkp/cuda/sha.cu",
+            "kernels/zkp/cuda/supra/api.cu",
+            "kernels/zkp/cuda/supra/ntt.cu",
         ])
         .deps([
             "kernels/zkp/cuda/cuda.h",
-            "kernels/zkp/cuda/eltwise.cu",
             "kernels/zkp/cuda/fp.h",
             "kernels/zkp/cuda/fpext.h",
-            "kernels/zkp/cuda/fri.cu",
             "kernels/zkp/cuda/kernels.h",
-            "kernels/zkp/cuda/mix.cu",
-            "kernels/zkp/cuda/ntt.cu",
-            "kernels/zkp/cuda/sha.cu",
             "kernels/zkp/cuda/sha256.h",
             "kernels/zkp/cuda/supra/fp.h",
             "kernels/zkp/cuda/supra/calc_prefix_operation.cuh",
+            "kernels/zkp/cuda/supra/fp.h",
             "kernels/zkp/cuda/supra/poly_divide.cuh",
-            "kernels/zkp/cuda/supra/poseidon_baby_bear/poseidon2.cu",
-            "kernels/zkp/cuda/supra/poseidon_baby_bear/poseidon2_constants.cuh",
+            "kernels/zkp/cuda/supra/poseidon2.cuh",
+            "kernels/zkp/cuda/supra/poseidon2_constants.cuh",
         ])
         .flag("-DFEATURE_BABY_BEAR")
         .include(cxx_root)
