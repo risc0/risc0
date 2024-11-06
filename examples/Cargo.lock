@@ -4182,6 +4182,7 @@ dependencies = [
  "risc0-zkp",
  "serde",
  "serde_json",
+ "stability",
  "tempfile",
  "tracing",
 ]
@@ -4200,6 +4201,7 @@ dependencies = [
 name = "risc0-sys"
 version = "1.2.0-alpha.1"
 dependencies = [
+ "anyhow",
  "cc",
  "cust",
  "risc0-build-kernel",
@@ -4250,6 +4252,8 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
+ "num-bigint 0.4.6",
+ "num-traits",
  "prost",
  "rand",
  "rayon",

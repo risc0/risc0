@@ -14,7 +14,7 @@
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
-use core::{cmp::min, ffi::CStr, ptr::null_mut, str::Utf8Error};
+use core::{cmp::min, ffi::CStr, ptr::null_mut, slice, str::Utf8Error};
 
 use crate::WORD_SIZE;
 
@@ -73,6 +73,13 @@ pub mod reg_abi {
 
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
+
+pub mod rsa {
+    pub const RSA_EXPONENT: usize = 65537;
+    pub const WIDTH_BITS: usize = 3072;
+    pub const WIDTH_BYTES: usize = WIDTH_BITS / 8;
+    pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
+}
 
 /// Number of words in each cycle received using the SOFTWARE ecall
 pub const IO_CHUNK_WORDS: usize = 4;
@@ -141,6 +148,7 @@ pub mod nr {
     declare_syscall!(pub SYS_PIPE);
     declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
+    declare_syscall!(pub SYS_RSA);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
@@ -344,6 +352,25 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
         core::hint::black_box((t0, index));
         unimplemented!()
     }
+}
+
+/// # Safety
+///
+/// `recv_buf`, `in_base`, and `in_modulus` must be aligned and dereferenceable.
+#[stability::unstable]
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub unsafe extern "C" fn sys_rsa(
+    recv_buf: *mut [u32; rsa::WIDTH_WORDS],
+    in_base: *const [u32; rsa::WIDTH_WORDS],
+    in_modulus: *const [u32; rsa::WIDTH_WORDS],
+) {
+    syscall_2(
+        nr::SYS_RSA,
+        recv_buf as *mut u32,
+        rsa::WIDTH_WORDS,
+        in_base as u32,
+        in_modulus as u32,
+    );
 }
 
 /// # Safety
@@ -615,6 +642,11 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
     }
 }
 
+// Some environment variable names are considered safe by default to use in the guest, provided by
+// the host, and are included in this list. It may be useful to allow guest developers to register
+// additional variable names as part of their guest program.
+const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE"];
+
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
 /// out_nwords).
@@ -639,6 +671,23 @@ pub unsafe extern "C" fn sys_getenv(
     varname: *const u8,
     varname_len: usize,
 ) -> usize {
+    if cfg!(not(feature = "sys-getenv")) {
+        let mut allowed = false;
+        for allowed_varname in ALLOWED_ENV_VARNAMES {
+            let varname_buf = unsafe { slice::from_raw_parts(varname, varname_len) };
+            if *allowed_varname == varname_buf {
+                allowed = true;
+                break;
+            }
+        }
+        if !allowed {
+            const MSG_1: &[u8] = "sys_getenv not enabaled for var".as_bytes();
+            unsafe { sys_log(MSG_1.as_ptr(), MSG_1.len()) };
+            unsafe { sys_log(varname, varname_len) };
+            const MSG_2: &[u8] = "sys_getenv is disabled; can be enabled with the sys-getenv feature flag on risc0-zkvm-platform".as_bytes();
+            unsafe { sys_panic(MSG_2.as_ptr(), MSG_2.len()) };
+        }
+    }
     let Return(a0, _) = syscall_2(
         nr::SYS_GETENV,
         out_words,
@@ -659,6 +708,10 @@ pub unsafe extern "C" fn sys_getenv(
 /// data being returned. Returned data is entirely in the control of the host.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_argc() -> usize {
+    if cfg!(not(feature = "sys-args")) {
+        const MSG: &[u8] = "sys_argc is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
     let Return(a0, _) = unsafe { syscall_0(nr::SYS_ARGC, null_mut(), 0) };
     a0 as usize
 }
@@ -686,6 +739,10 @@ pub unsafe extern "C" fn sys_argv(
     out_nwords: usize,
     arg_index: usize,
 ) -> usize {
+    if cfg!(not(feature = "sys-args")) {
+        const MSG: &[u8] = "sys_argv is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
     let Return(a0, _) = syscall_1(nr::SYS_ARGV, out_words, out_nwords, arg_index as u32);
     a0 as usize
 }

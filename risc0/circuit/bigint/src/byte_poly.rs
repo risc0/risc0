@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Document how BytePoly works.
+// byte_poly big integers are represented as slices of i32.  The big
+// integer represented by [a0, a1, a2...] is a0 * 256^0 + a1 * 256^1 +
+// a2 * 256^3 + ....
+//
+// This representation allows more than one representation of a given
+// big integer.  However, we call it 'normalied' when each term is in
+// the range [0, 256).
+//
+// TODO: Document more how byte_poly works.
 
-use std::{
-    borrow::Borrow,
-    cmp::max,
-    fmt::{Debug, Display, Formatter},
-    ops,
-};
+use std::cmp::max;
 
 use hex::FromHex;
-use num_bigint::{BigInt, BigUint};
+use num_bigint::BigUint;
 use num_integer::Integer;
 use risc0_circuit_recursion::CHECKED_COEFFS_PER_POLY;
 use risc0_core::field::{Elem, Field};
@@ -31,246 +34,222 @@ use tracing::trace;
 
 pub const BITS_PER_COEFF: usize = 8;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct BytePoly(Vec<i32>);
-
-impl Display for BytePoly {
-    // Required method
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", BigUint::from(self))
-    }
-}
-impl Debug for BytePoly {
-    // Required method
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ({:?})", BigUint::from(self), &self.0)
-    }
+/// Show the given byte poly including both the bigint it represents
+/// and its i32 terms.  Used for debugging.
+pub fn dump(bp: impl AsRef<[i32]>) -> String {
+    let bp = bp.as_ref();
+    format!("{} ({:?})", to_biguint(bp), bp)
 }
 
-impl BytePoly {
-    pub fn with_coeffs(coeffs: usize) -> Self {
-        BytePoly(vec![0; coeffs])
-    }
+fn fill_from_bigint(val: &BigUint, dest: &mut [i32]) {
+    let u32s = val.iter_u32_digits();
+    assert!(
+        u32s.len() / 4 <= dest.len(),
+        "bigint value exceeds size of byte poly"
+    );
 
-    pub fn from_biguint(mut val: BigUint, coeffs: usize) -> Self {
-        trace!("from_bigint: {val}");
-        let mut out = Vec::with_capacity(coeffs);
-        let mul = BigUint::from(1usize << BITS_PER_COEFF);
-        for _ in 0..coeffs {
-            let (quot, remain) = val.div_rem(&mul);
-            out.push(
-                remain
-                    .try_into()
-                    .expect("Unable to convert coefficient from bigint"),
-            );
-            val = quot;
+    u32s.flat_map(u32::to_le_bytes)
+        .zip(dest.iter_mut())
+        .for_each(|(src, dst)| *dst = src as i32);
+}
+
+pub fn from_biguint(val: &BigUint, coeffs: usize) -> Vec<i32> {
+    let mut out = vec![0; coeffs];
+    fill_from_bigint(val, &mut out);
+    out
+}
+
+pub fn from_biguint_fixed<const N: usize>(val: impl std::borrow::Borrow<BigUint>) -> [i32; N] {
+    let mut out = [0i32; N];
+    fill_from_bigint(val.borrow(), &mut out);
+    out
+}
+
+pub fn from_hex(hex: &str) -> Vec<i32> {
+    let bytes: Vec<u8> = FromHex::from_hex(hex).unwrap();
+    bytes.into_iter().map(i32::from).collect()
+}
+
+pub fn nondet_quot_fixed<const N: usize>(
+    lhs: impl AsRef<[i32]>,
+    rhs: impl AsRef<[i32]>,
+) -> [i32; N] {
+    let lhs = to_biguint(lhs);
+    let rhs = to_biguint(rhs);
+    let quot = lhs.div_floor(&rhs);
+    trace!("quot({lhs},{rhs}) = {quot}");
+    from_biguint_fixed(quot)
+}
+
+pub fn nondet_rem_fixed<const N: usize>(
+    lhs: impl AsRef<[i32]>,
+    rhs: impl AsRef<[i32]>,
+) -> [i32; N] {
+    let rem = to_biguint(lhs).mod_floor(&to_biguint(rhs));
+    from_biguint_fixed(rem)
+}
+
+pub fn nondet_inv_fixed<const N: usize>(
+    lhs: impl AsRef<[i32]>,
+    rhs: impl AsRef<[i32]>,
+) -> [i32; N] {
+    let lhs = to_biguint(lhs);
+    let rhs = to_biguint(rhs);
+    let result = lhs.modinv(&rhs).expect("Can't divide by zero");
+    trace!("inv({lhs}, [mod] {rhs}) = {result}");
+    from_biguint_fixed(result)
+}
+
+// Returns variable length BytePolys to be added to the private witness.
+pub fn eval_constraint(
+    val: impl AsRef<[i32]>,
+    carry_offset: usize,
+    carry_bytes: usize,
+) -> Vec<Vec<i32>> {
+    let val = val.as_ref();
+    let mut carry_polys: Vec<Vec<i32>> = Vec::new();
+    carry_polys.resize(carry_bytes, vec![0; val.len()]);
+
+    let mut carry: i32 = 0;
+    for (pos, cur_val) in val.iter().enumerate() {
+        carry = (cur_val + carry) / 256;
+        let carry_u = carry + carry_offset as i32;
+        carry_polys[0][pos] = carry_u & 0xFF;
+        if carry_bytes > 1 {
+            carry_polys[1][pos] = (carry_u >> 8) & 0xff;
         }
-        assert_eq!(val, BigUint::from(0usize));
-        BytePoly(out)
+        if carry_bytes > 2 {
+            carry_polys[2][pos] = (carry_u >> 16) & 0xff;
+            carry_polys[3][pos] = ((carry_u >> 16) & 0xff) * 4;
+        }
     }
 
-    pub fn from_coeffs_iter(coeffs: impl Iterator<Item = impl Borrow<i32>>) -> Self {
-        BytePoly(coeffs.map(|coeff| *coeff.borrow()).collect())
+    // Verify carry computation
+    let mut big_carry = vec![0; val.len()];
+    for (pos, cur_big_carry) in big_carry.iter_mut().enumerate() {
+        *cur_big_carry = carry_polys[0][pos];
+        if carry_bytes > 1 {
+            *cur_big_carry += 256 * carry_polys[1][pos];
+        }
+        if carry_bytes > 2 {
+            *cur_big_carry += 65536 * carry_polys[2][pos];
+        }
+        *cur_big_carry -= carry_offset as i32;
     }
 
-    pub fn from_coeffs(coeffs: &[impl Borrow<i32>]) -> Self {
-        Self::from_coeffs_iter(coeffs.iter().map(|x| x.borrow()))
+    for i in 0..val.len() {
+        let mut should_be_zero: i32 = val[i];
+        should_be_zero -= 256 * big_carry[i];
+        if i != 0 {
+            should_be_zero += big_carry[i - 1];
+        }
+        assert_eq!(should_be_zero, 0, "Invalid carry computation");
     }
 
-    pub fn from_hex(hex: &str) -> Self {
-        let bytes: Vec<u8> = FromHex::from_hex(hex).unwrap();
+    carry_polys
+}
 
-        Self::from_coeffs_iter(bytes.into_iter().map(i32::from))
-    }
+pub fn compute_digest<F: Field>(
+    hash: &dyn HashFn<F>,
+    witness: &[impl AsRef<[i32]>],
+    group_count: usize,
+) -> Digest {
+    let mut group: usize = 0;
+    let mut cur = [F::Elem::ZERO; CHECKED_COEFFS_PER_POLY];
+    let mut elems = Vec::new();
 
-    pub fn nondet_quot<Rhs: Borrow<BytePoly>>(&self, rhs: Rhs, coeffs: usize) -> BytePoly {
-        let lhs = BigUint::from(self);
-        let rhs = BigUint::from(rhs.borrow());
-        let quot = lhs.div_floor(&rhs);
-        trace!("quot({lhs},{rhs}) = {quot}");
-        Self::from_biguint(quot, coeffs)
-    }
-
-    pub fn nondet_rem<Rhs: Borrow<BytePoly>>(&self, rhs: Rhs, coeffs: usize) -> BytePoly {
-        let rem = BigUint::from(self).mod_floor(&BigUint::from(rhs.borrow()));
-        Self::from_biguint(rem, coeffs)
-    }
-
-    pub fn nondet_inv<Rhs: Borrow<BytePoly>>(&self, rhs: Rhs, coeffs: usize) -> BytePoly {
-        let lhs = BigUint::from(self);
-        let rhs = BigUint::from(rhs.borrow());
-        let result = lhs.modinv(&rhs).expect("Can't divide by zero");
-        trace!("inv({lhs}, [mod] {rhs}) = {result}");
-        Self::from_biguint(result, coeffs)
-    }
-
-    // Returns BytePolys to be added to the private witness.
-    pub fn eval_constraint(&self, carry_offset: usize, carry_bytes: usize) -> Vec<BytePoly> {
-        let coeffs = self.0.len();
-        let mut carry_polys = Vec::new();
-        carry_polys.resize(carry_bytes, Self::with_coeffs(coeffs));
-
-        let mut carry: i32 = 0;
-        for i in 0..coeffs {
-            carry = (self.0[i] + carry) / 256;
-            let carry_u = carry + carry_offset as i32;
-            carry_polys[0][i] = carry_u & 0xFF;
-            if carry_bytes > 1 {
-                carry_polys[1][i] = (carry_u >> 8) & 0xff;
+    for wit in witness.iter() {
+        for chunk in wit.as_ref().chunks(CHECKED_COEFFS_PER_POLY) {
+            for (k, elem) in cur.iter_mut().enumerate() {
+                *elem = *elem * F::Elem::from_u64(1u64 << BITS_PER_COEFF)
+                    + F::Elem::from_u64(*chunk.get(k).unwrap_or(&0) as u64);
             }
-            if carry_bytes > 2 {
-                carry_polys[2][i] = (carry_u >> 16) & 0xff;
-                carry_polys[3][i] = ((carry_u >> 16) & 0xff) * 4;
+            group += 1;
+            if group == group_count {
+                elems.extend(cur);
+                cur = Default::default();
+                group = 0;
             }
         }
-
-        // Verify carry computation
-        let mut big_carry = Self::with_coeffs(coeffs);
-        for i in 0..coeffs {
-            big_carry[i] = carry_polys[0][i];
-            if carry_bytes > 1 {
-                big_carry[i] += 256 * carry_polys[1][i];
-            }
-            if carry_bytes > 2 {
-                big_carry[i] += 65536 * carry_polys[2][i];
-            }
-            big_carry[i] -= carry_offset as i32;
-        }
-
-        for i in 0..coeffs {
-            let mut should_be_zero: i32 = self.0[i];
-            should_be_zero -= 256 * big_carry[i];
-            if i != 0 {
-                should_be_zero += big_carry[i - 1];
-            }
-            assert_eq!(should_be_zero, 0, "Invalid carry computation");
-        }
-
-        carry_polys
     }
-
-    pub fn compute_digest<F: Field>(
-        hash: &dyn HashFn<F>,
-        witness: &[impl Borrow<BytePoly>],
-        group_count: usize,
-    ) -> Digest {
-        let mut group: usize = 0;
-        let mut cur = [F::Elem::ZERO; CHECKED_COEFFS_PER_POLY];
-        let mut elems = Vec::new();
-
-        for wit in witness.iter() {
-            for chunk in wit.borrow().0.chunks(CHECKED_COEFFS_PER_POLY) {
-                for (k, elem) in cur.iter_mut().enumerate() {
-                    *elem = *elem * F::Elem::from_u64(1u64 << BITS_PER_COEFF)
-                        + F::Elem::from_u64(*chunk.get(k).unwrap_or(&0) as u64);
-                }
-                group += 1;
-                if group == group_count {
-                    elems.extend(cur);
-                    cur = Default::default();
-                    group = 0;
-                }
-            }
-        }
-        if group != 0 {
-            elems.extend(cur);
-        }
-        *hash.hash_elem_slice(&elems)
+    if group != 0 {
+        elems.extend(cur);
     }
+    *hash.hash_elem_slice(&elems)
+}
 
-    /// Packs this byte poly into u32s, 4 bytes per u32, for use in
-    /// calculating digests.  Each byte must be normalized, i.e. fit
-    /// into a u8.
-    pub fn into_padded_u32s(mut self) -> Vec<u32> {
-        const WORD_SIZE: usize = std::mem::size_of::<u32>();
-        let padded_coeffs = self.len().div_ceil(CHECKED_COEFFS_PER_POLY) * CHECKED_COEFFS_PER_POLY;
-        self.0.resize(padded_coeffs, 0i32);
+/// Packs this byte poly into u32s, 4 bytes per u32, for use in
+/// calculating digests.  Each byte must be normalized, i.e. fit
+/// into a u8.
+pub fn into_padded_u32s(bp: impl AsRef<[i32]>) -> Vec<u32> {
+    let bp = bp.as_ref();
+    const WORD_SIZE: usize = std::mem::size_of::<u32>();
+    let padded_coeffs = bp.len().div_ceil(CHECKED_COEFFS_PER_POLY) * CHECKED_COEFFS_PER_POLY;
+    let mut out = Vec::from(bp);
+    out.resize(padded_coeffs, 0i32);
 
-        self.chunks(WORD_SIZE)
-            // Convert from [i32] to [i32; 4]
-            .map(|chunk| {
-                <[i32; 4]>::try_from(chunk)
-                    .expect("Encountered unexpected partial chunk; is padding logic wrong?")
+    out.chunks(WORD_SIZE)
+        // Convert from [i32] to [i32; 4]
+        .map(|chunk| {
+            <[i32; 4]>::try_from(chunk)
+                .expect("Encountered unexpected partial chunk; is padding logic wrong?")
+        })
+        // Convert from [i32; 4] to [u8; 4]
+        .map(|chunk| {
+            chunk.map(|coeff| {
+                u8::try_from(coeff)
+                    .expect("Coefficient out of range; byte poly should be normalized")
             })
-            // Convert from [i32; 4] to [u8; 4]
-            .map(|chunk| {
-                chunk.map(|coeff| {
-                    u8::try_from(coeff)
-                        .expect("Coefficient out of range; byte poly should be normalized")
-                })
-            })
-            // Convert from [u8; 4] to u32
-            .map(u32::from_le_bytes)
-            .collect()
-    }
+        })
+        // Convert from [u8; 4] to u32
+        .map(u32::from_le_bytes)
+        .collect()
 }
 
-impl ops::Deref for BytePoly {
-    type Target = [i32];
+pub fn to_biguint(bp: impl AsRef<[i32]>) -> BigUint {
+    let bp = bp.as_ref();
 
-    fn deref(&self) -> &Self::Target {
-        self.0.as_slice()
+    let mut u8s = Vec::<u8>::with_capacity(bp.len());
+    let mut carry: i32 = 0;
+    for b in bp.iter() {
+        let term = b + carry;
+        u8s.push((term & 0xFF) as u8);
+        carry = term >> 8;
     }
+
+    assert!(carry >= 0, "Final carry {carry} must not be negative");
+
+    while carry != 0 {
+        u8s.push((carry & 0xFF) as u8);
+        carry >>= 8;
+    }
+
+    BigUint::from_bytes_le(&u8s)
 }
 
-impl ops::DerefMut for BytePoly {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.0.as_mut_slice()
-    }
+pub fn add_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>) -> [i32; N] {
+    let lhs = lhs.as_ref();
+    let rhs = rhs.as_ref();
+    assert_eq!(N, max(lhs.len(), rhs.len()));
+    core::array::from_fn(|i| lhs.get(i).unwrap_or(&0) + rhs.get(i).unwrap_or(&0))
 }
 
-impl From<&BytePoly> for BigUint {
-    fn from(bp: &BytePoly) -> Self {
-        let mut out = BigInt::default();
-        let mut mul = BigInt::from(1usize);
-        let coeff_mul = BigInt::from(1usize << BITS_PER_COEFF);
-        for i in 0..bp.0.len() {
-            out += &mul * bp.0[i];
-            mul *= &coeff_mul;
+pub fn sub_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>) -> [i32; N] {
+    let lhs = lhs.as_ref();
+    let rhs = rhs.as_ref();
+    assert_eq!(N, max(lhs.len(), rhs.len()));
+    core::array::from_fn(|i| lhs.get(i).unwrap_or(&0) - rhs.get(i).unwrap_or(&0))
+}
+
+pub fn mul_fixed<const N: usize>(lhs: impl AsRef<[i32]>, rhs: impl AsRef<[i32]>) -> [i32; N] {
+    let lhs = lhs.as_ref();
+    let rhs = rhs.as_ref();
+    assert_eq!(N, lhs.len() + rhs.len() - 1);
+    let mut out = [0; N];
+    for (i, a) in lhs.iter().enumerate() {
+        for (j, b) in rhs.iter().enumerate() {
+            out[i + j] += a * b;
         }
-        out.to_biguint().expect("Unable to make unsigned bigint")
     }
-}
-
-impl<Rhs: Borrow<BytePoly>> ops::Add<Rhs> for &BytePoly {
-    type Output = BytePoly;
-
-    fn add(self, rhs: Rhs) -> Self::Output {
-        let rhs = rhs.borrow();
-        let size = max(self.0.len(), rhs.0.len());
-        let mut out = Vec::with_capacity(size);
-        for i in 0..size {
-            out.push(self.0.get(i).unwrap_or(&0) + rhs.0.get(i).unwrap_or(&0));
-        }
-        BytePoly(out)
-    }
-}
-
-impl<Rhs: Borrow<BytePoly>> ops::Sub<Rhs> for &BytePoly {
-    type Output = BytePoly;
-
-    fn sub(self, rhs: Rhs) -> Self::Output {
-        let rhs = rhs.borrow();
-        let size = max(self.0.len(), rhs.0.len());
-        let mut out = Vec::with_capacity(size);
-        for i in 0..size {
-            out.push(self.0.get(i).unwrap_or(&0) - rhs.0.get(i).unwrap_or(&0));
-        }
-        BytePoly(out)
-    }
-}
-
-impl<Rhs: Borrow<BytePoly>> ops::Mul<Rhs> for &BytePoly {
-    type Output = BytePoly;
-
-    fn mul(self, rhs: Rhs) -> Self::Output {
-        let rhs = rhs.borrow();
-        let mut out = vec![0; self.0.len() + rhs.0.len()];
-        for (i, a) in self.0.iter().enumerate() {
-            for (j, b) in rhs.0.iter().enumerate() {
-                out[i + j] += a * b;
-            }
-        }
-        BytePoly(out)
-    }
+    out
 }

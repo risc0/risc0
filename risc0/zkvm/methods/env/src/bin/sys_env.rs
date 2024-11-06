@@ -1,4 +1,4 @@
-// Copyright 2022 Risc0, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "eltwise.cu"
-#include "fri.cu"
-#include "mix.cu"
-#include "ntt.cu"
-#include "sha.cu"
+#![no_main]
+
+risc0_zkvm::guest::entry!(main);
+
+fn main() {
+    // Should panic, as sys_getenv is disabled at build-time.
+    std::env::var("FOO").ok();
+}
