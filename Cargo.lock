@@ -613,7 +613,7 @@ checksum = "c7c24de15d275a1ecfd47a380fb4d5ec9bfe0933f309ed5e705b775596a3574d"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.77",
+ "syn 2.0.74",
 ]
 
 [[package]]
@@ -808,7 +808,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "bincode",
@@ -950,13 +950,13 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "bincode",
  "bonsai-sdk",
  "cargo_metadata",
- "clap 4.5.20",
+ "clap 4.5.14",
  "const_format",
  "dirs",
  "downloader",
@@ -1079,6 +1079,21 @@ checksum = "773f3b9af64447d2ce9850330c473515014aa235e6a783b02db81ff39e4a3dad"
 dependencies = [
  "crypto-common",
  "inout",
+]
+
+[[package]]
+name = "clap"
+version = "2.34.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0610544180c38b88101fecf2dd634b174a62eef6946f84dfc6a7127512b381c"
+dependencies = [
+ "ansi_term",
+ "atty",
+ "bitflags 1.3.2",
+ "strsim 0.8.0",
+ "textwrap",
+ "unicode-width",
+ "vec_map",
 ]
 
 [[package]]
@@ -1262,7 +1277,7 @@ dependencies = [
  "anes",
  "cast",
  "ciborium",
- "clap 4.5.20",
+ "clap 4.5.14",
  "criterion-plot",
  "is-terminal",
  "itertools 0.10.5",
@@ -1443,7 +1458,7 @@ dependencies = [
  "ident_case",
  "proc-macro2",
  "quote",
- "strsim",
+ "strsim 0.11.1",
  "syn 2.0.74",
 ]
 
@@ -2421,7 +2436,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.10",
+ "socket2 0.5.7",
  "tokio",
  "tower-service",
  "tracing",
@@ -3153,7 +3168,7 @@ checksum = "a948666b637a0f465e8564c73e89d4dde00d72d4d473cc972f390fc3dcee7d9c"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.77",
+ "syn 2.0.74",
 ]
 
 [[package]]
@@ -3989,7 +4004,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "borsh",
@@ -4005,7 +4020,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -4022,7 +4037,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "cc",
  "directories",
@@ -4036,7 +4051,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-bigint"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4067,7 +4082,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4094,7 +4109,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -4105,7 +4120,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -4132,7 +4147,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -4143,7 +4158,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "bytemuck",
  "nvtx",
@@ -4154,7 +4169,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -4177,14 +4192,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "assert_cmd",
  "assert_fs",
  "bincode",
  "bytemuck",
- "clap",
+ "clap 4.5.14",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "temp-env",
@@ -4195,7 +4210,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "cc",
@@ -4206,17 +4221,17 @@ dependencies = [
 
 [[package]]
 name = "risc0-tools"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "assert_cmd",
- "clap 4.5.20",
+ "clap 4.5.14",
  "risc0-zkvm",
  "tempfile",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -4248,7 +4263,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -4259,7 +4274,7 @@ dependencies = [
  "bytes",
  "chrono",
  "ciborium",
- "clap 4.5.20",
+ "clap 4.5.14",
  "crypto-bigint",
  "elf",
  "enum-iterator",
@@ -4308,7 +4323,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "bincode",
  "borsh",
@@ -4324,7 +4339,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.1.2"
+version = "1.1.3"
 dependencies = [
  "bytemuck",
  "critical-section",
@@ -4336,7 +4351,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "1.1.2"
+version = "1.1.3"
 
 [[package]]
 name = "rmp"
@@ -4488,7 +4503,7 @@ version = "0.2.1"
 dependencies = [
  "anyhow",
  "cfg-if",
- "clap 4.5.20",
+ "clap 4.5.14",
  "dirs",
  "flate2",
  "fs2",
@@ -5126,9 +5141,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.39.2"
+version = "1.41.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "daa4fb1bc778bd6f04cbfc4bb2d06a7396a8f299dc33ea1900cedaa316f467b1"
+checksum = "22cfb5bee7a6a52939ca9224d6ac897bb669134078daa8735560897f69de4d33"
 dependencies = [
  "backtrace",
  "bytes",
@@ -5954,7 +5969,7 @@ name = "xtask"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "clap 4.5.20",
+ "clap 4.5.14",
  "hex",
  "prost-build",
  "protobuf-src",
