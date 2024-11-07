@@ -19,6 +19,7 @@ anyhow = "1.0"
 bytemuck = "1.16.1"
 hex = "0.4"
 num-bigint = { version = "0.4", default-features = false }
+num-bigint-dig = { version = "0.8.2", default-features = false, optional = true, features = ["serde"] }
 num-integer = "0.1"
 num-traits = "0.2"
 paste = "1.0"
@@ -45,6 +46,8 @@ risc0-circuit-bigint-test-methods = { path = "methods" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
+# Compatibility code for libraries based on num-bigint-dig
+bigint-dig-shim = ["dep:num-bigint-dig"]
 default = ["prove"]
 # Omits control_ids.rs, and instead uses all zeros for control ids.
 # This is needed for the 'make_control_ids' binary to compile if any
