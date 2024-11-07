@@ -12,4 +12,4 @@ risc0-zkvm = { git = "https://github.com/risc0/risc0", default-features = false,
 
 [patch.crates-io]
 # TODO: Make a permanent `rsa` patch
-rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "aa73b77db01cf407fa4521faffbf5408bf274e1a" }
+rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "555416ebe2f3d013aae4b609dbacc4a2026b0a17" }
