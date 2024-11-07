@@ -28,7 +28,7 @@ runs:
         fi
       shell: bash
 
-    - run: rustup default ${{ inputs.toolchain }}
+    - run: rustup override set ${{ inputs.toolchain }}
       shell: bash
 
     - if: ${{ inputs.targets != '' }}
