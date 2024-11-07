@@ -14,7 +14,7 @@
 
 use std::io::Read;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
 use num_bigint::BigUint;
 use num_derive::FromPrimitive;
@@ -83,7 +83,7 @@ impl Op {
         let bits = stream.read_u64::<LittleEndian>()?;
         let opcode = FromPrimitive::from_u32((bits & 0x0F) as u32);
         Ok(Self {
-            code: opcode.unwrap(),
+            code: opcode.ok_or(anyhow!("Invalid BigInt2 bytecode"))?,
             result_type: ((bits >> 4) & 0x0FFF) as usize,
             a: ((bits >> 16) & 0x00FFFFFF) as usize,
             b: ((bits >> 40) & 0x00FFFFFF) as usize,
@@ -203,8 +203,7 @@ impl Program {
                 }
                 OpCode::Inv => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
-                    let exp = rhs - 2u8;
-                    let value = lhs.modpow(&exp, rhs);
+                    let value = lhs.modinv(rhs).ok_or(anyhow!("Can't divide by zero"))?;
                     regs[op_index] = value.clone();
                 }
             }
