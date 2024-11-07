@@ -272,6 +272,11 @@ fn bigint_accel() {
 }
 
 #[test]
+fn sys_bigint2() {
+    run_test(MultiTestSpec::SysBigInt2);
+}
+
+#[test]
 fn env_stdio() {
     const MSG: &str = "Hello world!  This is a test of standard input and output.";
     const FD: u32 = 123;
