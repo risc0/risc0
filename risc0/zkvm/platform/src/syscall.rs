@@ -25,7 +25,7 @@ pub mod ecall {
     pub const SHA: u32 = 3;
     pub const BIGINT: u32 = 4;
     pub const USER: u32 = 5;
-    pub const MACHINE: u32 = 5;
+    pub const BIGINT2: u32 = 6;
 }
 
 pub mod halt {
@@ -951,3 +951,92 @@ pub unsafe extern "C" fn sys_prove_zkr(
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 }
+
+#[repr(C)]
+pub struct BigIntBlobHeader {
+    pub nondet_program_size: u32,
+    pub verify_program_size: u32,
+    pub consts_size: u32,
+    pub temp_size: u32,
+}
+
+macro_rules! impl_sys_bigint2 {
+    ($func_name:ident, $a1:ident
+        $(, $a2: ident
+            $(, $a3: ident
+                $(, $a4: ident
+                    $(, $a5: ident
+                        $(, $a6: ident
+                            $(, $a7: ident )?
+                        )?
+                    )?
+                )?
+            )?
+        )?
+    ) => {
+        /// Invoke a bigint2 program.
+        ///
+        /// # Safety
+        ///
+        /// `blob_ptr` and all arguments must be aligned and dereferenceable.
+        #[cfg_attr(feature = "export-syscalls", no_mangle)]
+        #[stability::unstable]
+        pub unsafe extern "C" fn $func_name(blob_ptr: *const u32, a1: *mut u32
+            $(, $a2: *mut u32
+                $(, $a3: *mut u32
+                    $(, $a4: *mut u32
+                        $(, $a5: *mut u32
+                            $(, $a6: *mut u32
+                                $(, $a7: *mut u32)?
+                            )?
+                        )?
+                    )?
+                )?
+            )?
+        ) {
+            #[cfg(target_os = "zkvm")]
+            {
+                let header = blob_ptr as *const $crate::syscall::BigIntBlobHeader;
+                let nondet_program_ptr = (header.add(1)) as *const u32;
+                let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);
+                let consts_ptr = verify_program_ptr.add((*header).verify_program_size as usize);
+                let temp_space = ((*header).consts_size as usize) << 2;
+
+                ::core::arch::asm!(
+                    "sub sp, sp, {temp_space}",
+                    "ecall",
+                    "add sp, sp, {temp_space}",
+                    temp_space = in(reg) temp_space,
+                    in("t0") ecall::BIGINT2,
+                    in("t1") nondet_program_ptr,
+                    in("t2") verify_program_ptr,
+                    in("t3") consts_ptr,
+                    in("a0") blob_ptr,
+                    in("a1") a1,
+                    $(in("a2") $a2,
+                        $(in("a3") $a3,
+                            $(in("a4") $a4,
+                                $(in("a5") $a5,
+                                    $(in("a6") $a6,
+                                        $(in("a7") $a7,)?
+                                    )?
+                                )?
+                            )?
+                        )?
+                    )?
+                );
+            }
+
+            #[cfg(not(target_os = "zkvm"))]
+            unimplemented!()
+        }
+    }
+}
+
+impl_sys_bigint2!(sys_bigint2_1, a1);
+impl_sys_bigint2!(sys_bigint2_2, a1, a2);
+impl_sys_bigint2!(sys_bigint2_3, a1, a2, a3);
+impl_sys_bigint2!(sys_bigint2_4, a1, a2, a3, a4);
+impl_sys_bigint2!(sys_bigint2_5, a1, a2, a3, a4, a5);
+impl_sys_bigint2!(sys_bigint2_6, a1, a2, a3, a4, a5, a6);
+impl_sys_bigint2!(sys_bigint2_7, a1, a2, a3, a4, a5, a6, a7);
