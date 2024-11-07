@@ -19,7 +19,7 @@ use std::collections::VecDeque;
 
 use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
-use derive_debug::Dbg;
+use derive_more::Debug;
 use risc0_core::scope;
 use risc0_zkp::{
     core::{
@@ -76,11 +76,11 @@ pub struct PreflightCycle {
     pub extra_idx: usize,
 }
 
-#[derive(Clone, Dbg, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MemoryTransaction {
     pub cycle: usize,
     pub addr: WordAddr,
-    #[dbg(fmt = "0x{:08x}")]
+    #[debug("${data:#010x}")]
     pub data: u32,
 }
 
