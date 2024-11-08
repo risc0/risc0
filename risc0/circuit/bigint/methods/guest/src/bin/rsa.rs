@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use num_bigint::BigUint;
 use risc0_circuit_bigint::rsa;
 use risc0_zkvm::guest::env;
 
 fn main() {
     // Computes and proves the result of modpow with exponent of 65537
-    let input: Vec<[BigUint; 2]> = env::read();
-    let result: Vec<BigUint> = input
-        .into_iter()
-        .map(|[base, modulus]| rsa::modpow_65537(&base, &modulus).unwrap())
-        .collect();
-    env::commit(&result);
+    let input: Vec<u32> = env::read();
+    let base: [u32; 96] = input.try_into().expect("Inputs should come pre-padded A");  // TODO: Not magic number 96
+    let input: Vec<u32> = env::read();
+    let modulus: [u32; 96] = input.try_into().expect("Inputs should come pre-padded B");  // TODO: Not magic number 96
+    const fn zero() -> u32 {
+        0
+    }
+    let mut result = [zero(); 96];
+
+    // TODO: safety docs
+    unsafe {
+        rsa::sys_rsa_and_prove(&mut result, &base, &modulus);
+    }
+
+    env::commit(&result.to_vec());
 }

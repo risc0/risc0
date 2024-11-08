@@ -31,12 +31,16 @@ fn main() {
     register_zkrs();
 
     // We compute the modpow of `base` to 65537 mod `modulus`, commit it to the journal, and compare to `expected`
-    let modulus = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
-    let base = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
-    let inputs = vec![[modulus, base]];
+    let mut modulus = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5").to_u32_digits();
+    let mut base = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677").to_u32_digits();
+    assert!(modulus.len() <= 96 && base.len() <= 96);  // TODO: Clean magic number 96
+    modulus.resize(96, 0);
+    base.resize(96, 0);
 
     let env = ExecutorEnv::builder()
-        .write(&inputs)
+        .write(&base)
+        .unwrap()
+        .write(&modulus)
         .unwrap()
         .build()
         .unwrap();
@@ -45,9 +49,9 @@ fn main() {
     let prove_info = prover.prove(env, RSA_ELF).unwrap();
     assert_eq!(prove_info.stats.segments, 1);
 
-    let result: Vec<BigUint> = prove_info.receipt.journal.decode().unwrap();
+    let result: Vec<u32> = prove_info.receipt.journal.decode().unwrap();
     let expected = from_hex("1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
-    assert_eq!(result[0], expected);
+    assert_eq!(BigUint::from_slice(&result), expected);
     println!("RSA example produces expected result");
 }
 
