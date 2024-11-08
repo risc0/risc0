@@ -2,7 +2,21 @@
 
 ## Next (upcoming release)
 
+## [v1.1.3 (2024-11-08)](https://github.com/risc0/risc0/releases/tag/v1.1.3)
+
+### 🔥 Performance Improvements
+
+* Add `poly_divide` kernel. This achieves proving speeds of 1.5 MHz on a 4090 GPU for proving rv32im programs.
+
+### ⚡️ Features
+
+* Enable environment variable to configure Bonsai poll time and reduce default.
+* Client server: add an option to use redis.
+
 ### Fixes
+
+* Fix cpp toolchain support for docker guest builds.
+* Fix bugs in data sheet.
 
 ### 🚨 Breaking Changes
 
