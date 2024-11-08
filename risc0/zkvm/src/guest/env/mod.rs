@@ -134,7 +134,7 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         #[allow(static_mut_refs)]
         if KECCAK_BATCHER.has_data() {
-            KECCAK_BATCHER.finalize();
+            KECCAK_BATCHER.finalize_transcript();
         }
 
         #[allow(static_mut_refs)]
@@ -545,7 +545,7 @@ impl KeccakBatcher {
         // if this entry does not fit in the remaining space, create a new claim and reset the batcher.
         let padding_bytes = Self::BLOCK_BYTES - (input.len() % Self::BLOCK_BYTES);
         if self.data_offset + input.len() + padding_bytes + DIGEST_BYTES + Self::FINAL_PADDING_BYTES > Self::KECCAK_LIMIT {
-            let _digest = self.finalize();
+            let _digest = self.finalize_transcript();
         }
 
         self.write_data(input)?;
@@ -568,7 +568,7 @@ impl KeccakBatcher {
     }
 
     /// get the digest of the input transcript
-    pub fn finalize(&mut self) -> Digest {
+    pub fn finalize_transcript(&mut self) -> Digest {
         use risc0_zkp::core::hash::sha::Sha256;
 
         self.input_transcript
