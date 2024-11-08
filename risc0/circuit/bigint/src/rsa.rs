@@ -116,13 +116,27 @@ pub fn modpow_65537_simple(base: &[u32], modulus: &[u32]) -> Result<Vec<u8>> {
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[no_mangle]
 pub fn modpow_65537_vecs(base: Vec<u32>, modulus: Vec<u32>) -> Result<Vec<u8>> {
-    // TODO: Clean up where I have vecs vs. slices
-    let claims = compute_claim_inner(base, modulus)?;
-    let result = claims[2].clone().to_le_bytes();
-    let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
-    prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
-    return Ok(result);
+    // // TODO: Clean up where I have vecs vs. slices
+    // let claims = compute_claim_inner(base, modulus)?;
+    // let result = claims[2].clone().to_le_bytes();
+    // let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
+    // prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
+    // return Ok(result);
+
+    // TODO: Not right, just hacking in a test
+    return Ok(base[0].to_le_bytes().to_vec());
 }
+
+// // E.g.
+// pub unsafe extern "C" fn env_commit(hasher: *mut sha256_state, bytes_ptr: *const u8, len: u32) {
+// pub unsafe extern "C" fn env_read(bytes_ptr: *mut u8, len: u32) -> usize {
+
+// // TODO: Document
+// #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+// #[no_mangle]
+// pub extern "C" fn(base_ptr: *const u32, modulus_ptr: *const u32, base_len: u32, modulus_len: u32) -> TODO {
+
+// }
 
 
 
@@ -200,4 +214,41 @@ fn compute_claim_inner(mut base: Vec<u32>, mut modulus: Vec<u32>) -> Result<[Big
         .collect::<Vec<u8>>();
     let modulus = BigUint::from_bytes_le(&modulus);
     Ok([modulus, base, result])
+}
+
+/// Compute and prove the modpow_65537 RSA operation
+/// 
+/// Uses the same signature as the `sys_rsa` syscall.
+/// 
+/// # Safety
+///
+/// `recv_buf`, `in_base`, and `in_modulus` must be aligned and dereferenceable.
+#[stability::unstable]
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[no_mangle]
+pub unsafe extern "C" fn sys_rsa_and_prove(  // TODO: Better name
+    recv_buf: *mut [u32; risc0_zkvm_platform::syscall::rsa::WIDTH_WORDS],  // TODO nicer constant
+    in_base: *const [u32; risc0_zkvm_platform::syscall::rsa::WIDTH_WORDS],
+    in_modulus: *const [u32; risc0_zkvm_platform::syscall::rsa::WIDTH_WORDS],
+) {
+    unsafe {
+        risc0_zkvm_platform::syscall::sys_rsa(recv_buf, in_base, in_modulus);
+    }
+    let result = (&*recv_buf)
+        .iter()
+        .flat_map(|elem| elem.to_le_bytes())
+        .collect::<Vec<u8>>();
+    let result = BigUint::from_bytes_le(&result);
+    let base = (&*in_base)
+        .iter()
+        .flat_map(|elem| elem.to_le_bytes())
+        .collect::<Vec<u8>>();
+    let base = BigUint::from_bytes_le(&base);
+    let modulus = (&*in_modulus)
+        .iter()
+        .flat_map(|elem| elem.to_le_bytes())
+        .collect::<Vec<u8>>();
+    let modulus = BigUint::from_bytes_le(&modulus);
+    let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &[modulus, base, result]);
+    prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
 }
