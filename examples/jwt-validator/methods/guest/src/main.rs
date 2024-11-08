@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use jwt_core::Validator;
-use num_bigint_dig::BigUint;
 use risc0_zkvm::guest::env;
 use risc0_circuit_bigint::rsa::modpow_65537;
 
@@ -45,9 +44,14 @@ fn main() {
         .validate_token_integrity(token.as_str())
         .expect("token integrity check failed");
 
+    // TODO: Dead code for the linker
+    if false {
+      let _x = modpow_65537(&1u32.into(), &3u32.into());
+    }
+
     env::commit(&valid_token.claims().custom.subject);
 }
 
-fn todo_linker_experiment() {
-  let _x = modpow_65537(&BigUint::from(1u32), &BigUint::from(3u32));
-}
+// fn todo_linker_experiment() {
+//   let _x = modpow_65537(&1u32.into(), &3u32.into());
+// }

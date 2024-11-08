@@ -33,6 +33,10 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
+// TODO: Sort in
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+use num_traits::ops::bytes::ToBytes;
+
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use crate::prove;
 use crate::{BigIntClaim, BigIntProgram};
@@ -52,6 +56,27 @@ pub fn claim(
     BigIntClaim::from_biguints(prog_info, &[modulus, base, result])
 }
 
+// TODO: So this comes through as an extern just fine...
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[cfg(feature = "bigint-dig-shim")]
+#[no_mangle]
+pub fn todo_test_fn(x: u32) -> u32 {
+    x
+}
+
+// TODO
+#[no_mangle]
+pub fn todo_test_types(test: &Vec<u32>) -> Result<Vec<u32>, &'static str> {
+    let mut output = vec!{1u32};
+    for elem in test {
+        output.push(*elem);
+    }
+    if output.len() < 1 {
+        return Err("test message");
+    }
+    Ok(output)
+}
+
 /// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
 ///
 /// `S` is the `base`, `N` is the `modulus`, and the result `M` is returned
@@ -65,6 +90,41 @@ pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
     prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
     return Ok(result);
 }
+
+/// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
+///
+/// `S` is the `base`, `N` is the `modulus`, and the result `M` is returned
+/// 
+/// All are little endian
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[no_mangle]
+pub fn modpow_65537_simple(base: &[u32], modulus: &[u32]) -> Result<Vec<u8>> {
+    // TODO: Clean up where I have vecs vs. slices
+    let base = base.to_vec();
+    let modulus = modulus.to_vec();
+    let claims = compute_claim_inner(base, modulus)?;
+    let result = claims[2].clone().to_le_bytes();
+    let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
+    prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
+    return Ok(result);
+
+    // // TODO: Not right, just hacking in a test
+    // return Ok(base[0].to_le_bytes().to_vec());
+}
+
+// TODO: Document
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[no_mangle]
+pub fn modpow_65537_vecs(base: Vec<u32>, modulus: Vec<u32>) -> Result<Vec<u8>> {
+    // TODO: Clean up where I have vecs vs. slices
+    let claims = compute_claim_inner(base, modulus)?;
+    let result = claims[2].clone().to_le_bytes();
+    let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
+    prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
+    return Ok(result);
+}
+
+
 
 /// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
 ///
@@ -98,6 +158,7 @@ pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDi
     let claims = BigIntClaim::from_biguints(&RSA_3072_X1, &claims);
     prove(&RSA_3072_X1, &[claims]).expect("Unable to compose with RSA");
     return Ok(result);
+    // return Ok(base.clone());  // TODO: Wrong answer, just to test
 }
 
 /// Compute M = S^e (mod N), where e = 65537, and return the `claim` to prove this
