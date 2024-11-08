@@ -57,6 +57,7 @@ pub fn claim(
 /// `S` is the `base`, `N` is the `modulus`, and the result `M` is returned
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(not(feature = "bigint-dig-shim"))]
+#[no_mangle]
 pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
     let claims = compute_claim_inner(base.to_u32_digits(), modulus.to_u32_digits())?;
     let result = claims[2].clone();
@@ -70,6 +71,7 @@ pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> Result<BigUint> {
 /// `S` is the `base`, `N` is the `modulus`, and the result `M` is returned
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[cfg(feature = "bigint-dig-shim")]
+#[no_mangle]
 pub fn modpow_65537(base: &BigUintDig, modulus: &BigUintDig) -> Result<BigUintDig> {
     // Ensure inputs fill an even number of words
     let mut base = base.to_bytes_le();
