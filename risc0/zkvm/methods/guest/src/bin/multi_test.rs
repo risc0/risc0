@@ -531,5 +531,16 @@ fn main() {
                 hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
             );
         }
+        MultiTestSpec::BigKeccak => {
+            // test_keccak_02.txt
+            let data1 = &[0u8; 100_001]; // TODO - don't hash input transcript for this case....
+            let mut hasher1 = Keccak::v256();
+            let mut output1 = [0u8; DIGEST_BYTES];
+            hasher1.update(data1);
+
+            hasher1.finalize(&mut output1);
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize() };
+        }
     }
 }

@@ -145,7 +145,7 @@ fn sha_iter() {
 
 #[test]
 fn run_keccak() {
-    let spec = MultiTestSpec::SysKeccak;
+    let spec = MultiTestSpec::BigKeccak;
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()

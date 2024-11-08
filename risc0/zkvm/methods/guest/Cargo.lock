@@ -1539,9 +1539,10 @@ dependencies = [
 [[package]]
 name = "tiny-keccak"
 version = "2.0.2"
+source = "git+https://github.com/risc0/tiny-keccak.git?branch=erik/risc0-v2#f921be7a9fc624c8ba26b82338cc37a72fe5a853"
 dependencies = [
+ "anyhow",
  "crunchy",
- "risc0-zkvm",
 ]
 
 [[package]]

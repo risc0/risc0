@@ -133,6 +133,11 @@ pub(crate) fn init() {
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         #[allow(static_mut_refs)]
+        if KECCAK_BATCHER.has_data() {
+            KECCAK_BATCHER.finalize();
+        }
+
+        #[allow(static_mut_refs)]
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
         #[allow(static_mut_refs)]
@@ -536,10 +541,11 @@ impl KeccakBatcher {
     ///
     /// the amount of raw data written to the
     pub fn write_keccak_entry(&mut self, input: &[u8], hash: &[u8; 32]) -> Result<()> {
+        //self::log(&alloc::format!("write keccak entry"));
         // if this entry does not fit in the remaining space, create a new claim and reset the batcher.
         let padding_bytes = Self::BLOCK_BYTES - (input.len() % Self::BLOCK_BYTES);
         if self.data_offset + input.len() + padding_bytes + DIGEST_BYTES + Self::FINAL_PADDING_BYTES > Self::KECCAK_LIMIT {
-            self.finalize();
+            let _digest = self.finalize();
         }
 
         self.write_data(input)?;
@@ -547,7 +553,7 @@ impl KeccakBatcher {
 
         let data_length = self.current_data_length();
         let block_count = (data_length / Self::BLOCK_BYTES) as u8;
-        self::log(&alloc::format!("block count: {block_count}"));
+        //self::log(&alloc::format!("block count: {block_count}"));
 
         self.write_data(hash)?;
         self.input_transcript[self.block_count_offset] = block_count;
@@ -568,13 +574,14 @@ impl KeccakBatcher {
         self.input_transcript
             [self.block_count_offset..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
             .copy_from_slice(&[0u8; Self::BLOCK_COUNT_BYTES]);
-        self::log(&alloc::format!(
-            "finalize: input transcript size: {}",
-            self.block_count_offset + Self::BLOCK_COUNT_BYTES,
-        ));
         let transcript_digest = crate::sha::Impl::hash_bytes(
             &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
         );
+        self::log(&alloc::format!(
+            "finalize: input transcript size : {} : {}",
+            self.block_count_offset + Self::BLOCK_COUNT_BYTES,
+            transcript_digest
+        ));
         // TODO: add assumption, send transcript
         // crate::guest::env::verify_assumption(*transcript_digest, Digest::default()).unwrap();
         self.reset();
@@ -589,10 +596,18 @@ impl KeccakBatcher {
     fn current_data_length(&self) -> usize {
         self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES)
     }
+
+    /// TODO
+    pub fn has_data(&self) -> bool {
+        self.data_offset != Self::BLOCK_COUNT_BYTES
+    }
 }
 
 /// take an input, and delim and returns a host-generated keccak hash.
-pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
+#[no_mangle]
+pub fn keccak_digest(input: &[u8], delim: u8) -> Result<[u8; 32]> {
+    self::log(&alloc::format!("delim {}", delim));
+
     let nondet_digest = [0u8; DIGEST_BYTES];
     unsafe {
         sys_keccak(

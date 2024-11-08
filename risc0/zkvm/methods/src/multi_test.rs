@@ -117,6 +117,7 @@ pub enum MultiTestSpec {
     },
     SysKeccak,
     TinyKeccak,
+    BigKeccak,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
