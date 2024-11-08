@@ -544,7 +544,9 @@ impl KeccakBatcher {
         //self::log(&alloc::format!("write keccak entry"));
         // if this entry does not fit in the remaining space, create a new claim and reset the batcher.
         let padding_bytes = Self::BLOCK_BYTES - (input.len() % Self::BLOCK_BYTES);
-        if self.data_offset + input.len() + padding_bytes + DIGEST_BYTES + Self::FINAL_PADDING_BYTES > Self::KECCAK_LIMIT {
+        if self.data_offset + input.len() + padding_bytes + DIGEST_BYTES + Self::FINAL_PADDING_BYTES
+            > Self::KECCAK_LIMIT
+        {
             let _digest = self.finalize_transcript();
         }
 

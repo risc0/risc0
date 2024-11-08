@@ -19,6 +19,7 @@ use std::{
     sync::Mutex,
 };
 
+use crate::guest::env;
 use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
@@ -1192,6 +1193,12 @@ fn heap_bug_zkvm_527() {
         .run()
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
+fn big_keccak() {
+    run_test(MultiTestSpec::BigKeccak);
+    assert!(!unsafe { env::KECCAK_BATCHER.has_data() })
 }
 
 #[cfg(feature = "docker")]
