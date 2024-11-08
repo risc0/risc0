@@ -13,7 +13,9 @@
 // limitations under the License.
 
 use jwt_core::Validator;
+use num_bigint_dig::BigUint;
 use risc0_zkvm::guest::env;
+use risc0_circuit_bigint::rsa::modpow_65537;
 
 static PUBLIC_KEY: &str = r#"
     {
@@ -44,4 +46,8 @@ fn main() {
         .expect("token integrity check failed");
 
     env::commit(&valid_token.claims().custom.subject);
+}
+
+fn todo_linker_experiment() {
+  let _x = modpow_65537(&BigUint::from(1u32), &BigUint::from(3u32));
 }
