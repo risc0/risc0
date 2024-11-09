@@ -22,7 +22,6 @@ use num_traits::ops::bytes::ToBytes;
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use risc0_zkvm_platform::syscall::sys_rsa;
 
-
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use crate::prove;
 use crate::{BigIntClaim, BigIntProgram};
@@ -48,9 +47,9 @@ pub fn claim(
 /// Compute M = S^e (mod N), where e = 65537, including an accelerated proof that the computation is correct
 ///
 /// (`S` is the `base`, `N` is the `modulus`, and `M` is the `result`.)
-/// 
+///
 /// Parameters are 3072 bits, given as 96 32-bit words (little endian). Zero-pad if using smaller values.
-/// 
+///
 /// # Safety
 ///
 /// `result`, `base`, and `modulus` must be aligned and dereferenceable.
