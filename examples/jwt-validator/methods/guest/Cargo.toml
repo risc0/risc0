@@ -7,8 +7,7 @@ edition = "2021"
 
 [dependencies]
 jwt-core = { path = "../../core/" }
-num-bigint-dig = "0.8"
-risc0-circuit-bigint = { path = "../../../../risc0/circuit/bigint", default-features = false, features = ["bigint-dig-shim"] }
+risc0-circuit-bigint = { path = "../../../../risc0/circuit/bigint", default-features = false }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 
 [patch.crates-io]

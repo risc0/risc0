@@ -16,11 +16,6 @@
 #[cfg(feature = "prove")]
 mod tests;
 
-#[cfg(test)]
-#[cfg(feature = "prove")]
-#[cfg(feature = "bigint-dig-shim")]
-mod tests_dig;
-
 use num_bigint::BigUint;
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 use num_traits::ops::bytes::ToBytes;
