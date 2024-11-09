@@ -14,7 +14,7 @@
 
 use num_bigint::BigUint;
 use num_traits::Num as _;
-use risc0_circuit_bigint::zkr::register_zkrs;
+use risc0_circuit_bigint::{rsa::WIDTH_WORDS, zkr::register_zkrs};
 use risc0_circuit_bigint_test_methods::RSA_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
@@ -33,9 +33,9 @@ fn main() {
     // We compute the modpow of `base` to 65537 mod `modulus`, commit it to the journal, and compare to `expected`
     let mut modulus = from_hex("9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5").to_u32_digits();
     let mut base = from_hex("de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677").to_u32_digits();
-    assert!(modulus.len() <= 96 && base.len() <= 96);  // TODO: Clean magic number 96
-    modulus.resize(96, 0);
-    base.resize(96, 0);
+    assert!(modulus.len() <= WIDTH_WORDS && base.len() <= WIDTH_WORDS);
+    modulus.resize(WIDTH_WORDS, 0);
+    base.resize(WIDTH_WORDS, 0);
 
     let env = ExecutorEnv::builder()
         .write(&base)

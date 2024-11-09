@@ -26,12 +26,6 @@ mod testutil;
 #[cfg(feature = "prove")]
 pub mod zkr;
 
-// // TODO: So this comes through as an extern just fine...
-// #[no_mangle]
-// pub fn todo_test_fn(x: u32) -> u32 {
-//     x
-// }
-
 pub(crate) mod generated {
     #![allow(dead_code)]
     #![allow(non_camel_case_types)]

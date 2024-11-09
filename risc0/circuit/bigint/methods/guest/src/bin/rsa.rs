@@ -18,17 +18,17 @@ use risc0_zkvm::guest::env;
 fn main() {
     // Computes and proves the result of modpow with exponent of 65537
     let input: Vec<u32> = env::read();
-    let base: [u32; 96] = input.try_into().expect("Inputs should come pre-padded A");  // TODO: Not magic number 96
+    let base: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs should come pre-padded A");
     let input: Vec<u32> = env::read();
-    let modulus: [u32; 96] = input.try_into().expect("Inputs should come pre-padded B");  // TODO: Not magic number 96
+    let modulus: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs should come pre-padded B");
     const fn zero() -> u32 {
         0
     }
-    let mut result = [zero(); 96];
+    let mut result = [zero(); rsa::WIDTH_WORDS];
 
-    // TODO: safety docs
+    // Safety: Parameters are dereferenceable and aligned
     unsafe {
-        rsa::sys_rsa_and_prove(&mut result, &base, &modulus);
+        rsa::modpow_65537(&mut result, &base, &modulus);
     }
 
     env::commit(&result.to_vec());

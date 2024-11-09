@@ -138,9 +138,9 @@ fn guest_compute() {
     let expected_result = base.clone();
     let mut base = base.to_u32_digits();
     let mut modulus = from_hex("010001").to_u32_digits(); // 65537
-    assert!(modulus.len() <= 96 && base.len() <= 96);  // TODO: Clean magic number 96
-    modulus.resize(96, 0);
-    base.resize(96, 0);
+    assert!(modulus.len() <= crate::rsa::WIDTH_WORDS && base.len() <= crate::rsa::WIDTH_WORDS);
+    modulus.resize(crate::rsa::WIDTH_WORDS, 0);
+    base.resize(crate::rsa::WIDTH_WORDS, 0);
     let env = ExecutorEnv::builder()
         .write(&base)
         .unwrap()

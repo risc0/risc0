@@ -14,7 +14,7 @@
 
 use jwt_core::Validator;
 use risc0_zkvm::guest::env;
-use risc0_circuit_bigint::rsa::sys_rsa_and_prove;
+use risc0_circuit_bigint::rsa::modpow_65537;
 
 static PUBLIC_KEY: &str = r#"
     {
@@ -53,6 +53,6 @@ fn _linker_helper() {
   assert!(false, "Do not call this function");
   // Null pointers break safety but this is dead code so it's ok
   unsafe {
-    sys_rsa_and_prove(std::ptr::null_mut(), std::ptr::null(), std::ptr::null());
+    modpow_65537(std::ptr::null_mut(), std::ptr::null(), std::ptr::null());
   }
 }
