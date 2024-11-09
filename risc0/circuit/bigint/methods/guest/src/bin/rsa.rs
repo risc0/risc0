@@ -18,9 +18,9 @@ use risc0_zkvm::guest::env;
 fn main() {
     // Computes and proves the result of modpow with exponent of 65537
     let input: Vec<u32> = env::read();
-    let base: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs should come pre-padded A");
+    let base: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs must be 96 words");
     let input: Vec<u32> = env::read();
-    let modulus: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs should come pre-padded B");
+    let modulus: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs must be 96 words");
     const fn zero() -> u32 {
         0
     }
