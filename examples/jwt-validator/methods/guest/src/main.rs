@@ -14,7 +14,7 @@
 
 use jwt_core::Validator;
 use risc0_zkvm::guest::env;
-use risc0_circuit_bigint::rsa::modpow_65537;
+use risc0_circuit_bigint::rsa::sys_rsa_and_prove;
 
 static PUBLIC_KEY: &str = r#"
     {
@@ -44,14 +44,15 @@ fn main() {
         .validate_token_integrity(token.as_str())
         .expect("token integrity check failed");
 
-    // TODO: Dead code for the linker
-    if false {
-      let _x = modpow_65537(&1u32.into(), &3u32.into());
-    }
-
     env::commit(&valid_token.claims().custom.subject);
 }
 
-// fn todo_linker_experiment() {
-//   let _x = modpow_65537(&1u32.into(), &3u32.into());
-// }
+// Dead code for the linker
+// The linker will "helpfully" optimize away our weakly linked function if we don't directly use it somewhere. This is a fake function to prevent such an optimization. Do not call this function, it is both useless and unsafe.
+fn _linker_helper() {
+  assert!(false, "Do not call this function");
+  // Null pointers break safety but this is dead code so it's ok
+  unsafe {
+    sys_rsa_and_prove(std::ptr::null_mut(), std::ptr::null(), std::ptr::null());
+  }
+}
