@@ -54,7 +54,7 @@ pub fn claim(
 /// # Safety
 ///
 /// `result`, `base`, and `modulus` must be aligned and dereferenceable.
-// #[stability::unstable]  // TODO
+#[stability::unstable]
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 #[no_mangle]
 pub unsafe extern "C" fn modpow_65537(

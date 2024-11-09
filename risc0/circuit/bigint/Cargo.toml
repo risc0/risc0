@@ -54,3 +54,4 @@ default = ["prove"]
 make_control_ids = []
 # Enables ZKR registration to actually generate proofs.
 prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
+unstable = []
