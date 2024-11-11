@@ -9,7 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-ark-bn254 = { version = "0.4" }
+ark-bn254 = { version = "0.5" }
 ark-ec = { version = "0.4" }
 ark-groth16 = { version = "0.4", default-features = false }
 ark-serialize = { version = "0.4", default-features = false }
