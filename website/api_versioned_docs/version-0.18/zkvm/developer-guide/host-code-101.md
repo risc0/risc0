@@ -68,9 +68,9 @@ If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
-[Bonsai]: ../../bonsai/
+[Bonsai]: ../../bonsai
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples
 [execute]: /terminology#execute
 [execution environment]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.ExecutorEnv.html
 [executor]: /terminology#executor
@@ -87,6 +87,6 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [Receipts]: receipts.md
 [these docs]: https://github.com/risc0/risc0/issues/new/choose
 [verifying receipts]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#method.verify
-[zkVM]: ../
-[zkVM Application]: ../
+[zkVM]: ..
+[zkVM Application]: ..
 [zkVM Quick Start]: ../quickstart.md

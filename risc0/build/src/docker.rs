@@ -154,12 +154,17 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:r0.1.79.0-2")
+        .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
         .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[(
+            "CC_riscv32im_risc0_zkvm_elf",
+            "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
+        )])
+        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)
@@ -260,7 +265,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "c71021f816ffdced1dd7a514c38cab053efcc29f29fc0506cfd02cbfe4be3a27",
+            "0b11efb820b1744d551871e49c88b52874d2bb66acafba9a5ddda1facf3e3828",
         );
     }
 }

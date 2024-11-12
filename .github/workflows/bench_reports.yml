@@ -1,8 +1,10 @@
 name: Benchmark Reports
-
 on:
   schedule:
     - cron: '0 7 * * *' # Nightly (ish) Pacific
+
+  push:
+    branches: [ "release-*" ]
 
   workflow_dispatch:
 
@@ -22,7 +24,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0-2
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.81.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 jobs:

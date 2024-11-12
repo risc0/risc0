@@ -78,5 +78,5 @@ This phase validates if the objectives of the security plan have been met. This 
 [External deep dive audits]: https://github.com/risc0/rz-security/tree/main/audits
 [ISO 27002:2022]: https://www.iso.org/standard/75652.html
 [NIST SSDF]: https://csrc.nist.gov/Projects/ssdf
-[OWASP SAAAM]: https://owasp.org/www-project-samm/
+[OWASP SAAAM]: https://owasp.org/www-project-samm
 [the ReKT test]: https://www.risczero.com/blog/risc-zero-take-the-rekt-test

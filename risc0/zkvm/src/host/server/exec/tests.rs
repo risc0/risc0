@@ -25,7 +25,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
     BLST_ELF, HEAP_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
-    ZKVM_527_ELF,
+    SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -269,6 +269,11 @@ fn bigint_accel() {
             bytemuck::cast_slice::<u32, u8>(case.expected().as_slice())
         );
     }
+}
+
+#[test]
+fn sys_bigint2() {
+    run_test(MultiTestSpec::SysBigInt2);
 }
 
 #[test]
@@ -870,6 +875,26 @@ fn random() {
 fn getrandom_panic() {
     let env = ExecutorEnv::builder().build().unwrap();
     let _session = ExecutorImpl::from_elf(env, RAND_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Guest panicked: sys_getenv is disabled")]
+fn sys_getenv_panic() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let _session = ExecutorImpl::from_elf(env, SYS_ENV_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Guest panicked: sys_argc is disabled")]
+fn sys_args_panic() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let _session = ExecutorImpl::from_elf(env, SYS_ARGS_ELF)
         .unwrap()
         .run()
         .unwrap();

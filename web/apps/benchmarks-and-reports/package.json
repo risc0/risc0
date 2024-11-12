@@ -8,7 +8,7 @@
     "build": "next build",
     "dev": "next dev --turbo",
     "start": "next start",
-    "test": "bun test spec",
+    "test": "vitest run --silent --passWithNoTests",
     "typecheck": "tsc"
   },
   "dependencies": {

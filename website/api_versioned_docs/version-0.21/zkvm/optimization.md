@@ -468,17 +468,16 @@ below.
 
 ---
 
-[^1]:
-    Here "sampling" is in quotes because the profiler actually captures the call
+[^1]: Here "sampling" is in quotes because the profiler actually captures the call
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-    <!-- -->
+
+    1. It would be cost prohibitive to do so for all but quite short program
+       executions.
+    2. Introducing such heavy profiling would actually alter the performance
+       characteristics in significant ways.
+
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
@@ -490,7 +489,7 @@ below.
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
-[`counts`]: https://github.com/nnethercote/counts/
+[`counts`]: https://github.com/nnethercote/counts
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read.html
@@ -503,7 +502,7 @@ below.
 [arithmetic circuits]: /reference-docs/about-arithmetic-circuits
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
-[CBOR]: https://cbor.io/
+[CBOR]: https://cbor.io
 [continuation segments]: https://www.risczero.com/news/continuations
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
@@ -518,17 +517,17 @@ below.
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
-[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
+[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles
 [os-page]: https://en.wikipedia.org/wiki/Page_%28computer_memory%29
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
-[perf-book]: https://nnethercote.github.io/perf-book/
+[perf-book]: https://nnethercote.github.io/perf-book
 [pprof]: https://github.com/google/pprof
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
 [RISC-V architecture]: /reference-docs/about-risc-v
-[RISC-V operations]: https://marks.page/riscv/
-[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+[RISC-V operations]: https://marks.page/riscv
+[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
 [snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.21/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
 [snippet-password-checker]: https://github.com/risc0/risc0/blob/release-0.21/examples/password-checker/methods/guest/src/main.rs#L24

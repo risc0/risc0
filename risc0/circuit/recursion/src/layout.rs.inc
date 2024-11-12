@@ -1,12 +1,12 @@
-pub struct RecursionCheckedBytesInst {
-    pub eval_point: &'static CodeReg,
-    pub keep_coeffs: &'static CodeReg,
-    pub keep_upper_state: &'static CodeReg,
-    pub prep_full: &'static CodeReg,
+pub struct RecursionCheckedBytesInstLayout {
+    pub eval_point: &'static Reg,
+    pub keep_coeffs: &'static Reg,
+    pub keep_upper_state: &'static Reg,
+    pub prep_full: &'static Reg,
 }
-impl risc0_zkp::layout::Component for RecursionCheckedBytesInst {
+impl risc0_zkp::layout::Component for RecursionCheckedBytesInstLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionCheckedBytesInst"
+        "RecursionCheckedBytesInstLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -17,21 +17,21 @@ impl risc0_zkp::layout::Component for RecursionCheckedBytesInst {
         Ok(())
     }
 }
-pub struct OneHot {
-    pub bit_and_elem: &'static CodeReg,
-    pub bit_op_shorts: &'static CodeReg,
-    pub nop: &'static CodeReg,
-    pub set_global: &'static CodeReg,
-    pub sha_fini: &'static CodeReg,
-    pub sha_init: &'static CodeReg,
-    pub sha_load: &'static CodeReg,
-    pub sha_mix: &'static CodeReg,
-    pub wom_fini: &'static CodeReg,
-    pub wom_init: &'static CodeReg,
+pub struct OneHotLayout {
+    pub bit_and_elem: &'static Reg,
+    pub bit_op_shorts: &'static Reg,
+    pub nop: &'static Reg,
+    pub set_global: &'static Reg,
+    pub sha_fini: &'static Reg,
+    pub sha_init: &'static Reg,
+    pub sha_load: &'static Reg,
+    pub sha_mix: &'static Reg,
+    pub wom_fini: &'static Reg,
+    pub wom_init: &'static Reg,
 }
-impl risc0_zkp::layout::Component for OneHot {
+impl risc0_zkp::layout::Component for OneHotLayout {
     fn ty_name(&self) -> &'static str {
-        "OneHot"
+        "OneHotLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -48,14 +48,14 @@ impl risc0_zkp::layout::Component for OneHot {
         Ok(())
     }
 }
-pub type CodeReg3LayoutArray = [&'static CodeReg; 3];
-pub struct RecursionMacroInst {
-    pub opcode: &'static OneHot,
-    pub operand: &'static CodeReg3LayoutArray,
+pub type Reg3LayoutArray = [&'static Reg; 3];
+pub struct RecursionMacroInstLayout {
+    pub opcode: &'static OneHotLayout,
+    pub operand: &'static Reg3LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionMacroInst {
+impl risc0_zkp::layout::Component for RecursionMacroInstLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionMacroInst"
+        "RecursionMacroInstLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -64,13 +64,13 @@ impl risc0_zkp::layout::Component for RecursionMacroInst {
         Ok(())
     }
 }
-pub struct RecursionMicroInst {
-    pub opcode: &'static CodeReg,
-    pub operand: &'static CodeReg3LayoutArray,
+pub struct RecursionMicroInstLayout {
+    pub opcode: &'static Reg,
+    pub operand: &'static Reg3LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionMicroInst {
+impl risc0_zkp::layout::Component for RecursionMicroInstLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionMicroInst"
+        "RecursionMicroInstLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -79,16 +79,16 @@ impl risc0_zkp::layout::Component for RecursionMicroInst {
         Ok(())
     }
 }
-pub type RecursionMicroInst3LayoutArray = [&'static RecursionMicroInst; 3];
-pub struct OneHot0 {
-    pub c0: &'static CodeReg,
-    pub c1: &'static CodeReg,
-    pub c2: &'static CodeReg,
-    pub c3: &'static CodeReg,
+pub type RecursionMicroInstLayout3LayoutArray = [&'static RecursionMicroInstLayout; 3];
+pub struct OneHot0Layout {
+    pub c0: &'static Reg,
+    pub c1: &'static Reg,
+    pub c2: &'static Reg,
+    pub c3: &'static Reg,
 }
-impl risc0_zkp::layout::Component for OneHot0 {
+impl risc0_zkp::layout::Component for OneHot0Layout {
     fn ty_name(&self) -> &'static str {
-        "OneHot0"
+        "OneHot0Layout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -99,14 +99,14 @@ impl risc0_zkp::layout::Component for OneHot0 {
         Ok(())
     }
 }
-pub struct OneHot1 {
-    pub g0: &'static CodeReg,
-    pub g1: &'static CodeReg,
-    pub g2: &'static CodeReg,
+pub struct OneHot1Layout {
+    pub g0: &'static Reg,
+    pub g1: &'static Reg,
+    pub g2: &'static Reg,
 }
-impl risc0_zkp::layout::Component for OneHot1 {
+impl risc0_zkp::layout::Component for OneHot1Layout {
     fn ty_name(&self) -> &'static str {
-        "OneHot1"
+        "OneHot1Layout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -116,18 +116,18 @@ impl risc0_zkp::layout::Component for OneHot1 {
         Ok(())
     }
 }
-pub type CodeReg8LayoutArray = [&'static CodeReg; 8];
-pub struct RecursionPoseidon2MemInst {
-    pub do_mont: &'static CodeReg,
-    pub keep_state: &'static CodeReg,
-    pub keep_upper_state: &'static CodeReg,
-    pub prep_full: &'static CodeReg,
-    pub group: &'static OneHot1,
-    pub inputs: &'static CodeReg8LayoutArray,
+pub type Reg8LayoutArray = [&'static Reg; 8];
+pub struct RecursionPoseidon2MemInstLayout {
+    pub do_mont: &'static Reg,
+    pub keep_state: &'static Reg,
+    pub keep_upper_state: &'static Reg,
+    pub prep_full: &'static Reg,
+    pub group: &'static OneHot1Layout,
+    pub inputs: &'static Reg8LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionPoseidon2MemInst {
+impl risc0_zkp::layout::Component for RecursionPoseidon2MemInstLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionPoseidon2MemInst"
+        "RecursionPoseidon2MemInstLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -140,17 +140,17 @@ impl risc0_zkp::layout::Component for RecursionPoseidon2MemInst {
         Ok(())
     }
 }
-pub struct Mux {
-    pub checked_bytes: &'static RecursionCheckedBytesInst,
-    pub macro_ops: &'static RecursionMacroInst,
-    pub micro_ops: &'static RecursionMicroInst3LayoutArray,
-    pub poseidon2_full: &'static OneHot0,
-    pub poseidon2_load: &'static RecursionPoseidon2MemInst,
-    pub poseidon2_store: &'static RecursionPoseidon2MemInst,
+pub struct MuxLayout {
+    pub checked_bytes: &'static RecursionCheckedBytesInstLayout,
+    pub macro_ops: &'static RecursionMacroInstLayout,
+    pub micro_ops: &'static RecursionMicroInstLayout3LayoutArray,
+    pub poseidon2_full: &'static OneHot0Layout,
+    pub poseidon2_load: &'static RecursionPoseidon2MemInstLayout,
+    pub poseidon2_store: &'static RecursionPoseidon2MemInstLayout,
 }
-impl risc0_zkp::layout::Component for Mux {
+impl risc0_zkp::layout::Component for MuxLayout {
     fn ty_name(&self) -> &'static str {
-        "Mux"
+        "MuxLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -163,18 +163,18 @@ impl risc0_zkp::layout::Component for Mux {
         Ok(())
     }
 }
-pub struct OneHot2 {
-    pub checked_bytes: &'static CodeReg,
-    pub macro_ops: &'static CodeReg,
-    pub micro_ops: &'static CodeReg,
-    pub poseidon2_full: &'static CodeReg,
-    pub poseidon2_load: &'static CodeReg,
-    pub poseidon2_partial: &'static CodeReg,
-    pub poseidon2_store: &'static CodeReg,
+pub struct OneHot2Layout {
+    pub checked_bytes: &'static Reg,
+    pub macro_ops: &'static Reg,
+    pub micro_ops: &'static Reg,
+    pub poseidon2_full: &'static Reg,
+    pub poseidon2_load: &'static Reg,
+    pub poseidon2_partial: &'static Reg,
+    pub poseidon2_store: &'static Reg,
 }
-impl risc0_zkp::layout::Component for OneHot2 {
+impl risc0_zkp::layout::Component for OneHot2Layout {
     fn ty_name(&self) -> &'static str {
-        "OneHot2"
+        "OneHot2Layout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -188,14 +188,14 @@ impl risc0_zkp::layout::Component for OneHot2 {
         Ok(())
     }
 }
-pub struct RecursionCode {
-    pub write_addr: &'static CodeReg,
-    pub inst: &'static Mux,
-    pub select: &'static OneHot2,
+pub struct RecursionCodeLayout {
+    pub write_addr: &'static Reg,
+    pub inst: &'static MuxLayout,
+    pub select: &'static OneHot2Layout,
 }
-impl risc0_zkp::layout::Component for RecursionCode {
+impl risc0_zkp::layout::Component for RecursionCodeLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionCode"
+        "RecursionCodeLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -205,14 +205,162 @@ impl risc0_zkp::layout::Component for RecursionCode {
         Ok(())
     }
 }
-pub type DataReg4LayoutArray = [&'static DataReg; 4];
-pub struct RecursionImplWomPlonkElement {
-    pub addr: &'static DataReg,
-    pub data: &'static DataReg4LayoutArray,
+pub struct RecursionTopLayout {
+    pub code: &'static RecursionCodeLayout,
+    pub mux: &'static RecursionMicroInstLayout3LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionImplWomPlonkElement {
+impl risc0_zkp::layout::Component for RecursionTopLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionImplWomPlonkElement"
+        "RecursionTopLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("code", self.code)?;
+        v.visit_component("mux", self.mux)?;
+        Ok(())
+    }
+}
+pub const CODE_LAYOUT: &RecursionTopLayout = &RecursionTopLayout {
+    code: &RecursionCodeLayout {
+        write_addr: &Reg { offset: 0 },
+        inst: &MuxLayout {
+            checked_bytes: &RecursionCheckedBytesInstLayout {
+                eval_point: &Reg { offset: 8 },
+                keep_coeffs: &Reg { offset: 9 },
+                keep_upper_state: &Reg { offset: 10 },
+                prep_full: &Reg { offset: 11 },
+            },
+            macro_ops: &RecursionMacroInstLayout {
+                opcode: &OneHotLayout {
+                    bit_and_elem: &Reg { offset: 11 },
+                    bit_op_shorts: &Reg { offset: 12 },
+                    nop: &Reg { offset: 8 },
+                    set_global: &Reg { offset: 17 },
+                    sha_fini: &Reg { offset: 14 },
+                    sha_init: &Reg { offset: 13 },
+                    sha_load: &Reg { offset: 15 },
+                    sha_mix: &Reg { offset: 16 },
+                    wom_fini: &Reg { offset: 10 },
+                    wom_init: &Reg { offset: 9 },
+                },
+                operand: &[
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                ],
+            },
+            micro_ops: &[
+                &RecursionMicroInstLayout {
+                    opcode: &Reg { offset: 8 },
+                    operand: &[&Reg { offset: 9 }, &Reg { offset: 10 }, &Reg { offset: 11 }],
+                },
+                &RecursionMicroInstLayout {
+                    opcode: &Reg { offset: 12 },
+                    operand: &[
+                        &Reg { offset: 13 },
+                        &Reg { offset: 14 },
+                        &Reg { offset: 15 },
+                    ],
+                },
+                &RecursionMicroInstLayout {
+                    opcode: &Reg { offset: 16 },
+                    operand: &[
+                        &Reg { offset: 17 },
+                        &Reg { offset: 18 },
+                        &Reg { offset: 19 },
+                    ],
+                },
+            ],
+            poseidon2_full: &OneHot0Layout {
+                c0: &Reg { offset: 8 },
+                c1: &Reg { offset: 9 },
+                c2: &Reg { offset: 10 },
+                c3: &Reg { offset: 11 },
+            },
+            poseidon2_load: &RecursionPoseidon2MemInstLayout {
+                do_mont: &Reg { offset: 8 },
+                keep_state: &Reg { offset: 9 },
+                keep_upper_state: &Reg { offset: 10 },
+                prep_full: &Reg { offset: 11 },
+                group: &OneHot1Layout {
+                    g0: &Reg { offset: 12 },
+                    g1: &Reg { offset: 13 },
+                    g2: &Reg { offset: 14 },
+                },
+                inputs: &[
+                    &Reg { offset: 15 },
+                    &Reg { offset: 16 },
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                    &Reg { offset: 21 },
+                    &Reg { offset: 22 },
+                ],
+            },
+            poseidon2_store: &RecursionPoseidon2MemInstLayout {
+                do_mont: &Reg { offset: 8 },
+                keep_state: &Reg { offset: 9 },
+                keep_upper_state: &Reg { offset: 10 },
+                prep_full: &Reg { offset: 11 },
+                group: &OneHot1Layout {
+                    g0: &Reg { offset: 12 },
+                    g1: &Reg { offset: 13 },
+                    g2: &Reg { offset: 14 },
+                },
+                inputs: &[
+                    &Reg { offset: 15 },
+                    &Reg { offset: 16 },
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                    &Reg { offset: 21 },
+                    &Reg { offset: 22 },
+                ],
+            },
+        },
+        select: &OneHot2Layout {
+            checked_bytes: &Reg { offset: 7 },
+            macro_ops: &Reg { offset: 2 },
+            micro_ops: &Reg { offset: 1 },
+            poseidon2_full: &Reg { offset: 4 },
+            poseidon2_load: &Reg { offset: 3 },
+            poseidon2_partial: &Reg { offset: 5 },
+            poseidon2_store: &Reg { offset: 6 },
+        },
+    },
+    mux: &[
+        &RecursionMicroInstLayout {
+            opcode: &Reg { offset: 8 },
+            operand: &[&Reg { offset: 9 }, &Reg { offset: 10 }, &Reg { offset: 11 }],
+        },
+        &RecursionMicroInstLayout {
+            opcode: &Reg { offset: 12 },
+            operand: &[
+                &Reg { offset: 13 },
+                &Reg { offset: 14 },
+                &Reg { offset: 15 },
+            ],
+        },
+        &RecursionMicroInstLayout {
+            opcode: &Reg { offset: 16 },
+            operand: &[
+                &Reg { offset: 17 },
+                &Reg { offset: 18 },
+                &Reg { offset: 19 },
+            ],
+        },
+    ],
+};
+pub type Reg4LayoutArray = [&'static Reg; 4];
+pub struct RecursionImplWomPlonkElementLayout {
+    pub addr: &'static Reg,
+    pub data: &'static Reg4LayoutArray,
+}
+impl risc0_zkp::layout::Component for RecursionImplWomPlonkElementLayout {
+    fn ty_name(&self) -> &'static str {
+        "RecursionImplWomPlonkElementLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -221,17 +369,17 @@ impl risc0_zkp::layout::Component for RecursionImplWomPlonkElement {
         Ok(())
     }
 }
-pub type DataReg31LayoutArray = [&'static DataReg; 31];
-pub struct RecursionBitAndElem {
-    pub in_a: &'static RecursionImplWomPlonkElement,
-    pub in_b: &'static RecursionImplWomPlonkElement,
-    pub out: &'static RecursionImplWomPlonkElement,
-    pub bits_a: &'static DataReg31LayoutArray,
-    pub bits_b: &'static DataReg31LayoutArray,
+pub type Reg31LayoutArray = [&'static Reg; 31];
+pub struct RecursionBitAndElemLayout {
+    pub in_a: &'static RecursionImplWomPlonkElementLayout,
+    pub in_b: &'static RecursionImplWomPlonkElementLayout,
+    pub out: &'static RecursionImplWomPlonkElementLayout,
+    pub bits_a: &'static Reg31LayoutArray,
+    pub bits_b: &'static Reg31LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionBitAndElem {
+impl risc0_zkp::layout::Component for RecursionBitAndElemLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionBitAndElem"
+        "RecursionBitAndElemLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -243,17 +391,17 @@ impl risc0_zkp::layout::Component for RecursionBitAndElem {
         Ok(())
     }
 }
-pub type DataReg32LayoutArray = [&'static DataReg; 32];
-pub struct RecursionBitOpShorts {
-    pub in_a: &'static RecursionImplWomPlonkElement,
-    pub in_b: &'static RecursionImplWomPlonkElement,
-    pub out: &'static RecursionImplWomPlonkElement,
-    pub bits_a: &'static DataReg32LayoutArray,
-    pub bits_b: &'static DataReg32LayoutArray,
+pub type Reg32LayoutArray = [&'static Reg; 32];
+pub struct RecursionBitOpShortsLayout {
+    pub in_a: &'static RecursionImplWomPlonkElementLayout,
+    pub in_b: &'static RecursionImplWomPlonkElementLayout,
+    pub out: &'static RecursionImplWomPlonkElementLayout,
+    pub bits_a: &'static Reg32LayoutArray,
+    pub bits_b: &'static Reg32LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionBitOpShorts {
+impl risc0_zkp::layout::Component for RecursionBitOpShortsLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionBitOpShorts"
+        "RecursionBitOpShortsLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -265,45 +413,43 @@ impl risc0_zkp::layout::Component for RecursionBitOpShorts {
         Ok(())
     }
 }
-pub type OutReg32LayoutArray = [&'static OutReg; 32];
-pub type RecursionImplWomPlonkElement4LayoutArray = [&'static RecursionImplWomPlonkElement; 4];
-pub struct RecursionSetGlobal {
-    pub select: &'static DataReg4LayoutArray,
-    pub out: &'static OutReg32LayoutArray,
-    pub regs: &'static RecursionImplWomPlonkElement4LayoutArray,
+pub type RecursionImplWomPlonkElementLayout4LayoutArray =
+    [&'static RecursionImplWomPlonkElementLayout; 4];
+pub struct RecursionSetGlobalLayout {
+    pub select: &'static Reg4LayoutArray,
+    pub regs: &'static RecursionImplWomPlonkElementLayout4LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionSetGlobal {
+impl risc0_zkp::layout::Component for RecursionSetGlobalLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionSetGlobal"
+        "RecursionSetGlobalLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("select", self.select)?;
-        v.visit_component("out", self.out)?;
         v.visit_component("regs", self.regs)?;
         Ok(())
     }
 }
-pub type DataReg2LayoutArray = [&'static DataReg; 2];
-pub struct RecursionShaCycle {
-    pub a_carry_hi: &'static DataReg,
-    pub a_carry_low: &'static DataReg,
-    pub e_carry_high: &'static DataReg,
-    pub e_carry_low: &'static DataReg,
-    pub w_carry_high: &'static DataReg,
-    pub w_carry_low: &'static DataReg,
-    pub io0: &'static RecursionImplWomPlonkElement,
-    pub io1: &'static RecursionImplWomPlonkElement,
-    pub a: &'static DataReg32LayoutArray,
-    pub a_raw: &'static DataReg2LayoutArray,
-    pub e: &'static DataReg32LayoutArray,
-    pub e_raw: &'static DataReg2LayoutArray,
-    pub w: &'static DataReg32LayoutArray,
-    pub w_raw: &'static DataReg2LayoutArray,
+pub type Reg2LayoutArray = [&'static Reg; 2];
+pub struct RecursionShaCycleLayout {
+    pub a_carry_hi: &'static Reg,
+    pub a_carry_low: &'static Reg,
+    pub e_carry_high: &'static Reg,
+    pub e_carry_low: &'static Reg,
+    pub w_carry_high: &'static Reg,
+    pub w_carry_low: &'static Reg,
+    pub io0: &'static RecursionImplWomPlonkElementLayout,
+    pub io1: &'static RecursionImplWomPlonkElementLayout,
+    pub a: &'static Reg32LayoutArray,
+    pub a_raw: &'static Reg2LayoutArray,
+    pub e: &'static Reg32LayoutArray,
+    pub e_raw: &'static Reg2LayoutArray,
+    pub w: &'static Reg32LayoutArray,
+    pub w_raw: &'static Reg2LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionShaCycle {
+impl risc0_zkp::layout::Component for RecursionShaCycleLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionShaCycle"
+        "RecursionShaCycleLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -324,18 +470,18 @@ impl risc0_zkp::layout::Component for RecursionShaCycle {
         Ok(())
     }
 }
-pub struct Mux3 {
-    pub bit_and_elem: &'static RecursionBitAndElem,
-    pub bit_op_shorts: &'static RecursionBitOpShorts,
-    pub set_global: &'static RecursionSetGlobal,
-    pub sha_fini: &'static RecursionShaCycle,
-    pub sha_init: &'static RecursionShaCycle,
-    pub sha_load: &'static RecursionShaCycle,
-    pub sha_mix: &'static RecursionShaCycle,
+pub struct Mux3Layout {
+    pub bit_and_elem: &'static RecursionBitAndElemLayout,
+    pub bit_op_shorts: &'static RecursionBitOpShortsLayout,
+    pub set_global: &'static RecursionSetGlobalLayout,
+    pub sha_fini: &'static RecursionShaCycleLayout,
+    pub sha_init: &'static RecursionShaCycleLayout,
+    pub sha_load: &'static RecursionShaCycleLayout,
+    pub sha_mix: &'static RecursionShaCycleLayout,
 }
-impl risc0_zkp::layout::Component for Mux3 {
+impl risc0_zkp::layout::Component for Mux3Layout {
     fn ty_name(&self) -> &'static str {
-        "Mux3"
+        "Mux3Layout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -349,22 +495,22 @@ impl risc0_zkp::layout::Component for Mux3 {
         Ok(())
     }
 }
-pub struct OneHot4 {
-    pub add: &'static DataReg,
-    pub constop: &'static DataReg,
-    pub eq: &'static DataReg,
-    pub extract: &'static DataReg,
-    pub inv: &'static DataReg,
-    pub mix_rng: &'static DataReg,
-    pub mul: &'static DataReg,
-    pub read_iop_body: &'static DataReg,
-    pub read_iop_header: &'static DataReg,
-    pub select: &'static DataReg,
-    pub sub: &'static DataReg,
+pub struct OneHot4Layout {
+    pub add: &'static Reg,
+    pub constop: &'static Reg,
+    pub eq: &'static Reg,
+    pub extract: &'static Reg,
+    pub inv: &'static Reg,
+    pub mix_rng: &'static Reg,
+    pub mul: &'static Reg,
+    pub read_iop_body: &'static Reg,
+    pub read_iop_header: &'static Reg,
+    pub select: &'static Reg,
+    pub sub: &'static Reg,
 }
-impl risc0_zkp::layout::Component for OneHot4 {
+impl risc0_zkp::layout::Component for OneHot4Layout {
     fn ty_name(&self) -> &'static str {
-        "OneHot4"
+        "OneHot4Layout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -382,17 +528,16 @@ impl risc0_zkp::layout::Component for OneHot4 {
         Ok(())
     }
 }
-pub struct RecursionMicroOp {
-    pub extra: &'static DataReg,
-    pub decode: &'static OneHot4,
-    pub in0: &'static RecursionImplWomPlonkElement,
-    pub in1: &'static RecursionImplWomPlonkElement,
-    pub inst: &'static RecursionMicroInst,
-    pub out: &'static RecursionImplWomPlonkElement,
+pub struct RecursionMicroOpLayout {
+    pub extra: &'static Reg,
+    pub decode: &'static OneHot4Layout,
+    pub in0: &'static RecursionImplWomPlonkElementLayout,
+    pub in1: &'static RecursionImplWomPlonkElementLayout,
+    pub out: &'static RecursionImplWomPlonkElementLayout,
 }
-impl risc0_zkp::layout::Component for RecursionMicroOp {
+impl risc0_zkp::layout::Component for RecursionMicroOpLayout {
     fn ty_name(&self) -> &'static str {
-        "RecursionMicroOp"
+        "RecursionMicroOpLayout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -400,20 +545,19 @@ impl risc0_zkp::layout::Component for RecursionMicroOp {
         v.visit_component("decode", self.decode)?;
         v.visit_component("in0", self.in0)?;
         v.visit_component("in1", self.in1)?;
-        v.visit_component("inst", self.inst)?;
         v.visit_component("out", self.out)?;
         Ok(())
     }
 }
-pub type RecursionMicroOp3LayoutArray = [&'static RecursionMicroOp; 3];
-pub struct Mux5 {
-    pub checked_bytes: &'static RecursionImplWomPlonkElement,
-    pub macro_ops: &'static Mux3,
-    pub micro_ops: &'static RecursionMicroOp3LayoutArray,
+pub type RecursionMicroOpLayout3LayoutArray = [&'static RecursionMicroOpLayout; 3];
+pub struct Mux5Layout {
+    pub checked_bytes: &'static RecursionImplWomPlonkElementLayout,
+    pub macro_ops: &'static Mux3Layout,
+    pub micro_ops: &'static RecursionMicroOpLayout3LayoutArray,
 }
-impl risc0_zkp::layout::Component for Mux5 {
+impl risc0_zkp::layout::Component for Mux5Layout {
     fn ty_name(&self) -> &'static str {
-        "Mux5"
+        "Mux5Layout"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -423,1097 +567,943 @@ impl risc0_zkp::layout::Component for Mux5 {
         Ok(())
     }
 }
-pub struct RecursionTop {
-    pub code: &'static RecursionCode,
-    pub mux: &'static Mux5,
-}
-impl risc0_zkp::layout::Component for RecursionTop {
-    fn ty_name(&self) -> &'static str {
-        "RecursionTop"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("code", self.code)?;
-        v.visit_component("mux", self.mux)?;
-        Ok(())
-    }
-}
-pub const LAYOUT: &RecursionTop = &RecursionTop {
-    code: &RecursionCode {
-        write_addr: &CodeReg { offset: 0 },
-        inst: &Mux {
-            checked_bytes: &RecursionCheckedBytesInst {
-                eval_point: &CodeReg { offset: 8 },
-                keep_coeffs: &CodeReg { offset: 9 },
-                keep_upper_state: &CodeReg { offset: 10 },
-                prep_full: &CodeReg { offset: 11 },
-            },
-            macro_ops: &RecursionMacroInst {
-                opcode: &OneHot {
-                    bit_and_elem: &CodeReg { offset: 11 },
-                    bit_op_shorts: &CodeReg { offset: 12 },
-                    nop: &CodeReg { offset: 8 },
-                    set_global: &CodeReg { offset: 17 },
-                    sha_fini: &CodeReg { offset: 14 },
-                    sha_init: &CodeReg { offset: 13 },
-                    sha_load: &CodeReg { offset: 15 },
-                    sha_mix: &CodeReg { offset: 16 },
-                    wom_fini: &CodeReg { offset: 10 },
-                    wom_init: &CodeReg { offset: 9 },
-                },
-                operand: &[
-                    &CodeReg { offset: 18 },
-                    &CodeReg { offset: 19 },
-                    &CodeReg { offset: 20 },
-                ],
-            },
-            micro_ops: &[
-                &RecursionMicroInst {
-                    opcode: &CodeReg { offset: 8 },
-                    operand: &[
-                        &CodeReg { offset: 9 },
-                        &CodeReg { offset: 10 },
-                        &CodeReg { offset: 11 },
-                    ],
-                },
-                &RecursionMicroInst {
-                    opcode: &CodeReg { offset: 12 },
-                    operand: &[
-                        &CodeReg { offset: 13 },
-                        &CodeReg { offset: 14 },
-                        &CodeReg { offset: 15 },
-                    ],
-                },
-                &RecursionMicroInst {
-                    opcode: &CodeReg { offset: 16 },
-                    operand: &[
-                        &CodeReg { offset: 17 },
-                        &CodeReg { offset: 18 },
-                        &CodeReg { offset: 19 },
-                    ],
-                },
-            ],
-            poseidon2_full: &OneHot0 {
-                c0: &CodeReg { offset: 8 },
-                c1: &CodeReg { offset: 9 },
-                c2: &CodeReg { offset: 10 },
-                c3: &CodeReg { offset: 11 },
-            },
-            poseidon2_load: &RecursionPoseidon2MemInst {
-                do_mont: &CodeReg { offset: 8 },
-                keep_state: &CodeReg { offset: 9 },
-                keep_upper_state: &CodeReg { offset: 10 },
-                prep_full: &CodeReg { offset: 11 },
-                group: &OneHot1 {
-                    g0: &CodeReg { offset: 12 },
-                    g1: &CodeReg { offset: 13 },
-                    g2: &CodeReg { offset: 14 },
-                },
-                inputs: &[
-                    &CodeReg { offset: 15 },
-                    &CodeReg { offset: 16 },
-                    &CodeReg { offset: 17 },
-                    &CodeReg { offset: 18 },
-                    &CodeReg { offset: 19 },
-                    &CodeReg { offset: 20 },
-                    &CodeReg { offset: 21 },
-                    &CodeReg { offset: 22 },
-                ],
-            },
-            poseidon2_store: &RecursionPoseidon2MemInst {
-                do_mont: &CodeReg { offset: 8 },
-                keep_state: &CodeReg { offset: 9 },
-                keep_upper_state: &CodeReg { offset: 10 },
-                prep_full: &CodeReg { offset: 11 },
-                group: &OneHot1 {
-                    g0: &CodeReg { offset: 12 },
-                    g1: &CodeReg { offset: 13 },
-                    g2: &CodeReg { offset: 14 },
-                },
-                inputs: &[
-                    &CodeReg { offset: 15 },
-                    &CodeReg { offset: 16 },
-                    &CodeReg { offset: 17 },
-                    &CodeReg { offset: 18 },
-                    &CodeReg { offset: 19 },
-                    &CodeReg { offset: 20 },
-                    &CodeReg { offset: 21 },
-                    &CodeReg { offset: 22 },
-                ],
-            },
-        },
-        select: &OneHot2 {
-            checked_bytes: &CodeReg { offset: 7 },
-            macro_ops: &CodeReg { offset: 2 },
-            micro_ops: &CodeReg { offset: 1 },
-            poseidon2_full: &CodeReg { offset: 4 },
-            poseidon2_load: &CodeReg { offset: 3 },
-            poseidon2_partial: &CodeReg { offset: 5 },
-            poseidon2_store: &CodeReg { offset: 6 },
-        },
-    },
-    mux: &Mux5 {
-        checked_bytes: &RecursionImplWomPlonkElement {
-            addr: &DataReg { offset: 5 },
-            data: &[
-                &DataReg { offset: 6 },
-                &DataReg { offset: 7 },
-                &DataReg { offset: 8 },
-                &DataReg { offset: 9 },
-            ],
-        },
-        macro_ops: &Mux3 {
-            bit_and_elem: &RecursionBitAndElem {
-                in_a: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 11 },
-                    data: &[
-                        &DataReg { offset: 12 },
-                        &DataReg { offset: 13 },
-                        &DataReg { offset: 14 },
-                        &DataReg { offset: 15 },
-                    ],
-                },
-                in_b: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 16 },
-                    data: &[
-                        &DataReg { offset: 17 },
-                        &DataReg { offset: 18 },
-                        &DataReg { offset: 19 },
-                        &DataReg { offset: 20 },
-                    ],
-                },
-                out: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 21 },
-                    data: &[
-                        &DataReg { offset: 22 },
-                        &DataReg { offset: 23 },
-                        &DataReg { offset: 24 },
-                        &DataReg { offset: 25 },
-                    ],
-                },
-                bits_a: &[
-                    &DataReg { offset: 36 },
-                    &DataReg { offset: 38 },
-                    &DataReg { offset: 40 },
-                    &DataReg { offset: 42 },
-                    &DataReg { offset: 44 },
-                    &DataReg { offset: 46 },
-                    &DataReg { offset: 48 },
-                    &DataReg { offset: 50 },
-                    &DataReg { offset: 52 },
-                    &DataReg { offset: 54 },
-                    &DataReg { offset: 56 },
-                    &DataReg { offset: 58 },
-                    &DataReg { offset: 60 },
-                    &DataReg { offset: 62 },
-                    &DataReg { offset: 64 },
-                    &DataReg { offset: 66 },
-                    &DataReg { offset: 68 },
-                    &DataReg { offset: 70 },
-                    &DataReg { offset: 72 },
-                    &DataReg { offset: 74 },
-                    &DataReg { offset: 76 },
-                    &DataReg { offset: 78 },
-                    &DataReg { offset: 80 },
-                    &DataReg { offset: 82 },
-                    &DataReg { offset: 84 },
-                    &DataReg { offset: 86 },
-                    &DataReg { offset: 88 },
-                    &DataReg { offset: 90 },
-                    &DataReg { offset: 92 },
-                    &DataReg { offset: 94 },
-                    &DataReg { offset: 96 },
-                ],
-                bits_b: &[
-                    &DataReg { offset: 37 },
-                    &DataReg { offset: 39 },
-                    &DataReg { offset: 41 },
-                    &DataReg { offset: 43 },
-                    &DataReg { offset: 45 },
-                    &DataReg { offset: 47 },
-                    &DataReg { offset: 49 },
-                    &DataReg { offset: 51 },
-                    &DataReg { offset: 53 },
-                    &DataReg { offset: 55 },
-                    &DataReg { offset: 57 },
-                    &DataReg { offset: 59 },
-                    &DataReg { offset: 61 },
-                    &DataReg { offset: 63 },
-                    &DataReg { offset: 65 },
-                    &DataReg { offset: 67 },
-                    &DataReg { offset: 69 },
-                    &DataReg { offset: 71 },
-                    &DataReg { offset: 73 },
-                    &DataReg { offset: 75 },
-                    &DataReg { offset: 77 },
-                    &DataReg { offset: 79 },
-                    &DataReg { offset: 81 },
-                    &DataReg { offset: 83 },
-                    &DataReg { offset: 85 },
-                    &DataReg { offset: 87 },
-                    &DataReg { offset: 89 },
-                    &DataReg { offset: 91 },
-                    &DataReg { offset: 93 },
-                    &DataReg { offset: 95 },
-                    &DataReg { offset: 97 },
-                ],
-            },
-            bit_op_shorts: &RecursionBitOpShorts {
-                in_a: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 11 },
-                    data: &[
-                        &DataReg { offset: 12 },
-                        &DataReg { offset: 13 },
-                        &DataReg { offset: 14 },
-                        &DataReg { offset: 15 },
-                    ],
-                },
-                in_b: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 16 },
-                    data: &[
-                        &DataReg { offset: 17 },
-                        &DataReg { offset: 18 },
-                        &DataReg { offset: 19 },
-                        &DataReg { offset: 20 },
-                    ],
-                },
-                out: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 21 },
-                    data: &[
-                        &DataReg { offset: 22 },
-                        &DataReg { offset: 23 },
-                        &DataReg { offset: 24 },
-                        &DataReg { offset: 25 },
-                    ],
-                },
-                bits_a: &[
-                    &DataReg { offset: 36 },
-                    &DataReg { offset: 37 },
-                    &DataReg { offset: 38 },
-                    &DataReg { offset: 39 },
-                    &DataReg { offset: 40 },
-                    &DataReg { offset: 41 },
-                    &DataReg { offset: 42 },
-                    &DataReg { offset: 43 },
-                    &DataReg { offset: 44 },
-                    &DataReg { offset: 45 },
-                    &DataReg { offset: 46 },
-                    &DataReg { offset: 47 },
-                    &DataReg { offset: 48 },
-                    &DataReg { offset: 49 },
-                    &DataReg { offset: 50 },
-                    &DataReg { offset: 51 },
-                    &DataReg { offset: 52 },
-                    &DataReg { offset: 53 },
-                    &DataReg { offset: 54 },
-                    &DataReg { offset: 55 },
-                    &DataReg { offset: 56 },
-                    &DataReg { offset: 57 },
-                    &DataReg { offset: 58 },
-                    &DataReg { offset: 59 },
-                    &DataReg { offset: 60 },
-                    &DataReg { offset: 61 },
-                    &DataReg { offset: 62 },
-                    &DataReg { offset: 63 },
-                    &DataReg { offset: 64 },
-                    &DataReg { offset: 65 },
-                    &DataReg { offset: 66 },
-                    &DataReg { offset: 67 },
-                ],
-                bits_b: &[
-                    &DataReg { offset: 68 },
-                    &DataReg { offset: 69 },
-                    &DataReg { offset: 70 },
-                    &DataReg { offset: 71 },
-                    &DataReg { offset: 72 },
-                    &DataReg { offset: 73 },
-                    &DataReg { offset: 74 },
-                    &DataReg { offset: 75 },
-                    &DataReg { offset: 76 },
-                    &DataReg { offset: 77 },
-                    &DataReg { offset: 78 },
-                    &DataReg { offset: 79 },
-                    &DataReg { offset: 80 },
-                    &DataReg { offset: 81 },
-                    &DataReg { offset: 82 },
-                    &DataReg { offset: 83 },
-                    &DataReg { offset: 84 },
-                    &DataReg { offset: 85 },
-                    &DataReg { offset: 86 },
-                    &DataReg { offset: 87 },
-                    &DataReg { offset: 88 },
-                    &DataReg { offset: 89 },
-                    &DataReg { offset: 90 },
-                    &DataReg { offset: 91 },
-                    &DataReg { offset: 92 },
-                    &DataReg { offset: 93 },
-                    &DataReg { offset: 94 },
-                    &DataReg { offset: 95 },
-                    &DataReg { offset: 96 },
-                    &DataReg { offset: 97 },
-                    &DataReg { offset: 98 },
-                    &DataReg { offset: 99 },
-                ],
-            },
-            set_global: &RecursionSetGlobal {
-                select: &[
-                    &DataReg { offset: 11 },
-                    &DataReg { offset: 12 },
-                    &DataReg { offset: 13 },
-                    &DataReg { offset: 14 },
-                ],
-                out: &[
-                    &OutReg { offset: 0 },
-                    &OutReg { offset: 1 },
-                    &OutReg { offset: 2 },
-                    &OutReg { offset: 3 },
-                    &OutReg { offset: 4 },
-                    &OutReg { offset: 5 },
-                    &OutReg { offset: 6 },
-                    &OutReg { offset: 7 },
-                    &OutReg { offset: 8 },
-                    &OutReg { offset: 9 },
-                    &OutReg { offset: 10 },
-                    &OutReg { offset: 11 },
-                    &OutReg { offset: 12 },
-                    &OutReg { offset: 13 },
-                    &OutReg { offset: 14 },
-                    &OutReg { offset: 15 },
-                    &OutReg { offset: 16 },
-                    &OutReg { offset: 17 },
-                    &OutReg { offset: 18 },
-                    &OutReg { offset: 19 },
-                    &OutReg { offset: 20 },
-                    &OutReg { offset: 21 },
-                    &OutReg { offset: 22 },
-                    &OutReg { offset: 23 },
-                    &OutReg { offset: 24 },
-                    &OutReg { offset: 25 },
-                    &OutReg { offset: 26 },
-                    &OutReg { offset: 27 },
-                    &OutReg { offset: 28 },
-                    &OutReg { offset: 29 },
-                    &OutReg { offset: 30 },
-                    &OutReg { offset: 31 },
-                ],
-                regs: &[
-                    &RecursionImplWomPlonkElement {
-                        addr: &DataReg { offset: 15 },
-                        data: &[
-                            &DataReg { offset: 16 },
-                            &DataReg { offset: 17 },
-                            &DataReg { offset: 18 },
-                            &DataReg { offset: 19 },
-                        ],
-                    },
-                    &RecursionImplWomPlonkElement {
-                        addr: &DataReg { offset: 20 },
-                        data: &[
-                            &DataReg { offset: 21 },
-                            &DataReg { offset: 22 },
-                            &DataReg { offset: 23 },
-                            &DataReg { offset: 24 },
-                        ],
-                    },
-                    &RecursionImplWomPlonkElement {
-                        addr: &DataReg { offset: 25 },
-                        data: &[
-                            &DataReg { offset: 26 },
-                            &DataReg { offset: 27 },
-                            &DataReg { offset: 28 },
-                            &DataReg { offset: 29 },
-                        ],
-                    },
-                    &RecursionImplWomPlonkElement {
-                        addr: &DataReg { offset: 30 },
-                        data: &[
-                            &DataReg { offset: 31 },
-                            &DataReg { offset: 32 },
-                            &DataReg { offset: 33 },
-                            &DataReg { offset: 34 },
-                        ],
-                    },
-                ],
-            },
-            sha_fini: &RecursionShaCycle {
-                a_carry_hi: &DataReg { offset: 6 },
-                a_carry_low: &DataReg { offset: 5 },
-                e_carry_high: &DataReg { offset: 8 },
-                e_carry_low: &DataReg { offset: 7 },
-                w_carry_high: &DataReg { offset: 10 },
-                w_carry_low: &DataReg { offset: 9 },
-                io0: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 11 },
-                    data: &[
-                        &DataReg { offset: 12 },
-                        &DataReg { offset: 13 },
-                        &DataReg { offset: 14 },
-                        &DataReg { offset: 15 },
-                    ],
-                },
-                io1: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 16 },
-                    data: &[
-                        &DataReg { offset: 17 },
-                        &DataReg { offset: 18 },
-                        &DataReg { offset: 19 },
-                        &DataReg { offset: 20 },
-                    ],
-                },
-                a: &[
-                    &DataReg { offset: 26 },
-                    &DataReg { offset: 27 },
-                    &DataReg { offset: 28 },
-                    &DataReg { offset: 29 },
-                    &DataReg { offset: 30 },
-                    &DataReg { offset: 31 },
-                    &DataReg { offset: 32 },
-                    &DataReg { offset: 33 },
-                    &DataReg { offset: 34 },
-                    &DataReg { offset: 35 },
-                    &DataReg { offset: 36 },
-                    &DataReg { offset: 37 },
-                    &DataReg { offset: 38 },
-                    &DataReg { offset: 39 },
-                    &DataReg { offset: 40 },
-                    &DataReg { offset: 41 },
-                    &DataReg { offset: 42 },
-                    &DataReg { offset: 43 },
-                    &DataReg { offset: 44 },
-                    &DataReg { offset: 45 },
-                    &DataReg { offset: 46 },
-                    &DataReg { offset: 47 },
-                    &DataReg { offset: 48 },
-                    &DataReg { offset: 49 },
-                    &DataReg { offset: 50 },
-                    &DataReg { offset: 51 },
-                    &DataReg { offset: 52 },
-                    &DataReg { offset: 53 },
-                    &DataReg { offset: 54 },
-                    &DataReg { offset: 55 },
-                    &DataReg { offset: 56 },
-                    &DataReg { offset: 57 },
-                ],
-                a_raw: &[&DataReg { offset: 58 }, &DataReg { offset: 59 }],
-                e: &[
-                    &DataReg { offset: 60 },
-                    &DataReg { offset: 61 },
-                    &DataReg { offset: 62 },
-                    &DataReg { offset: 63 },
-                    &DataReg { offset: 64 },
-                    &DataReg { offset: 65 },
-                    &DataReg { offset: 66 },
-                    &DataReg { offset: 67 },
-                    &DataReg { offset: 68 },
-                    &DataReg { offset: 69 },
-                    &DataReg { offset: 70 },
-                    &DataReg { offset: 71 },
-                    &DataReg { offset: 72 },
-                    &DataReg { offset: 73 },
-                    &DataReg { offset: 74 },
-                    &DataReg { offset: 75 },
-                    &DataReg { offset: 76 },
-                    &DataReg { offset: 77 },
-                    &DataReg { offset: 78 },
-                    &DataReg { offset: 79 },
-                    &DataReg { offset: 80 },
-                    &DataReg { offset: 81 },
-                    &DataReg { offset: 82 },
-                    &DataReg { offset: 83 },
-                    &DataReg { offset: 84 },
-                    &DataReg { offset: 85 },
-                    &DataReg { offset: 86 },
-                    &DataReg { offset: 87 },
-                    &DataReg { offset: 88 },
-                    &DataReg { offset: 89 },
-                    &DataReg { offset: 90 },
-                    &DataReg { offset: 91 },
-                ],
-                e_raw: &[&DataReg { offset: 92 }, &DataReg { offset: 93 }],
-                w: &[
-                    &DataReg { offset: 94 },
-                    &DataReg { offset: 95 },
-                    &DataReg { offset: 96 },
-                    &DataReg { offset: 97 },
-                    &DataReg { offset: 98 },
-                    &DataReg { offset: 99 },
-                    &DataReg { offset: 100 },
-                    &DataReg { offset: 101 },
-                    &DataReg { offset: 102 },
-                    &DataReg { offset: 103 },
-                    &DataReg { offset: 104 },
-                    &DataReg { offset: 105 },
-                    &DataReg { offset: 106 },
-                    &DataReg { offset: 107 },
-                    &DataReg { offset: 108 },
-                    &DataReg { offset: 109 },
-                    &DataReg { offset: 110 },
-                    &DataReg { offset: 111 },
-                    &DataReg { offset: 112 },
-                    &DataReg { offset: 113 },
-                    &DataReg { offset: 114 },
-                    &DataReg { offset: 115 },
-                    &DataReg { offset: 116 },
-                    &DataReg { offset: 117 },
-                    &DataReg { offset: 118 },
-                    &DataReg { offset: 119 },
-                    &DataReg { offset: 120 },
-                    &DataReg { offset: 121 },
-                    &DataReg { offset: 122 },
-                    &DataReg { offset: 123 },
-                    &DataReg { offset: 124 },
-                    &DataReg { offset: 125 },
-                ],
-                w_raw: &[&DataReg { offset: 126 }, &DataReg { offset: 127 }],
-            },
-            sha_init: &RecursionShaCycle {
-                a_carry_hi: &DataReg { offset: 6 },
-                a_carry_low: &DataReg { offset: 5 },
-                e_carry_high: &DataReg { offset: 8 },
-                e_carry_low: &DataReg { offset: 7 },
-                w_carry_high: &DataReg { offset: 10 },
-                w_carry_low: &DataReg { offset: 9 },
-                io0: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 11 },
-                    data: &[
-                        &DataReg { offset: 12 },
-                        &DataReg { offset: 13 },
-                        &DataReg { offset: 14 },
-                        &DataReg { offset: 15 },
-                    ],
-                },
-                io1: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 16 },
-                    data: &[
-                        &DataReg { offset: 17 },
-                        &DataReg { offset: 18 },
-                        &DataReg { offset: 19 },
-                        &DataReg { offset: 20 },
-                    ],
-                },
-                a: &[
-                    &DataReg { offset: 26 },
-                    &DataReg { offset: 27 },
-                    &DataReg { offset: 28 },
-                    &DataReg { offset: 29 },
-                    &DataReg { offset: 30 },
-                    &DataReg { offset: 31 },
-                    &DataReg { offset: 32 },
-                    &DataReg { offset: 33 },
-                    &DataReg { offset: 34 },
-                    &DataReg { offset: 35 },
-                    &DataReg { offset: 36 },
-                    &DataReg { offset: 37 },
-                    &DataReg { offset: 38 },
-                    &DataReg { offset: 39 },
-                    &DataReg { offset: 40 },
-                    &DataReg { offset: 41 },
-                    &DataReg { offset: 42 },
-                    &DataReg { offset: 43 },
-                    &DataReg { offset: 44 },
-                    &DataReg { offset: 45 },
-                    &DataReg { offset: 46 },
-                    &DataReg { offset: 47 },
-                    &DataReg { offset: 48 },
-                    &DataReg { offset: 49 },
-                    &DataReg { offset: 50 },
-                    &DataReg { offset: 51 },
-                    &DataReg { offset: 52 },
-                    &DataReg { offset: 53 },
-                    &DataReg { offset: 54 },
-                    &DataReg { offset: 55 },
-                    &DataReg { offset: 56 },
-                    &DataReg { offset: 57 },
-                ],
-                a_raw: &[&DataReg { offset: 58 }, &DataReg { offset: 59 }],
-                e: &[
-                    &DataReg { offset: 60 },
-                    &DataReg { offset: 61 },
-                    &DataReg { offset: 62 },
-                    &DataReg { offset: 63 },
-                    &DataReg { offset: 64 },
-                    &DataReg { offset: 65 },
-                    &DataReg { offset: 66 },
-                    &DataReg { offset: 67 },
-                    &DataReg { offset: 68 },
-                    &DataReg { offset: 69 },
-                    &DataReg { offset: 70 },
-                    &DataReg { offset: 71 },
-                    &DataReg { offset: 72 },
-                    &DataReg { offset: 73 },
-                    &DataReg { offset: 74 },
-                    &DataReg { offset: 75 },
-                    &DataReg { offset: 76 },
-                    &DataReg { offset: 77 },
-                    &DataReg { offset: 78 },
-                    &DataReg { offset: 79 },
-                    &DataReg { offset: 80 },
-                    &DataReg { offset: 81 },
-                    &DataReg { offset: 82 },
-                    &DataReg { offset: 83 },
-                    &DataReg { offset: 84 },
-                    &DataReg { offset: 85 },
-                    &DataReg { offset: 86 },
-                    &DataReg { offset: 87 },
-                    &DataReg { offset: 88 },
-                    &DataReg { offset: 89 },
-                    &DataReg { offset: 90 },
-                    &DataReg { offset: 91 },
-                ],
-                e_raw: &[&DataReg { offset: 92 }, &DataReg { offset: 93 }],
-                w: &[
-                    &DataReg { offset: 94 },
-                    &DataReg { offset: 95 },
-                    &DataReg { offset: 96 },
-                    &DataReg { offset: 97 },
-                    &DataReg { offset: 98 },
-                    &DataReg { offset: 99 },
-                    &DataReg { offset: 100 },
-                    &DataReg { offset: 101 },
-                    &DataReg { offset: 102 },
-                    &DataReg { offset: 103 },
-                    &DataReg { offset: 104 },
-                    &DataReg { offset: 105 },
-                    &DataReg { offset: 106 },
-                    &DataReg { offset: 107 },
-                    &DataReg { offset: 108 },
-                    &DataReg { offset: 109 },
-                    &DataReg { offset: 110 },
-                    &DataReg { offset: 111 },
-                    &DataReg { offset: 112 },
-                    &DataReg { offset: 113 },
-                    &DataReg { offset: 114 },
-                    &DataReg { offset: 115 },
-                    &DataReg { offset: 116 },
-                    &DataReg { offset: 117 },
-                    &DataReg { offset: 118 },
-                    &DataReg { offset: 119 },
-                    &DataReg { offset: 120 },
-                    &DataReg { offset: 121 },
-                    &DataReg { offset: 122 },
-                    &DataReg { offset: 123 },
-                    &DataReg { offset: 124 },
-                    &DataReg { offset: 125 },
-                ],
-                w_raw: &[&DataReg { offset: 126 }, &DataReg { offset: 127 }],
-            },
-            sha_load: &RecursionShaCycle {
-                a_carry_hi: &DataReg { offset: 6 },
-                a_carry_low: &DataReg { offset: 5 },
-                e_carry_high: &DataReg { offset: 8 },
-                e_carry_low: &DataReg { offset: 7 },
-                w_carry_high: &DataReg { offset: 10 },
-                w_carry_low: &DataReg { offset: 9 },
-                io0: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 11 },
-                    data: &[
-                        &DataReg { offset: 12 },
-                        &DataReg { offset: 13 },
-                        &DataReg { offset: 14 },
-                        &DataReg { offset: 15 },
-                    ],
-                },
-                io1: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 16 },
-                    data: &[
-                        &DataReg { offset: 17 },
-                        &DataReg { offset: 18 },
-                        &DataReg { offset: 19 },
-                        &DataReg { offset: 20 },
-                    ],
-                },
-                a: &[
-                    &DataReg { offset: 26 },
-                    &DataReg { offset: 27 },
-                    &DataReg { offset: 28 },
-                    &DataReg { offset: 29 },
-                    &DataReg { offset: 30 },
-                    &DataReg { offset: 31 },
-                    &DataReg { offset: 32 },
-                    &DataReg { offset: 33 },
-                    &DataReg { offset: 34 },
-                    &DataReg { offset: 35 },
-                    &DataReg { offset: 36 },
-                    &DataReg { offset: 37 },
-                    &DataReg { offset: 38 },
-                    &DataReg { offset: 39 },
-                    &DataReg { offset: 40 },
-                    &DataReg { offset: 41 },
-                    &DataReg { offset: 42 },
-                    &DataReg { offset: 43 },
-                    &DataReg { offset: 44 },
-                    &DataReg { offset: 45 },
-                    &DataReg { offset: 46 },
-                    &DataReg { offset: 47 },
-                    &DataReg { offset: 48 },
-                    &DataReg { offset: 49 },
-                    &DataReg { offset: 50 },
-                    &DataReg { offset: 51 },
-                    &DataReg { offset: 52 },
-                    &DataReg { offset: 53 },
-                    &DataReg { offset: 54 },
-                    &DataReg { offset: 55 },
-                    &DataReg { offset: 56 },
-                    &DataReg { offset: 57 },
-                ],
-                a_raw: &[&DataReg { offset: 58 }, &DataReg { offset: 59 }],
-                e: &[
-                    &DataReg { offset: 60 },
-                    &DataReg { offset: 61 },
-                    &DataReg { offset: 62 },
-                    &DataReg { offset: 63 },
-                    &DataReg { offset: 64 },
-                    &DataReg { offset: 65 },
-                    &DataReg { offset: 66 },
-                    &DataReg { offset: 67 },
-                    &DataReg { offset: 68 },
-                    &DataReg { offset: 69 },
-                    &DataReg { offset: 70 },
-                    &DataReg { offset: 71 },
-                    &DataReg { offset: 72 },
-                    &DataReg { offset: 73 },
-                    &DataReg { offset: 74 },
-                    &DataReg { offset: 75 },
-                    &DataReg { offset: 76 },
-                    &DataReg { offset: 77 },
-                    &DataReg { offset: 78 },
-                    &DataReg { offset: 79 },
-                    &DataReg { offset: 80 },
-                    &DataReg { offset: 81 },
-                    &DataReg { offset: 82 },
-                    &DataReg { offset: 83 },
-                    &DataReg { offset: 84 },
-                    &DataReg { offset: 85 },
-                    &DataReg { offset: 86 },
-                    &DataReg { offset: 87 },
-                    &DataReg { offset: 88 },
-                    &DataReg { offset: 89 },
-                    &DataReg { offset: 90 },
-                    &DataReg { offset: 91 },
-                ],
-                e_raw: &[&DataReg { offset: 92 }, &DataReg { offset: 93 }],
-                w: &[
-                    &DataReg { offset: 94 },
-                    &DataReg { offset: 95 },
-                    &DataReg { offset: 96 },
-                    &DataReg { offset: 97 },
-                    &DataReg { offset: 98 },
-                    &DataReg { offset: 99 },
-                    &DataReg { offset: 100 },
-                    &DataReg { offset: 101 },
-                    &DataReg { offset: 102 },
-                    &DataReg { offset: 103 },
-                    &DataReg { offset: 104 },
-                    &DataReg { offset: 105 },
-                    &DataReg { offset: 106 },
-                    &DataReg { offset: 107 },
-                    &DataReg { offset: 108 },
-                    &DataReg { offset: 109 },
-                    &DataReg { offset: 110 },
-                    &DataReg { offset: 111 },
-                    &DataReg { offset: 112 },
-                    &DataReg { offset: 113 },
-                    &DataReg { offset: 114 },
-                    &DataReg { offset: 115 },
-                    &DataReg { offset: 116 },
-                    &DataReg { offset: 117 },
-                    &DataReg { offset: 118 },
-                    &DataReg { offset: 119 },
-                    &DataReg { offset: 120 },
-                    &DataReg { offset: 121 },
-                    &DataReg { offset: 122 },
-                    &DataReg { offset: 123 },
-                    &DataReg { offset: 124 },
-                    &DataReg { offset: 125 },
-                ],
-                w_raw: &[&DataReg { offset: 126 }, &DataReg { offset: 127 }],
-            },
-            sha_mix: &RecursionShaCycle {
-                a_carry_hi: &DataReg { offset: 6 },
-                a_carry_low: &DataReg { offset: 5 },
-                e_carry_high: &DataReg { offset: 8 },
-                e_carry_low: &DataReg { offset: 7 },
-                w_carry_high: &DataReg { offset: 10 },
-                w_carry_low: &DataReg { offset: 9 },
-                io0: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 11 },
-                    data: &[
-                        &DataReg { offset: 12 },
-                        &DataReg { offset: 13 },
-                        &DataReg { offset: 14 },
-                        &DataReg { offset: 15 },
-                    ],
-                },
-                io1: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 16 },
-                    data: &[
-                        &DataReg { offset: 17 },
-                        &DataReg { offset: 18 },
-                        &DataReg { offset: 19 },
-                        &DataReg { offset: 20 },
-                    ],
-                },
-                a: &[
-                    &DataReg { offset: 26 },
-                    &DataReg { offset: 27 },
-                    &DataReg { offset: 28 },
-                    &DataReg { offset: 29 },
-                    &DataReg { offset: 30 },
-                    &DataReg { offset: 31 },
-                    &DataReg { offset: 32 },
-                    &DataReg { offset: 33 },
-                    &DataReg { offset: 34 },
-                    &DataReg { offset: 35 },
-                    &DataReg { offset: 36 },
-                    &DataReg { offset: 37 },
-                    &DataReg { offset: 38 },
-                    &DataReg { offset: 39 },
-                    &DataReg { offset: 40 },
-                    &DataReg { offset: 41 },
-                    &DataReg { offset: 42 },
-                    &DataReg { offset: 43 },
-                    &DataReg { offset: 44 },
-                    &DataReg { offset: 45 },
-                    &DataReg { offset: 46 },
-                    &DataReg { offset: 47 },
-                    &DataReg { offset: 48 },
-                    &DataReg { offset: 49 },
-                    &DataReg { offset: 50 },
-                    &DataReg { offset: 51 },
-                    &DataReg { offset: 52 },
-                    &DataReg { offset: 53 },
-                    &DataReg { offset: 54 },
-                    &DataReg { offset: 55 },
-                    &DataReg { offset: 56 },
-                    &DataReg { offset: 57 },
-                ],
-                a_raw: &[&DataReg { offset: 58 }, &DataReg { offset: 59 }],
-                e: &[
-                    &DataReg { offset: 60 },
-                    &DataReg { offset: 61 },
-                    &DataReg { offset: 62 },
-                    &DataReg { offset: 63 },
-                    &DataReg { offset: 64 },
-                    &DataReg { offset: 65 },
-                    &DataReg { offset: 66 },
-                    &DataReg { offset: 67 },
-                    &DataReg { offset: 68 },
-                    &DataReg { offset: 69 },
-                    &DataReg { offset: 70 },
-                    &DataReg { offset: 71 },
-                    &DataReg { offset: 72 },
-                    &DataReg { offset: 73 },
-                    &DataReg { offset: 74 },
-                    &DataReg { offset: 75 },
-                    &DataReg { offset: 76 },
-                    &DataReg { offset: 77 },
-                    &DataReg { offset: 78 },
-                    &DataReg { offset: 79 },
-                    &DataReg { offset: 80 },
-                    &DataReg { offset: 81 },
-                    &DataReg { offset: 82 },
-                    &DataReg { offset: 83 },
-                    &DataReg { offset: 84 },
-                    &DataReg { offset: 85 },
-                    &DataReg { offset: 86 },
-                    &DataReg { offset: 87 },
-                    &DataReg { offset: 88 },
-                    &DataReg { offset: 89 },
-                    &DataReg { offset: 90 },
-                    &DataReg { offset: 91 },
-                ],
-                e_raw: &[&DataReg { offset: 92 }, &DataReg { offset: 93 }],
-                w: &[
-                    &DataReg { offset: 94 },
-                    &DataReg { offset: 95 },
-                    &DataReg { offset: 96 },
-                    &DataReg { offset: 97 },
-                    &DataReg { offset: 98 },
-                    &DataReg { offset: 99 },
-                    &DataReg { offset: 100 },
-                    &DataReg { offset: 101 },
-                    &DataReg { offset: 102 },
-                    &DataReg { offset: 103 },
-                    &DataReg { offset: 104 },
-                    &DataReg { offset: 105 },
-                    &DataReg { offset: 106 },
-                    &DataReg { offset: 107 },
-                    &DataReg { offset: 108 },
-                    &DataReg { offset: 109 },
-                    &DataReg { offset: 110 },
-                    &DataReg { offset: 111 },
-                    &DataReg { offset: 112 },
-                    &DataReg { offset: 113 },
-                    &DataReg { offset: 114 },
-                    &DataReg { offset: 115 },
-                    &DataReg { offset: 116 },
-                    &DataReg { offset: 117 },
-                    &DataReg { offset: 118 },
-                    &DataReg { offset: 119 },
-                    &DataReg { offset: 120 },
-                    &DataReg { offset: 121 },
-                    &DataReg { offset: 122 },
-                    &DataReg { offset: 123 },
-                    &DataReg { offset: 124 },
-                    &DataReg { offset: 125 },
-                ],
-                w_raw: &[&DataReg { offset: 126 }, &DataReg { offset: 127 }],
-            },
-        },
-        micro_ops: &[
-            &RecursionMicroOp {
-                extra: &DataReg { offset: 101 },
-                decode: &OneHot4 {
-                    add: &DataReg { offset: 91 },
-                    constop: &DataReg { offset: 90 },
-                    eq: &DataReg { offset: 95 },
-                    extract: &DataReg { offset: 100 },
-                    inv: &DataReg { offset: 94 },
-                    mix_rng: &DataReg { offset: 98 },
-                    mul: &DataReg { offset: 93 },
-                    read_iop_body: &DataReg { offset: 97 },
-                    read_iop_header: &DataReg { offset: 96 },
-                    select: &DataReg { offset: 99 },
-                    sub: &DataReg { offset: 92 },
-                },
-                in0: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 5 },
-                    data: &[
-                        &DataReg { offset: 6 },
-                        &DataReg { offset: 7 },
-                        &DataReg { offset: 8 },
-                        &DataReg { offset: 9 },
-                    ],
-                },
-                in1: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 10 },
-                    data: &[
-                        &DataReg { offset: 11 },
-                        &DataReg { offset: 12 },
-                        &DataReg { offset: 13 },
-                        &DataReg { offset: 14 },
-                    ],
-                },
-                inst: &RecursionMicroInst {
-                    opcode: &CodeReg { offset: 8 },
-                    operand: &[
-                        &CodeReg { offset: 9 },
-                        &CodeReg { offset: 10 },
-                        &CodeReg { offset: 11 },
-                    ],
-                },
-                out: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 15 },
-                    data: &[
-                        &DataReg { offset: 16 },
-                        &DataReg { offset: 17 },
-                        &DataReg { offset: 18 },
-                        &DataReg { offset: 19 },
-                    ],
-                },
-            },
-            &RecursionMicroOp {
-                extra: &DataReg { offset: 113 },
-                decode: &OneHot4 {
-                    add: &DataReg { offset: 103 },
-                    constop: &DataReg { offset: 102 },
-                    eq: &DataReg { offset: 107 },
-                    extract: &DataReg { offset: 112 },
-                    inv: &DataReg { offset: 106 },
-                    mix_rng: &DataReg { offset: 110 },
-                    mul: &DataReg { offset: 105 },
-                    read_iop_body: &DataReg { offset: 109 },
-                    read_iop_header: &DataReg { offset: 108 },
-                    select: &DataReg { offset: 111 },
-                    sub: &DataReg { offset: 104 },
-                },
-                in0: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 20 },
-                    data: &[
-                        &DataReg { offset: 21 },
-                        &DataReg { offset: 22 },
-                        &DataReg { offset: 23 },
-                        &DataReg { offset: 24 },
-                    ],
-                },
-                in1: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 25 },
-                    data: &[
-                        &DataReg { offset: 26 },
-                        &DataReg { offset: 27 },
-                        &DataReg { offset: 28 },
-                        &DataReg { offset: 29 },
-                    ],
-                },
-                inst: &RecursionMicroInst {
-                    opcode: &CodeReg { offset: 12 },
-                    operand: &[
-                        &CodeReg { offset: 13 },
-                        &CodeReg { offset: 14 },
-                        &CodeReg { offset: 15 },
-                    ],
-                },
-                out: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 30 },
-                    data: &[
-                        &DataReg { offset: 31 },
-                        &DataReg { offset: 32 },
-                        &DataReg { offset: 33 },
-                        &DataReg { offset: 34 },
-                    ],
-                },
-            },
-            &RecursionMicroOp {
-                extra: &DataReg { offset: 125 },
-                decode: &OneHot4 {
-                    add: &DataReg { offset: 115 },
-                    constop: &DataReg { offset: 114 },
-                    eq: &DataReg { offset: 119 },
-                    extract: &DataReg { offset: 124 },
-                    inv: &DataReg { offset: 118 },
-                    mix_rng: &DataReg { offset: 122 },
-                    mul: &DataReg { offset: 117 },
-                    read_iop_body: &DataReg { offset: 121 },
-                    read_iop_header: &DataReg { offset: 120 },
-                    select: &DataReg { offset: 123 },
-                    sub: &DataReg { offset: 116 },
-                },
-                in0: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 35 },
-                    data: &[
-                        &DataReg { offset: 36 },
-                        &DataReg { offset: 37 },
-                        &DataReg { offset: 38 },
-                        &DataReg { offset: 39 },
-                    ],
-                },
-                in1: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 40 },
-                    data: &[
-                        &DataReg { offset: 41 },
-                        &DataReg { offset: 42 },
-                        &DataReg { offset: 43 },
-                        &DataReg { offset: 44 },
-                    ],
-                },
-                inst: &RecursionMicroInst {
-                    opcode: &CodeReg { offset: 16 },
-                    operand: &[
-                        &CodeReg { offset: 17 },
-                        &CodeReg { offset: 18 },
-                        &CodeReg { offset: 19 },
-                    ],
-                },
-                out: &RecursionImplWomPlonkElement {
-                    addr: &DataReg { offset: 45 },
-                    data: &[
-                        &DataReg { offset: 46 },
-                        &DataReg { offset: 47 },
-                        &DataReg { offset: 48 },
-                        &DataReg { offset: 49 },
-                    ],
-                },
-            },
+pub const DATA_LAYOUT: &Mux5Layout = &Mux5Layout {
+    checked_bytes: &RecursionImplWomPlonkElementLayout {
+        addr: &Reg { offset: 5 },
+        data: &[
+            &Reg { offset: 6 },
+            &Reg { offset: 7 },
+            &Reg { offset: 8 },
+            &Reg { offset: 9 },
         ],
     },
+    macro_ops: &Mux3Layout {
+        bit_and_elem: &RecursionBitAndElemLayout {
+            in_a: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 11 },
+                data: &[
+                    &Reg { offset: 12 },
+                    &Reg { offset: 13 },
+                    &Reg { offset: 14 },
+                    &Reg { offset: 15 },
+                ],
+            },
+            in_b: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 16 },
+                data: &[
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                ],
+            },
+            out: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 21 },
+                data: &[
+                    &Reg { offset: 22 },
+                    &Reg { offset: 23 },
+                    &Reg { offset: 24 },
+                    &Reg { offset: 25 },
+                ],
+            },
+            bits_a: &[
+                &Reg { offset: 36 },
+                &Reg { offset: 38 },
+                &Reg { offset: 40 },
+                &Reg { offset: 42 },
+                &Reg { offset: 44 },
+                &Reg { offset: 46 },
+                &Reg { offset: 48 },
+                &Reg { offset: 50 },
+                &Reg { offset: 52 },
+                &Reg { offset: 54 },
+                &Reg { offset: 56 },
+                &Reg { offset: 58 },
+                &Reg { offset: 60 },
+                &Reg { offset: 62 },
+                &Reg { offset: 64 },
+                &Reg { offset: 66 },
+                &Reg { offset: 68 },
+                &Reg { offset: 70 },
+                &Reg { offset: 72 },
+                &Reg { offset: 74 },
+                &Reg { offset: 76 },
+                &Reg { offset: 78 },
+                &Reg { offset: 80 },
+                &Reg { offset: 82 },
+                &Reg { offset: 84 },
+                &Reg { offset: 86 },
+                &Reg { offset: 88 },
+                &Reg { offset: 90 },
+                &Reg { offset: 92 },
+                &Reg { offset: 94 },
+                &Reg { offset: 96 },
+            ],
+            bits_b: &[
+                &Reg { offset: 37 },
+                &Reg { offset: 39 },
+                &Reg { offset: 41 },
+                &Reg { offset: 43 },
+                &Reg { offset: 45 },
+                &Reg { offset: 47 },
+                &Reg { offset: 49 },
+                &Reg { offset: 51 },
+                &Reg { offset: 53 },
+                &Reg { offset: 55 },
+                &Reg { offset: 57 },
+                &Reg { offset: 59 },
+                &Reg { offset: 61 },
+                &Reg { offset: 63 },
+                &Reg { offset: 65 },
+                &Reg { offset: 67 },
+                &Reg { offset: 69 },
+                &Reg { offset: 71 },
+                &Reg { offset: 73 },
+                &Reg { offset: 75 },
+                &Reg { offset: 77 },
+                &Reg { offset: 79 },
+                &Reg { offset: 81 },
+                &Reg { offset: 83 },
+                &Reg { offset: 85 },
+                &Reg { offset: 87 },
+                &Reg { offset: 89 },
+                &Reg { offset: 91 },
+                &Reg { offset: 93 },
+                &Reg { offset: 95 },
+                &Reg { offset: 97 },
+            ],
+        },
+        bit_op_shorts: &RecursionBitOpShortsLayout {
+            in_a: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 11 },
+                data: &[
+                    &Reg { offset: 12 },
+                    &Reg { offset: 13 },
+                    &Reg { offset: 14 },
+                    &Reg { offset: 15 },
+                ],
+            },
+            in_b: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 16 },
+                data: &[
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                ],
+            },
+            out: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 21 },
+                data: &[
+                    &Reg { offset: 22 },
+                    &Reg { offset: 23 },
+                    &Reg { offset: 24 },
+                    &Reg { offset: 25 },
+                ],
+            },
+            bits_a: &[
+                &Reg { offset: 36 },
+                &Reg { offset: 37 },
+                &Reg { offset: 38 },
+                &Reg { offset: 39 },
+                &Reg { offset: 40 },
+                &Reg { offset: 41 },
+                &Reg { offset: 42 },
+                &Reg { offset: 43 },
+                &Reg { offset: 44 },
+                &Reg { offset: 45 },
+                &Reg { offset: 46 },
+                &Reg { offset: 47 },
+                &Reg { offset: 48 },
+                &Reg { offset: 49 },
+                &Reg { offset: 50 },
+                &Reg { offset: 51 },
+                &Reg { offset: 52 },
+                &Reg { offset: 53 },
+                &Reg { offset: 54 },
+                &Reg { offset: 55 },
+                &Reg { offset: 56 },
+                &Reg { offset: 57 },
+                &Reg { offset: 58 },
+                &Reg { offset: 59 },
+                &Reg { offset: 60 },
+                &Reg { offset: 61 },
+                &Reg { offset: 62 },
+                &Reg { offset: 63 },
+                &Reg { offset: 64 },
+                &Reg { offset: 65 },
+                &Reg { offset: 66 },
+                &Reg { offset: 67 },
+            ],
+            bits_b: &[
+                &Reg { offset: 68 },
+                &Reg { offset: 69 },
+                &Reg { offset: 70 },
+                &Reg { offset: 71 },
+                &Reg { offset: 72 },
+                &Reg { offset: 73 },
+                &Reg { offset: 74 },
+                &Reg { offset: 75 },
+                &Reg { offset: 76 },
+                &Reg { offset: 77 },
+                &Reg { offset: 78 },
+                &Reg { offset: 79 },
+                &Reg { offset: 80 },
+                &Reg { offset: 81 },
+                &Reg { offset: 82 },
+                &Reg { offset: 83 },
+                &Reg { offset: 84 },
+                &Reg { offset: 85 },
+                &Reg { offset: 86 },
+                &Reg { offset: 87 },
+                &Reg { offset: 88 },
+                &Reg { offset: 89 },
+                &Reg { offset: 90 },
+                &Reg { offset: 91 },
+                &Reg { offset: 92 },
+                &Reg { offset: 93 },
+                &Reg { offset: 94 },
+                &Reg { offset: 95 },
+                &Reg { offset: 96 },
+                &Reg { offset: 97 },
+                &Reg { offset: 98 },
+                &Reg { offset: 99 },
+            ],
+        },
+        set_global: &RecursionSetGlobalLayout {
+            select: &[
+                &Reg { offset: 11 },
+                &Reg { offset: 12 },
+                &Reg { offset: 13 },
+                &Reg { offset: 14 },
+            ],
+            regs: &[
+                &RecursionImplWomPlonkElementLayout {
+                    addr: &Reg { offset: 15 },
+                    data: &[
+                        &Reg { offset: 16 },
+                        &Reg { offset: 17 },
+                        &Reg { offset: 18 },
+                        &Reg { offset: 19 },
+                    ],
+                },
+                &RecursionImplWomPlonkElementLayout {
+                    addr: &Reg { offset: 20 },
+                    data: &[
+                        &Reg { offset: 21 },
+                        &Reg { offset: 22 },
+                        &Reg { offset: 23 },
+                        &Reg { offset: 24 },
+                    ],
+                },
+                &RecursionImplWomPlonkElementLayout {
+                    addr: &Reg { offset: 25 },
+                    data: &[
+                        &Reg { offset: 26 },
+                        &Reg { offset: 27 },
+                        &Reg { offset: 28 },
+                        &Reg { offset: 29 },
+                    ],
+                },
+                &RecursionImplWomPlonkElementLayout {
+                    addr: &Reg { offset: 30 },
+                    data: &[
+                        &Reg { offset: 31 },
+                        &Reg { offset: 32 },
+                        &Reg { offset: 33 },
+                        &Reg { offset: 34 },
+                    ],
+                },
+            ],
+        },
+        sha_fini: &RecursionShaCycleLayout {
+            a_carry_hi: &Reg { offset: 6 },
+            a_carry_low: &Reg { offset: 5 },
+            e_carry_high: &Reg { offset: 8 },
+            e_carry_low: &Reg { offset: 7 },
+            w_carry_high: &Reg { offset: 10 },
+            w_carry_low: &Reg { offset: 9 },
+            io0: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 11 },
+                data: &[
+                    &Reg { offset: 12 },
+                    &Reg { offset: 13 },
+                    &Reg { offset: 14 },
+                    &Reg { offset: 15 },
+                ],
+            },
+            io1: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 16 },
+                data: &[
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                ],
+            },
+            a: &[
+                &Reg { offset: 26 },
+                &Reg { offset: 27 },
+                &Reg { offset: 28 },
+                &Reg { offset: 29 },
+                &Reg { offset: 30 },
+                &Reg { offset: 31 },
+                &Reg { offset: 32 },
+                &Reg { offset: 33 },
+                &Reg { offset: 34 },
+                &Reg { offset: 35 },
+                &Reg { offset: 36 },
+                &Reg { offset: 37 },
+                &Reg { offset: 38 },
+                &Reg { offset: 39 },
+                &Reg { offset: 40 },
+                &Reg { offset: 41 },
+                &Reg { offset: 42 },
+                &Reg { offset: 43 },
+                &Reg { offset: 44 },
+                &Reg { offset: 45 },
+                &Reg { offset: 46 },
+                &Reg { offset: 47 },
+                &Reg { offset: 48 },
+                &Reg { offset: 49 },
+                &Reg { offset: 50 },
+                &Reg { offset: 51 },
+                &Reg { offset: 52 },
+                &Reg { offset: 53 },
+                &Reg { offset: 54 },
+                &Reg { offset: 55 },
+                &Reg { offset: 56 },
+                &Reg { offset: 57 },
+            ],
+            a_raw: &[&Reg { offset: 58 }, &Reg { offset: 59 }],
+            e: &[
+                &Reg { offset: 60 },
+                &Reg { offset: 61 },
+                &Reg { offset: 62 },
+                &Reg { offset: 63 },
+                &Reg { offset: 64 },
+                &Reg { offset: 65 },
+                &Reg { offset: 66 },
+                &Reg { offset: 67 },
+                &Reg { offset: 68 },
+                &Reg { offset: 69 },
+                &Reg { offset: 70 },
+                &Reg { offset: 71 },
+                &Reg { offset: 72 },
+                &Reg { offset: 73 },
+                &Reg { offset: 74 },
+                &Reg { offset: 75 },
+                &Reg { offset: 76 },
+                &Reg { offset: 77 },
+                &Reg { offset: 78 },
+                &Reg { offset: 79 },
+                &Reg { offset: 80 },
+                &Reg { offset: 81 },
+                &Reg { offset: 82 },
+                &Reg { offset: 83 },
+                &Reg { offset: 84 },
+                &Reg { offset: 85 },
+                &Reg { offset: 86 },
+                &Reg { offset: 87 },
+                &Reg { offset: 88 },
+                &Reg { offset: 89 },
+                &Reg { offset: 90 },
+                &Reg { offset: 91 },
+            ],
+            e_raw: &[&Reg { offset: 92 }, &Reg { offset: 93 }],
+            w: &[
+                &Reg { offset: 94 },
+                &Reg { offset: 95 },
+                &Reg { offset: 96 },
+                &Reg { offset: 97 },
+                &Reg { offset: 98 },
+                &Reg { offset: 99 },
+                &Reg { offset: 100 },
+                &Reg { offset: 101 },
+                &Reg { offset: 102 },
+                &Reg { offset: 103 },
+                &Reg { offset: 104 },
+                &Reg { offset: 105 },
+                &Reg { offset: 106 },
+                &Reg { offset: 107 },
+                &Reg { offset: 108 },
+                &Reg { offset: 109 },
+                &Reg { offset: 110 },
+                &Reg { offset: 111 },
+                &Reg { offset: 112 },
+                &Reg { offset: 113 },
+                &Reg { offset: 114 },
+                &Reg { offset: 115 },
+                &Reg { offset: 116 },
+                &Reg { offset: 117 },
+                &Reg { offset: 118 },
+                &Reg { offset: 119 },
+                &Reg { offset: 120 },
+                &Reg { offset: 121 },
+                &Reg { offset: 122 },
+                &Reg { offset: 123 },
+                &Reg { offset: 124 },
+                &Reg { offset: 125 },
+            ],
+            w_raw: &[&Reg { offset: 126 }, &Reg { offset: 127 }],
+        },
+        sha_init: &RecursionShaCycleLayout {
+            a_carry_hi: &Reg { offset: 6 },
+            a_carry_low: &Reg { offset: 5 },
+            e_carry_high: &Reg { offset: 8 },
+            e_carry_low: &Reg { offset: 7 },
+            w_carry_high: &Reg { offset: 10 },
+            w_carry_low: &Reg { offset: 9 },
+            io0: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 11 },
+                data: &[
+                    &Reg { offset: 12 },
+                    &Reg { offset: 13 },
+                    &Reg { offset: 14 },
+                    &Reg { offset: 15 },
+                ],
+            },
+            io1: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 16 },
+                data: &[
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                ],
+            },
+            a: &[
+                &Reg { offset: 26 },
+                &Reg { offset: 27 },
+                &Reg { offset: 28 },
+                &Reg { offset: 29 },
+                &Reg { offset: 30 },
+                &Reg { offset: 31 },
+                &Reg { offset: 32 },
+                &Reg { offset: 33 },
+                &Reg { offset: 34 },
+                &Reg { offset: 35 },
+                &Reg { offset: 36 },
+                &Reg { offset: 37 },
+                &Reg { offset: 38 },
+                &Reg { offset: 39 },
+                &Reg { offset: 40 },
+                &Reg { offset: 41 },
+                &Reg { offset: 42 },
+                &Reg { offset: 43 },
+                &Reg { offset: 44 },
+                &Reg { offset: 45 },
+                &Reg { offset: 46 },
+                &Reg { offset: 47 },
+                &Reg { offset: 48 },
+                &Reg { offset: 49 },
+                &Reg { offset: 50 },
+                &Reg { offset: 51 },
+                &Reg { offset: 52 },
+                &Reg { offset: 53 },
+                &Reg { offset: 54 },
+                &Reg { offset: 55 },
+                &Reg { offset: 56 },
+                &Reg { offset: 57 },
+            ],
+            a_raw: &[&Reg { offset: 58 }, &Reg { offset: 59 }],
+            e: &[
+                &Reg { offset: 60 },
+                &Reg { offset: 61 },
+                &Reg { offset: 62 },
+                &Reg { offset: 63 },
+                &Reg { offset: 64 },
+                &Reg { offset: 65 },
+                &Reg { offset: 66 },
+                &Reg { offset: 67 },
+                &Reg { offset: 68 },
+                &Reg { offset: 69 },
+                &Reg { offset: 70 },
+                &Reg { offset: 71 },
+                &Reg { offset: 72 },
+                &Reg { offset: 73 },
+                &Reg { offset: 74 },
+                &Reg { offset: 75 },
+                &Reg { offset: 76 },
+                &Reg { offset: 77 },
+                &Reg { offset: 78 },
+                &Reg { offset: 79 },
+                &Reg { offset: 80 },
+                &Reg { offset: 81 },
+                &Reg { offset: 82 },
+                &Reg { offset: 83 },
+                &Reg { offset: 84 },
+                &Reg { offset: 85 },
+                &Reg { offset: 86 },
+                &Reg { offset: 87 },
+                &Reg { offset: 88 },
+                &Reg { offset: 89 },
+                &Reg { offset: 90 },
+                &Reg { offset: 91 },
+            ],
+            e_raw: &[&Reg { offset: 92 }, &Reg { offset: 93 }],
+            w: &[
+                &Reg { offset: 94 },
+                &Reg { offset: 95 },
+                &Reg { offset: 96 },
+                &Reg { offset: 97 },
+                &Reg { offset: 98 },
+                &Reg { offset: 99 },
+                &Reg { offset: 100 },
+                &Reg { offset: 101 },
+                &Reg { offset: 102 },
+                &Reg { offset: 103 },
+                &Reg { offset: 104 },
+                &Reg { offset: 105 },
+                &Reg { offset: 106 },
+                &Reg { offset: 107 },
+                &Reg { offset: 108 },
+                &Reg { offset: 109 },
+                &Reg { offset: 110 },
+                &Reg { offset: 111 },
+                &Reg { offset: 112 },
+                &Reg { offset: 113 },
+                &Reg { offset: 114 },
+                &Reg { offset: 115 },
+                &Reg { offset: 116 },
+                &Reg { offset: 117 },
+                &Reg { offset: 118 },
+                &Reg { offset: 119 },
+                &Reg { offset: 120 },
+                &Reg { offset: 121 },
+                &Reg { offset: 122 },
+                &Reg { offset: 123 },
+                &Reg { offset: 124 },
+                &Reg { offset: 125 },
+            ],
+            w_raw: &[&Reg { offset: 126 }, &Reg { offset: 127 }],
+        },
+        sha_load: &RecursionShaCycleLayout {
+            a_carry_hi: &Reg { offset: 6 },
+            a_carry_low: &Reg { offset: 5 },
+            e_carry_high: &Reg { offset: 8 },
+            e_carry_low: &Reg { offset: 7 },
+            w_carry_high: &Reg { offset: 10 },
+            w_carry_low: &Reg { offset: 9 },
+            io0: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 11 },
+                data: &[
+                    &Reg { offset: 12 },
+                    &Reg { offset: 13 },
+                    &Reg { offset: 14 },
+                    &Reg { offset: 15 },
+                ],
+            },
+            io1: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 16 },
+                data: &[
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                ],
+            },
+            a: &[
+                &Reg { offset: 26 },
+                &Reg { offset: 27 },
+                &Reg { offset: 28 },
+                &Reg { offset: 29 },
+                &Reg { offset: 30 },
+                &Reg { offset: 31 },
+                &Reg { offset: 32 },
+                &Reg { offset: 33 },
+                &Reg { offset: 34 },
+                &Reg { offset: 35 },
+                &Reg { offset: 36 },
+                &Reg { offset: 37 },
+                &Reg { offset: 38 },
+                &Reg { offset: 39 },
+                &Reg { offset: 40 },
+                &Reg { offset: 41 },
+                &Reg { offset: 42 },
+                &Reg { offset: 43 },
+                &Reg { offset: 44 },
+                &Reg { offset: 45 },
+                &Reg { offset: 46 },
+                &Reg { offset: 47 },
+                &Reg { offset: 48 },
+                &Reg { offset: 49 },
+                &Reg { offset: 50 },
+                &Reg { offset: 51 },
+                &Reg { offset: 52 },
+                &Reg { offset: 53 },
+                &Reg { offset: 54 },
+                &Reg { offset: 55 },
+                &Reg { offset: 56 },
+                &Reg { offset: 57 },
+            ],
+            a_raw: &[&Reg { offset: 58 }, &Reg { offset: 59 }],
+            e: &[
+                &Reg { offset: 60 },
+                &Reg { offset: 61 },
+                &Reg { offset: 62 },
+                &Reg { offset: 63 },
+                &Reg { offset: 64 },
+                &Reg { offset: 65 },
+                &Reg { offset: 66 },
+                &Reg { offset: 67 },
+                &Reg { offset: 68 },
+                &Reg { offset: 69 },
+                &Reg { offset: 70 },
+                &Reg { offset: 71 },
+                &Reg { offset: 72 },
+                &Reg { offset: 73 },
+                &Reg { offset: 74 },
+                &Reg { offset: 75 },
+                &Reg { offset: 76 },
+                &Reg { offset: 77 },
+                &Reg { offset: 78 },
+                &Reg { offset: 79 },
+                &Reg { offset: 80 },
+                &Reg { offset: 81 },
+                &Reg { offset: 82 },
+                &Reg { offset: 83 },
+                &Reg { offset: 84 },
+                &Reg { offset: 85 },
+                &Reg { offset: 86 },
+                &Reg { offset: 87 },
+                &Reg { offset: 88 },
+                &Reg { offset: 89 },
+                &Reg { offset: 90 },
+                &Reg { offset: 91 },
+            ],
+            e_raw: &[&Reg { offset: 92 }, &Reg { offset: 93 }],
+            w: &[
+                &Reg { offset: 94 },
+                &Reg { offset: 95 },
+                &Reg { offset: 96 },
+                &Reg { offset: 97 },
+                &Reg { offset: 98 },
+                &Reg { offset: 99 },
+                &Reg { offset: 100 },
+                &Reg { offset: 101 },
+                &Reg { offset: 102 },
+                &Reg { offset: 103 },
+                &Reg { offset: 104 },
+                &Reg { offset: 105 },
+                &Reg { offset: 106 },
+                &Reg { offset: 107 },
+                &Reg { offset: 108 },
+                &Reg { offset: 109 },
+                &Reg { offset: 110 },
+                &Reg { offset: 111 },
+                &Reg { offset: 112 },
+                &Reg { offset: 113 },
+                &Reg { offset: 114 },
+                &Reg { offset: 115 },
+                &Reg { offset: 116 },
+                &Reg { offset: 117 },
+                &Reg { offset: 118 },
+                &Reg { offset: 119 },
+                &Reg { offset: 120 },
+                &Reg { offset: 121 },
+                &Reg { offset: 122 },
+                &Reg { offset: 123 },
+                &Reg { offset: 124 },
+                &Reg { offset: 125 },
+            ],
+            w_raw: &[&Reg { offset: 126 }, &Reg { offset: 127 }],
+        },
+        sha_mix: &RecursionShaCycleLayout {
+            a_carry_hi: &Reg { offset: 6 },
+            a_carry_low: &Reg { offset: 5 },
+            e_carry_high: &Reg { offset: 8 },
+            e_carry_low: &Reg { offset: 7 },
+            w_carry_high: &Reg { offset: 10 },
+            w_carry_low: &Reg { offset: 9 },
+            io0: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 11 },
+                data: &[
+                    &Reg { offset: 12 },
+                    &Reg { offset: 13 },
+                    &Reg { offset: 14 },
+                    &Reg { offset: 15 },
+                ],
+            },
+            io1: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 16 },
+                data: &[
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                    &Reg { offset: 20 },
+                ],
+            },
+            a: &[
+                &Reg { offset: 26 },
+                &Reg { offset: 27 },
+                &Reg { offset: 28 },
+                &Reg { offset: 29 },
+                &Reg { offset: 30 },
+                &Reg { offset: 31 },
+                &Reg { offset: 32 },
+                &Reg { offset: 33 },
+                &Reg { offset: 34 },
+                &Reg { offset: 35 },
+                &Reg { offset: 36 },
+                &Reg { offset: 37 },
+                &Reg { offset: 38 },
+                &Reg { offset: 39 },
+                &Reg { offset: 40 },
+                &Reg { offset: 41 },
+                &Reg { offset: 42 },
+                &Reg { offset: 43 },
+                &Reg { offset: 44 },
+                &Reg { offset: 45 },
+                &Reg { offset: 46 },
+                &Reg { offset: 47 },
+                &Reg { offset: 48 },
+                &Reg { offset: 49 },
+                &Reg { offset: 50 },
+                &Reg { offset: 51 },
+                &Reg { offset: 52 },
+                &Reg { offset: 53 },
+                &Reg { offset: 54 },
+                &Reg { offset: 55 },
+                &Reg { offset: 56 },
+                &Reg { offset: 57 },
+            ],
+            a_raw: &[&Reg { offset: 58 }, &Reg { offset: 59 }],
+            e: &[
+                &Reg { offset: 60 },
+                &Reg { offset: 61 },
+                &Reg { offset: 62 },
+                &Reg { offset: 63 },
+                &Reg { offset: 64 },
+                &Reg { offset: 65 },
+                &Reg { offset: 66 },
+                &Reg { offset: 67 },
+                &Reg { offset: 68 },
+                &Reg { offset: 69 },
+                &Reg { offset: 70 },
+                &Reg { offset: 71 },
+                &Reg { offset: 72 },
+                &Reg { offset: 73 },
+                &Reg { offset: 74 },
+                &Reg { offset: 75 },
+                &Reg { offset: 76 },
+                &Reg { offset: 77 },
+                &Reg { offset: 78 },
+                &Reg { offset: 79 },
+                &Reg { offset: 80 },
+                &Reg { offset: 81 },
+                &Reg { offset: 82 },
+                &Reg { offset: 83 },
+                &Reg { offset: 84 },
+                &Reg { offset: 85 },
+                &Reg { offset: 86 },
+                &Reg { offset: 87 },
+                &Reg { offset: 88 },
+                &Reg { offset: 89 },
+                &Reg { offset: 90 },
+                &Reg { offset: 91 },
+            ],
+            e_raw: &[&Reg { offset: 92 }, &Reg { offset: 93 }],
+            w: &[
+                &Reg { offset: 94 },
+                &Reg { offset: 95 },
+                &Reg { offset: 96 },
+                &Reg { offset: 97 },
+                &Reg { offset: 98 },
+                &Reg { offset: 99 },
+                &Reg { offset: 100 },
+                &Reg { offset: 101 },
+                &Reg { offset: 102 },
+                &Reg { offset: 103 },
+                &Reg { offset: 104 },
+                &Reg { offset: 105 },
+                &Reg { offset: 106 },
+                &Reg { offset: 107 },
+                &Reg { offset: 108 },
+                &Reg { offset: 109 },
+                &Reg { offset: 110 },
+                &Reg { offset: 111 },
+                &Reg { offset: 112 },
+                &Reg { offset: 113 },
+                &Reg { offset: 114 },
+                &Reg { offset: 115 },
+                &Reg { offset: 116 },
+                &Reg { offset: 117 },
+                &Reg { offset: 118 },
+                &Reg { offset: 119 },
+                &Reg { offset: 120 },
+                &Reg { offset: 121 },
+                &Reg { offset: 122 },
+                &Reg { offset: 123 },
+                &Reg { offset: 124 },
+                &Reg { offset: 125 },
+            ],
+            w_raw: &[&Reg { offset: 126 }, &Reg { offset: 127 }],
+        },
+    },
+    micro_ops: &[
+        &RecursionMicroOpLayout {
+            extra: &Reg { offset: 101 },
+            decode: &OneHot4Layout {
+                add: &Reg { offset: 91 },
+                constop: &Reg { offset: 90 },
+                eq: &Reg { offset: 95 },
+                extract: &Reg { offset: 100 },
+                inv: &Reg { offset: 94 },
+                mix_rng: &Reg { offset: 98 },
+                mul: &Reg { offset: 93 },
+                read_iop_body: &Reg { offset: 97 },
+                read_iop_header: &Reg { offset: 96 },
+                select: &Reg { offset: 99 },
+                sub: &Reg { offset: 92 },
+            },
+            in0: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 5 },
+                data: &[
+                    &Reg { offset: 6 },
+                    &Reg { offset: 7 },
+                    &Reg { offset: 8 },
+                    &Reg { offset: 9 },
+                ],
+            },
+            in1: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 10 },
+                data: &[
+                    &Reg { offset: 11 },
+                    &Reg { offset: 12 },
+                    &Reg { offset: 13 },
+                    &Reg { offset: 14 },
+                ],
+            },
+            out: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 15 },
+                data: &[
+                    &Reg { offset: 16 },
+                    &Reg { offset: 17 },
+                    &Reg { offset: 18 },
+                    &Reg { offset: 19 },
+                ],
+            },
+        },
+        &RecursionMicroOpLayout {
+            extra: &Reg { offset: 113 },
+            decode: &OneHot4Layout {
+                add: &Reg { offset: 103 },
+                constop: &Reg { offset: 102 },
+                eq: &Reg { offset: 107 },
+                extract: &Reg { offset: 112 },
+                inv: &Reg { offset: 106 },
+                mix_rng: &Reg { offset: 110 },
+                mul: &Reg { offset: 105 },
+                read_iop_body: &Reg { offset: 109 },
+                read_iop_header: &Reg { offset: 108 },
+                select: &Reg { offset: 111 },
+                sub: &Reg { offset: 104 },
+            },
+            in0: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 20 },
+                data: &[
+                    &Reg { offset: 21 },
+                    &Reg { offset: 22 },
+                    &Reg { offset: 23 },
+                    &Reg { offset: 24 },
+                ],
+            },
+            in1: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 25 },
+                data: &[
+                    &Reg { offset: 26 },
+                    &Reg { offset: 27 },
+                    &Reg { offset: 28 },
+                    &Reg { offset: 29 },
+                ],
+            },
+            out: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 30 },
+                data: &[
+                    &Reg { offset: 31 },
+                    &Reg { offset: 32 },
+                    &Reg { offset: 33 },
+                    &Reg { offset: 34 },
+                ],
+            },
+        },
+        &RecursionMicroOpLayout {
+            extra: &Reg { offset: 125 },
+            decode: &OneHot4Layout {
+                add: &Reg { offset: 115 },
+                constop: &Reg { offset: 114 },
+                eq: &Reg { offset: 119 },
+                extract: &Reg { offset: 124 },
+                inv: &Reg { offset: 118 },
+                mix_rng: &Reg { offset: 122 },
+                mul: &Reg { offset: 117 },
+                read_iop_body: &Reg { offset: 121 },
+                read_iop_header: &Reg { offset: 120 },
+                select: &Reg { offset: 123 },
+                sub: &Reg { offset: 116 },
+            },
+            in0: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 35 },
+                data: &[
+                    &Reg { offset: 36 },
+                    &Reg { offset: 37 },
+                    &Reg { offset: 38 },
+                    &Reg { offset: 39 },
+                ],
+            },
+            in1: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 40 },
+                data: &[
+                    &Reg { offset: 41 },
+                    &Reg { offset: 42 },
+                    &Reg { offset: 43 },
+                    &Reg { offset: 44 },
+                ],
+            },
+            out: &RecursionImplWomPlonkElementLayout {
+                addr: &Reg { offset: 45 },
+                data: &[
+                    &Reg { offset: 46 },
+                    &Reg { offset: 47 },
+                    &Reg { offset: 48 },
+                    &Reg { offset: 49 },
+                ],
+            },
+        },
+    ],
 };
+pub const OUT_LAYOUT: &Reg32LayoutArray = &[
+    &Reg { offset: 0 },
+    &Reg { offset: 1 },
+    &Reg { offset: 2 },
+    &Reg { offset: 3 },
+    &Reg { offset: 4 },
+    &Reg { offset: 5 },
+    &Reg { offset: 6 },
+    &Reg { offset: 7 },
+    &Reg { offset: 8 },
+    &Reg { offset: 9 },
+    &Reg { offset: 10 },
+    &Reg { offset: 11 },
+    &Reg { offset: 12 },
+    &Reg { offset: 13 },
+    &Reg { offset: 14 },
+    &Reg { offset: 15 },
+    &Reg { offset: 16 },
+    &Reg { offset: 17 },
+    &Reg { offset: 18 },
+    &Reg { offset: 19 },
+    &Reg { offset: 20 },
+    &Reg { offset: 21 },
+    &Reg { offset: 22 },
+    &Reg { offset: 23 },
+    &Reg { offset: 24 },
+    &Reg { offset: 25 },
+    &Reg { offset: 26 },
+    &Reg { offset: 27 },
+    &Reg { offset: 28 },
+    &Reg { offset: 29 },
+    &Reg { offset: 30 },
+    &Reg { offset: 31 },
+];

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(feature = "bonsai")]
 pub(crate) mod bonsai;
 pub(crate) mod external;
 #[cfg(feature = "prove")]
@@ -26,10 +27,14 @@ use serde::{Deserialize, Serialize};
 use risc0_circuit_recursion::control_id::ALLOWED_CONTROL_IDS;
 use risc0_zkp::core::digest::Digest;
 
-use self::{bonsai::BonsaiProver, external::ExternalProver};
+#[cfg(feature = "bonsai")]
+use {self::bonsai::BonsaiProver, crate::is_dev_mode};
+
+use self::external::ExternalProver;
+
 use crate::{
-    get_version, host::prove_info::ProveInfo, is_dev_mode, receipt::DEFAULT_MAX_PO2, ExecutorEnv,
-    Receipt, SessionInfo, VerifierContext,
+    get_version, host::prove_info::ProveInfo, receipt::DEFAULT_MAX_PO2, ExecutorEnv, Receipt,
+    SessionInfo, VerifierContext,
 };
 
 /// A Prover can execute a given ELF binary and produce a
@@ -361,6 +366,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
+            #[cfg(feature = "bonsai")]
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
             "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path().unwrap())),
             #[cfg(feature = "prove")]
@@ -369,11 +375,14 @@ pub fn default_prover() -> Rc<dyn Prover> {
         };
     }
 
-    if !is_dev_mode()
-        && std::env::var("BONSAI_API_URL").is_ok()
-        && std::env::var("BONSAI_API_KEY").is_ok()
+    #[cfg(feature = "bonsai")]
     {
-        return Rc::new(BonsaiProver::new("bonsai"));
+        if !is_dev_mode()
+            && std::env::var("BONSAI_API_URL").is_ok()
+            && std::env::var("BONSAI_API_KEY").is_ok()
+        {
+            return Rc::new(BonsaiProver::new("bonsai"));
+        }
     }
 
     if cfg!(feature = "prove") {

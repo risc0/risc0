@@ -99,9 +99,12 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
 
     pub fn run(&mut self) -> Result<()> {
         let mut emu = Emulator::new();
+        let mut cycles = 1;
         while !self.exit {
             emu.step(self)?;
+            cycles += 1;
         }
+        tracing::info!("unconstrained cycles: {cycles}");
         Ok(())
     }
 
