@@ -254,6 +254,7 @@ impl Connection for TcpConnection {
         Ok(0)
     }
 
+    #[cfg(feature = "prove")]
     fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
         Ok(Box::new(Self::new(self.stream.try_clone()?)))
     }
