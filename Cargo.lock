@@ -4178,6 +4178,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-platform",
+ "stability",
  "test-log",
  "tracing",
  "tracing-subscriber 0.3.18",

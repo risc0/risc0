@@ -785,6 +785,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-platform",
+ "stability",
  "tracing",
  "zip",
 ]
