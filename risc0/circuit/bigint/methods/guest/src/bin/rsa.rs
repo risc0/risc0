@@ -12,16 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use num_bigint::BigUint;
 use risc0_circuit_bigint::rsa;
 use risc0_zkvm::guest::env;
 
 fn main() {
     // Computes and proves the result of modpow with exponent of 65537
-    let input: Vec<[BigUint; 2]> = env::read();
-    let result: Vec<BigUint> = input
-        .into_iter()
-        .map(|[base, modulus]| rsa::modpow_65537(&base, &modulus).unwrap())
-        .collect();
-    env::commit(&result);
+    let input: Vec<u32> = env::read();
+    let base: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs must be 96 words");
+    let input: Vec<u32> = env::read();
+    let modulus: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs must be 96 words");
+    let mut result = [0u32; rsa::WIDTH_WORDS];
+
+    // Safety: Parameters are dereferenceable and aligned
+    unsafe {
+        rsa::modpow_65537(&mut result, &base, &modulus);
+    }
+
+    env::commit(&result.to_vec());
 }
