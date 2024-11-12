@@ -1152,7 +1152,7 @@ dependencies = [
 [[package]]
 name = "rsa"
 version = "0.9.6"
-source = "git+https://www.github.com/risc0/RustCrypto-RSA.git?rev=6939133bb0e1a9309996d561843d970318f85941#6939133bb0e1a9309996d561843d970318f85941"
+source = "git+https://www.github.com/risc0/RustCrypto-RSA.git?rev=d48bf59a402c32776bcf9cfa47d7b5d959f028e6#d48bf59a402c32776bcf9cfa47d7b5d959f028e6"
 dependencies = [
  "const-oid",
  "digest",
