@@ -46,13 +46,3 @@ fn main() {
 
     env::commit(&valid_token.claims().custom.subject);
 }
-
-// Dead code for the linker
-// The linker will "helpfully" optimize away our weakly linked function if we don't directly use it somewhere. This is a fake function to prevent such an optimization. Do not call this function, it is both useless and unsafe.
-fn _linker_helper() {
-  assert!(false, "Do not call this function");
-  // Null pointers break safety but this is dead code so it's ok
-  unsafe {
-    modpow_65537(std::ptr::null_mut(), std::ptr::null(), std::ptr::null());
-  }
-}
