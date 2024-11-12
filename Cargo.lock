@@ -932,7 +932,7 @@ dependencies = [
  "fs_extra",
  "hex",
  "regex",
- "reqwest 0.11.27",
+ "reqwest 0.12.5",
  "reqwest-middleware",
  "reqwest-retry",
  "risc0-binfmt",
