@@ -4,7 +4,10 @@
 
 <p align="center">
   <a href="https://risczero.com" target="_blank">
-    <img src="https://risczero.com/companies/risczero.svg" alt="RISC Zero Company Logo" width="142" height="126">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://risczero.com/companies/risczero_dark.svg">
+      <img src="https://risczero.com/companies/risczero.svg" alt="RISC Zero Company Logo" width="142" height="126">
+    </picture>
   </a>
 </p>
 
