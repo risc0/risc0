@@ -391,14 +391,14 @@ jobs:
       - uses: ./.github/actions/rustup
         with:
           # Building with docs.rs config requires the nightly toolchain.
-          toolchain: nightly
+          toolchain: nightly-2024-09-04
       - uses: ./.github/actions/sccache
         with:
           key: macOS-nightly
-      - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +nightly doc -p risc0-zkp -Fprove,std --no-deps
-      - run: cargo +nightly doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +nightly doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
