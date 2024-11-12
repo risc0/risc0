@@ -104,7 +104,9 @@ static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
 pub(crate) fn init() {
     unsafe {
+        #[allow(static_mut_refs)]
         HASHER.set(Sha256::new()).unwrap();
+        #[allow(static_mut_refs)]
         syscall::sys_rand(
             MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
             MEMORY_IMAGE_ENTROPY.len(),
@@ -114,8 +116,10 @@ pub(crate) fn init() {
 
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
+        #[allow(static_mut_refs)]
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
+        #[allow(static_mut_refs)]
         let output = Output {
             journal: MaybePruned::Pruned(journal_digest),
             assumptions: MaybePruned::Pruned(ASSUMPTIONS_DIGEST.digest()),
@@ -191,6 +195,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), I
         // Use the zero digest as the control root, which indicates that the assumption is a zkVM
         // assumption to be verified with the same control root as the current execution.
         sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        #[allow(static_mut_refs)]
         ASSUMPTIONS_DIGEST.add(
             Assumption {
                 claim: claim_digest,
@@ -234,6 +239,7 @@ pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError
         // Use the zero digest as the control root, which indicates that the assumption is a zkVM
         // assumption to be verified with the same control root as the current execution.
         sys_verify_integrity(claim_digest.as_ref(), Digest::ZERO.as_ref());
+        #[allow(static_mut_refs)]
         ASSUMPTIONS_DIGEST.add(
             Assumption {
                 claim: claim_digest,
@@ -302,6 +308,7 @@ impl std::error::Error for VerifyIntegrityError {}
 pub fn verify_assumption(claim: Digest, control_root: Digest) -> Result<(), Infallible> {
     unsafe {
         sys_verify_integrity(claim.as_ref(), control_root.as_ref());
+        #[allow(static_mut_refs)]
         ASSUMPTIONS_DIGEST.add(
             Assumption {
                 claim,
@@ -533,7 +540,10 @@ pub fn stderr() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
 /// Return a writer for the JOURNAL.
 pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     FdWriter::new(fileno::JOURNAL, |bytes| {
-        unsafe { HASHER.get_mut().unwrap_unchecked().update(bytes) };
+        #[allow(static_mut_refs)]
+        unsafe {
+            HASHER.get_mut().unwrap_unchecked().update(bytes)
+        };
     })
 }
 
