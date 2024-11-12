@@ -63,6 +63,9 @@ fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
+const KECCAK_TEST_DATA_01: &[u8] = b"The quick brown fox jumps over the lazy dog.";
+const KECCAK_TEST_DATA_02_PT_1: &[u8] = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
+const KECCAK_TEST_DATA_02_PT_2: &[u8] = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
 fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
@@ -450,8 +453,8 @@ fn main() {
             assert_eq!(&expected, &output);
 
             // test_keccak_01.txt
-            let test_data_01 = b"The quick brown fox jumps over the lazy dog.";
-            let _output1 = env::keccak_digest(test_data_01, 0x1).unwrap();
+            //let test_data_01 = b"The quick brown fox jumps over the lazy dog.";
+            let _output1 = env::keccak_digest(KECCAK_TEST_DATA_01, 0x1).unwrap();
 
             let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
 
@@ -462,17 +465,14 @@ fn main() {
                 )
             );
 
-
             // test_keccak_02.txt
-            let data1 = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
-            let output1 = env::keccak_digest(data1, 0x1).unwrap();
+            let output1 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_1, 0x1).unwrap();
             assert_eq!(
                 output1,
                 hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
             );
 
-            let data2 = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
-            let output2 = env::keccak_digest(data2, 0x1).unwrap();
+            let output2 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_2, 0x1).unwrap();
             assert_eq!(
                 output2,
                 hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
@@ -485,11 +485,9 @@ fn main() {
             );
         }
         MultiTestSpec::TinyKeccak => {
-
             // test_keccak_01.txt
             let mut hasher = Keccak::v256();
-            let test_data_01 = b"The quick brown fox jumps over the lazy dog.";
-            hasher.update(test_data_01);
+            hasher.update(KECCAK_TEST_DATA_01);
             let mut output = [0u8; DIGEST_BYTES];
             hasher.finalize(output.as_mut_slice());
 
@@ -503,15 +501,13 @@ fn main() {
             );
 
             // test_keccak_02.txt
-            let data1 = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
             let mut hasher1 = Keccak::v256();
             let mut output1 = [0u8; DIGEST_BYTES];
-            hasher1.update(data1);
+            hasher1.update(KECCAK_TEST_DATA_02_PT_1);
 
-            let data2 = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
             let mut hasher2 = Keccak::v256();
             let mut output2 = [0u8; DIGEST_BYTES];
-            hasher2.update(data2);
+            hasher2.update(KECCAK_TEST_DATA_02_PT_2);
 
             hasher1.finalize(&mut output1);
             assert_eq!(
@@ -533,12 +529,13 @@ fn main() {
         }
         MultiTestSpec::BigKeccak => {
             // test_keccak_02.txt
-            let data1 = &[0u8; 100_001]; // TODO - don't hash input transcript for this case....
-            let mut hasher1 = Keccak::v256();
-            let mut output1 = [0u8; DIGEST_BYTES];
-            hasher1.update(data1);
+            let data = &[0u8; 100_001];
+            let mut hasher = Keccak::v256();
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.update(data);
 
-            hasher1.finalize(&mut output1);
+            hasher.finalize(&mut output);
+            assert!(!unsafe { env::KECCAK_BATCHER.has_data() })
         }
     }
 }
