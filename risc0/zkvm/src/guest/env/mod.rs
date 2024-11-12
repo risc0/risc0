@@ -69,6 +69,7 @@
 //! [guest-optimization]:
 //!     https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
+mod batcher;
 mod read;
 mod verify;
 mod write;
@@ -98,6 +99,7 @@ use risc0_zkvm_platform::{
 };
 use serde::{de::DeserializeOwned, Serialize};
 
+use self::batcher::KeccakBatcher;
 pub use self::{
     read::{FdReader, Read},
     verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
@@ -478,138 +480,9 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
     T::deserialize(&mut crate::serde::Deserializer::new(reader))
 }
 
-/// Keccak is proven in batches.
-pub struct KeccakBatcher {
-    input_transcript: [u8; Self::KECCAK_LIMIT],
-    block_count_offset: usize,
-    data_offset: usize,
-}
-
-impl Default for KeccakBatcher {
-    /// create a new instance of a batcher with an input transcript region
-    fn default() -> Self {
-        Self {
-            input_transcript: [0u8; Self::KECCAK_LIMIT],
-            block_count_offset: 0,
-            data_offset: Self::BLOCK_COUNT_BYTES,
-        }
-    }
-}
-
-impl KeccakBatcher {
-    const KECCAK_LIMIT: usize = 100_000;
-    const BLOCK_COUNT_BYTES: usize = 8;
-    const BLOCK_BYTES: usize = 136;
-    const FINAL_PADDING_BYTES: usize = 8;
-
-    /// write data to the input transcript.
-    ///
-    /// This is meant to be used by lower-level functions within keccak crates.
-    /// Many keccak crates will write raw data and padding to a 1600 bit buffer
-    /// often called the "state". All data and padding written to the state
-    /// should be passed to this function.
-    fn write_data(&mut self, input: &[u8]) -> Result<()> {
-        self.input_transcript[self.data_offset..self.data_offset + input.len()]
-            .copy_from_slice(input);
-        self.data_offset += input.len();
-        //        self::log(&alloc::format!(
-        //            "write data: current data offset: {}",
-        //            self.data_offset
-        //        ));
-
-        Ok(())
-    }
-
-    /// write padding to the input transcript.
-    ///
-    /// Pad the raw input with the delimitor, 0x00 bytes, and a 0x80 byte. This
-    /// will pad the raw data upto the current block boundary.
-    fn write_padding(&mut self) -> Result<()> {
-        self.write_data(&[0x01])?;
-        let data_length = self.current_data_length();
-        let remaining_bytes = Self::BLOCK_BYTES - (data_length % Self::BLOCK_BYTES);
-
-        let zeroes = vec![0u8; remaining_bytes - 1];
-
-        self.write_data(&zeroes)?;
-        self.write_data(&[0x80])?;
-
-        Ok(())
-    }
-
-    /// write keccak hash to the transcript, updating the block count.
-    ///
-    /// the amount of raw data written to the
-    pub fn write_keccak_entry(&mut self, input: &[u8], hash: &[u8; 32]) -> Result<()> {
-        //self::log(&alloc::format!("write keccak entry"));
-        // if this entry does not fit in the remaining space, create a new claim and reset the batcher.
-        let padding_bytes = Self::BLOCK_BYTES - (input.len() % Self::BLOCK_BYTES);
-        if self.data_offset + input.len() + padding_bytes + DIGEST_BYTES + Self::FINAL_PADDING_BYTES
-            > Self::KECCAK_LIMIT
-        {
-            let _digest = self.finalize_transcript();
-        }
-
-        self.write_data(input)?;
-        self.write_padding()?;
-
-        let data_length = self.current_data_length();
-        let block_count = (data_length / Self::BLOCK_BYTES) as u8;
-        //self::log(&alloc::format!("block count: {block_count}"));
-
-        self.write_data(hash)?;
-        self.input_transcript[self.block_count_offset] = block_count;
-
-        self.block_count_offset = self.data_offset;
-        self.data_offset += Self::BLOCK_COUNT_BYTES;
-        //        self::log(&alloc::format!(
-        //            "write hash: current data offset: {}",
-        //            self.data_offset
-        //        ));
-        Ok(())
-    }
-
-    /// get the digest of the input transcript
-    pub fn finalize_transcript(&mut self) -> Digest {
-        use risc0_zkp::core::hash::sha::Sha256;
-
-        self.input_transcript
-            [self.block_count_offset..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
-            .copy_from_slice(&[0u8; Self::BLOCK_COUNT_BYTES]);
-        let transcript_digest = crate::sha::Impl::hash_bytes(
-            &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
-        );
-        self::log(&alloc::format!(
-            "finalize: input transcript size : {} : {}",
-            self.block_count_offset + Self::BLOCK_COUNT_BYTES,
-            transcript_digest
-        ));
-        // TODO: add assumption, send transcript
-        // crate::guest::env::verify_assumption(*transcript_digest, Digest::default()).unwrap();
-        self.reset();
-        *transcript_digest
-    }
-
-    fn reset(&mut self) {
-        self.block_count_offset = 0;
-        self.data_offset = Self::BLOCK_COUNT_BYTES;
-    }
-
-    fn current_data_length(&self) -> usize {
-        self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES)
-    }
-
-    /// TODO
-    pub fn has_data(&self) -> bool {
-        self.data_offset != Self::BLOCK_COUNT_BYTES
-    }
-}
-
 /// take an input, and delim and returns a host-generated keccak hash.
 #[no_mangle]
-pub fn keccak_digest(input: &[u8], delim: u8) -> Result<[u8; 32]> {
-    self::log(&alloc::format!("delim {}", delim));
-
+pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
     let nondet_digest = [0u8; DIGEST_BYTES];
     unsafe {
         sys_keccak(
@@ -625,9 +498,5 @@ pub fn keccak_digest(input: &[u8], delim: u8) -> Result<[u8; 32]> {
     Ok(nondet_digest)
 }
 
-/// TODO
-pub static mut KECCAK_BATCHER: KeccakBatcher = KeccakBatcher {
-    input_transcript: [0u8; KeccakBatcher::KECCAK_LIMIT],
-    block_count_offset: 0,
-    data_offset: KeccakBatcher::BLOCK_COUNT_BYTES,
-};
+/// Used for batching keccak proofs
+pub static mut KECCAK_BATCHER: KeccakBatcher = KeccakBatcher::init();

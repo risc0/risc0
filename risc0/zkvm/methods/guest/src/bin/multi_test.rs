@@ -453,7 +453,6 @@ fn main() {
             assert_eq!(&expected, &output);
 
             // test_keccak_01.txt
-            //let test_data_01 = b"The quick brown fox jumps over the lazy dog.";
             let _output1 = env::keccak_digest(KECCAK_TEST_DATA_01, 0x1).unwrap();
 
             let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
