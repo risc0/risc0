@@ -22,6 +22,7 @@ mod log;
 mod panic;
 mod pipe;
 mod posix_io;
+mod prove_keccak;
 mod prove_zkr;
 mod random;
 mod rsa;
@@ -36,14 +37,18 @@ use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     nr::{
         SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_PIPE,
-        SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_RSA, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+        SYS_PROVE_KECCAK, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_RSA, SYS_VERIFY_INTEGRITY,
+        SYS_WRITE,
     },
     SyscallName, DIGEST_BYTES,
 };
 
 use crate::{
     host::client::{
-        env::{AssumptionReceipts, CoprocessorCallbackRef, ProveZkrRequest},
+        env::{
+            AssumptionReceipts, CoprocessorCallbackRef, KeccakCoprocessorCallbackRef,
+            ProveZkrRequest,
+        },
         posix_io::PosixIo,
     },
     Assumption, AssumptionReceipt, ExecutorEnv,
@@ -51,8 +56,9 @@ use crate::{
 
 use self::{
     args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, log::SysLog,
-    panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite, prove_zkr::SysProveZkr,
-    random::SysRandom, rsa::SysRSA, slice_io::SysSliceIo, verify::SysVerify,
+    panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite,
+    prove_keccak::SysProveKeccak, prove_zkr::SysProveZkr, random::SysRandom, rsa::SysRSA,
+    slice_io::SysSliceIo, verify::SysVerify,
 };
 
 /// A host-side implementation of a system call.
@@ -116,6 +122,7 @@ pub(crate) struct SyscallTable<'a> {
     pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
     pub(crate) assumptions_used: Rc<RefCell<AssumptionUsage>>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
+    pub(crate) keccak_coprocessor: Option<KeccakCoprocessorCallbackRef<'a>>,
     pub(crate) pending_zkrs: Rc<RefCell<Vec<ProveZkrRequest>>>,
 }
 
@@ -127,6 +134,7 @@ impl<'a> SyscallTable<'a> {
             assumptions: env.assumptions.clone(),
             assumptions_used: Default::default(),
             coprocessor: env.coprocessor.clone(),
+            keccak_coprocessor: env.keccak_coprocessor.clone(),
             pending_zkrs: Default::default(),
         }
     }
@@ -143,6 +151,7 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_PIPE, SysPipe::default())
             .with_syscall(SYS_PROVE_ZKR, SysProveZkr)
+            .with_syscall(SYS_PROVE_KECCAK, SysProveKeccak)
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_READ, SysRead)
             .with_syscall(SYS_RSA, SysRSA)
