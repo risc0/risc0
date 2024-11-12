@@ -33,8 +33,8 @@ reqwest = { version = "0.12", default-features = false, features = [
   "json",
   "rustls-tls",
 ] }
-reqwest-middleware = "0.2"
-reqwest-retry = "0.4"
+reqwest-middleware = "0.3"
+reqwest-retry = "0.6"
 risc0-binfmt = { workspace = true, default-features = false }
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
