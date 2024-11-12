@@ -123,7 +123,7 @@ impl risc0_zkp::layout::Component for HaltCycleLayout {
         Ok(())
     }
 }
-pub type Reg16LayoutArray = [&'static Reg; 16];
+pub type Reg17LayoutArray = [&'static Reg; 17];
 pub type Reg2LayoutArray = [&'static Reg; 2];
 pub struct PcRegLayout {
     pub twits: &'static Reg2LayoutArray,
@@ -145,7 +145,7 @@ pub struct BodyStepLayout {
     pub user_mode: &'static Reg,
     pub header: &'static RamHeaderLayout,
     pub major_mux: &'static HaltCycleLayout,
-    pub major_select: &'static Reg16LayoutArray,
+    pub major_select: &'static Reg17LayoutArray,
     pub pc: &'static PcRegLayout,
 }
 impl risc0_zkp::layout::Component for BodyStepLayout {
@@ -225,9 +225,9 @@ pub const DATA_LAYOUT: &TopLayout = &TopLayout {
                 },
             },
             major_mux: &HaltCycleLayout {
-                sys_exit_code: &Reg { offset: 117 },
-                user_exit_code: &Reg { offset: 118 },
-                write_addr: &Reg { offset: 119 },
+                sys_exit_code: &Reg { offset: 118 },
+                user_exit_code: &Reg { offset: 119 },
+                write_addr: &Reg { offset: 120 },
             },
             major_select: &[
                 &Reg { offset: 101 },
@@ -246,6 +246,7 @@ pub const DATA_LAYOUT: &TopLayout = &TopLayout {
                 &Reg { offset: 114 },
                 &Reg { offset: 115 },
                 &Reg { offset: 116 },
+                &Reg { offset: 117 },
             ],
             pc: &PcRegLayout {
                 twits: &[&Reg { offset: 70 }, &Reg { offset: 71 }],

@@ -28,7 +28,7 @@ use risc0_zkp::{
             BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashSha256,
             DeviceExtElem,
         },
-        Buffer, CircuitHal, Hal,
+        AccumPreflight, Buffer, CircuitHal, Hal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -127,6 +127,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
     fn accumulate(
         &self,
+        _preflight: &AccumPreflight,
         ctrl: &CudaBuffer<BabyBearElem>,
         io: &CudaBuffer<BabyBearElem>,
         data: &CudaBuffer<BabyBearElem>,

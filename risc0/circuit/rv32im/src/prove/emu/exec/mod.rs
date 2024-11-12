@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod bibc;
 #[cfg(test)]
 mod tests;
 
@@ -38,12 +37,12 @@ use risc0_zkvm_platform::{
 };
 use sha2::digest::generic_array::GenericArray;
 
-use self::bibc::BigIntIO;
 use super::{
     addr::{ByteAddr, WordAddr},
+    bibc,
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    BIGINT_CYCLES, SYSTEM_START,
+    BIGINT2_WIDTH_BYTES, BIGINT_CYCLES, SYSTEM_START,
 };
 use crate::{
     prove::{
@@ -541,7 +540,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn ecall_bigint2(&mut self) -> Result<bool> {
         let blob_ptr = self.load_guest_addr_from_register(REG_A0)?.waddr();
         let nondet_program_ptr = self.load_guest_addr_from_register(REG_T1)?;
-        let nondet_program_size = self.load_u32_from_guest((blob_ptr + 0u32).baddr())?;
+        let verify_program_ptr = self.load_guest_addr_from_register(REG_T2)?;
+        let consts_ptr = self.load_guest_addr_from_register(REG_T3)?;
+
+        let nondet_program_size = self.load_u32_from_guest(blob_ptr.baddr())?;
+        let verify_program_size = self.load_u32_from_guest((blob_ptr + 1u32).baddr())?;
+        let consts_size = self.load_u32_from_guest((blob_ptr + 2u32).baddr())?;
 
         let program_bytes = self
             .load_region_from_guest(nondet_program_ptr, nondet_program_size * WORD_SIZE as u32)?;
@@ -549,7 +553,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let program = bibc::Program::decode(&mut cursor)?;
         program.eval(self)?;
 
-        self.pending.cycles += BIGINT_CYCLES; // FIXME
+        self.load_region_from_guest(verify_program_ptr, verify_program_size * WORD_SIZE as u32)?;
+        self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
+
+        self.pending.cycles += verify_program_size as usize + 1;
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
@@ -663,21 +670,25 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
-#[allow(unused)]
-impl<'a, 'b, S: Syscall> BigIntIO for Executor<'a, 'b, S> {
+impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
-        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count}");
-        let reg = self.load_register(arena as usize)?;
-        let addr = ByteAddr(reg + offset * 16);
+        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+        let base = ByteAddr(self.load_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
         let bytes = self.load_region_from_guest(addr, count)?;
         Ok(BigUint::from_bytes_le(&bytes))
     }
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
-        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value}");
-        let reg = self.load_register(arena as usize)?;
-        let addr = ByteAddr(reg + offset * 16);
-        self.store_region_into_guest(addr, &value.to_bytes_le())
+        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+        let base = ByteAddr(self.load_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
+        let mut bytes = value.to_bytes_le();
+        if bytes.len() < count as usize {
+            bytes.resize(count as usize, 0);
+        }
+        ensure!(bytes.len() == count as usize);
+        self.store_region_into_guest(addr, &bytes)
     }
 }
 

@@ -25,8 +25,8 @@ use crate::{
     },
 };
 
-pub struct MachineContext {
-    trace: PreflightTrace,
+pub struct MachineContext<'a> {
+    trace: &'a PreflightTrace,
     pub raw_trace: Box<RawPreflightTrace>,
     _raw_cycles: Vec<RawPreflightCycle>,
     _raw_txns: Vec<RawMemoryTransaction>,
@@ -102,6 +102,7 @@ impl<'a> Injector<'a> {
 impl TopMux {
     fn is_safe_verify_mem(&self) -> u8 {
         match self {
+            TopMux::Body(Major::BigInt2, _) => 0,
             TopMux::Body(Major::VerifyAnd, _) => 0,
             TopMux::Body(Major::VerifyDivide, _) => 0,
             TopMux::Body(Major::PageFault, _) => 0,
@@ -112,8 +113,8 @@ impl TopMux {
     }
 }
 
-impl MachineContext {
-    pub fn new(trace: PreflightTrace) -> Self {
+impl<'a> MachineContext<'a> {
+    pub fn new(trace: &'a PreflightTrace) -> Self {
         scope!("prepare_trace");
         let _raw_cycles: Vec<_> = trace
             .pre
@@ -197,12 +198,12 @@ impl MachineContext {
         self.get_cycle(cycle).back.is_some()
     }
 
-    pub fn inject_exec_backs<'a>(
+    pub fn inject_exec_backs<'b>(
         &self,
         steps: usize,
         cycle: usize,
-        offsets: &'a mut Vec<u32>,
-        values: &'a mut Vec<BabyBearElem>,
+        offsets: &'b mut Vec<u32>,
+        values: &'b mut Vec<BabyBearElem>,
     ) {
         let cur_cycle = self.get_cycle(cycle);
         if let Some(back) = &cur_cycle.back {
