@@ -11,4 +11,4 @@ risc0-circuit-bigint = { path = "../../../../risc0/circuit/bigint", default-feat
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 
 [patch.crates-io]
-rsa = { path = "/Users/tzerrell/code/RustCrypto/RSA" }
+rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "d48bf59a402c32776bcf9cfa47d7b5d959f028e6" }
