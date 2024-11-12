@@ -78,7 +78,6 @@ where
             &io,
             &trace,
             StepMode::Parallel,
-            // StepMode::SeqForward,
         );
         let steps = witgen.steps;
 
