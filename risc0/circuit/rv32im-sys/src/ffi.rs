@@ -76,7 +76,10 @@ extern "C" {
         data: *const BabyBearElem,
     ) -> *const std::os::raw::c_char;
 
-    pub fn risc0_circuit_rv32im_accum_context_alloc(steps: usize) -> *const RawAccumContext;
+    pub fn risc0_circuit_rv32im_accum_context_alloc(
+        steps: usize,
+        is_par_safe: *const u8,
+    ) -> *const RawAccumContext;
 
     pub fn risc0_circuit_rv32im_accum_context_free(ctx: *const RawAccumContext);
 

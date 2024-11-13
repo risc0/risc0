@@ -21,7 +21,7 @@ use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
 #[derive(Debug)]
-pub struct Type {
+pub(crate) struct Type {
     pub coeffs: u64,
     _max_pos: u64,
     _max_neg: u64,
@@ -29,7 +29,7 @@ pub struct Type {
 }
 
 #[derive(Debug)]
-pub struct Input {
+pub(crate) struct Input {
     _label: u64,
     _bit_width: u32,
     _min_bits: u16,
@@ -37,7 +37,7 @@ pub struct Input {
 }
 
 #[derive(Debug, FromPrimitive)]
-pub enum OpCode {
+pub(crate) enum OpCode {
     Const = 0x2, // unary: constant index
     Load = 0x3,  // unary: constant index
     Store = 0x4, // unary: constant index
@@ -50,21 +50,21 @@ pub enum OpCode {
 }
 
 #[derive(Debug)]
-pub struct Op {
+pub(crate) struct Op {
     pub code: OpCode,
     pub result_type: usize,
     pub a: usize,
     pub b: usize,
 }
 
-pub struct Program {
+pub(crate) struct Program {
     pub inputs: Vec<Input>,
     pub types: Vec<Type>,
     pub constants: Vec<u64>,
     pub ops: Vec<Op>,
 }
 
-pub trait BigIntIO {
+pub(crate) trait BigIntIO {
     fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint>;
 
     fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()>;
@@ -153,7 +153,7 @@ impl Program {
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
         let mut regs = vec![BigUint::ZERO; self.ops.len()];
         for (op_index, op) in self.ops.iter().enumerate() {
-            // tracing::debug!("[{op_index}]: {op:?}");
+            tracing::debug!("[{op_index}]: {op:?}");
             match op.code {
                 OpCode::Const => {
                     let offset = op.a;

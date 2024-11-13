@@ -76,7 +76,7 @@ where
             self.circuit_hal.as_ref(),
             segment.po2,
             &io,
-            trace,
+            &trace,
             StepMode::Parallel,
         );
         let steps = witgen.steps;
@@ -150,6 +150,7 @@ where
                 });
 
                 self.circuit_hal.accumulate(
+                    &trace.accum,
                     &witgen.ctrl,
                     &witgen.io,
                     &witgen.data,

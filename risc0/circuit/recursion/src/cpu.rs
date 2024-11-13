@@ -23,7 +23,7 @@ use risc0_zkp::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         map_pow, Elem, ExtElem, RootsOfUnity,
     },
-    hal::{cpu::CpuBuffer, CircuitHal, Hal},
+    hal::{cpu::CpuBuffer, AccumPreflight, CircuitHal, Hal},
     prove::accum::{Accum, Handler},
     INV_RATE, ZK_CYCLES,
 };
@@ -106,6 +106,7 @@ where
 
     fn accumulate(
         &self,
+        _preflight: &AccumPreflight,
         ctrl: &CpuBuffer<BabyBearElem>,
         io: &CpuBuffer<BabyBearElem>,
         data: &CpuBuffer<BabyBearElem>,

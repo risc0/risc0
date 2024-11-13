@@ -19,7 +19,7 @@
 #include <metal_stdlib>
 
 constexpr constant size_t kBabyBearExtSize = 4;
-constexpr constant size_t kMaxRamRowsPerCycle = 5;
+constexpr constant size_t kMaxRamRowsPerCycle = 6;
 constexpr constant size_t kMaxBytePairsPerCycle = 21;
 constexpr constant uint32_t kInvalidPattern = 0xffffffff;
 
@@ -79,4 +79,5 @@ struct MachineContext {
 struct AccumContext {
   device FpExt* ram;
   device FpExt* bytes;
+  device uint8_t* isParSafe;
 };

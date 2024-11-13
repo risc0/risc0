@@ -25,6 +25,7 @@ tracing = { version = "0.1", default-features = false, features = [
 metal = { workspace = true }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
+auto_ops = { version = "0.3", optional = true }
 bytemuck = { version = "1.13", optional = true }
 byteorder = { version = "1.5", optional = true }
 cfg-if = { version = "1.0", optional = true }
@@ -57,6 +58,7 @@ cuda = [
 default = ["prove"]
 metal = ["prove"]
 prove = [
+  "dep:auto_ops",
   "dep:bytemuck",
   "dep:byteorder",
   "dep:cfg-if",

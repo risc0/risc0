@@ -432,7 +432,13 @@ __global__ void par_step_compute_accum(AccumContext* ctx,
   if (cycle >= count) {
     return;
   }
-  step_compute_accum(ctx, steps, cycle, arg0, arg1, arg2, arg3, arg4);
+
+  if (cycle == 0 || ctx->isParSafe[cycle]) {
+    step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
+    while (cycle < count && !ctx->isParSafe[cycle]) {
+      step_compute_accum(ctx, steps, cycle++, arg0, arg1, arg2, arg3, arg4);
+    }
+  }
 }
 
 const char* risc0_circuit_rv32im_cuda_step_compute_accum(AccumContext* ctx,
