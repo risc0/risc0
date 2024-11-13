@@ -93,15 +93,9 @@ pub fn nondet_inv_fixed<const N: usize>(
     lhs: impl AsRef<[i32]>,
     rhs: impl AsRef<[i32]>,
 ) -> [i32; N] {
-    // Computes the inverse of LHS mod RHS via the `inv = lhs^{rhs - 2} % rhs` algorithm
-    // Note that this assumes `rhs` is prime. For non-prime `rhs`, this algorithm can
-    // fail (compute an incorrect inverse). Note that this is not a soundness problem, as
-    // this is a nondet and the correctness of the inversion must be checked inside the
-    // circuit regardless.
     let lhs = to_biguint(lhs);
     let rhs = to_biguint(rhs);
-    let exp = rhs.clone() - 2u8;
-    let result = lhs.modpow(&exp, &rhs);
+    let result = lhs.modinv(&rhs).expect("Can't divide by zero");
     trace!("inv({lhs}, [mod] {rhs}) = {result}");
     from_biguint_fixed(result)
 }

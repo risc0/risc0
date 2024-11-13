@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0-2
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.81.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
 
 defaults:
@@ -391,14 +391,14 @@ jobs:
       - uses: ./.github/actions/rustup
         with:
           # Building with docs.rs config requires the nightly toolchain.
-          toolchain: nightly
+          toolchain: nightly-2024-09-04
       - uses: ./.github/actions/sccache
         with:
           key: macOS-nightly
-      - run: cargo +nightly doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
-      - run: cargo +nightly doc -p risc0-zkp -Fprove,std --no-deps
-      - run: cargo +nightly doc -p cargo-risczero -Fdocker,r0vm --no-deps
-      - run: cargo +nightly doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-zkvm -Fclient,prove,getrandom,std --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-zkp -Fprove,std --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p cargo-risczero -Fdocker,r0vm --no-deps
+      - run: cargo +nightly-2024-09-04 doc -p risc0-binfmt -p risc0-core -p risc0-groth16 -p risc0-zkvm-platform --all-features  --no-deps
       - run: sccache --show-stats
 
   check-external:
@@ -609,7 +609,7 @@ jobs:
       - name: 🍞 Setup Bun
         uses: risc0/setup-bun@v1.2.1
         with:
-          bun-version: 1.1.29
+          bun-version: 1.1.34
       - run: bun install
         working-directory: web
       - run: bun run ci

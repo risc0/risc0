@@ -1,10 +1,10 @@
 import "shared/styles/styles.css";
 
 import { cn } from "@risc0/ui/cn";
-import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import type { PropsWithChildren } from "react";
 import { Providers } from "shared/client/providers/providers";
 
@@ -41,8 +41,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className={cn("flex min-h-full flex-col font-sans", fontMono.variable)}>
         <Providers>{children}</Providers>
-        <Analytics />
         <SpeedInsights />
+
+        <Script defer data-domain="reports.risczero.com" src="https://plausible.io/js/script.outbound-links.js" />
       </body>
     </html>
   );

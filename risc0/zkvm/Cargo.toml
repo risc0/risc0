@@ -63,6 +63,8 @@ bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.7", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
 lazy-regex = { version = "3.3", optional = true }
+num-bigint = { version = "0.4", default-features = false, optional = true }
+num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -150,6 +152,8 @@ prove = [
   "dep:bincode",
   "dep:elf",
   "dep:lazy-regex",
+  "dep:num-bigint",
+  "dep:num-traits",
   "dep:prost",
   "dep:rand",
   "dep:rayon",

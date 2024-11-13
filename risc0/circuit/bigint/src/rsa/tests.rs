@@ -16,7 +16,7 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 use num_bigint::BigUint;
-use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_ID};
+use risc0_circuit_bigint_test_methods::{RSA_ELF, RSA_VERIFY_ELF, RSA_VERIFY_ID};
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use test_log::test;
 
@@ -68,7 +68,7 @@ fn run_guest_compose(claims: &[impl Borrow<[BigUint; 3]>]) -> Result<()> {
     let prover = get_prover_server(&ProverOpts::fast())?;
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, RSA_ELF)?.receipt;
+    let receipt = prover.prove(env, RSA_VERIFY_ELF)?.receipt;
 
     // Make sure this receipt actually depends on the assumption;
     // otherwise this test might give a false negative.
@@ -80,7 +80,7 @@ fn run_guest_compose(claims: &[impl Borrow<[BigUint; 3]>]) -> Result<()> {
         .is_empty());
 
     // Make sure the receipt verifies OK
-    receipt.verify(RSA_ID)?;
+    receipt.verify(RSA_VERIFY_ID)?;
 
     Ok(())
 }
@@ -127,4 +127,37 @@ fn guest_compose_corrupted() {
             "Expected zkr verification failure when corrupting RSA value #{idx}"
         ));
     }
+}
+
+// Makes sure the RSA `modpow_65537` accelerator can run in the guest
+#[test]
+fn guest_compute() {
+    // Test using small inputs based on Fermat's Little Theorem
+    // (Since 65537 is prime, a = modpow_65537(a, 65537) for any 0 <= a < 65537)
+    let base = from_hex("47"); // arbitrary (but less than 65537)
+    let expected_result = base.clone();
+    let mut base = base.to_u32_digits();
+    let mut modulus = from_hex("010001").to_u32_digits(); // 65537
+    assert!(modulus.len() <= crate::rsa::WIDTH_WORDS && base.len() <= crate::rsa::WIDTH_WORDS);
+    modulus.resize(crate::rsa::WIDTH_WORDS, 0);
+    base.resize(crate::rsa::WIDTH_WORDS, 0);
+    let env = ExecutorEnv::builder()
+        .write(&base)
+        .unwrap()
+        .write(&modulus)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    register_zkrs();
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let result: Vec<u32> = prover
+        .prove(env, RSA_ELF)
+        .unwrap()
+        .receipt
+        .journal
+        .decode()
+        .unwrap();
+    assert_eq!(BigUint::from_slice(&result), expected_result);
 }

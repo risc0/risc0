@@ -192,6 +192,20 @@ fn bigint_accel() {
 }
 
 #[test]
+fn sys_bigint2() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::SysBigInt2)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    prove_session_fast(&session);
+}
+
+#[test]
 fn memory_io() {
     fn run_memio(pairs: &[(usize, usize)]) -> Result<ExitCode> {
         let input = MultiTestSpec::ReadWriteMem {
@@ -1075,7 +1089,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::proven::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 41.752773);
+        assert_eq!(security, 41.66407);
     }
 
     #[test]
@@ -1086,7 +1100,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 74.90066);
+        assert_eq!(security, 74.88997);
     }
 
     #[test]
@@ -1097,6 +1111,6 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::toy_model_security::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 98.32892);
+        assert_eq!(security, 97.945);
     }
 }

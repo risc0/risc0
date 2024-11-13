@@ -12,21 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use num_bigint::BigUint;
 use risc0_circuit_bigint::rsa;
 use risc0_zkvm::guest::env;
 
 fn main() {
-    // Computes and proves the result of modpow with exponent of 65537
-    let input: Vec<u32> = env::read();
-    let base: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs must be 96 words");
-    let input: Vec<u32> = env::read();
-    let modulus: [u32; rsa::WIDTH_WORDS] = input.try_into().expect("Inputs must be 96 words");
-    let mut result = [0u32; rsa::WIDTH_WORDS];
-
-    // Safety: Parameters are dereferenceable and aligned
-    unsafe {
-        rsa::modpow_65537(&mut result, &base, &modulus);
-    }
-
-    env::commit(&result.to_vec());
+    // Verifies an RSA signature (message `msg`, signature `sig`, public key modulus `modulus`)
+    let input: Vec<[BigUint; 3]> = env::read();
+    let claims: Vec<_> = input
+        .into_iter()
+        .map(|[modulus, sig, msg]| rsa::claim(&rsa::RSA_256_X2, modulus, sig, msg))
+        .collect();
+    risc0_circuit_bigint::prove(&rsa::RSA_256_X2, &claims).expect("Unable to compose with RSA");
 }

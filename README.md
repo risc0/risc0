@@ -3,7 +3,12 @@
 > When building applications or running examples, use the [latest release](https://github.com/risc0/risc0/releases) instead.
 
 <p align="center">
-  <a href="https://risczero.com" target="_blank"><img src="website/static/img/banner.png" height="100"></a>
+  <a href="https://risczero.com" target="_blank">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://risczero.com/companies/risczero_dark.svg">
+      <img src="https://risczero.com/companies/risczero.svg" alt="RISC Zero Company Logo" width="142" height="126">
+    </picture>
+  </a>
 </p>
 
 [![Crates.io][crates-badge]][crates-url]

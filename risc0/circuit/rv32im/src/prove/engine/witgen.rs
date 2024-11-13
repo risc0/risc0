@@ -53,7 +53,7 @@ where
         circuit_hal: &C,
         po2: usize,
         io: &[BabyBearElem],
-        trace: PreflightTrace,
+        trace: &PreflightTrace,
         mode: StepMode,
     ) -> Self {
         scope!("witgen");

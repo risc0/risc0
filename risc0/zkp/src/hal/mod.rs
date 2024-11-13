@@ -257,9 +257,16 @@ pub trait Hal {
     }
 }
 
+#[derive(Clone, Default)]
+pub struct AccumPreflight {
+    pub is_par_safe: Vec<u8>,
+}
+
 pub trait CircuitHal<H: Hal> {
+    #[allow(clippy::too_many_arguments)]
     fn accumulate(
         &self,
+        preflight: &AccumPreflight,
         ctrl: &H::Buffer<H::Elem>,
         io: &H::Buffer<H::Elem>,
         data: &H::Buffer<H::Elem>,

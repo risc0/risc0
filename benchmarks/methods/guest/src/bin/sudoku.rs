@@ -15,7 +15,6 @@
 // Based from: https://github.com/anoma/zkp-compiler-shootout/blob/main/shootout/risc/methods/guest/src/bin/sudoku.rs
 #![no_std]
 #![no_main]
-#![feature(slice_flatten)]
 
 use risc0_benchmark_lib::Sudoku;
 use risc0_zkvm::{
@@ -32,7 +31,7 @@ fn main() {
         panic!("invalid solution");
     }
 
-    let digest = Impl::hash_bytes(&puzzle.0.flatten());
+    let digest = Impl::hash_bytes(&puzzle.0.as_flattened());
     env::commit(&digest);
 }
 
