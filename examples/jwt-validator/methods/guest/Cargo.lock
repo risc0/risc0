@@ -905,7 +905,7 @@ dependencies = [
 [[package]]
 name = "risc0-bigint2"
 version = "1.2.0-alpha.1"
-source = "git+https://github.com/risc0/risc0?rev=43e5883d0dad5c405e565c9327cf7346f4431216#43e5883d0dad5c405e565c9327cf7346f4431216"
+source = "git+https://github.com/risc0/risc0?rev=8fc8437633f08a66e0fbacce947f41d01b074774#8fc8437633f08a66e0fbacce947f41d01b074774"
 dependencies = [
  "include_bytes_aligned",
  "num-bigint-dig",
@@ -1048,7 +1048,7 @@ dependencies = [
 [[package]]
 name = "rsa"
 version = "0.9.6"
-source = "git+https://www.github.com/risc0/RustCrypto-RSA.git?rev=f9e799733fb86303dd1288beb8daa77a589edf69#f9e799733fb86303dd1288beb8daa77a589edf69"
+source = "git+https://www.github.com/risc0/RustCrypto-RSA.git?rev=fa372e9f5008350bd61289340019ce2222425a7c#fa372e9f5008350bd61289340019ce2222425a7c"
 dependencies = [
  "const-oid",
  "digest",

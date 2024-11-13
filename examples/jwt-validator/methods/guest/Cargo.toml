@@ -12,4 +12,4 @@ risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, featur
 ] }
 
 [patch.crates-io]
-rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "f9e799733fb86303dd1288beb8daa77a589edf69" }
+rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "fa372e9f5008350bd61289340019ce2222425a7c" }
