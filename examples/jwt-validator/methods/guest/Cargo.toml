@@ -7,4 +7,9 @@ edition = "2021"
 
 [dependencies]
 jwt-core = { path = "../../core/" }
-risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
+  "std",
+] }
+
+[patch.crates-io]
+rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "f9e799733fb86303dd1288beb8daa77a589edf69" }
