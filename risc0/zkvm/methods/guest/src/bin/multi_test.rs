@@ -42,7 +42,7 @@ use risc0_zkvm_platform::{
     memory::{self, SYSTEM},
     syscall::{
         bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write,
+        sys_read, sys_read_words, sys_write, DIGEST_BYTES, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
