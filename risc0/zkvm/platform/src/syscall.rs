@@ -146,6 +146,7 @@ pub mod nr {
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
+    declare_syscall!(pub SYS_PROVE_KECCAK);
     declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_RSA);
@@ -949,6 +950,48 @@ pub unsafe extern "C" fn sys_prove_zkr(
     if a0 != 0 {
         const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+}
+
+/// Executes the keccak circuit, and then executes the lift predicate
+/// in the recursion circuit.
+///
+/// This only triggers the execution of the circuits; it does not add
+/// any assumptions.  In order to prove that it executed correctly,
+/// users must calculate the claim digest and add it to the list of
+/// assumptions.
+///
+/// # Safety
+///
+/// `control_root` must be aligned and dereferenceable.
+///
+/// `input` must be aligned and have `input_len` u32s dereferenceable
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+#[stability::unstable]
+pub unsafe extern "C" fn sys_prove_keccak(
+    po2: usize,
+    input: *const u32,
+    input_len: usize,
+    control_root: *const [u32; DIGEST_WORDS],
+) {
+    let Return(a0, _) = unsafe {
+        syscall_4(
+            nr::SYS_PROVE_KECCAK,
+            null_mut(),
+            0,
+            po2 as u32,
+            input as u32,
+            input_len as u32,
+            control_root as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // Currently, this should always be the case. This check is
+    // included for forwards-compatibility.
+    if a0 != 0 {
+        panic!("sys_execute_keccak returned error result");
     }
 }
 
