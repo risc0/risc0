@@ -41,13 +41,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-<<<<<<< HEAD
-        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write, DIGEST_BYTES, DIGEST_WORDS,
-=======
-        bigint, sys_bigint, sys_bigint2_2, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write,
->>>>>>> main
+        bigint, sys_bigint, sys_bigint2_2, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe,
+        sys_prove_zkr, sys_read, sys_read_words, sys_write, DIGEST_BYTES, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
