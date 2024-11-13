@@ -15,6 +15,8 @@
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
+use risc0_bigint2::ec::AffinePt;
+
 fn main() {
     const POINT_G: &[u32] = &[
         0x16F81798, 0x59F2815B, 0x2DCE28D9, 0x029BFCDB, 0xCE870B07, 0x55A06295, 0xF9DCBBAC,
@@ -30,6 +32,10 @@ fn main() {
     ];
     let mut result = [0u32; 16];
 
-    risc0_bigint2::ec::double(POINT_G, &mut result);
-    assert_eq!(result, EXPECTED);
+    let in_pt = AffinePt::from_slice(POINT_G);
+    let expected_pt = AffinePt::from_slice(EXPECTED);
+    // assert!(false, "CHKPT C");
+
+    let result = risc0_bigint2::ec::double(in_pt);
+    assert_eq!(result, expected_pt);
 }
