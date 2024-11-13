@@ -33,7 +33,7 @@ use risc0_zkp::{
             BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
             MetalHash,
         },
-        Buffer as _, CircuitHal,
+        AccumPreflight, Buffer as _, CircuitHal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -106,6 +106,7 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
 struct AccumContext {
     ram: *const c_void,
     bytes: *const c_void,
+    is_par_safe: *const c_void,
 }
 
 impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
@@ -162,6 +163,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
 
     fn accumulate(
         &self,
+        preflight: &AccumPreflight,
         ctrl: &MetalBuffer<BabyBearElem>,
         io: &MetalBuffer<BabyBearElem>,
         data: &MetalBuffer<BabyBearElem>,
@@ -184,9 +186,18 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             &bytes,
         );
 
+        assert_eq!(preflight.is_par_safe.len(), count);
+        let is_par_safe = MetalBuffer::copy_from(
+            "is_par_safe",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &preflight.is_par_safe,
+        );
+
         let ctx = AccumContext {
             ram: ram.as_device_ptr(),
             bytes: bytes.as_device_ptr(),
+            is_par_safe: is_par_safe.as_device_ptr(),
         };
         // TODO: detect if device supports shared mode
         let ctx_buffer = self.hal.device.new_buffer_with_data(
@@ -214,6 +225,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
                 .dispatch_with_resources(kernel, &args, count as u64, None, |cmd_encoder| {
                     cmd_encoder.use_resource(&ram.as_buf(), MTLResourceUsage::Write);
                     cmd_encoder.use_resource(&bytes.as_buf(), MTLResourceUsage::Write);
+                    cmd_encoder.use_resource(&is_par_safe.as_buf(), MTLResourceUsage::Read);
                 });
         });
 

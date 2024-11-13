@@ -34,7 +34,7 @@ use risc0_zkp::{
     field::baby_bear::BabyBear,
     hal::{
         cpu::{CpuBuffer, CpuHal},
-        CircuitHal, Hal,
+        AccumPreflight, CircuitHal, Hal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -147,6 +147,7 @@ where
 
     fn accumulate(
         &self,
+        preflight: &AccumPreflight,
         ctrl: &CpuBuffer<BabyBearElem>,
         io: &CpuBuffer<BabyBearElem>,
         data: &CpuBuffer<BabyBearElem>,
@@ -163,8 +164,9 @@ where
                 accum.as_slice_sync(),
             ];
 
-            let accum_ctx = CIRCUIT.alloc_accum_ctx(steps);
+            let accum_ctx = CIRCUIT.alloc_accum_ctx(steps, &preflight.is_par_safe);
 
+            // TODO: use preflight
             scope!("step_compute_accum", {
                 (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
                     CIRCUIT

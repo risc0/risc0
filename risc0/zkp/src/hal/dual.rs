@@ -16,7 +16,7 @@ use std::{fmt::Debug, marker::PhantomData, rc::Rc};
 
 use risc0_core::field::Field;
 
-use super::{Buffer, CircuitHal, Hal};
+use super::{AccumPreflight, Buffer, CircuitHal, Hal};
 use crate::core::{digest::Digest, hash::HashSuite};
 
 #[derive(Clone)]
@@ -487,6 +487,7 @@ where
 
     fn accumulate(
         &self,
+        _preflight: &AccumPreflight,
         _ctrl: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
         _io: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
         _data: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,

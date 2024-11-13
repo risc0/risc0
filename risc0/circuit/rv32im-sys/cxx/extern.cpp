@@ -85,7 +85,12 @@ extern_ramRead(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> arg
   size_t memIdx = trace->cycles[cycle].memIdx++;
   MemoryTransaction& txn = trace->txns[memIdx];
   if (trace->isTrace) {
-    printf("ramRead(%lu, 0x%x): txn(%u, 0x%x)\n", cycle, addr, txn.cycle, txn.addr);
+    printf("ramRead(%lu, 0x%08x): txn(%u, 0x%08x): 0x%08x\n",
+           cycle,
+           addr,
+           txn.cycle,
+           txn.addr,
+           txn.data);
   }
   if (cycle != txn.cycle) {
     throw std::runtime_error("Mismatched memory txn cycle");
@@ -257,7 +262,7 @@ void extern_plonkWrite_ram(void* ctx, size_t cycle, const char* extra, std::arra
                   args[5].asUInt32() << 16 | //
                   args[6].asUInt32() << 24;
   if (mctx->trace->isTrace) {
-    printf("plonkWriteRam(0x%x, %u, %u, 0x%x)\n", addr, memCycle, memOp, word);
+    printf("plonkWriteRam(0x%08x, %u, %u, 0x%08x)\n", addr, memCycle, memOp, word);
   }
   uint32_t idx = mctx->ramIndex[cycle]++;
   assert(idx < kMaxRamRowsPerCycle);
@@ -273,6 +278,14 @@ extern_plonkRead_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 
   MachineContext* mctx = static_cast<MachineContext*>(ctx);
   uint32_t idx = mctx->ramIndex[cycle]++;
   const RamArgumentRow& row = mctx->ramRows[idx];
+  if (mctx->trace->isTrace) {
+    printf("plonkReadRam(%zu): 0x%08x, %u, %u, 0x%08x)\n",
+           cycle,
+           row.addr,
+           row.getMemCycle(),
+           row.getMemOp(),
+           row.word);
+  }
   return {
       Fp(row.addr),
       Fp(row.getMemCycle()),
@@ -332,6 +345,41 @@ extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, std::arr
   AccumContext* actx = static_cast<AccumContext*>(ctx);
   const FpExt& item = actx->cells[cycle].bytes;
   return {item.elems[0], item.elems[1], item.elems[2], item.elems[3]};
+}
+
+void extern_syscallBigInt2Precompute(void* ctx,
+                                     size_t cycle,
+                                     const char* extra,
+                                     std::array<Fp, 0> args) {
+  // no-op
+}
+
+std::array<Fp, 16>
+extern_syscallBigInt2Witness(void* ctx, size_t cycle, const char* extra, std::array<Fp, 5> args) {
+  PreflightTrace* trace = static_cast<MachineContext*>(ctx)->trace;
+  size_t extraIdx = trace->cycles[cycle].extraIdx;
+  uint32_t a0 = trace->extras[extraIdx + 0];
+  uint32_t a1 = trace->extras[extraIdx + 1];
+  uint32_t a2 = trace->extras[extraIdx + 2];
+  uint32_t a3 = trace->extras[extraIdx + 3];
+  return {
+      Fp(a0 & 0xff),
+      Fp(a0 >> 8 & 0xff),
+      Fp(a0 >> 16 & 0xff),
+      Fp(a0 >> 24 & 0xff),
+      Fp(a1 & 0xff),
+      Fp(a1 >> 8 & 0xff),
+      Fp(a1 >> 16 & 0xff),
+      Fp(a1 >> 24 & 0xff),
+      Fp(a2 & 0xff),
+      Fp(a2 >> 8 & 0xff),
+      Fp(a2 >> 16 & 0xff),
+      Fp(a2 >> 24 & 0xff),
+      Fp(a3 & 0xff),
+      Fp(a3 >> 8 & 0xff),
+      Fp(a3 >> 16 & 0xff),
+      Fp(a3 >> 24 & 0xff),
+  };
 }
 
 } // namespace risc0::circuit::rv32im

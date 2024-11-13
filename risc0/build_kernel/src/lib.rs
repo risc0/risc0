@@ -173,6 +173,7 @@ impl KernelBuild {
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_SCCACHE_RECACHE");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_TIME");
 
         for inc_dir in self.inc_dirs.iter() {
             for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
@@ -222,6 +223,11 @@ impl KernelBuild {
 
                 for flag in self.flags.iter() {
                     cmd.arg(flag);
+                }
+
+                if let Some(time_file) = env::var_os("RISC0_CUDA_TIME") {
+                    cmd.arg("--time");
+                    cmd.arg(time_file);
                 }
 
                 cmd.arg(src);

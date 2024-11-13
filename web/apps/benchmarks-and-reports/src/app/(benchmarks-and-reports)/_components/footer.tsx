@@ -11,7 +11,7 @@ export function Footer() {
           href="https://www.risczero.com"
           target="_blank"
         >
-          Risc Zero
+          RISC Zero
         </Link>
       </span>
       <span>•</span>

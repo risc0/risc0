@@ -50,8 +50,10 @@ impl PolyFp<BabyBear> for CircuitImpl {
 }
 
 impl CircuitImpl {
-    pub fn alloc_accum_ctx(&self, steps: usize) -> SyncAccumContext {
-        SyncAccumContext(unsafe { risc0_circuit_rv32im_accum_context_alloc(steps) })
+    pub fn alloc_accum_ctx(&self, steps: usize, is_par_safe: &[u8]) -> SyncAccumContext {
+        SyncAccumContext(unsafe {
+            risc0_circuit_rv32im_accum_context_alloc(steps, is_par_safe.as_ptr())
+        })
     }
 
     pub fn par_step_compute_accum(

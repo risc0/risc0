@@ -70,3 +70,7 @@ extern_plonkReadAccum_ram(void* ctx, size_t cycle, const char* extra, Fp* args, 
 
 __device__ void
 extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs);
+
+__device__ void extern_syscallBigInt2Precompute(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs);
+
+__device__ void extern_syscallBigInt2Witness(void* ctx, size_t cycle, const char* extra, Fp* args, Fp* outs);

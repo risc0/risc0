@@ -22,7 +22,7 @@
 namespace risc0::circuit::rv32im {
 
 constexpr size_t kBabyBearExtSize = 4;
-constexpr size_t kMaxRamRowsPerCycle = 5;
+constexpr size_t kMaxRamRowsPerCycle = 6;
 constexpr size_t kMaxBytePairsPerCycle = 21;
 constexpr uint32_t kInvalidPattern = 0xffffffff;
 
@@ -94,6 +94,7 @@ struct AccumCell {
 struct AccumContext {
   size_t steps;
   std::vector<AccumCell> cells;
+  uint8_t* isParSafe;
 
   void calcPrefixProducts();
 };
