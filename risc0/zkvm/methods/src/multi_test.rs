@@ -69,7 +69,6 @@ pub enum MultiTestSpec {
         // Number of guest cycles to use, including startup.
         cycles: u64,
     },
-    SysBigInt2,
     Syscall {
         count: u32,
     },
