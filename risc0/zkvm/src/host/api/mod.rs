@@ -34,7 +34,7 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 
@@ -59,11 +59,12 @@ trait RootMessage: Message {}
 pub trait Connection {
     fn stream(&self) -> &TcpStream;
     fn close(&mut self) -> Result<i32>;
-    fn try_clone(&self) -> Result<Box<dyn Connection>>;
+    #[cfg(feature = "prove")]
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>>;
 }
 
 pub struct ConnectionWrapper {
-    inner: Box<dyn Connection>,
+    inner: Box<dyn Connection + Send>,
     buf: Vec<u8>,
 }
 
@@ -86,7 +87,7 @@ impl RootMessage for pb::api::CompressRequest {}
 impl RootMessage for pb::api::CompressReply {}
 
 impl ConnectionWrapper {
-    fn new(inner: Box<dyn Connection>) -> Self {
+    fn new(inner: Box<dyn Connection + Send>) -> Self {
         Self {
             inner,
             buf: Vec::new(),
@@ -232,7 +233,8 @@ impl Connection for ParentProcessConnection {
         Ok(status.code().unwrap_or_default())
     }
 
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
+    #[cfg(feature = "prove")]
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
         unimplemented!()
     }
 }
@@ -252,7 +254,8 @@ impl Connection for TcpConnection {
         Ok(0)
     }
 
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
+    #[cfg(feature = "prove")]
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
         Ok(Box::new(Self::new(self.stream.try_clone()?)))
     }
 }
@@ -266,6 +269,7 @@ impl pb::api::Asset {
         let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
+            pb::api::asset::Kind::Redis(_) => bail!("as_bytes not supported for redis"),
         };
         Ok(bytes.into())
     }
@@ -279,6 +283,22 @@ pub enum Asset {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    Redis(String),
+}
+
+/// Determines the parameters for AssetRequest::Redis
+#[derive(Clone)]
+pub struct RedisParams {
+    /// The url of the redis instance
+    pub url: String,
+
+    /// The key used to write to redis
+    pub key: String,
+
+    /// time to live (expiration) for the key being set
+    pub ttl: u64,
 }
 
 /// Determines the format of an asset request.
@@ -289,6 +309,9 @@ pub enum AssetRequest {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    Redis(RedisParams),
 }
 
 /// Provides information about the result of execution.
@@ -321,6 +344,7 @@ impl Asset {
         Ok(match self {
             Asset::Inline(bytes) => bytes.clone(),
             Asset::Path(path) => std::fs::read(path)?.into(),
+            Asset::Redis(_) => bail!("as_bytes not supported for Asset::Redis"),
         })
     }
 }

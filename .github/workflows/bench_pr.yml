@@ -80,13 +80,25 @@ jobs:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
 
-      - name: Download previous benchmark data
-        run: aws s3 cp $S3_BENCH_PATH/external.json ./cache/external.json
-
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 
       - name: Run benchmarks
         run: cargo bench --bench fib -F $FEATURE
+
+      - name: (New Benchmarks / Re-Baseline) Check for Existing Benchmark Data
+        run: |
+          aws s3 ls $S3_BENCH_PATH/external.json || NOT_EXIST=true
+          if [ $NOT_EXIST ]; then
+              echo "No ${{ matrix.os }}-${{ matrix.device }} Benchmark data yet... Will be uploaded..." && echo "NEW_BENCHMARK=true" >> $GITHUB_ENV
+          else
+              echo "Previous Benchmark data for ${{ matrix.os }}-${{ matrix.device }} exists... Continuing..."
+          fi
+
+      - name: (New Benchmarks / Re-Baseline) Upload Initial Benchmark Data
+        if: env.NEW_BENCHMARK == 'true'
+        run: aws s3 cp target/hotbench/fib/benchmark.json $S3_BENCH_PATH/external.json
+      - name: Download previous benchmark data
+        run: aws s3 cp $S3_BENCH_PATH/external.json ./cache/external.json
 
       - name: Analyze benchmark results
         uses: risc0/github-action-benchmark@v1.19.3

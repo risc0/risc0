@@ -226,9 +226,9 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}-1.0
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
-        run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
+        run: cargo test -F $FEATURE -F prove -F redis --workspace --timings --no-run --exclude doc-test
       - name: test workspace
-        run: cargo test -F $FEATURE -F prove --workspace --timings --exclude doc-test
+        run: cargo test -F $FEATURE -F prove -F redis --workspace --timings --exclude doc-test
       - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
