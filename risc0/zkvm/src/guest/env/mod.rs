@@ -487,7 +487,7 @@ pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
     let nondet_digest = [0u8; DIGEST_BYTES];
     unsafe {
         sys_keccak(
-            input.as_ptr() as *const u8,
+            input.as_ptr(),
             input.len(),
             nondet_digest.as_ptr() as *mut [u32; DIGEST_WORDS],
         );
