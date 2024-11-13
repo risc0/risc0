@@ -79,13 +79,6 @@ use alloc::{
     vec,
 };
 
-use crate::{
-    sha::{
-        rust_crypto::{Digest as _, Sha256},
-        Digest, Digestible,
-    },
-    Assumptions, MaybePruned, Output,
-};
 use anyhow::Result;
 use bytemuck::Pod;
 use core::cell::OnceCell;
@@ -98,6 +91,14 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 use serde::{de::DeserializeOwned, Serialize};
+
+use crate::{
+    sha::{
+        rust_crypto::{Digest as _, Sha256},
+        Digest, Digestible,
+    },
+    Assumptions, MaybePruned, Output,
+};
 
 use self::batcher::KeccakBatcher;
 pub use self::{
