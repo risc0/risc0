@@ -24,7 +24,7 @@ const WORD_SIZE: usize = 4;
 pub const RSA_3072_WIDTH_WORDS: usize = 3072 / 32;
 pub const RSA_3072_WIDTH_BYTES: usize = RSA_3072_WIDTH_WORDS * WORD_SIZE;
 
-const BLOB: &[u8] = include_bytes_aligned!(16, "modpow_65537.blob");
+const BLOB: &[u8] = include_bytes_aligned!(4, "modpow_65537.blob");
 
 #[cfg(feature = "num-bigint-dig")]
 fn to_u32_digits(input: &BigUint) -> Vec<u32> {
