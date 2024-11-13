@@ -30,6 +30,7 @@ pub enum MultiTestSpec {
         y: [u32; bigint::WIDTH_WORDS],
         modulus: [u32; bigint::WIDTH_WORDS],
     },
+    BigKeccak,
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u64,
@@ -87,6 +88,7 @@ pub enum MultiTestSpec {
     SysForkFork,
     SysForkJournalPanic,
     SysInput(Digest),
+    SysKeccak,
     SysLogInvalidAddr,
     SysProveZkr {
         // Control id of ZKR to execute
@@ -115,32 +117,8 @@ pub enum MultiTestSpec {
         // Assumption: Field is serialized to avoid circular dependency issues.
         assumption_words: Vec<u32>,
     },
-    TooManySha,
-    AlignedAlloc,
-    AllocZeroed,
-    SysFork,
-    SysForkFork,
-    SysForkJournalPanic,
-    RunUnconstrained {
-        // True to actually call run_unconstrained, false to run the busy loop directly as a control.
-        unconstrained: bool,
-        // Number of guest cycles to use, including startup.
-        cycles: u64,
-    },
-    SysProveZkr {
-        // Control id of ZKR to execute
-        control_id: Digest,
-        // Input to provide to ZKR execution
-        input: Vec<u32>,
-        // Claim digest and control root to provide to
-        // verify_assumption to make sure that the proof from the ZKR
-        // gets added to our assumptions.
-        claim_digest: Digest,
-        control_root: Digest,
-    },
-    SysKeccak,
     TinyKeccak,
-    BigKeccak,
+    TooManySha,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
