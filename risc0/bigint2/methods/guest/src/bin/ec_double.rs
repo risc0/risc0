@@ -34,7 +34,6 @@ fn main() {
 
     let in_pt = AffinePt::from_slice(POINT_G);
     let expected_pt = AffinePt::from_slice(EXPECTED);
-    // assert!(false, "CHKPT C");
 
     let result = risc0_bigint2::ec::double(in_pt);
     assert_eq!(result, expected_pt);
