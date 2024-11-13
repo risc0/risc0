@@ -2661,6 +2661,7 @@ dependencies = [
  "jwt-core",
  "jwt-methods",
  "risc0-zkvm",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
