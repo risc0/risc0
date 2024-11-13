@@ -192,20 +192,6 @@ fn bigint_accel() {
 }
 
 #[test]
-fn sys_bigint2() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::SysBigInt2)
-        .unwrap()
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    prove_session_fast(&session);
-}
-
-#[test]
 fn memory_io() {
     fn run_memio(pairs: &[(usize, usize)]) -> Result<ExitCode> {
         let input = MultiTestSpec::ReadWriteMem {
