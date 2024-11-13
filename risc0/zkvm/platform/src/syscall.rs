@@ -1024,13 +1024,13 @@ macro_rules! impl_sys_bigint2 {
         /// `blob_ptr` and all arguments must be aligned and dereferenceable.
         #[cfg_attr(feature = "export-syscalls", no_mangle)]
         #[stability::unstable]
-        pub unsafe extern "C" fn $func_name(blob_ptr: *const u32, a1: *mut u32
-            $(, $a2: *mut u32
-                $(, $a3: *mut u32
-                    $(, $a4: *mut u32
-                        $(, $a5: *mut u32
-                            $(, $a6: *mut u32
-                                $(, $a7: *mut u32)?
+        pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
+            $(, $a2: *const u32
+                $(, $a3: *const u32
+                    $(, $a4: *const u32
+                        $(, $a5: *const u32
+                            $(, $a6: *const u32
+                                $(, $a7: *const u32)?
                             )?
                         )?
                     )?
@@ -1043,7 +1043,7 @@ macro_rules! impl_sys_bigint2 {
                 let nondet_program_ptr = (header.add(1)) as *const u32;
                 let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);
                 let consts_ptr = verify_program_ptr.add((*header).verify_program_size as usize);
-                let temp_space = ((*header).consts_size as usize) << 2;
+                let temp_space = ((*header).temp_size as usize) << 2;
 
                 ::core::arch::asm!(
                     "sub sp, sp, {temp_space}",

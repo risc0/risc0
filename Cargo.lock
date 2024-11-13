@@ -894,9 +894,9 @@ checksum = "5ce89b21cab1437276d2650d57e971f9d548a2d9037cc231abdc0562b97498ce"
 
 [[package]]
 name = "bytemuck"
-version = "1.16.1"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b236fc92302c97ed75b38da1f4917b5cdda4984745740f153a5d3059e48d725e"
+checksum = "8334215b81e418a0a7bdb8ef0849474f40bb10c8b71f1c4ed315cff49f32494d"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -2615,6 +2615,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "include_bytes_aligned"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ee796ad498c8d9a1d68e477df8f754ed784ef875de1414ebdaf169f70a6a784"
+
+[[package]]
 name = "indexmap"
 version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4113,6 +4119,29 @@ dependencies = [
  "spin",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "risc0-bigint2"
+version = "1.2.0-alpha.1"
+dependencies = [
+ "clap 4.5.20",
+ "include_bytes_aligned",
+ "num-bigint 0.4.6",
+ "num-bigint-dig",
+ "puffin",
+ "puffin_http",
+ "risc0-bigint2-methods",
+ "risc0-zkvm",
+ "test-log",
+ "tracing-subscriber 0.3.18",
+]
+
+[[package]]
+name = "risc0-bigint2-methods"
+version = "1.2.0-alpha.1"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]

@@ -1,0 +1,27 @@
+[package]
+name = "risc0-bigint2"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+include_bytes_aligned = "0.1"
+num-bigint = { version = "0.4", default-features = false, optional = true }
+num-bigint-dig = { version = "0.8", default-features = false, optional = true }
+
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+clap = { version = "4.5", features = ["derive"] }
+puffin = "0.19"
+puffin_http = "0.16"
+risc0-bigint2-methods = { path = "methods" }
+risc0-zkvm = { workspace = true, features = ["prove"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = ["dep:num-bigint"]
+num-bigint-dig = ["dep:num-bigint-dig"]
+unstable = []
