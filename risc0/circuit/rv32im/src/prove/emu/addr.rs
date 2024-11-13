@@ -18,10 +18,10 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use super::pager::PAGE_WORDS;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct ByteAddr(pub u32);
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct WordAddr(pub u32);
 
 impl From<ByteAddr> for WordAddr {
@@ -59,6 +59,10 @@ impl WordAddr {
         ByteAddr(self.0 * WORD_SIZE as u32)
     }
 
+    pub const fn is_null(&self) -> bool {
+        self.0 == 0
+    }
+
     pub fn page_idx(&self) -> u32 {
         self.0 / PAGE_WORDS as u32
     }
@@ -66,13 +70,13 @@ impl WordAddr {
 
 impl fmt::Debug for ByteAddr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "0x{:08x}", self.0)
+        write!(f, "{:#010x}({:#010x})", self.waddr().0, self.0)
     }
 }
 
 impl fmt::Debug for WordAddr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "0x{:08x}", self.baddr().0)
+        write!(f, "{:#010x}({:#010x})", self.0, self.baddr().0)
     }
 }
 

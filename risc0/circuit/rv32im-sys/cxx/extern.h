@@ -87,4 +87,12 @@ extern_plonkReadAccum_ram(void* ctx, size_t cycle, const char* extra, std::array
 std::array<Fp, 4>
 extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args);
 
+void extern_syscallBigInt2Precompute(void* ctx,
+                                     size_t cycle,
+                                     const char* extra,
+                                     std::array<Fp, 0> args);
+
+std::array<Fp, 16>
+extern_syscallBigInt2Witness(void* ctx, size_t cycle, const char* extra, std::array<Fp, 5> args);
+
 } // namespace risc0::circuit::rv32im
