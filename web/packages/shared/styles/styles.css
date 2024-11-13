@@ -56,6 +56,10 @@ a {
   @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring;
 }
 
+.link {
+  @apply underline;
+}
+
 /* Chartjs */
 .chartjs-render-monitor {
   letter-spacing: normal;
