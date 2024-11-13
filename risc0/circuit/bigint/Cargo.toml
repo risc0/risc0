@@ -32,6 +32,7 @@ risc0-zkvm = { workspace = true, features = [
   "unstable",
 ], default-features = false }
 risc0-zkvm-platform = { workspace = true, features = ["unstable"] }
+stability = "0.2"
 tracing = "0.1.40"
 zip = { version = "2.0", default-features = false, features = ["deflate"] }
 
@@ -46,8 +47,6 @@ risc0-circuit-bigint-test-methods = { path = "methods" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-# Compatibility code for libraries based on num-bigint-dig
-bigint-dig-shim = ["dep:num-bigint-dig"]
 default = ["prove"]
 # Omits control_ids.rs, and instead uses all zeros for control ids.
 # This is needed for the 'make_control_ids' binary to compile if any
@@ -55,3 +54,4 @@ default = ["prove"]
 make_control_ids = []
 # Enables ZKR registration to actually generate proofs.
 prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
+unstable = []
