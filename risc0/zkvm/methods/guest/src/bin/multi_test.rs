@@ -24,6 +24,7 @@ use alloc::{
     format, vec,
 };
 use core::arch::asm;
+use hex_literal::hex;
 
 use getrandom::getrandom;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
@@ -40,11 +41,13 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr, sys_read,
-        sys_read_words, sys_write,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
+        sys_read, sys_read_words, sys_write, DIGEST_BYTES, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
+use tiny_keccak::Hasher;
+use tiny_keccak::Keccak;
 
 risc0_zkvm::entry!(main);
 
@@ -60,6 +63,9 @@ fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
+const KECCAK_TEST_DATA_01: &[u8] = b"The quick brown fox jumps over the lazy dog.";
+const KECCAK_TEST_DATA_02_PT_1: &[u8] = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
+const KECCAK_TEST_DATA_02_PT_2: &[u8] = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
 fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
@@ -429,6 +435,106 @@ fn main() {
             }
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
+        }
+        MultiTestSpec::SysKeccak => {
+            let expected: [u8; DIGEST_BYTES] = [
+                71, 23, 50, 133, 168, 215, 52, 30, 94, 151, 47, 198, 119, 40, 99, 132, 248, 2, 248,
+                239, 66, 165, 236, 95, 3, 187, 250, 37, 76, 176, 31, 173,
+            ];
+            let output = [0u8; DIGEST_BYTES];
+            let data = b"hello world";
+            unsafe {
+                sys_keccak(
+                    data as *const u8,
+                    data.len(),
+                    output.as_ptr() as *mut [u32; DIGEST_WORDS],
+                )
+            };
+            assert_eq!(&expected, &output);
+
+            // test_keccak_01.txt
+            let _output1 = env::keccak_digest(KECCAK_TEST_DATA_01, 0x1).unwrap();
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex_literal::hex!(
+                    "b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7"
+                )
+            );
+
+            // test_keccak_02.txt
+            let output1 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_1, 0x1).unwrap();
+            assert_eq!(
+                output1,
+                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+            );
+
+            let output2 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_2, 0x1).unwrap();
+            assert_eq!(
+                output2,
+                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+            );
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
+            );
+        }
+        MultiTestSpec::TinyKeccak => {
+            // test_keccak_01.txt
+            let mut hasher = Keccak::v256();
+            hasher.update(KECCAK_TEST_DATA_01);
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.finalize(output.as_mut_slice());
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex_literal::hex!(
+                    "b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7"
+                )
+            );
+
+            // test_keccak_02.txt
+            let mut hasher1 = Keccak::v256();
+            let mut output1 = [0u8; DIGEST_BYTES];
+            hasher1.update(KECCAK_TEST_DATA_02_PT_1);
+
+            let mut hasher2 = Keccak::v256();
+            let mut output2 = [0u8; DIGEST_BYTES];
+            hasher2.update(KECCAK_TEST_DATA_02_PT_2);
+
+            hasher1.finalize(&mut output1);
+            assert_eq!(
+                output1,
+                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+            );
+
+            hasher2.finalize(&mut output2);
+            assert_eq!(
+                output2,
+                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+            );
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
+            );
+        }
+        MultiTestSpec::BigKeccak => {
+            // test_keccak_02.txt
+            let data = &[0u8; 100_001];
+            let mut hasher = Keccak::v256();
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.update(data);
+
+            hasher.finalize(&mut output);
+            assert!(!unsafe { env::KECCAK_BATCHER.has_data() })
         }
     }
 }
