@@ -1568,12 +1568,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "diff"
-version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56254986775e3233ffa9c4d7d3faaf6d36a2c09d30b20687e9f88bc8bafc16c8"
-
-[[package]]
 name = "difflib"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1770,27 +1764,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.87",
-]
-
-[[package]]
-name = "env_filter"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f2c92ceda6ceec50f43169f9ee8424fe2db276791afde7b2cd8bc084cb376ab"
-dependencies = [
- "log",
-]
-
-[[package]]
-name = "env_logger"
-version = "0.11.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e13fa619b91fb2381732789fc5de83b45675e882f66623b7d8cb4f643017018d"
-dependencies = [
- "anstream",
- "anstyle",
- "env_filter",
- "log",
 ]
 
 [[package]]
@@ -3144,7 +3117,6 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
- "serde",
 ]
 
 [[package]]
@@ -3159,7 +3131,6 @@ dependencies = [
  "num-integer",
  "num-iter",
  "num-traits",
- "serde",
  "smallvec",
 ]
 
@@ -3627,16 +3598,6 @@ checksum = "368ba315fb8c5052ab692e68a0eefec6ec57b23a36959c14496f0b0df2c0cecf"
 dependencies = [
  "predicates-core",
  "termtree",
-]
-
-[[package]]
-name = "pretty_assertions"
-version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ae130e2f271fbc2ac3a40fb1d07180839cdbbe443c7a27e1e3c13c5cac0116d"
-dependencies = [
- "diff",
- "yansi",
 ]
 
 [[package]]
@@ -4202,41 +4163,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-bigint"
-version = "1.2.0-alpha.1"
-dependencies = [
- "anyhow",
- "bytemuck",
- "criterion",
- "hex",
- "num-bigint 0.4.6",
- "num-bigint-dig",
- "num-integer",
- "num-traits",
- "paste",
- "pretty_assertions",
- "risc0-binfmt",
- "risc0-circuit-bigint-test-methods",
- "risc0-circuit-recursion",
- "risc0-core",
- "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-platform",
- "stability",
- "test-log",
- "tracing",
- "tracing-subscriber 0.3.18",
- "zip",
-]
-
-[[package]]
-name = "risc0-circuit-bigint-test-methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
-]
-
-[[package]]
 name = "risc0-circuit-recursion"
 version = "1.2.0-alpha.1"
 dependencies = [
@@ -4362,7 +4288,6 @@ dependencies = [
  "bincode",
  "bytemuck",
  "clap 4.5.20",
- "risc0-circuit-bigint",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "temp-env",
@@ -5224,7 +5149,6 @@ version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3dffced63c2b5c7be278154d76b479f9f9920ed34e7574201407f0b14e2bbb93"
 dependencies = [
- "env_logger",
  "test-log-macros",
  "tracing-subscriber 0.3.18",
 ]
@@ -6244,12 +6168,6 @@ checksum = "388c44dc09d76f1536602ead6d325eb532f5c122f17782bd57fb47baeeb767e2"
 dependencies = [
  "lzma-sys",
 ]
-
-[[package]]
-name = "yansi"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfe53a6657fd280eaa890a3bc59152892ffa3e30101319d168b781ed6529b049"
 
 [[package]]
 name = "zerocopy"

@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::sha::Digest;
 use alloc::vec;
+
 use anyhow::Result;
 use risc0_zkvm_platform::syscall::DIGEST_BYTES;
+
+use crate::sha::Digest;
 
 /// This struct implements the batching of calls to the keccak accelerator.
 pub struct KeccakBatcher {

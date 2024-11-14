@@ -448,8 +448,6 @@ jobs:
             --exclude fibonacci-methods \
             --exclude risc0-bigint2 \
             --exclude risc0-bigint2-methods \
-            --exclude risc0-circuit-bigint \
-            --exclude risc0-circuit-bigint-test-methods \
             --exclude risc0-zkvm-receipts \
             --exclude risc0-zkvm-methods
       - run: sccache --show-stats

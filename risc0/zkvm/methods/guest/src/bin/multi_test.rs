@@ -24,9 +24,9 @@ use alloc::{
     format, vec,
 };
 use core::arch::asm;
-use hex_literal::hex;
 
 use getrandom::getrandom;
+use hex_literal::hex;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{
@@ -46,8 +46,7 @@ use risc0_zkvm_platform::{
     },
     PAGE_SIZE,
 };
-use tiny_keccak::Hasher;
-use tiny_keccak::Keccak;
+use tiny_keccak::{Hasher, Keccak};
 
 risc0_zkvm::entry!(main);
 
@@ -459,9 +458,7 @@ fn main() {
 
             assert_eq!(
                 digest.as_bytes(),
-                hex_literal::hex!(
-                    "b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7"
-                )
+                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
             );
 
             // test_keccak_02.txt
@@ -494,9 +491,7 @@ fn main() {
 
             assert_eq!(
                 digest.as_bytes(),
-                hex_literal::hex!(
-                    "b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7"
-                )
+                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
             );
 
             // test_keccak_02.txt
