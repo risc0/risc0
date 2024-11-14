@@ -215,6 +215,8 @@ impl<'a> ExecutorImpl<'a> {
             result.post_image,
             assumptions,
             result.user_cycles,
+            result.paging_cycles,
+            result.reserved_cycles,
             result.total_cycles,
             result.pre_state,
             result.post_state,

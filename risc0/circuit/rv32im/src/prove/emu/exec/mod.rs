@@ -106,6 +106,8 @@ pub struct ExecutorResult {
     pub exit_code: ExitCode,
     pub post_image: MemoryImage,
     pub user_cycles: u64,
+    pub paging_cycles: u64,
+    pub reserved_cycles: u64,
     pub total_cycles: u64,
     pub pre_state: SystemState,
     pub post_state: SystemState,
@@ -115,6 +117,8 @@ pub struct ExecutorResult {
 #[derive(Default)]
 struct SessionCycles {
     user: usize,
+    paging: usize,
+    reserved: usize,
     total: usize,
 }
 
@@ -234,9 +238,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             } else {
                 self.pager.undo();
                 let used_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
-                let waste = (1 << segment_po2) - used_cycles;
-                tracing::debug!(
-                    "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, waste: {waste}, pending: {:?}",
+                let po2_padding = (1 << segment_po2) - used_cycles;
+                tracing::info!(
+                    "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, padding: {po2_padding}, pending: {:?}",
                     self.insn_cycles,
                     self.pager.cycles,
                     self.pending
@@ -258,6 +262,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 })?;
                 segments += 1;
                 self.cycles.total += 1 << segment_po2;
+                self.cycles.paging += self.pager.cycles;
+                self.cycles.reserved += po2_padding + RESERVED_CYCLES;
                 self.pager.clear();
                 self.insn_cycles = 0;
 
@@ -270,6 +276,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
         let segment_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
         let po2 = log2_ceil(segment_cycles.next_power_of_two());
+        let po2_padding = (1 << po2) - segment_cycles;
         let exit_code = self.exit_code.unwrap();
 
         callback(Segment {
@@ -286,6 +293,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })?;
         segments += 1;
         self.cycles.total += 1 << po2;
+        self.cycles.paging += self.pager.cycles;
+        self.cycles.reserved += po2_padding + RESERVED_CYCLES;
 
         // NOTE: When a segment ends in a Halted(_) state, the post_state will be null.
         let post_state = match exit_code {
@@ -301,6 +310,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             exit_code,
             post_image: self.pager.image.clone(),
             user_cycles: self.cycles.user.try_into()?,
+            paging_cycles: self.cycles.paging.try_into()?,
+            reserved_cycles: self.cycles.reserved.try_into()?,
             total_cycles: self.cycles.total.try_into()?,
             pre_state: initial_state,
             post_state,
@@ -556,7 +567,10 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.load_region_from_guest(verify_program_ptr, verify_program_size * WORD_SIZE as u32)?;
         self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
 
-        self.pending.cycles += verify_program_size as usize + 1;
+        let cycles = verify_program_size as usize + 1;
+        tracing::info!("bigint2: {cycles} cycles");
+
+        self.pending.cycles += cycles;
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)

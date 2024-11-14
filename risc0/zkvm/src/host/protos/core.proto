@@ -13,6 +13,8 @@ message SessionStats {
   uint64 segments = 1;
   uint64 total_cycles = 2;
   uint64 user_cycles = 3;
+  uint64 paging_cycles = 4;
+  uint64 reserved_cycles = 5;
 }
 
 message Receipt {

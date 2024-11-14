@@ -145,6 +145,9 @@ impl Prover for BonsaiProver {
                         segments: stats.segments,
                         total_cycles: stats.total_cycles,
                         user_cycles: stats.cycles,
+                        // These are currently unavailable from Bonsai
+                        paging_cycles: 0,
+                        reserved_cycles: 0,
                     },
                 };
             } else {
