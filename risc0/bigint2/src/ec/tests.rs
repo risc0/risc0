@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_bigint2_methods::{EC_ADD_ELF, EC_DOUBLE_ELF, NEGTEST_ELF};
+use risc0_bigint2_methods::{EC_ADD_ELF, EC_ADDALT_ELF, EC_DOUBLE_ELF, NEGTEST_ELF};
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
 };
@@ -37,6 +37,27 @@ fn ec_add() {
 fn ec_double() {
     let env = ExecutorEnv::builder().build().unwrap();
     let session = ExecutorImpl::from_elf(env, EC_DOUBLE_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+}
+
+
+
+
+
+
+
+#[test]
+fn ec_addalt() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let session = ExecutorImpl::from_elf(env, EC_ADDALT_ELF)
         .unwrap()
         .run()
         .unwrap();
