@@ -17,12 +17,13 @@ mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
 
-use crate::ffi::sys_bigint2_2;
+use crate::ffi::{sys_bigint2_2, sys_bigint2_3};
 #[cfg(not(feature = "num-bigint-dig"))]
 use num_bigint::BigUint;
 #[cfg(feature = "num-bigint-dig")]
 use num_bigint_dig::BigUint;
 
+const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -92,7 +93,7 @@ pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
         doubled_pt = double(&doubled_pt);
     }
     if first_write {
-        // Somewhere there was a nonzero bit
+        // Since scalar is nonzero, there was a write
         unreachable!();
     }
     result
@@ -135,7 +136,13 @@ pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
     AffinePt::from_slice(&result)
 }
 
-unsafe fn add_raw(_lhs: &[u32], _rhs: &[u32], _result: &mut [u32]) {
-    // TODO
-    unimplemented!()
+/// SAFETY: Parameters must be aligned and correctly sized
+///
+/// Each parameter represents a field element and stores both coordinates; hence, the correct size
+/// is twice the word width of an element of the elliptic curve field (or 1/16 the bitwidth when
+/// the bitwidth is a multiple of 32).
+unsafe fn add_raw(lhs: &[u32], rhs: &[u32], result: &mut [u32]) {
+    unsafe {
+        sys_bigint2_3(ADD_BLOB.as_ptr(), lhs.as_ptr(), rhs.as_ptr(), result.as_mut_ptr());
+    }
 }
