@@ -25,6 +25,7 @@ use num_bigint_dig::BigUint;
 
 const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
+const NEGTEST_BLOB: &[u8] = include_bytes_aligned!(4, "negtest.blob");
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AffinePt {
@@ -144,5 +145,11 @@ pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
 unsafe fn add_raw(lhs: &[u32], rhs: &[u32], result: &mut [u32]) {
     unsafe {
         sys_bigint2_3(ADD_BLOB.as_ptr(), lhs.as_ptr(), rhs.as_ptr(), result.as_mut_ptr());
+    }
+}
+
+pub unsafe fn negtest_raw(lhs: &[u32], rhs: &[u32], result: &mut [u32]) {
+    unsafe {
+        sys_bigint2_3(NEGTEST_BLOB.as_ptr(), lhs.as_ptr(), rhs.as_ptr(), result.as_mut_ptr());
     }
 }
