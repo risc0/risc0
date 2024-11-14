@@ -45,12 +45,16 @@ fn to_u32_digits(input: &BigUint) -> Vec<u32> {
         digits.push(word);
     }
 
+    digits.resize(RSA_3072_WIDTH_WORDS, 0);
+
     digits
 }
 
 #[cfg(not(feature = "num-bigint-dig"))]
 fn to_u32_digits(input: &BigUint) -> Vec<u32> {
-    input.to_u32_digits()
+    let mut digits = input.to_u32_digits();
+    digits.resize(RSA_3072_WIDTH_WORDS, 0);
+    digits
 }
 
 pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> BigUint {
