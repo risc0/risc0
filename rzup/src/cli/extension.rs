@@ -46,6 +46,13 @@ pub enum ExtensionSubcmd {
         /// The version of the extension to use (e.g., v1.0.1)
         version: String,
     },
+    /// Build extension from source
+    Build {
+        /// The extension to build (e.g., cargo-risczero)
+        extension: Extension,
+        /// The git tag or commit of the extension to build
+        tag: Option<String>,
+    },
     /// Uninstall an installed extension
     Uninstall {
         /// The extension to uninstall (e.g., cargo-risczero)
@@ -72,6 +79,7 @@ pub async fn handler(subcmd: ExtensionSubcmd) -> Result<()> {
             extension.link(&extension_path)
         }
         ExtensionSubcmd::Uninstall { extension } => extension.unlink(),
+        ExtensionSubcmd::Build { extension, tag } => extension.build(tag.as_deref()),
     }
 }
 

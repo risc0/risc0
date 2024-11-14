@@ -29,8 +29,9 @@ use crate::{
     errors::RzupError,
     info_msg,
     repo::GithubReleaseInfo,
-    utils::{flock, http_client, rzup_home, target::Target},
-    verbose_msg,
+    utils::command::CommandExt,
+    utils::{ensure_binary, flock, http_client, rzup_home, target::Target},
+    verbose_msg, Command,
 };
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -279,6 +280,124 @@ impl Extension {
                 self.link(&cargo_risczero_path)?;
             }
         }
+        Ok(())
+    }
+
+    pub fn build(&self, tag: Option<&str>) -> Result<()> {
+        match self {
+            Extension::CargoRiscZero => {
+                let source_url = "https://github.com/risc0/risc0.git";
+                let tag = tag.unwrap_or("main");
+
+                // Use RISC0_BUILD_DIR if set, otherwise use ~/.risc0
+                let root_dir = if let Ok(dir) = std::env::var("RISC0_BUILD_DIR") {
+                    PathBuf::from(dir)
+                } else {
+                    dirs::home_dir()
+                        .context("Could not determine home dir. Set RISC0_BUILD_DIR env var!")?
+                        .join(".risc0")
+                        .join("build")
+                };
+
+                let build_dir = root_dir.join(format!("cargo-risczero-{}", tag));
+                let extensions_root_dir = rzup_home()?.join("extensions");
+
+                let extension_name = format!("{}-{}-local", tag, self.to_str());
+                let final_extension_dir = extensions_root_dir.join(extension_name);
+
+                if final_extension_dir.exists() {
+                    verbose_msg!(format!(
+                        "Removing existing extension directory at {}",
+                        final_extension_dir.display()
+                    ));
+                    fs::remove_dir_all(&final_extension_dir)
+                        .context("Failed to remove existing extension directory")?;
+                }
+
+                fs::create_dir_all(&build_dir)?;
+
+                self.prepare_git_repo(source_url, tag, &build_dir)?;
+
+                self.build_extension(&build_dir)?;
+
+                fs::create_dir_all(&final_extension_dir)?;
+
+                let cargo_risczero_src = build_dir.join("target/release/cargo-risczero");
+                let r0vm_src = build_dir.join("target/release/r0vm");
+
+                let cargo_risczero_dest = final_extension_dir.join("cargo-risczero");
+                let r0vm_dest = final_extension_dir.join("r0vm");
+
+                verbose_msg!("Copying built binaries to installation directory");
+                fs::copy(cargo_risczero_src, &cargo_risczero_dest)?;
+                fs::copy(r0vm_src, &r0vm_dest)?;
+
+                verbose_msg!("Setting executable permissions");
+                let mut perms = fs::metadata(&cargo_risczero_dest)?.permissions();
+                perms.set_mode(0o755);
+                fs::set_permissions(&cargo_risczero_dest, perms.clone())?;
+                fs::set_permissions(&r0vm_dest, perms)?;
+
+                self.link(&final_extension_dir)?;
+
+                info_msg!("Successfully built and installed cargo-risczero from source");
+            }
+        }
+        Ok(())
+    }
+
+    fn prepare_git_repo(&self, source: &str, tag: &str, path: &Path) -> Result<()> {
+        info_msg!(format!(
+            "Preparing git repo {} with tag/branch {}",
+            source, tag
+        ));
+
+        ensure_binary("git", &["--version"])?;
+
+        if !path.join(".git").is_dir() {
+            Command::new("git")
+                .args(["clone", source, "."])
+                .current_dir(path)
+                .run_verbose()?;
+        } else {
+            Command::new("git")
+                .args(["fetch", "--all", "--prune"])
+                .current_dir(path)
+                .run_verbose()?;
+        }
+
+        Command::new("git")
+            .args(["checkout", tag])
+            .current_dir(path)
+            .run_verbose()?;
+
+        Command::new("git")
+            .args(["reset", "--hard"])
+            .current_dir(path)
+            .run_verbose()?;
+
+        Command::new("git")
+            .args(["submodule", "update", "--init", "--recursive", "--progress"])
+            .current_dir(path)
+            .run_verbose()?;
+
+        verbose_msg!(format!("Git repo ready at {}", path.display()));
+
+        Ok(())
+    }
+
+    fn build_extension(&self, build_dir: &Path) -> Result<()> {
+        info_msg!("Building cargo-risczero and r0vm...");
+
+        // Build cargo-risczero
+        Command::new("cargo")
+            .args(["build", "--release", "-p", "cargo-risczero"])
+            .current_dir(build_dir)
+            .run_verbose()
+            .context("Failed to build cargo-risczero")?;
+
+        verbose_msg!("Build complete!");
+
         Ok(())
     }
 }
