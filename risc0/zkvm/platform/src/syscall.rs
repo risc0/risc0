@@ -927,7 +927,8 @@ pub unsafe extern "C" fn sys_prove_zkr(
     }
 }
 
-/// get a keccak hash from the host with the given input data - should be invoked during `hasher.finalize(...)`
+/// Get a keccak hash from the host with the given input data - should be
+/// invoked during `hasher.finalize(...)`
 ///
 /// # Safety
 #[cfg(feature = "export-syscalls")]
