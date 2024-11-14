@@ -71,7 +71,34 @@ impl AffinePt {
     }
 }
 
-pub fn double(point: AffinePt) -> AffinePt {
+pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
+    // This assumes `pt` is actually on the curve
+    // This assumption isn't checked here, so other code must ensure it's met
+    // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
+    // TODO: Need a different algorithm in num-bigint-dig because no `bit`
+    assert_ne!(*scalar, BigUint::ZERO);  // TODO: Do we check this?
+    let mut result = point.clone();  // Arbitrary, but nice to start initialized TODO?
+    let mut first_write = true;
+    let mut doubled_pt = point.clone();
+    for pos in 0..scalar.bits() {
+        if scalar.bit(pos) {
+            if first_write {
+                result = doubled_pt.clone();
+                first_write = false;
+            } else {
+                result = add(&result, &doubled_pt);
+            }
+        }
+        doubled_pt = double(&doubled_pt);
+    }
+    if first_write {
+        // Somewhere there was a nonzero bit
+        unreachable!();
+    }
+    result
+}
+
+pub fn double(point: &AffinePt) -> AffinePt {
     // TODO: Handle bitwidth properly, not hacked in like this
     const BITWIDTH: usize = 256;
     const WORD_WIDTH: usize = BITWIDTH / 32;
@@ -94,7 +121,21 @@ unsafe fn double_raw(point: &[u32], result: &mut [u32]) {
     }
 }
 
-pub fn add(_lhs: &[u32], _rhs: &[u32], _result: &mut [u32]) {
+pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
+    // TODO: Check for P + P, P - P?
+
+    // TODO: Handle bitwidth properly, not hacked in like this
+    const BITWIDTH: usize = 256;
+    const WORD_WIDTH: usize = BITWIDTH / 32;
+
+    let mut result = [0u32; 2 * WORD_WIDTH];
+    unsafe {
+        add_raw(&lhs.to_u32s(), &rhs.to_u32s(), &mut result);
+    }
+    AffinePt::from_slice(&result)
+}
+
+unsafe fn add_raw(_lhs: &[u32], _rhs: &[u32], _result: &mut [u32]) {
     // TODO
     unimplemented!()
 }
