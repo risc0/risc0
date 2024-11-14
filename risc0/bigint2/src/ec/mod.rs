@@ -15,9 +15,11 @@
 #[cfg(test)]
 mod tests;
 
+use include_bytes_aligned::include_bytes_aligned;
+
 use crate::ffi::sys_bigint2_2;
 
-const DOUBLE_BLOB: &[u8] = include_bytes!("double.blob");
+const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
 
 pub fn double(point: &[u32], result: &mut [u32]) {
     unsafe {
