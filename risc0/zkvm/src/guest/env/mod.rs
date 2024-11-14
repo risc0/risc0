@@ -69,6 +69,7 @@
 //! [guest-optimization]:
 //!     https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
+mod batcher;
 mod read;
 mod verify;
 mod write;
@@ -78,13 +79,14 @@ use alloc::{
     vec,
 };
 
+use anyhow::Result;
 use bytemuck::Pod;
 use core::cell::OnceCell;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
-        syscall_2, SyscallName,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_keccak, sys_log,
+        sys_pause, syscall_2, SyscallName, DIGEST_BYTES, DIGEST_WORDS,
     },
     WORD_SIZE,
 };
@@ -98,6 +100,7 @@ use crate::{
     Assumptions, MaybePruned, Output,
 };
 
+use self::batcher::KeccakBatcher;
 pub use self::{
     read::{FdReader, Read},
     verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
@@ -132,6 +135,11 @@ pub(crate) fn init() {
 /// Finalize execution
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
+        #[allow(static_mut_refs)]
+        if KECCAK_BATCHER.has_data() {
+            KECCAK_BATCHER.finalize_transcript();
+        }
+
         #[allow(static_mut_refs)]
         let hasher = HASHER.take();
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
@@ -472,3 +480,24 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
     let reader = std::io::BufReader::with_capacity(len as usize, stdin());
     T::deserialize(&mut crate::serde::Deserializer::new(reader))
 }
+
+/// take an input, and delim and returns a host-generated keccak hash.
+#[no_mangle]
+pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
+    let nondet_digest = [0u8; DIGEST_BYTES];
+    unsafe {
+        sys_keccak(
+            input.as_ptr(),
+            input.len(),
+            nondet_digest.as_ptr() as *mut [u32; DIGEST_WORDS],
+        );
+        KECCAK_BATCHER
+            .write_keccak_entry(input, &nondet_digest)
+            .unwrap();
+    };
+
+    Ok(nondet_digest)
+}
+
+/// Used for batching keccak proofs
+pub static mut KECCAK_BATCHER: KeccakBatcher = KeccakBatcher::init();

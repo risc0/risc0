@@ -18,6 +18,7 @@ mod args;
 mod cycle_count;
 mod fork;
 mod getenv;
+mod keccak;
 mod log;
 mod panic;
 mod pipe;
@@ -36,9 +37,9 @@ use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::{
     nr::{
-        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_PIPE,
-        SYS_PROVE_KECCAK, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_RSA, SYS_VERIFY_INTEGRITY,
-        SYS_WRITE,
+        SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_FORK, SYS_GETENV, SYS_KECCAK, SYS_LOG, SYS_PANIC,
+        SYS_PIPE, SYS_PROVE_KECCAK, SYS_PROVE_ZKR, SYS_RANDOM, SYS_READ, SYS_RSA,
+        SYS_VERIFY_INTEGRITY, SYS_WRITE,
     },
     SyscallName, DIGEST_BYTES,
 };
@@ -55,8 +56,8 @@ use crate::{
 };
 
 use self::{
-    args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, log::SysLog,
-    panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite,
+    args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, keccak::SysKeccak,
+    log::SysLog, panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite,
     prove_keccak::SysProveKeccak, prove_zkr::SysProveZkr, random::SysRandom, rsa::SysRSA,
     slice_io::SysSliceIo, verify::SysVerify,
 };
@@ -147,6 +148,7 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
             .with_syscall(SYS_FORK, SysFork)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
+            .with_syscall(SYS_KECCAK, SysKeccak)
             .with_syscall(SYS_LOG, SysLog)
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_PIPE, SysPipe::default())
