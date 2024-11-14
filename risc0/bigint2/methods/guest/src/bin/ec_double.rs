@@ -30,7 +30,6 @@ fn main() {
         0x50CFE52A, 0x236431A9, 0x3266D0E1, 0xF7F63265, 0x466CEAEE, 0xA3C58419, 0xA63DC339,
         0x1AE168FE,
     ];
-    let mut result = [0u32; 16];
 
     let in_pt = AffinePt::from_slice(POINT_G);
     let expected_pt = AffinePt::from_slice(EXPECTED);
