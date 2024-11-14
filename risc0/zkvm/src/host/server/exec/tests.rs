@@ -1194,6 +1194,11 @@ fn heap_bug_zkvm_527() {
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
+#[test]
+fn big_keccak() {
+    run_test(MultiTestSpec::BigKeccak);
+}
+
 #[cfg(feature = "docker")]
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};

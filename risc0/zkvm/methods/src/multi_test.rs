@@ -30,6 +30,7 @@ pub enum MultiTestSpec {
         y: [u32; bigint::WIDTH_WORDS],
         modulus: [u32; bigint::WIDTH_WORDS],
     },
+    BigKeccak,
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u64,
@@ -86,6 +87,7 @@ pub enum MultiTestSpec {
     SysForkFork,
     SysForkJournalPanic,
     SysInput(Digest),
+    SysKeccak,
     SysLogInvalidAddr,
     SysProveZkr {
         // Control id of ZKR to execute
@@ -114,6 +116,7 @@ pub enum MultiTestSpec {
         // Assumption: Field is serialized to avoid circular dependency issues.
         assumption_words: Vec<u32>,
     },
+    TinyKeccak,
     TooManySha,
 }
 
