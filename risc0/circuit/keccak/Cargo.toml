@@ -1,0 +1,51 @@
+[package]
+name = "risc0-circuit-keccak"
+description = "RISC Zero circuit for keccak"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+homepage = "https://risczero.com/"
+
+[[bin]]
+name = "make_control_ids"
+required-features = ["make_control_ids"]
+
+[dependencies]
+anyhow = "1.0"
+bytemuck = "1.16.1"
+clap = "4.5"
+hex = "0.4"
+lazy_static = "1.5.0"
+paste = "1.0"
+rayon = "1.10.0"
+risc0-binfmt = { workspace = true }
+risc0-circuit-keccak-sys = { workspace = true, optional = true }
+risc0-circuit-recursion = { workspace = true, default-features = false }
+risc0-core = { workspace = true }
+risc0-zirgen-dsl = { workspace = true, optional = true }
+risc0-zkp = { workspace = true, features = ["default"] }
+risc0-zkvm = { workspace = true, features = [
+  "std",
+  "unstable",
+], default-features = false }
+risc0-zkvm-platform = { workspace = true, features = ["unstable"] }
+tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+zip = { version = "2.0", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing-forest = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+risc0-circuit-keccak-test-methods = { path = "methods" }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[features]
+default = ["prove"]
+# Omits control_ids.rs, and instead uses all zeros for control ids.
+# This is needed for the 'make_control_ids' binary to compile to
+# generate control ids fot lift predicates.
+make_control_ids = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
+# Enables ZKR registration to actually generate proofs.
+prove = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove", "dep:risc0-circuit-keccak-sys", "dep:risc0-zirgen-dsl"]

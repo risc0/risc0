@@ -1,0 +1,33 @@
+// RUN: zirgen -I zirgen/%S --test %s
+
+import bits;
+
+component OneHot<N: Val>(v: Val) {
+  // Make N bit registers, with bit v set and all others 0
+  bits := for i : 0..N { NondetBitReg(Isz(i - v)) };
+  // Verify exactly one bit is set
+  reduce bits init 0 with Add = 1;
+  // Verify the right bit is set
+  reduce for i : 0..N { bits[i] * i } init 0 with Add = v;
+  bits
+}
+
+component Switch<N: Val, idx: Val>() {
+  for i : 0..N { Isz(i - idx) }
+}
+
+test Simple {
+  x := OneHot<8>(3);
+  x.bits[0] = 0;
+  x.bits[1] = 0;
+  x.bits[2] = 0;
+  x.bits[3] = 1;
+  x.bits[4] = 0;
+  x.bits[5] = 0;
+  x.bits[6] = 0;
+  x.bits[7] = 0;
+}
+
+test_fails OutOfRange {
+  x := OneHot<8>(8);
+}

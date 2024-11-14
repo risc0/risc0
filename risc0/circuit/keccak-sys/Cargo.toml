@@ -1,0 +1,24 @@
+[package]
+name = "risc0-circuit-keccak-sys"
+description = "Generated HAL code for keccak cicuit"
+#version = { workspace = true }
+edition = "2021"
+version = "0.1.0"
+#license = { workspace = true }
+#homepage = { workspace = true }
+#repository = { workspace = true }
+links = "risc0-circuit-keccak-sys"
+
+[dependencies]
+risc0-core = { workspace = true }
+risc0-sys = { workspace = true }
+sppark = { workspace = true, optional = true }
+
+[build-dependencies]
+glob = "0.3"
+risc0-build-kernel = { workspace = true }
+
+[features]
+default = []
+cuda = ["dep:sppark", "risc0-sys/cuda"]
+metal = []

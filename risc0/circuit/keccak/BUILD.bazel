@@ -1,0 +1,43 @@
+load("@rules_pkg//pkg:zip.bzl", "pkg_zip")
+load("//bazel/rules/lit:defs.bzl", "glob_lit_tests")
+load("//bazel/rules/zirgen:edsl-defs.bzl", "ZIRGEN_OUTS", "build_circuit")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+KECCAK_ZIR_FILES = [
+    "bits.zir",
+    "keccak.zir",
+    "one_hot.zir",
+    "sha256_for_keccak.zir",
+]
+
+glob_lit_tests(
+    # TODO: shorten timeout once zirgen is faster
+    timeout = "long",
+    data = KECCAK_ZIR_FILES,
+    exclude = KECCAK_ZIR_FILES,
+    test_file_exts = ["zir"],
+)
+
+KECCAK_OUTS = ZIRGEN_OUTS + [
+    "rust_poly_fp_0.cpp",
+    "rust_poly_fp_1.cpp",
+    "rust_poly_fp_2.cpp",
+    "rust_poly_fp_3.cpp",
+    "rust_poly_fp_4.cpp",
+]
+
+build_circuit(
+    name = "keccak",
+    outs = KECCAK_OUTS,
+    bin = "//zirgen/Main:gen_zirgen",
+    data = KECCAK_ZIR_FILES,
+    extra_args = [
+        "zirgen/circuit/keccak/keccak.zir",
+        "-I",
+        "zirgen/circuit/keccak",
+        "--validity-split-count=5",
+    ],
+)

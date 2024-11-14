@@ -1,0 +1,15 @@
+[package]
+name = "risc0-circuit-keccak-test-methods"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[workspace.dependencies.risc0-zkvm]
+git = "https://github.com/risc0/risc0.git"
+rev = "5a2ad2b3bdd197123cf0fbfdf7aec88150105da3"
+default-features = false
+
+[dependencies]
+risc0-circuit-keccak = { path = "../..", default-features = false }
+risc0-zkvm = { workspace = true, default-features = false }
