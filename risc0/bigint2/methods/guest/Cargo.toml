@@ -6,8 +6,8 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-num-bigint = { version = "0.4", default-features = false, optional = true }
-num-bigint-dig = { version = "0.8", default-features = false, optional = true }
+num-bigint = { version = "0.4", default-features = false, features = ["serde"], optional = true }
+num-bigint-dig = { version = "0.8", default-features = false, features = ["serde"], optional = true }
 risc0-bigint2 = { path = "../..", default-features = false, features = [
   "unstable",
 ] }

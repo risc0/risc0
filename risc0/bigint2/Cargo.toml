@@ -19,6 +19,9 @@ risc0-bigint2-methods = { path = "methods" }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+num-bigint = { version = "0.4", default-features = false, features = ["serde"] }
+num-bigint-dig = { version = "0.8", default-features = false, features = ["serde"] }
+anyhow = "1.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

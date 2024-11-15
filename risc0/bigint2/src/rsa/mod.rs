@@ -27,30 +27,47 @@ pub const RSA_3072_WIDTH_BYTES: usize = RSA_3072_WIDTH_WORDS * WORD_SIZE;
 const BLOB: &[u8] = include_bytes_aligned!(4, "modpow_65537.blob");
 
 #[cfg(feature = "num-bigint-dig")]
-fn to_u32_digits(input: &BigUint) -> Vec<u32> {
-    let mut digits = Vec::with_capacity(RSA_3072_WIDTH_WORDS);
+fn to_u32_digits(input: &BigUint) -> Box<[u32; RSA_3072_WIDTH_WORDS]> {
+    let mut result = Box::new([0u32; RSA_3072_WIDTH_WORDS]);
     let bytes = input.to_bytes_le();
+    assert!(
+        bytes.len() <= RSA_3072_WIDTH_BYTES,
+        "Input too large: {} bytes exceeds RSA width of {} bytes",
+        bytes.len(),
+        RSA_3072_WIDTH_BYTES
+    );
+
     let mut chunks = bytes.chunks_exact(WORD_SIZE);
-    for chunk in chunks.by_ref() {
-        let word = u32::from_le_bytes(chunk.try_into().unwrap());
-        digits.push(word);
+    for (i, chunk) in chunks.by_ref().enumerate() {
+        result[i] = u32::from_le_bytes(chunk.try_into().unwrap());
     }
 
     let remainder = chunks.remainder();
     if !remainder.is_empty() {
+        let idx = bytes.len() / WORD_SIZE;
         let mut word = 0u32;
-        for i in 0..remainder.len() {
-            word |= (remainder[i] as u32) << (i * 8);
+        for (i, &byte) in remainder.iter().enumerate() {
+            word |= (byte as u32) << (i * 8);
         }
-        digits.push(word);
+        result[idx] = word;
     }
 
-    digits
+    result
 }
 
 #[cfg(not(feature = "num-bigint-dig"))]
-fn to_u32_digits(input: &BigUint) -> Vec<u32> {
-    input.to_u32_digits()
+fn to_u32_digits(input: &BigUint) -> Box<[u32; RSA_3072_WIDTH_WORDS]> {
+    let digits = input.to_u32_digits();
+    assert!(
+        digits.len() <= RSA_3072_WIDTH_WORDS,
+        "Input too large: {} words exceeds RSA width of {} words",
+        digits.len(),
+        RSA_3072_WIDTH_WORDS
+    );
+
+    let mut result = Box::new([0u32; RSA_3072_WIDTH_WORDS]);
+    result[..digits.len()].copy_from_slice(&digits);
+    result
 }
 
 pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> BigUint {
@@ -61,11 +78,11 @@ pub fn modpow_65537(base: &BigUint, modulus: &BigUint) -> BigUint {
     BigUint::from_slice(&result)
 }
 
-pub fn raw_modpow_65537(base: &[u32], modulus: &[u32], result: &mut [u32]) {
-    assert_eq!(base.len(), RSA_3072_WIDTH_WORDS);
-    assert_eq!(modulus.len(), RSA_3072_WIDTH_WORDS);
-    assert_eq!(result.len(), RSA_3072_WIDTH_WORDS);
-
+pub fn raw_modpow_65537(
+    base: &[u32; RSA_3072_WIDTH_WORDS],
+    modulus: &[u32; RSA_3072_WIDTH_WORDS],
+    result: &mut [u32; RSA_3072_WIDTH_WORDS],
+) {
     unsafe {
         sys_bigint2_3(
             BLOB.as_ptr(),
