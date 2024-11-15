@@ -23,11 +23,7 @@ use risc0_zkvm::{
 use test_log::test;
 
 fn execute_modpow_session(base: &BigUint, modulus: &BigUint) -> anyhow::Result<Session> {
-    let env = ExecutorEnv::builder()
-        .write(&(base, modulus))?
-        .unwrap()
-        .build()?
-        .unwrap();
+    let env = ExecutorEnv::builder().write(&(base, modulus))?.build()?;
     ExecutorImpl::from_elf(env, RSA_ELF)?.run()
 }
 
@@ -55,7 +51,7 @@ fn modpow_65537() {
 #[test]
 fn modpow_65537_small_buffers() {
     let base = BigUint::from(1u32);
-    let modulus = BigUint::from(7u32);
+    let modulus = BigUint::from(2_147_483_647u32);
     let expected = BigUint::from(1u32);
 
     let session = execute_modpow_session(&base, &modulus).unwrap();
