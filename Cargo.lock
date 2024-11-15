@@ -3117,6 +3117,7 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -3131,6 +3132,7 @@ dependencies = [
  "num-integer",
  "num-iter",
  "num-traits",
+ "serde",
  "smallvec",
 ]
 
@@ -4095,6 +4097,7 @@ dependencies = [
 name = "risc0-bigint2"
 version = "1.2.0-alpha.1"
 dependencies = [
+ "anyhow",
  "clap 4.5.20",
  "include_bytes_aligned",
  "num-bigint 0.4.6",
