@@ -237,11 +237,12 @@ pub(crate) fn allowed_control_ids(
     // Recursion programs (ZKRs) that are to be included in the allowed set.
     // NOTE: Although the rv32im circuit has control IDs down to po2 13, lift predicates are only
     // generated for po2 14 and above, hence the magic 14 below.
-    let allowed_zkr_names: BTreeSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
-        .map(str::to_string)
-        .into_iter()
-        .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
-        .collect();
+    let allowed_zkr_names: BTreeSet<String> =
+        ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
+            .map(str::to_string)
+            .into_iter()
+            .chain((MIN_LIFT_PO2..=po2_max).map(|i| format!("lift_{i}.zkr")))
+            .collect();
 
     let zkr_control_ids = match hash_name.as_ref() {
         "sha-256" => SHA256_CONTROL_IDS,
@@ -358,7 +359,7 @@ mod tests {
     fn succinct_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SuccinctReceiptVerifierParameters::default().digest(),
-            digest!("7110462471d0b2ad464389f5159aad970b62dcc557235391505cac69184ea8c7")
+            digest!("21a829e931cda9f34723dc77d947efe264771fea83bc495b3903014d0fe50d57")
         );
     }
 
