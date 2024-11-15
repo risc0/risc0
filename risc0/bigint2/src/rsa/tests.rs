@@ -73,9 +73,7 @@ fn modpow_65537_large_base_panics() {
     let modulus = BigUint::from(2u32);
 
     let err = execute_modpow_session(&base, &modulus).err().unwrap();
-    assert!(err
-        .to_string()
-        .contains("base.len() <= RSA_3072_WIDTH_WORDS"));
+    assert!(err.to_string().contains("Input too large"));
 }
 
 #[test]
@@ -86,7 +84,5 @@ fn modpow_65537_large_mod_panics() {
     let modulus = BigUint::parse_bytes(MODULUS, 16).unwrap();
 
     let err = execute_modpow_session(&base, &modulus).err().unwrap();
-    assert!(err
-        .to_string()
-        .contains("modulus.len() <= RSA_3072_WIDTH_WORDS"));
+    assert!(err.to_string().contains("Input too large"));
 }

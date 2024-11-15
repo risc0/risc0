@@ -15,6 +15,8 @@
 #[cfg(test)]
 mod tests;
 
+use std::alloc::{self, Layout};
+
 use include_bytes_aligned::include_bytes_aligned;
 use num_bigint::BigUint;
 
@@ -26,9 +28,15 @@ pub const RSA_3072_WIDTH_BYTES: usize = RSA_3072_WIDTH_WORDS * WORD_SIZE;
 
 const BLOB: &[u8] = include_bytes_aligned!(4, "modpow_65537.blob");
 
+fn init_rsa_buffer() -> Box<[u32; RSA_3072_WIDTH_WORDS]> {
+    let layout = Layout::array::<u32>(RSA_3072_WIDTH_WORDS).unwrap();
+    let ptr = unsafe { alloc::alloc_zeroed(layout) };
+    unsafe { Box::from_raw(ptr as *mut [u32; RSA_3072_WIDTH_WORDS]) }
+}
+
 #[cfg(feature = "num-bigint-dig")]
 fn to_u32_digits(input: &BigUint) -> Box<[u32; RSA_3072_WIDTH_WORDS]> {
-    let mut result = Box::new([0u32; RSA_3072_WIDTH_WORDS]);
+    let mut result = init_rsa_buffer();
     let bytes = input.to_bytes_le();
     assert!(
         bytes.len() <= RSA_3072_WIDTH_BYTES,
@@ -65,7 +73,7 @@ fn to_u32_digits(input: &BigUint) -> Box<[u32; RSA_3072_WIDTH_WORDS]> {
         RSA_3072_WIDTH_WORDS
     );
 
-    let mut result = Box::new([0u32; RSA_3072_WIDTH_WORDS]);
+    let mut result = init_rsa_buffer();
     result[..digits.len()].copy_from_slice(&digits);
     result
 }
