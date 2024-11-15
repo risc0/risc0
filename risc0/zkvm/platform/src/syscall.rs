@@ -74,13 +74,6 @@ pub mod reg_abi {
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
-pub mod rsa {
-    pub const RSA_EXPONENT: usize = 65537;
-    pub const WIDTH_BITS: usize = 3072;
-    pub const WIDTH_BYTES: usize = WIDTH_BITS / 8;
-    pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
-}
-
 /// Number of words in each cycle received using the SOFTWARE ecall
 pub const IO_CHUNK_WORDS: usize = 4;
 
@@ -150,7 +143,6 @@ pub mod nr {
     declare_syscall!(pub SYS_PROVE_KECCAK);
     declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
-    declare_syscall!(pub SYS_RSA);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
@@ -354,25 +346,6 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
         core::hint::black_box((t0, index));
         unimplemented!()
     }
-}
-
-/// # Safety
-///
-/// `recv_buf`, `in_base`, and `in_modulus` must be aligned and dereferenceable.
-#[stability::unstable]
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe extern "C" fn sys_rsa(
-    recv_buf: *mut [u32; rsa::WIDTH_WORDS],
-    in_base: *const [u32; rsa::WIDTH_WORDS],
-    in_modulus: *const [u32; rsa::WIDTH_WORDS],
-) {
-    syscall_2(
-        nr::SYS_RSA,
-        recv_buf as *mut u32,
-        rsa::WIDTH_WORDS,
-        in_base as u32,
-        in_modulus as u32,
-    );
 }
 
 /// # Safety
@@ -954,7 +927,8 @@ pub unsafe extern "C" fn sys_prove_zkr(
     }
 }
 
-/// get a keccak hash from the host with the given input data - should be invoked during `hasher.finalize(...)`
+/// Get a keccak hash from the host with the given input data - should be
+/// invoked during `hasher.finalize(...)`
 ///
 /// # Safety
 #[cfg(feature = "export-syscalls")]

@@ -14,9 +14,9 @@
 
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
 use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
+use sha3::{Digest, Keccak256};
 
 use super::{Syscall, SyscallContext};
-use sha3::{Digest, Keccak256};
 
 #[derive(Clone, Default)]
 pub(crate) struct SysKeccak;
