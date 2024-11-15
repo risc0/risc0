@@ -18,9 +18,18 @@ extern crate num_bigint_dig as num_bigint;
 use num_bigint::BigUint;
 use risc0_bigint2_methods::RSA_ELF;
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, Session, VerifierContext,
 };
 use test_log::test;
+
+fn execute_modpow_session(base: &BigUint, modulus: &BigUint) -> anyhow::Result<Session> {
+    let env = ExecutorEnv::builder()
+        .write(&(base, modulus))?
+        .unwrap()
+        .build()?
+        .unwrap();
+    ExecutorImpl::from_elf(env, RSA_ELF)?.run()
+}
 
 #[test]
 fn modpow_65537() {
@@ -32,12 +41,7 @@ fn modpow_65537() {
     let modulus = BigUint::parse_bytes(MODULUS, 16).unwrap();
     let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
 
-    let env = ExecutorEnv::builder()
-        .write(&(base, modulus))
-        .unwrap()
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, RSA_ELF).unwrap().run().unwrap();
+    let session = execute_modpow_session(&base, &modulus).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     let result: BigUint = session.journal.as_ref().unwrap().decode().unwrap();
     assert_eq!(result, expected);
@@ -54,16 +58,10 @@ fn modpow_65537_small_buffers() {
     let modulus = BigUint::from(7u32);
     let expected = BigUint::from(1u32);
 
-    let env = ExecutorEnv::builder()
-        .write(&(base, modulus))
-        .unwrap()
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, RSA_ELF).unwrap().run().unwrap();
+    let session = execute_modpow_session(&base, &modulus).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     let result: BigUint = session.journal.as_ref().unwrap().decode().unwrap();
     assert_eq!(result, expected);
-    println!("session cycles: {}", session.user_cycles);
 
     let prover = get_prover_server(&ProverOpts::fast()).unwrap();
     prover
@@ -77,19 +75,8 @@ fn modpow_65537_large_base_panics() {
 
     let base = BigUint::parse_bytes(BASE, 16).unwrap();
     let modulus = BigUint::from(2u32);
-    let expected = BigUint::from(0u32);
 
-    let env = ExecutorEnv::builder()
-        .write(&(base, modulus, expected))
-        .unwrap()
-        .build()
-        .unwrap();
-
-    let err = ExecutorImpl::from_elf(env, RSA_ELF)
-        .unwrap()
-        .run()
-        .err()
-        .unwrap();
+    let err = execute_modpow_session(&base, &modulus).err().unwrap();
     assert!(err
         .to_string()
         .contains("base.len() <= RSA_3072_WIDTH_WORDS"));
@@ -101,19 +88,8 @@ fn modpow_65537_large_mod_panics() {
 
     let base = BigUint::from(1u32);
     let modulus = BigUint::parse_bytes(MODULUS, 16).unwrap();
-    let expected = BigUint::from(1u32);
 
-    let env = ExecutorEnv::builder()
-        .write(&(base, modulus, expected))
-        .unwrap()
-        .build()
-        .unwrap();
-
-    let err = ExecutorImpl::from_elf(env, RSA_ELF)
-        .unwrap()
-        .run()
-        .err()
-        .unwrap();
+    let err = execute_modpow_session(&base, &modulus).err().unwrap();
     assert!(err
         .to_string()
         .contains("modulus.len() <= RSA_3072_WIDTH_WORDS"));

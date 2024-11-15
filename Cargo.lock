@@ -4097,6 +4097,7 @@ dependencies = [
 name = "risc0-bigint2"
 version = "1.2.0-alpha.1"
 dependencies = [
+ "anyhow",
  "clap 4.5.20",
  "include_bytes_aligned",
  "num-bigint 0.4.6",
