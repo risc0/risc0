@@ -24,76 +24,89 @@ use num_bigint_dig::BitUint;
 
 fn main() {
 
-    const POINT_LHS: &[u32] = &[
-        0x16F81798, 0x59F2815B, 0x2DCE28D9, 0x029BFCDB, 0xCE870B07, 0x55A06295, 0xF9DCBBAC,
-        0x79BE667E, //
-        0xFB10D4B8, 0x9C47D08F, 0xA6855419, 0xFD17B448, 0x0E1108A8, 0x5DA4FBFC, 0x26A3C465,
-        0x483ADA77,
-    ];
-    let lhs = AffinePt::from_slice(POINT_LHS);
+    // const POINT_LHS: &[u32] = &[
+    //     0x16F81798, 0x59F2815B, 0x2DCE28D9, 0x029BFCDB, 0xCE870B07, 0x55A06295, 0xF9DCBBAC,
+    //     0x79BE667E, //
+    //     0xFB10D4B8, 0x9C47D08F, 0xA6855419, 0xFD17B448, 0x0E1108A8, 0x5DA4FBFC, 0x26A3C465,
+    //     0x483ADA77,
+    // ];
+    // let lhs = AffinePt::from_slice(POINT_LHS);
 
 
-    // let lhs = AffinePt {
-    //     x: BigUint::from_slice(&[
-    //         0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb,
-    //         0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e
-    //     ]),
-    //     y: BigUint::from_slice(&[
-    //         0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448,
-    //         0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77
-    //     ])
-    // };
+    // // let lhs = AffinePt {
+    // //     x: BigUint::from_slice(&[
+    // //         0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb,
+    // //         0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e
+    // //     ]),
+    // //     y: BigUint::from_slice(&[
+    // //         0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448,
+    // //         0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77
+    // //     ])
+    // // };
 
-    let rhs = AffinePt{
-        x: BigUint::from_slice(&[
-            0xac04dc3f, 0x9465e6a4, 0xf46d2dad, 0x5d5ac4b6,
-            0xad2c0db6, 0xa7c06f71, 0xe335abc9, 0x0f66dc33
-        ]),
-        y: BigUint::from_slice(&[
-            0xd3f64d1c, 0x50650be0, 0x2a8577b0, 0xb701323c,
-            0x95565b00, 0x6dddd83d, 0x398fcd2c, 0x83641fc5
-        ])
-    };
-    let expected = AffinePt {
-        x: BigUint::from_slice(&[
-            0x3db079e0, 0xd4ad0ff5, 0xdd0da7e2, 0x4faad0a4,
-            0x85894785, 0x280d6b36, 0xe8ab292d, 0xa901b0db
-        ]),
-        y: BigUint::from_slice(&[
-            0x47298a9d, 0x01d0e60e, 0xa6b063b3, 0x716bc5e0,
-            0x61e7ae64, 0xaf6f04dc, 0x834f1a61, 0x3f27e7e1
-        ])
-    };
-    // let lhs = AffinePt {
-    //     x: BigUint::from_slice(&[
-    //         0x79be667e, 0xf9dcbbac, 0x55a06295, 0xce870b07,
-    //         0x029bfcdb, 0x2dce28d9, 0x59f2815b, 0x16f81798
-    //     ]),
-    //     y: BigUint::from_slice(&[
-    //         0x483ada77, 0x26a3c465, 0x5da4fbfc, 0x0e1108a8,
-    //         0xfd17b448, 0xa6855419, 0x9c47d08f, 0xfb10d4b8
-    //     ])
-    // };
     // let rhs = AffinePt{
     //     x: BigUint::from_slice(&[
-    //         0x0f66dc33, 0xe335abc9, 0xa7c06f71, 0xad2c0db6,
-    //         0x5d5ac4b6, 0xf46d2dad, 0x9465e6a4, 0xac04dc3f
+    //         0xac04dc3f, 0x9465e6a4, 0xf46d2dad, 0x5d5ac4b6,
+    //         0xad2c0db6, 0xa7c06f71, 0xe335abc9, 0x0f66dc33
     //     ]),
     //     y: BigUint::from_slice(&[
-    //         0x83641fc5, 0x398fcd2c, 0x6dddd83d, 0x95565b00,
-    //         0xb701323c, 0x2a8577b0, 0x50650be0, 0xd3f64d1c
+    //         0xd3f64d1c, 0x50650be0, 0x2a8577b0, 0xb701323c,
+    //         0x95565b00, 0x6dddd83d, 0x398fcd2c, 0x83641fc5
     //     ])
     // };
     // let expected = AffinePt {
     //     x: BigUint::from_slice(&[
-    //         0xa901b0db, 0xe8ab292d, 0x280d6b36, 0x85894785,
-    //         0x4faad0a4, 0xdd0da7e2, 0xd4ad0ff5, 0x3db079e0
+    //         0x3db079e0, 0xd4ad0ff5, 0xdd0da7e2, 0x4faad0a4,
+    //         0x85894785, 0x280d6b36, 0xe8ab292d, 0xa901b0db
     //     ]),
     //     y: BigUint::from_slice(&[
-    //         0x3f27e7e1, 0x834f1a61, 0xaf6f04dc, 0x61e7ae64,
-    //         0x716bc5e0, 0xa6b063b3, 0x01d0e60e, 0x47298a9d
+    //         0x47298a9d, 0x01d0e60e, 0xa6b063b3, 0x716bc5e0,
+    //         0x61e7ae64, 0xaf6f04dc, 0x834f1a61, 0x3f27e7e1
     //     ])
     // };
+    // // let lhs = AffinePt {
+    // //     x: BigUint::from_slice(&[
+    // //         0x79be667e, 0xf9dcbbac, 0x55a06295, 0xce870b07,
+    // //         0x029bfcdb, 0x2dce28d9, 0x59f2815b, 0x16f81798
+    // //     ]),
+    // //     y: BigUint::from_slice(&[
+    // //         0x483ada77, 0x26a3c465, 0x5da4fbfc, 0x0e1108a8,
+    // //         0xfd17b448, 0xa6855419, 0x9c47d08f, 0xfb10d4b8
+    // //     ])
+    // // };
+    // // let rhs = AffinePt{
+    // //     x: BigUint::from_slice(&[
+    // //         0x0f66dc33, 0xe335abc9, 0xa7c06f71, 0xad2c0db6,
+    // //         0x5d5ac4b6, 0xf46d2dad, 0x9465e6a4, 0xac04dc3f
+    // //     ]),
+    // //     y: BigUint::from_slice(&[
+    // //         0x83641fc5, 0x398fcd2c, 0x6dddd83d, 0x95565b00,
+    // //         0xb701323c, 0x2a8577b0, 0x50650be0, 0xd3f64d1c
+    // //     ])
+    // // };
+    // // let expected = AffinePt {
+    // //     x: BigUint::from_slice(&[
+    // //         0xa901b0db, 0xe8ab292d, 0x280d6b36, 0x85894785,
+    // //         0x4faad0a4, 0xdd0da7e2, 0xd4ad0ff5, 0x3db079e0
+    // //     ]),
+    // //     y: BigUint::from_slice(&[
+    // //         0x3f27e7e1, 0x834f1a61, 0xaf6f04dc, 0x61e7ae64,
+    // //         0x716bc5e0, 0xa6b063b3, 0x01d0e60e, 0x47298a9d
+    // //     ])
+    // // };
+
+    let lhs = AffinePt {
+        x: BigUint::parse_bytes(b"79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", 16).unwrap(),
+        y: BigUint::parse_bytes(b"483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", 16).unwrap(),
+    };
+    let rhs = AffinePt {
+        x: BigUint::parse_bytes(b"0f66dc33e335abc9a7c06f71ad2c0db65d5ac4b6f46d2dad9465e6a4ac04dc3f", 16).unwrap(),
+        y: BigUint::parse_bytes(b"83641fc5398fcd2c6dddd83d95565b00b701323c2a8577b050650be0d3f64d1c", 16).unwrap(),
+    };
+    let expected = AffinePt {
+        x: BigUint::parse_bytes(b"a901b0dbe8ab292d280d6b36858947854faad0a4dd0da7e2d4ad0ff53db079e0", 16).unwrap(),
+        y: BigUint::parse_bytes(b"3f27e7e1834f1a61af6f04dc61e7ae64716bc5e0a6b063b301d0e60e47298a9d", 16).unwrap(),
+    };
 
     let result = risc0_bigint2::ec::add(&lhs, &rhs);
     assert_eq!(result, expected);
