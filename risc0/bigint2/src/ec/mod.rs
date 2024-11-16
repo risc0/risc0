@@ -26,6 +26,8 @@ use num_bigint_dig::BigUint;
 const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
 
+pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AffinePt {
     /// x coordinate
@@ -38,36 +40,38 @@ impl AffinePt {
     /// The point as concatenated u32s for x and y
     ///
     /// Little-endian, x coordinate before y coordinate
-    ///
-    /// TODO: Ensure that this fills the bitwidth! Broken in rare cases otherwise!
     #[cfg(not(feature = "num-bigint-dig"))]
-    pub fn to_u32s(&self) -> Vec<u32> {
-        let mut output = self.x.to_u32_digits();
-        output.extend(self.y.to_u32_digits());
-        output
+    pub fn to_u32s(&self) -> [u32; 2 * EC_256_WIDTH_WORDS] {
+        // TODO: This feels duplicative with `to_u32_digits` from RSA, but I don't see a way to share code without doubling the `copy_from_slice` calls
+        let mut result = [0u32; 2 * EC_256_WIDTH_WORDS];
+        let mut first = self.x.to_u32_digits();
+        assert!(first.len() <= EC_256_WIDTH_WORDS);
+        if first.len() < EC_256_WIDTH_WORDS {
+            first.resize(EC_256_WIDTH_WORDS, 0);
+        }
+        let mut last = self.y.to_u32_digits();
+        assert!(last.len() <= EC_256_WIDTH_WORDS);
+        if last.len() < EC_256_WIDTH_WORDS {
+            last.resize(EC_256_WIDTH_WORDS, 0);
+        }
+        result[..EC_256_WIDTH_WORDS].copy_from_slice(&first);
+        result[EC_256_WIDTH_WORDS..].copy_from_slice(&last);
+        result
     }
 
     /// The point as concatenated u32s for x and y
     ///
     /// Little-endian, x coordinate before y coordinate
-    ///
-    /// TODO: Ensure that this fills the bitwidth! Broken in rare cases otherwise!
     #[cfg(feature = "num-bigint-dig")]
-    pub fn to_u32s(&self) -> Vec<u32> {
-        // TODO
-        unimplemented!();
+    pub fn to_u32s(&self) -> [u32; 2 * EC_256_WIDTH_WORDS] {
+        todo!();
     }
 
-    pub fn from_slice(slice: &[u32]) -> AffinePt {
-        // TODO: Handle bitwidth properly, not hacked in like this
-        const BITWIDTH: usize = 256;
-        const WORD_WIDTH: usize = BITWIDTH / 32;
-
-        let mut iter = slice.chunks(WORD_WIDTH);
-        // TODO: length checking?
-        let x = BigUint::from_slice(iter.next().expect("Slice too small to be an AffinePt"));
-        let y = BigUint::from_slice(iter.next().expect("Slice too small to be an AffinePt"));
-        assert_eq!(iter.len(), 0);
+    pub fn from_u32s(data: &[u32; 2 * EC_256_WIDTH_WORDS]) -> AffinePt {
+        let mut iter = data.chunks(EC_256_WIDTH_WORDS);
+        // We know the exact length of `data` so these unwraps are always successful
+        let x = BigUint::from_slice(iter.next().unwrap());
+        let y = BigUint::from_slice(iter.next().unwrap());
         AffinePt { x, y }
     }
 }
@@ -77,8 +81,9 @@ pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
     // This assumption isn't checked here, so other code must ensure it's met
     // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
     // TODO: Need a different algorithm in num-bigint-dig because no `bit`
-    assert_ne!(*scalar, BigUint::ZERO);  // TODO: Do we check this?
-    let mut result = point.clone();  // Arbitrary, but nice to start initialized TODO?
+
+    // `result` will always be overridden, but the compiler doesn't know that so initialize
+    let mut result = AffinePt{ x: BigUint::ZERO, y: BigUint::ZERO };
     let mut first_write = true;
     let mut doubled_pt = point.clone();
     for pos in 0..scalar.bits() {
@@ -93,22 +98,17 @@ pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
         doubled_pt = double(&doubled_pt);
     }
     if first_write {
-        // Since scalar is nonzero, there was a write
-        unreachable!();
+        panic!("Multiplication by zero forbidden as affine coordinates can't represent the point at infinity");
     }
     result
 }
 
 pub fn double(point: &AffinePt) -> AffinePt {
-    // TODO: Handle bitwidth properly, not hacked in like this
-    const BITWIDTH: usize = 256;
-    const WORD_WIDTH: usize = BITWIDTH / 32;
-
-    let mut result = [0u32; 2 * WORD_WIDTH];
+    let mut result = [0u32; 2 * EC_256_WIDTH_WORDS];
     unsafe {
         double_raw(&point.to_u32s(), &mut result);
     }
-    AffinePt::from_slice(&result)
+    AffinePt::from_u32s(&result)
 }
 
 /// SAFETY: Parameters must be aligned and correctly sized
@@ -116,24 +116,20 @@ pub fn double(point: &AffinePt) -> AffinePt {
 /// Each parameter represents a field element and stores both coordinates; hence, the correct size
 /// is twice the word width of an element of the elliptic curve field (or 1/16 the bitwidth when
 /// the bitwidth is a multiple of 32).
-unsafe fn double_raw(point: &[u32], result: &mut [u32]) {
+unsafe fn double_raw(point: &[u32; 2 * EC_256_WIDTH_WORDS], result: &mut [u32; 2 * EC_256_WIDTH_WORDS]) {
     unsafe {
         sys_bigint2_2(DOUBLE_BLOB.as_ptr(), point.as_ptr(), result.as_mut_ptr());
     }
 }
 
 pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
-    // TODO: Check for P + P, P - P?
-
-    // TODO: Handle bitwidth properly, not hacked in like this
-    const BITWIDTH: usize = 256;
-    const WORD_WIDTH: usize = BITWIDTH / 32;
-
-    let mut result = [0u32; 2 * WORD_WIDTH];
+    // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
+    // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
+    let mut result = [0u32; 2 * EC_256_WIDTH_WORDS];
     unsafe {
         add_raw(&lhs.to_u32s(), &rhs.to_u32s(), &mut result);
     }
-    AffinePt::from_slice(&result)
+    AffinePt::from_u32s(&result)
 }
 
 /// SAFETY: Parameters must be aligned and correctly sized
@@ -141,7 +137,11 @@ pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
 /// Each parameter represents a field element and stores both coordinates; hence, the correct size
 /// is twice the word width of an element of the elliptic curve field (or 1/16 the bitwidth when
 /// the bitwidth is a multiple of 32).
-unsafe fn add_raw(lhs: &[u32], rhs: &[u32], result: &mut [u32]) {
+unsafe fn add_raw(
+    lhs: &[u32; 2 * EC_256_WIDTH_WORDS],
+    rhs: &[u32; 2 * EC_256_WIDTH_WORDS],
+    result: &mut [u32; 2 * EC_256_WIDTH_WORDS]
+) {
     unsafe {
         sys_bigint2_3(ADD_BLOB.as_ptr(), lhs.as_ptr(), rhs.as_ptr(), result.as_mut_ptr());
     }
