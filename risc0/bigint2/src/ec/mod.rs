@@ -105,18 +105,11 @@ pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
 
 pub fn double(point: &AffinePt) -> AffinePt {
     let mut result = [0u32; 2 * EC_256_WIDTH_WORDS];
-    unsafe {
-        double_raw(&point.to_u32s(), &mut result);
-    }
+    double_raw(&point.to_u32s(), &mut result);
     AffinePt::from_u32s(&result)
 }
 
-/// SAFETY: Parameters must be aligned and correctly sized
-///
-/// Each parameter represents a field element and stores both coordinates; hence, the correct size
-/// is twice the word width of an element of the elliptic curve field (or 1/16 the bitwidth when
-/// the bitwidth is a multiple of 32).
-unsafe fn double_raw(point: &[u32; 2 * EC_256_WIDTH_WORDS], result: &mut [u32; 2 * EC_256_WIDTH_WORDS]) {
+fn double_raw(point: &[u32; 2 * EC_256_WIDTH_WORDS], result: &mut [u32; 2 * EC_256_WIDTH_WORDS]) {
     unsafe {
         sys_bigint2_2(DOUBLE_BLOB.as_ptr(), point.as_ptr(), result.as_mut_ptr());
     }
@@ -126,18 +119,11 @@ pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
     // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
     // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
     let mut result = [0u32; 2 * EC_256_WIDTH_WORDS];
-    unsafe {
-        add_raw(&lhs.to_u32s(), &rhs.to_u32s(), &mut result);
-    }
+    add_raw(&lhs.to_u32s(), &rhs.to_u32s(), &mut result);
     AffinePt::from_u32s(&result)
 }
 
-/// SAFETY: Parameters must be aligned and correctly sized
-///
-/// Each parameter represents a field element and stores both coordinates; hence, the correct size
-/// is twice the word width of an element of the elliptic curve field (or 1/16 the bitwidth when
-/// the bitwidth is a multiple of 32).
-unsafe fn add_raw(
+fn add_raw(
     lhs: &[u32; 2 * EC_256_WIDTH_WORDS],
     rhs: &[u32; 2 * EC_256_WIDTH_WORDS],
     result: &mut [u32; 2 * EC_256_WIDTH_WORDS]
