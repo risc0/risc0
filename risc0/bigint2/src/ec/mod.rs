@@ -83,7 +83,10 @@ pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
     // TODO: Need a different algorithm in num-bigint-dig because no `bit`
 
     // `result` will always be overridden, but the compiler doesn't know that so initialize
-    let mut result = AffinePt{ x: BigUint::ZERO, y: BigUint::ZERO };
+    let mut result = AffinePt {
+        x: BigUint::ZERO,
+        y: BigUint::ZERO,
+    };
     let mut first_write = true;
     let mut doubled_pt = point.clone();
     for pos in 0..scalar.bits() {
@@ -126,9 +129,14 @@ pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
 fn add_raw(
     lhs: &[u32; 2 * EC_256_WIDTH_WORDS],
     rhs: &[u32; 2 * EC_256_WIDTH_WORDS],
-    result: &mut [u32; 2 * EC_256_WIDTH_WORDS]
+    result: &mut [u32; 2 * EC_256_WIDTH_WORDS],
 ) {
     unsafe {
-        sys_bigint2_3(ADD_BLOB.as_ptr(), lhs.as_ptr(), rhs.as_ptr(), result.as_mut_ptr());
+        sys_bigint2_3(
+            ADD_BLOB.as_ptr(),
+            lhs.as_ptr(),
+            rhs.as_ptr(),
+            result.as_mut_ptr(),
+        );
     }
 }
