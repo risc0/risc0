@@ -177,7 +177,7 @@ impl Program {
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = &regs[op.b];
-                    let value = value.to_biguint().ok_or_else(|| anyhow!("TODO Negative output produced during bigint2 acceleration"))?;
+                    let value = value.to_biguint().ok_or_else(|| anyhow!("Negative output produced during bigint2 acceleration"))?;
                     io.store(op.arena(), op.offset(), count, &value)?;
                 }
                 OpCode::Add => {
