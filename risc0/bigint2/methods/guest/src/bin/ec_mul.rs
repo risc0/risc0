@@ -40,7 +40,6 @@ fn main() {
         y: BigUint::from_slice(&[
             0x671c60d6, 0xbe8eb3c7, 0xd97077cb, 0x96c95330,
             0x9ba1b378, 0x0a08266e, 0x7886b640, 0x958ef42a
-
         ])
     };
 
