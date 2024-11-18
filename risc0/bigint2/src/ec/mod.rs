@@ -16,6 +16,9 @@
 mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
+use num_bigint::BigUint;
+
+use crate::ffi::{sys_bigint2_2, sys_bigint2_3};
 
 const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
