@@ -17,10 +17,8 @@ use risc0_zkvm::guest::env;
 
 use risc0_bigint2::ec::AffinePt;
 
-#[cfg(feature = "num-bigint")]
-use num_bigint::BigUint;
 #[cfg(feature = "num-bigint-dig")]
-use num_bigint_dig::BitUint;
+extern crate num_bigint_dig as num_bigint;```
 
 fn main() {
     let lhs = AffinePt {
