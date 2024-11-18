@@ -17,12 +17,6 @@ mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
 
-use crate::ffi::{sys_bigint2_2, sys_bigint2_3};
-#[cfg(not(feature = "num-bigint-dig"))]
-use num_bigint::BigUint;
-#[cfg(feature = "num-bigint-dig")]
-use num_bigint_dig::BigUint;
-
 const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
 
