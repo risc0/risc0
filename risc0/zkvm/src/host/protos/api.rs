@@ -2,7 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerRequest {
-    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
+    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11")]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
 /// Nested message and enum types in `ServerRequest`.
@@ -30,6 +30,8 @@ pub mod server_request {
         Verify(super::VerifyRequest),
         #[prost(message, tag = "10")]
         ProveZkr(super::ProveZkrRequest),
+        #[prost(message, tag = "11")]
+        ProveKeccak(super::ProveKeccakRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -139,6 +141,40 @@ pub mod prove_zkr_reply {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ProveZkrResult {
+    #[prost(message, optional, tag = "1")]
+    pub receipt: ::core::option::Option<Asset>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ProveKeccakRequest {
+    #[prost(uint64, tag = "1")]
+    pub po2: u64,
+    #[prost(bytes = "vec", tag = "2")]
+    pub input: ::prost::alloc::vec::Vec<u8>,
+    /// This is optional in the context of a CoprocessorRequest // todo - why is this optional?
+    #[prost(message, optional, tag = "3")]
+    pub receipt_out: ::core::option::Option<AssetRequest>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ProveKeccakReply {
+    #[prost(oneof = "prove_keccak_reply::Kind", tags = "1, 2")]
+    pub kind: ::core::option::Option<prove_keccak_reply::Kind>,
+}
+/// Nested message and enum types in `ProveKeccakReply`.
+pub mod prove_keccak_reply {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Kind {
+        #[prost(message, tag = "1")]
+        Ok(super::ProveKeccakResult),
+        #[prost(message, tag = "2")]
+        Error(super::GenericError),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ProveKeccakResult {
     #[prost(message, optional, tag = "1")]
     pub receipt: ::core::option::Option<Asset>,
 }
@@ -325,8 +361,10 @@ pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars:
-        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    pub env_vars: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]
@@ -604,7 +642,7 @@ pub mod trace_event {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CoprocessorRequest {
-    #[prost(oneof = "coprocessor_request::Kind", tags = "1")]
+    #[prost(oneof = "coprocessor_request::Kind", tags = "1, 2")]
     pub kind: ::core::option::Option<coprocessor_request::Kind>,
 }
 /// Nested message and enum types in `CoprocessorRequest`.
@@ -614,6 +652,8 @@ pub mod coprocessor_request {
     pub enum Kind {
         #[prost(message, tag = "1")]
         ProveZkr(super::ProveZkrRequest),
+        #[prost(message, tag = "2")]
+        ProveKeccak(super::ProveKeccakRequest),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

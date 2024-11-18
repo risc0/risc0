@@ -145,8 +145,7 @@ pub use {
 #[cfg(feature = "client")]
 #[cfg(feature = "unstable")]
 pub use self::host::client::env::{
-    CoprocessorCallback, KeccakCoprocessorCallback, ProveKeccakRequest, ProveKeccakResponse,
-    ProveZkrRequest,
+    CoprocessorCallback, ProveKeccakRequest, ProveKeccakResponse, ProveZkrRequest,
 };
 
 #[cfg(not(target_os = "zkvm"))]

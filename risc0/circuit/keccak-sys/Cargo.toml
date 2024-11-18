@@ -1,13 +1,11 @@
 [package]
 name = "risc0-circuit-keccak-sys"
 description = "Generated HAL code for keccak cicuit"
-#version = { workspace = true }
-edition = "2021"
-version = "0.1.0"
-#license = { workspace = true }
-#homepage = { workspace = true }
-#repository = { workspace = true }
-links = "risc0-circuit-keccak-sys"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [dependencies]
 risc0-core = { workspace = true }

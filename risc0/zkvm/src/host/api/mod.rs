@@ -77,6 +77,7 @@ impl RootMessage for pb::api::ServerReply {}
 impl RootMessage for pb::api::GenericReply {}
 impl RootMessage for pb::api::OnIoReply {}
 impl RootMessage for pb::api::ProveSegmentReply {}
+impl RootMessage for pb::api::ProveKeccakReply {}
 impl RootMessage for pb::api::ProveZkrReply {}
 impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}

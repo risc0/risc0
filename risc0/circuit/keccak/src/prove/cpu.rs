@@ -19,6 +19,7 @@ use keccak_circuit::{CircuitField, ExtVal, Val, REGISTER_GROUP_ACCUM, REGISTER_G
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use risc0_zirgen_dsl::{CycleContext, CycleRow, GlobalRow};
+use risc0_zkp::hal::AccumPreflight;
 use risc0_zkp::{
     adapter::PolyFp,
     core::log2_ceil,
@@ -222,6 +223,7 @@ impl<'a> keccak_circuit::CircuitHal<'a, CpuHal<CircuitField>> for CpuCircuitHal 
 impl risc0_zkp::hal::CircuitHal<CpuHal<CircuitField>> for CpuCircuitHal {
     fn accumulate(
         &self,
+        _preflight: &AccumPreflight,
         _ctrl: &CpuBuffer<Val>,
         _io: &CpuBuffer<Val>,
         _data: &CpuBuffer<Val>,

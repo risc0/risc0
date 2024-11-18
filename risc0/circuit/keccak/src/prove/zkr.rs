@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{control_id::KECCAK_CONTROL_IDS, KECCAK_PO2_RANGE, RECURSION_PO2};
+//use crate::{control_id::KECCAK_CONTROL_IDS, KECCAK_PO2_RANGE, RECURSION_PO2};
 use anyhow::{ensure, Result};
 use risc0_circuit_recursion::prove::Program;
 use risc0_core::field::baby_bear::BabyBearElem;
@@ -20,7 +20,7 @@ use risc0_core::field::baby_bear::BabyBearElem;
 // TODO: publish this value from recursion crate or find some other way not to have this constant here.
 const RECURSION_CODE_SIZE: usize = 23;
 
-static REGISTER_ZKRS: std::sync::Once = std::sync::Once::new();
+//static REGISTER_ZKRS: std::sync::Once = std::sync::Once::new();
 
 pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     let code_size = RECURSION_CODE_SIZE;
@@ -40,14 +40,14 @@ pub fn get_zkr(name: &str, po2: usize) -> Result<Program> {
     })
 }
 
-pub fn register_zkrs() {
-    REGISTER_ZKRS.call_once(|| {
-        for (po2, control_id) in KECCAK_PO2_RANGE.zip(KECCAK_CONTROL_IDS) {
-            let name = format!("keccak_lift_{}.zkr", po2);
-            risc0_zkvm::register_zkr(&control_id, move || get_zkr(&name, RECURSION_PO2));
-        }
-    });
-}
+//pub fn register_zkrs() {
+//    REGISTER_ZKRS.call_once(|| {
+//        for (po2, control_id) in KECCAK_PO2_RANGE.zip(KECCAK_CONTROL_IDS) {
+//            let name = format!("keccak_lift_{}.zkr", po2);
+//            risc0_zkvm::register_zkr(&control_id, move || get_zkr(&name, RECURSION_PO2));
+//        }
+//    });
+//}
 
 #[cfg(test)]
 mod tests {

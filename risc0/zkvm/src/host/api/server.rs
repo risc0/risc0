@@ -18,6 +18,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::host::client::env::ProveKeccakRequest;
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
@@ -239,6 +240,39 @@ impl CoprocessorCallback for CoprocessorProxy {
             pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
         }
     }
+
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        //todo!();
+        let request = pb::api::ServerReply {
+            // TODO: copy pasta from prove_zkr. can we reduce boilerplate here?
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
+                        pb::api::CoprocessorRequest {
+                            kind: Some(pb::api::coprocessor_request::Kind::ProveKeccak({
+                                pb::api::ProveKeccakRequest {
+                                    input: proof_request.input,
+                                    po2: proof_request.po2 as u64,
+                                    receipt_out: None,
+                                }
+                            })),
+                        },
+                    )),
+                })),
+            })),
+        };
+        tracing::trace!("tx: {request:?}");
+        self.conn.send(request)?;
+
+        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        tracing::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
+    }
 }
 
 impl Server {
@@ -302,6 +336,9 @@ impl Server {
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
             pb::api::server_request::Kind::Verify(request) => self.on_verify(conn, request),
             pb::api::server_request::Kind::ProveZkr(request) => self.on_prove_zkr(conn, request),
+            pb::api::server_request::Kind::ProveKeccak(request) => {
+                self.on_prove_keccak(conn, request)
+            }
         }
     }
 
@@ -480,6 +517,45 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::ProveZkrReply {
             kind: Some(pb::api::prove_zkr_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
+                },
+            )),
+        });
+
+        tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    // TODO: copy pasta from on_prove_zkr. remove boilerplate?
+    fn on_prove_keccak(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ProveKeccakRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::ProveKeccakRequest) -> Result<pb::api::ProveKeccakReply> {
+            let po2 = request.po2;
+            let receipt = prove_keccak(&po2, &request.input)?;
+
+            let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ProveKeccakReply {
+                kind: Some(pb::api::prove_keccak_reply::Kind::Ok(
+                    pb::api::ProveKeccakResult {
+                        receipt: Some(asset),
+                    },
+                )),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ProveKeccakReply {
+            kind: Some(pb::api::prove_keccak_reply::Kind::Error(
                 pb::api::GenericError {
                     reason: err.to_string(),
                 },

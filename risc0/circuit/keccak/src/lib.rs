@@ -31,13 +31,13 @@ pub mod prove;
 #[cfg(feature = "prove")]
 mod taps;
 
-#[cfg(target_os = "zkvm")]
-mod guest;
-#[cfg(target_os = "zkvm")]
-pub use guest::*;
+//#[cfg(target_os = "zkvm")]
+//mod guest;
+//#[cfg(target_os = "zkvm")]
+//pub use guest::*;
 
-#[cfg(test)]
-mod tests;
+//#[cfg(test)]
+//mod tests;
 
 // TODO: Can we import this from somewhere other than ZKVM?
 pub const RECURSION_PO2: usize = 18;

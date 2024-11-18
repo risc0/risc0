@@ -46,13 +46,10 @@ use risc0_zkvm_platform::syscall::{
 
 use crate::{
     host::client::{
-        env::{
-            AssumptionReceipts, CoprocessorCallbackRef, KeccakCoprocessorCallbackRef,
-            ProveZkrRequest,
-        },
+        env::{AssumptionReceipts, CoprocessorCallbackRef, ProveZkrRequest},
         posix_io::PosixIo,
     },
-    Assumption, AssumptionReceipt, ExecutorEnv,
+    Assumption, AssumptionReceipt, ExecutorEnv, ProveKeccakRequest,
 };
 
 use self::{
@@ -123,8 +120,8 @@ pub(crate) struct SyscallTable<'a> {
     pub(crate) assumptions: Rc<RefCell<AssumptionReceipts>>,
     pub(crate) assumptions_used: Rc<RefCell<AssumptionUsage>>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
-    pub(crate) keccak_coprocessor: Option<KeccakCoprocessorCallbackRef<'a>>,
     pub(crate) pending_zkrs: Rc<RefCell<Vec<ProveZkrRequest>>>,
+    pub(crate) pending_keccaks: Rc<RefCell<Vec<ProveKeccakRequest>>>,
 }
 
 impl<'a> SyscallTable<'a> {
@@ -135,8 +132,8 @@ impl<'a> SyscallTable<'a> {
             assumptions: env.assumptions.clone(),
             assumptions_used: Default::default(),
             coprocessor: env.coprocessor.clone(),
-            keccak_coprocessor: env.keccak_coprocessor.clone(),
             pending_zkrs: Default::default(),
+            pending_keccaks: Default::default(),
         }
     }
 

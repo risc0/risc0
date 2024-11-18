@@ -23,7 +23,7 @@ hex-literal = "0.4"
 risc0-zkvm-methods = { path = ".." }
 risc0-zkvm-platform = { path = "../../platform", features = ["unstable"] }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }
-tiny-keccak = { git = "https://github.com/risc0/tiny-keccak.git", branch = "erik/risc0-v2", features = ["keccak"] }
+tiny-keccak = { git = "https://github.com/risc0/tiny-keccak.git", branch = "risc0", features = ["keccak"] }
 
 [profile.release]
 lto = true

@@ -788,6 +788,7 @@ impl Client {
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_zkr(proof_request)
             }
+            pb::api::coprocessor_request::Kind::ProveKeccak(_) => todo!(),
         }
     }
 }

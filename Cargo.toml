@@ -9,6 +9,8 @@ members = [
   "risc0/build_kernel",
   "risc0/cargo-risczero",
   "risc0/circuit/bigint",
+  "risc0/circuit/keccak",
+  "risc0/circuit/keccak-sys",
   "risc0/circuit/recursion",
   "risc0/circuit/recursion-sys",
   "risc0/circuit/rv32im",
@@ -18,6 +20,7 @@ members = [
   "risc0/r0vm",
   "risc0/sys",
   "risc0/tools",
+  "risc0/zirgen/dsl",
   "risc0/zkp",
   "risc0/zkvm",
   "risc0/zkvm/methods",
@@ -56,6 +59,7 @@ risc0-core = { version = "1.2.0-alpha.1", default-features = false, path = "risc
 risc0-groth16 = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/groth16" }
 risc0-r0vm = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/r0vm" }
 risc0-sys = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/sys" }
+risc0-zirgen-dsl = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/zirgen/dsl" }
 risc0-zkp = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "1.2.0-alpha.1", default-features = false, path = "risc0/zkvm/platform" }
