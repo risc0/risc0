@@ -13,4 +13,4 @@ risc0-zkvm = { workspace = true, features = ["default"] }
 
 [dev-dependencies]
 assert_cmd = "2.0"
-tempfile = "3.12"
+tempfile = "3.14"
