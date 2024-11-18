@@ -16,12 +16,19 @@
 extern crate num_bigint_dig as num_bigint;
 
 use num_bigint::BigUint;
+use std::rc::Rc;
 
-use risc0_bigint2::ec::AffinePoint;
+use risc0_bigint2::ec::{SECP256K1_PRIME, AffinePoint, WeierstrassCurve};
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
 fn main() {
+    let curve = Rc::new(WeierstrassCurve::<8> {
+        prime: BigUint::from_slice(&SECP256K1_PRIME),
+        a: BigUint::ZERO,
+        b: BigUint::from(7u32),
+    });
+
     let scalar = BigUint::parse_bytes(b"2f", 16).unwrap();
     let point = AffinePoint {
         x: BigUint::from_slice(&[
@@ -32,6 +39,7 @@ fn main() {
             0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
             0x483ada77,
         ]),
+        curve: Rc::clone(&curve),
     };
     let expected = AffinePoint {
         x: BigUint::from_slice(&[
@@ -42,6 +50,7 @@ fn main() {
             0x671c60d6, 0xbe8eb3c7, 0xd97077cb, 0x96c95330, 0x9ba1b378, 0x0a08266e, 0x7886b640,
             0x958ef42a,
         ]),
+        curve,
     };
 
     let result = risc0_bigint2::ec::mul(&scalar, &point);
