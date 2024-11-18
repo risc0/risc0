@@ -25,21 +25,21 @@ fn main() {
     let point = AffinePoint{
         x: BigUint::from_slice(&[
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb,
-            0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e
+            0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e,
         ]),
         y: BigUint::from_slice(&[
             0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448,
-            0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77
+            0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77,
         ])
     };
     let expected = AffinePoint {
         x: BigUint::from_slice(&[
             0xfc345d74, 0xf1c13eb1, 0x0e1498e2, 0x881d811e,
-            0xd64702ef, 0xd73df930, 0x6ee88cbb, 0x77f23093
+            0xd64702ef, 0xd73df930, 0x6ee88cbb, 0x77f23093,
         ]),
         y: BigUint::from_slice(&[
             0x671c60d6, 0xbe8eb3c7, 0xd97077cb, 0x96c95330,
-            0x9ba1b378, 0x0a08266e, 0x7886b640, 0x958ef42a
+            0x9ba1b378, 0x0a08266e, 0x7886b640, 0x958ef42a,
         ])
     };
 
