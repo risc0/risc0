@@ -18,7 +18,7 @@ use risc0_zkvm::guest::env;
 use risc0_bigint2::ec::AffinePoint;
 
 #[cfg(feature = "num-bigint-dig")]
-extern crate num_bigint_dig as num_bigint;```
+extern crate num_bigint_dig as num_bigint;
 
 fn main() {
     let lhs = AffinePoint {
