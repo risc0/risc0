@@ -15,14 +15,14 @@
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
-use risc0_bigint2::ec::AffinePt;
+use risc0_bigint2::ec::AffinePoint;
 
 #[cfg(feature = "num-bigint-dig")]
 extern crate num_bigint_dig as num_bigint;
 
 fn main() {
     let scalar = BigUint::parse_bytes(b"2f", 16).unwrap();
-    let point = AffinePt{
+    let point = AffinePoint{
         x: BigUint::from_slice(&[
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb,
             0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e
@@ -32,7 +32,7 @@ fn main() {
             0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77
         ])
     };
-    let expected = AffinePt {
+    let expected = AffinePoint {
         x: BigUint::from_slice(&[
             0xfc345d74, 0xf1c13eb1, 0x0e1498e2, 0x881d811e,
             0xd64702ef, 0xd73df930, 0x6ee88cbb, 0x77f23093

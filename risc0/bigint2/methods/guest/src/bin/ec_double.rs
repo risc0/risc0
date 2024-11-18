@@ -15,7 +15,7 @@
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
-use risc0_bigint2::ec::AffinePt;
+use risc0_bigint2::ec::AffinePoint;
 
 fn main() {
     const POINT_G: &[u32; 16] = &[
@@ -31,8 +31,8 @@ fn main() {
         0x1AE168FE,
     ];
 
-    let in_pt = AffinePt::from_u32s(POINT_G);
-    let expected_pt = AffinePt::from_u32s(EXPECTED);
+    let in_pt = AffinePoint::from_u32s(POINT_G);
+    let expected_pt = AffinePoint::from_u32s(EXPECTED);
 
     let result = risc0_bigint2::ec::double(&in_pt);
     assert_eq!(result, expected_pt);

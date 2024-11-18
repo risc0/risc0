@@ -29,14 +29,14 @@ const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct AffinePt {
+pub struct AffinePoint {
     /// x coordinate
     pub x: BigUint,
     /// y coordinate
     pub y: BigUint,
 }
 
-impl AffinePt {
+impl AffinePoint {
     /// The point as concatenated u32s for x and y
     ///
     /// Little-endian, x coordinate before y coordinate
@@ -67,23 +67,23 @@ impl AffinePt {
         todo!();
     }
 
-    pub fn from_u32s(data: &[u32; 2 * EC_256_WIDTH_WORDS]) -> AffinePt {
+    pub fn from_u32s(data: &[u32; 2 * EC_256_WIDTH_WORDS]) -> AffinePoint {
         let mut iter = data.chunks(EC_256_WIDTH_WORDS);
         // We know the exact length of `data` so these unwraps are always successful
         let x = BigUint::from_slice(iter.next().unwrap());
         let y = BigUint::from_slice(iter.next().unwrap());
-        AffinePt { x, y }
+        AffinePoint { x, y }
     }
 }
 
-pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
+pub fn mul(scalar: &BigUint, point: &AffinePoint) -> AffinePoint {
     // This assumes `pt` is actually on the curve
     // This assumption isn't checked here, so other code must ensure it's met
     // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
     // TODO: Need a different algorithm in num-bigint-dig because no `bit`
 
     // `result` will always be overridden, but the compiler doesn't know that so initialize
-    let mut result = AffinePt {
+    let mut result = AffinePoint {
         x: BigUint::ZERO,
         y: BigUint::ZERO,
     };
@@ -106,10 +106,10 @@ pub fn mul(scalar: &BigUint, point: &AffinePt) -> AffinePt {
     result
 }
 
-pub fn double(point: &AffinePt) -> AffinePt {
+pub fn double(point: &AffinePoint) -> AffinePoint {
     let mut result = [0u32; 2 * EC_256_WIDTH_WORDS];
     double_raw(&point.to_u32s(), &mut result);
-    AffinePt::from_u32s(&result)
+    AffinePoint::from_u32s(&result)
 }
 
 fn double_raw(point: &[u32; 2 * EC_256_WIDTH_WORDS], result: &mut [u32; 2 * EC_256_WIDTH_WORDS]) {
@@ -118,12 +118,12 @@ fn double_raw(point: &[u32; 2 * EC_256_WIDTH_WORDS], result: &mut [u32; 2 * EC_2
     }
 }
 
-pub fn add(lhs: &AffinePt, rhs: &AffinePt) -> AffinePt {
+pub fn add(lhs: &AffinePoint, rhs: &AffinePoint) -> AffinePoint {
     // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
     // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
     let mut result = [0u32; 2 * EC_256_WIDTH_WORDS];
     add_raw(&lhs.to_u32s(), &rhs.to_u32s(), &mut result);
-    AffinePt::from_u32s(&result)
+    AffinePoint::from_u32s(&result)
 }
 
 fn add_raw(
