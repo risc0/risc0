@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(feature = "num-bigint-dig")]
+extern crate num_bigint_dig as num_bigint;
+
 use num_bigint::BigUint;
 
 use risc0_bigint2::ec::AffinePoint;
-
 #[allow(unused)]
 use risc0_zkvm::guest::env;
-
-#[cfg(feature = "num-bigint-dig")]
-extern crate num_bigint_dig as num_bigint;
 
 fn main() {
     let lhs = AffinePoint {
