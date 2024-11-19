@@ -29,7 +29,10 @@ fn main() {
         b: BigUint::from(7u32),
     });
 
-    let scalar = BigUint::parse_bytes(b"2f", 16).unwrap();
+    let scalar = BigUint::from_slice(&[
+        0x409f9918, 0xd218afb5, 0x81d5a9ae, 0x1aabde69, 0xe5cd569f, 0x478b33e5, 0xd5ff94e4,
+        0x232ad1e3,
+    ]);
     let point = AffinePoint {
         x: BigUint::from_slice(&[
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
@@ -41,14 +44,14 @@ fn main() {
         ]),
         curve: Rc::clone(&curve),
     };
+
     let expected = AffinePoint {
         x: BigUint::from_slice(&[
-            0xfc345d74, 0xf1c13eb1, 0x0e1498e2, 0x881d811e, 0xd64702ef, 0xd73df930, 0x6ee88cbb,
-            0x77f23093,
+            0xd430a92d, 0x5fdd93b4, 0x23c8434f, 0x1616b5ae, 0x2570e09c, 0x673f0dec, 0xb6bdef51, 0x2985d840,
         ]),
         y: BigUint::from_slice(&[
-            0x671c60d6, 0xbe8eb3c7, 0xd97077cb, 0x96c95330, 0x9ba1b378, 0x0a08266e, 0x7886b640,
-            0x958ef42a,
+            0x34ab3c01, 0x0abd13e0, 0x8060d279, 0xa37beeeb, 0xb083593d, 0x4679f415, 0x6c4af2e8,
+            0x1af7251d,
         ]),
         curve,
     };
