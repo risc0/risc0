@@ -8,38 +8,47 @@ import { fetchBenchmarks } from "~/app/(benchmarks-and-reports)/benchmarks/_acti
 import { latestVersion } from "./src/versions.js";
 
 let config: NextConfig = deepmerge(nextConfigBase, {
-  experimental: {
-    ppr: false, // DO NOT USE PPR, breaks everything, don't bother with it
-  },
+	experimental: {
+		ppr: false, // DO NOT USE PPR, breaks everything, don't bother with it
+	},
 
-  async redirects() {
-    const data = await fetchBenchmarks();
-    const benchmarksSlugs = Object.keys(data.entries);
+	async redirects() {
+		const response = await fetch(
+			"https://risc0.github.io/ghpages/dev/bench/data.js",
+			{
+				cache: "no-store",
+			},
+		);
+		const text = await response.text();
+		const data = JSON.parse(
+			text.replace("window.BENCHMARK_DATA = ", "").trim(),
+		);
+		const benchmarksSlugs = Object.keys(data.entries);
 
-    return [
-      {
-        source: "/",
-        destination: latestVersion ? `/${latestVersion}` : "/",
-        permanent: true,
-      },
-      {
-        source: "/:version/applications-benchmarks",
-        destination: "/:version/applications-benchmarks/macOS-apple_m2_pro", // TODO: make sure this is the right default
-        permanent: true,
-      },
-      {
-        source: "/benchmarks",
-        destination: `/benchmarks/${benchmarksSlugs[0]}`,
-        permanent: true,
-      },
-    ];
-  },
+		return [
+			{
+				source: "/",
+				destination: latestVersion ? `/${latestVersion}` : "/",
+				permanent: true,
+			},
+			{
+				source: "/:version/applications-benchmarks",
+				destination: "/:version/applications-benchmarks/macOS-apple_m2_pro", // TODO: make sure this is the right default
+				permanent: true,
+			},
+			{
+				source: "/benchmarks",
+				destination: `/benchmarks/${benchmarksSlugs[0]}`,
+				permanent: true,
+			},
+		];
+	},
 });
 
 if (process.env.ANALYZE === "true") {
-  config = withBundleAnalyzer({
-    enabled: true,
-  })(config);
+	config = withBundleAnalyzer({
+		enabled: true,
+	})(config);
 }
 
 export default config;
