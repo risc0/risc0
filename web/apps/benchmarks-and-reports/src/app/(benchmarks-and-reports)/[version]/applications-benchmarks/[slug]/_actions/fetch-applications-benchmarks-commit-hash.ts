@@ -7,6 +7,11 @@ export async function fetchApplicationsBenchmarksCommitHash({ version }: { versi
   const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/COMMIT_HASH.txt`,
+    {
+      next: {
+        revalidate: 60,
+      },
+    },
   );
 
   // error handling

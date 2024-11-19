@@ -7,6 +7,11 @@ export async function fetchDatasheet({ version, url }: { version: Version; url: 
   const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/${url}`,
+    {
+      next: {
+        revalidate: 60,
+      },
+    },
   );
 
   // error handling

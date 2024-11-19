@@ -4,7 +4,6 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 import { nextConfigBase } from "@risc0/ui/config/next.config.base.js";
 import deepmerge from "deepmerge";
 import type { NextConfig } from "next";
-import { fetchBenchmarks } from "~/app/(benchmarks-and-reports)/benchmarks/_actions/fetch-benchmarks";
 import { latestVersion } from "./src/versions.js";
 
 let config: NextConfig = deepmerge(nextConfigBase, {

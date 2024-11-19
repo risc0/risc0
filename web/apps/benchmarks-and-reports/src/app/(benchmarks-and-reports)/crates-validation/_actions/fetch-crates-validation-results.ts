@@ -9,6 +9,11 @@ export async function fetchCratesValidationResults({
   const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
+    {
+      next: {
+        revalidate: 60,
+      },
+    },
   );
 
   // error handling
