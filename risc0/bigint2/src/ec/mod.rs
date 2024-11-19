@@ -19,7 +19,7 @@ use include_bytes_aligned::include_bytes_aligned;
 use num_bigint::BigUint;
 use std::rc::Rc;
 
-use crate::ffi::{sys_bigint2_2, sys_bigint2_3};
+use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
 
 const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
@@ -33,13 +33,44 @@ pub const SECP256K1_PRIME: [u32; 8] = [
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
 /// An elliptic curve over a prime field
-/// 
+///
 /// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH` of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so the maximum bitwidth will be `32 * WIDTH`)
 #[derive(Debug, Eq, PartialEq)]
 pub struct WeierstrassCurve<const WIDTH: usize> {
     pub prime: BigUint,
     pub a: BigUint,
     pub b: BigUint,
+}
+
+impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
+    const BITWIDTH: usize = 32 * WIDTH;
+
+    /// The curve as concatenated u32s
+    ///
+    /// Little-endian, prime then a then b
+    #[cfg(not(feature = "num-bigint-dig"))]
+    pub fn to_u32s(&self) -> [[u32; WIDTH]; 3] {
+        // TODO: This feels duplicative with `to_u32_digits` from RSA, but I don't see a way to share code without doubling the `copy_from_slice` calls
+        let mut result = [[0u32; WIDTH]; 3];
+        let first = self.prime.to_u32_digits();
+        assert!(first.len() <= WIDTH);
+        let middle = self.a.to_u32_digits();
+        assert!(middle.len() <= WIDTH);
+        let last = self.b.to_u32_digits();
+        assert!(last.len() <= WIDTH);
+        result[0][..first.len()].copy_from_slice(&first);
+        result[1][..middle.len()].copy_from_slice(&middle);
+        result[2][..last.len()].copy_from_slice(&last);
+        result
+    }
+
+    /// The curve as concatenated u32s
+    ///
+    /// Little-endian, prime then a then b
+    #[cfg(feature = "num-bigint-dig")]
+    pub fn to_u32s(&self) -> [[u32; WIDTH]; 3] {
+        todo!();
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -67,7 +98,7 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
         let last = self.y.to_u32_digits();
         assert!(last.len() <= WIDTH);
         result[0][..first.len()].copy_from_slice(&first);
-        result[1][..first.len()].copy_from_slice(&last);
+        result[1][..last.len()].copy_from_slice(&last);
         result
     }
 
@@ -82,8 +113,11 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
     /// Read the point from concatenated u32s for x and y
     ///
     /// Input interpreted as little-endian with x coordinate before y coordinate
-    pub fn from_u32s(data: &[[u32; WIDTH]; 2], curve: Rc<WeierstrassCurve<WIDTH>>) -> AffinePoint<WIDTH> {
-        AffinePoint { 
+    pub fn from_u32s(
+        data: &[[u32; WIDTH]; 2],
+        curve: Rc<WeierstrassCurve<WIDTH>>,
+    ) -> AffinePoint<WIDTH> {
+        AffinePoint {
             x: BigUint::from_slice(&data[0]),
             y: BigUint::from_slice(&data[1]),
             curve,
@@ -124,39 +158,60 @@ pub fn mul<const WIDTH: usize>(scalar: &BigUint, point: &AffinePoint<WIDTH>) -> 
 
 pub fn double<const WIDTH: usize>(point: &AffinePoint<WIDTH>) -> AffinePoint<WIDTH> {
     let mut result = [[0u32; WIDTH]; 2];
-    double_raw(&point.to_u32s(), &mut result);
-    AffinePoint::from_u32s(&result,Rc::clone(&point.curve))
+    double_raw(&point.to_u32s(), &point.curve.to_u32s(), &mut result);
+    AffinePoint::from_u32s(&result, Rc::clone(&point.curve))
 }
 
-fn double_raw<const WIDTH: usize>(point: &[[u32; WIDTH]; 2], result: &mut [[u32; WIDTH]; 2]) {
+fn double_raw<const WIDTH: usize>(
+    point: &[[u32; WIDTH]; 2],
+    curve: &[[u32; WIDTH]; 3],
+    result: &mut [[u32; WIDTH]; 2],
+) {
     unsafe {
         // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
+        // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
         // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-        sys_bigint2_2(DOUBLE_BLOB.as_ptr(), point.as_ptr() as *const u32, result.as_mut_ptr() as *mut u32);
+        sys_bigint2_3(
+            DOUBLE_BLOB.as_ptr(),
+            point.as_ptr() as *const u32,
+            curve.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
     }
 }
 
-pub fn add<const WIDTH: usize>(lhs: &AffinePoint<WIDTH>, rhs: &AffinePoint<WIDTH>) -> AffinePoint<WIDTH> {
+pub fn add<const WIDTH: usize>(
+    lhs: &AffinePoint<WIDTH>,
+    rhs: &AffinePoint<WIDTH>,
+) -> AffinePoint<WIDTH> {
     // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
     // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
     assert_eq!(lhs.curve, rhs.curve);
     let mut result = [[0u32; WIDTH]; 2];
-    add_raw(&lhs.to_u32s(), &rhs.to_u32s(), &mut result);
+    add_raw(
+        &lhs.to_u32s(),
+        &rhs.to_u32s(),
+        &lhs.curve.to_u32s(),
+        &mut result,
+    );
     AffinePoint::from_u32s(&result, Rc::clone(&lhs.curve))
 }
 
 fn add_raw<const WIDTH: usize>(
     lhs: &[[u32; WIDTH]; 2],
     rhs: &[[u32; WIDTH]; 2],
+    curve: &[[u32; WIDTH]; 3],
     result: &mut [[u32; WIDTH]; 2],
 ) {
     unsafe {
         // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
+        // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
         // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-        sys_bigint2_3(
+        sys_bigint2_4(
             ADD_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
+            curve.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
