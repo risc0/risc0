@@ -42,7 +42,11 @@ impl Syscall for SysProveKeccak {
         let control_root = ctx.load_digest_from_register(REG_A6)?;
         let claim = ctx.load_digest_from_register(REG_A7)?;
 
-        let proof_request = ProveKeccakRequest { po2, input };
+        let proof_request = ProveKeccakRequest {
+            claim_digest: claim,
+            po2: po2 as u64,
+            input,
+        };
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
             coprocessor.borrow_mut().prove_keccak(proof_request)?;

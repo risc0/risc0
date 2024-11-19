@@ -18,7 +18,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::host::client::env::ProveKeccakRequest;
+use crate::host::{client::env::ProveKeccakRequest, keccak::prove_keccak};
 use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
@@ -242,7 +242,6 @@ impl CoprocessorCallback for CoprocessorProxy {
     }
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
-        //todo!();
         let request = pb::api::ServerReply {
             // TODO: copy pasta from prove_zkr. can we reduce boilerplate here?
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
@@ -254,6 +253,7 @@ impl CoprocessorCallback for CoprocessorProxy {
                                     input: proof_request.input,
                                     po2: proof_request.po2 as u64,
                                     receipt_out: None,
+                                    claim_digest: Some(proof_request.claim_digest.try_into()?),
                                 }
                             })),
                         },
@@ -535,7 +535,9 @@ impl Server {
     ) -> Result<()> {
         fn inner(request: pb::api::ProveKeccakRequest) -> Result<pb::api::ProveKeccakReply> {
             let po2 = request.po2;
-            let receipt = prove_keccak(&po2, &request.input)?;
+            // TODO: address unwrap panic
+            let claim: Digest = request.claim_digest.unwrap().try_into()?;
+            let receipt = prove_keccak(po2, &request.input, &claim)?;
 
             let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();

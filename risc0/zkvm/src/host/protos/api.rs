@@ -147,12 +147,14 @@ pub struct ProveZkrResult {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ProveKeccakRequest {
-    #[prost(uint64, tag = "1")]
+    #[prost(message, optional, tag = "1")]
+    pub claim_digest: ::core::option::Option<super::base::Digest>,
+    #[prost(uint64, tag = "2")]
     pub po2: u64,
-    #[prost(bytes = "vec", tag = "2")]
+    #[prost(bytes = "vec", tag = "3")]
     pub input: ::prost::alloc::vec::Vec<u8>,
     /// This is optional in the context of a CoprocessorRequest // todo - why is this optional?
-    #[prost(message, optional, tag = "3")]
+    #[prost(message, optional, tag = "4")]
     pub receipt_out: ::core::option::Option<AssetRequest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

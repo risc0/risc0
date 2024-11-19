@@ -80,10 +80,11 @@ message ProveZkrResult {
 }
 
 message ProveKeccakRequest {
-  uint64 po2 = 1;
-  bytes input = 2;
+  base.Digest claim_digest = 1;
+  uint64 po2 = 2;
+  bytes input = 3;
   // This is optional in the context of a CoprocessorRequest // todo - why is this optional?
-  AssetRequest receipt_out = 3;
+  AssetRequest receipt_out = 4;
 }
 
 message ProveKeccakReply {

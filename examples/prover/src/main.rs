@@ -27,7 +27,7 @@ use num_bigint::BigUint;
 use risc0_circuit_bigint_test_methods::{RSA_VERIFY_ELF, RSA_VERIFY_ID};
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
 
 use self::{plan::Planner, task_mgr::TaskManager};
@@ -53,6 +53,14 @@ impl CoprocessorCallback for Coprocessor {
         let client = ApiClient::from_env().unwrap();
         let claim_digest = proof_request.claim_digest;
         let receipt = client.prove_zkr(proof_request, AssetRequest::Inline)?;
+        self.receipts.insert(claim_digest, receipt);
+        Ok(())
+    }
+
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        let client = ApiClient::from_env().unwrap();
+        let claim_digest = proof_request.claim_digest;
+        let receipt = client.prove_keccak(proof_request, AssetRequest::Inline)?;
         self.receipts.insert(claim_digest, receipt);
         Ok(())
     }
