@@ -5,25 +5,25 @@ import { CratesIoValidationContent } from "./_components/crates-io-validation-co
 import { CratesIoValidationSkeleton } from "./_components/crates-io-validation-skeleton";
 
 export const metadata: Metadata = {
-	title: "Crates.io Validation",
-	description: CRATES_VALIDATION_DESCRIPTION,
-	openGraph: {
-		images: [
-			{
-				url: `https://reports.risczero.com/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
-					CRATES_VALIDATION_DESCRIPTION,
-				)}`,
-			},
-		],
-	},
+  title: "Crates.io Validation",
+  description: CRATES_VALIDATION_DESCRIPTION,
+  openGraph: {
+    images: [
+      {
+        url: `https://reports.risczero.com/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
+          CRATES_VALIDATION_DESCRIPTION,
+        )}`,
+      },
+    ],
+  },
 };
 
 export default function CratesIoValidationPage() {
-	return (
-		<div className="mt-6">
-			<Suspense fallback={<CratesIoValidationSkeleton />}>
-				<CratesIoValidationContent />
-			</Suspense>
-		</div>
-	);
+  return (
+    <div className="mt-6">
+      <Suspense fallback={<CratesIoValidationSkeleton />}>
+        <CratesIoValidationContent />
+      </Suspense>
+    </div>
+  );
 }
