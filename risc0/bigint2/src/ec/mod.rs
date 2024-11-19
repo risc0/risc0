@@ -43,7 +43,8 @@ pub struct WeierstrassCurve<const WIDTH: usize> {
 }
 
 impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
-    const BITWIDTH: usize = 32 * WIDTH;
+    // TODO: Need something like this to select blob, yeah?
+    // const BITWIDTH: usize = 32 * WIDTH;
 
     /// The curve as concatenated u32s
     ///
