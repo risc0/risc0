@@ -56,7 +56,7 @@ impl TaskManager {
             receipts: HashMap::new(),
             pending_tasks: BTreeMap::new(),
             completed: HashSet::new(),
-            pool: Pool::new(4),
+            pool: Pool::new(1),
             job_tx,
             job_rx,
         }

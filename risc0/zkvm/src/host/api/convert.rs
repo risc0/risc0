@@ -308,6 +308,8 @@ impl From<SessionStats> for pb::core::SessionStats {
             segments: value.segments.try_into().unwrap(),
             total_cycles: value.total_cycles,
             user_cycles: value.user_cycles,
+            paging_cycles: value.paging_cycles,
+            reserved_cycles: value.reserved_cycles,
         }
     }
 }
@@ -320,6 +322,8 @@ impl TryFrom<pb::core::SessionStats> for SessionStats {
             segments: value.segments.try_into()?,
             total_cycles: value.total_cycles,
             user_cycles: value.user_cycles,
+            paging_cycles: value.paging_cycles,
+            reserved_cycles: value.reserved_cycles,
         })
     }
 }

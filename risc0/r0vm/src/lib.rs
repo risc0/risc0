@@ -120,8 +120,6 @@ pub fn main() {
         return;
     }
 
-    risc0_circuit_bigint::zkr::register_zkrs();
-
     if let Some(port) = args.mode.port {
         run_server(port);
         return;

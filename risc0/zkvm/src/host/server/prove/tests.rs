@@ -144,6 +144,29 @@ fn sha_iter() {
 }
 
 #[test]
+fn run_keccak() {
+    let spec = MultiTestSpec::SysKeccak;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+
+    let spec = MultiTestSpec::TinyKeccak;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
@@ -166,20 +189,6 @@ fn bigint_accel() {
         let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
         assert_eq!(receipt.journal.bytes, expected);
     }
-}
-
-#[test]
-fn sys_bigint2() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::SysBigInt2)
-        .unwrap()
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    prove_session_fast(&session);
 }
 
 #[test]

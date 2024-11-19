@@ -2661,6 +2661,7 @@ dependencies = [
  "jwt-core",
  "jwt-methods",
  "risc0-zkvm",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -3578,8 +3579,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "num-bigint 0.4.6",
- "risc0-circuit-bigint",
- "risc0-circuit-bigint-test-methods",
+ "risc0-bigint2-methods",
  "risc0-zkvm",
  "tracing-subscriber 0.3.18",
  "workerpool",
@@ -4038,6 +4038,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-bigint2-methods"
+version = "1.2.0-alpha.1"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "risc0-binfmt"
 version = "1.2.0-alpha.1"
 dependencies = [
@@ -4080,35 +4087,6 @@ dependencies = [
  "sha2",
  "tempfile",
  "which 6.0.2",
-]
-
-[[package]]
-name = "risc0-circuit-bigint"
-version = "1.2.0-alpha.1"
-dependencies = [
- "anyhow",
- "bytemuck",
- "hex",
- "num-bigint 0.4.6",
- "num-integer",
- "num-traits",
- "paste",
- "risc0-binfmt",
- "risc0-circuit-recursion",
- "risc0-core",
- "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-platform",
- "stability",
- "tracing",
- "zip",
-]
-
-[[package]]
-name = "risc0-circuit-bigint-test-methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
 ]
 
 [[package]]
@@ -4304,6 +4282,7 @@ dependencies = [
  "semver",
  "serde",
  "sha2",
+ "sha3",
  "stability",
  "tempfile",
  "tracing",

@@ -23,7 +23,6 @@ mod gen_receipt;
 mod install;
 
 use clap::{Parser, Subcommand};
-use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[cfg(feature = "zkvm")]
 use self::{bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16, gen_receipt::GenReceipt};
@@ -67,8 +66,8 @@ impl Commands {
 }
 
 fn main() {
-    tracing_subscriber::registry()
-        .with(EnvFilter::from_default_env())
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
     Cli::parse().cmd.run();

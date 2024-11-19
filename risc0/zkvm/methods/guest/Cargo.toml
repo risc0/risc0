@@ -19,9 +19,11 @@ risc0-zkvm = { path = "../..", default-features = false, features = [
   "getrandom",
   "std",
 ] }
+hex-literal = "0.4"
 risc0-zkvm-methods = { path = ".." }
 risc0-zkvm-platform = { path = "../../platform", features = ["unstable"] }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }
+tiny-keccak = { git = "https://github.com/risc0/tiny-keccak.git", rev = "11b6495b4f102bae3ac6ed975b9c91cf52995af4", features = ["keccak"] }
 
 [profile.release]
 lto = true

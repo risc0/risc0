@@ -111,14 +111,25 @@ impl Bootstrap {
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
         // enabled by using a custom VerifierContext.
-        let allowed_zkr_names: HashSet<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
-            .map(str::to_string)
-            .into_iter()
-            .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
-            .collect();
+        let allowed_zkr_names: HashSet<String> =
+            ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
+                .map(str::to_string)
+                .into_iter()
+                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
+                .collect();
 
-        tracing::info!("unzipping recursion programs (zkrs)");
+        tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
+
+        tracing::info!("Unzipping recursion programs (zkrs)");
         let zkrs = get_all_zkrs().unwrap();
+
+        tracing::info!(
+            "Unzipped zkrs list is {:#?}",
+            zkrs.iter()
+                .map(|(name, _)| name)
+                .cloned()
+                .collect::<Vec<_>>()
+        );
 
         let poseidon2_control_ids =
             Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
@@ -134,6 +145,7 @@ impl Bootstrap {
                     .map(|(name, digest)| (format!("recursion {name}"), *digest)),
             )
             .collect();
+        tracing::info!("Calculate allowed_control_ids {allowed_control_ids:#?}");
 
         // Calculate a Merkle root for the allowed control IDs and add it to the file.
         let merkle_group = MerkleGroup::new(
@@ -143,6 +155,7 @@ impl Bootstrap {
                 .collect(),
         )
         .unwrap();
+
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_control_root = merkle_group.calc_root(hashfn);

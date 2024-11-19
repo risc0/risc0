@@ -272,11 +272,6 @@ fn bigint_accel() {
 }
 
 #[test]
-fn sys_bigint2() {
-    run_test(MultiTestSpec::SysBigInt2);
-}
-
-#[test]
 fn env_stdio() {
     const MSG: &str = "Hello world!  This is a test of standard input and output.";
     const FD: u32 = 123;
@@ -1197,6 +1192,11 @@ fn heap_bug_zkvm_527() {
         .run()
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
+fn big_keccak() {
+    run_test(MultiTestSpec::BigKeccak);
 }
 
 #[cfg(feature = "docker")]

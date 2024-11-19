@@ -17,6 +17,10 @@ use jwt_methods::VALIDATOR_ID;
 use jwt_validator::prove_token_validation;
 
 fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     let claims = CustomClaims {
         subject: "Hello, world!".to_string(),
     };

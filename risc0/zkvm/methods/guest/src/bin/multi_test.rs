@@ -26,6 +26,7 @@ use alloc::{
 use core::arch::asm;
 
 use getrandom::getrandom;
+use hex_literal::hex;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{
@@ -40,11 +41,12 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_bigint2_2, sys_exit, sys_fork, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
+        sys_read, sys_read_words, sys_write, DIGEST_BYTES, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
+use tiny_keccak::{Hasher, Keccak};
 
 risc0_zkvm::entry!(main);
 
@@ -60,6 +62,9 @@ fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
+const KECCAK_TEST_DATA_01: &[u8] = b"The quick brown fox jumps over the lazy dog.";
+const KECCAK_TEST_DATA_02_PT_1: &[u8] = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
+const KECCAK_TEST_DATA_02_PT_2: &[u8] = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
 fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
@@ -430,90 +435,101 @@ fn main() {
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
         }
-        MultiTestSpec::SysBigInt2 => {
-            const BLOB: &[u32] = &[
-                0x00000130, 0x00000079, 0x00000010, 0x00000040, 0x63626962, 0x00000001, 0x00000000,
-                0x00000019, 0x00000006, 0x0000002b, 0x00000001, 0x00000000, 0x000000ff, 0x00000000,
-                0x00000000, 0x00000000, 0x00000001, 0x00000000, 0x00000001, 0x00000000, 0x000000ff,
-                0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000020, 0x00000000,
-                0x000000ff, 0x00000000, 0x00000000, 0x00000000, 0x00000100, 0x00000000, 0x00000020,
-                0x00000000, 0x000000ff, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-                0x0000003f, 0x00000000, 0x001fc020, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-                0x00000000, 0x0000003f, 0x00000000, 0x003f8040, 0x00000000, 0x00000000, 0x00000000,
-                0x00000000, 0x00000000, 0x0000003f, 0x00000000, 0x005f4060, 0x00000000, 0x00000000,
-                0x00000000, 0x00000000, 0x00000000, 0x0000003f, 0x00000000, 0x005f415f, 0x00000000,
-                0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x0000003f, 0x00000000, 0x001fc020,
-                0x00000000, 0x00000000, 0x00000000, 0x000001ff, 0x00000000, 0x0000003f, 0x00000000,
-                0x003f8040, 0x00000000, 0x00000000, 0x00000000, 0x000001ff, 0x00000000, 0x0000003f,
-                0x00000000, 0x009ec19f, 0x00000000, 0x00000000, 0x00000000, 0x000001ff, 0x00000000,
-                0x00000020, 0x00000000, 0x000001fe, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-                0x00000000, 0x00000041, 0x00000000, 0x000000ff, 0x00000000, 0x00000000, 0x00000000,
-                0x00000000, 0x00000000, 0x00000060, 0x00000000, 0x001fc020, 0x00000000, 0x00000000,
-                0x00000000, 0x00000000, 0x00000000, 0x0000003f, 0x00000000, 0x009ec19f, 0x00000000,
-                0x003f8040, 0x00000000, 0x00000000, 0x00000000, 0x00000022, 0x00000000, 0x000000ff,
-                0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x0000003f, 0x00000000,
-                0x001fc11f, 0x00000000, 0x00000000, 0x00000000, 0x00000100, 0x00000000, 0x0000003f,
-                0x00000000, 0x001fc21e, 0x00000000, 0x00000000, 0x00000000, 0x00000100, 0x00000000,
-                0x0000003f, 0x00000000, 0x001fc21e, 0x00000000, 0x000000ff, 0x00000000, 0x00000000,
-                0x00000000, 0x0000003f, 0x00000000, 0x001fc21e, 0x00000000, 0x000001fe, 0x00000000,
-                0x00000000, 0x00000000, 0x00000021, 0x00000000, 0x000000ff, 0x00000000, 0x00000000,
-                0x00000000, 0x00000000, 0x00000000, 0x0000003f, 0x00000000, 0x001fc020, 0x00000000,
-                0x001fc020, 0x00000000, 0x00000000, 0x00000000, 0x0000003f, 0x00000000, 0x001fc11f,
-                0x00000000, 0x001fc020, 0x00000000, 0x00000000, 0x00000000, 0x0000003f, 0x00000000,
-                0x001fc11f, 0x00000000, 0x001fc11f, 0x00000000, 0x00000000, 0x00000000, 0x0000003f,
-                0x00000000, 0x003f813f, 0x00000000, 0x001fc11f, 0x00000000, 0x00000000, 0x00000000,
-                0x00000001, 0x00000000, 0x00000000, 0x00000000, 0xfffffc2f, 0xfffffffe, 0xffffffff,
-                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x00000002, 0x00000100,
-                0x00010012, 0x00000100, 0x00020022, 0x00000400, 0x00000033, 0x0000000b, 0x00020033,
-                0x0000000b, 0x0003004a, 0x00000300, 0x00050058, 0x00000500, 0x00060068, 0x00000500,
-                0x00070078, 0x00000100, 0x0002008a, 0x00000200, 0x00090098, 0x00000900, 0x000a00a8,
-                0x00000800, 0x000400b8, 0x00000400, 0x000c003e, 0x00000200, 0x000800cc, 0x00000000,
-                0x000e00da, 0x00000d00, 0x000f003b, 0x00000200, 0x0004004a, 0x00001000, 0x00110058,
-                0x00001100, 0x000b00e9, 0x00001200, 0x001300fc, 0x00000200, 0x0010004a, 0x00001000,
-                0x00150108, 0x00000200, 0x00160118, 0x00000200, 0x00170129, 0x00000300, 0x00180139,
-                0x00000300, 0x0019014c, 0x00000200, 0x0019003b, 0x00000200, 0x0010004a, 0x00001b00,
-                0x00090159, 0x00001c00, 0x001d0168, 0x00000200, 0x001e0179, 0x00000400, 0x0010004a,
-                0x00000300, 0x001f0188, 0x00002000, 0x0021014c, 0x00000200, 0x0021003b, 0x00000200,
-                0x00000034, 0x00001b0c, 0x00020034, 0x0000230c, 0x00090034, 0x00001002, 0x00000144,
-                0x00002202, 0x00030144, 0x00001a02, 0x000600f4, 0x00001402, 0x000b00c4, 0x00000e02,
-                0x11a2000f, 0x11a2000e, 0x11a2000d, 0x11a2000c, 0x13a2000b, 0x012b0001, 0x022b0000,
-                0x012b0001, 0x032b0000, 0x037c0002, 0x24000004, 0x25000004, 0x21000004, 0x24000003,
-                0x25000003, 0x21000003, 0x24000002, 0x25000002, 0x21000002, 0x24000001, 0x25000001,
-                0x21000001, 0x24000000, 0x25000000, 0x26000000, 0x11a20008, 0x11a20007, 0x12a20006,
-                0x01bc0001, 0x03bc0000, 0x11c2000a, 0x12c20009, 0x01cb0003, 0x03cb0002, 0x012b0001,
-                0x022b0000, 0x012b0001, 0x032b0000, 0x015c0001, 0x025c0000, 0x015c0001, 0x035c0000,
-                0x037c0002, 0x24000004, 0x25000004, 0x21000004, 0x24000003, 0x25000003, 0x21000003,
-                0x24000002, 0x25000002, 0x21000002, 0x24000001, 0x25000001, 0x21000001, 0x24000000,
-                0x25000000, 0x26000000, 0x11a20005, 0x11a20004, 0x12a20003, 0x01bc0001, 0x03bc0000,
-                0x0162000a, 0x02620009, 0x0162000a, 0x03620009, 0x01cb0001, 0x03cb0000, 0x11ac0001,
-                0x13ac0000, 0x015c0001, 0x035c0000, 0x24000003, 0x25000003, 0x21000003, 0x24000002,
-                0x25000002, 0x21000002, 0x24000001, 0x25000001, 0x21000001, 0x24000000, 0x25000000,
-                0x26000000, 0x11a20002, 0x11a20001, 0x12a20000, 0x01bc0001, 0x03bc0000, 0x0162000a,
-                0x02620009, 0x016b0001, 0x036b0000, 0x01a2000a, 0x02a20009, 0x01ac0001, 0x03ac0000,
-                0x01ab0003, 0x03ab0002, 0x11ac0003, 0x13ac0002, 0x017c0001, 0x037c0000, 0x017c0001,
-                0x027c0000, 0x017c0001, 0x037c0000, 0x24000003, 0x25000003, 0x21000003, 0x24000002,
-                0x25000002, 0x21000002, 0x24000001, 0x25000001, 0x21000001, 0x24000000, 0x25000000,
-                0x26000000, 0x20000000, 0xfffffc2f, 0xfffffffe, 0xffffffff, 0xffffffff, 0xffffffff,
-                0xffffffff, 0xffffffff, 0xffffffff, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-                0x00000001, 0x00000000, 0x00000000, 0x00000000,
+        MultiTestSpec::SysKeccak => {
+            let expected: [u8; DIGEST_BYTES] = [
+                71, 23, 50, 133, 168, 215, 52, 30, 94, 151, 47, 198, 119, 40, 99, 132, 248, 2, 248,
+                239, 66, 165, 236, 95, 3, 187, 250, 37, 76, 176, 31, 173,
             ];
-            let point_g: &mut [u32] = &mut [
-                0x16F81798, 0x59F2815B, 0x2DCE28D9, 0x029BFCDB, 0xCE870B07, 0x55A06295, 0xF9DCBBAC,
-                0x79BE667E, //
-                0xFB10D4B8, 0x9C47D08F, 0xA6855419, 0xFD17B448, 0x0E1108A8, 0x5DA4FBFC, 0x26A3C465,
-                0x483ADA77,
-            ];
-            let result: &mut [u32] = &mut [0; 16];
-            let expected: &[u32] = &[
-                0x5C709EE5, 0xABAC09B9, 0x8CEF3CA7, 0x5C778E4B, 0x95C07CD8, 0x3045406E, 0x41ED7D6D,
-                0xC6047F94, //
-                0x50CFE52A, 0x236431A9, 0x3266D0E1, 0xF7F63265, 0x466CEAEE, 0xA3C58419, 0xA63DC339,
-                0x1AE168FE,
-            ];
+            let output = [0u8; DIGEST_BYTES];
+            let data = b"hello world";
             unsafe {
-                sys_bigint2_2(BLOB.as_ptr(), point_g.as_mut_ptr(), result.as_mut_ptr());
-            }
-            assert_eq!(result, expected);
+                sys_keccak(
+                    data as *const u8,
+                    data.len(),
+                    output.as_ptr() as *mut [u32; DIGEST_WORDS],
+                )
+            };
+            assert_eq!(&expected, &output);
+
+            // test_keccak_01.txt
+            let _output1 = env::keccak_digest(KECCAK_TEST_DATA_01, 0x1).unwrap();
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
+            );
+
+            // test_keccak_02.txt
+            let output1 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_1, 0x1).unwrap();
+            assert_eq!(
+                output1,
+                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+            );
+
+            let output2 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_2, 0x1).unwrap();
+            assert_eq!(
+                output2,
+                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+            );
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
+            );
+        }
+        MultiTestSpec::TinyKeccak => {
+            // test_keccak_01.txt
+            let mut hasher = Keccak::v256();
+            hasher.update(KECCAK_TEST_DATA_01);
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.finalize(output.as_mut_slice());
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
+            );
+
+            // test_keccak_02.txt
+            let mut hasher1 = Keccak::v256();
+            let mut output1 = [0u8; DIGEST_BYTES];
+            hasher1.update(KECCAK_TEST_DATA_02_PT_1);
+
+            let mut hasher2 = Keccak::v256();
+            let mut output2 = [0u8; DIGEST_BYTES];
+            hasher2.update(KECCAK_TEST_DATA_02_PT_2);
+
+            hasher1.finalize(&mut output1);
+            assert_eq!(
+                output1,
+                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+            );
+
+            hasher2.finalize(&mut output2);
+            assert_eq!(
+                output2,
+                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+            );
+
+            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+            assert_eq!(
+                digest.as_bytes(),
+                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
+            );
+        }
+        MultiTestSpec::BigKeccak => {
+            // test_keccak_02.txt
+            let data = &[0u8; 100_001];
+            let mut hasher = Keccak::v256();
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.update(data);
+
+            hasher.finalize(&mut output);
+            assert!(!unsafe { env::KECCAK_BATCHER.has_data() })
         }
     }
 }
