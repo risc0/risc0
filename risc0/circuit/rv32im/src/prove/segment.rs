@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use derive_debug::Dbg;
+use derive_more::Debug;
 use risc0_binfmt::{ExitCode, MemoryImage, SystemState};
 use risc0_core::scope;
 use risc0_zkp::{
@@ -25,19 +25,19 @@ use serde::{Deserialize, Serialize};
 
 use crate::CircuitImpl;
 
-#[derive(Clone, Dbg, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SyscallRecord {
     pub to_guest: Vec<u32>,
     pub regs: (u32, u32),
 }
 
-#[derive(Clone, Dbg, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Segment {
-    #[dbg(placeholder = "...")]
+    #[debug(skip)]
     pub partial_image: MemoryImage,
     pub pre_state: SystemState,
     pub post_state: SystemState,
-    #[dbg(placeholder = "...")]
+    #[debug(skip)]
     pub syscalls: Vec<SyscallRecord>,
     pub insn_cycles: usize,
     pub po2: usize,

@@ -144,6 +144,29 @@ fn sha_iter() {
 }
 
 #[test]
+fn run_keccak() {
+    let spec = MultiTestSpec::SysKeccak;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+
+    let spec = MultiTestSpec::TinyKeccak;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
@@ -1052,7 +1075,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::proven::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 41.752773);
+        assert_eq!(security, 41.66407);
     }
 
     #[test]
@@ -1063,7 +1086,7 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 74.90066);
+        assert_eq!(security, 74.88997);
     }
 
     #[test]
@@ -1074,6 +1097,6 @@ mod soundness {
         let taps = CIRCUIT.get_taps();
 
         let security = soundness::toy_model_security::<CpuHal<BabyBear>>(taps, coeffs_size);
-        assert_eq!(security, 98.32892);
+        assert_eq!(security, 97.945);
     }
 }

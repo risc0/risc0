@@ -7,7 +7,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-anyhow = "1.0.89"
+anyhow = "1.0.93"
 cfg-if = "1.0.0"
 clap = { version = "4.5.20", features = ["derive"] }
 dirs = "5.0.1"
@@ -21,7 +21,7 @@ reqwest = { version = "0.12", default-features = false, features = [
   "rustls-tls",
 ] }
 risc0-build = { path = "../risc0/build" }
-serde = { version = "1.0.210", features = ["derive"] }
+serde = { version = "1.0.215", features = ["derive"] }
 tar = "0.4.43"
 tempfile = "3.12.0"
 termcolor = "1.4.1"

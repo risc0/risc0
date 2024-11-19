@@ -34,6 +34,17 @@ export default async function createConfigAsync() {
       mermaid: true,
     },
 
+    future: {
+      experimental_faster: {
+        swcJsLoader: true,
+        swcJsMinimizer: true,
+        swcHtmlMinimizer: false, // doesn't work with @acid-info/docusaurus-og
+        lightningCssMinimizer: true,
+        rspackBundler: true,
+        mdxCrossCompilerCache: true,
+      },
+    },
+
     themes: ["@docusaurus/theme-mermaid"],
 
     presets: [

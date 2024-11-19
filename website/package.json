@@ -4,7 +4,8 @@
   "private": true,
   "description": "RISC Zero Documentation, Education Hub, and Resources",
   "overrides": {
-    "mdast-util-to-string": "^4.0.0"
+    "mdast-util-to-string": "^4.0.0",
+    "github-slugger": "^1.5.0"
   },
   "scripts": {
     "build": "docusaurus build",
@@ -12,7 +13,6 @@
     "check-markdown": "remark . --quiet --frail",
     "clear": "docusaurus clear",
     "deploy": "docusaurus deploy",
-    "docusaurus": "docusaurus",
     "fmt": "prettier . --write",
     "fmt-markdown": "remark . --output --use sort-definitions --use remark-lint-match-punctuation --use remark-lint-no-url-trailing-slash",
     "lint": "prettier . --check && python ./link-version-check.py && remark . --quiet --frail",
@@ -33,12 +33,13 @@
   },
   "dependencies": {
     "@acid-info/docusaurus-og": "1.0.0-alpha.131",
-    "@docusaurus/core": "3.4.0",
-    "@docusaurus/module-type-aliases": "3.4.0",
-    "@docusaurus/plugin-client-redirects": "3.4.0",
-    "@docusaurus/preset-classic": "3.4.0",
-    "@docusaurus/theme-mermaid": "3.4.0",
-    "@mdx-js/react": "3.0.1",
+    "@docusaurus/core": "3.6.0",
+    "@docusaurus/faster": "3.6.0",
+    "@docusaurus/module-type-aliases": "3.6.0",
+    "@docusaurus/plugin-client-redirects": "3.6.0",
+    "@docusaurus/preset-classic": "3.6.0",
+    "@docusaurus/theme-mermaid": "3.6.0",
+    "@mdx-js/react": "3.1.0",
     "clsx": "1.2.1",
     "prism-react-renderer": "2.4.0",
     "react": "18.3.1",
@@ -46,7 +47,7 @@
     "rehype-katex": "7.0.1"
   },
   "devDependencies": {
-    "@docusaurus/types": "3.5.2",
+    "@docusaurus/types": "3.6.0",
     "prettier": "3.3.3",
     "remark": "15.0.1",
     "remark-cli": "12.0.1",
@@ -63,5 +64,5 @@
     "remark-toc": "9.0.0",
     "remark-wiki-link": "2.0.1"
   },
-  "packageManager": "bun@1.1.30"
+  "packageManager": "bun@1.1.34"
 }

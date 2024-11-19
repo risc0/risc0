@@ -15,10 +15,11 @@
 #[cfg(test)]
 mod tests;
 
-use std::{array, cell::RefCell, collections::BTreeSet, mem, rc::Rc};
+use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
 use anyhow::{bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
+use num_bigint::BigUint;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -31,20 +32,17 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     align_up,
     memory::{is_guest_memory, GUEST_MAX_MEM},
-    syscall::{
-        bigint, ecall, halt,
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_MAX, REG_T0},
-        IO_CHUNK_WORDS,
-    },
+    syscall::{bigint, ecall, halt, reg_abi::*, IO_CHUNK_WORDS},
     PAGE_SIZE, WORD_SIZE,
 };
 use sha2::digest::generic_array::GenericArray;
 
 use super::{
     addr::{ByteAddr, WordAddr},
+    bibc,
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    BIGINT_CYCLES, SYSTEM_START,
+    BIGINT2_WIDTH_BYTES, BIGINT_CYCLES, SYSTEM_START,
 };
 use crate::{
     prove::{
@@ -108,6 +106,8 @@ pub struct ExecutorResult {
     pub exit_code: ExitCode,
     pub post_image: MemoryImage,
     pub user_cycles: u64,
+    pub paging_cycles: u64,
+    pub reserved_cycles: u64,
     pub total_cycles: u64,
     pub pre_state: SystemState,
     pub post_state: SystemState,
@@ -117,6 +117,8 @@ pub struct ExecutorResult {
 #[derive(Default)]
 struct SessionCycles {
     user: usize,
+    paging: usize,
+    reserved: usize,
     total: usize,
 }
 
@@ -236,9 +238,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             } else {
                 self.pager.undo();
                 let used_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
-                let waste = (1 << segment_po2) - used_cycles;
-                tracing::debug!(
-                    "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, waste: {waste}, pending: {:?}",
+                let po2_padding = (1 << segment_po2) - used_cycles;
+                tracing::info!(
+                    "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, padding: {po2_padding}, pending: {:?}",
                     self.insn_cycles,
                     self.pager.cycles,
                     self.pending
@@ -260,6 +262,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 })?;
                 segments += 1;
                 self.cycles.total += 1 << segment_po2;
+                self.cycles.paging += self.pager.cycles;
+                self.cycles.reserved += po2_padding + RESERVED_CYCLES;
                 self.pager.clear();
                 self.insn_cycles = 0;
 
@@ -272,6 +276,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
         let segment_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
         let po2 = log2_ceil(segment_cycles.next_power_of_two());
+        let po2_padding = (1 << po2) - segment_cycles;
         let exit_code = self.exit_code.unwrap();
 
         callback(Segment {
@@ -288,6 +293,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })?;
         segments += 1;
         self.cycles.total += 1 << po2;
+        self.cycles.paging += self.pager.cycles;
+        self.cycles.reserved += po2_padding + RESERVED_CYCLES;
 
         // NOTE: When a segment ends in a Halted(_) state, the post_state will be null.
         let post_state = match exit_code {
@@ -303,6 +310,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             exit_code,
             post_image: self.pager.image.clone(),
             user_cycles: self.cycles.user.try_into()?,
+            paging_cycles: self.cycles.paging.try_into()?,
+            reserved_cycles: self.cycles.reserved.try_into()?,
             total_cycles: self.cycles.total.try_into()?,
             pre_state: initial_state,
             post_state,
@@ -539,6 +548,34 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Ok(true)
     }
 
+    fn ecall_bigint2(&mut self) -> Result<bool> {
+        let blob_ptr = self.load_guest_addr_from_register(REG_A0)?.waddr();
+        let nondet_program_ptr = self.load_guest_addr_from_register(REG_T1)?;
+        let verify_program_ptr = self.load_guest_addr_from_register(REG_T2)?;
+        let consts_ptr = self.load_guest_addr_from_register(REG_T3)?;
+
+        let nondet_program_size = self.load_u32_from_guest(blob_ptr.baddr())?;
+        let verify_program_size = self.load_u32_from_guest((blob_ptr + 1u32).baddr())?;
+        let consts_size = self.load_u32_from_guest((blob_ptr + 2u32).baddr())?;
+
+        let program_bytes = self
+            .load_region_from_guest(nondet_program_ptr, nondet_program_size * WORD_SIZE as u32)?;
+        let mut cursor = Cursor::new(program_bytes);
+        let program = bibc::Program::decode(&mut cursor)?;
+        program.eval(self)?;
+
+        self.load_region_from_guest(verify_program_ptr, verify_program_size * WORD_SIZE as u32)?;
+        self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
+
+        let cycles = verify_program_size as usize + 1;
+        tracing::info!("bigint2: {cycles} cycles");
+
+        self.pending.cycles += cycles;
+        self.pending.pc = self.pc + WORD_SIZE;
+
+        Ok(true)
+    }
+
     fn check_guest_addr(addr: ByteAddr) -> Result<ByteAddr> {
         if !is_guest_memory(addr.0) {
             bail!("{addr:?} is an invalid guest address");
@@ -571,6 +608,16 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let ret = array::from_fn(|i| bytes[i]);
         // tracing::trace!("load_array({addr:?}) -> {ret:02x?}");
         Ok(ret)
+    }
+
+    fn load_region_from_guest(&mut self, base: ByteAddr, size: u32) -> Result<Vec<u8>> {
+        let mut region = Vec::new();
+        for i in 0..size {
+            let addr = base + i;
+            Self::check_guest_addr(addr)?;
+            region.push(self.load_u8(addr)?);
+        }
+        Ok(region)
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
@@ -637,6 +684,28 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     }
 }
 
+impl<'a, 'b, S: Syscall> bibc::BigIntIO for Executor<'a, 'b, S> {
+    fn load(&mut self, arena: u32, offset: u32, count: u32) -> Result<BigUint> {
+        tracing::debug!("load(arena: {arena}, offset: {offset}, count: {count})");
+        let base = ByteAddr(self.load_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
+        let bytes = self.load_region_from_guest(addr, count)?;
+        Ok(BigUint::from_bytes_le(&bytes))
+    }
+
+    fn store(&mut self, arena: u32, offset: u32, count: u32, value: &BigUint) -> Result<()> {
+        tracing::debug!("store(arena: {arena}, offset: {offset}, count: {count}, value: {value})");
+        let base = ByteAddr(self.load_register(arena as usize)?);
+        let addr = base + offset * BIGINT2_WIDTH_BYTES as u32;
+        let mut bytes = value.to_bytes_le();
+        if bytes.len() < count as usize {
+            bytes.resize(count as usize, 0);
+        }
+        ensure!(bytes.len() == count as usize);
+        self.store_region_into_guest(addr, &bytes)
+    }
+}
+
 impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
     fn ecall(&mut self) -> Result<bool> {
         match self.load_register(REG_T0)? {
@@ -645,6 +714,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
+            ecall::BIGINT2 => self.ecall_bigint2(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }
