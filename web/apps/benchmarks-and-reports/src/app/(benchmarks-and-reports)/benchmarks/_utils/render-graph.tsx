@@ -12,7 +12,7 @@ function CustomTooltip({ active, payload }) {
       <div className="w-[480px] rounded-md bg-black p-2 text-white shadow-2xl">
         <div>
           Commit{" "}
-          <Badge className="p-0" variant="secondary">
+          <Badge className="rounded-[4px] px-0.5 py-0" variant="secondary">
             {data.commit}
           </Badge>
         </div>
@@ -21,7 +21,7 @@ function CustomTooltip({ active, payload }) {
         <br />
         <div className="text-[11px]">
           {`Commited on ${new Date(data.commitTimestamp).toUTCString()} by`}{" "}
-          <Badge className="p-0" variant="secondary">
+          <Badge className="rounded-[4px] px-0.5 py-0" variant="secondary">
             @{data.committer}
           </Badge>
         </div>
@@ -30,6 +30,18 @@ function CustomTooltip({ active, payload }) {
   }
 
   return null;
+}
+
+function formatFrequency(hz: number): { value: number; unit: string } {
+  if (hz >= 1_000_000) {
+    return { value: hz / 1_000_000, unit: "MHz" };
+  }
+
+  if (hz >= 1_000) {
+    return { value: hz / 1_000, unit: "kHz" };
+  }
+
+  return { value: hz, unit: "Hz" };
 }
 
 const chartConfig = {
@@ -48,14 +60,22 @@ export function renderGraph({
   benchName: string;
   dataset: FormattedDataSetEntry[];
 }) {
-  const chartData = dataset.map((entry) => ({
-    commit: entry.commit.id.slice(0, 7),
-    value: entry.bench.value,
-    commitUrl: entry.commit.url,
-    commitMessage: entry.commit.message,
-    commitTimestamp: entry.commit.timestamp,
-    committer: entry.commit.committer.username,
-  }));
+  const chartData = dataset.map((entry) => {
+    const { value, unit } = formatFrequency(entry.bench.value);
+
+    return {
+      commit: entry.commit.id.slice(0, 7),
+      value,
+      unit,
+      commitUrl: entry.commit.url,
+      commitMessage: entry.commit.message,
+      commitTimestamp: entry.commit.timestamp,
+      committer: entry.commit.committer.username,
+    };
+  });
+
+  // Get the unit from the first entry (assuming all entries use the same unit)
+  const frequencyUnit = chartData[0]?.unit ?? "Hz";
 
   return (
     <Card id={`${platformName}-${benchName}`} className="relative w-full border-none bg-transparent pt-8">
@@ -72,7 +92,6 @@ export function renderGraph({
             data={chartData}
             margin={{
               left: 12,
-              right: 12,
             }}
           >
             <CartesianGrid />
@@ -108,10 +127,10 @@ export function renderGraph({
               dataKey="value"
               tickLine={false}
               axisLine={false}
-              domain={[0, (dataMax) => (dataMax * 1.25).toFixed(0)]}
+              domain={[0, (dataMax) => (dataMax * 1.15).toFixed(0)]}
             >
-              <Label angle={270} offset={8} position="left" style={{ textAnchor: "middle" }}>
-                Hz
+              <Label angle={270} position="left" style={{ textAnchor: "middle" }}>
+                {frequencyUnit}
               </Label>
             </YAxis>
 
