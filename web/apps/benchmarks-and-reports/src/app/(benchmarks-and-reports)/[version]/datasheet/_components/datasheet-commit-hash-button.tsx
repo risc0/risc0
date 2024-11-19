@@ -5,18 +5,21 @@ import type { Version } from "~/types/version";
 import { fetchDatasheetCommitHash } from "../_actions/fetch-datasheet-commit-hash";
 
 export async function DatasheetCommitHashButton({ version }: { version: Version }) {
-  const { data: commitHash, updatedAt } = await fetchDatasheetCommitHash({ version });
+  const { data: commitHash, updatedAt } = await fetchDatasheetCommitHash({
+    version,
+  });
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div>
           <CopyButton size="sm" variant="ghost" value={commitHash}>
-            Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
+            Commit Hash
+            <span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
           </CopyButton>
         </div>
       </TooltipTrigger>
-      <TooltipContent>Last Update: {new Date(updatedAt).toLocaleString()}</TooltipContent>
+      <TooltipContent>Last Update: {new Date(updatedAt).toUTCString()}</TooltipContent>
     </Tooltip>
   );
 }
