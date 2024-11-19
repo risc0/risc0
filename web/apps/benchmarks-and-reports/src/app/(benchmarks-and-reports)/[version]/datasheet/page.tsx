@@ -26,13 +26,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DatasheetPage({
-  params,
-}: {
-  params: {
+export default async function DatasheetPage(props: {
+  params: Promise<{
     version: Version;
-  };
+  }>;
 }) {
+  const params = await props.params;
   return (
     <div className="mt-6 grid grid-cols-1 gap-8">
       <Suspense fallback={<DatasheetSkeleton />}>

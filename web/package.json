@@ -1,5 +1,6 @@
 {
   "name": "web",
+  "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo build",
@@ -12,41 +13,42 @@
   "dependencies": {
     "@joshdavenport/tailwindcss-filter-order": "0.2.0",
     "@poppinss/intl-formatter": "3.0.3",
-    "@risc0/ui": "0.0.180",
+    "@risc0/ui": "0.0.223",
     "@t3-oss/env-nextjs": "0.11.1",
     "@tanstack/match-sorter-utils": "8.19.4",
     "@tanstack/react-table": "8.20.5",
     "@vercel/analytics": "1.4.0",
     "@vercel/speed-insights": "1.1.0",
-    "chart.js": "2.9.4",
     "deepmerge": "4.3.1",
-    "framer-motion": "11.11.13",
-    "lucide-react": "0.456.0",
-    "next": "14.2.14",
+    "framer-motion": "11.11.17",
+    "lodash-es": "4.17.21",
+    "lucide-react": "0.460.0",
+    "next": "15.0.3",
     "next-themes": "0.4.3",
     "prism-react-renderer": "2.4.0",
     "radash": "12.1.0",
     "react": "18.3.1",
-    "react-chartjs-2": "2.11.2",
     "react-dom": "18.3.1",
     "react-rainbow-ascii": "1.0.3",
+    "server-only": "0.0.1",
     "sharp": "0.33.5",
-    "turbo": "2.2.3",
-    "typescript": "5.6.3",
-    "zod": "3.23.8"
+    "sonner": "1.7.0",
+    "zod": "3.23.8",
+    "zustand": "5.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@next/bundle-analyzer": "14.2.14",
+    "@next/bundle-analyzer": "15.0.3",
     "@testing-library/jest-dom": "6.6.3",
-    "@types/chart.js": "2.9.41",
     "@types/jest": "29.5.14",
+    "@types/lodash-es": "4.17.12",
     "@types/node": "22.9.0",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react-swc": "3.7.1",
-    "happy-dom": "15.11.3",
-    "vitest": "2.1.4"
+    "happy-dom": "15.11.6",
+    "turbo": "2.3.0",
+    "vitest": "2.1.5"
   },
   "packageManager": "bun@1.1.34"
 }

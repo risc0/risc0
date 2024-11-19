@@ -27,7 +27,7 @@ export function Benchmarks() {
       return;
     }
 
-    setLastUpdate(new Date(data.lastUpdate).toLocaleString());
+    setLastUpdate(new Date(data.lastUpdate).toUTCString());
     setNames(Object.keys(data.entries));
   }, [ready]);
 

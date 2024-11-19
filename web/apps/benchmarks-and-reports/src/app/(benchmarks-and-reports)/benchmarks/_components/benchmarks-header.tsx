@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@risc0/ui/button";
 import { Skeleton } from "@risc0/ui/skeleton";
 import { DownloadIcon } from "lucide-react";
