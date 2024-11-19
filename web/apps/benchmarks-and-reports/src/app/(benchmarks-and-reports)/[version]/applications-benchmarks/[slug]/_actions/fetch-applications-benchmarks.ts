@@ -8,7 +8,9 @@ export async function fetchApplicationsBenchmarks({ url, version }: { url: strin
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/${url}`,
     {
-      next: { revalidate: 180, tags: ["fetch-applications-benchmarks"] }, // 3 minutes cache
+      next: {
+        revalidate: 60,
+      },
     },
   );
 

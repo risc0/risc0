@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { FormattedDataSetEntry } from "../_utils/collect-benches-per-test-case";
 import { renderGraph } from "../_utils/render-graph";
 import { BenchmarksList } from "./benchmarks-list";
@@ -68,26 +68,22 @@ export function BenchmarksContent({
           {benchSet &&
             names.map((name) => (
               <TabsContent tabIndex={-1} id={`chart-${name}`} key={name} value={name}>
-                {benchSet.map(({ name: platformName, dataSet }, index) => {
-                  return (
-                    <Fragment
-                      // biome-ignore lint/suspicious/noArrayIndexKey: ignore
-                      key={`${platformName}-${index}`}
+                {benchSet
+                  .filter(({ name: platformName }) => platformName === name)
+                  .map(({ name: platformName, dataSet }) => (
+                    <div
+                      className="-mt-8 flex flex-col"
+                      key={`${platformName}-${name}-${Array.from(dataSet.keys()).join("-")}`}
                     >
-                      {platformName === name && (
-                        <div className="mt-6 flex flex-col gap-10 dark:invert">
-                          {Array.from(dataSet, ([key, value]) =>
-                            renderGraph({
-                              platformName,
-                              benchName: key,
-                              dataset: value,
-                            }),
-                          )}
-                        </div>
+                      {Array.from(dataSet, ([key, value]) =>
+                        renderGraph({
+                          platformName,
+                          benchName: key,
+                          dataset: value,
+                        }),
                       )}
-                    </Fragment>
-                  );
-                })}
+                    </div>
+                  ))}
               </TabsContent>
             ))}
         </div>
