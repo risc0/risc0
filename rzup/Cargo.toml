@@ -7,7 +7,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-anyhow = "1.0.89"
+anyhow = "1.0.93"
 cfg-if = "1.0.0"
 clap = { version = "4.5.20", features = ["derive"] }
 dirs = "5.0.1"
