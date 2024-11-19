@@ -16,7 +16,7 @@ use std::io::Read;
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint, Sign};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
@@ -151,7 +151,7 @@ impl Program {
     }
 
     pub fn eval<T: BigIntIO>(&self, io: &mut T) -> Result<()> {
-        let mut regs = vec![BigUint::ZERO; self.ops.len()];
+        let mut regs = vec![BigInt::ZERO; self.ops.len()];
         for (op_index, op) in self.ops.iter().enumerate() {
             tracing::debug!("[{op_index}]: {op:?}");
             match op.code {
@@ -165,19 +165,22 @@ impl Program {
                         tmp <<= i * 64;
                         value |= &tmp;
                     }
-                    regs[op_index] = value.clone();
+                    regs[op_index] = BigInt::from_biguint(Sign::Plus, value);
                 }
                 OpCode::Load => {
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = io.load(op.arena(), op.offset(), count)?;
-                    regs[op_index] = value;
+                    regs[op_index] = BigInt::from_biguint(Sign::Plus, value);
                 }
                 OpCode::Store => {
                     let typ = &self.types[op.result_type];
                     let count = typ.coeffs.next_multiple_of(16) as u32;
                     let value = &regs[op.b];
-                    io.store(op.arena(), op.offset(), count, value)?;
+                    let value = value.to_biguint().ok_or_else(|| {
+                        anyhow!("Negative output produced during bigint2 acceleration")
+                    })?;
+                    io.store(op.arena(), op.offset(), count, &value)?;
                 }
                 OpCode::Add => {
                     let (lhs, rhs) = operands(op, op_index, &regs);
@@ -212,7 +215,7 @@ impl Program {
     }
 }
 
-fn operands<'p>(op: &Op, op_index: usize, regs: &'p [BigUint]) -> (&'p BigUint, &'p BigUint) {
+fn operands<'p>(op: &Op, op_index: usize, regs: &'p [BigInt]) -> (&'p BigInt, &'p BigInt) {
     assert!(op.a < op_index);
     assert!(op.b < op_index);
     (&regs[op.a], &regs[op.b])
