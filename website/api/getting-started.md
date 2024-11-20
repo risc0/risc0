@@ -9,7 +9,7 @@ To harness the power of ZK, you'll need to:
 3. [Integrate your proofs into on-chain applications][bonsai-on-eth].
 
 <Mermaid
-  definition={`
+  definition={`no_run
   flowchart TD
     %% Level 0
     getting_started["Getting Started

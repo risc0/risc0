@@ -20,7 +20,7 @@ The end-to-end process for proof generation is shown in the following diagram.
 
 <Mermaid
   height="580"
-  definition={`
+  definition={`no_run
 flowchart TB
 
 execute(".execute()")
