@@ -30,10 +30,6 @@ export default async function createConfigAsync() {
       locales: ["en"],
     },
 
-    markdown: {
-      mermaid: true,
-    },
-
     future: {
       experimental_faster: {
         swcJsLoader: true,
@@ -44,8 +40,6 @@ export default async function createConfigAsync() {
         mdxCrossCompilerCache: true,
       },
     },
-
-    themes: ["@docusaurus/theme-mermaid"],
 
     presets: [
       [
@@ -285,20 +279,6 @@ export default async function createConfigAsync() {
         colorMode: {
           defaultMode: "dark",
           respectPrefersColorScheme: false,
-        },
-        mermaid: {
-          theme: { light: "default", dark: "dark" },
-          options: {
-            fontFamily: "var(--ifm-heading-font-family)",
-            themeVariables: {
-              fontSize: "12px",
-              mainBkg: "rgba(255,255,255,0.9)",
-              lineColor: "var(--ifm-color-emphasis-600)",
-              nodeBorder: "var(--ifm-color-emphasis-500)",
-              clusterBorder: "var(--ifm-color-emphasis-300)",
-              clusterBkg: "var(--ifm-color-emphasis-200)",
-            },
-          },
         },
         algolia: {
           appId: "TQC8F4X8Z5",

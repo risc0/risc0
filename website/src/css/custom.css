@@ -74,7 +74,7 @@ main {
   border-bottom: 1px solid var(--ifm-toc-border-color);
 }
 
-[data-theme="dark"] .label-container,
+[data-theme="dark"] footer img,
 [data-theme="dark"] .navbar__logo {
   filter: invert(1);
 }
@@ -105,13 +105,17 @@ main {
   max-width: 220px;
 }
 
-[data-theme="dark"] footer img {
-  filter: invert(1);
-}
-
 #mermaid-svg-id {
   height: 100%;
   width: 100%;
+}
+
+.mermaid-graph {
+  cursor: grab;
+}
+
+.mermaid-graph:active {
+  cursor: grabbing !important;
 }
 
 /* small screens */

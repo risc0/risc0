@@ -1,3 +1,5 @@
+import Mermaid from "@site/src/components/Mermaid"
+
 # The RISC Zero STARK Protocol
 
 _The implementation in code for the RISC Zero STARK prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
@@ -58,7 +60,9 @@ We describe this in more detail below, and refer readers to the [ZKP Whitepaper]
 
 ## Sequence Diagram
 
-```mermaid
+<Mermaid
+  height="860"
+  definition={`
 sequenceDiagram
   participant P as Prover
   participant V as Verifier
@@ -86,7 +90,8 @@ sequenceDiagram
   P->>V: Send Merkle Root<br/>for the FRI polynomial
   Note over P,V: Begin FRI protocol.
   Note over P,V: Details of FRI are omitted for brevity.
-```
+`}
+/>
 
 ## Detailed Step-by-Step Description
 

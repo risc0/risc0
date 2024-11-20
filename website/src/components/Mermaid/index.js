@@ -1,28 +1,25 @@
 import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
+import { useColorMode } from "@docusaurus/theme-common";
 import mermaid from "mermaid";
 import React, { useEffect, useId } from "react";
 
 export default function Mermaid({ definition, height = 280 }) {
   const id = useId();
+  const { isDarkTheme } = useColorMode();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: ignore
   useEffect(() => {
     if (ExecutionEnvironment.canUseDOM) {
       import("svg-pan-zoom")
         .then((module) => {
-          const svgPanZoom = module.default; // Extract the default export
+          const svgPanZoom = module.default;
           const drawDiagram = async () => {
             const element = document.querySelector(
               `#${CSS.escape(id)}-mermaid`,
             );
 
             mermaid.initialize({
-              theme: "dark",
-              themeVariables: {
-                fontSize: "12px",
-                fontFamily: "var(--ifm-heading-font-family)",
-                nodeTextColor: "var(--ifm-color-emphasis-100)",
-              },
+              theme: isDarkTheme ? "dark" : "default",
             });
 
             const { svg } = await mermaid.render("mermaid-svg-id", definition);
@@ -41,13 +38,20 @@ export default function Mermaid({ definition, height = 280 }) {
         })
         .catch(console.error);
     }
-  }, []);
+  }, [isDarkTheme]);
 
   return (
     <div
       id={`${id}-mermaid`}
       className="mermaid-graph"
-      style={{ height: Number(height), borderRadius: 12 }}
+      style={{
+        height: Number(height),
+        borderRadius: 12,
+        cursor: "grab",
+        "&:active": {
+          cursor: "grabbing",
+        },
+      }}
     />
   );
 }
