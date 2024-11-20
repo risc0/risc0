@@ -1,0 +1,35 @@
+// RUN: zirgen --test --test-cycles=2 %s
+
+// This test covers a regression in GenerateLayoutPass where memo hits did not
+// update the column index at which to allocate subsequent columns. This could
+// result in unrelated components with overlapping lifetimes being allocated in
+// the same columns.
+
+extern GetCycle() : Val;
+
+component Major(x: Val, y: Val) {
+  x := NondetReg(x);
+  y := NondetReg(y);
+}
+
+component Major1() {
+  Major(1, 2)
+}
+
+component Major2() {
+  // prior to fixing this bug, z incorrectly aliased @super.x
+  z := NondetReg(5);
+  Major(3, 4)
+}
+
+component Top() {
+  cycle := NondetReg(GetCycle());
+  [cycle, 1 - cycle] -> (
+    Major1(),
+    Major2()
+  )
+}
+
+test {
+  Top()
+}

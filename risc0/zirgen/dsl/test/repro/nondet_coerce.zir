@@ -1,0 +1,12 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+component TakesNondet(reg: NondetReg) {
+  reg
+}
+
+test should_fail {
+  // 5 is not a register
+  TakesNondet(5)
+}
+

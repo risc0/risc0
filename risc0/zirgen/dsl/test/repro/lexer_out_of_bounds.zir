@@ -1,0 +1,11 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+import mid;
+
+import leaf;
+
+extern SomeTopThingThing
+// foo
+// bar
+

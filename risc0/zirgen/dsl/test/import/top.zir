@@ -1,0 +1,15 @@
+// RUN: zirgen -I %p --emit=zhl %s | FileCheck %s
+
+// Lets try an import
+import mid;
+
+// This shoud be a no-op, since mid imports leaf
+import leaf;
+
+// Actually declare something
+extern SomeTopThing();
+
+// CHECK: SomeLeafThing
+// CHECK: SomeMidThing
+// CHECK: SomeTopThing
+

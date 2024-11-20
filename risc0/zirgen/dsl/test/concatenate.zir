@@ -1,0 +1,31 @@
+// RUN: zirgen --test %s | FileCheck %s
+
+// Super is the Array<T, N+M> with all the elements of `a` followed by all the
+// elements of `b`
+component Concatenate<T: Type, N: Val, M: Val>(a: Array<T, N>, b: Array<T, M>) {
+  for i : 0..(N + M) {
+    in_a := InRange(0, i, N);
+    [in_a, 1 - in_a] -> (
+      a[i],
+      b[i - N]
+    )
+  }
+}
+
+component Top() {
+  arr := Concatenate<Val, 4, 2>(0..4, 4..6);
+  // CHECK: [0] Log: arr[0] = 0
+  // CHECK: [0] Log: arr[1] = 1
+  // CHECK: [0] Log: arr[2] = 2
+  // CHECK: [0] Log: arr[3] = 3
+  // CHECK: [0] Log: arr[4] = 4
+  // CHECK: [0] Log: arr[5] = 5
+  for i : 0..6 {
+    Log("arr[%u] = %u", i, arr[i]);
+    arr[i] = i;
+  }
+}
+
+test {
+  Top()
+}

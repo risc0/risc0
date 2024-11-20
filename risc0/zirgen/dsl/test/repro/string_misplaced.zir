@@ -1,0 +1,10 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+
+// This test case used to trip an assertion when lowering to ZHLT rather than
+// giving a helpful diagnostic.
+
+// CHECK: error: argument of type `String` is not convertible to `Val`
+
+component Top() {
+  Isz("there shouldn't be a string here");
+}

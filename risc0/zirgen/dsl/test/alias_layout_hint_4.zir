@@ -1,0 +1,41 @@
+// RUN: zirgen %s --emit=layoutattr | FileCheck %s
+
+// CHECK-LABEL: GlobalConstOp "layout$Top": Top
+// CHECK:      | | arm0: MakePair
+// CHECK-NEXT: | | | @super: Pair
+// CHECK-NEXT: | | | | a: NondetReg
+// CHECK-NEXT: | | | | | @super: 1
+// CHECK-NEXT: | | | | b: NondetReg
+// CHECK-NEXT: | | | | | @super: 2
+// CHECK-NEXT: | | | x: NondetReg
+// CHECK-NEXT: | | | | @super: 1
+
+extern IsFirstCycle() : Val;
+
+component Pair(a: Val, b: Val) {
+  a := Reg(a);
+  b := Reg(b);
+}
+
+component MakePair() {
+    x := NondetReg(7);
+    Pair(x, 6)
+}
+
+component Top() {
+  first := NondetReg(IsFirstCycle());
+  result := [first, 1 - first ] -> (
+    {
+      arm := MakePair();
+      AliasLayout!(arm.x, arm.a);
+      arm
+    },
+    {
+      Pair(1, 2)
+    }
+  );
+}
+
+test {
+  Top()
+}

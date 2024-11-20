@@ -1,0 +1,7 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error: missing base expression for switch
+
+component Top() {
+  x := -> 0;
+}
+

@@ -1,0 +1,65 @@
+load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+td_library(
+    name = "PassesTdFiles",
+    srcs = ["Passes.td"],
+    deps = [
+        "@llvm-project//mlir:OpBaseTdFiles",
+        "@llvm-project//mlir:RewritePassBaseTdFiles",
+    ],
+)
+
+gentbl_cc_library(
+    name = "PassesIncGen",
+    tbl_outs = [
+        (
+            ["-gen-pass-decls"],
+            "Passes.h.inc",
+        ),
+    ],
+    tblgen = "@llvm-project//mlir:mlir-tblgen",
+    td_file = ":Passes.td",
+    deps = [
+        ":PassesTdFiles",
+        "@llvm-project//mlir:PassBaseTdFiles",
+    ],
+)
+
+cc_library(
+    name = "passes",
+    srcs = [
+        "CommonRewrites.cpp",
+        "ElideTrivialStructs.cpp",
+        "EraseUnusedAspects.cpp",
+        "FieldDCE.cpp",
+        "GenerateAccum.cpp",
+        "GenerateCheckLayout.cpp",
+        "GenerateGlobals.cpp",
+        "GenerateLayout.cpp",
+        "GenerateTaps.cpp",
+        "HoistInvariants.cpp",
+        "InlinePure.cpp",
+        "PassDetail.h",
+        "SemanticLowering.cpp",
+        "TopologicalShuffle.cpp",
+    ],
+    hdrs = [
+        "CommonRewrites.h",
+        "Passes.h",
+    ],
+    deps = [
+        ":PassesIncGen",
+        "//zirgen/Dialect/ZHLT/IR",
+        "//zirgen/Dialect/ZHLT/Transforms:passes",
+        "//zirgen/Dialect/ZStruct/Analysis",
+        "//zirgen/Dialect/ZStruct/IR",
+        "//zirgen/Dialect/ZStruct/Transforms:passes",
+        "//zirgen/Dialect/Zll/IR",
+        "//zirgen/compiler/edsl",
+        "//zirgen/dsl/Analysis",
+    ],
+)

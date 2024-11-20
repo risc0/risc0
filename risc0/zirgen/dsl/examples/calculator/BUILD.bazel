@@ -1,0 +1,44 @@
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+load("//bazel/rules/zirgen:edsl-defs.bzl", "ZIRGEN_OUTS", "build_circuit")
+
+# Calculator uses rust-based validity polynomial evaluation instead of
+# c++-based so that we don't have to have all the FFI boilerplate
+# code.  This works, since the calculator circuit is pretty simple and
+# doesn't have the compilation performance problems that bigger
+# circuits have.
+CALCULATOR_OUTS = ZIRGEN_OUTS + ["validity.rs.inc"]
+
+CALCULATOR_ZIR_FILES = [":calculator.zir"]
+
+build_circuit(
+    name = "calculator",
+    outs = CALCULATOR_OUTS,
+    bin = "//zirgen/Main:gen_zirgen",
+    data = CALCULATOR_ZIR_FILES,
+    extra_args = ["zirgen/dsl/examples/calculator/calculator.zir"],
+)
+
+# TODO: Do we need any C++ tests for calculator?  If not, maybe delete calculator_test.cpp?
+# cc_test(
+#     name = "calculator_test",
+#     size = "small",
+#     srcs = [
+#         "calculator_test.cpp",
+#     ],
+#     deps = [
+#         ":calc_cpp_incs",
+#         "//risc0/core/test:gtest_main",
+#         "//zirgen/dsl",
+#         "//zirgen/dsl/test:test_utils",
+#     ],
+# )
+
+cc_library(
+    name = "calc_cpp_incs",
+    hdrs = [
+        ":Fp.h",
+    ],
+)

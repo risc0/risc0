@@ -1,0 +1,42 @@
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "dsl",
+    srcs = [
+        "ast.cpp",
+        "lexer.cpp",
+        "lower.cpp",
+        "parser.cpp",
+        "stats.cpp",
+    ],
+    hdrs = [
+        "ast.h",
+        "lexer.h",
+        "lower.h",
+        "parser.h",
+        "stats.h",
+    ],
+    deps = [
+        "//zirgen/Dialect/ZHL/IR",
+        "//zirgen/Dialect/ZHLT/IR",
+        "//zirgen/Dialect/ZStruct/Analysis",
+        "//zirgen/Dialect/Zll/Analysis",
+        "//zirgen/Dialect/Zll/IR",
+        "@llvm-project//llvm:Support",
+    ],
+)
+
+cc_binary(
+    name = "zirgen",
+    srcs = ["driver.cpp"],
+    deps = [
+        "//risc0/core",
+        "//zirgen/Conversions/Typing",
+        "//zirgen/Dialect/ZHLT/IR:Codegen",
+        "//zirgen/Main",
+        "//zirgen/compiler/codegen",
+        "//zirgen/compiler/layout",
+    ],
+)

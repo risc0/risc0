@@ -1,0 +1,15 @@
+// RUN: zirgen --test %s --test-cycles 4 2>&1
+
+extern GetCycle() : Val;
+
+test {
+  cycle := NondetReg(GetCycle());
+  first := NondetReg(Isz(cycle));
+
+  arr := for i : 0..4 { NondetReg(cycle + i) };
+
+  [first, 1 - first] -> (
+    for i : 0..4 { arr[i] = i; },
+    for i : 0..4 { arr[i] - arr@1[i] = 1; }
+  );
+}

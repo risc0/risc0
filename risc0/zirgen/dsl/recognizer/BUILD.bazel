@@ -1,0 +1,26 @@
+load("rules.bzl", "bison", "flex")
+
+cc_binary(
+    name = "recognizer",
+    srcs = [
+        ":lexer",
+        ":parser",
+    ],
+)
+
+flex(
+    name = "lexer",
+    src = "zirgen.l",
+    out = "lex.yy.c",
+    flags = [
+        "-DYY_NO_UNPUT",
+        "-DYY_NO_INPUT",
+    ],
+)
+
+bison(
+    name = "parser",
+    src = "zirgen.y",
+    out = "zirgen.tab.c",
+    defines = "zirgen.tab.h",
+)

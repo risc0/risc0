@@ -1,0 +1,26 @@
+// RUN: zirgen %s --test --test-cycles=4 | FileCheck %s
+
+// CHECK: [0] Log: result = 1
+// CHECK: [1] Log: result = 2
+// CHECK: [2] Log: result = 4
+// CHECK: [3] Log: result = 8
+
+extern IsFirstCycle() : Val;
+
+component DoubleBackOne(x: NondetReg) {
+    NondetReg(2 * x@1)
+}
+
+component Top() {
+    first := NondetReg(IsFirstCycle());
+    result : NondetReg;
+    result := [first, 1 - first] -> (
+        NondetReg(1),
+        DoubleBackOne(result@0)
+    );
+}
+
+test {
+    top := Top();
+    Log("result = %u", top.result);
+}

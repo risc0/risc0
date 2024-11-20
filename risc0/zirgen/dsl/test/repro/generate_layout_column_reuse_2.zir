@@ -1,0 +1,51 @@
+// RUN: zirgen --test --test-cycles=2 %s
+
+// This test covers a bug where the GenerateLayoutPass could reallocate a column
+// used by a pinned layout for an unrelated component with overlapping lifetime.
+
+extern GetCycle() : Val;
+
+argument Arg(c: Val, x: Val) {
+  count := NondetReg(c);
+  x := NondetReg(x);
+}
+
+component CommonSuper(i: Val) {
+  a := Reg(i + 1);
+}
+
+component DerivedSuper(i: Val) {
+  b := NondetReg(2 * i);
+  CommonSuper(3 * i)
+}
+
+component Minor1() {
+  a := Arg(1, 0);
+  CommonSuper(2)
+}
+
+component Minor2() {
+  a := Arg(-1, 0);
+  DerivedSuper(3)
+}
+
+component Major(cycle: NondetReg) {
+  [cycle, 1 - cycle] -> (
+    Minor1(),
+    Minor2()
+  )
+}
+
+component Top() {
+  cycle := NondetReg(GetCycle());
+  major := NondetReg(InRange(0, cycle, 2));
+  notMajor := Reg(1 - major);
+  [major, notMajor] ->! (
+    Major(cycle),
+    Component()
+  )
+}
+
+test {
+  Top()
+}

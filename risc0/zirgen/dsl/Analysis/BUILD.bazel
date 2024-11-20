@@ -1,0 +1,20 @@
+load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "Analysis",
+    srcs = [
+        "LayoutDAGAnalysis.cpp",
+    ],
+    hdrs = [
+        "LayoutDAGAnalysis.h",
+    ],
+    deps = [
+        "//zirgen/Dialect/ZHLT/IR",
+        "//zirgen/Dialect/ZStruct/IR",
+        "//zirgen/Utilities",
+    ],
+)

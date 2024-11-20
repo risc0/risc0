@@ -1,0 +1,17 @@
+// RUN: zirgen --test %s | FileCheck %s
+
+extern Output(v: Val);
+
+component Sequence(x: Val) {
+  [x, x + 1, x + 2]
+}
+
+test {
+  seq := Sequence(2);
+  // CHECK: Output(2) -> ()
+  // CHECK: Output(3) -> ()
+  // CHECK: Output(4) -> ()
+  Output(seq[0]);
+  Output(seq[1]);
+  Output(seq[2]);
+}

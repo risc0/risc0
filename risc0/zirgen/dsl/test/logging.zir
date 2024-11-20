@@ -1,0 +1,22 @@
+// RUN: zirgen --test %s | FileCheck %s
+
+component Top() {
+  // CHECK: Hello world!
+  Log("Hello world!");
+
+  // CHECK: a = 5
+  Log("a = %u", 5);
+
+  // CHECK: (a, b) = (3, 4)
+  Log("(a, b) = (%u, %u)", 3, 4);
+
+  // CHECK: (a, b, c) = (0, 1, 2)
+  Log("(a, b, c) = (%u, %u, %u)", 0, 1, 2);
+
+  // CHECK: word = 0xff090807
+  Log("word = %w", 7, 8, 9, 0xff);
+}
+
+test {
+  Top()
+}

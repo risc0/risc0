@@ -1,0 +1,4 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error: Literal value exceeds legal range
+888888888888888888888888
+

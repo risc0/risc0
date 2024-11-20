@@ -1,0 +1,8 @@
+// RUN: not zirgen --emit=zhlt %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+component Top() {
+  x := Reg(1);
+  y := R@g(x@1 + x);
+}
+

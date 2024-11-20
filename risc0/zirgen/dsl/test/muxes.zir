@@ -1,0 +1,57 @@
+// RUN: zirgen --test %s --test-cycles 2 2>&1 | FileCheck %s
+
+extern PrintVal(v: Val);
+extern GetCycle() : Val;
+
+component Incrementer(v: Val) {
+  Reg(v + 1)
+}
+
+component Decrementer(v: Val) {
+  Reg(v - 1)
+}
+
+// CHECK-LABEL: Running MuxArm0
+test MuxArm0 {
+  x := [1, 0] -> (Decrementer(7), Incrementer(8));
+// CHECK: [0] PrintVal(6) -> ()
+// CHECK: WARNING: attempt to read back too far
+// CHECK: [0] PrintVal(0) -> ()
+// CHECK: [1] PrintVal(6) -> ()
+// CHECK: [1] PrintVal(6) -> ()
+  PrintVal(x);
+  PrintVal(x@1);
+}
+
+// CHECK-LABEL: Running MuxArm1
+test MuxArm1 {
+  x := [0, 1] -> (Decrementer(7), Incrementer(8));
+// CHECK: [0] PrintVal(9) -> ()
+// CHECK: WARNING: attempt to read back too far
+// CHECK: [0] PrintVal(0) -> ()
+// CHECK: [1] PrintVal(9) -> ()
+// CHECK: [1] PrintVal(9) -> ()
+  PrintVal(x);
+  PrintVal(x@1);
+}
+
+// CHECK-LABEL: Running SharedDecl
+test SharedDecl {
+  a : Reg;
+  isFirst := NondetReg(Isz(GetCycle()));
+  x := [isFirst, 1 - isFirst] -> ({
+     a := Reg(3);
+     Log("a := %u", a);
+  },{
+     b := Reg(5);
+     a := Reg(4);
+     Log("a := %u", a);
+     Log("a@1 = %u", a@1);
+  });
+  Log("outer a@0 = %u", a@0);
+  // CHECK: [0] Log: a := 3
+  // CHECK: [0] Log: outer a@0 = 3
+  // CHECK: [1] Log: a := 4
+  // CHECK: [1] Log: a@1 = 3
+  // CHECK: [1] Log: outer a@0 = 4
+}

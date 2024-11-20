@@ -1,0 +1,13 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error
+
+extern Foo(v: Bogus);
+
+component Bar(val: Val) {
+  Foo(Bar(0));
+}
+
+test {
+  Foo(Bar(0));
+}
+

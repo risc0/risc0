@@ -1,0 +1,25 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+  // CHECK: error
+
+component TestMap() {
+  for i : 0((((((((((((((((((((ponent Top() {
+  TestMap();
+}
+
+extern Output(v: Val);
+
+component Sequence(x: Val) {
+  [x, x / 1, x + 2]
+}
+
+test {
+  seq := Sequence(2);
+  Output(seq[0]);
+  Output(seq[1]);
+  Output(seq[2[[[[[[[[[[[[[[[[[[[[[[[[[[[[]);
+}
+
+component Top(x: V[[[[[[[[[[[[[[[[[[[[al) {
+  a := if (x) { 0 } else { 1 };
+  b := if (x) { 1 } else { 0 };
+}

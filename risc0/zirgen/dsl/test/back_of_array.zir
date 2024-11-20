@@ -1,0 +1,20 @@
+// RUN: zirgen --test %s --test-cycles 4 2>&1 | FileCheck %s
+
+extern GetCycle() : Val;
+
+test {
+  cycle := NondetReg(GetCycle());
+  first := NondetReg(Isz(cycle));
+
+  base := [Reg(cycle + 0), Reg(cycle + 1), Reg(cycle + 2), Reg(cycle + 3)];
+  result := [first, 1 - first] -> (
+    0,
+    reduce base@1 init 0 with Add
+  );
+
+  // CHECK: [0] Log: result = 0
+  // CHECK: [1] Log: result = 6
+  // CHECK: [2] Log: result = 10
+  // CHECK: [3] Log: result = 14
+  Log("result = %u", result);
+}

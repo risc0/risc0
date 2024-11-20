@@ -1,0 +1,29 @@
+// RUN: zirgen --test %s --test-cycles 4 2>&1 | FileCheck %s
+
+
+function InstInfo(a: Val, b: Val) {
+  a := a;
+  b := b;
+}
+
+function Table() {[
+  InstInfo(1, 2),
+  InstInfo(3, 4)
+]}
+
+function GetTableEntry(x: Val) {
+  Table()[x].b
+}
+
+function ParameterizedType<x : Val>() {
+  a := x;
+}
+
+function ComplextTypeDependence<x :Val>() {
+  ParameterizedType<GetTableEntry(x)>().a
+}
+
+// CHECK-LABEL: Running MulPrec
+test MulPrec {
+  ComplextTypeDependence<1>() = 4;
+}

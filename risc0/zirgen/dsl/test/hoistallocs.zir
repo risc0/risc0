@@ -1,0 +1,56 @@
+// TODO: Commmented out test since the driver now skips this pass
+// RUN: true || zirgen --emit=zhltopt %s | FileCheck %s
+
+component Hoistable(x : Val) {
+  // CHECK-LABEL: @Hoistable
+  // CHECK-SAME: %arg0: !zstruct$NondetReg
+  // CHECK: %0 = zstruct.pack(%arg0
+  // CHECK: zhlt.return %0
+  NondetReg(x)
+}
+
+component Redunderator(y : Val) {
+  // CHECK-LABEL: @Redunderator
+  // CHECK-SAME: %arg0: !zstruct$NondetReg
+  // CHECK: %0 = zstruct.lookup %layout
+  // CHECK: %1 = zhlt.construct @Hoistable
+  // CHECK: %2 = zstruct.pack(%1
+  // CHECK: zhlt.return %2
+  Hoistable(y)
+}
+
+component Outer(z : Val) {
+  // CHECK-LABEL: @Outer
+  // CHECK-SAME: %arg0: !zll.val
+  // CHECK: %2 = zhlt.construct @Add
+  // CHECK: %3 = zstruct.lookup %2["@super"]
+  // CHECK: %5 = zstruct.lookup %layout["@construct
+  // CHECK: %6 = zhlt.construct @NondetReg(%3, %5)
+  Redunderator(1 + z)
+}
+
+component Incrementer(x: Val) {
+  // CHECK-LABEL: @Incrementer
+  // CHECK-SAME: %arg0: !zll.val
+  // CHECK: %2 = zhlt.construct @Add
+  // CHECK: %3 = zstruct.lookup %2["@super"]
+  // CHECK: %4 = zstruct.lookup %layout["@construct
+  // CHECK: %5 = zhlt.construct @NondetReg(%3, %4)
+  NondetReg(NondetReg(x + 1));
+}
+
+component JustAlloc(x: Val) {
+  // CHECK-LABEL: @JustAlloc
+  // CHECK-SAME: %arg0: !zstruct$NondetReg
+  // CHECK: %0 = zstruct.get_global_const
+  // CHECK: %1 = zhlt.construct @Component(%0)
+  // CHECK: %2 = zstruct.pack(%arg0
+  // CHECK: zhlt.return %2
+  NondetReg(NondetReg(x));
+}
+
+component Top() {
+  // CHECK-LABEL: @Top
+  Incrementer(42)
+}
+

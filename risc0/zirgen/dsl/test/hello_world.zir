@@ -1,0 +1,5 @@
+// RUN: zirgen --test %s
+
+test {
+  Log("Hello world!");
+}

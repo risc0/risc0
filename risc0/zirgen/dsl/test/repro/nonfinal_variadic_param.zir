@@ -1,0 +1,4 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+
+// CHECK: error: only the last parameter can be variadic
+component NonfinalVariadic(x: Val..., y: Val) {}

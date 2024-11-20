@@ -1,0 +1,17 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+
+// CHECK: error: array size parameter must be an integer
+component Foo(arr: Array<Val,Val>) {
+  arr[1];
+}
+
+// CHECK: error: array type specialization must have two parameters
+component Bar(arr: Array<Val>) {
+  arr[1];
+}
+
+// CHECK: error: Cannot find generic component Val
+component Baz(arr: Array<Val<1>, 3>) {
+  arr[1];
+}
+

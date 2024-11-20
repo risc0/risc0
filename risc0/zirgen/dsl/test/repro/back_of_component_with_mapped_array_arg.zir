@@ -1,0 +1,27 @@
+// RUN: zirgen --test %s --test-cycles 2 | FileCheck %s
+
+// This test covers a bug where constructor arguments with array types that are
+// used as the source array of a map op result in invalid IR in the generated
+// back function.
+
+extern IsFirstCycle() : Val;
+
+component OwnedCopy<N: Val>(arr : Array<NondetReg, N>) {
+  // We previously failed to eliminate the use of `arr` as the source array of a
+  // map op. Semantically, this should be equivalent to the following:
+  // for i : 0..N { Reg(arr[i]) }
+  for a : arr { Reg(a) }
+}
+
+test {
+  first := NondetReg(IsFirstCycle());
+
+  arr := for i : 0..4 { NondetReg(5 + i) };
+  copy := OwnedCopy<4>(arr);
+
+  // CHECK: [1] Log: copy = [5 6 7 8]
+  [first, 1-first] -> (
+    Component(),
+    Log("copy = [%u %u %u %u]", copy@1[0], copy@1[1], copy@1[2], copy@1[3])
+  );
+}

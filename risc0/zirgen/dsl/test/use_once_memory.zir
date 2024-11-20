@@ -1,0 +1,80 @@
+// RUN: zirgen --test %s --test-cycles=2 2>&1 | FileCheck %s
+
+extern SimpleMemoryPoke(index: Val, data: Val);
+extern SimpleMemoryPeek(index: Val) : Val;
+extern IsFirstCycle() : Val;
+
+component NUM_DIGEST_ELEMS() { 16 }
+
+component Digest(elems: Array<Val, NUM_DIGEST_ELEMS()>) {
+  elems
+}
+
+component NondetDigestReg(elems: Digest) {
+  elemRegs := for elem : elems { NondetReg(elem) };
+  Digest(elemRegs)
+}
+
+// Argument for memory element where each (index, digest) is written
+// exactly once then is read exactly once.
+argument UseOnceMemoryElement(c: Val, i: Val, d: Digest) {
+  count := Reg(c);
+  index := Reg(i);
+  digest := NondetDigestReg(d);
+}
+
+component ReadMemory(i: Val) {
+  digest := Digest(for elemIdx : 0..NUM_DIGEST_ELEMS() { SimpleMemoryPeek(i * NUM_DIGEST_ELEMS() + elemIdx) });
+  elem := UseOnceMemoryElement(-1, i, digest);
+  elem.digest
+}
+
+component WriteMemory(i: Val, d: Digest) {
+  for elemIdx : 0..NUM_DIGEST_ELEMS() {
+     SimpleMemoryPoke(i * NUM_DIGEST_ELEMS() + elemIdx, d[elemIdx]);
+  };
+  elem := UseOnceMemoryElement(1, i, d);
+  for elemIdx : 0..NUM_DIGEST_ELEMS()  {
+    elem.digest[elemIdx] = d[elemIdx];
+  }
+}
+
+// TODO: Change these two from "component" to "comp_major" when
+// we can handle these complicated memory arguments.
+component WriteStep() {
+  WriteMemory(0, Digest(1000..1016));
+}
+component ReadStep() {
+  mem := ReadMemory(0);
+  for elemIdx : 0..NUM_DIGEST_ELEMS() {
+    Log("read %u = %u", elemIdx, mem[elemIdx])
+  }
+}
+
+// CHECK:      [1] Log: read 0 = 1000
+// CHECK-NEXT: [1] Log: read 1 = 1001
+// CHECK-NEXT: [1] Log: read 2 = 1002
+// CHECK-NEXT: [1] Log: read 3 = 1003
+// CHECK-NEXT: [1] Log: read 4 = 1004
+// CHECK-NEXT: [1] Log: read 5 = 1005
+// CHECK-NEXT: [1] Log: read 6 = 1006
+// CHECK-NEXT: [1] Log: read 7 = 1007
+// CHECK-NEXT: [1] Log: read 8 = 1008
+// CHECK-NEXT: [1] Log: read 9 = 1009
+// CHECK-NEXT: [1] Log: read 10 = 1010
+// CHECK-NEXT: [1] Log: read 11 = 1011
+// CHECK-NEXT: [1] Log: read 12 = 1012
+// CHECK-NEXT: [1] Log: read 13 = 1013
+// CHECK-NEXT: [1] Log: read 14 = 1014
+// CHECK-NEXT: [1] Log: read 15 = 1015
+// CHECK:      final accum: [0, 0, 0, 0]
+
+test {
+  isFirst := NondetReg(IsFirstCycle());
+  notFirst := Reg(1 - isFirst);
+  [isFirst, notFirst] ->! (
+     WriteStep(),
+     ReadStep()
+  )
+}
+

@@ -1,0 +1,8 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error: missing base expression for member lookup
+
+component Top() {
+  x := Reg(1);
+  y := Reg(x@1 +.x);
+}
+

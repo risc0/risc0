@@ -1,0 +1,26 @@
+// RUN: zirgen --emit=zstruct %s
+
+// This test covers an issue where allocations hoisted from a constructor into
+// a nested region like a loop did not correctly convert types inside of the
+// nested region.
+
+component NondetRegWrapper(val: Val) {
+  // This allocation should be hoisted
+  NondetReg(val)
+}
+
+test {
+  for i : 0..2 {
+    // Hoisting this register allocation into the map construct previously
+    // resulted in incorrectly typed IR.
+    NondetRegWrapper(i)
+  }
+}
+
+// This test still results in broken IR when HoistAllocs is enabled
+// test {
+//   [1, 0] -> (
+//     NondetRegWrapper(2),
+//     NondetRegWrapper(3)
+//   )
+// }

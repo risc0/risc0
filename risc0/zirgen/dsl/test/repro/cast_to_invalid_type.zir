@@ -1,0 +1,10 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+component Foo(arr: Bogus<Val, 3>) {
+  arr[1];
+}
+
+component Bar() {
+  Foo([1, 2, 3]);
+}

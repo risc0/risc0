@@ -1,0 +1,29 @@
+// RUN: not zirgen --test %s 2>&1 | FileCheck %s
+
+// Determine if val is zero or not
+component IsZero(val: Val) {
+  // Nondeterministically 'guess' the result
+  isZero := NondetReg(Isz(val));
+
+  // Compute the inverse (for non-zero values), for zero values, SafeInv returns 0
+  inv := NondetReg(Inv(val));
+
+  // Assert that the result is a bit
+  isZero * (1 - isZero) = 0;
+  // If isZero is 0 (i.e. nonzero) then val must have an inverse
+  val * inv = 1 - isZero;
+  // If isZero is 1, then val must be zero
+  isZero * val = 0;
+  // If isZero is 1, then inv must be zero
+  isZero * inv = 0;
+  // Make the reuslt Return 'isZero'
+  isZero
+}
+
+test {
+  IsZero(0) = 1;
+  IsZero(1) = 0;
+  // CHECK: EqualZeroOp: Not zero: 2013265920
+  IsZero(2) = 1;
+}
+

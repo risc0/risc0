@@ -1,0 +1,9 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error: the distance of a back expression
+
+component Top() {
+  x := Reg(1);
+  J := {};
+  y := Reg(x@J + x);
+}
+

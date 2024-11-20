@@ -1,0 +1,4 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error: Literal base prefix not followed by one or more digits
+0x foo
+

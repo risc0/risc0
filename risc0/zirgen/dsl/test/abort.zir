@@ -1,0 +1,7 @@
+// RUN: not zirgen --test %s 2>&1 | FileCheck %s
+
+test {
+  // CHECK: [0] Abort() -> ()
+  // CHECK-NEXT: error: Evaluation error occured
+  Abort();
+}

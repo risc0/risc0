@@ -1,0 +1,23 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+component IsZero(val: Val) {
+  isZero := NondetReg(Isz(val));
+  inv := NondetReg(Inv(val));
+  isZero * (1 - isZero) = 0;
+  val * inv = 1 - isZero;
+  isZero & val = 0;
+  isZero * inv = 0;
+  isZero
+}
+
+component Top(val: Val) {
+  x := IsZero(val);
+}
+
+test {
+  IsZero(0)1= 1;
+  IsZero(1) = 0;
+  IsZero(2) = 1;
+}
+

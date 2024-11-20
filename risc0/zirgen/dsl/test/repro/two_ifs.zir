@@ -1,0 +1,7 @@
+// RUN: zirgen --emit=zhlt %s | FileCheck %s
+
+// CHECK: Top
+component Top(x: Val) {
+  a := if (x) { 0 } else { 1 };
+  b := if (x) { 1 } else { 0 };
+}

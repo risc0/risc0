@@ -1,0 +1,52 @@
+// RUN: zirgen --test %s --test-cycles=8 2>&1 | FileCheck %s
+
+// Disclaimer: this is a simple (but trivial) test of arguments. The only
+// constraints that it actually has are the ones related to the accumulator of
+// the arguments, and so it would be really easy to construct bad witnesses for
+// this circuit.
+
+// This test uses multiple muxes which contain arguments inside of a single
+// major component. The argument is satisified if the number of cycles is a
+// multiple of 8.
+
+//  c1 |  v1 |  c2 |  v2
+// ----+-----+-----+-----
+//   1 |   0 |   1 |   1
+//   0 |   0 |   0 |   0
+//  -1 |   0 |   1 |   1
+//   0 |   0 |   0 |   0
+//   1 |   0 |  -1 |   1
+//   0 |   0 |   0 |   0
+//  -1 |   0 |  -1 |   1
+//   0 |   0 |   0 |   0
+// ... | ... | ... | ...
+
+// CHECK: final accum: [0, 0, 0, 0]
+
+extern GetCycle() : Val;
+
+argument ArgReg(c: Val, v: Val) {
+  c := NondetReg(c);
+  v := NondetReg(v);
+}
+
+component Major(v: Val) {
+  half_v := v / 2;
+  bit0 := NondetReg(half_v & 1);
+  bit1 := NondetReg((half_v & 2) / 2);
+  [1 - bit0, bit0] -> (ArgReg(1, 0), ArgReg(-1, 0));
+  [1 - bit1, bit1] -> (ArgReg(1, 1), ArgReg(-1, 1));
+}
+
+component Top() {
+  cycle := NondetReg(GetCycle());
+  major := NondetReg(cycle & 1);
+  notMajor := Reg(1 - major);
+  [notMajor, major] ->! (Major(cycle), {});
+}
+
+test foo {
+  Top();
+}
+
+

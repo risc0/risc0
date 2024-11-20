@@ -1,0 +1,103 @@
+// RUN: zirgen --test %s --test-cycles=116 2>&1 | FileCheck %s
+
+// CHECK: Lookups resolved
+// CHECK: final accum: [0, 0, 0, 0]
+
+// Cycle #
+extern GetCycle() : Val;
+extern IsFirstCycle() : Val;
+// Lookups
+extern LookupDelta(table: Val, idx: Val, amount: Val);
+extern LookupPeek(table: Val, idx: Val) : Val;
+
+argument ArgU8(c: Val, v: Val) {
+  c := NondetReg(c);
+  v := NondetReg(v);
+  LookupDelta(0, v, c);
+}
+
+
+// Determine if val is zero or not
+component IsZero(val: Val) {
+  // Nondeterministically 'guess' the result
+  isZero := NondetReg(Isz(val));
+
+  // Compute the inverse (for non-zero values), for zero values, Inv returns 0
+  inv := NondetReg(Inv(val));
+
+  // Assert that the result is a bit
+  isZero * (1 - isZero) = 0;
+  // If isZero is 0 (i.e. nonzero) then val must have an inverse
+  val * inv = 1 - isZero;
+  // If isZero is 1, then val must be zero
+  isZero * val = 0;
+  // If isZero is 1, then inv must be zero
+  isZero * inv = 0;
+  // Make the reuslt Return 'isZero'
+  isZero
+}
+
+// A U8 table lookup
+component NondetU8Reg(val: Val) {
+  // Record to argument
+  arg := ArgU8(1, val);
+  // Verify count is one
+  arg.c = 1;
+  // Super is our register
+  arg.v
+}
+
+// Add an entry to the U8 table
+component TableU8(val: Val) {
+  count := LookupPeek(0, val);
+  arg := ArgU8(-count, val);
+  arg.v = val;
+}
+
+component TableStep(start: Val) {
+  for i : 0..16 {
+    TableU8(start + i);
+  };
+}
+
+component Decompose111(x: Val) {
+  // Decompose the cycle * 111 into two bytes
+  x111 := x * 111;
+  low := NondetU8Reg(x111 & 0xff);
+  high := NondetU8Reg((x111 & 0xff00) / 0x100);
+  x111 = high * 256 + low;
+}
+
+component LessThan100(x: Val) {
+  diff := NondetU8Reg(100 - x);
+  diff = 100 - x;
+}
+
+component NormalStep(cycle: Val) {
+  // Get the low bit of the cycle
+  minor := NondetReg(cycle & 1);
+  minor * (1 - minor) = 0;
+  // Verify it's right (and cycle < 512)
+  check := NondetU8Reg((cycle - minor) / 2);
+  [1 - minor, minor] -> (Decompose111(cycle), LessThan100(cycle));
+}
+
+component Top() {
+  isFirst := NondetReg(IsFirstCycle());
+  cycle := NondetReg(GetCycle());
+  is100 := IsZero(cycle - 100);
+  major : Reg;
+  // Run normal step for 100 cycles, then make the table of bytes
+  major := Reg(isFirst * 0 + (1 - isFirst) * is100 * 1 + (1 - isFirst) * (1 - is100) * major@1);
+  notMajor := Reg(1 - major);
+  [notMajor, major] ->! (
+    NormalStep(cycle),
+    TableStep((cycle - 100) * 16)
+  );
+}
+
+test foo {
+  Top();
+}
+
+

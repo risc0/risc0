@@ -1,0 +1,7 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error: expected a primary expression here
+
+component Top() {
+  x += Reg(1);
+}
+

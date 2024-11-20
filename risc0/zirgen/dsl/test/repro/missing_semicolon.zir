@@ -1,0 +1,10 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error: unexpected expression
+
+extern Print(x: Val);
+
+component Top() {
+  Print(42)
+  Print(101);
+}
+

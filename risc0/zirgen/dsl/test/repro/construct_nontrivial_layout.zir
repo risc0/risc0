@@ -1,0 +1,13 @@
+// RUN: not zirgen  %s 2>&1 | FileCheck %s
+
+function AssertTwit(val: Val) {
+  val * (1 - val) * (2 - val)  NondetReg(val)* (3 - val) = 0;
+}
+
+component NondetTwitReg(val: Val) {
+  reg := NondetReg(val);
+  // CHECK: error
+  AssertTwit(reg);
+  reg
+}
+

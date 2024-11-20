@@ -1,0 +1,7 @@
+// RUN: true
+
+// This imports leaf and defines a thing
+
+import leaf;
+
+extern SomeMidThing();

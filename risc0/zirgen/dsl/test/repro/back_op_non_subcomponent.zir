@@ -1,0 +1,7 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+
+component TestMap() {
+  // CHECK: error: back operation must apply to a subcomponent
+  for i : 0..3 { i @ 2 }
+}
+

@@ -1,0 +1,153 @@
+/*
+ * A block comment
+ */
+
+// parameters and type parameters
+component DeclarationTest() {}
+
+component DeclarationTest(a: Val) {}
+component DeclarationTest<a: Val>() {}
+
+component DeclarationTest(a: Val, b: Val) {}
+component DeclarationTest<a: Val>(b: Val) {}
+component DeclarationTest<a: Val, b: Val>() {}
+
+component DeclarationTest(a: Val, b: Val, c: Val) {}
+component DeclarationTest<a: Val>(b: Val, c: Val) {}
+component DeclarationTest<a: Val, b: Val>(c: Val) {}
+component DeclarationTest<a: Val, b: Val, c: Val>() {}
+
+// functions have parameters too
+function DeclarationTest() {}
+
+function DeclarationTest(a: Val) {}
+function DeclarationTest<a: Val>() {}
+
+function DeclarationTest(a: Val, b: Val) {}
+function DeclarationTest<a: Val>(b: Val) {}
+function DeclarationTest<a: Val, b: Val>() {}
+
+function DeclarationTest(a: Val, b: Val, c: Val) {}
+function DeclarationTest<a: Val>(b: Val, c: Val) {}
+function DeclarationTest<a: Val, b: Val>(c: Val) {}
+function DeclarationTest<a: Val, b: Val, c: Val>() {}
+
+/**
+ * array type syntax
+ */
+component TypeDeclarationTest(arr: Array<Val, 15>) {}
+component TypeDeclarationTest(arr: Val[15]) {}
+component TypeDeclarationTest(arr: Val[5][3]) {}
+component TypeDeclarationTest(arr: Array<Array<Val, 5>, 3>) {}
+
+/******
+ ** expressions
+ ***/
+component LiteralExprTest() {
+  5
+}
+
+component IdentifierExprTest() {
+  anIdentifier
+}
+
+component SubcomponentExprTest() {
+  foo.bar
+}
+
+component ArrayElementExprTest() {
+  foo[2]
+}
+
+component ParenthesizedExprTest() {
+  (foo[2].bar)
+}
+
+component ArrayConstructorExprTest() {
+  [4, 2, 6, arr[1]]
+}
+
+component ComponentConstructorExprTest() {
+  Reg(x)
+}
+
+component ParametricComponentConstructorExprTest() {
+  ParametricType<3>(x)
+}
+
+component BlockExprTest() {
+  {}
+}
+
+component ForExprTest() {
+  for i: [1, 2, 3] {
+    i + 1
+  }
+}
+
+component ReduceExprTest() {
+  reduce 0..10 init 0 with Add
+}
+
+component MuxExprTest() {
+  sel -> (
+    Inst1(), // a comment in the middle of an expression
+    Inst2(),
+    Inst3(/* inline block comment */)
+  )
+}
+
+component BitAndExprTest() {
+  guess { byte & 255 }
+}
+
+component IfExprTest(x: Val, y: Val) {
+  if (Isz(x - 5)) {
+    y = 5;
+  }
+}
+
+component IfElseExprTest(x: Val, y: Val) {
+  if (Isz(x - 5)) {
+    y = 5;
+  } else {
+    y = 0;
+  }
+}
+
+component RangeExprTest() {
+  for i: 0..8 {
+    isz(i - 4)
+  }
+}
+
+component BackExprTest() {
+  x@1
+}
+
+// statements
+component MemberStmtTest(x: Val) {
+  r := Reg(x);
+}
+
+component ConstraintStmtTest(x: Val) {
+  x * (x - 1) = 0;
+}
+
+component ExpressionStmtTest() {
+  5;
+}
+
+component TypeAliasStmtTest() {
+  Arr := Reg[8];
+  x := Something<Arr>(2);
+}
+
+component Fib(isStart : Val) {
+  cur : Val;
+  cur := Reg(
+    if (isStart) { 1 }
+    else { back<Val, 1>(cur) + back<Val, 2>(cur) }
+  );
+}
+

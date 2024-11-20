@@ -1,0 +1,106 @@
+Expression {}
+
+Statement {}
+
+Parameter {
+	name: string
+	type: Expression
+}
+
+Component {
+	kind: Object|Function
+	name: string
+	type_params: vector<Param>
+	params: vector<Param>
+	body: Block
+}
+
+Module {
+	body: vector<Component>
+}
+
+Literal: Expression {
+	value: uint64_t
+}
+
+Ident: Expression {
+	name: string
+}
+
+Lookup: Expression {
+	component: Expression
+	member: string
+}
+
+Subscript: Expression {
+	array: Expression
+	element: Expression
+}
+
+Specialize: Expression {
+	type: Expression
+	args: vector<Expression>
+}
+
+Construct: Expression {
+	type: Expression
+	args: vector<Expression>
+}
+
+Block: Expression {
+	body: vector<Statement>
+	value: Expression
+}
+
+Map: Expression {
+	array: Expression
+	element: string
+	function: Block
+}
+
+Reduce: Expression {
+	array: Expression
+	init: Expression
+	type: Expression
+}
+
+Switch: Expression {
+	selector: Expression
+	cases: vector<Expression>
+}
+
+Range: Expression {
+  start: Expression
+  end: Expression
+}
+
+Back: Expression {
+	expression: Expression
+	distance: Expression
+}
+
+ArrayLiteral: Expression {
+  elements: vector<Expression>
+}
+
+Declaration: Statement {
+	name: string
+	type: Expression
+}
+
+Definition: Statement {
+	name: string
+	value: Expression
+}
+
+Constraint: Statement {
+	left: Expression
+	right: Expression
+}
+
+Void: Statement {
+	value: Expression
+}
+
+
+

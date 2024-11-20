@@ -1,0 +1,21 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+
+component Top() {
+  // Since `Val` has no layout, this conflict is detected when adding the member
+  // to Top's value type
+  // CHECK: error: definition of type `Val` is not a subtype of the declared type `NondetReg`
+  // CHECK-NEXT: r := 5;
+  // CHECK: note: declared here:
+  // CHECK-NEXT: r : NondetReg;
+  r : NondetReg;
+  r := 5;
+
+  // Since `NondetReg` has a layout, this conflict is detected when adding the
+  // member to Top's layout type
+  // CHECK: error: definition of type `NondetReg` is not a subtype of the declared type `Reg`
+  // CHECK-NEXT: s := NondetReg(r);
+  // CHECK: note: declared here:
+  // CHECK-NEXT: s : Reg;
+  s : Reg;
+  s := NondetReg(r);
+}

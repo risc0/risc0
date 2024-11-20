@@ -1,0 +1,27 @@
+// RUN: zirgen %s --emit=stats | FileCheck %s
+
+// CHECK-LABEL:  - "data"
+// CHECK-NEXT:     - size: 8
+
+component Concatenate<N: Val, M: Val>(a: Array<NondetReg, N>, b: Array<NondetReg, M>) {
+  result := for i : 0..(N + M) {
+    in_a := InRange(0, i, N);
+    [in_a, 1 - in_a] -> (
+      NondetReg(a[i]),
+      NondetReg(b[i - N])
+    )
+  };
+  for i : 0..N { AliasLayout!(a[i], result[i]); };
+  for i : 0..M { AliasLayout!(b[i], result[i + N]); };
+  result
+}
+
+component Top() {
+  a := for i : 0..4 { Reg(i) };
+  b := for i : 4..8 { Reg(i) };
+  Concatenate<4, 4>(a, b)
+}
+
+test {
+  Top()
+}

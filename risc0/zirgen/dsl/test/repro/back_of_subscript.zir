@@ -1,0 +1,10 @@
+// RUN: not zirgen --emit=zhlt %s 2>&1 | FileCheck %s
+
+// We restrict the target of a back expression to be a bare identifier, because
+// this makes it easier to trace it back to a related component.
+
+component BackOfSubscript() {
+  // CHECK: error: The target of a back expression must be an identifier
+  x := [NondetReg(5)];
+  x[0]@1
+}

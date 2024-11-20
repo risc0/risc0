@@ -1,0 +1,39 @@
+// Tests muxes and returned values.
+// RUN: zirgen --test %s --test-cycles=5 2>&1 | FileCheck %s
+extern IsFirstCycle() : Val;
+extern PrintPrevDecl(v: Val);
+extern PrintCur(v: Val);
+extern PrintPrev(v: Val);
+
+component Fib(in0: Val, in1: Val) {
+  x0 := Reg(in1);
+  x1 := Reg(in0 + in1);
+}
+
+component Top() {
+  fib : Fib;
+  // Print the sum based on a declaration before we construct the mux.
+  PrintPrevDecl(fib@1.x1);
+  first_cycle := NondetReg(IsFirstCycle());
+  fib := if (first_cycle) {
+    Fib(0, 1)
+  } else {
+    Fib(fib@1.x0, fib@1.x1)
+  };
+  // Print the new value returned from the switch
+  PrintCur(fib.x1);
+  // Make sure we can still access the back reference.
+  PrintPrev(fib@1.x1);
+}
+
+// CHECK-LABEL: Running fib
+test fib {
+  Top();
+// CHECK: [0] PrintPrevDecl(0) -> ()
+// CHECK: [0] PrintCur(1) -> ()
+// CHECK: [0] PrintPrev(0) -> ()
+// ...
+// CHECK: [4] PrintPrevDecl(5) -> ()
+// CHECK: [4] PrintCur(8) -> ()
+// CHECK: [4] PrintPrev(5) -> ()
+}

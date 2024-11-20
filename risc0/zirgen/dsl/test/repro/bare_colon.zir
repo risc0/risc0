@@ -1,0 +1,4 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: expected an identifier on left side of member declaration
+component Test() { : }
+

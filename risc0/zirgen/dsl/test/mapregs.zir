@@ -1,0 +1,40 @@
+// RUN: zirgen --test %s --test-cycles 2 | FileCheck %s
+
+extern Output(v: Val);
+extern GetCycle() : Val;
+
+component AddDoubler(v: Val) {
+  reg := Reg(v);
+  first := NondetReg(Isz(GetCycle()));
+  reg + 2 * (1 - first) * reg@1
+}
+
+component TriangleSum(x: Val, y: Val) {
+  reg := Reg(x + y);
+  first := NondetReg(Isz(GetCycle()));
+  reg + (1 - first) * reg@1
+}
+
+component SumRegs<numRegs: Val>(vals: Array<Val, numRegs>) {
+  regs := for i : 0..numRegs { AddDoubler(vals[i]) };
+  sum := reduce regs init 0 with TriangleSum;
+}
+
+test {
+  regs := SumRegs<4>(0..4);
+  for i : regs.regs { Output(i) };
+  // CHECK: [0] Output(0) -> ()
+  // CHECK: [0] Output(1) -> ()
+  // CHECK: [0] Output(2) -> ()
+  // CHECK: [0] Output(3) -> ()
+  Output(regs.sum);
+  // CHECK: [0] Output(6) -> ()
+
+
+  // CHECK: [1] Output(0) -> ()
+  // CHECK: [1] Output(3) -> ()
+  // CHECK: [1] Output(6) -> ()
+  // CHECK: [1] Output(9) -> ()
+
+  // CHECK: [1] Output(28) -> ()
+}

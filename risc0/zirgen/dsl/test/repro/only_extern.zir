@@ -1,0 +1,4 @@
+// RUN: zirgen --emit=zhl %s | FileCheck %s
+
+// CHECK: zhl.component @SomeExtern
+extern SomeExtern();

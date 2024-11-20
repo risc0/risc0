@@ -1,0 +1,12 @@
+// RUN: zirgen %s --emit=cpp | FileCheck %s
+
+extern Output(v: Val);
+
+// CHECK-LABEL: Struct exec_Sum
+function Sum<N: Val>(arr: Array<Val, N>) {
+  reduce arr init 0 with Add
+}
+
+component Top() {
+  Sum<3>([1, 2, 3]) = 6;
+}

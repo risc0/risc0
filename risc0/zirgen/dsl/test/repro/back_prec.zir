@@ -1,0 +1,12 @@
+// RUN: zirgen --emit=zhlt %s | FileCheck %s
+
+// This test verifies that back binds tight (not loose).  If it doesn't, the
+// below will be intrepreted at x@(1 + x), which will fail due to back being
+// non-constant
+component Top() {
+  x := Reg(1);
+  y := Reg(x@1 + x);
+}
+
+// CHECK: Top
+

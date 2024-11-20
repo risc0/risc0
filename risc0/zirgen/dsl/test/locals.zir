@@ -1,0 +1,13 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error:
+// CHECK-SAME: no member named
+// CHECK-SAME: _local
+
+component Foo() {
+  _local := Reg(5);
+  _local
+}
+
+test {
+  Foo()._local
+}

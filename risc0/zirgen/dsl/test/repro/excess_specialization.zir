@@ -1,0 +1,11 @@
+// RUN: not zirgen --emit=zhlt %s 2>&1 | FileCheck %s
+// CHECK: error: Cannot find generic component Foo<0>
+
+component Foo() {
+  0
+}
+
+component Bar() {
+  Foo<0><1>();
+}
+

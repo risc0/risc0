@@ -1,0 +1,38 @@
+// RUN: zirgen --emit=zstruct %s | FileCheck %s
+
+component PairVal(aArg: Val, bArg: Val) {
+   a := aArg;
+   b := bArg;
+}
+
+extern TakesArg(x: Val);
+// CHECK-LABEL: zhlt.exec_func private @exec$TakesArg(%arg0: !zll.val<BabyBear>) ->
+// CHECK: zll.extern "TakesArg" "", (%arg0) : (!zll.val<BabyBear>) -> ()
+
+extern ReturnsVal() : Val;
+// CHECK-LABEL: zhlt.exec_func private @exec$ReturnsVal() -> !zstruct$ReturnsVal
+// CHECK: %{{[0-9]+}} = zll.extern "ReturnsVal" "", () : () -> !zll.val<BabyBear>
+
+extern TakesPair(v: PairVal);
+extern ReturnsPair() : PairVal;
+
+component Top() {
+  TakesArg(ReturnsVal());
+  TakesPair(ReturnsPair());
+}
+
+// RUN: zirgen --test %s 2>&1 | FileCheck %s --check-prefixes=TEST-CHECK
+
+test val {
+// TEST-CHECK-LABEL: Running val
+// TEST-CHECK-NEXT: [0] ReturnsVal() -> (0)
+// TEST-CHECK-NEXT: [0] TakesArg(0) -> ()
+  TakesArg(ReturnsVal());
+}
+
+test pair {
+// TEST-CHECK-LABEL: Running pair
+// TEST-CHECK-NEXT: [0] ReturnsPair() -> (0, 1)
+// TEST-CHECK-NEXT: [0] TakesPair(0, 1) -> ()
+  TakesPair(ReturnsPair());
+}

@@ -1,0 +1,6 @@
+// RUN: not zirgen --test %s 2>&1 | FileCheck %s
+
+test {
+  // CHECK: [0] Assert failed: one is not zero
+  Assert(1, "one is not zero");
+}

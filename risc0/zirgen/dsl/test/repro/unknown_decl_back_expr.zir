@@ -1,0 +1,8 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error: unknown component `Bogus`
+
+component Top() {
+  x := Bogus;
+  y := Reg(x@1);
+}
+

@@ -1,0 +1,5 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+// CHECK: error: Expected type annotation expression
+
+function DeclarationTest<a: , c: Val>() {}
+

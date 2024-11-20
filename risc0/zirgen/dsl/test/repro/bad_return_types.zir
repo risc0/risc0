@@ -1,0 +1,16 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+
+component V(){}
+component Va(){}
+component al(){}
+component l(){}
+
+// CHECK: error: attempted to use type name 'V' as a value
+extern Foo() : V+al;
+
+// CHECK: error: attempted to use type name 'V' as a value
+extern Bar() : V*l;
+
+// CHECK: error: the start of range must be a compile-time
+extern Baz() : Va..l;
+

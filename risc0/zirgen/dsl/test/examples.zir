@@ -1,0 +1,40 @@
+// TODO: run the full compilation pipeline once it is implemented
+// RUN: zirgen --emit=zhlt %s
+
+component IsBit(x: Val) {
+  x * (1 - x) = 0;
+}
+
+component Bit(x: Val) {
+  r := Reg(x);
+  IsBit(r);
+  r
+}
+
+component U32(x: Val) {
+  // Do nothing, in reality this would use lookup
+}
+
+component MultiMuls(a: Val) {
+  b := a * 1;
+  c := b * 2;
+}
+
+/*
+// TODO: This currently fails to typecheck, with the error: 'zhlt.define' op failed to verify that all of {declaration, definition} have same type
+component Cycles(a: Val, b: Val, c: Val) {
+  a := a;
+  b := b;
+  c := c;
+}
+
+component Rotator(isFirst: Val) {
+  cycles : Cycles;
+  cycles := if (isFirst) {
+    Cycles(1, 2, 3)
+  } else {
+    Cycles(cycles@1.c, cycles@1.a, cycles@1.b)
+  };
+}
+*/
+

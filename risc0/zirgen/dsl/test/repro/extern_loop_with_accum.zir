@@ -1,0 +1,32 @@
+// RUN: zirgen %s --emit=zhlt
+
+// This test covers an issue found during development of accum generation where
+// a non-registerized extern value being used inside of a loop unrelated to the
+// major mux prevented elimination of the extern call.
+
+extern GetCycle() : Val;
+
+extern Print(x: Val);
+
+argument Arg(c: Val, x: Val) {
+  count := NondetReg(c);
+  value := NondetReg(x);
+}
+
+component IPlus(x: Val) {
+  r := Arg(1, x);
+}
+
+component IMinus(x: Val) {
+  r := Arg(-1, x);
+}
+
+component Top() {
+  x := GetCycle();
+  major := NondetReg(reduce [x] init 0 with Add);
+  notMajor := Reg(1 - major);
+  inst_result := [major, notMajor] ->! (
+    IPlus(x),
+    IMinus(x)
+  );
+}

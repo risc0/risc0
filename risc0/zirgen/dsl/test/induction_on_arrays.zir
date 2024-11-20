@@ -1,0 +1,38 @@
+// RUN: zirgen --test %s --test-cycles=5 2>&1 | FileCheck %s --check-prefix=EXEC
+// RUN: zirgen %s --emit=layouttype | FileCheck %s --check-prefix=LAYOUT
+
+extern IsFirstCycle() : Val;
+
+// LAYOUT-LABEL: Component: Top
+// LAYOUT-NEXT: 5 registers
+
+// LAYOUT: first
+// LAYOUT-NEXT: NondetReg
+// LAYOUT-NEXT: 1
+
+// LAYOUT: arr
+// LAYOUT-NEXT: NondetReg[4]
+// LAYOUT-NEXT: 4
+// LAYOUT-LABEL: Component:
+component Top() {
+  first := NondetReg(IsFirstCycle());
+
+  arr : Array<Reg, 4>;
+  arr := for i : 0..4 {
+    Reg([first, 1-first] -> (
+      i + 1,
+      (i + 1) * arr@1[i]
+    ))
+  };
+}
+
+test {
+  arr := Top().arr;
+
+  // EXEC: [0] Log: 1 2 3 4
+  // EXEC: [1] Log: 1 4 9 16
+  // EXEC: [2] Log: 1 8 27 64
+  // EXEC: [3] Log: 1 16 81 256
+  // EXEC: [4] Log: 1 32 243 1024
+  Log("%u %u %u %u", arr[0], arr[1], arr[2], arr[3]);
+}

@@ -1,0 +1,46 @@
+// RUN: zirgen --test %s --test-cycles=2 2>&1 | FileCheck %s
+
+extern Output(x:Val);
+
+component TestBlocks() {
+  a := NondetReg(6);
+  block := {
+    b := NondetReg(7);
+    block := {
+      c := a;
+      d := b;
+    };
+  };
+}
+
+
+
+test Blocks {
+// CHECK-LABEL: Running Blocks
+   block := TestBlocks();
+   Output(block.a);
+// CHECK-NEXT: [0] Output(6) -> ()
+   Output(block.block.b);
+// CHECK-NEXT: [0] Output(7) -> ()
+   Output(block.block.block.c);
+// CHECK-NEXT: [0] Output(6) -> ()
+   Output(block.block.block.d);
+// CHECK-NEXT: [0] Output(7) -> ()
+// CHECK-NEXT: [1]
+}
+
+test BackBlocks {
+// CHECK-LABEL: Running BackBlocks
+   block := TestBlocks();
+
+   Output(block@1.a);
+// Advance to cycle [1], and start with the first output.
+// CHECK: [1]
+// CHECK-SAME: Output(6) -> ()
+   Output(block@1.block.b);
+// CHECK-NEXT: [1] Output(7) -> ()
+   Output(block@1.block.block.c);
+// CHECK-NEXT: [1] Output(6) -> ()
+   Output(block@1.block.block.d);
+// CHECK-NEXT: [1] Output(7) -> ()
+}

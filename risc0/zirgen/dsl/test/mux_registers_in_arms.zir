@@ -1,0 +1,12 @@
+// RUN: zirgen --test --test-cycles=2 %s
+
+extern IsFirstCycle() : Val;
+
+test Foo {
+  first := NondetReg(IsFirstCycle());
+  x := [1-first, first] -> (NondetReg(7), NondetReg(8));
+  Log("x = %u", x);
+
+  // CHECK: [0] Log: x = 8
+  // CHECK: [1] Log: x = 7
+}

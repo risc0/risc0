@@ -1,0 +1,32 @@
+// RUN: zirgen --test --test-cycles=3 %s | FileCheck %s
+
+// This regression test covers two bugs related to muxes with array
+// supercomponents. The first is that we always failed to deduce common supers
+// when the common super is an array. The second is that the generate layout
+// pass did not reuse the pre-allocated common super when arm supers were arrays
+// of subtypes of the common super, as with the result of a for loop.
+
+extern IsFirstCycle() : Val;
+
+component Top() {
+  first := NondetReg(IsFirstCycle());
+
+  // If the array supertype of the mux is not correctly deduced, it conflicts
+  // with the declaration type.
+  arr : Array<NondetReg, 4>;
+  arr := [first, 1-first] -> (
+    for i : 0..4 { Reg(i) },
+    for i : 0..4 { Reg(2 * arr@1[i]) }
+  );
+
+  // If the mux arms don't use the layout preallocated for the common super,
+  // these array accesses access uninitialized columns.
+  // CHECK: [0] Log: arr = [0 1 2 3]
+  // CHECK: [1] Log: arr = [0 2 4 6]
+  // CHECK: [2] Log: arr = [0 4 8 12]
+  Log("arr = [%u %u %u %u]", arr[0], arr[1], arr[2], arr[3]);
+}
+
+test {
+  Top()
+}

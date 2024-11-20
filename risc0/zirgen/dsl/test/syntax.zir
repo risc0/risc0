@@ -1,0 +1,6 @@
+// RUN: zirgen --emit=zstruct %s | FileCheck %s
+
+component Top() {
+  // CHECK-LABEL: @step$Top
+  5
+}

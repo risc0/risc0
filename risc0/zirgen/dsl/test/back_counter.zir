@@ -1,0 +1,44 @@
+// RUN: zirgen --test %s --test-cycles 4 2>&1 | grep -v 'GetCycle' | grep -v 'WARNING: attempt to read back too far' | FileCheck %s
+
+// Simple counter that adds one to the previous register value.
+
+extern Output(v: Val);
+extern GetCycle() : Val;
+
+component Count(first: Val) {
+  a : Reg;
+  // TODO: Don't reference nonexistant back values.
+  a := Reg((1+a@1) * (1 - first));
+}
+
+// Makes the previous value of the count accessible as "prev".
+component PrevCount(first: Val) {
+  c := Count(first);
+  prev := c@1;
+}
+
+// CHECK-LABEL: Running count
+test count {
+// CHECK-NEXT: [0] Output(0) -> ()
+// CHECK-NEXT: [1] Output(1) -> ()
+// CHECK-NEXT: [2] Output(2) -> ()
+// CHECK-NEXT: [3] Output(3) -> ()
+  first := NondetReg(Isz(GetCycle()));
+  c := Count(first);
+  Output(c.a);
+}
+
+// Check to make sure taking the value of the PrevCount component's
+// "prev" at the previous // cycle gives us the value of the Count
+// component two cycles back.
+// CHECK-LABEL: Running prev_count
+test prev_count {
+// CHECK-NEXT: [0] Output(0) -> ()
+// CHECK-NEXT: [1] Output(0) -> ()
+// CHECK-NEXT: [2] Output(0) -> ()
+// CHECK-NEXT: [3] Output(1) -> ()
+  first := NondetReg(Isz(GetCycle()));
+  c := PrevCount(first);
+  Output(c@1.prev.a);
+}
+

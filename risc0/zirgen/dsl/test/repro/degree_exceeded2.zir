@@ -1,0 +1,40 @@
+// RUN: (zirgen --emit=zstruct %s 2>&1 ; exit 0) | FileCheck %s
+
+// We have some nice diagnostics for constraints with too high of degree. This
+// regression test exercises them to make sure they're
+
+// CHECK: error: Constraint degree 6 exceeds maximum degree 5
+// CHECK-NEXT:    a * c = 0;
+
+// CHECK: note: see current operation: "zll.eqz"(%11) : (!zll.val<BabyBear>) -> ()
+// CHECK-NEXT:    a * c = 0;
+
+// CHECK: note: At mux depth 1
+// CHECK-NEXT:  [first, 1 - first] -> ({
+
+// CHECK: note: Degree 5 produced by %10 = zll.mul %5 : <BabyBear>, %9 : <BabyBear> from input degrees 1, 4
+// CHECK-NEXT:    a * c = 0;
+
+// CHECK: note: Degree 1 produced by %5 = zstruct.load %4 back %c0 : (!zstruct.ref) -> !zll.val<BabyBear> from input degrees 1
+// CHECK-NEXT:  a := NondetReg(1);
+
+// CHECK: note: Degree 1 produced by %2 = zstruct.lookup %1["a"] : (!zstruct.layout<Top, <a: !zstruct.layout<NondetReg, <"@super": !zstruct.ref>>, first: !zstruct.layout<NondetReg, <"@super": !zstruct.ref>>>>) -> !zstruct.layout<NondetReg, <"@super": !zstruct.ref>> from input degrees 1
+// CHECK-NEXT:  a := NondetReg(1);
+
+// CHECK: note: Degree 4 produced by %9 = zll.mul %6 : <BabyBear>, %6 : <BabyBear> from input degrees 2, 2
+// CHECK-NEXT:    c := b * b;
+
+// CHECK: note: Degree 2 produced by %6 = zll.mul %5 : <BabyBear>, %5 : <BabyBear> from input degrees 1, 1
+// CHECK-NEXT:  b := a * a;
+
+extern IsFirstCycle() : Val;
+
+component Top() {
+  a := NondetReg(1);
+  b := a * a;
+  first := NondetReg(IsFirstCycle());
+  [first, 1 - first] -> ({
+    c := b * b;
+    a * c = 0;
+  }, {});
+}

@@ -1,0 +1,13 @@
+load("//bazel/rules/lit:defs.bzl", "glob_lit_tests")
+
+glob_lit_tests(
+    data = [
+        "leaf.zir",
+        "mid.zir",
+    ],
+    exclude = [
+        "mid.zir",
+        "leaf.zir",
+    ],
+    test_file_exts = ["zir"],
+)

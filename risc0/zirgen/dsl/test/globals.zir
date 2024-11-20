@@ -1,0 +1,34 @@
+// RUN: zirgen %s --test --test-cycles=2 2>&1  | FileCheck %s
+
+extern IsFirstCycle() : Val;
+
+component SetGlobal(v: Val) {
+   global MyGlobal := Reg(v);
+}
+
+component CheckGlobal() {
+  global MyGlobal : Reg;
+  MyGlobal = 5;
+}
+
+component Top() {
+   isFirst := NondetReg(IsFirstCycle());
+   x := [isFirst, 1 - isFirst] -> (
+   SetGlobal(5),
+   CheckGlobal()
+   );
+}
+
+extern PrintVal(v: Val);
+
+// CHECK-LABEL: Running Globals
+// CHECK: [0] IsFirstCycle() -> (1)
+// CHECK: [0] PrintVal(5) -> ()
+// CHECK: [1] IsFirstCycle() -> (0)
+// CHECK: [1] PrintVal(5) -> ()
+test Globals {
+     Top();
+     
+     global MyGlobal : Reg;
+     PrintVal(MyGlobal);
+}

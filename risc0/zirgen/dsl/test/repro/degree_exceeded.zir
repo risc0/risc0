@@ -1,0 +1,29 @@
+// RUN: (zirgen --emit=zstruct %s 2>&1 ; exit 0) | FileCheck %s
+
+// We have some nice diagnostics for constraints with too high of degree. This
+// regression test exercises them to make sure they're
+
+// CHECK: Constraint degree 8 exceeds maximum degree 5
+// CHECK-NEXT  c := b * b;
+
+// CHECK: note: see current operation: "zll.eqz"(%8) : (!zll.val<BabyBear>) -> ()
+// CHECK-NEXT:  c * c = 0;
+
+// CHECK: note: Degree 8 produced by %7 = zll.mul %6 : <BabyBear>, %6 : <BabyBear> from input degrees 4, 4
+// CHECK-NEXT:  c * c = 0;
+
+// CHECK: note: Degree 4 produced by %6 = zll.mul %5 : <BabyBear>, %5 : <BabyBear> from input degrees 2, 2
+// CHECK-NEXT:  c := b * b;
+
+// CHECK: note: Degree 2 produced by %5 = zll.mul %4 : <BabyBear>, %4 : <BabyBear> from input degrees 1, 1
+// CHECK-NEXT:  b := a * a;
+
+// CHECK: note: Degree 1 produced by %4 = zstruct.load %3 back %c0 : (!zstruct.ref) -> !zll.val<BabyBear>
+// CHECK-NEXT:  a := NondetReg(1);
+
+component Top() {
+  a := NondetReg(1);
+  b := a * a;
+  c := b * b;
+  c * c = 0;
+}

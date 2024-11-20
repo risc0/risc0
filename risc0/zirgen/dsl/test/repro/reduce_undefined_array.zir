@@ -1,0 +1,8 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: unknown component `vrr`
+
+component ReduceWithBadInitType() {
+  arr := [1, 2, 3];
+  reduce vrr init Component() with Add
+}
+

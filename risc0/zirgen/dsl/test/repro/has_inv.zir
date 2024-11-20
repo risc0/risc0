@@ -1,0 +1,7 @@
+// RUN: zirgen --emit=zhlt %s | FileCheck %s
+
+// CHECK: Top 
+component Top() {
+  x:= NondetReg(Inv(2));
+}
+

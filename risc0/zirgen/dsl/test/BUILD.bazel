@@ -1,0 +1,87 @@
+load("//bazel/rules/lit:defs.bzl", "glob_lit_tests")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+glob_lit_tests(test_file_exts = [
+    "zir",
+    "mlir",
+])
+
+cc_test(
+    name = "ast",
+    size = "small",
+    srcs = [
+        "ast.cpp",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//zirgen/dsl",
+        "//zirgen/dsl/test:test_utils",
+    ],
+)
+
+cc_test(
+    name = "parser",
+    size = "small",
+    srcs = [
+        "parser.cpp",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//zirgen/dsl",
+        "//zirgen/dsl/test:test_utils",
+    ],
+)
+
+cc_test(
+    name = "lower",
+    size = "small",
+    srcs = [
+        "lower.cpp",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//zirgen/dsl",
+        "//zirgen/dsl/test:test_utils",
+    ],
+)
+
+cc_test(
+    name = "types",
+    size = "small",
+    srcs = [
+        "types.cpp",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//zirgen/Dialect/ZHLT/IR",
+        "//zirgen/dsl",
+    ],
+)
+
+cc_test(
+    name = "generate_layout",
+    size = "small",
+    srcs = [
+        "generate_layout.cpp",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//zirgen/dsl/Analysis",
+    ],
+)
+
+cc_library(
+    name = "test_utils",
+    srcs = [
+        "utils.cpp",
+    ],
+    hdrs = [
+        "utils.h",
+    ],
+    deps = [
+        "//zirgen/dsl",
+    ],
+)

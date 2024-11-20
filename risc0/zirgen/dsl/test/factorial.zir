@@ -1,0 +1,17 @@
+// RUN: zirgen --test %s | FileCheck %s
+
+extern Output(v: Val);
+
+function Factorial<n: Val>() {
+  reduce 1..n+1 init 1 with Mul
+}
+
+component Top() {
+  Factorial<4>()
+}
+
+test SimpleFactorial {
+  // CHECK: [0] Output(24) -> ()
+  x := Factorial<4>();
+  Output(x);
+}

@@ -1,0 +1,7 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+component Foo(arr: Array<Va..63>) {
+  arr[1];
+}
+

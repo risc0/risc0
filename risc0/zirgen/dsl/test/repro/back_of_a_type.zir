@@ -1,0 +1,12 @@
+// RUN: not zirgen --emit=zhlt %s 2>&1 | FileCheck %s
+
+component Count() {
+  a : Reg;
+  a := Reg(1+a@1);
+}
+
+component PrevCount() {
+  // CHECK: error: Back expression does not have a value
+  c := Count@1;
+}
+

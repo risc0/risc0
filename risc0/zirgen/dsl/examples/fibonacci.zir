@@ -1,0 +1,94 @@
+
+extern GetCycle() : Val;
+
+component IsZero(val: Val) {
+  // Nondeterministically 'guess' the result
+  isZero := NondetReg(Isz(val));
+
+  // Compute the inverse (for non-zero values), for zero values, Inv returns 0
+  inv := NondetReg(Inv(val));
+
+  // isZero should be either 0 or 1
+  isZero * (1 - isZero) = 0;
+  // If isZero is 0 (i.e. nonzero) then val must have an inverse
+  val * inv = 1 - isZero;
+  // If isZero is 1, then val must be zero
+  isZero * val = 0;
+  // If isZero is 1, then inv must be zero
+  isZero * inv = 0;
+  isZero
+}
+
+test IsZeroTest {
+  IsZero(0) = 1;
+  IsZero(1) = 0;
+  IsZero(2) = 0;
+}
+
+component CycleCounter() {
+  global total_cycles := NondetReg(6);
+
+  cycle := NondetReg(GetCycle());
+  is_first_cycle := IsZero(cycle);
+
+  [is_first_cycle, 1-is_first_cycle] -> ({
+    // First cycle; previous cycle should be the last cycle.
+    // cycle@1 = total_cycles - 1;
+  }, {
+    // Not first cycle; cycle number should advance by one for every row.
+    cycle = cycle@1 + 1;
+  });
+  cycle
+}
+
+component Top() {
+  global f0: Reg;
+  global f1: Reg;
+  global steps: Reg;
+
+  cycle := CycleCounter();
+  first := cycle.is_first_cycle;
+
+  // Copy previous two terms forward
+  d2 : Reg;
+  d3 : Reg;
+  d1 := Reg([first, 1-first] -> (f0, d2@1));
+  d2 := Reg([first, 1-first] -> (f1, d3@1));
+
+  // Compute the next Fibonacci term
+  d3 := Reg(d1 + d2);
+
+  // If cycle = steps, write the next term to the output
+  terminate := IsZero(cycle - steps + 1);
+  [terminate, 1 - terminate] -> ({
+    global f_last := Reg(d3);
+    Log("f_last = %u", f_last);
+  }, {});
+}
+
+component FibTest(f0: Val, f1: Val, steps: Val, out: Val) {
+  // Supply inputs
+  global f0 := Reg(f0);
+  global f1 := Reg(f1);
+  global steps := Reg(steps);
+
+  top := Top();
+
+  // Check the output
+  [top.terminate, 1 - top.terminate] -> ({
+    global f_last : Reg;
+    f_last = out;
+  }, {});
+}
+
+test FirstCycle {
+  FibTest(1, 2, 1, 3);
+}
+
+test SecondCycle {
+  FibTest(1, 2, 2, 5);
+}
+
+test SixthCycle {
+  FibTest(1, 2, 6, 34);
+}

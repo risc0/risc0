@@ -1,0 +1,44 @@
+// RUN: not zirgen --emit=zhlt %s 2>&1 | FileCheck %s
+
+// This test covers diagnostics related to implicit layout arguments. When a
+// component constructor makes use of the layout of a parameter, for example to
+// compute a back on it or to alias the layout, the compiler adds the layout as
+// an implicit argument and in turn must resolve the layout at the call sites.
+// Sometimes this isn't feasible, so we add a few diagnostics to make it easier
+// to understand why that is.
+
+component A(a: Val) {
+  a := Reg(a);
+}
+
+component B(a: A) {
+  aa := a;
+  extra := Reg(0);
+  aa
+}
+
+component TakeAsValueOnly(a: A) {}
+
+component TakeAsValueAndLayout(a: A) {
+  a@1.a // Make sure the layout of the parameter is actually used
+}
+
+test {
+  a := A(1);
+  b := B(a);
+
+  // No error
+  // CHECK-NOT: :[[# @LINE + 1]]:{{[0-9]+}}: error
+  TakeAsValueOnly(b);
+
+
+  // the super of b is not part of the layout of b
+  // CHECK: error: type `B` does not own a super layout of type `A`
+  // CHECK: :[[# @LINE + 1]]:{{[0-9]+}}: note: which is expected by this constructor call:
+  TakeAsValueAndLayout(b);
+
+  // the layout of aa is not part of the layout of b
+  // CHECK: error: type `B` does not own the layout of member "aa"
+  // CHECK: :[[# @LINE + 1]]:{{[0-9]+}}: note: which is expected by this constructor call:
+  TakeAsValueAndLayout(b.aa);
+}

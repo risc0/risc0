@@ -1,0 +1,18 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+component A(a: Val, b: A) {
+  a := a;
+  b
+}
+
+component B(b: Val, c: Val) {
+  b := b;
+  c := c;
+}
+
+component TestLookup() {
+  data := A(1, B(2, 3));
+  data.a;
+}
+

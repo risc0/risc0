@@ -1,0 +1,16 @@
+// RUN: zirgen --test %s
+
+extern Output(v: Val);
+
+component Func(v : Val) {
+  for i : 0..5 { v + i }
+}
+
+test Simple {
+  // CHECK: [0] Output(3) -> ()
+  // CHECK: [0] Output(4) -> ()
+  // CHECK: [0] Output(5) -> ()
+  // CHECK: [0] Output(6) -> ()
+  // CHECK: [0] Output(7) -> ()
+  for x : Func(3) { Output(x) }
+}

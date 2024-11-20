@@ -1,0 +1,40 @@
+// Tests reading input two elements at a time
+
+// RUN: zirgen --test %s --input-data-hex 0001020304050607 2>&1 | FileCheck %s
+
+component TwoVals(a: Val, b: Val) {
+  a := a;
+  b := b;
+}
+
+component TwoValsAre(vals: TwoVals, a: Val, b: Val) {
+  NondetReg(vals.a) = a;
+  NondetReg(vals.b) = b;
+}
+
+extern configureInput(bytesPerElem: Val);
+extern readInput() : TwoVals;
+
+test bytes {
+// CHECK-LABEL: Running bytes
+  configureInput(1);
+  TwoValsAre(readInput(), 0, 1);
+  TwoValsAre(readInput(), 2, 3);
+  TwoValsAre(readInput(), 4, 5);
+  TwoValsAre(readInput(), 6, 7);
+}
+
+test shorts {
+// CHECK-LABEL: Running shorts
+  configureInput(2);
+  TwoValsAre(readInput(), 0 + 1 * 256, 2 + 3 * 256);
+  TwoValsAre(readInput(), 4 + 5 * 256, 6 + 7 * 256);
+}
+
+test u32s {
+// CHECK-LABEL: Running u32s
+  configureInput(4);
+  TwoValsAre(readInput(),
+    0 + 1 * 256 + 2 * 256 * 256 + 3 * 256 * 256 * 256,
+    4 + 5 * 256 + 6 * 256 * 256 + 7 * 256 * 256 * 256);
+}

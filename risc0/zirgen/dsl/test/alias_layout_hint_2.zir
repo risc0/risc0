@@ -1,0 +1,32 @@
+// RUN: zirgen %s --emit=layoutattr | FileCheck %s
+
+// CHECK-LABEL: GlobalConstOp "layout$Top": Top
+// CHECK-NEXT:  | c: 
+// CHECK-NEXT:  | | [0]: NondetReg
+// CHECK-NEXT:  | | | @super: 0
+// CHECK-NEXT:  | | [1]: NondetReg
+// CHECK-NEXT:  | | | @super: 1
+// CHECK-NEXT:  | | [2]: NondetReg
+// CHECK-NEXT:  | | | @super: 2
+// CHECK-NEXT:  | | [3]: NondetReg
+// CHECK-NEXT:  | | | @super: 3
+// CHECK-NEXT:  | d: 
+// CHECK-NEXT:  | | [0]: NondetReg
+// CHECK-NEXT:  | | | @super: 0
+// CHECK-NEXT:  | | [1]: NondetReg
+// CHECK-NEXT:  | | | @super: 1
+// CHECK-NEXT:  | | [2]: NondetReg
+// CHECK-NEXT:  | | | @super: 2
+// CHECK-NEXT:  | | [3]: NondetReg
+// CHECK-NEXT:  | | | @super: 3
+
+
+component Top() {
+  c := for i : 0..4 { Reg(i) };
+  d := for i : 0..4 { Reg(c[i]) };
+  AliasLayout!(c, d);
+}
+
+test {
+  Top()
+}

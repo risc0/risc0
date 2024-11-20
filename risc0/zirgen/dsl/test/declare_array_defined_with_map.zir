@@ -1,0 +1,9 @@
+// RUN: zirgen --test %s | FileCheck %s
+
+test {
+  arr : Array<Reg, 4>;
+  arr := for i : 0..4 { Reg(i) };
+
+  // CHECK: arr = [0, 1, 2, 3]
+  Log("arr = [%u, %u, %u, %u]", arr[0], arr[1], arr[2], arr[3]);
+}

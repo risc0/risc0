@@ -1,0 +1,7 @@
+// RUN: not zirgen --emit=ast %s 2>&1 | FileCheck %s
+  // CHECK: error: Expected a condition expression
+
+component Top(x: Val) {
+  a := if (x) { 0 } else { 1 };
+  b := if ( ) { 1 } else { 0 };
+}

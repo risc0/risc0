@@ -1,0 +1,7 @@
+// RUN: not zirgen %s 2>&1 >/dev/null | FileCheck %s
+// CHECK: error: unknown component `ExampleGenericWal`
+
+component SpecializeWithWrongType() {
+  ExampleGenericWal<Val>()
+}
+

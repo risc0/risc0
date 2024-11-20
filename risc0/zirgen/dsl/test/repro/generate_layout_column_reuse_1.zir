@@ -1,0 +1,59 @@
+// RUN: zirgen --test --test-cycles=2 %s
+
+// This test covers a bug where the GenerateLayoutPass could reallocate a column
+// used by a pinned layout for an unrelated component with overlapping lifetime.
+
+extern GetCycle() : Val;
+
+argument Arg(c: Val, x: Val) {
+  count := NondetReg(c);
+  x := NondetReg(x);
+}
+
+// Wrap the argument inside of two different component types to trick the old
+// type-based layout optimizer. If the nested types are exactly the same, the
+// argument members will be shifted to the same offset at the start of the arm,
+// which masked the bug.
+component IncArg(x: Val) {
+  Arg(1, x)
+}
+
+component DecArg(x: Val) {
+  Arg(-1, x)
+}
+
+// This mux arm is considered first; `a` is allocated to columns 0..4 and `b`
+// is allocated to 4..6.
+component Minor1() {
+  a := for i : 0..4 { Reg(i) };
+  b := IncArg(0);
+}
+
+// This mux arm is considered second; the hoisted argument in `b` must now be
+// allocated to columns 4..6. We must not assign `a` to columns 0..8, but rather
+// the disjoint range 0..4 and 6..10.
+component Minor2() {
+  a := for i : 0..8 { Reg(i) };
+  b := DecArg(0);
+}
+
+component Major(cycle: NondetReg) {
+  [cycle, 1 - cycle] -> (
+    Minor1(),
+    Minor2()
+  )
+}
+
+component Top() {
+  cycle := NondetReg(GetCycle());
+  major := NondetReg(InRange(0, cycle, 2));
+  notMajor := Reg(1 - major);
+  [major, notMajor] ->! (
+    Major(cycle),
+    Component()
+  )
+}
+
+test {
+  Top()
+}

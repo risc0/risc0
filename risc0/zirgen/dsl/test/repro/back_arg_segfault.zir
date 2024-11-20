@@ -1,0 +1,10 @@
+// RUN: zirgen %s --emit=zhlt
+
+component Foo(rt1: Reg) {
+    Reg(5)
+}
+
+component Top() {
+    x : Reg;
+    x := Foo(x@1);
+}

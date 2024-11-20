@@ -1,0 +1,3 @@
+load("//bazel/rules/lit:defs.bzl", "glob_lit_tests")
+
+glob_lit_tests(test_file_exts = ["zir"])

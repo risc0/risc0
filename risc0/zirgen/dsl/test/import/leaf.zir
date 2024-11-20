@@ -1,0 +1,5 @@
+// RUN: true
+
+// This defines a leaf thing
+
+extern SomeLeafThing();

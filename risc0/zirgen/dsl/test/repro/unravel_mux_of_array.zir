@@ -1,0 +1,22 @@
+// RUN: zirgen --emit=zstruct %s
+
+// This test covers a bug where we failed to unravel a mux with an array super,
+// which resulted in a SwitchOp persisting into the check function and beyond,
+// which is not allowed and caused a failure at that point in compilation.
+
+component rctable(idx: Val) {
+  arr := [[0, 0, 2],
+          [1, 0, 4]];
+  arr[idx]
+}
+
+extern GetCycle() : Val;
+
+component Top() {
+  cycle := NondetReg(GetCycle());
+  rc := [1 - cycle, cycle] -> (
+    rctable(0),
+    rctable(1)
+  );
+  rc[1] = 0;
+}

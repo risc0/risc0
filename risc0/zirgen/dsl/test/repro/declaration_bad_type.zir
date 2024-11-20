@@ -1,0 +1,8 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error:
+
+component Count() {
+  a : R+eg;
+  a := Reg(1+a@1);
+}
+

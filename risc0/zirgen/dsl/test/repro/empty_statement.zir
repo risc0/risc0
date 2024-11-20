@@ -1,0 +1,8 @@
+// RUN: not zirgen %s 2>&1 | FileCheck %s
+// CHECK: error: expected expression at beginning of statement
+
+component Top() {
+  x := Reg(1);
+; y := Reg(x@1 + x);
+}
+

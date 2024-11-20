@@ -1,0 +1,10 @@
+// RUN: not zirgen --emit=zhlt %s 2>&1 | FileCheck %s
+// CHECK: error: expected a value for type parameter #1
+
+component Foo<n: Val, t: Type>() {}
+
+component Bar() {
+  Foo<0>();
+}
+
+

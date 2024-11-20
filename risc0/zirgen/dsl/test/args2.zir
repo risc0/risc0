@@ -1,0 +1,54 @@
+// RUN: zirgen --test %s --test-cycles=8 2>&1 | FileCheck %s
+
+// Disclaimer: this is a simple (but trivial) test of arguments. The only
+// constraints that it actually has are the ones related to the accumulator of
+// the arguments, and so it would be really easy to construct bad witnesses for
+// this circuit.
+
+// The major mux has two arms which are active on alternating cycles: the first
+// writes the cycle number with a count of +1, and the second writes the
+// previous cycle number with a count of -1, so that the argument columns look
+// like this:
+
+//   c |   v
+// ----+-----
+//   1 |   0
+//  -1 |   0
+//   1 |   2
+//  -1 |   2
+//   1 |   4
+//  -1 |   4
+// ... | ...
+
+// As a result, the accumulator should sum to zero as long as the number of test
+// cycles is a multiple of two.
+
+// CHECK: final accum: [0, 0, 0, 0]
+
+extern GetCycle() : Val;
+
+argument ArgReg(c: Val, v: Val) {
+  c := NondetReg(c);
+  v := NondetReg(v);
+}
+
+component Major1(v: Val) {
+  ArgReg(1, v);
+}
+
+component Major2(v: Val) {
+  ArgReg(-1, v);
+}
+
+component Top() {
+  cycle := NondetReg(GetCycle());
+  major := NondetReg(cycle & 1);
+  notMajor := Reg(1 - major);
+  [notMajor, major] ->! (Major1(cycle), Major2(cycle - 1));
+}
+
+test foo {
+  Top();
+}
+
+

@@ -1,0 +1,14 @@
+// RUN: zirgen %s --emit=zhlt | FileCheck %s
+
+// CHECK-LABEL: zhlt.component @"sized_range<1, 3>"
+// CHECK-DAG: %[[one:[0-9]+]] = zll.const 1
+// CHECK-DAG: %[[two:[0-9]+]] = zll.const 2
+// CHECK-DAG: %[[three:[0-9]+]] = zll.const 3
+// CHECK: zstruct.array[%[[one]], %[[two]], %[[three]]
+function sized_range<start: Val, size: Val>() {
+  start..start+size
+}
+
+component Top() {
+  sized_range<1, 3>()
+}

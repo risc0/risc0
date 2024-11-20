@@ -1,0 +1,17 @@
+// RUN: zirgen --emit=zstruct %s | FileCheck %s
+
+extern Print(x: Val);
+
+component Foo(a: Val) { b := Reg(a); b }
+
+// CHECK-LABEL: zhlt.validity_taps_func @validity_taps
+component HeyMux(a: Val, b: Val, c: Val) {
+  z := [a, 1-a] -> (Foo(b), Foo(c));
+  Print(z.b);
+  z
+}
+
+component Top() {
+  a := HeyMux(0, 2, 7);
+  a = 7;
+}

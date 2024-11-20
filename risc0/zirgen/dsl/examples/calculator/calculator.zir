@@ -1,0 +1,43 @@
+// Simple example circuit that does simple calculations.
+// SECURITY WARNING: This is not an example
+// of a sound zirgen circuit.
+
+extern GetValFromUser() : Val;
+extern OutputToUser(val: Val);
+
+component OneHot(v: Val) {
+  // Type parameters are causing name issues in codegen, so we use a fixed
+  // constant for now.
+  N := 2;
+  // Make N bit registers, with bit v set and all others 0
+  bits := for i : 0..N { NondetReg(Isz(i - v)) };
+  // Verify all elements of bits are actually 0 or 1
+  for bit : bits { bit * (1 - bit) = 0; };
+  // Verify exactly one bit is set
+  reduce bits init 0 with Add = 1;
+  // Verify the right bit is set
+  reduce for i : 0..N { bits[i] * i } init 0 with Add = v;
+  bits
+}
+
+component SetGlobalResult(val: Val) {
+  global result := Reg(val);
+  result
+}
+
+component Top() {
+  op := NondetReg(GetValFromUser());
+  arg1 := NondetReg(GetValFromUser());
+  arg2 := NondetReg(GetValFromUser());
+  expected := NondetReg(GetValFromUser());
+  result := OneHot(op) -> (
+    // add
+    Reg(arg1 + arg2),
+    // subtract
+    Reg(arg1 - arg2)
+  );
+  Log("op = %u, arg1 = %u arg2 = %u result = %u expected = %u", op, arg1, arg2, result, expected);
+  result = expected;
+  SetGlobalResult(5);
+  OutputToUser(result);
+}
