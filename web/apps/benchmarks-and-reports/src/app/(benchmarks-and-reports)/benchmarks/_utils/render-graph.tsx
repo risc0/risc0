@@ -3,16 +3,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@risc0/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip } from "@risc0/ui/chart";
 import { joinWords } from "@risc0/ui/utils/join-words";
 import { Area, AreaChart, CartesianGrid, Label, XAxis, YAxis } from "recharts";
+import { formatNumber } from "shared/utils/format-number";
 import type { FormattedDataSetEntry } from "./collect-benches-per-test-case";
 
 function CustomTooltip({ active, payload }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+
     return (
       <div className="w-[480px] rounded-md bg-black p-2 text-white shadow-2xl">
+        <strong className="mb-4 flex w-full items-center justify-between truncate font-mono text-sm">
+          <span>
+            {data.value} {data.unit}
+          </span>
+          <span className="ml-4 text-[10px] text-muted-foreground">({formatNumber(data.rawValue)} Hz)</span>
+        </strong>
         <div>
           Commit{" "}
-          <Badge className="p-0" variant="secondary">
+          <Badge className="rounded-[4px] px-0.5 py-0" variant="secondary">
             {data.commit}
           </Badge>
         </div>
@@ -21,7 +29,7 @@ function CustomTooltip({ active, payload }) {
         <br />
         <div className="text-[11px]">
           {`Commited on ${new Date(data.commitTimestamp).toUTCString()} by`}{" "}
-          <Badge className="p-0" variant="secondary">
+          <Badge className="rounded-[4px] px-0.5 py-0" variant="secondary">
             @{data.committer}
           </Badge>
         </div>
@@ -30,6 +38,50 @@ function CustomTooltip({ active, payload }) {
   }
 
   return null;
+}
+
+function roundToNiceNumber(value: number) {
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const normalized = value / magnitude;
+
+  if (normalized <= 1) {
+    return Math.ceil(value);
+  }
+
+  if (normalized <= 2) {
+    return Math.ceil(value / 2) * 2;
+  }
+
+  if (normalized <= 5) {
+    return Math.ceil(value / 5) * 5;
+  }
+
+  return Math.ceil(value / 10) * 10;
+}
+
+function determineUnit(values: number[]): "MHz" | "kHz" | "Hz" {
+  const maxValue = Math.max(...values);
+
+  if (maxValue >= 1_000_000) {
+    return "MHz";
+  }
+
+  if (maxValue >= 1_000) {
+    return "kHz";
+  }
+
+  return "Hz";
+}
+
+function convertToUnit(hz: number, unit: "MHz" | "kHz" | "Hz"): number {
+  switch (unit) {
+    case "MHz":
+      return hz / 1_000_000;
+    case "kHz":
+      return hz / 1_000;
+    default:
+      return hz;
+  }
 }
 
 const chartConfig = {
@@ -48,14 +100,25 @@ export function renderGraph({
   benchName: string;
   dataset: FormattedDataSetEntry[];
 }) {
-  const chartData = dataset.map((entry) => ({
-    commit: entry.commit.id.slice(0, 7),
-    value: entry.bench.value,
-    commitUrl: entry.commit.url,
-    commitMessage: entry.commit.message,
-    commitTimestamp: entry.commit.timestamp,
-    committer: entry.commit.committer.username,
-  }));
+  const frequencyUnit = determineUnit(dataset.map((entry) => entry.bench.value));
+
+  const chartData = dataset.map((entry) => {
+    const value = convertToUnit(entry.bench.value, frequencyUnit);
+
+    return {
+      commit: entry.commit.id.slice(0, 7),
+      rawValue: entry.bench.value,
+      value,
+      unit: frequencyUnit,
+      commitUrl: entry.commit.url,
+      commitMessage: entry.commit.message,
+      commitTimestamp: entry.commit.timestamp,
+      committer: entry.commit.committer.username,
+    };
+  });
+
+  const maxValue = Math.max(...chartData.map((d) => d.value));
+  const yAxisMax = roundToNiceNumber(maxValue * 1.2);
 
   return (
     <Card id={`${platformName}-${benchName}`} className="relative w-full border-none bg-transparent pt-8">
@@ -72,7 +135,6 @@ export function renderGraph({
             data={chartData}
             margin={{
               left: 12,
-              right: 12,
             }}
           >
             <CartesianGrid />
@@ -104,14 +166,9 @@ export function renderGraph({
 
             <XAxis dataKey="commit" tickLine={false} axisLine={false} />
 
-            <YAxis
-              dataKey="value"
-              tickLine={false}
-              axisLine={false}
-              domain={[0, (dataMax) => (dataMax * 1.25).toFixed(0)]}
-            >
-              <Label angle={270} offset={8} position="left" style={{ textAnchor: "middle" }}>
-                Hz
+            <YAxis dataKey="value" tickLine={false} axisLine={false} domain={[0, yAxisMax]}>
+              <Label angle={270} position="left" style={{ textAnchor: "middle" }}>
+                {frequencyUnit}
               </Label>
             </YAxis>
 
