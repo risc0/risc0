@@ -8,8 +8,10 @@ To harness the power of ZK, you'll need to:
 2. [Generate proofs for your zkVM application][bonsai-quickstart].
 3. [Integrate your proofs into on-chain applications][bonsai-on-eth].
 
+{/* no_run */}
+
 <Mermaid
-  definition={`no_run
+  definition={`
   flowchart TD
     %% Level 0
     getting_started["Getting Started
