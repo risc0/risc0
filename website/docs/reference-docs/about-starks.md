@@ -11,8 +11,8 @@ By encoding the [execution trace](../proof-system/what-is-a-trace.md) into [poly
 In the context of the RISC Zero zkVM, the term **seal** refers to the zk-STARK that attests to the integrity of the trace.
 The following documentation describes the RISC Zero zk-STARK in more detail:
 
-- [Proof system sequence diagram](../proof-system/proof-system.md) <br/> This document includes a sequence diagram and step-by-step specification of the RISC Zero zk-STARK.
-- [STARK by Hand](../proof-system/stark-by-hand.md) <br/> This document shows a simplified, concrete example of the construction of a RISC Zero seal.
+- [Proof system sequence diagram](../proof-system/proof-system.md) <br /> This document includes a sequence diagram and step-by-step specification of the RISC Zero zk-STARK.
+- [STARK by Hand](../proof-system/stark-by-hand.md) <br /> This document shows a simplified, concrete example of the construction of a RISC Zero seal.
 
 ## References
 
