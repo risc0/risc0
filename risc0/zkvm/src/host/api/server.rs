@@ -18,16 +18,25 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
-    host::{client::slice_io::SliceIo, server::session::NullSegmentRef},
-    Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts, Receipt,
-    ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
+    host::{
+        client::{
+            env::{CoprocessorCallback, ProveZkrRequest},
+            slice_io::SliceIo,
+        },
+        server::session::NullSegmentRef,
+    },
+    prove_zkr,
+    recursion::identity_p254,
+    AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
+    Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
     VerifierContext,
 };
 
@@ -188,6 +197,50 @@ impl TraceCallback for TraceProxy {
     }
 }
 
+struct CoprocessorProxy {
+    conn: ConnectionWrapper,
+}
+
+impl CoprocessorProxy {
+    fn new(conn: ConnectionWrapper) -> Self {
+        Self { conn }
+    }
+}
+
+impl CoprocessorCallback for CoprocessorProxy {
+    fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
+        let request = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
+                        pb::api::CoprocessorRequest {
+                            kind: Some(pb::api::coprocessor_request::Kind::ProveZkr({
+                                pb::api::ProveZkrRequest {
+                                    claim_digest: Some(proof_request.claim_digest.into()),
+                                    control_id: Some(proof_request.control_id.into()),
+                                    input: proof_request.input,
+                                    receipt_out: None,
+                                }
+                            })),
+                        },
+                    )),
+                })),
+            })),
+        };
+        tracing::trace!("tx: {request:?}");
+        self.conn.send(request)?;
+
+        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        tracing::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
+    }
+}
+
 impl Server {
     /// Construct a new [Server] with the specified [Connector].
     pub fn new(connector: Box<dyn Connector>) -> Self {
@@ -247,6 +300,8 @@ impl Server {
                 self.on_identity_p254(conn, request)
             }
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
+            pb::api::server_request::Kind::Verify(request) => self.on_verify(conn, request),
+            pb::api::server_request::Kind::ProveZkr(request) => self.on_prove_zkr(conn, request),
         }
     }
 
@@ -268,40 +323,13 @@ impl Server {
             let bytes = binary.as_bytes()?;
             let mut exec = ExecutorImpl::from_elf(env, &bytes)?;
 
-            let session = exec.run_with_callback(|segment| {
-                let segment_bytes = bincode::serialize(&segment)?;
-                let asset = pb::api::Asset::from_bytes(
-                    &segments_out,
-                    segment_bytes.into(),
-                    format!("segment-{}", segment.index),
-                )?;
-                let msg = pb::api::ServerReply {
-                    kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                        kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                            pb::api::OnSegmentDone {
-                                segment: Some(pb::api::SegmentInfo {
-                                    index: segment.index,
-                                    po2: segment.inner.po2 as u32,
-                                    cycles: segment.inner.insn_cycles as u32,
-                                    segment: Some(asset),
-                                }),
-                            },
-                        )),
-                    })),
-                };
-                tracing::trace!("tx: {msg:?}");
-                conn.send(msg)?;
+            let session = match AssetRequest::try_from(segments_out.clone())? {
+                #[cfg(feature = "redis")]
+                AssetRequest::Redis(params) => execute_redis(conn, &mut exec, params)?,
+                _ => execute_default(conn, &mut exec, &segments_out)?,
+            };
 
-                let reply: pb::api::GenericReply = conn.recv()?;
-                tracing::trace!("rx: {reply:?}");
-                let kind = reply.kind.ok_or(malformed_err())?;
-                if let pb::api::generic_reply::Kind::Error(err) = kind {
-                    bail!(err)
-                }
-
-                Ok(Box::new(NullSegmentRef))
-            })?;
-
+            let receipt_claim = session.claim()?;
             Ok(pb::api::ServerReply {
                 kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                     kind: Some(pb::api::client_callback::Kind::SessionDone(
@@ -310,6 +338,15 @@ impl Server {
                                 segments: session.segments.len().try_into()?,
                                 journal: session.journal.unwrap_or_default().bytes,
                                 exit_code: Some(session.exit_code.into()),
+                                receipt_claim: Some(pb::api::Asset::from_bytes(
+                                    &pb::api::AssetRequest {
+                                        kind: Some(pb::api::asset_request::Kind::Inline(())),
+                                    },
+                                    pb::core::ReceiptClaim::from(receipt_claim)
+                                        .encode_to_vec()
+                                        .into(),
+                                    "session_info.claim",
+                                )?),
                             }),
                         },
                     )),
@@ -415,6 +452,44 @@ impl Server {
         conn.send(msg)
     }
 
+    fn on_prove_zkr(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ProveZkrRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::ProveZkrRequest) -> Result<pb::api::ProveZkrReply> {
+            let control_id = request.control_id.ok_or(malformed_err())?.try_into()?;
+            let receipt = prove_zkr(&control_id, &request.input)?;
+
+            let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ProveZkrReply {
+                kind: Some(pb::api::prove_zkr_reply::Kind::Ok(
+                    pb::api::ProveZkrResult {
+                        receipt: Some(asset),
+                    },
+                )),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ProveZkrReply {
+            kind: Some(pb::api::prove_zkr_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
+                },
+            )),
+        });
+
+        tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
     fn on_lift(&self, mut conn: ConnectionWrapper, request: pb::api::LiftRequest) -> Result<()> {
         fn inner(request: pb::api::LiftRequest) -> Result<pb::api::LiftReply> {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
@@ -445,7 +520,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -483,7 +558,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -534,7 +609,7 @@ impl Server {
             })),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -544,14 +619,11 @@ impl Server {
         request: pb::api::IdentityP254Request,
     ) -> Result<()> {
         fn inner(request: pb::api::IdentityP254Request) -> Result<pb::api::IdentityP254Reply> {
-            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.try_into()?;
             let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
             let succinct_receipt: SuccinctReceipt<ReceiptClaim> =
                 bincode::deserialize(&receipt_bytes)?;
 
-            let prover = get_prover_server(&opts)?;
-            let receipt = prover.identity_p254(&succinct_receipt)?;
-
+            let receipt = identity_p254(&succinct_receipt)?;
             let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
@@ -577,7 +649,7 @@ impl Server {
             )),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -617,7 +689,27 @@ impl Server {
             )),
         });
 
-        tracing::debug!("tx: {msg:?}");
+        // tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_verify(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::VerifyRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::VerifyRequest) -> Result<()> {
+            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
+            let receipt: Receipt =
+                bincode::deserialize(&receipt_bytes).context("deserialize receipt")?;
+            let image_id: Digest = request.image_id.ok_or(malformed_err())?.try_into()?;
+            receipt
+                .verify(image_id)
+                .map_err(|err| anyhow!("verify failed: {err}"))
+        }
+
+        let msg: pb::api::GenericReply = inner(request).into();
+        // tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 }
@@ -655,6 +747,10 @@ fn build_env<'a>(
     }
     if !request.segment_path.is_empty() {
         env_builder.segment_path(Path::new(&request.segment_path));
+    }
+    if request.coprocessor {
+        let proxy = CoprocessorProxy::new(conn.try_clone()?);
+        env_builder.coprocessor_callback(proxy);
     }
 
     for assumption in request.assumptions.iter() {
@@ -708,6 +804,10 @@ impl pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
                 })
             }
+            pb::api::asset_request::Kind::Redis(_) => {
+                tracing::error!("It's likely that r0vm is not installed with the redis feature");
+                bail!("from_bytes not supported for redis")
+            }
         }
     }
 }
@@ -725,6 +825,103 @@ fn check_client_version(client: &semver::Version, server: &semver::Version) -> b
     } else {
         client == server
     }
+}
+
+#[cfg(feature = "redis")]
+fn execute_redis(
+    conn: &mut ConnectionWrapper,
+    exec: &mut ExecutorImpl,
+    params: super::RedisParams,
+) -> Result<crate::Session> {
+    use redis::{Commands, SetExpiry, SetOptions};
+
+    let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {
+        Ok(val_str) => val_str.parse::<usize>().unwrap_or(100),
+        Err(_) => 100,
+    };
+    let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
+    let mut connection_copy = conn.try_clone()?;
+    let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
+        let client = redis::Client::open(params.url)
+            .map_err(anyhow::Error::new)
+            .unwrap();
+        let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
+        while let Ok((segment_key, segment)) = receiver.recv() {
+            let segment_bytes = bincode::serialize(&segment)
+                .map_err(anyhow::Error::new)
+                .unwrap();
+            let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
+            let _: () = connection
+                .set_options(segment_key.clone(), segment_bytes, opts)
+                .map_err(anyhow::Error::new)
+                .unwrap();
+
+            let asset = pb::api::Asset {
+                kind: Some(pb::api::asset::Kind::Redis(segment_key)),
+            };
+            send_segment_done_msg(&mut connection_copy, segment, Some(asset)).unwrap();
+        }
+    });
+
+    let session = exec.run_with_callback(|segment| {
+        let segment_key = format!("{}:{}", params.key, segment.index);
+        sender.send((segment_key, segment))?;
+        Ok(Box::new(NullSegmentRef))
+    });
+
+    drop(sender);
+
+    join_handle.join().expect("redis task failure");
+
+    session
+}
+
+fn execute_default(
+    conn: &mut ConnectionWrapper,
+    exec: &mut ExecutorImpl,
+    segments_out: &pb::api::AssetRequest,
+) -> Result<crate::Session> {
+    exec.run_with_callback(|segment| {
+        let segment_bytes = bincode::serialize(&segment)?;
+        let asset = pb::api::Asset::from_bytes(
+            segments_out,
+            segment_bytes.into(),
+            format!("segment-{}", segment.index),
+        )?;
+        send_segment_done_msg(conn, segment, Some(asset))?;
+        Ok(Box::new(NullSegmentRef))
+    })
+}
+
+fn send_segment_done_msg(
+    conn: &mut ConnectionWrapper,
+    segment: Segment,
+    some_asset: Option<pb::api::Asset>,
+) -> Result<()> {
+    let segment = Some(pb::api::SegmentInfo {
+        index: segment.index,
+        po2: segment.inner.po2 as u32,
+        cycles: segment.inner.insn_cycles as u32,
+        segment: some_asset,
+    });
+
+    let msg = pb::api::ServerReply {
+        kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+            kind: Some(pb::api::client_callback::Kind::SegmentDone(
+                pb::api::OnSegmentDone { segment },
+            )),
+        })),
+    };
+    tracing::trace!("tx: {msg:?}");
+    conn.send(msg)?;
+
+    let reply: pb::api::GenericReply = conn.recv()?;
+    tracing::trace!("rx: {reply:?}");
+    let kind = reply.kind.ok_or(malformed_err())?;
+    if let pb::api::generic_reply::Kind::Error(err) = kind {
+        bail!(err)
+    }
+    Ok(())
 }
 
 #[cfg(test)]

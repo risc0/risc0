@@ -14,9 +14,10 @@
 
 use std::path::Path;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_zkp::core::digest::Digest;
 
 use super::{
     malformed_err, pb, Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector,
@@ -24,7 +25,10 @@ use super::{
 };
 use crate::{
     get_version,
-    host::{api::SegmentInfo, client::prove::get_r0vm_path},
+    host::{
+        api::SegmentInfo,
+        client::{env::ProveZkrRequest, prove::get_r0vm_path},
+    },
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
     ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
@@ -32,6 +36,7 @@ use crate::{
 /// A client implementation for interacting with a zkVM server.
 pub struct Client {
     connector: Box<dyn Connector>,
+    compat: bool,
 }
 
 impl Default for Client {
@@ -53,6 +58,18 @@ impl Client {
         Ok(Self::with_connector(Box::new(connector)))
     }
 
+    /// Construct a [Client] that connects to a sub-process which implements
+    /// the server by calling the specified `server_path`.
+    ///
+    /// Additionally allows for wider version mismatches, only rejecting major differences
+    pub fn new_sub_process_compat<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let connector = ParentProcessConnector::new_wide_version(server_path)?;
+        Ok(Self {
+            connector: Box::new(connector),
+            compat: true,
+        })
+    }
+
     /// Construct a [Client] based on environment variables.
     pub fn from_env() -> Result<Self> {
         Client::new_sub_process(get_r0vm_path()?)
@@ -61,7 +78,10 @@ impl Client {
     /// Construct a [Client] using the specified [Connector] to establish a
     /// connection with the server.
     pub fn with_connector(connector: Box<dyn Connector>) -> Self {
-        Self { connector }
+        Self {
+            connector,
+            compat: false,
+        }
     }
 
     /// Prove the specified ELF binary.
@@ -119,7 +139,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let result = self.execute_handler(segment_callback, &mut conn, env);
@@ -150,7 +170,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::ProveSegmentReply = conn.recv()?;
@@ -162,6 +182,52 @@ impl Client {
                 receipt_pb.try_into()
             }
             pb::api::prove_segment_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Prove the specified ZKR proof request.
+    #[stability::unstable]
+    pub fn prove_zkr<Claim>(
+        &self,
+        proof_request: ProveZkrRequest,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt<Claim>>
+    where
+        Claim: risc0_binfmt::Digestible + std::fmt::Debug + Clone + serde::Serialize,
+        crate::MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+    {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::ProveZkr(
+                pb::api::ProveZkrRequest {
+                    claim_digest: Some(proof_request.claim_digest.into()),
+                    control_id: Some(proof_request.control_id.into()),
+                    input: proof_request.input,
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+
+        tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::ProveZkrReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::prove_zkr_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::prove_zkr_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -193,7 +259,7 @@ impl Client {
                 receipt_out: Some(receipt_out.try_into()?),
             })),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::LiftReply = conn.recv()?;
@@ -236,7 +302,7 @@ impl Client {
                 receipt_out: Some(receipt_out.try_into()?),
             })),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::JoinReply = conn.recv()?;
@@ -283,7 +349,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::ResolveReply = conn.recv()?;
@@ -327,7 +393,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::IdentityP254Reply = conn.recv()?;
@@ -390,7 +456,7 @@ impl Client {
                 },
             )),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::CompressReply = conn.recv()?;
@@ -412,6 +478,36 @@ impl Client {
         result
     }
 
+    /// Verify a [Receipt].
+    pub fn verify(&self, receipt: Asset, image_id: impl Into<Digest>) -> Result<()> {
+        let mut conn = self.connect().context("connect")?;
+        let image_id = image_id.into();
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Verify(
+                pb::api::VerifyRequest {
+                    receipt: Some(receipt.try_into().context("convert receipt asset")?),
+                    image_id: Some(image_id.into()),
+                },
+            )),
+        };
+        // tracing::trace!("tx: {request:?}");
+        conn.send(request).context("send")?;
+
+        let reply: pb::api::GenericReply = conn.recv().context("error from server")?;
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::generic_reply::Kind::Ok(ok) => Ok(ok),
+            pb::api::generic_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close().context("close")?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
     fn connect(&self) -> Result<ConnectionWrapper> {
         let mut conn = self.connector.connect()?;
 
@@ -419,11 +515,11 @@ impl Client {
         let request = pb::api::HelloRequest {
             version: Some(client_version.clone().into()),
         };
-        tracing::trace!("tx: {request:?}");
+        // tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::HelloReply = conn.recv()?;
-        tracing::trace!("rx: {reply:?}");
+        // tracing::trace!("rx: {reply:?}");
         match reply.kind.ok_or(malformed_err())? {
             pb::api::hello_reply::Kind::Ok(reply) => {
                 let server_version: semver::Version = reply
@@ -431,7 +527,13 @@ impl Client {
                     .ok_or(malformed_err())?
                     .try_into()
                     .map_err(|err: semver::Error| anyhow!(err))?;
-                if !check_server_version(&client_version, &server_version) {
+
+                let version_check = if self.compat {
+                    check_server_version_wide
+                } else {
+                    check_server_version
+                };
+                if !version_check(&client_version, &server_version) {
                     let msg = format!("incompatible server version: {server_version}");
                     tracing::warn!("{msg}");
                     bail!(msg);
@@ -462,6 +564,7 @@ impl Client {
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
             trace_events: (!env.trace.is_empty()).then_some(()),
+            coprocessor: env.coprocessor.is_some(),
             pprof_out: env
                 .pprof_out
                 .as_ref()
@@ -470,7 +573,7 @@ impl Client {
             assumptions: env
                 .assumptions
                 .borrow()
-                .cached
+                .0
                 .iter()
                 .map(|a| {
                     Ok(match a {
@@ -518,14 +621,14 @@ impl Client {
         let mut segments = Vec::new();
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
-            tracing::trace!("rx: {reply:?}");
+            // tracing::trace!("rx: {reply:?}");
 
             match reply.kind.ok_or(malformed_err())? {
                 pb::api::server_reply::Kind::Ok(request) => {
                     match request.kind.ok_or(malformed_err())? {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                            tracing::trace!("tx: {msg:?}");
+                            // tracing::trace!("tx: {msg:?}");
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(segment) => {
@@ -545,7 +648,7 @@ impl Client {
                                     },
                                 )
                                 .into();
-                            tracing::trace!("tx: {reply:?}");
+                            // tracing::trace!("tx: {reply:?}");
                             conn.send(reply)?;
                         }
                         pb::api::client_callback::Kind::SessionDone(session) => {
@@ -557,6 +660,10 @@ impl Client {
                                         .exit_code
                                         .ok_or(malformed_err())?
                                         .try_into()?,
+                                    receipt_claim: pb::core::ReceiptClaim::decode(
+                                        session.receipt_claim.ok_or(malformed_err())?.as_bytes()?,
+                                    )?
+                                    .try_into()?,
                                 }),
                                 None => Err(malformed_err()),
                             }
@@ -578,14 +685,14 @@ impl Client {
     ) -> Result<pb::api::Asset> {
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
-            tracing::trace!("rx: {reply:?}");
+            // tracing::trace!("rx: {reply:?}");
 
             match reply.kind.ok_or(malformed_err())? {
                 pb::api::server_reply::Kind::Ok(request) => {
                     match request.kind.ok_or(malformed_err())? {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                            tracing::trace!("tx: {msg:?}");
+                            // tracing::trace!("tx: {msg:?}");
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(_) => {
@@ -623,6 +730,10 @@ impl Client {
             }
             pb::api::on_io_request::Kind::Trace(event) => {
                 self.on_trace(env, event)?;
+                Ok(Bytes::new())
+            }
+            pb::api::on_io_request::Kind::Coprocessor(request) => {
+                self.on_coprocessor(env, request)?;
                 Ok(Bytes::new())
             }
         }
@@ -664,6 +775,21 @@ impl Client {
         }
         Ok(())
     }
+
+    fn on_coprocessor(
+        &self,
+        env: &ExecutorEnv<'_>,
+        coprocessor_request: pb::api::CoprocessorRequest,
+    ) -> Result<()> {
+        match coprocessor_request.kind.ok_or(malformed_err())? {
+            pb::api::coprocessor_request::Kind::ProveZkr(proof_request) => {
+                let proof_request = proof_request.try_into()?;
+                let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
+                let mut coprocessor = coprocessor.borrow_mut();
+                coprocessor.prove_zkr(proof_request)
+            }
+        }
+    }
 }
 
 impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
@@ -685,11 +811,18 @@ pub(crate) fn check_server_version(requested: &semver::Version, server: &semver:
     }
 }
 
+pub(crate) fn check_server_version_wide(
+    requested: &semver::Version,
+    server: &semver::Version,
+) -> bool {
+    requested.major == server.major
+}
+
 #[cfg(test)]
 mod tests {
     use semver::Version;
 
-    use super::check_server_version;
+    use super::{check_server_version, check_server_version_wide};
 
     #[test]
     fn check_version() {
@@ -718,5 +851,22 @@ mod tests {
 
         assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
         assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
+    }
+
+    #[test]
+    fn check_wide_version() {
+        fn test(requested: &str, server: &str) -> bool {
+            check_server_version_wide(
+                &Version::parse(requested).unwrap(),
+                &Version::parse(server).unwrap(),
+            )
+        }
+
+        assert!(test("0.1.0", "0.1.0"));
+        assert!(test("0.1.0", "0.1.1"));
+        assert!(test("0.1.0", "0.2.0"));
+        assert!(test("0.1.0-rc.1", "0.2.0"));
+        assert!(test("1.1.0", "1.0.0"));
+        assert!(!test("1.0.0", "2.0.0"));
     }
 }

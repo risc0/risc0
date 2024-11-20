@@ -16,7 +16,6 @@ reqwest = { version = "0.12", default-features = false, features = [
   "rustls-tls",
   "stream",
 ] }
-risc0-groth16 = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 tokio = { version = "1", features = ["fs"], optional = true }
@@ -31,11 +30,10 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 temp-env = "0.3"
 tokio = { version = "1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-uuid = { version = "1.10", features = ["v4"] }
+uuid = { version = "1.11", features = ["v4"] }
 
 [features]
-default = ["std"]
-std = ["risc0-groth16/std"]
+default = []
 non_blocking = ["dep:tokio"]
 
 [package.metadata.docs.rs]

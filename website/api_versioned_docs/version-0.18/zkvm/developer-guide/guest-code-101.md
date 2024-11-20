@@ -68,9 +68,9 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [`env::write`]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest/env/fn.write.html
 [`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
-[Bonsai]: ../../bonsai/
+[Bonsai]: ../../bonsai
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples
 [guest]: /terminology#guest
 [guest code]: /terminology#guest
 [Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
@@ -78,6 +78,6 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [journal]: /terminology#journal
 [template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
 [these docs]: https://github.com/risc0/risc0/issues/new/choose
-[zkVM]: ../
-[zkVM Application]: ../
+[zkVM]: ..
+[zkVM Application]: ..
 [zkVM Quick Start]: ../quickstart.md

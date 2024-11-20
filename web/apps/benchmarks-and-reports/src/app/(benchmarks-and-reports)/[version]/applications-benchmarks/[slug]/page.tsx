@@ -18,26 +18,26 @@ export function generateStaticParams() {
   });
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: {
-    slug: string;
+export async function generateMetadata(props: {
+  params: Promise<{
     version: Version;
-  };
+    slug: string;
+  }>;
 }) {
+  const params = await props.params;
+
   const applicationsBenchmarks = APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version];
   const slugLabel = Object.values(
     pick(applicationsBenchmarks, [`${params.slug}.csv` as keyof typeof applicationsBenchmarks]),
   )[0];
 
   return {
-    title: `${slugLabel ? `${slugLabel} | ` : ""}Applications Benchmark`,
+    title: `${slugLabel ? `${slugLabel} ` : ""}Applications Benchmark`,
     description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
     openGraph: {
       images: [
         {
-          url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+          url: `https://reports.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
             APPLICATIONS_BENCHMARKS_DESCRIPTION,
           )}`,
         },
@@ -46,17 +46,17 @@ export function generateMetadata({
   };
 }
 
-export default function ApplicationsBenchmarksPage({
-  params,
-}: {
-  params: {
-    slug: string;
+export default async function ApplicationsBenchmarksPage(props: {
+  params: Promise<{
     version: Version;
-  };
+    slug: string;
+  }>;
 }) {
+  const params = await props.params;
+
   return (
     <Tabs className="mt-6" defaultValue={params.slug}>
-      <TabsList>
+      <TabsList className="flex flex-wrap justify-start">
         {Object.keys(APPLICATIONS_BENCHMARKS_FILENAMES_TO_TITLES[params.version]).map((filename, index) => (
           <Link
             tabIndex={-1}

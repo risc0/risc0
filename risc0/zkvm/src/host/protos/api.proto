@@ -15,6 +15,8 @@ message ServerRequest {
     IdentityP254Request identity_p254 = 6;
     ResolveRequest resolve = 7;
     CompressRequest compress = 8;
+    VerifyRequest verify = 9;
+    ProveZkrRequest prove_zkr = 10;
   }
 }
 
@@ -55,6 +57,25 @@ message ProveSegmentReply {
     ProveSegmentResult ok = 1;
     GenericError error = 2;
   }
+}
+
+message ProveZkrRequest {
+  base.Digest claim_digest = 1;
+  base.Digest control_id = 2;
+  bytes input = 3;
+  // This is optional in the context of a CoprocessorRequest
+  AssetRequest receipt_out = 4;
+}
+
+message ProveZkrReply {
+  oneof kind {
+    ProveZkrResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message ProveZkrResult {
+  Asset receipt = 1;
 }
 
 message LiftRequest {
@@ -144,6 +165,11 @@ message CompressResult {
   Asset receipt = 1;
 }
 
+message VerifyRequest {
+  Asset receipt = 1;
+  base.Digest image_id = 2;
+}
+
 message ExecutorEnv {
   Asset binary = 1;
   map<string, string> env_vars = 2;
@@ -158,6 +184,7 @@ message ExecutorEnv {
   string pprof_out = 10;
   repeated AssumptionReceipt assumptions = 11;
   string segment_path = 12;
+  bool coprocessor = 13;
 }
 
 message AssumptionReceipt {
@@ -172,6 +199,7 @@ message ProverOpts {
   bool prove_guest_errors = 2;
   ReceiptKind receipt_kind = 3;
   repeated base.Digest control_ids = 4;
+  uint64 max_segment_po2 = 5;
 }
 
 enum ReceiptKind {
@@ -184,6 +212,7 @@ message SessionInfo {
   uint32 segments = 1;
   bytes journal = 2;
   base.ExitCode exit_code = 3;
+  Asset receipt_claim = 4;
 }
 
 message SegmentInfo {
@@ -197,10 +226,17 @@ message ProveSegmentResult {
   Asset receipt = 1;
 }
 
+message RedisParams {
+  string url = 1;
+  string key = 2;
+  uint64 ttl = 3;
+}
+
 message Asset {
   oneof kind {
     bytes inline = 1;
     string path = 2;
+    string redis = 3;
   }
 }
 
@@ -208,6 +244,7 @@ message AssetRequest {
   oneof kind {
     google.protobuf.Empty inline = 1;
     string path = 2;
+    RedisParams redis = 3;
   }
 }
 
@@ -232,6 +269,7 @@ message OnIoRequest {
     PosixIo posix = 1;
     SliceIo slice = 2;
     TraceEvent trace = 3;
+    CoprocessorRequest coprocessor = 4;
   }
 }
 
@@ -277,6 +315,12 @@ message TraceEvent {
   }
 }
 
+message CoprocessorRequest {
+  oneof kind {
+    ProveZkrRequest prove_zkr = 1;
+  }
+}
+
 message OnIoReply {
   oneof kind {
     bytes ok = 1;
@@ -312,10 +356,12 @@ service Server {
   rpc prove(ProveRequest) returns (stream ServerReply);
   rpc execute(ExecuteRequest) returns (stream ServerReply);
   rpc prove_segment(ProveSegmentRequest) returns (ProveSegmentReply);
+  rpc prove_zkr(ProveZkrRequest) returns (ProveZkrReply);
   rpc lift(LiftRequest) returns (LiftReply);
   rpc join(JoinRequest) returns (JoinReply);
   rpc resolve(ResolveRequest) returns (ResolveReply);
   rpc compress(CompressRequest) returns (CompressReply);
+  rpc verify(VerifyRequest) returns (GenericReply);
 }
 
 service ExecuteCallback {

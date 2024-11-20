@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: `https://benchmarks.risczero.com/api/og?title=Datasheet&description=${encodeURIComponent(
+        url: `https://reports.risczero.com/api/og?title=Datasheet&description=${encodeURIComponent(
           DATASHEET_DESCRIPTION,
         )}`,
       },
@@ -26,15 +26,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DatasheetPage({
-  params,
-}: {
-  params: {
+export default async function DatasheetPage(props: {
+  params: Promise<{
     version: Version;
-  };
+  }>;
 }) {
+  const params = await props.params;
   return (
-    <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-2">
+    <div className="mt-6 grid grid-cols-1 gap-8">
       <Suspense fallback={<DatasheetSkeleton />}>
         <DatasheetContent version={params.version} />
       </Suspense>

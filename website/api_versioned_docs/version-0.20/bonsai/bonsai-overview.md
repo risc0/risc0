@@ -59,7 +59,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [Bonsai Pay]: https://www.risczero.com/news/bonsai-pay
 [Bonsai Quick Start]: quickstart.md
-[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
+[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance#readme
 [guest program]: /terminology#guest-program

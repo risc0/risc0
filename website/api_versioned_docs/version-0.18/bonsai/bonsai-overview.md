@@ -76,7 +76,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonfire Wallet]: https://ethglobal.com/showcase/bonfire-wallet-n1dzp
 [Bonsai as a zk coprocessor]: https://www.risczero.com/blog/a-guide-to-zk-coprocessors-for-scalability
 [Bonsai Quick Start]: ../bonsai/quickstart.md
-[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
+[Bonsai REST API]: https://api.bonsai.xyz/swagger-ui
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance#readme
 [litepaper]: /litepaper

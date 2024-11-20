@@ -23,7 +23,10 @@ use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::{client::env::SegmentPath, prove_info::SessionStats},
+    host::{
+        client::env::{ProveZkrRequest, SegmentPath},
+        prove_info::SessionStats,
+    },
     sha::Digest,
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
     ReceiptClaim,
@@ -71,6 +74,12 @@ pub struct Session {
     /// padding.
     pub user_cycles: u64,
 
+    /// The number of cycles needed for paging operations.
+    pub paging_cycles: u64,
+
+    /// The number of cycles needed for the proof system which includes padding up to the nearest power of 2.
+    pub reserved_cycles: u64,
+
     /// Total number of cycles that a prover experiences. This includes overhead
     /// associated with continuations and padding up to the nearest power of 2.
     pub total_cycles: u64,
@@ -80,6 +89,10 @@ pub struct Session {
 
     /// The system state of the final [MemoryImage] at the end of execution.
     pub post_state: SystemState,
+
+    /// A list of pending ZKR proof requests.
+    // TODO: make this scalable so we don't OOM
+    pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
 }
 
 /// The execution trace of a portion of a program.
@@ -132,7 +145,7 @@ pub trait SessionEvents {
 impl Session {
     /// Construct a new [Session] from its constituent components.
     #[allow(clippy::too_many_arguments)]
-    pub fn new(
+    pub(crate) fn new(
         segments: Vec<Box<dyn SegmentRef>>,
         input: Digest,
         journal: Option<Vec<u8>>,
@@ -140,9 +153,12 @@ impl Session {
         post_image: MemoryImage,
         assumptions: Vec<(Assumption, AssumptionReceipt)>,
         user_cycles: u64,
+        paging_cycles: u64,
+        padding_cycles: u64,
         total_cycles: u64,
         pre_state: SystemState,
         post_state: SystemState,
+        pending_zkrs: Vec<ProveZkrRequest>,
     ) -> Self {
         Self {
             segments,
@@ -153,9 +169,12 @@ impl Session {
             assumptions,
             hooks: Vec::new(),
             user_cycles,
+            paging_cycles,
+            reserved_cycles: padding_cycles,
             total_cycles,
             pre_state,
             post_state,
+            pending_zkrs,
         }
     }
 
@@ -171,6 +190,13 @@ impl Session {
         // Construct the Output struct for the session, checking internal consistency.
         // NOTE: The Session output is distinct from the final Segment output because in the
         // Session output any proven assumptions are not included.
+        self.claim_with_assumptions(self.assumptions.iter().map(|(_, x)| x))
+    }
+
+    pub(crate) fn claim_with_assumptions<'a>(
+        &self,
+        assumptions: impl Iterator<Item = &'a AssumptionReceipt>,
+    ) -> Result<ReceiptClaim> {
         let output = if self.exit_code.expects_output() {
             self.journal
                 .as_ref()
@@ -178,9 +204,8 @@ impl Session {
                     Ok(Output {
                         journal: journal.bytes.clone().into(),
                         assumptions: Assumptions(
-                            self.assumptions
-                                .iter()
-                                .filter_map(|(_, ar)| match ar {
+                            assumptions
+                                .filter_map(|x| match x {
                                     AssumptionReceipt::Proven(_) => None,
                                     AssumptionReceipt::Unresolved(a) => Some(a.clone().into()),
                                 })
@@ -217,12 +242,28 @@ impl Session {
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
     pub fn log(&self) {
-        let cycle_efficiency = self.user_cycles as f64 / self.total_cycles as f64 * 100.0;
-
         tracing::info!("number of segments: {}", self.segments.len());
         tracing::info!("total cycles: {}", self.total_cycles);
-        tracing::info!("user cycles: {}", self.user_cycles);
-        tracing::debug!("cycle efficiency: {}%", cycle_efficiency as u32);
+        tracing::info!(
+            "user cycles: {} ({:.2}%)",
+            self.user_cycles,
+            self.user_cycles as f64 / self.total_cycles as f64 * 100.0
+        );
+        tracing::info!(
+            "paging cycles: {} ({:.2}%)",
+            self.paging_cycles,
+            self.paging_cycles as f64 / self.total_cycles as f64 * 100.0
+        );
+        tracing::info!(
+            "reserved cycles: {} ({:.2}%)",
+            self.reserved_cycles,
+            self.reserved_cycles as f64 / self.total_cycles as f64 * 100.0
+        );
+
+        assert_eq!(
+            self.total_cycles,
+            self.user_cycles + self.paging_cycles + self.reserved_cycles
+        );
     }
 
     /// Returns stats for the session
@@ -233,6 +274,8 @@ impl Session {
             segments: self.segments.len(),
             total_cycles: self.total_cycles,
             user_cycles: self.user_cycles,
+            paging_cycles: self.paging_cycles,
+            reserved_cycles: self.reserved_cycles,
         }
     }
 }

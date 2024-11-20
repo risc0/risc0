@@ -53,7 +53,7 @@ Many of these resources assume you are developing without the aid of Bonsai. Her
 [host]: /terminology#host
 [journal]: /terminology#journal
 [receipt]: /terminology#receipt
-[Rust]: https://www.rust-lang.org/
+[Rust]: https://www.rust-lang.org
 [rust-learn]: https://www.rust-lang.org/learn
 [term-guest-program]: /terminology#guest-program
 [term-zkvm]: /terminology#zero-knowledge-virtual-machine-zkvm

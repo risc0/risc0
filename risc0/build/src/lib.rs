@@ -38,11 +38,15 @@ use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-use crate::config::GuestBuildOptions;
-use crate::docker::build_guest_package_docker;
-use config::GuestMetadata;
-pub use config::{DockerOptions, GuestOptions};
-pub use docker::{docker_build, BuildStatus, TARGET_DIR};
+use self::{
+    config::{GuestBuildOptions, GuestMetadata},
+    docker::build_guest_package_docker,
+};
+
+pub use self::{
+    config::{DockerOptions, GuestOptions},
+    docker::{docker_build, BuildStatus, TARGET_DIR},
+};
 
 /// This const represents a filename that is used in the use to indicate to in
 /// order to indicate to the client and the risc0-build crate that the new rust
@@ -171,12 +175,13 @@ pub struct GuestListEntry {
 fn r0vm_image_id(path: &str) -> Result<Digest> {
     use hex::FromHex;
     let output = Command::new("r0vm")
+        .env_remove("RUST_LOG")
         .args(["--elf", path, "--id"])
         .output()?;
     if output.status.success() {
         let stdout = String::from_utf8(output.stdout)?;
         let digest = stdout.trim();
-        Ok(Digest::from_hex(digest)?)
+        Ok(Digest::from_hex(digest).context("expecting a hex string")?)
     } else {
         let stderr = String::from_utf8(output.stderr)?;
         Err(anyhow!("{stderr}"))
@@ -192,7 +197,7 @@ impl GuestBuilder for GuestListEntry {
             let image_id = match r0vm_image_id(elf_path) {
                 Ok(image_id) => image_id,
                 Err(err) => {
-                    tty_println(&format!("{err}"));
+                    tty_println(&format!("failed to get image ID using r0vm: {err}"));
                     compute_image_id(&elf)?
                 }
             };
@@ -482,18 +487,25 @@ fn cpp_toolchain_override() -> bool {
 
 /// Builds a static library providing a rust runtime.
 ///
-/// This can be used to build programs for the zkvm which don't depend on
-/// risc0_zkvm.
+/// This can be used to build programs for the zkvm which don't depend on risc0_zkvm.
 pub fn build_rust_runtime() -> String {
+    build_rust_runtime_with_features(&[])
+}
+
+/// Builds a static library providing a rust runtime, with additional features given as arguments.
+///
+/// This can be used to build programs for the zkvm which don't depend on risc0_zkvm. Feature flags
+/// given will be pass when building risc0-zkvm-platform.
+pub fn build_rust_runtime_with_features(features: &[&str]) -> String {
     build_staticlib(
         "risc0-zkvm-platform",
-        &["rust-runtime", "panic-handler", "entrypoint", "getrandom"],
+        &[&["rust-runtime", "panic-handler", "entrypoint"], features].concat(),
     )
 }
 
 /// Builds a static library and returns the name of the resultant file.
 fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
-    let guest_dir = get_guest_dir();
+    let guest_dir = get_guest_dir("static-lib", guest_pkg);
 
     let mut cmd = cargo_command("rustc", &[]);
 
@@ -662,8 +674,7 @@ fn detect_toolchain(name: &str) {
     }
 }
 
-fn get_guest_dir() -> PathBuf {
-    // Determine the output directory, in the target folder, for the guest binary.
+fn get_out_dir() -> PathBuf {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     out_dir
@@ -676,6 +687,10 @@ fn get_guest_dir() -> PathBuf {
         .parent() // $profile
         .unwrap()
         .join("riscv-guest")
+}
+
+fn get_guest_dir<H: AsRef<Path>, G: AsRef<Path>>(host_pkg: H, guest_pkg: G) -> PathBuf {
+    get_out_dir().join(host_pkg).join(guest_pkg)
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
@@ -709,7 +724,7 @@ fn do_embed_methods<G: GuestBuilder>(
 ) -> Vec<G> {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-    let guest_dir = get_guest_dir();
+
     // Read the cargo metadata for info from `[package.metadata.risc0]`.
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
@@ -752,8 +767,9 @@ fn do_embed_methods<G: GuestBuilder>(
                 &guest_build_opts,
             )
             .unwrap();
-            guest_methods_docker(&guest_pkg, &guest_dir)
+            guest_methods_docker(&guest_pkg, &get_out_dir())
         } else {
+            let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
             build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);
             guest_methods(&guest_pkg, &guest_dir, &guest_build_opts.features)
         };

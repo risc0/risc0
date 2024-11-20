@@ -36,12 +36,13 @@ it the [pprof] tool.
 Run the Fibonacci profiling example with:
 
 ```bash
-RISC0_PPROF_OUT=./profile.pb cargo run
+RISC0_PPROF_OUT=./profile.pb RISC0_DEV_MODE=1 cargo run
 ```
 
 The above command will run the Fibonacci computation for 1000 iterations and
 write the profiling output to `profile.pb`. Use the environment variable
-`RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
+`RISC0_PPROF_OUT` to set to the desired output path for the profiling data. 
+We recommend running profiling in [dev mode][devmode] to avoid unneccesary proving time. 
 
 ### Step 3: Visualization
 
@@ -92,21 +93,22 @@ web interface.
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-    {/* HACK: This comment prevents the list below from being interpreted to be a code block */}
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-    {/* */}
+
+    1. It would be cost prohibitive to do so for all but quite short program
+       executions.
+    2. Introducing such heavy profiling would actually alter the performance
+       characteristics in significant ways.
+
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
 
 [cycle count]: /terminology#clock-cycles
+[devmode]: ../generating-proofs/dev-mode
 [example-profiling]: https://github.com/risc0/risc0/tree/main/examples/profiling
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [install]: ./install.md
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [pprof]: https://github.com/google/pprof
-[profiler]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+[profiler]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction

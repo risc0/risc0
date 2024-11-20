@@ -192,24 +192,27 @@ host; as a CPU would use a hard drive.
 
 The first time a page is accessed in a segment, it needs to be **paged-in**,
 loading it from the host. Confirming the page is correct, the guest verifies a
-Merkle inclusion proof for the page against the image ID. These hashing
-operations required take a number of cycles.
-
-**A page-in operation takes between 1094 and 5130 cycles; 1130 cycles on
-average.**
-
-The very first page-in takes longer, 5130 cycles, because it needs to traverse
-up the page table (i.e. Merkle tree) all the way to the root, which is equal to
-the image ID. Once a path is verified, it doesn't need to be hashed again, so
-most page-in operations only need to hash the leaf (i.e. data) page. If a
-program were to iterate over memory in sequence, it would cost on average 1130
-cycles per page, or 1.35 cycles per byte.
+Merkle inclusion proof for the page against the image ID. Note as well that the
+address of the program counter must be paged-in, as instructions are loaded
+from memory. These hashing operations required take a number of cycles.
 
 In order to support continuation after the segment ends (i.e. the zkVM
 "hibernates"), it needs to **page-out** pages that were modified. Paging-out
 takes the same number of operations as paging-in, so for the first time any
-given page is written to in a segment, there is an page-out cost of 1094 to 5130
-cycles.
+given page is written to in a segment, it is marked as "dirty". At the end
+of segment execution, every dirty page must be "paged-out" at a cost of 1094 to
+5130 cycles. An exception to this rule is the last segment, where no paging out
+occurs, since there will be no continuation from the last segment.
+
+**A page-in or page-out operation takes between 1094 and 5130 cycles; 1130
+cycles on average.**
+
+The very first page-in or page-out takes longer, 5130 cycles, because it needs
+to traverse up the page table (i.e. Merkle tree) all the way to the root, which
+is equal to the image ID. Once a path is verified, it doesn't need to be hashed
+again, so most page-in operations only need to hash the leaf (i.e. data) page.
+If a program were to iterate over memory in sequence, it would cost on average
+1130 cycles per page, or 1.35 cycles per byte.
 
 If, after profiling your application, you learn page-in and page-out operations
 are a significant overhead, you can optimize your application by reducing it's
@@ -416,14 +419,14 @@ cycle counts added.
 | BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
 | BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 \< rs2 then pc ← pc + offset            | 1                                               |
 | BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
-| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LB rd,offset(rs1)   | Load Byte                          | rd ← s8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LH rd,offset(rs1)   | Load Half                          | rd ← s16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LW rd,offset(rs1)   | Load Word                          | rd ← s32\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8\[rs1 + offset]                         | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16\[rs1 + offset]                        | 1 if [paged-in](#paging) 1095 to 5131 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8\[rs1 + offset] ← rs2                        | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SH rs2,offset(rs1)  | Store Half                         | u16\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
+| SW rs2,offset(rs1)  | Store Word                         | u32\[rs1 + offset] ← rs2                       | 1 if [dirty](#paging) 1095 to 5131 otherwise    |
 | ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
 | SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) \< sx(imm)                        | 1                                               |
 | SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) \< ux(imm)                        | 1                                               |
@@ -472,12 +475,12 @@ below.
     stack at every cycle of program execution. Capturing a call stack on every
     cycle of execution is not done in most programs on physical CPUs for a few
     reasons:
-    {/* HACK: This comment prevents the list below from being interpreted to be a code block */}
-    - It would be cost prohibitive to do so for all but quite short program
-      executions.
-    - Introducing such heavy profiling would actually alter the performance
-      characteristics in significant ways.
-    {/* */}
+
+    1. It would be cost prohibitive to do so for all but quite short program
+       executions.
+    2. Introducing such heavy profiling would actually alter the performance
+       characteristics in significant ways.
+
     In zkVM execution, executions are generally short and all execution is
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
@@ -486,7 +489,7 @@ below.
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
-[`counts`]: https://github.com/nnethercote/counts/
+[`counts`]: https://github.com/nnethercote/counts
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/guest/env/fn.read.html
@@ -499,7 +502,7 @@ below.
 [arithmetic circuits]: /reference-docs/about-arithmetic-circuits
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
-[CBOR]: https://cbor.io/
+[CBOR]: https://cbor.io
 [continuation segments]: https://www.risczero.com/news/continuations
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
@@ -513,19 +516,19 @@ below.
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
-[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
+[op-cycles]: http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles
 [os-page]: https://en.wikipedia.org/wiki/Page_%28computer_memory%29
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
-[perf-book]: https://nnethercote.github.io/perf-book/
+[perf-book]: https://nnethercote.github.io/perf-book
 [pprof]: https://github.com/google/pprof
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
 [RISC-V architecture]: /reference-docs/about-risc-v
-[RISC-V operations]: https://marks.page/riscv/
-[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+[RISC-V operations]: https://marks.page/riscv
+[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
+[snippet-bonsai-governance]: https://github.com/risc0/risc0-ethereum/blob/main/examples/governance/methods/guest/src/bin/finalize_votes.rs#L86-L87
 [snippet-password-checker]: https://github.com/risc0/risc0/blob/main/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
 [waldo-merkle]: https://github.com/risc0/risc0/blob/main/examples/waldo/core/src/merkle.rs

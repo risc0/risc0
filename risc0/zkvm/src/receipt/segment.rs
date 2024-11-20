@@ -19,19 +19,20 @@ use anyhow::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use risc0_binfmt::{tagged_iter, tagged_struct, Digestible, ExitCode, SystemState};
 use risc0_circuit_rv32im::{
-    control_id::{BLAKE2B_CONTROL_IDS, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS},
-    layout, CircuitImpl, CIRCUIT,
+    layout::{SystemStateLayout, OUT_LAYOUT},
+    CircuitImpl, CIRCUIT,
 };
+use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::{CircuitInfo as _, ProtocolInfo, PROOF_SYSTEM_INFO},
     core::{digest::Digest, hash::sha::Sha256},
-    layout::Buffer,
+    layout,
     verify::VerificationError,
 };
 use serde::{Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
-use super::VerifierContext;
+use super::{VerifierContext, DEFAULT_MAX_PO2};
 use crate::{sha, MaybePruned, ReceiptClaim};
 
 /// A receipt attesting to the execution of a Segment.
@@ -149,6 +150,31 @@ pub struct SegmentReceiptVerifierParameters {
     pub circuit_info: ProtocolInfo,
 }
 
+impl SegmentReceiptVerifierParameters {
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts as powers of two (po2) up to the given max
+    /// inclusive.
+    #[stability::unstable]
+    pub fn from_max_po2(max_po2: usize) -> Self {
+        Self {
+            control_ids: BTreeSet::from_iter(
+                ["poseidon2", "sha-256", "blake2b"]
+                    .into_iter()
+                    .flat_map(|hash_name| risc0_circuit_rv32im::control_ids(hash_name, max_po2)),
+            ),
+            proof_system_info: PROOF_SYSTEM_INFO,
+            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
+        }
+    }
+
+    /// Construct verifier parameters that will accept receipts with control any of the default
+    /// control ID associated with cycle counts of all supported powers of two (po2).
+    #[stability::unstable]
+    pub fn all_po2s() -> Self {
+        Self::from_max_po2(risc0_zkp::MAX_CYCLES_PO2)
+    }
+}
+
 impl Digestible for SegmentReceiptVerifierParameters {
     /// Hash the [SegmentReceiptVerifierParameters] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
@@ -167,30 +193,20 @@ impl Digestible for SegmentReceiptVerifierParameters {
 impl Default for SegmentReceiptVerifierParameters {
     /// Default set of parameters used to verify a [SegmentReceipt].
     fn default() -> Self {
-        Self {
-            control_ids: BTreeSet::from_iter(
-                POSEIDON2_CONTROL_IDS
-                    .into_iter()
-                    .chain(SHA256_CONTROL_IDS)
-                    .chain(BLAKE2B_CONTROL_IDS),
-            ),
-            proof_system_info: PROOF_SYSTEM_INFO,
-            circuit_info: risc0_circuit_rv32im::CircuitImpl::CIRCUIT_INFO,
-        }
+        Self::from_max_po2(DEFAULT_MAX_PO2)
     }
 }
 
-fn decode_system_state_from_io(
-    io: layout::OutBuffer,
-    sys_state: &layout::SystemState,
+fn decode_system_state_from_io<E: Elem + Into<u32>>(
+    sys_state: layout::Tree<E, SystemStateLayout>,
 ) -> Result<SystemState, VerificationError> {
-    let bytes: Vec<u8> = io
-        .tree(sys_state.image_id)
+    let bytes: Vec<u8> = sys_state
+        .map(|c| c.image_id)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
-    let pc = io
-        .tree(sys_state.pc)
-        .get_u32()
+    let pc = sys_state
+        .map(|c| c.pc)
+        .get_u32_from_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
     Ok(SystemState { pc, merkle_root })
@@ -199,26 +215,31 @@ fn decode_system_state_from_io(
 pub(crate) fn decode_receipt_claim_from_seal(
     seal: &[u32],
 ) -> Result<ReceiptClaim, VerificationError> {
-    let elems = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
-    let io = layout::OutBuffer(elems);
-    let body = layout::LAYOUT.mux.body;
-    let pre = decode_system_state_from_io(io, body.global.pre)?;
-    let post = decode_system_state_from_io(io, body.global.post)?;
+    let io: &[BabyBearElem] = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
+    let global = layout::Tree::new(io, OUT_LAYOUT);
+    let pre = decode_system_state_from_io(global.map(|c| c.pre))?;
+    let post = decode_system_state_from_io(global.map(|c| c.post))?;
 
-    let input_bytes: Vec<u8> = io
-        .tree(body.global.input)
+    let input_bytes: Vec<u8> = global
+        .map(|c| c.input)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
 
-    let output_bytes: Vec<u8> = io
-        .tree(body.global.output)
+    let output_bytes: Vec<u8> = global
+        .map(|c| c.output)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let output = Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
 
-    let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
-    let user_exit = io.get_u64(body.global.user_exit_code) as u32;
+    let sys_exit = global
+        .map(|c| c.sys_exit_code)
+        .get_u32_from_elem()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let user_exit = global
+        .map(|c| c.user_exit_code)
+        .get_u32_from_elem()
+        .or(Err(VerificationError::ReceiptFormatError))?;
     let exit_code =
         ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
 
@@ -245,7 +266,7 @@ mod tests {
     fn segment_receipt_verifier_parameters_is_stable() {
         assert_eq!(
             SegmentReceiptVerifierParameters::default().digest(),
-            digest!("c41779698e58f1a53204aa5f27be49875791fbd9a299c464a0dfc4bc892e3623")
+            digest!("52a27aff2de5a8206e3e88cb8dcb087c1193ede8efaf4889117bc68e704cf29a")
         );
     }
 }

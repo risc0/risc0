@@ -20,8 +20,9 @@ use risc0_binfmt::SystemState;
 use risc0_zkp::core::digest::Digest;
 use serde::Serialize;
 
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
+use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
+    host::client::env::ProveZkrRequest,
     receipt::{
         merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
         FakeReceipt, InnerAssumptionReceipt, InnerReceipt, ReceiptMetadata, SegmentReceipt,
@@ -51,6 +52,13 @@ impl TryFrom<AssetRequest> for pb::api::AssetRequest {
                 AssetRequest::Path(path) => {
                     pb::api::asset_request::Kind::Path(path_to_string(path)?)
                 }
+                AssetRequest::Redis(params) => {
+                    pb::api::asset_request::Kind::Redis(pb::api::RedisParams {
+                        url: params.url,
+                        key: params.key,
+                        ttl: params.ttl,
+                    })
+                }
             }),
         })
     }
@@ -64,6 +72,7 @@ impl TryFrom<Asset> for pb::api::Asset {
             kind: match value {
                 Asset::Inline(bytes) => Some(pb::api::asset::Kind::Inline(bytes.into())),
                 Asset::Path(path) => Some(pb::api::asset::Kind::Path(path_to_string(path)?)),
+                Asset::Redis(key) => Some(pb::api::asset::Kind::Redis(key)),
             },
         })
     }
@@ -103,6 +112,25 @@ impl TryFrom<pb::api::Asset> for Asset {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::api::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
+            pb::api::asset::Kind::Redis(key) => Asset::Redis(key),
+        })
+    }
+}
+
+impl TryFrom<pb::api::AssetRequest> for AssetRequest {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::api::AssetRequest) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::api::asset_request::Kind::Inline(()) => AssetRequest::Inline,
+            pb::api::asset_request::Kind::Path(path) => {
+                AssetRequest::Path(std::path::PathBuf::from(path))
+            }
+            pb::api::asset_request::Kind::Redis(params) => AssetRequest::Redis(RedisParams {
+                url: params.url,
+                key: params.key,
+                ttl: params.ttl,
+            }),
         })
     }
 }
@@ -227,6 +255,10 @@ impl TryFrom<pb::api::ProverOpts> for ProverOpts {
                 .into_iter()
                 .map(TryInto::try_into)
                 .collect::<Result<_>>()?,
+            max_segment_po2: opts
+                .max_segment_po2
+                .try_into()
+                .map_err(|_| malformed_err())?,
         })
     }
 }
@@ -238,6 +270,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
             prove_guest_errors: opts.prove_guest_errors,
             receipt_kind: opts.receipt_kind as i32,
             control_ids: opts.control_ids.into_iter().map(Into::into).collect(),
+            max_segment_po2: opts.max_segment_po2 as u64,
         }
     }
 }
@@ -275,6 +308,8 @@ impl From<SessionStats> for pb::core::SessionStats {
             segments: value.segments.try_into().unwrap(),
             total_cycles: value.total_cycles,
             user_cycles: value.user_cycles,
+            paging_cycles: value.paging_cycles,
+            reserved_cycles: value.reserved_cycles,
         }
     }
 }
@@ -287,6 +322,8 @@ impl TryFrom<pb::core::SessionStats> for SessionStats {
             segments: value.segments.try_into()?,
             total_cycles: value.total_cycles,
             user_cycles: value.user_cycles,
+            paging_cycles: value.paging_cycles,
+            reserved_cycles: value.reserved_cycles,
         })
     }
 }
@@ -729,6 +766,7 @@ impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
             input: match value.input {
                 None => MaybePruned::Value(None),
                 Some(x) => match MaybePruned::<Input>::try_from(x)? {
+                    #[allow(unreachable_patterns)]
                     MaybePruned::Value(input) => MaybePruned::Value(Some(input)),
                     MaybePruned::Pruned(digest) => MaybePruned::Pruned(digest),
                 },
@@ -956,6 +994,7 @@ impl From<MaybePruned<Unknown>> for pb::core::MaybePruned {
     fn from(value: MaybePruned<Unknown>) -> Self {
         Self {
             kind: Some(match value {
+                #[allow(unreachable_patterns)]
                 MaybePruned::Value(inner) => {
                     match inner { /* unreachable */ }
                 }
@@ -972,6 +1011,18 @@ impl TryFrom<pb::core::MaybePruned> for MaybePruned<Unknown> {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::core::maybe_pruned::Kind::Value(_) => Err(malformed_err())?,
             pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
+        })
+    }
+}
+
+impl TryFrom<pb::api::ProveZkrRequest> for ProveZkrRequest {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::api::ProveZkrRequest) -> Result<Self> {
+        Ok(Self {
+            claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
+            control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
+            input: value.input,
         })
     }
 }

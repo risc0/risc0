@@ -26,7 +26,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.79.0-2
+  RISC0_RUST_TOOLCHAIN_VERSION: r0.1.81.0
   RISC0_CPP_TOOLCHAIN_VERSION: 2024.01.05
   RISC0_PATH: ${{ github.workspace }}/risc0
   RISC0_ETHEREUM_PATH: ${{ github.workspace }}/risc0-ethereum
@@ -73,7 +73,7 @@ jobs:
   test:
     if: ${{ needs.changes.outputs.test == 'true' || github.event_name == 'workflow_dispatch'}}
     needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu, docker]
+    runs-on: [self-hosted, prod, Linux, X64, cpu, docker]
     env:
       RUST_BACKTRACE: full
     steps:
@@ -128,7 +128,7 @@ jobs:
         working-directory: risc0
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-4351742481c98adaa9ca3e8642e619aa986b3cee
+          version: nightly-5c69a9d9fd4e2ec07fc398ab5ef9d706c33890c2
       # Apply local patch
       - name: Local patch on risc0-ethereum
         run: python ${{ env.RISC0_PATH }}/.github/cargo_local_patch.py  .

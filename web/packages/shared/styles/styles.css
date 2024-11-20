@@ -1,3 +1,5 @@
+@import "@risc0/ui/styles/globals.css";
+
 @font-face {
   /* includes font-weights from 600-900 */
   font-family: "Europa";
@@ -55,12 +57,7 @@ a {
 }
 
 .link {
-  @apply hover:text-primary dark:no-underline underline;
-}
-
-/* Chartjs */
-.chartjs-render-monitor {
-  letter-spacing: normal;
+  @apply underline;
 }
 
 /* ascii */

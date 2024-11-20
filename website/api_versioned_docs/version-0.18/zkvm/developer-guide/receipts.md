@@ -59,7 +59,7 @@ If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples
 [execution]: /terminology#execution-trace
 [guest program]: /terminology#guest-program
 [Image ID]: /terminology#image-id
@@ -73,5 +73,5 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [verified]: /terminology#verify
 [verify]: /terminology#verify
 [Verifying]: /terminology#verify
-[zkVM application]: ../
+[zkVM application]: ..
 [zkVM Quick Start]: ../quickstart.md

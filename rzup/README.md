@@ -4,8 +4,6 @@ Install, update, or revert to a specific RISC Zero version.
 
 ## Install
 
-<!-- TODO: Replace this friendly redirect URL once set up -->
-
 ```sh
 curl -L https://risczero.com/install | bash
 ```
@@ -18,15 +16,13 @@ To install the latest RISC Zero release version:
 rzup install
 ```
 
-To install a specific release version:
+Optionally, you can specify which version of `cargo-risczero` to install with:
 
-```sh
-rzup install --version <VERSION>
+```bash
+rzup install cargo-risczero $VERSION
 ```
 
-Where `VERSION` can be replaced with a specified RISC Zero release (e.g.,
-`1.0.0`). See our [releases](https://github.com/risc0/risc0/releases) for more
-information.
+Where the `$VERSION` is a [release tag](https://github.com/risc0/risc0/releases) (e.g `v1.1.1`).
 
 To enable verbose installation logs:
 

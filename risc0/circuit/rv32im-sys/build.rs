@@ -43,7 +43,7 @@ fn build_cpu_kernels() {
         ])
         .deps(glob::glob("cxx/*.h").unwrap().map(|x| x.unwrap()))
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .compile("circuit");
+        .compile("risc0_rv32im_cpu");
 }
 
 fn build_cuda_kernels() {
@@ -64,10 +64,10 @@ fn build_cuda_kernels() {
             "kernels/cuda/extern.h",
             "kernels/cuda/extern.cuh",
             "kernels/cuda/kernels.h",
-            "kernels/cuda/layout.inc.cu",
+            "kernels/cuda/layout.cu.inc",
         ])
-        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
+        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_rv32im_cuda");
 }

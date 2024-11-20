@@ -112,15 +112,16 @@ pub fn main() {
         .init();
 
     let args = Cli::parse();
-    if let Some(port) = args.mode.port {
-        run_server(port);
-        return;
-    }
 
     if args.id {
         let elf = fs::read(args.mode.elf.unwrap()).unwrap();
         let image_id = compute_image_id(&elf).unwrap();
         println!("{image_id}");
+        return;
+    }
+
+    if let Some(port) = args.mode.port {
+        run_server(port);
         return;
     }
 

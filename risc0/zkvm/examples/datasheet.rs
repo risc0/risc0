@@ -20,46 +20,63 @@ use std::{
 
 use clap::{Parser, Subcommand};
 use enum_iterator::Sequence;
-use human_repr::{HumanCount, HumanDuration};
 use risc0_zkp::{hal::tracker, MAX_CYCLES_PO2};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
+    RECURSION_PO2,
 };
-use risc0_zkvm_methods::{bench::BenchmarkSpec, BENCH_ELF};
 use serde::Serialize;
 use serde_with::{serde_as, DurationNanoSeconds};
 use tabled::{settings::Style, Table, Tabled};
 
-const ITERATIONS: &[(u32, u64)] = &[
-    (1, 1 << 16),           // 16, 64K
-    (8 * 1024, 1 << 17),    // 17, 128K
-    (32 * 1024, 1 << 18),   // 18, 256K
-    (64 * 1024, 1 << 19),   // 19, 512K
-    (128 * 1024, 1 << 20),  // 20, 1M
-    (256 * 1024, 1 << 21),  // 21, 2M
-    (512 * 1024, 1 << 22),  // 22, 4M
-    (1024 * 1024, 1 << 23), // 23, 8M
-    (2048 * 1024, 1 << 24), // 24, 16M
+/// Pre-compiled program that simply loops `count: u32` times (read from stdin).
+const LOOP_ELF: &[u8] = include_bytes!("loop.bin");
+
+/// Powers-of-two for cycles, paired with the number of loop iterations used to
+/// achieve that many cycles.
+const CYCLES_PO2_ITERS: &[(u32, u32)] = &[
+    (15, 1),               // 15, 32K
+    (16, 1024 * 8),        // 16, 64K
+    (17, 1024 * 32),       // 17, 128K
+    (18, 1024 * 64),       // 18, 256K
+    (19, 1024 * 128),      // 19, 512K
+    (20, 1024 * 256),      // 20, 1M
+    (21, 1024 * 256 * 3),  // 21, 2M
+    (22, 1024 * 256 * 7),  // 22, 4M
+    (23, 1024 * 256 * 15), // 23, 8M
+    (24, 1024 * 256 * 31), // 24, 16M
 ];
 
-const MIN_PO2: usize = MAX_CYCLES_PO2 - ITERATIONS.len() + 1;
+const MIN_CYCLES_PO2: usize = CYCLES_PO2_ITERS[0].0 as usize;
+
+const ITERATIONS_1M_CYCLES: u32 = 1024 * 512 - 10;
 
 #[serde_as]
 #[derive(Debug, Serialize, Tabled)]
 struct PerformanceData {
     name: String,
     hashfn: String,
-    #[tabled(display_with = "display_speed")]
-    throughput: f32,
+
+    /// Cycles per second.
+    #[tabled(display_with = "display::hertz")]
+    throughput: f64,
+
     #[serde_as(as = "DurationNanoSeconds")]
-    #[tabled(display_with = "display_duration")]
+    #[tabled(display_with = "display::duration")]
     duration: Duration,
-    #[tabled(display_with = "display_cycles")]
+
+    /// Either user execution cycle count or the total cycle count.
+    ///
+    /// When this is the total cycle count, it includes overhead associated with
+    /// continuations and padding up to the nearest power of 2.
+    #[tabled(display_with = "display::cycles")]
     cycles: u64,
-    #[tabled(display_with = "display_bytes")]
-    ram: usize,
-    #[tabled(display_with = "display_bytes")]
-    seal: usize,
+
+    #[tabled(display_with = "display::bytes")]
+    ram: u64,
+
+    #[tabled(display_with = "display::bytes")]
+    seal: u64,
 }
 
 #[derive(Parser)]
@@ -78,10 +95,12 @@ struct Args {
 
 fn po2_in_range(s: &str) -> Result<usize, String> {
     let po2: usize = s.parse().map_err(|_| format!("`{s}` must be an integer"))?;
-    if (MIN_PO2..=MAX_CYCLES_PO2).contains(&po2) {
+    if (MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&po2) {
         Ok(po2)
     } else {
-        Err(format!("po2 must be in range: {MIN_PO2}-{MAX_CYCLES_PO2}",))
+        Err(format!(
+            "po2 must be in range: {MIN_CYCLES_PO2}-{MAX_CYCLES_PO2}",
+        ))
     }
 }
 
@@ -146,18 +165,18 @@ impl Datasheet {
 
     fn execute(&mut self) {
         let env = ExecutorEnv::builder()
-            .write(&BenchmarkSpec::SimpleLoop { iters: 128 * 1024 })
-            .unwrap()
+            .write_slice(&ITERATIONS_1M_CYCLES.to_le_bytes())
             .build()
             .unwrap();
 
-        let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, LOOP_ELF).unwrap();
 
         let start = Instant::now();
         let session = exec.run().unwrap();
         let duration = start.elapsed();
+        assert_eq!(session.user_cycles, (1 << 20) - 1);
 
-        let throughput = (session.user_cycles as f32) / duration.as_secs_f32();
+        let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
         self.results.push(PerformanceData {
             name: "execute".into(),
             hashfn: "N/A".into(),
@@ -171,37 +190,32 @@ impl Datasheet {
 
     fn composite(&mut self, args: &Args) {
         for hashfn in ["sha-256", "poseidon2"] {
-            let opts = ProverOpts::default().with_hashfn(hashfn.to_string());
+            let opts = ProverOpts::all_po2s().with_hashfn(hashfn.to_string());
             let prover = get_prover_server(&opts).unwrap();
 
-            for (iterations, expected) in ITERATIONS.iter().take(args.max_po2 - MIN_PO2 + 1) {
+            for (po2, iterations) in CYCLES_PO2_ITERS
+                .iter()
+                .take(args.max_po2 - MIN_CYCLES_PO2 + 1)
+            {
+                let expected = 1 << po2;
                 println!("rv32im/{hashfn}: {expected}");
 
                 let env = ExecutorEnv::builder()
                     .segment_limit_po2(args.max_po2 as u32)
-                    .write(&BenchmarkSpec::SimpleLoop { iters: *iterations })
-                    .unwrap()
+                    .write_slice(&iterations.to_le_bytes())
                     .build()
                     .unwrap();
 
                 tracker().lock().unwrap().reset();
 
                 let start = Instant::now();
-                let info = black_box(prover.prove(env, BENCH_ELF).unwrap());
+                let info = black_box(prover.prove(env, LOOP_ELF).unwrap());
                 let duration = start.elapsed();
 
-                let ram = tracker().lock().unwrap().peak;
-                assert_eq!(info.stats.total_cycles, *expected);
-                let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-                let seal = info
-                    .receipt
-                    .inner
-                    .composite()
-                    .unwrap()
-                    .segments
-                    .iter()
-                    .map(|x| x.get_seal_bytes().len())
-                    .sum();
+                let ram = tracker().lock().unwrap().peak as u64;
+                assert_eq!(info.stats.total_cycles, expected);
+                let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+                let seal = info.receipt.inner.composite().unwrap().seal_size() as u64;
 
                 self.results.push(PerformanceData {
                     name: "rv32im".into(),
@@ -219,17 +233,16 @@ impl Datasheet {
     fn lift(&mut self) {
         println!("lift");
 
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::all_po2s();
 
         let env = ExecutorEnv::builder()
-            .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
-            .unwrap()
+            .write_slice(&0u32.to_le_bytes())
             .build()
             .unwrap();
 
-        let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, LOOP_ELF).unwrap();
         let session = exec.run().unwrap();
         let segment = session.segments[0].resolve().unwrap();
         let receipt = prover.prove_segment(&ctx, &segment).unwrap();
@@ -240,10 +253,10 @@ impl Datasheet {
         let receipt = black_box(prover.lift(&receipt).unwrap());
         let duration = start.elapsed();
 
-        let ram = tracker().lock().unwrap().peak;
+        let ram = tracker().lock().unwrap().peak as u64;
         let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "lift".into(),
@@ -259,19 +272,24 @@ impl Datasheet {
     fn join(&mut self) {
         println!("join");
 
-        let opts = ProverOpts::default();
+        let opts = ProverOpts::all_po2s();
         let prover = get_prover_server(&opts).unwrap();
-        let ctx = VerifierContext::default();
+        let ctx = VerifierContext::all_po2s();
+
+        let (po2, iters) = CYCLES_PO2_ITERS[1];
 
         let env = ExecutorEnv::builder()
-            .write(&BenchmarkSpec::SimpleLoop { iters: 4 * 1024 })
-            .unwrap()
-            .segment_limit_po2(16)
+            .write_slice(&iters.to_le_bytes())
+            .segment_limit_po2(po2 - 1)
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, LOOP_ELF).unwrap();
         let session = exec.run().unwrap();
-        assert!(session.segments.len() >= 2);
+        assert!(
+            session.segments.len() >= 2,
+            "cycles: {}",
+            session.total_cycles
+        );
 
         let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
         let composite = receipt.inner.composite().unwrap();
@@ -284,10 +302,10 @@ impl Datasheet {
         let receipt = black_box(prover.join(&left, &right).unwrap());
         let duration = start.elapsed();
 
-        let ram = tracker().lock().unwrap().peak;
+        let ram = tracker().lock().unwrap().peak as u64;
         let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "join".into(),
@@ -303,30 +321,24 @@ impl Datasheet {
     fn succinct(&mut self) {
         println!("succinct");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
+        let iterations: u32 = 64 * 1024;
         let env = ExecutorEnv::builder()
-            .write(&BenchmarkSpec::SimpleLoop { iters: 64 * 1024 })
-            .unwrap()
+            .write_slice(&iterations.to_le_bytes())
             .build()
             .unwrap();
 
         tracker().lock().unwrap().reset();
 
         let start = Instant::now();
-        let info = prover.prove(env, BENCH_ELF).unwrap();
+        let info = prover.prove(env, LOOP_ELF).unwrap();
         let duration = start.elapsed();
 
-        let ram = tracker().lock().unwrap().peak;
-        let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-        let seal = info
-            .receipt
-            .inner
-            .succinct()
-            .unwrap()
-            .get_seal_bytes()
-            .len();
+        let ram = tracker().lock().unwrap().peak as u64;
+        let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+        let seal = info.receipt.inner.succinct().unwrap().seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "succinct".into(),
@@ -342,16 +354,15 @@ impl Datasheet {
     fn identity_p254(&mut self) {
         println!("identity_p254");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
-            .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
-            .unwrap()
+            .write_slice(&0u32.to_le_bytes())
             .build()
             .unwrap();
 
-        let info = prover.prove(env, BENCH_ELF).unwrap();
+        let info = prover.prove(env, LOOP_ELF).unwrap();
         let succinct_receipt = info.receipt.inner.succinct().unwrap();
 
         tracker().lock().unwrap().reset();
@@ -360,10 +371,10 @@ impl Datasheet {
         let receipt = black_box(risc0_zkvm::recursion::identity_p254(succinct_receipt).unwrap());
         let duration = start.elapsed();
 
-        let ram = tracker().lock().unwrap().peak;
+        let ram = tracker().lock().unwrap().peak as u64;
         let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f32) / duration.as_secs_f32();
-        let seal = receipt.get_seal_bytes().len();
+        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let seal = receipt.seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "identity_p254".into(),
@@ -380,16 +391,15 @@ impl Datasheet {
     fn stark2snark(&mut self) {
         println!("stark2snark");
 
-        let opts = ProverOpts::succinct();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
         let prover = get_prover_server(&opts).unwrap();
 
         let env = ExecutorEnv::builder()
-            .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
-            .unwrap()
+            .write_slice(&0u32.to_le_bytes())
             .build()
             .unwrap();
 
-        let info = prover.prove(env, BENCH_ELF).unwrap();
+        let info = prover.prove(env, LOOP_ELF).unwrap();
         let succinct_receipt = info.receipt.inner.succinct().unwrap();
         let receipt = risc0_zkvm::recursion::identity_p254(&succinct_receipt).unwrap();
         let seal_bytes = receipt.get_seal_bytes();
@@ -399,7 +409,7 @@ impl Datasheet {
         let duration = start.elapsed();
 
         let cycles = 1 << RECURSION_PO2;
-        let throughput = (cycles as f32) / duration.as_secs_f32();
+        let throughput = (cycles as f64) / duration.as_secs_f64();
         let encoded = bincode::serialize(&seal).unwrap();
 
         self.results.push(PerformanceData {
@@ -408,7 +418,7 @@ impl Datasheet {
             cycles,
             duration,
             ram: 0,
-            seal: encoded.len(),
+            seal: encoded.len() as u64,
             throughput,
         });
     }
@@ -417,24 +427,24 @@ impl Datasheet {
     fn groth16(&mut self) {
         println!("groth16");
 
-        let opts = ProverOpts::groth16();
+        let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Groth16);
         let prover = get_prover_server(&opts).unwrap();
 
+        let iterations: u32 = 64 * 1024;
         let env = ExecutorEnv::builder()
-            .write(&BenchmarkSpec::SimpleLoop { iters: 64 * 1024 })
-            .unwrap()
+            .write_slice(&iterations.to_le_bytes())
             .build()
             .unwrap();
 
         tracker().lock().unwrap().reset();
 
         let start = Instant::now();
-        let info = prover.prove(env, BENCH_ELF).unwrap();
+        let info = prover.prove(env, LOOP_ELF).unwrap();
         let duration = start.elapsed();
 
-        let ram = tracker().lock().unwrap().peak;
-        let throughput = (info.stats.total_cycles as f32) / duration.as_secs_f32();
-        let seal = info.receipt.inner.groth16().unwrap().seal.len();
+        let ram = tracker().lock().unwrap().peak as u64;
+        let throughput = (info.stats.total_cycles as f64) / duration.as_secs_f64();
+        let seal = info.receipt.inner.groth16().unwrap().seal_size() as u64;
 
         self.results.push(PerformanceData {
             name: "groth16".into(),
@@ -452,15 +462,14 @@ impl Datasheet {
         {
             println!("warmup");
 
-            let opts = ProverOpts::succinct();
+            let opts = ProverOpts::all_po2s().with_receipt_kind(ReceiptKind::Succinct);
             let prover = get_prover_server(&opts).unwrap();
 
             let env = ExecutorEnv::builder()
-                .write(&BenchmarkSpec::SimpleLoop { iters: 0 })
-                .unwrap()
+                .write_slice(&0u32.to_le_bytes())
                 .build()
                 .unwrap();
-            prover.prove(env, BENCH_ELF).unwrap();
+            prover.prove(env, LOOP_ELF).unwrap();
         }
     }
 }
@@ -469,21 +478,28 @@ fn main() {
     Datasheet::default().run(Args::parse());
 }
 
-fn display_bytes(bytes: &usize) -> String {
-    if *bytes == 0 {
-        return "N/A".into();
+/// Utilities to make data human-readable for displaying in a table.
+mod display {
+    use std::time::Duration;
+
+    use human_repr::{HumanCount, HumanDuration};
+
+    pub fn bytes(bytes: &u64) -> String {
+        if *bytes == 0 {
+            return "N/A".into();
+        }
+        bytes.human_count_bytes().to_string()
     }
-    bytes.human_count_bytes().to_string()
-}
 
-fn display_cycles(cycles: &u64) -> String {
-    cycles.human_count_bare().to_string()
-}
+    pub fn cycles(cycles: &u64) -> String {
+        cycles.human_count_bare().to_string()
+    }
 
-fn display_duration(duration: &Duration) -> String {
-    duration.human_duration().to_string()
-}
+    pub fn duration(duration: &Duration) -> String {
+        duration.human_duration().to_string()
+    }
 
-fn display_speed(speed: &f32) -> String {
-    speed.human_count("Hz").to_string()
+    pub fn hertz(hertz: &f64) -> String {
+        hertz.human_count("Hz").to_string()
+    }
 }

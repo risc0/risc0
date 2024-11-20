@@ -14,14 +14,13 @@
 
 use std::path::PathBuf;
 
-use crate::commands::build_guest;
-use crate::utils;
 use anyhow::{Context, Result};
 use bonsai_sdk::blocking::Client;
 use cargo_metadata::MetadataCommand;
 use clap::Parser;
-use risc0_build::BuildStatus;
-use risc0_build::GuestOptions;
+use risc0_build::{BuildStatus, GuestOptions};
+
+use crate::{commands::build_guest, utils};
 
 /// `cargo risczero deploy`
 ///

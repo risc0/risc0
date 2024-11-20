@@ -25,7 +25,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
     BLST_ELF, HEAP_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
-    ZKVM_527_ELF,
+    SYS_ARGS_ELF, SYS_ENV_ELF, ZKVM_527_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -876,6 +876,26 @@ fn getrandom_panic() {
 }
 
 #[test]
+#[should_panic(expected = "Guest panicked: sys_getenv is disabled")]
+fn sys_getenv_panic() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let _session = ExecutorImpl::from_elf(env, SYS_ENV_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Guest panicked: sys_argc is disabled")]
+fn sys_args_panic() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let _session = ExecutorImpl::from_elf(env, SYS_ARGS_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn slice_io() {
     let run = |slice: &[u8]| {
         let env = ExecutorEnv::builder()
@@ -1172,6 +1192,11 @@ fn heap_bug_zkvm_527() {
         .run()
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
+fn big_keccak() {
+    run_test(MultiTestSpec::BigKeccak);
 }
 
 #[cfg(feature = "docker")]

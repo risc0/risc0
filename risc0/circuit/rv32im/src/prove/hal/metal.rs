@@ -16,7 +16,7 @@ use std::{collections::HashMap, ffi::c_void, rc::Rc};
 
 use anyhow::{bail, Result};
 use metal::{ComputePipelineDescriptor, MTLResourceOptions, MTLResourceUsage};
-use risc0_circuit_rv32im_sys::ffi::RawPreflightTrace;
+use risc0_circuit_rv32im_sys::ffi::{risc0_circuit_rv32im_cpu_witgen, RawPreflightTrace};
 use risc0_core::{
     field::{
         baby_bear::{BabyBearElem, BabyBearExtElem},
@@ -24,7 +24,7 @@ use risc0_core::{
     },
     scope,
 };
-use risc0_sys::CppError;
+use risc0_sys::ffi_wrap;
 use risc0_zkp::{
     core::log2_ceil,
     field::Elem as _,
@@ -33,7 +33,7 @@ use risc0_zkp::{
             BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalPoseidon2, MetalHalSha256,
             MetalHash,
         },
-        Buffer as _, CircuitHal,
+        AccumPreflight, Buffer as _, CircuitHal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -87,19 +87,7 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
         // TODO: call metal kernels for witgen.
         // For now we use the CPU implementation.
 
-        extern "C" {
-            fn risc0_circuit_rv32im_cpu_witgen(
-                mode: u32,
-                trace: *const RawPreflightTrace,
-                steps: u32,
-                count: u32,
-                ctrl: *const BabyBearElem,
-                io: *const BabyBearElem,
-                data: *const BabyBearElem,
-            ) -> CppError;
-        }
-
-        unsafe {
+        ffi_wrap(|| unsafe {
             risc0_circuit_rv32im_cpu_witgen(
                 mode as u32,
                 trace,
@@ -109,8 +97,8 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
                 io.as_ptr() as *const BabyBearElem,
                 data.as_ptr() as *const BabyBearElem,
             )
-            .unwrap();
-        }
+        })
+        .unwrap()
     }
 }
 
@@ -118,6 +106,7 @@ impl<MH: MetalHash> CircuitWitnessGenerator<MetalHal<MH>> for MetalCircuitHal<MH
 struct AccumContext {
     ram: *const c_void,
     bytes: *const c_void,
+    is_par_safe: *const c_void,
 }
 
 impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
@@ -174,6 +163,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
 
     fn accumulate(
         &self,
+        preflight: &AccumPreflight,
         ctrl: &MetalBuffer<BabyBearElem>,
         io: &MetalBuffer<BabyBearElem>,
         data: &MetalBuffer<BabyBearElem>,
@@ -196,9 +186,18 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             &bytes,
         );
 
+        assert_eq!(preflight.is_par_safe.len(), count);
+        let is_par_safe = MetalBuffer::copy_from(
+            "is_par_safe",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &preflight.is_par_safe,
+        );
+
         let ctx = AccumContext {
             ram: ram.as_device_ptr(),
             bytes: bytes.as_device_ptr(),
+            is_par_safe: is_par_safe.as_device_ptr(),
         };
         // TODO: detect if device supports shared mode
         let ctx_buffer = self.hal.device.new_buffer_with_data(
@@ -226,6 +225,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
                 .dispatch_with_resources(kernel, &args, count as u64, None, |cmd_encoder| {
                     cmd_encoder.use_resource(&ram.as_buf(), MTLResourceUsage::Write);
                     cmd_encoder.use_resource(&bytes.as_buf(), MTLResourceUsage::Write);
+                    cmd_encoder.use_resource(&is_par_safe.as_buf(), MTLResourceUsage::Read);
                 });
         });
 

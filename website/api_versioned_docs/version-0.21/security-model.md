@@ -91,7 +91,7 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
+[bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [control ID]: /terminology#control-id
 [control root]: /terminology#control-root
 [deterministically]: /terminology#deterministic-builds
@@ -105,5 +105,5 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [RISC Zero zkVM]: ./zkvm
 [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: pathname:///proof-system-in-detail.pdf
 [security calculator]: https://github.com/risc0/risc0/pull/1661
-[this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
+[this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance
 [Verifier Contract]: ./blockchain-integration/contracts/verifier.md

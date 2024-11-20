@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub mod addr;
+mod bibc;
 pub mod exec;
 pub mod mux;
 mod pager;
@@ -20,7 +21,7 @@ pub mod preflight;
 pub mod rv32im;
 pub mod testutil;
 
-use risc0_zkvm_platform::{memory::SYSTEM, syscall::DIGEST_WORDS};
+use risc0_zkvm_platform::{memory::SYSTEM, syscall::DIGEST_WORDS, WORD_SIZE};
 
 use self::addr::{ByteAddr, WordAddr};
 
@@ -38,3 +39,9 @@ const BIGINT_CYCLES: usize = 9;
 const fn sha_cycles(count: usize) -> usize {
     SHA_INIT + (SHA_LOAD + SHA_MAIN_MIX + SHA_MAIN_FINI) * count
 }
+
+/// BigInt width, in words, handled by the BigInt2 accelerator circuit.
+pub(crate) const BIGINT2_WIDTH_WORDS: usize = 4;
+
+/// BigInt width, in bytes, handled by the BigInt2 accelerator circuit.
+pub(crate) const BIGINT2_WIDTH_BYTES: usize = BIGINT2_WIDTH_WORDS * WORD_SIZE;

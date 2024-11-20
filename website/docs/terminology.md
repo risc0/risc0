@@ -255,7 +255,7 @@ A virtual machine that runs trusted code and generates proofs.
 RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [STARK]-based proof system.
 
 [`cargo risczero build`]: https://docs.rs/crate/cargo-risczero/latest
-[About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups/#validity-proofs
+[About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups#validity-proofs
 [About STARKs]: ./reference-docs/about-starks.md
 [Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
 [assumptions]: #assumption

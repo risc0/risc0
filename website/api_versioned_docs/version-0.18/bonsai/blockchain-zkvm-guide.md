@@ -41,7 +41,7 @@ We have [extensive resources](../zkvm) on writing zkVM code. Many of these resou
 - zkVM docs frequently refer to the [guest] and [host]. With Bonsai, you only write code for the [guest]; Bonsai itself runs the [host]. A partial exception is providing inputs and receiving the [receipt], which is handled by the [host] without Bonsai, whereas with the Bonsai ETH Relay your smart contract must handle these duties.
 - You might see our zkVM documentation refer to executors, sessions, and segments. These code-level concepts are related to [continuations](https://www.risczero.com/news/continuations), a feature that lets us design our zkVM program proof work to be parallelizable and not limited by the size of the program to be proven. Bonsai takes advantage of this feature to parallelize proofs about off-chain computation. If you're reading about these in zkVM documentation, you're almost certainly looking at host-side details that you don't need in order to write provable code.
 
-[Bonsai]: ../bonsai/
+[Bonsai]: ../bonsai
 [Bonsai Quick Start]: quickstart.md
 [committing]: /terminology#commit
 [Discord]: https://discord.gg/risczero
@@ -53,5 +53,5 @@ We have [extensive resources](../zkvm) on writing zkVM code. Many of these resou
 [journal]: /terminology#journal
 [proves]: /terminology#validity-proof
 [receipt]: /terminology#receipt
-[Rust]: https://www.rust-lang.org/
+[Rust]: https://www.rust-lang.org
 [verify]: /terminology#verify

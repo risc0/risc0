@@ -14,7 +14,7 @@
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
-use core::{cmp::min, ffi::CStr, ptr::null_mut, str::Utf8Error};
+use core::{cmp::min, ffi::CStr, ptr::null_mut, slice, str::Utf8Error};
 
 use crate::WORD_SIZE;
 
@@ -25,7 +25,7 @@ pub mod ecall {
     pub const SHA: u32 = 3;
     pub const BIGINT: u32 = 4;
     pub const USER: u32 = 5;
-    pub const MACHINE: u32 = 5;
+    pub const BIGINT2: u32 = 6;
 }
 
 pub mod halt {
@@ -132,17 +132,20 @@ pub mod nr {
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_EXECUTE_ZKR);
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
+    declare_syscall!(pub SYS_KECCAK);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
+    declare_syscall!(pub SYS_PROVE_KECCAK);
+    declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
-    declare_syscall!(pub SYS_EXECUTE_ZKR);
 }
 
 impl SyscallName {
@@ -614,6 +617,11 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
     }
 }
 
+// Some environment variable names are considered safe by default to use in the guest, provided by
+// the host, and are included in this list. It may be useful to allow guest developers to register
+// additional variable names as part of their guest program.
+const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE"];
+
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
 /// out_nwords).
@@ -638,6 +646,23 @@ pub unsafe extern "C" fn sys_getenv(
     varname: *const u8,
     varname_len: usize,
 ) -> usize {
+    if cfg!(not(feature = "sys-getenv")) {
+        let mut allowed = false;
+        for allowed_varname in ALLOWED_ENV_VARNAMES {
+            let varname_buf = unsafe { slice::from_raw_parts(varname, varname_len) };
+            if *allowed_varname == varname_buf {
+                allowed = true;
+                break;
+            }
+        }
+        if !allowed {
+            const MSG_1: &[u8] = "sys_getenv not enabaled for var".as_bytes();
+            unsafe { sys_log(MSG_1.as_ptr(), MSG_1.len()) };
+            unsafe { sys_log(varname, varname_len) };
+            const MSG_2: &[u8] = "sys_getenv is disabled; can be enabled with the sys-getenv feature flag on risc0-zkvm-platform".as_bytes();
+            unsafe { sys_panic(MSG_2.as_ptr(), MSG_2.len()) };
+        }
+    }
     let Return(a0, _) = syscall_2(
         nr::SYS_GETENV,
         out_words,
@@ -658,6 +683,10 @@ pub unsafe extern "C" fn sys_getenv(
 /// data being returned. Returned data is entirely in the control of the host.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_argc() -> usize {
+    if cfg!(not(feature = "sys-args")) {
+        const MSG: &[u8] = "sys_argc is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
     let Return(a0, _) = unsafe { syscall_0(nr::SYS_ARGC, null_mut(), 0) };
     a0 as usize
 }
@@ -685,6 +714,10 @@ pub unsafe extern "C" fn sys_argv(
     out_nwords: usize,
     arg_index: usize,
 ) -> usize {
+    if cfg!(not(feature = "sys-args")) {
+        const MSG: &[u8] = "sys_argv is disabled; can be enabled with the sys-args feature flag on risc0-zkvm-platform".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
     let Return(a0, _) = syscall_1(nr::SYS_ARGV, out_words, out_nwords, arg_index as u32);
     a0 as usize
 }
@@ -864,17 +897,22 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 /// `input` must be aligned and have `input_len` u32s dereferenceable
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_execute_zkr(
+#[stability::unstable]
+pub unsafe extern "C" fn sys_prove_zkr(
+    claim_digest: *const [u32; DIGEST_WORDS],
     control_id: *const [u32; DIGEST_WORDS],
+    control_root: *const [u32; DIGEST_WORDS],
     input: *const u32,
     input_len: usize,
 ) {
     let Return(a0, _) = unsafe {
-        syscall_3(
-            nr::SYS_EXECUTE_ZKR,
+        syscall_5(
+            nr::SYS_PROVE_ZKR,
             null_mut(),
             0,
+            claim_digest as u32,
             control_id as u32,
+            control_root as u32,
             input as u32,
             input_len as u32,
         )
@@ -884,7 +922,158 @@ pub unsafe extern "C" fn sys_execute_zkr(
     // Currently, this should always be the case. This check is
     // included for forwards-compatibility.
     if a0 != 0 {
-        const MSG: &[u8] = "sys_execute_zkr returned error result".as_bytes();
+        const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 }
+
+/// Get a keccak hash from the host with the given input data - should be
+/// invoked during `hasher.finalize(...)`
+///
+/// # Safety
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_keccak(
+    input_ptr: *const u8,
+    len: usize,
+    out_state: *mut [u32; DIGEST_WORDS],
+) {
+    syscall_2(
+        nr::SYS_KECCAK,
+        out_state as *mut u32,
+        DIGEST_WORDS,
+        input_ptr as u32,
+        len as u32,
+    );
+}
+
+/// Executes the keccak circuit, and then executes the lift predicate
+/// in the recursion circuit.
+///
+/// This only triggers the execution of the circuits; it does not add
+/// any assumptions.  In order to prove that it executed correctly,
+/// users must calculate the claim digest and add it to the list of
+/// assumptions.
+///
+/// # Safety
+///
+/// `control_root` must be aligned and dereferenceable.
+///
+/// `input` must be aligned and have `input_len` u32s dereferenceable
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+#[stability::unstable]
+pub unsafe extern "C" fn sys_prove_keccak(
+    po2: usize,
+    input: *const u32,
+    input_len: usize,
+    control_root: *const [u32; DIGEST_WORDS],
+) {
+    let Return(a0, _) = unsafe {
+        syscall_4(
+            nr::SYS_PROVE_KECCAK,
+            null_mut(),
+            0,
+            po2 as u32,
+            input as u32,
+            input_len as u32,
+            control_root as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // Currently, this should always be the case. This check is
+    // included for forwards-compatibility.
+    if a0 != 0 {
+        panic!("sys_execute_keccak returned error result");
+    }
+}
+
+#[repr(C)]
+pub struct BigIntBlobHeader {
+    pub nondet_program_size: u32,
+    pub verify_program_size: u32,
+    pub consts_size: u32,
+    pub temp_size: u32,
+}
+
+macro_rules! impl_sys_bigint2 {
+    ($func_name:ident, $a1:ident
+        $(, $a2: ident
+            $(, $a3: ident
+                $(, $a4: ident
+                    $(, $a5: ident
+                        $(, $a6: ident
+                            $(, $a7: ident )?
+                        )?
+                    )?
+                )?
+            )?
+        )?
+    ) => {
+        /// Invoke a bigint2 program.
+        ///
+        /// # Safety
+        ///
+        /// `blob_ptr` and all arguments must be aligned and dereferenceable.
+        #[cfg_attr(feature = "export-syscalls", no_mangle)]
+        #[stability::unstable]
+        pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
+            $(, $a2: *const u32
+                $(, $a3: *const u32
+                    $(, $a4: *const u32
+                        $(, $a5: *const u32
+                            $(, $a6: *const u32
+                                $(, $a7: *const u32)?
+                            )?
+                        )?
+                    )?
+                )?
+            )?
+        ) {
+            #[cfg(target_os = "zkvm")]
+            {
+                let header = blob_ptr as *const $crate::syscall::BigIntBlobHeader;
+                let nondet_program_ptr = (header.add(1)) as *const u32;
+                let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);
+                let consts_ptr = verify_program_ptr.add((*header).verify_program_size as usize);
+                let temp_space = ((*header).temp_size as usize) << 2;
+
+                ::core::arch::asm!(
+                    "sub sp, sp, {temp_space}",
+                    "ecall",
+                    "add sp, sp, {temp_space}",
+                    temp_space = in(reg) temp_space,
+                    in("t0") ecall::BIGINT2,
+                    in("t1") nondet_program_ptr,
+                    in("t2") verify_program_ptr,
+                    in("t3") consts_ptr,
+                    in("a0") blob_ptr,
+                    in("a1") a1,
+                    $(in("a2") $a2,
+                        $(in("a3") $a3,
+                            $(in("a4") $a4,
+                                $(in("a5") $a5,
+                                    $(in("a6") $a6,
+                                        $(in("a7") $a7,)?
+                                    )?
+                                )?
+                            )?
+                        )?
+                    )?
+                );
+            }
+
+            #[cfg(not(target_os = "zkvm"))]
+            unimplemented!()
+        }
+    }
+}
+
+impl_sys_bigint2!(sys_bigint2_1, a1);
+impl_sys_bigint2!(sys_bigint2_2, a1, a2);
+impl_sys_bigint2!(sys_bigint2_3, a1, a2, a3);
+impl_sys_bigint2!(sys_bigint2_4, a1, a2, a3, a4);
+impl_sys_bigint2!(sys_bigint2_5, a1, a2, a3, a4, a5);
+impl_sys_bigint2!(sys_bigint2_6, a1, a2, a3, a4, a5, a6);
+impl_sys_bigint2!(sys_bigint2_7, a1, a2, a3, a4, a5, a6, a7);

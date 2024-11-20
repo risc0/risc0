@@ -4,6 +4,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import katex from "rehype-katex";
 import math from "remark-math";
+import apiVersions from "./api_versions.json";
 import rustCode from "./src/remark/rust.js";
 
 const baseUrl = process.env.BASE_URL ?? "/";
@@ -29,6 +30,23 @@ export default async function createConfigAsync() {
       locales: ["en"],
     },
 
+    markdown: {
+      mermaid: true,
+    },
+
+    future: {
+      experimental_faster: {
+        swcJsLoader: true,
+        swcJsMinimizer: true,
+        swcHtmlMinimizer: false, // doesn't work with @acid-info/docusaurus-og
+        lightningCssMinimizer: true,
+        rspackBundler: true,
+        mdxCrossCompilerCache: true,
+      },
+    },
+
+    themes: ["@docusaurus/theme-mermaid"],
+
     presets: [
       [
         "classic",
@@ -51,6 +69,16 @@ export default async function createConfigAsync() {
 
     plugins: [
       [
+        "@acid-info/docusaurus-og",
+        {
+          path: "./preview-images", // relative to the build directory
+          imageRenderers: {
+            "docusaurus-plugin-content-docs": require("./src/og/og-renderer")
+              .renderer,
+          },
+        },
+      ],
+      [
         "@docusaurus/plugin-content-docs",
         {
           id: "api",
@@ -69,22 +97,30 @@ export default async function createConfigAsync() {
       [
         "@docusaurus/plugin-client-redirects",
         {
-          createRedirects(path) {
-            if (path.includes("/api/generating-proofs/remote-proving")) {
+          createRedirects(existingPath) {
+            if (
+              existingPath.includes("/api/generating-proofs/remote-proving")
+            ) {
               return [
-                path.replace(
+                existingPath.replace(
                   "/api/generating-proofs/remote-proving",
                   "/bonsai",
                 ),
-                path.replace(
+                existingPath.replace(
                   "/api/generating-proofs/remote-proving",
                   "/bonsai/quickstart",
                 ),
               ];
             }
-            if (path.includes("/api/zkvm")) {
-              return [path.replace("/api/zkvm", "/zkvm")];
+
+            if (existingPath.includes("/api/zkvm")) {
+              return [existingPath.replace("/api/zkvm", "/zkvm")];
             }
+
+            if (existingPath.includes("/api")) {
+              return [existingPath.replace("/api", `/api/${apiVersions[0]}`)];
+            }
+
             return undefined;
           },
           redirects: [{ from: "/tech_faq", to: "/faq" }],
@@ -113,17 +149,21 @@ export default async function createConfigAsync() {
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({
-        image: "img/logo.svg",
+        metadata: [
+          { name: "twitter:card", content: "summary_large_image" },
+          { name: "og:type", content: "website" },
+          { name: "og:logo", content: "img/logo.svg" },
+        ],
         navbar: {
           logo: {
             alt: "RISC Zero",
             src: "img/logo.svg",
-            href: "https://risczero.com",
+            href: "/",
           },
           items: [
             {
               position: "left",
-              label: "Introduction",
+              label: "Documentation",
               to: "/api",
             },
             {
@@ -187,9 +227,55 @@ export default async function createConfigAsync() {
           ],
         },
         footer: {
-          style: "dark",
-          links: [{}],
-          copyright: `Copyright © ${new Date().getFullYear()} RISC Zero, Inc. Built with Docusaurus.`,
+          logo: {
+            alt: "RISC Zero",
+            src: "img/logo.svg",
+            href: "https://risczero.com",
+            height: 42,
+          },
+          links: [
+            {
+              items: [
+                {
+                  label: "Blog",
+                  href: "https://www.risczero.com/blog",
+                },
+                {
+                  label: "Careers",
+                  href: "https://jobs.ashbyhq.com/RiscZero",
+                },
+                {
+                  label: "Reports & Benchmarks",
+                  href: "https://reports.risczero.com",
+                },
+                {
+                  label: "Bug Bounties",
+                  href: "https://hackenproof.com/company/risc-zero/programs",
+                },
+              ],
+            },
+            {
+              items: [
+                {
+                  label: "GitHub",
+                  href: "https://github.com/risc0",
+                },
+                {
+                  label: "Discord",
+                  href: "https://discord.com/invite/risczero",
+                },
+                {
+                  label: "X",
+                  href: "https://x.com/RiscZero",
+                },
+                {
+                  label: "YouTube",
+                  href: "https://www.youtube.com/@risczero",
+                },
+              ],
+            },
+          ],
+          copyright: `©${new Date().getFullYear()} RISC Zero`,
         },
         prism: {
           additionalLanguages: ["bash", "rust", "toml"],

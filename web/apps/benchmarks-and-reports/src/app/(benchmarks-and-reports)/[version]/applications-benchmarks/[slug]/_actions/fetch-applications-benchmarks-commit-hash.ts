@@ -8,7 +8,9 @@ export async function fetchApplicationsBenchmarksCommitHash({ version }: { versi
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/COMMIT_HASH.txt`,
     {
-      next: { revalidate: 180, tags: ["fetch-applications-benchmarks-commit-hash"] }, // 3 minutes cache
+      next: {
+        revalidate: 60,
+      },
     },
   );
 

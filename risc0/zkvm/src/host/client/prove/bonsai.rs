@@ -19,8 +19,9 @@ use bonsai_sdk::blocking::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, is_dev_mode, sha::Digestible, ExecutorEnv, Groth16Receipt, InnerReceipt,
-    ProveInfo, ProverOpts, Receipt, ReceiptKind, VerifierContext,
+    compute_image_id, is_dev_mode, AssumptionReceipt, ExecutorEnv, InnerAssumptionReceipt,
+    InnerReceipt, ProveInfo, ProverOpts, Receipt, ReceiptKind, SessionStats, VerifierContext,
+    VERSION,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
@@ -40,6 +41,24 @@ impl BonsaiProver {
     }
 }
 
+// Only proven assumptions that are succinct are supported by Bonsai.
+fn get_inner_assumption_receipt(assumption: &AssumptionReceipt) -> Result<&InnerAssumptionReceipt> {
+    match assumption {
+        AssumptionReceipt::Proven(receipt) => {
+            if !matches!(receipt, InnerAssumptionReceipt::Succinct(_)) {
+                bail!(
+                    "Bonsai only supports succinct assumption receipts. \
+                    Use `ProverOpts::succinct()` when proving any assumptions."
+                );
+            };
+            Ok(receipt)
+        }
+        AssumptionReceipt::Unresolved(_) => {
+            bail!("only proven assumptions can be uploaded to Bonsai.")
+        }
+    }
+}
+
 impl Prover for BonsaiProver {
     fn get_name(&self) -> String {
         self.name.clone()
@@ -52,7 +71,7 @@ impl Prover for BonsaiProver {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<ProveInfo> {
-        let client = Client::from_env(crate::VERSION)?;
+        let client = Client::from_env(VERSION)?;
 
         // Compute the ImageID and upload the ELF binary
         let image_id = compute_image_id(elf)?;
@@ -63,14 +82,10 @@ impl Prover for BonsaiProver {
         let input_id = client.upload_input(env.input)?;
 
         // upload receipts
-        let mut receipts_ids: Vec<String> = vec![];
-        for assumption in &env.assumptions.borrow().cached {
-            let serialized_receipt = match assumption {
-                crate::AssumptionReceipt::Proven(receipt) => bincode::serialize(receipt)?,
-                crate::AssumptionReceipt::Unresolved(_) => {
-                    bail!("only proven assumptions can be uploaded to Bonsai.")
-                }
-            };
+        let mut receipts_ids = vec![];
+        for assumption in env.assumptions.borrow().0.iter() {
+            let inner_receipt = get_inner_assumption_receipt(assumption)?;
+            let serialized_receipt = bincode::serialize(inner_receipt)?;
             let receipt_id = client.upload_receipt(serialized_receipt)?;
             receipts_ids.push(receipt_id);
         }
@@ -78,16 +93,27 @@ impl Prover for BonsaiProver {
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
-        let session = client.create_session(image_id_hex, input_id, receipts_ids, false)?;
+        let session = client.create_session_with_limit(
+            image_id_hex,
+            input_id,
+            receipts_ids,
+            false,
+            env.session_limit,
+        )?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
+        // TODO(#1759): Improve upon this polling solution.
+        let polling_interval = if let Ok(ms) = std::env::var("BONSAI_POLL_INTERVAL_MS") {
+            Duration::from_millis(ms.parse().context("invalid bonsai poll interval")?)
+        } else {
+            Duration::from_secs(1)
+        };
         let succinct_prove_info = loop {
             // The session has already been started in the executor. Poll bonsai to check if
             // the proof request succeeded.
             let res = session.status(&client)?;
             if res.status == "RUNNING" {
-                // TODO(#1759): Improve upon this polling solution.
-                std::thread::sleep(Duration::from_secs(5));
+                std::thread::sleep(polling_interval);
                 continue;
             }
             if res.status == "SUCCEEDED" {
@@ -115,10 +141,13 @@ impl Prover for BonsaiProver {
                 }
                 break ProveInfo {
                     receipt,
-                    stats: crate::SessionStats {
+                    stats: SessionStats {
                         segments: stats.segments,
                         total_cycles: stats.total_cycles,
                         user_cycles: stats.cycles,
+                        // These are currently unavailable from Bonsai
+                        paging_cycles: 0,
+                        reserved_cycles: 0,
                     },
                 };
             } else {
@@ -142,12 +171,11 @@ impl Prover for BonsaiProver {
 
         // Request that Bonsai compress further, to Groth16.
         let snark_session = client.create_snark(session.uuid)?;
-        let snark_receipt = loop {
+        let snark_receipt_url = loop {
             let res = snark_session.status(&client)?;
             match res.status.as_str() {
                 "RUNNING" => {
-                    // TODO(#1759): Improve upon this polling solution.
-                    std::thread::sleep(Duration::from_secs(5));
+                    std::thread::sleep(polling_interval);
                     continue;
                 }
                 "SUCCEEDED" => {
@@ -177,14 +205,8 @@ impl Prover for BonsaiProver {
         // the verifier parameters for this version of risc0-zkvm, which may be different than
         // Bonsai. By verifying the receipt though, we at least know the proving key used on Bonsai
         // matches the verifying key used here.
-        let groth16_receipt = Receipt::new(
-            InnerReceipt::Groth16(Groth16Receipt {
-                seal: snark_receipt.snark.to_vec(),
-                claim: succinct_prove_info.receipt.claim()?,
-                verifier_parameters: ctx.groth16_verifier_parameters.digest(),
-            }),
-            succinct_prove_info.receipt.journal.bytes,
-        );
+        let receipt_buf = client.download(&snark_receipt_url)?;
+        let groth16_receipt: Receipt = bincode::deserialize(&receipt_buf)?;
         groth16_receipt
             .verify_integrity_with_context(ctx)
             .context("failed to verify Groth16Receipt returned by Bonsai")?;

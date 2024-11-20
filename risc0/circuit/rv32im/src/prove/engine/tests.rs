@@ -101,7 +101,7 @@ fn fwd_rev_ab_test(program: Program) {
             &circuit_hal,
             segment.po2,
             &io,
-            trace.clone(),
+            &trace,
             StepMode::SeqForward,
         );
         let rev_witgen = WitnessGenerator::new(
@@ -109,7 +109,7 @@ fn fwd_rev_ab_test(program: Program) {
             &circuit_hal,
             segment.po2,
             &io,
-            trace.clone(),
+            &trace,
             StepMode::SeqReverse,
         );
         assert!(fwd_witgen.data.to_vec() == rev_witgen.data.to_vec());

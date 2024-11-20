@@ -17,3 +17,4 @@ serde = { version = "1.0", features = ["derive"] }
 
 [build-dependencies]
 glob = "0.3"
+regex = "1.11"

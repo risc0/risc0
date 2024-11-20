@@ -1,0 +1,21 @@
+[package]
+name = "risc0-bigint2-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+num-bigint = { version = "0.4", default-features = false, features = ["serde"], optional = true }
+num-bigint-dig = { version = "0.8", default-features = false, features = ["serde"], optional = true }
+risc0-bigint2 = { path = "../..", default-features = false, features = [
+  "unstable",
+] }
+risc0-zkvm = { path = "../../../zkvm", default-features = false, features = [
+  "std",
+  "unstable",
+] }
+
+[features]
+num-bigint = ["dep:num-bigint", "risc0-bigint2/default"]
+num-bigint-dig = ["dep:num-bigint-dig", "risc0-bigint2/num-bigint-dig"]

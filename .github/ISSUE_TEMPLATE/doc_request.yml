@@ -14,7 +14,7 @@ body:
     id: stackexchange
     attributes:
       label: Experiencing problems? Have you tried our Discord first?
-      description: Please search <https://discord.com/invite/risczero> to see if an post already exists, and ask if not. Please do not file support issues here.
+      description: Please search <https://discord.com/invite/risczero> to see if a post already exists, and ask if not. Please do not file support issues here.
       options:
         - label: This is not a support question.
           required: true

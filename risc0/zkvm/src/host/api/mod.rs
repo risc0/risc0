@@ -40,7 +40,7 @@ use lazy_regex::regex_captures;
 use prost::Message;
 use semver::Version;
 
-use crate::{get_version, ExitCode, Journal};
+use crate::{get_version, ExitCode, Journal, ReceiptClaim};
 
 mod pb {
     pub(crate) mod api {
@@ -62,11 +62,11 @@ pub trait Connection {
     fn stream(&self) -> &TcpStream;
     fn close(&mut self) -> Result<i32>;
     #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection>>;
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>>;
 }
 
 pub struct ConnectionWrapper {
-    inner: Box<dyn Connection>,
+    inner: Box<dyn Connection + Send>,
     buf: Vec<u8>,
 }
 
@@ -77,6 +77,7 @@ impl RootMessage for pb::api::ServerReply {}
 impl RootMessage for pb::api::GenericReply {}
 impl RootMessage for pb::api::OnIoReply {}
 impl RootMessage for pb::api::ProveSegmentReply {}
+impl RootMessage for pb::api::ProveZkrReply {}
 impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}
 impl RootMessage for pb::api::JoinRequest {}
@@ -89,7 +90,7 @@ impl RootMessage for pb::api::CompressRequest {}
 impl RootMessage for pb::api::CompressReply {}
 
 impl ConnectionWrapper {
-    fn new(inner: Box<dyn Connection>) -> Self {
+    fn new(inner: Box<dyn Connection + Send>) -> Self {
         Self {
             inner,
             buf: Vec::new(),
@@ -166,6 +167,24 @@ impl ParentProcessConnector {
             bail!(msg);
         }
 
+        Ok(Self {
+            server_path: server_path.as_ref().to_path_buf(),
+            listener: TcpListener::bind("127.0.0.1:0")?,
+        })
+    }
+
+    pub fn new_wide_version<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let server_version = get_server_version(&server_path)?;
+
+        if !client::check_server_version_wide(&client_version, &server_version) {
+            let msg = format!(
+                "Your installation of r0vm differs by a major version:\n\
+            {client_version} vs {server_version} only minor, patch / pre-releases supported"
+            );
+            tracing::warn!("{msg}");
+            bail!(msg);
+        }
         Ok(Self {
             server_path: server_path.as_ref().to_path_buf(),
             listener: TcpListener::bind("127.0.0.1:0")?,
@@ -278,7 +297,7 @@ impl Connection for ParentProcessConnection {
     }
 
     #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
         unimplemented!()
     }
 }
@@ -300,7 +319,7 @@ impl Connection for TcpConnection {
         Ok(0)
     }
 
-    fn try_clone(&self) -> Result<Box<dyn Connection>> {
+    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
         Ok(Box::new(Self::new(self.stream.try_clone()?)))
     }
 }
@@ -314,6 +333,7 @@ impl pb::api::Asset {
         let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
+            pb::api::asset::Kind::Redis(_) => bail!("as_bytes not supported for redis"),
         };
         Ok(bytes.into())
     }
@@ -327,6 +347,22 @@ pub enum Asset {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    Redis(String),
+}
+
+/// Determines the parameters for AssetRequest::Redis
+#[derive(Clone)]
+pub struct RedisParams {
+    /// The url of the redis instance
+    pub url: String,
+
+    /// The key used to write to redis
+    pub key: String,
+
+    /// time to live (expiration) for the key being set
+    pub ttl: u64,
 }
 
 /// Determines the format of an asset request.
@@ -337,6 +373,9 @@ pub enum AssetRequest {
 
     /// The asset is written to disk.
     Path(PathBuf),
+
+    /// The asset is written to redis.
+    Redis(RedisParams),
 }
 
 /// Provides information about the result of execution.
@@ -350,6 +389,10 @@ pub struct SessionInfo {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
+    /// proven if this session is passed to the Prover.
+    pub receipt_claim: ReceiptClaim,
 }
 
 impl SessionInfo {
@@ -377,6 +420,7 @@ impl Asset {
         Ok(match self {
             Asset::Inline(bytes) => bytes.clone(),
             Asset::Path(path) => std::fs::read(path)?.into(),
+            Asset::Redis(_) => bail!("as_bytes not supported for Asset::Redis"),
         })
     }
 }

@@ -50,11 +50,7 @@ constexpr size_t kVerifyMemHaltKind = 2;
 
 namespace {
 
-using CodeReg = size_t;
-using OutReg = size_t;
-using DataReg = size_t;
-using MixReg = size_t;
-using AccumReg = size_t;
+using Reg = size_t;
 
 #include "layout.cpp.inc"
 
@@ -138,7 +134,7 @@ void inject_backs_ram(MachineContext* ctx, size_t steps, size_t cycle, Fp* data)
     }
 
     const RamArgumentRow& back1 = ctx->ramRows[idx - 1];
-    constexpr auto header = kLayout.mux.body.header;
+    constexpr auto header = kDataLayout.mux.body.header;
     constexpr auto a = header.element;
     constexpr auto v = header.verifier;
     data[a.addr * steps + cycle - 1] = back1.addr;                 // a->addr
@@ -329,7 +325,13 @@ void risc0_circuit_rv32im_step_compute_accum(
     risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
   ffi_wrap<uint32_t>(err, 0, [&] {
     // printf("step_compute_accum(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
-    circuit::rv32im::step_compute_accum(ctx, steps, cycle, args);
+    AccumContext* actx = static_cast<AccumContext*>(ctx);
+    if (cycle == 0 || actx->isParSafe[cycle]) {
+      circuit::rv32im::step_compute_accum(ctx, steps, cycle++, args);
+      while (cycle < steps && !actx->isParSafe[cycle]) {
+        circuit::rv32im::step_compute_accum(ctx, steps, cycle++, args);
+      }
+    }
     return 0;
   });
 }
@@ -343,10 +345,11 @@ void risc0_circuit_rv32im_step_verify_accum(
   });
 }
 
-AccumContext* risc0_circuit_rv32im_accum_context_alloc(size_t steps) {
+AccumContext* risc0_circuit_rv32im_accum_context_alloc(size_t steps, uint8_t* isParSafe) {
   AccumContext* ctx = new AccumContext;
   ctx->steps = steps;
   ctx->cells.resize(steps, AccumCell{FpExt(1), FpExt(1)});
+  ctx->isParSafe = isParSafe;
   return ctx;
 }
 
