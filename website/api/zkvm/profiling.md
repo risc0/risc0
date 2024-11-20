@@ -36,12 +36,13 @@ it the [pprof] tool.
 Run the Fibonacci profiling example with:
 
 ```bash
-RISC0_PPROF_OUT=./profile.pb cargo run
+RISC0_PPROF_OUT=./profile.pb RISC0_DEV_MODE=1 cargo run
 ```
 
 The above command will run the Fibonacci computation for 1000 iterations and
 write the profiling output to `profile.pb`. Use the environment variable
-`RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
+`RISC0_PPROF_OUT` to set to the desired output path for the profiling data. 
+We recommend running profiling in dev mode to avoid unneccesary proving time. 
 
 ### Step 3: Visualization
 
