@@ -109,6 +109,11 @@ main {
   filter: invert(1);
 }
 
+#mermaid-svg-id {
+  height: 100%;
+  width: 100%;
+}
+
 /* small screens */
 @media (max-width: 996px) {
   .navbar__items--right > div:has(.DocSearch-Button) {
