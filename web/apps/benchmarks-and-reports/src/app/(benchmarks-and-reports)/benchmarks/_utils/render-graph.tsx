@@ -1,4 +1,3 @@
-import formatters from "@poppinss/intl-formatter";
 import { Badge } from "@risc0/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@risc0/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip } from "@risc0/ui/chart";
