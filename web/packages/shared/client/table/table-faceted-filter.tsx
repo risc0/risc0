@@ -1,15 +1,7 @@
 import { Badge } from "@risc0/ui/badge";
 import { Button } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@risc0/ui/command";
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList, CommandSeparator } from "@risc0/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@risc0/ui/popover";
 import { Separator } from "@risc0/ui/separator";
 import { joinWords } from "@risc0/ui/utils/join-words";
@@ -80,7 +72,6 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="start">
         <Command>
-          <CommandInput placeholder={title} />
           <CommandList>
             <CommandEmpty>No Results Found</CommandEmpty>
             <CommandGroup>
