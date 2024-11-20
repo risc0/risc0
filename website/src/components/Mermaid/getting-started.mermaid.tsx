@@ -1,5 +1,5 @@
 import React from "react";
-import Mermaid from "../src/components/Mermaid";
+import Mermaid from ".";
 
 export default function GettingStartedMermaid() {
 	return (

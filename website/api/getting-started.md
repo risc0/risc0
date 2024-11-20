@@ -1,4 +1,4 @@
-import GettingStartedMermaid from "./getting-started.mermaid";
+import GettingStartedMermaid from "@site/src/components/Mermaid/getting-started.mermaid";
 
 # Getting Started
 
