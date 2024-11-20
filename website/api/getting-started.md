@@ -12,6 +12,7 @@ To harness the power of ZK, you'll need to:
 
 <Mermaid
   definition={`
+  %% no_run %%
   flowchart TD
     %% Level 0
     getting_started["Getting Started

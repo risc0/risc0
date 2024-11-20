@@ -63,6 +63,7 @@ We describe this in more detail below, and refer readers to the [ZKP Whitepaper]
 <Mermaid
   height="860"
   definition={`
+    %% no_run %%
 sequenceDiagram
   participant P as Prover
   participant V as Verifier
