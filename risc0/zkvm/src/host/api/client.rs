@@ -631,9 +631,9 @@ impl Client {
                             // tracing::trace!("tx: {msg:?}");
                             conn.send(msg)?;
                         }
-                        pb::api::client_callback::Kind::SegmentDone(segment) => {
-                            let reply: pb::api::GenericReply = segment
-                                .segment
+                        pb::api::client_callback::Kind::SegmentDone(segment_done) => {
+                            let reply: pb::api::GenericReply = segment_done
+                                .segment // some segment info
                                 .map_or_else(
                                     || Err(malformed_err()),
                                     |segment| {

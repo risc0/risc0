@@ -16,6 +16,7 @@ use std::{
     error::Error as StdError,
     io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Read, Write},
     path::{Path, PathBuf},
+    sync::{Arc, Mutex},
 };
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -46,11 +47,11 @@ pub struct Server {
 }
 struct PosixIoProxy {
     fd: u32,
-    conn: ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
 }
 
 impl PosixIoProxy {
-    fn new(fd: u32, conn: ConnectionWrapper) -> Self {
+    fn new(fd: u32, conn: Arc<Mutex<ConnectionWrapper>>) -> Self {
         PosixIoProxy { fd, conn }
     }
 }
@@ -72,10 +73,19 @@ impl Read for PosixIoProxy {
         };
 
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
+        let reply = {
+            let mut conn_lock = self.conn.lock().map_err(|_| {
+                std::io::Error::new(
+                    std::io::ErrorKind::WouldBlock,
+                    "Failed to get connection mutex",
+                )
+            })?;
+            conn_lock.send(request).map_io_err()?;
 
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
+            let reply: pb::api::OnIoReply = conn_lock.recv().map_io_err()?;
+            tracing::trace!("rx: {reply:?}");
+            reply
+        };
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -104,11 +114,20 @@ impl Write for PosixIoProxy {
             })),
         };
 
-        tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
+        let reply = {
+            let mut conn_lock = self.conn.lock().map_err(|_| {
+                std::io::Error::new(
+                    std::io::ErrorKind::WouldBlock,
+                    "Failed to get connection mutex",
+                )
+            })?;
+            tracing::trace!("tx: {request:?}");
+            conn_lock.send(request).map_io_err()?;
 
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
+            let reply: pb::api::OnIoReply = conn_lock.recv().map_io_err()?;
+            tracing::trace!("rx: {reply:?}");
+            reply
+        };
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -123,18 +142,18 @@ impl Write for PosixIoProxy {
 }
 
 struct SliceIoProxy {
-    conn: ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
 }
 
 impl SliceIoProxy {
-    fn new(conn: ConnectionWrapper) -> Self {
+    fn new(conn: Arc<Mutex<ConnectionWrapper>>) -> Self {
         Self { conn }
     }
 
-    fn try_clone(&self) -> Result<Self> {
-        Ok(SliceIoProxy {
-            conn: self.conn.try_clone()?,
-        })
+    fn clone(&self) -> Self {
+        SliceIoProxy {
+            conn: self.conn.clone(),
+        }
     }
 }
 
@@ -151,10 +170,17 @@ impl SliceIo for SliceIoProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
+        let reply = {
+            let mut conn_lock = self
+                .conn
+                .lock()
+                .map_err(|_| anyhow::anyhow!("Failed to lock connection mutex"))?;
+            conn_lock.send(request)?;
 
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
+            let reply: pb::api::OnIoReply = conn_lock.recv().map_io_err()?;
+            tracing::trace!("rx: {reply:?}");
+            reply
+        };
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -165,11 +191,11 @@ impl SliceIo for SliceIoProxy {
 }
 
 struct TraceProxy {
-    conn: ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
 }
 
 impl TraceProxy {
-    fn new(conn: ConnectionWrapper) -> Self {
+    fn new(conn: Arc<Mutex<ConnectionWrapper>>) -> Self {
         Self { conn }
     }
 }
@@ -183,11 +209,20 @@ impl TraceCallback for TraceProxy {
                 })),
             })),
         };
-        tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
 
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
+        let reply = {
+            let mut conn_lock = self
+                .conn
+                .lock()
+                .map_err(|_| anyhow::anyhow!("Failed to lock connection mutex"))?;
+            tracing::trace!("tx: {request:?}");
+            conn_lock.send(request)?;
+
+            let reply: pb::api::OnIoReply = conn_lock.recv().map_io_err()?;
+            tracing::trace!("rx: {reply:?}");
+
+            reply
+        };
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -198,11 +233,11 @@ impl TraceCallback for TraceProxy {
 }
 
 struct CoprocessorProxy {
-    conn: ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
 }
 
 impl CoprocessorProxy {
-    fn new(conn: ConnectionWrapper) -> Self {
+    fn new(conn: Arc<Mutex<ConnectionWrapper>>) -> Self {
         Self { conn }
     }
 }
@@ -228,11 +263,19 @@ impl CoprocessorCallback for CoprocessorProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
 
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
+        let reply = {
+            let mut conn_lock = self
+                .conn
+                .lock()
+                .map_err(|_| anyhow::anyhow!("Failed to lock connection mutex"))?;
+            conn_lock.send(request)?;
 
+            let reply: pb::api::OnIoReply = conn_lock.recv().map_io_err()?;
+            tracing::trace!("rx: {reply:?}");
+
+            reply
+        };
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
             pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
@@ -305,17 +348,13 @@ impl Server {
         }
     }
 
-    fn on_execute(
-        &self,
-        mut conn: ConnectionWrapper,
-        request: pb::api::ExecuteRequest,
-    ) -> Result<()> {
+    fn on_execute(&self, conn: ConnectionWrapper, request: pb::api::ExecuteRequest) -> Result<()> {
         fn inner(
-            conn: &mut ConnectionWrapper,
+            conn: Arc<Mutex<ConnectionWrapper>>,
             request: pb::api::ExecuteRequest,
         ) -> Result<pb::api::ServerReply> {
             let env_request = request.env.ok_or(malformed_err())?;
-            let env = build_env(conn, &env_request)?;
+            let env = build_env(conn.clone(), &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
 
@@ -354,19 +393,24 @@ impl Server {
             })
         }
 
-        let msg = inner(&mut conn, request).unwrap_or_else(|err| pb::api::ServerReply {
+        let conn_lock = Arc::new(Mutex::new(conn));
+
+        let msg = inner(conn_lock.clone(), request).unwrap_or_else(|err| pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Error(pb::api::GenericError {
                 reason: err.to_string(),
             })),
         });
 
         tracing::trace!("tx: {msg:?}");
+        let mut conn = conn_lock
+            .lock()
+            .map_err(|_| anyhow::anyhow!("Failed to lock connection mutex"))?;
         conn.send(msg)
     }
 
-    fn on_prove(&self, mut conn: ConnectionWrapper, request: pb::api::ProveRequest) -> Result<()> {
+    fn on_prove(&self, conn: ConnectionWrapper, request: pb::api::ProveRequest) -> Result<()> {
         fn inner(
-            conn: &mut ConnectionWrapper,
+            conn: Arc<Mutex<ConnectionWrapper>>,
             request: pb::api::ProveRequest,
         ) -> Result<pb::api::ServerReply> {
             let env_request = request.env.ok_or(malformed_err())?;
@@ -399,14 +443,19 @@ impl Server {
             })
         }
 
-        let msg = inner(&mut conn, request).unwrap_or_else(|err| pb::api::ServerReply {
+        let conn = Arc::new(Mutex::new(conn));
+
+        let msg = inner(conn.clone(), request).unwrap_or_else(|err| pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Error(pb::api::GenericError {
                 reason: err.to_string(),
             })),
         });
 
         tracing::trace!("tx: {msg:?}");
-        conn.send(msg)
+        let mut conn_lock = conn
+            .lock()
+            .map_err(|_| anyhow::anyhow!("Failed to lock connection mutex"))?;
+        conn_lock.send(msg)
     }
 
     fn on_prove_segment(
@@ -715,31 +764,31 @@ impl Server {
 }
 
 fn build_env<'a>(
-    conn: &ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
     request: &pb::api::ExecutorEnv,
 ) -> Result<ExecutorEnv<'a>> {
     let mut env_builder = ExecutorEnv::builder();
     env_builder.env_vars(request.env_vars.clone());
     env_builder.args(&request.args);
     for fd in request.read_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         let reader = BufReader::new(proxy);
         env_builder.read_fd(*fd, reader);
     }
     for fd in request.write_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         env_builder.write_fd(*fd, proxy);
     }
-    let proxy = SliceIoProxy::new(conn.try_clone()?);
+    let proxy = SliceIoProxy::new(conn.clone());
     for name in request.slice_ios.iter() {
-        env_builder.slice_io(name, proxy.try_clone()?);
+        env_builder.slice_io(name, proxy.clone());
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
     env_builder.session_limit(request.session_limit);
     if request.trace_events.is_some() {
-        let proxy = TraceProxy::new(conn.try_clone()?);
+        let proxy = TraceProxy::new(conn.clone());
         env_builder.trace_callback(proxy);
     }
     if !request.pprof_out.is_empty() {
@@ -749,7 +798,7 @@ fn build_env<'a>(
         env_builder.segment_path(Path::new(&request.segment_path));
     }
     if request.coprocessor {
-        let proxy = CoprocessorProxy::new(conn.try_clone()?);
+        let proxy = CoprocessorProxy::new(conn.clone());
         env_builder.coprocessor_callback(proxy);
     }
 
@@ -829,7 +878,7 @@ fn check_client_version(client: &semver::Version, server: &semver::Version) -> b
 
 #[cfg(feature = "redis")]
 fn execute_redis(
-    conn: &mut ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
@@ -840,44 +889,44 @@ fn execute_redis(
         Err(_) => 100,
     };
     let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
-    let mut connection_copy = conn.try_clone()?;
-    let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        let client = redis::Client::open(params.url)
-            .map_err(anyhow::Error::new)
-            .unwrap();
-        let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
+    let connection_copy = conn.clone();
+    let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
+    let join_handle: std::thread::JoinHandle<Result<()>> = std::thread::spawn(move || {
+        let client = redis::Client::open(params.url).context("Failed to open Redis connection")?;
+        let mut connection = client
+            .get_connection()
+            .context("Failed to get redis connection")?;
         while let Ok((segment_key, segment)) = receiver.recv() {
-            let segment_bytes = bincode::serialize(&segment)
-                .map_err(anyhow::Error::new)
-                .unwrap();
-            let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
+            let segment_bytes =
+                bincode::serialize(&segment).context("Failed to deserialize segment")?;
             let _: () = connection
                 .set_options(segment_key.clone(), segment_bytes, opts)
-                .map_err(anyhow::Error::new)
-                .unwrap();
-
+                .context("Failed to set redis key with TTL")?;
             let asset = pb::api::Asset {
                 kind: Some(pb::api::asset::Kind::Redis(segment_key)),
             };
-            send_segment_done_msg(&mut connection_copy, segment, Some(asset)).unwrap();
+            send_segment_done_msg(connection_copy.clone(), segment, Some(asset))
+                .context("Failed to send segment_done msg")?;
         }
+        Ok(())
     });
 
     let session = exec.run_with_callback(|segment| {
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key, segment))?;
+        sender.send((segment_key.clone(), segment.clone()))?;
         Ok(Box::new(NullSegmentRef))
     });
 
     drop(sender);
 
-    join_handle.join().expect("redis task failure");
-
-    session
+    join_handle
+        .join()
+        .map(|_| session)
+        .map_err(|err| anyhow::anyhow!("redis task join failed: {err:?}"))?
 }
 
 fn execute_default(
-    conn: &mut ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
     exec: &mut ExecutorImpl,
     segments_out: &pb::api::AssetRequest,
 ) -> Result<crate::Session> {
@@ -888,13 +937,13 @@ fn execute_default(
             segment_bytes.into(),
             format!("segment-{}", segment.index),
         )?;
-        send_segment_done_msg(conn, segment, Some(asset))?;
+        send_segment_done_msg(conn.clone(), segment, Some(asset))?;
         Ok(Box::new(NullSegmentRef))
     })
 }
 
 fn send_segment_done_msg(
-    conn: &mut ConnectionWrapper,
+    conn: Arc<Mutex<ConnectionWrapper>>,
     segment: Segment,
     some_asset: Option<pb::api::Asset>,
 ) -> Result<()> {
@@ -912,10 +961,21 @@ fn send_segment_done_msg(
             )),
         })),
     };
-    tracing::trace!("tx: {msg:?}");
-    conn.send(msg)?;
 
-    let reply: pb::api::GenericReply = conn.recv()?;
+    let reply = {
+        let mut conn_lock = conn
+            .lock()
+            .map_err(|_| anyhow::anyhow!("Failed to lock connection mutex"))?;
+        tracing::trace!("tx: {msg:?}");
+        conn_lock
+            .send(msg)
+            .inspect_err(|e| eprintln!("failed to send: {e}"))?;
+
+        let reply: pb::api::GenericReply = conn_lock
+            .recv()
+            .inspect_err(|e| eprintln!("failed to recv: {e}"))?;
+        reply
+    };
     tracing::trace!("rx: {reply:?}");
     let kind = reply.kind.ok_or(malformed_err())?;
     if let pb::api::generic_reply::Kind::Error(err) = kind {

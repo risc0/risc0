@@ -119,10 +119,10 @@ impl ConnectionWrapper {
         self.inner.close()
     }
 
-    #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Self> {
-        Ok(Self::new(self.inner.try_clone()?))
-    }
+    // #[cfg(feature = "prove")]
+    // fn clone(&self) -> Result<Self> {
+    //     Ok(Self::new(self.inner.clone()))
+    // }
 }
 
 /// Connects a zkVM client and server
