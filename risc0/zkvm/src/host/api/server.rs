@@ -65,9 +65,7 @@ impl Read for PosixIoProxy {
         };
 
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -98,9 +96,7 @@ impl Write for PosixIoProxy {
         };
 
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -139,9 +135,7 @@ impl SliceIo for SliceIoProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -172,9 +166,7 @@ impl TraceCallback for TraceProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -227,10 +219,9 @@ impl Server {
             })),
         };
         tracing::trace!("tx: {reply:?}");
-        conn.send(reply)?;
-
-        let request: pb::api::ServerRequest = conn.recv()?;
+        let request: pb::api::ServerRequest = conn.send_recv(reply)?;
         tracing::trace!("rx: {request:?}");
+
         match request.kind.ok_or(malformed_err())? {
             pb::api::server_request::Kind::Prove(request) => self.on_prove(conn, request),
             pb::api::server_request::Kind::Execute(request) => self.on_execute(conn, request),
@@ -803,11 +794,11 @@ fn send_segment_done_msg(
             )),
         })),
     };
-    tracing::trace!("tx: {msg:?}");
-    conn.send(msg)?;
 
-    let reply: pb::api::GenericReply = conn.recv()?;
+    tracing::trace!("tx: {msg:?}");
+    let reply: pb::api::GenericReply = conn.send_recv(msg)?;
     tracing::trace!("rx: {reply:?}");
+
     let kind = reply.kind.ok_or(malformed_err())?;
     if let pb::api::generic_reply::Kind::Error(err) = kind {
         bail!(err)

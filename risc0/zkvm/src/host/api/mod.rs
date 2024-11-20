@@ -60,7 +60,7 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 trait RootMessage: Message {}
 
 pub trait Connection {
-    fn stream(&self) -> &TcpStream;
+    fn stream(&mut self) -> &mut TcpStream;
     fn close(&mut self) -> Result<i32>;
 }
 
@@ -101,24 +101,39 @@ impl ConnectionWrapper {
     }
 
     fn send<T: RootMessage>(&mut self, msg: T) -> Result<()> {
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        self.inner_send(guard.stream(), msg)
+    }
+
+    fn recv<T: Default + RootMessage>(&mut self) -> Result<T> {
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        self.inner_recv(guard.stream())
+    }
+
+    #[cfg(feature = "prove")]
+    fn send_recv<S: RootMessage, R: Default + RootMessage>(&mut self, msg: S) -> Result<R> {
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        let stream = guard.stream();
+        self.inner_send(stream, msg)?;
+        self.inner_recv(stream)
+    }
+
+    fn close(&mut self) -> Result<i32> {
+        self.inner.lock().map_err(|_| lock_err())?.close()
+    }
+
+    fn inner_send<T: RootMessage>(&self, stream: &mut TcpStream, msg: T) -> Result<()> {
         let len = msg.encoded_len();
         LOCAL_BUF.with_borrow_mut(|buf| {
             buf.clear();
             buf.put_u32_le(len as u32);
             msg.encode(buf)?;
-            Ok(self
-                .inner
-                .lock()
-                .map_err(|_| lock_err())?
-                .stream()
-                .write_all(buf)?)
+            Ok(stream.write_all(buf)?)
         })
     }
 
-    fn recv<T: Default + RootMessage>(&mut self) -> Result<T> {
-        let guard = self.inner.lock().map_err(|_| lock_err())?;
+    fn inner_recv<T: Default + RootMessage>(&self, stream: &mut TcpStream) -> Result<T> {
         LOCAL_BUF.with_borrow_mut(|buf| {
-            let mut stream = guard.stream();
             buf.resize(4, 0);
             stream.read_exact(buf)?;
             let len = buf.as_slice().get_u32_le() as usize;
@@ -126,10 +141,6 @@ impl ConnectionWrapper {
             stream.read_exact(buf)?;
             Ok(T::decode(buf.as_slice())?)
         })
-    }
-
-    fn close(&mut self) -> Result<i32> {
-        self.inner.lock().map_err(|_| lock_err())?.close()
     }
 }
 
@@ -297,8 +308,8 @@ impl ParentProcessConnection {
 }
 
 impl Connection for ParentProcessConnection {
-    fn stream(&self) -> &TcpStream {
-        &self.stream
+    fn stream(&mut self) -> &mut TcpStream {
+        &mut self.stream
     }
 
     fn close(&mut self) -> Result<i32> {
@@ -316,8 +327,8 @@ impl TcpConnection {
 
 #[cfg(feature = "prove")]
 impl Connection for TcpConnection {
-    fn stream(&self) -> &TcpStream {
-        &self.stream
+    fn stream(&mut self) -> &mut TcpStream {
+        &mut self.stream
     }
 
     fn close(&mut self) -> Result<i32> {
