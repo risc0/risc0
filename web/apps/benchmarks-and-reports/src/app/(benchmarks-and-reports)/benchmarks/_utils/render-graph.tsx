@@ -32,16 +32,48 @@ function CustomTooltip({ active, payload }) {
   return null;
 }
 
-function formatFrequency(hz: number): { value: number; unit: string } {
-  if (hz >= 1_000_000) {
-    return { value: hz / 1_000_000, unit: "MHz" };
+function roundToNiceNumber(value: number) {
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const normalized = value / magnitude;
+
+  if (normalized <= 1) {
+    return Math.ceil(value);
   }
 
-  if (hz >= 1_000) {
-    return { value: hz / 1_000, unit: "kHz" };
+  if (normalized <= 2) {
+    return Math.ceil(value / 2) * 2;
   }
 
-  return { value: hz, unit: "Hz" };
+  if (normalized <= 5) {
+    return Math.ceil(value / 5) * 5;
+  }
+
+  return Math.ceil(value / 10) * 10;
+}
+
+function determineUnit(values: number[]): "MHz" | "kHz" | "Hz" {
+  const maxValue = Math.max(...values);
+
+  if (maxValue >= 1_000_000) {
+    return "MHz";
+  }
+
+  if (maxValue >= 1_000) {
+    return "kHz";
+  }
+
+  return "Hz";
+}
+
+function convertToUnit(hz: number, unit: "MHz" | "kHz" | "Hz"): number {
+  switch (unit) {
+    case "MHz":
+      return hz / 1_000_000;
+    case "kHz":
+      return hz / 1_000;
+    default:
+      return hz;
+  }
 }
 
 const chartConfig = {
@@ -60,13 +92,14 @@ export function renderGraph({
   benchName: string;
   dataset: FormattedDataSetEntry[];
 }) {
+  const frequencyUnit = determineUnit(dataset.map((entry) => entry.bench.value));
+
   const chartData = dataset.map((entry) => {
-    const { value, unit } = formatFrequency(entry.bench.value);
+    const value = convertToUnit(entry.bench.value, frequencyUnit);
 
     return {
       commit: entry.commit.id.slice(0, 7),
       value,
-      unit,
       commitUrl: entry.commit.url,
       commitMessage: entry.commit.message,
       commitTimestamp: entry.commit.timestamp,
@@ -74,8 +107,8 @@ export function renderGraph({
     };
   });
 
-  // Get the unit from the first entry (assuming all entries use the same unit)
-  const frequencyUnit = chartData[0]?.unit ?? "Hz";
+  const maxValue = Math.max(...chartData.map((d) => d.value));
+  const yAxisMax = roundToNiceNumber(maxValue * 1.2);
 
   return (
     <Card id={`${platformName}-${benchName}`} className="relative w-full border-none bg-transparent pt-8">
@@ -123,12 +156,7 @@ export function renderGraph({
 
             <XAxis dataKey="commit" tickLine={false} axisLine={false} />
 
-            <YAxis
-              dataKey="value"
-              tickLine={false}
-              axisLine={false}
-              domain={[0, (dataMax) => (dataMax * 1.15).toFixed(0)]}
-            >
+            <YAxis dataKey="value" tickLine={false} axisLine={false} domain={[0, yAxisMax]}>
               <Label angle={270} position="left" style={{ textAnchor: "middle" }}>
                 {frequencyUnit}
               </Label>
