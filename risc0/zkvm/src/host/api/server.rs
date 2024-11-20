@@ -115,6 +115,7 @@ impl Write for PosixIoProxy {
     }
 }
 
+#[derive(Clone)]
 struct SliceIoProxy {
     conn: ConnectionWrapper,
 }
@@ -122,12 +123,6 @@ struct SliceIoProxy {
 impl SliceIoProxy {
     fn new(conn: ConnectionWrapper) -> Self {
         Self { conn }
-    }
-
-    fn try_clone(&self) -> Result<Self> {
-        Ok(SliceIoProxy {
-            conn: self.conn.try_clone()?,
-        })
     }
 }
 
@@ -622,24 +617,24 @@ fn build_env<'a>(
     env_builder.env_vars(request.env_vars.clone());
     env_builder.args(&request.args);
     for fd in request.read_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         let reader = BufReader::new(proxy);
         env_builder.read_fd(*fd, reader);
     }
     for fd in request.write_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         env_builder.write_fd(*fd, proxy);
     }
-    let proxy = SliceIoProxy::new(conn.try_clone()?);
+    let proxy = SliceIoProxy::new(conn.clone());
     for name in request.slice_ios.iter() {
-        env_builder.slice_io(name, proxy.try_clone()?);
+        env_builder.slice_io(name, proxy.clone());
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
     env_builder.session_limit(request.session_limit);
     if request.trace_events.is_some() {
-        let proxy = TraceProxy::new(conn.try_clone()?);
+        let proxy = TraceProxy::new(conn.clone());
         env_builder.trace_callback(proxy);
     }
     if !request.pprof_out.is_empty() {
@@ -736,7 +731,7 @@ fn execute_redis(
         Err(_) => 100,
     };
     let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
-    let mut connection_copy = conn.try_clone()?;
+    let mut connection_copy = conn.clone();
     let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
         let client = redis::Client::open(params.url)
             .map_err(anyhow::Error::new)
