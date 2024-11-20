@@ -113,12 +113,22 @@ impl KeccakBatcher {
         self.input_transcript
             [self.block_count_offset..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
             .copy_from_slice(&[0u8; Self::BLOCK_COUNT_BYTES]);
-        let transcript_digest = crate::sha::Impl::hash_bytes(
-            &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
-        );
 
-        // TODO: add assumption, send transcript
-        // crate::guest::env::verify_assumption(*transcript_digest, Digest::default()).unwrap();
+        let transcript =
+            &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES];
+        let transcript_digest = crate::sha::Impl::hash_bytes(transcript);
+
+        let control_root = risc0_circuit_keccak::get_control_root(15); // TODO - generalize cycle count
+        unsafe {
+            risc0_zkvm_platform::syscall::sys_prove_keccak(
+                15,
+                transcript.as_ptr() as *const u32,
+                transcript.len(),
+                control_root.as_ref(),
+                (*transcript_digest).as_ref(),
+            );
+        }
+        crate::guest::env::verify_assumption(*transcript_digest, *control_root).unwrap(); //infallible
         self.reset();
         *transcript_digest
     }

@@ -15,6 +15,10 @@
 use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
+use risc0_circuit_keccak::control_id::KECCAK_CONTROL_IDS;
+use risc0_circuit_keccak::prove::zkr::get_zkr;
+use risc0_circuit_keccak::KECCAK_PO2_RANGE;
+use risc0_zkvm::RECURSION_PO2;
 use risc0_zkvm::{
     compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
     ProverServer, VerifierContext,
@@ -121,6 +125,11 @@ pub fn main() {
     }
 
     risc0_circuit_bigint::zkr::register_zkrs();
+
+    for (po2, control_id) in KECCAK_PO2_RANGE.zip(KECCAK_CONTROL_IDS) {
+        let name = format!("keccak_lift_{}.zkr", po2);
+        risc0_zkvm::register_zkr(&control_id, move || get_zkr(&name, RECURSION_PO2));
+    }
 
     if let Some(port) = args.mode.port {
         run_server(port);

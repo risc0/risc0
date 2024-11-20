@@ -117,6 +117,7 @@ pub enum MultiTestSpec {
         assumption_words: Vec<u32>,
     },
     TinyKeccak,
+    TinyKeccak1,
     TooManySha,
 }
 

@@ -23,12 +23,11 @@ mod worker;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
-use num_bigint::BigUint;
-use risc0_circuit_bigint_test_methods::{RSA_VERIFY_ELF, RSA_VERIFY_ID};
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
     ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
 };
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
 use self::{plan::Planner, task_mgr::TaskManager};
 
@@ -72,16 +71,10 @@ fn prover_example() {
     let mut task_manager = TaskManager::new();
     let mut planner = Planner::default();
 
-    // Parameters for a message `m` with signature `s` under the RSA public key modulus `n`.
-    let n = from_hex(b"9c98f9aacfc0b73c916a824db9afe39673dcb56c42dffe9de5b86d5748aca4d5");
-    let s = from_hex(b"de67116c809a5cc876cebb5e8c72d998f983a4d61b499dd9ae23b789a7183677");
-    let m = from_hex(b"1fb897fac8aa8870b936631d3af1a17930c8af0ca4376b3056677ded52adf5aa");
-    let claims = vec![[n, s, m]];
-
     let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
     let env = ExecutorEnv::builder()
         .coprocessor_callback_ref(coprocessor.clone())
-        .write(&claims)
+        .write(&MultiTestSpec::TinyKeccak1)
         .unwrap()
         // Use a low segment size to generate more jobs in this example.
         .segment_limit_po2(17)
@@ -93,7 +86,7 @@ fn prover_example() {
     let session = client
         .execute(
             &env,
-            Asset::Inline(RSA_VERIFY_ELF.into()),
+            Asset::Inline(MULTI_TEST_ELF.into()),
             AssetRequest::Inline,
             |info, segment| {
                 println!("{info:?}");
@@ -152,12 +145,8 @@ fn prover_example() {
         session.journal.bytes.clone(),
     );
     let asset = receipt.try_into().unwrap();
-    client.verify(asset, RSA_VERIFY_ID).unwrap();
+    client.verify(asset, MULTI_TEST_ID).unwrap();
     println!("Receipt verified!");
-}
-
-fn from_hex(bytes: &[u8]) -> BigUint {
-    BigUint::parse_bytes(bytes, 16).expect("Unable to parse hex value")
 }
 
 #[test]

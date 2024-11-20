@@ -526,6 +526,14 @@ fn main() {
                 hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
             );
         }
+        MultiTestSpec::TinyKeccak1 => {
+            // used as example and does not check the hash
+            // test_keccak_01.txt
+            let mut hasher = Keccak::v256();
+            hasher.update(KECCAK_TEST_DATA_01);
+            let mut output = [0u8; DIGEST_BYTES];
+            hasher.finalize(output.as_mut_slice());
+        }
         MultiTestSpec::BigKeccak => {
             // test_keccak_02.txt
             let data = &[0u8; 100_001];

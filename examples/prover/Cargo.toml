@@ -5,10 +5,9 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
-num-bigint = { version = "0.4", features = ["serde"] }
-risc0-circuit-bigint = { path = "../../risc0/circuit/bigint" }
-risc0-circuit-bigint-test-methods = { path = "../../risc0/circuit/bigint/methods" }
+risc0-zkvm-methods = { path = "../../risc0/zkvm/methods" }
 risc0-zkvm = { path = "../../risc0/zkvm", features = ["unstable"] }
+risc0-circuit-keccak = { path = "../../risc0/circuit/keccak" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 workerpool = "1.2"
 

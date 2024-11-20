@@ -412,6 +412,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "atomic-polyfill"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8cf2bce30dfe09ef0bfaef228b9d414faaf7e563035494d7fe092dba54b300f4"
+dependencies = [
+ "critical-section",
+]
+
+[[package]]
 name = "auto_impl"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -969,6 +978,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
 
 [[package]]
+name = "cobs"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67ba02a97a2bd10f4b59b25c7973101c79642302776489e030cd13cdab09ed15"
+
+[[package]]
 name = "color_quant"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1096,6 +1111,12 @@ checksum = "a97769d94ddab943e4510d138150169a2758b5ef3eb191a9ee688de3e23ef7b3"
 dependencies = [
  "cfg-if",
 ]
+
+[[package]]
+name = "critical-section"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "790eea4361631c5e7d22598ecd5723ff611904e3344ce8720784c93e3d83d40b"
 
 [[package]]
 name = "crossbeam"
@@ -2163,6 +2184,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hash32"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0c35f58762feb77d74ebe43bdbc3210f09be9fe6742234d573bacc26ed92b67"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2198,6 +2228,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b2bca93b15ea5a746f220e56587f71e73c6165eab783df9e26590069953e3c30"
 dependencies = [
  "fxhash",
+]
+
+[[package]]
+name = "heapless"
+version = "0.7.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cdc6457c0eb62c71aac4bc17216026d8410337c4126773b9c5daba343f17964f"
+dependencies = [
+ "atomic-polyfill",
+ "hash32",
+ "rustc_version",
+ "serde",
+ "spin 0.9.8",
+ "stable_deref_trait",
 ]
 
 [[package]]
@@ -3056,7 +3100,6 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
- "serde",
 ]
 
 [[package]]
@@ -3447,6 +3490,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "postcard"
+version = "1.0.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f7f0a8d620d71c457dd1d47df76bb18960378da56af4527aaa10f515eee732e"
+dependencies = [
+ "cobs",
+ "heapless",
+ "serde",
+]
+
+[[package]]
 name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3623,10 +3677,9 @@ name = "prover-example"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "num-bigint 0.4.6",
- "risc0-circuit-bigint",
- "risc0-circuit-bigint-test-methods",
+ "risc0-circuit-keccak",
  "risc0-zkvm",
+ "risc0-zkvm-methods",
  "tracing-subscriber 0.3.18",
  "workerpool",
 ]
@@ -4129,35 +4182,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-bigint"
-version = "1.2.0-alpha.1"
-dependencies = [
- "anyhow",
- "bytemuck",
- "hex",
- "num-bigint 0.4.6",
- "num-integer",
- "num-traits",
- "paste",
- "risc0-binfmt",
- "risc0-circuit-recursion",
- "risc0-core",
- "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-platform",
- "stability",
- "tracing",
- "zip",
-]
-
-[[package]]
-name = "risc0-circuit-bigint-test-methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
-]
-
-[[package]]
 name = "risc0-circuit-keccak"
 version = "1.2.0-alpha.1"
 dependencies = [
@@ -4410,6 +4434,21 @@ dependencies = [
  "tempfile",
  "tracing",
  "typetag",
+]
+
+[[package]]
+name = "risc0-zkvm-methods"
+version = "1.2.0-alpha.1"
+dependencies = [
+ "borsh",
+ "ciborium",
+ "postcard",
+ "risc0-build",
+ "risc0-zkvm",
+ "risc0-zkvm-platform",
+ "rmp-serde",
+ "serde",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]

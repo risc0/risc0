@@ -11,23 +11,26 @@ repository = { workspace = true }
 name = "make_control_ids"
 required-features = ["make_control_ids"]
 
-[dependencies]
-anyhow = "1.0"
-bytemuck = "1.16.1"
+# Host dependencies
+[target.'cfg(not(target_os = "zkvm"))'.dependencies]
 clap = "4.5"
-hex = "0.4"
 lazy_static = "1.5.0"
 paste = "1.0"
+hex = "0.4"
 rayon = "1.10.0"
-risc0-binfmt = { workspace = true }
-risc0-circuit-keccak-sys = { workspace = true, optional = true }
-risc0-circuit-recursion = { workspace = true, default-features = false }
-risc0-core = { workspace = true }
 risc0-zirgen-dsl = { workspace = true, optional = true }
-risc0-zkp = { workspace = true, features = ["default"] }
-risc0-zkvm-platform = { workspace = true, features = ["unstable"] }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+risc0-circuit-keccak-sys = { workspace = true, optional = true }
 zip = { version = "2.0", default-features = false, features = ["deflate"] }
+bytemuck = { version = "1.16.1", features = ["extern_crate_alloc"] }
+
+[dependencies]
+anyhow = { version = "1.0", default-features = false }
+risc0-binfmt = { workspace = true }
+risc0-circuit-recursion = { workspace = true }
+risc0-core = { workspace = true }
+risc0-zkp = { workspace = true }
+risc0-zkvm-platform = { workspace = true, features = ["unstable"] }
 
 [dev-dependencies]
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
@@ -45,4 +48,5 @@ default = ["prove"]
 # generate control ids fot lift predicates.
 # make_control_ids = ["risc0-zkvm/prove", "risc0-circuit-recursion/prove"]
 # Enables ZKR registration to actually generate proofs.
-prove = ["risc0-circuit-recursion/prove", "dep:risc0-circuit-keccak-sys", "dep:risc0-zirgen-dsl"]
+prove = ["risc0-circuit-recursion/prove", "dep:risc0-circuit-keccak-sys", "dep:risc0-zirgen-dsl", "std"]
+std = []

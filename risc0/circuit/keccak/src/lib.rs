@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
 use risc0_zkp::core::digest::Digest;
 
 pub struct CircuitImpl;
 
 #[cfg(not(feature = "make_control_ids"))]
-mod control_id;
-#[cfg(feature = "make_control_ids")]
-pub mod zkr;
+pub mod control_id;
+//#[cfg(feature = "make_control_ids")]
+//pub mod zkr;
 #[cfg(feature = "prove")]
 mod zkr;
 
@@ -38,7 +40,6 @@ mod taps;
 
 //#[cfg(test)]
 //mod tests;
-
 // TODO: Can we import this from somewhere other than ZKVM?
 pub const RECURSION_PO2: usize = 18;
 
