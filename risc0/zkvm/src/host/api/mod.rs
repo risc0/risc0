@@ -118,11 +118,6 @@ impl ConnectionWrapper {
     fn close(&mut self) -> Result<i32> {
         self.inner.close()
     }
-
-    // #[cfg(feature = "prove")]
-    // fn clone(&self) -> Result<Self> {
-    //     Ok(Self::new(self.inner.clone()))
-    // }
 }
 
 /// Connects a zkVM client and server

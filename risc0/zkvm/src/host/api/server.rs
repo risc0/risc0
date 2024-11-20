@@ -889,7 +889,6 @@ fn execute_redis(
         Err(_) => 100,
     };
     let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
-    let connection_copy = conn.clone();
     let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
     let join_handle: std::thread::JoinHandle<Result<()>> = std::thread::spawn(move || {
         let client = redis::Client::open(params.url).context("Failed to open Redis connection")?;
@@ -905,7 +904,7 @@ fn execute_redis(
             let asset = pb::api::Asset {
                 kind: Some(pb::api::asset::Kind::Redis(segment_key)),
             };
-            send_segment_done_msg(connection_copy.clone(), segment, Some(asset))
+            send_segment_done_msg(conn.clone(), segment, Some(asset))
                 .context("Failed to send segment_done msg")?;
         }
         Ok(())
@@ -913,7 +912,7 @@ fn execute_redis(
 
     let session = exec.run_with_callback(|segment| {
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key.clone(), segment.clone()))?;
+        sender.send((segment_key, segment))?;
         Ok(Box::new(NullSegmentRef))
     });
 
