@@ -715,39 +715,67 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    use redis::{Commands, SetExpiry, SetOptions};
+    use redis::{Client, Commands, SetExpiry, SetOptions};
+    use std::{
+        sync::{
+            mpsc::{sync_channel, Receiver},
+            Arc, Mutex,
+        },
+        thread::{spawn, JoinHandle},
+    };
 
     let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {
         Ok(val_str) => val_str.parse::<usize>().unwrap_or(100),
         Err(_) => 100,
     };
-    let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
-    let mut connection_copy = conn.clone();
-    let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        let client = redis::Client::open(params.url)
-            .map_err(anyhow::Error::new)
-            .unwrap();
-        let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
-        while let Ok((segment_key, segment)) = receiver.recv() {
-            let segment_bytes = bincode::serialize(&segment)
-                .map_err(anyhow::Error::new)
-                .unwrap();
-            let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
-            let _: () = connection
-                .set_options(segment_key.clone(), segment_bytes, opts)
-                .map_err(anyhow::Error::new)
-                .unwrap();
+    let (sender, receiver) = sync_channel::<(String, Segment)>(channel_size);
+    let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
 
-            let asset = pb::api::Asset {
-                kind: Some(pb::api::asset::Kind::Redis(segment_key)),
-            };
-            send_segment_done_msg(&mut connection_copy, segment, Some(asset)).unwrap();
+    let redis_err = Arc::new(Mutex::new(None));
+    let redis_err_clone = redis_err.clone();
+
+    let conn = conn.clone();
+    let join_handle: JoinHandle<()> = spawn(move || {
+        fn inner(
+            redis_url: String,
+            receiver: &Receiver<(String, Segment)>,
+            opts: SetOptions,
+            mut conn: ConnectionWrapper,
+        ) -> Result<()> {
+            let client = Client::open(redis_url).context("Failed to open Redis connection")?;
+            let mut connection = client
+                .get_connection()
+                .context("Failed to get redis connection")?;
+            while let Ok((segment_key, segment)) = receiver.recv() {
+                let segment_bytes =
+                    bincode::serialize(&segment).context("Failed to deserialize segment")?;
+                let _: () = connection
+                    .set_options(segment_key.clone(), segment_bytes, opts)
+                    .context("Failed to set redis key with TTL")?;
+                let asset = pb::api::Asset {
+                    kind: Some(pb::api::asset::Kind::Redis(segment_key)),
+                };
+                send_segment_done_msg(&mut conn, segment, Some(asset))
+                    .context("Failed to send segment_done msg")?;
+            }
+            Ok(())
+        }
+
+        if let Err(err) = inner(params.url, &receiver, opts, conn) {
+            *redis_err_clone.lock().unwrap() = Some(err);
         }
     });
 
     let session = exec.run_with_callback(|segment| {
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key, segment))?;
+        if let Err(send_err) = sender.send((segment_key, segment)) {
+            let mut redis_err_opt = redis_err.lock().unwrap();
+            let redis_err_inner = redis_err_opt.take();
+            return Err(match redis_err_inner {
+                Some(redis_thread_err) => anyhow!(redis_thread_err),
+                None => send_err.into(),
+            });
+        }
         Ok(Box::new(NullSegmentRef))
     });
 
