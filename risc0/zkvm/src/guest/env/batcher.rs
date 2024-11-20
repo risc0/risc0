@@ -15,6 +15,7 @@
 use crate::sha::Digest;
 use alloc::vec;
 use anyhow::Result;
+use risc0_zkp::core::digest::DIGEST_SHORTS;
 use risc0_zkvm_platform::syscall::DIGEST_BYTES;
 
 /// This struct implements the batching of calls to the keccak accelerator.
@@ -117,6 +118,12 @@ impl KeccakBatcher {
         let transcript =
             &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES];
         let transcript_digest = crate::sha::Impl::hash_bytes(transcript);
+        let transcript_digest_bytes: &[u8] = transcript_digest.as_bytes();
+        let claim_digest = &mut [0u8; DIGEST_BYTES];
+        for i in 0..DIGEST_SHORTS {
+            claim_digest[i * 2] = transcript_digest_bytes[i * 2 + 1];
+            claim_digest[i * 2 + 1] = transcript_digest_bytes[i * 2];
+        }
 
         let control_root = risc0_circuit_keccak::get_control_root(15); // TODO - generalize cycle count
         unsafe {
@@ -125,10 +132,10 @@ impl KeccakBatcher {
                 transcript.as_ptr() as *const u32,
                 transcript.len(),
                 control_root.as_ref(),
-                (*transcript_digest).as_ref(),
+                claim_digest.as_ptr() as *const [u32; 8],
             );
         }
-        crate::guest::env::verify_assumption(*transcript_digest, *control_root).unwrap(); //infallible
+        crate::guest::env::verify_assumption((*claim_digest).into(), *control_root).unwrap(); //infallible
         self.reset();
         *transcript_digest
     }
