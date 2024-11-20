@@ -922,7 +922,6 @@ fn execute_redis(
         }
 
         if let Err(err) = inner(params.url, &receiver, opts, conn) {
-            tracing::error!("Hit error: {err:?}");
             *redis_err_clone.lock().unwrap() = Some(err);
         }
     });
@@ -932,7 +931,6 @@ fn execute_redis(
         if let Err(send_err) = sender.send((segment_key, segment)) {
             let mut redis_err_opt = redis_err.lock().unwrap();
             let redis_err_inner = redis_err_opt.take();
-            tracing::info!("triggered send err: {redis_err_inner:?}");
             return Err(match redis_err_inner {
                 Some(redis_thread_err) => anyhow::anyhow!(redis_thread_err),
                 None => send_err.into(),
