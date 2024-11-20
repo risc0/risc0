@@ -2,10 +2,10 @@ import React from "react";
 import Mermaid from ".";
 
 export default function ProofSystemSequenceDiagramMermaid() {
-	return (
-		<Mermaid
-			height={860}
-			definition={`
+  return (
+    <Mermaid
+      height={860}
+      definition={`
     %% no_run %%
 sequenceDiagram
   participant P as Prover
@@ -35,6 +35,6 @@ sequenceDiagram
   Note over P,V: Begin FRI protocol.
   Note over P,V: Details of FRI are omitted for brevity.
 `}
-		/>
-	);
+    />
+  );
 }

@@ -2,9 +2,9 @@ import React from "react";
 import Mermaid from ".";
 
 export default function GettingStartedMermaid() {
-	return (
-		<Mermaid
-			definition={`
+  return (
+    <Mermaid
+      definition={`
   flowchart TD
     %% Level 0
     getting_started["Getting Started
@@ -39,6 +39,6 @@ export default function GettingStartedMermaid() {
         chain_integration --> getting_proofs_on_chain
         chain_integration --> onchain_verifier
   `}
-		/>
-	);
+    />
+  );
 }

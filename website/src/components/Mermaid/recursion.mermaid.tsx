@@ -2,10 +2,10 @@ import React from "react";
 import Mermaid from ".";
 
 export default function RecursionMermaid() {
-	return (
-		<Mermaid
-			height={580}
-			definition={`
+  return (
+    <Mermaid
+      height={580}
+      definition={`
     %% no_run %%
 flowchart TB
 
@@ -91,6 +91,6 @@ suc41-->compress(".compress()")
 
 compress-->groth16("<a target="_blank" href='https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Groth16Receipt.html'>Groth16Receipt</a>")
   `}
-		/>
-	);
+    />
+  );
 }
