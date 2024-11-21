@@ -69,6 +69,7 @@
 //! [guest-optimization]:
 //!     https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 
+#[cfg(feature = "unstable")]
 mod batcher;
 mod read;
 mod verify;
@@ -100,6 +101,7 @@ use crate::{
     Assumptions, MaybePruned, Output,
 };
 
+#[cfg(feature = "unstable")]
 use self::batcher::KeccakBatcher;
 pub use self::{
     read::{FdReader, Read},
