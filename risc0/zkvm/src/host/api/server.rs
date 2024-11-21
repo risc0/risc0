@@ -781,7 +781,9 @@ fn execute_redis(
 
     drop(sender);
 
-    join_handle.join().expect("redis task failure");
+    join_handle
+        .join()
+        .map_err(|err| anyhow!("redis task join failed: {err:?}"))?;
 
     session
 }
