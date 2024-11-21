@@ -235,7 +235,7 @@ fn bits<const WIDTH: usize>(scalar: &[u32; WIDTH]) -> u32 {
     for (i, &word) in scalar.iter().rev().enumerate() {
         if word != 0 {
             // Found highest non-zero word
-            // Calculate total bits: (WIDTH - 1 - i) * 32 + (32 - leading_zeros)
+            // Calculate total bits based on zero words and leading zeros of non-zero word
             return (WIDTH - 1 - i) as u32 * 32 + (32 - word.leading_zeros());
         }
     }
