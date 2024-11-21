@@ -65,9 +65,7 @@ impl Read for PosixIoProxy {
         };
 
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -98,9 +96,7 @@ impl Write for PosixIoProxy {
         };
 
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request).map_io_err()?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -115,6 +111,7 @@ impl Write for PosixIoProxy {
     }
 }
 
+#[derive(Clone)]
 struct SliceIoProxy {
     conn: ConnectionWrapper,
 }
@@ -122,12 +119,6 @@ struct SliceIoProxy {
 impl SliceIoProxy {
     fn new(conn: ConnectionWrapper) -> Self {
         Self { conn }
-    }
-
-    fn try_clone(&self) -> Result<Self> {
-        Ok(SliceIoProxy {
-            conn: self.conn.try_clone()?,
-        })
     }
 }
 
@@ -144,9 +135,7 @@ impl SliceIo for SliceIoProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -177,9 +166,7 @@ impl TraceCallback for TraceProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -232,10 +219,9 @@ impl Server {
             })),
         };
         tracing::trace!("tx: {reply:?}");
-        conn.send(reply)?;
-
-        let request: pb::api::ServerRequest = conn.recv()?;
+        let request: pb::api::ServerRequest = conn.send_recv(reply)?;
         tracing::trace!("rx: {request:?}");
+
         match request.kind.ok_or(malformed_err())? {
             pb::api::server_request::Kind::Prove(request) => self.on_prove(conn, request),
             pb::api::server_request::Kind::Execute(request) => self.on_execute(conn, request),
@@ -622,24 +608,24 @@ fn build_env<'a>(
     env_builder.env_vars(request.env_vars.clone());
     env_builder.args(&request.args);
     for fd in request.read_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         let reader = BufReader::new(proxy);
         env_builder.read_fd(*fd, reader);
     }
     for fd in request.write_fds.iter() {
-        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let proxy = PosixIoProxy::new(*fd, conn.clone());
         env_builder.write_fd(*fd, proxy);
     }
-    let proxy = SliceIoProxy::new(conn.try_clone()?);
+    let proxy = SliceIoProxy::new(conn.clone());
     for name in request.slice_ios.iter() {
-        env_builder.slice_io(name, proxy.try_clone()?);
+        env_builder.slice_io(name, proxy.clone());
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
     env_builder.session_limit(request.session_limit);
     if request.trace_events.is_some() {
-        let proxy = TraceProxy::new(conn.try_clone()?);
+        let proxy = TraceProxy::new(conn.clone());
         env_builder.trace_callback(proxy);
     }
     if !request.pprof_out.is_empty() {
@@ -729,45 +715,75 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    use redis::{Commands, SetExpiry, SetOptions};
+    use redis::{Client, Commands, SetExpiry, SetOptions};
+    use std::{
+        sync::{
+            mpsc::{sync_channel, Receiver},
+            Arc, Mutex,
+        },
+        thread::{spawn, JoinHandle},
+    };
 
     let channel_size = match std::env::var("RISC0_REDIS_CHANNEL_SIZE") {
         Ok(val_str) => val_str.parse::<usize>().unwrap_or(100),
         Err(_) => 100,
     };
-    let (sender, receiver) = std::sync::mpsc::sync_channel::<(String, Segment)>(channel_size);
-    let mut connection_copy = conn.try_clone()?;
-    let join_handle: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        let client = redis::Client::open(params.url)
-            .map_err(anyhow::Error::new)
-            .unwrap();
-        let mut connection = client.get_connection().map_err(anyhow::Error::new).unwrap();
-        while let Ok((segment_key, segment)) = receiver.recv() {
-            let segment_bytes = bincode::serialize(&segment)
-                .map_err(anyhow::Error::new)
-                .unwrap();
-            let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
-            let _: () = connection
-                .set_options(segment_key.clone(), segment_bytes, opts)
-                .map_err(anyhow::Error::new)
-                .unwrap();
+    let (sender, receiver) = sync_channel::<(String, Segment)>(channel_size);
+    let opts = SetOptions::default().with_expiration(SetExpiry::EX(params.ttl));
 
-            let asset = pb::api::Asset {
-                kind: Some(pb::api::asset::Kind::Redis(segment_key)),
-            };
-            send_segment_done_msg(&mut connection_copy, segment, Some(asset)).unwrap();
+    let redis_err = Arc::new(Mutex::new(None));
+    let redis_err_clone = redis_err.clone();
+
+    let conn = conn.clone();
+    let join_handle: JoinHandle<()> = spawn(move || {
+        fn inner(
+            redis_url: String,
+            receiver: &Receiver<(String, Segment)>,
+            opts: SetOptions,
+            mut conn: ConnectionWrapper,
+        ) -> Result<()> {
+            let client = Client::open(redis_url).context("Failed to open Redis connection")?;
+            let mut connection = client
+                .get_connection()
+                .context("Failed to get redis connection")?;
+            while let Ok((segment_key, segment)) = receiver.recv() {
+                let segment_bytes =
+                    bincode::serialize(&segment).context("Failed to deserialize segment")?;
+                let _: () = connection
+                    .set_options(segment_key.clone(), segment_bytes, opts)
+                    .context("Failed to set redis key with TTL")?;
+                let asset = pb::api::Asset {
+                    kind: Some(pb::api::asset::Kind::Redis(segment_key)),
+                };
+                send_segment_done_msg(&mut conn, segment, Some(asset))
+                    .context("Failed to send segment_done msg")?;
+            }
+            Ok(())
+        }
+
+        if let Err(err) = inner(params.url, &receiver, opts, conn) {
+            *redis_err_clone.lock().unwrap() = Some(err);
         }
     });
 
     let session = exec.run_with_callback(|segment| {
         let segment_key = format!("{}:{}", params.key, segment.index);
-        sender.send((segment_key, segment))?;
+        if let Err(send_err) = sender.send((segment_key, segment)) {
+            let mut redis_err_opt = redis_err.lock().unwrap();
+            let redis_err_inner = redis_err_opt.take();
+            return Err(match redis_err_inner {
+                Some(redis_thread_err) => anyhow!(redis_thread_err),
+                None => send_err.into(),
+            });
+        }
         Ok(Box::new(NullSegmentRef))
     });
 
     drop(sender);
 
-    join_handle.join().expect("redis task failure");
+    join_handle
+        .join()
+        .map_err(|err| anyhow!("redis task join failed: {err:?}"))?;
 
     session
 }
@@ -808,11 +824,11 @@ fn send_segment_done_msg(
             )),
         })),
     };
-    tracing::trace!("tx: {msg:?}");
-    conn.send(msg)?;
 
-    let reply: pb::api::GenericReply = conn.recv()?;
+    tracing::trace!("tx: {msg:?}");
+    let reply: pb::api::GenericReply = conn.send_recv(msg)?;
     tracing::trace!("rx: {reply:?}");
+
     let kind = reply.kind.ok_or(malformed_err())?;
     if let pb::api::generic_reply::Kind::Error(err) = kind {
         bail!(err)
