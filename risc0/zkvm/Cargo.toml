@@ -70,7 +70,9 @@ nvtx = { version = "1.3", optional = true }
 prost = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-redis = { version = "0.27.2", default-features = false, features = ["tls-native-tls"], optional = true }
+redis = { version = "0.27.2", default-features = false, features = [
+  "tls-native-tls",
+], optional = true }
 rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
