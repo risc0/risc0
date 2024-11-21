@@ -12,19 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
-
 use risc0_bigint2::ec::{AffinePoint, WeierstrassCurve, SECP256K1_PRIME};
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
-fn main() {
-    let curve = Rc::new(WeierstrassCurve::<8>::new(
-        SECP256K1_PRIME,
-        [0u32; 8],
-        [7, 0, 0, 0, 0, 0, 0, 0],
-    ));
+const CURVE: WeierstrassCurve<8> =
+    WeierstrassCurve::<8>::new(SECP256K1_PRIME, [0u32; 8], [7, 0, 0, 0, 0, 0, 0, 0]);
 
+fn main() {
     let scalar = [
         0x409f9918, 0xd218afb5, 0x81d5a9ae, 0x1aabde69, 0xe5cd569f, 0x478b33e5, 0xd5ff94e4,
         0x232ad1e3,
@@ -38,7 +33,7 @@ fn main() {
             0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
             0x483ada77,
         ],
-        Rc::clone(&curve),
+        &CURVE,
     );
     let expected = AffinePoint::new(
         [
@@ -49,7 +44,7 @@ fn main() {
             0x34ab3c01, 0x0abd13e0, 0x8060d279, 0xa37beeeb, 0xb083593d, 0x4679f415, 0x6c4af2e8,
             0x1af7251d,
         ],
-        curve,
+        &CURVE,
     );
 
     let result = risc0_bigint2::ec::mul(&scalar, &point);
