@@ -34,8 +34,8 @@ fn ec_add() {
         .prove_session(&VerifierContext::default(), &session)
         .unwrap();
     let elapsed = now.elapsed();
-    println!("Runtime: {}", elapsed.as_millis());
-    println!("User cycles: {}", prove_info.stats.user_cycles);
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 }
 
 #[test]
@@ -53,8 +53,8 @@ fn ec_double() {
         .prove_session(&VerifierContext::default(), &session)
         .unwrap();
     let elapsed = now.elapsed();
-    println!("Runtime: {}", elapsed.as_millis());
-    println!("User cycles: {}", prove_info.stats.user_cycles);
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 }
 
 #[test]
@@ -72,6 +72,6 @@ fn ec_mul() {
         .prove_session(&VerifierContext::default(), &session)
         .unwrap();
     let elapsed = now.elapsed();
-    println!("Runtime: {}", elapsed.as_millis());
-    println!("User cycles: {}", prove_info.stats.user_cycles);
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 }

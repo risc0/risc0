@@ -11,6 +11,9 @@ include_bytes_aligned = "0.1"
 num-bigint = { version = "0.4", default-features = false, optional = true }
 num-bigint-dig = { version = "0.8", default-features = false, optional = true }
 
+[dev-dependencies]
+tracing = "0.1"
+
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 puffin = "0.19"
