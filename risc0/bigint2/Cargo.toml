@@ -28,7 +28,7 @@ anyhow = "1.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
-default = ["dep:num-bigint"]
+default = []
 num-bigint-dig = ["dep:num-bigint-dig"]
 num-bigint = ["dep:num-bigint"]
 unstable = []

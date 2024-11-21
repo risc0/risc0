@@ -249,7 +249,7 @@ mod bit_tests {
     #[test]
     fn bit_test() {
         let test = [0b00001001, 0b11110010];
-        assert_eq!(bits(&test), 7);
+        assert_eq!(bits(&test), 40);
         assert!(bit(&test, 0));
         assert!(!bit(&test, 1));
         assert!(!bit(&test, 2));
