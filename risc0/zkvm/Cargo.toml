@@ -66,7 +66,9 @@ lazy-regex = { version = "3.2", optional = true }
 prost = { version = "0.13", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-redis = { version = "0.27.2", default-features = false, features = ["tls-native-tls"], optional = true }
+redis = { version = "0.27.2", default-features = false, features = [
+  "tls-native-tls",
+], optional = true }
 risc0-build = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
