@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(feature = "num-bigint-dig")]
-extern crate num_bigint_dig as num_bigint;
-
-use num_bigint::BigUint;
 use std::rc::Rc;
 
 use risc0_bigint2::ec::{AffinePoint, WeierstrassCurve, SECP256K1_PRIME};
@@ -24,35 +20,35 @@ use risc0_zkvm::guest::env;
 
 fn main() {
     let curve = Rc::new(WeierstrassCurve::<8>::new(
-        BigUint::from_slice(&SECP256K1_PRIME),
-        BigUint::ZERO,
-        BigUint::from(7u32),
+        SECP256K1_PRIME,
+        [0u32; 8],
+        [7, 0, 0, 0, 0, 0, 0, 0],
     ));
 
-    let scalar = BigUint::from_slice(&[
+    let scalar = [
         0x409f9918, 0xd218afb5, 0x81d5a9ae, 0x1aabde69, 0xe5cd569f, 0x478b33e5, 0xd5ff94e4,
         0x232ad1e3,
-    ]);
+    ];
     let point = AffinePoint::new(
-        BigUint::from_slice(&[
+        [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
             0x79be667e,
-        ]),
-        BigUint::from_slice(&[
+        ],
+        [
             0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
             0x483ada77,
-        ]),
+        ],
         Rc::clone(&curve),
     );
     let expected = AffinePoint::new(
-        BigUint::from_slice(&[
+        [
             0xd430a92d, 0x5fdd93b4, 0x23c8434f, 0x1616b5ae, 0x2570e09c, 0x673f0dec, 0xb6bdef51,
             0x2985d840,
-        ]),
-        BigUint::from_slice(&[
+        ],
+        [
             0x34ab3c01, 0x0abd13e0, 0x8060d279, 0xa37beeeb, 0xb083593d, 0x4679f415, 0x6c4af2e8,
             0x1af7251d,
-        ]),
+        ],
         curve,
     );
 

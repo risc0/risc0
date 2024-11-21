@@ -16,7 +16,6 @@
 mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
-use num_bigint::BigUint;
 use std::rc::Rc;
 
 use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
@@ -43,19 +42,10 @@ pub struct WeierstrassCurve<const WIDTH: usize> {
 
 impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
     // TODO this constructor is prone to misuse, ideal to have named fields
-    pub fn new(prime: BigUint, a: BigUint, b: BigUint) -> WeierstrassCurve<WIDTH> {
-        // TODO: This feels duplicative with `to_u32_digits` from RSA, but I don't see a way to share code without doubling the `copy_from_slice` calls
-        let mut buffer = [[0u32; WIDTH]; 3];
-        let first = prime.to_u32_digits();
-        assert!(first.len() <= WIDTH);
-        let middle = a.to_u32_digits();
-        assert!(middle.len() <= WIDTH);
-        let last = b.to_u32_digits();
-        assert!(last.len() <= WIDTH);
-        buffer[0][..first.len()].copy_from_slice(&first);
-        buffer[1][..middle.len()].copy_from_slice(&middle);
-        buffer[2][..last.len()].copy_from_slice(&last);
-        WeierstrassCurve { buffer }
+    pub fn new(prime: [u32; WIDTH], a: [u32; WIDTH], b: [u32; WIDTH]) -> WeierstrassCurve<WIDTH> {
+        WeierstrassCurve {
+            buffer: [prime, a, b],
+        }
     }
 
     /// The curve as concatenated u32s
@@ -74,16 +64,15 @@ pub struct AffinePoint<const WIDTH: usize> {
 }
 
 impl<const WIDTH: usize> AffinePoint<WIDTH> {
-    pub fn new(x: BigUint, y: BigUint, curve: Rc<WeierstrassCurve<WIDTH>>) -> AffinePoint<WIDTH> {
-        // TODO: This feels duplicative with `to_u32_digits` from RSA, but I don't see a way to share code without doubling the `copy_from_slice` calls
-        let mut buffer = [[0u32; WIDTH]; 2];
-        let first = x.to_u32_digits();
-        assert!(first.len() <= WIDTH);
-        let last = y.to_u32_digits();
-        assert!(last.len() <= WIDTH);
-        buffer[0][..first.len()].copy_from_slice(&first);
-        buffer[1][..last.len()].copy_from_slice(&last);
-        AffinePoint { buffer, curve }
+    pub fn new(
+        x: [u32; WIDTH],
+        y: [u32; WIDTH],
+        curve: Rc<WeierstrassCurve<WIDTH>>,
+    ) -> AffinePoint<WIDTH> {
+        AffinePoint {
+            buffer: [x, y],
+            curve,
+        }
     }
     /// The point as concatenated u32s for x and y
     ///
@@ -108,7 +97,10 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
     }
 }
 
-pub fn mul<const WIDTH: usize>(scalar: &BigUint, point: &AffinePoint<WIDTH>) -> AffinePoint<WIDTH> {
+pub fn mul<const WIDTH: usize>(
+    scalar: &[u32; WIDTH],
+    point: &AffinePoint<WIDTH>,
+) -> AffinePoint<WIDTH> {
     // This assumes `pt` is actually on the curve
     // This assumption isn't checked here, so other code must ensure it's met
     // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
@@ -116,7 +108,7 @@ pub fn mul<const WIDTH: usize>(scalar: &BigUint, point: &AffinePoint<WIDTH>) -> 
 
     // Initialize two values to alternate writes to avoid unnecessary copies.
     let mut result_flip = false;
-    let mut result1 = AffinePoint::new(BigUint::ZERO, BigUint::ZERO, Rc::clone(&point.curve));
+    let mut result1 = AffinePoint::new([0u32; WIDTH], [0u32; WIDTH], Rc::clone(&point.curve));
     let mut result2 = result1.clone();
 
     // Note: the first value can be an uninitialized value.
@@ -124,7 +116,7 @@ pub fn mul<const WIDTH: usize>(scalar: &BigUint, point: &AffinePoint<WIDTH>) -> 
     let mut doubled_pt2 = point.clone();
 
     let mut first_write = true;
-    for pos in 0..scalar.bits() {
+    for pos in 0..bits(scalar) {
         // Alternate between the doubled value. Immutable reference is to the current value,
         // mutable reference is to the other that can be written to.
         // Note: This is not using a boolean flag because `pos%2` is less cycles.
@@ -134,7 +126,7 @@ pub fn mul<const WIDTH: usize>(scalar: &BigUint, point: &AffinePoint<WIDTH>) -> 
             (&doubled_pt1, &mut doubled_pt2)
         };
 
-        if scalar.bit(pos) {
+        if bit(scalar, pos) {
             // Alternate buffers to write to and use as current value.
             let (current_result, next_result) = if result_flip {
                 (&result2, &mut result1)
@@ -222,5 +214,39 @@ fn add_raw<const WIDTH: usize>(
             curve.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
+    }
+}
+
+// TODO can the pos be u32?
+fn bit<const WIDTH: usize>(scalar: &[u32; WIDTH], bit: u64) -> bool {
+    let bits_per_digit = 32u64;
+    if let Ok(digit_index) = usize::try_from(bit / bits_per_digit) {
+        if let Some(digit) = scalar.get(digit_index) {
+            let bit_mask = (1u32) << (bit % bits_per_digit);
+            return (digit & bit_mask) != 0;
+        }
+    }
+    false
+}
+
+fn bits<const WIDTH: usize>(scalar: &[u32; WIDTH]) -> u64 {
+    scalar.iter().map(|d| d.count_ones() as u64).sum()
+}
+
+#[cfg(test)]
+mod bit_tests {
+    use super::*;
+
+    #[test]
+    fn bit_test() {
+        let test = [0b00001001, 0b11110010];
+        assert_eq!(bits(&test), 7);
+        assert!(bit(&test, 0));
+        assert!(!bit(&test, 1));
+        assert!(!bit(&test, 2));
+        assert!(bit(&test, 3));
+        assert!(bit(&test, 33));
+        assert!(bit(&test, 36));
+        assert!(!bit(&test, 35));
     }
 }

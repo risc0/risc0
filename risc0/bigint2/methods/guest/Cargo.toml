@@ -10,6 +10,8 @@ num-bigint = { version = "0.4", default-features = false, features = ["serde"], 
 num-bigint-dig = { version = "0.8", default-features = false, features = ["serde"], optional = true }
 risc0-bigint2 = { path = "../..", default-features = false, features = [
   "unstable",
+  "num-bigint",
+  "num-bigint-dig",
 ] }
 risc0-zkvm = { path = "../../../zkvm", default-features = false, features = [
   "std",
