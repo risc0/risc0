@@ -104,16 +104,17 @@ pub fn mul<const WIDTH: usize>(
     // This assumes `pt` is actually on the curve
     // This assumption isn't checked here, so other code must ensure it's met
     // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
-    // TODO: Need a different algorithm in num-bigint-dig because no `bit`
+
+    let curve = point.curve.as_u32s();
 
     // Initialize two values to alternate writes to avoid unnecessary copies.
     let mut result_flip = false;
-    let mut result1 = AffinePoint::new([0u32; WIDTH], [0u32; WIDTH], Rc::clone(&point.curve));
-    let mut result2 = result1.clone();
+    let mut result1 = [[0u32; WIDTH]; 2];
+    let mut result2 = [[0u32; WIDTH]; 2];
 
     // Note: the first value can be an uninitialized value.
-    let mut doubled_pt1 = point.clone();
-    let mut doubled_pt2 = point.clone();
+    let mut doubled_pt1 = point.buffer;
+    let mut doubled_pt2 = point.buffer;
 
     let mut first_write = true;
     for pos in 0..bits(scalar) {
@@ -136,14 +137,14 @@ pub fn mul<const WIDTH: usize>(
 
             if first_write {
                 first_write = false;
-                *next_result = current_doubled.clone();
+                *next_result = *current_doubled;
             } else {
-                add(current_result, current_doubled, next_result);
+                add_raw(current_result, current_doubled, curve, next_result);
             }
             result_flip = !result_flip;
         }
 
-        double(current_doubled, next_doubled);
+        double_raw(current_doubled, curve, next_doubled);
     }
 
     // Assert that some value was written to the result.
@@ -152,15 +153,15 @@ pub fn mul<const WIDTH: usize>(
     }
 
     // Return the result, based on which buffer was written to last.
-    if result_flip {
-        result2
-    } else {
-        result1
-    }
+    let result_scalar = if result_flip { result2 } else { result1 };
+
+    AffinePoint::from_u32s(result_scalar, point.curve.clone())
 }
 
-pub fn double<const WIDTH: usize>(point: &AffinePoint<WIDTH>, result: &mut AffinePoint<WIDTH>) {
-    double_raw(point.as_u32s(), point.curve.as_u32s(), &mut result.buffer);
+pub fn double<const WIDTH: usize>(point: &AffinePoint<WIDTH>) -> AffinePoint<WIDTH> {
+    let mut buffer = [[0u32; WIDTH]; 2];
+    double_raw(point.as_u32s(), point.curve.as_u32s(), &mut buffer);
+    AffinePoint::from_u32s(buffer, point.curve.clone())
 }
 
 fn double_raw<const WIDTH: usize>(
@@ -184,17 +185,18 @@ fn double_raw<const WIDTH: usize>(
 pub fn add<const WIDTH: usize>(
     lhs: &AffinePoint<WIDTH>,
     rhs: &AffinePoint<WIDTH>,
-    result: &mut AffinePoint<WIDTH>,
-) {
+) -> AffinePoint<WIDTH> {
     // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
     // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
     assert_eq!(lhs.curve, rhs.curve);
+    let mut buffer = [[0u32; WIDTH]; 2];
     add_raw(
         lhs.as_u32s(),
         rhs.as_u32s(),
         lhs.curve.as_u32s(),
-        &mut result.buffer,
+        &mut buffer,
     );
+    AffinePoint::from_u32s(buffer, lhs.curve.clone())
 }
 
 fn add_raw<const WIDTH: usize>(

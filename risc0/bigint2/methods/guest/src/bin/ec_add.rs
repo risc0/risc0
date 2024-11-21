@@ -58,8 +58,7 @@ fn main() {
         Rc::clone(&curve),
     );
 
-    let mut result = AffinePoint::new([0u32; 8], [0u32; 8], Rc::clone(&curve));
-    risc0_bigint2::ec::add(&lhs, &rhs, &mut result);
+    let result = risc0_bigint2::ec::add(&lhs, &rhs);
 
     assert_eq!(result, expected);
 }

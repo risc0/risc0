@@ -48,7 +48,6 @@ fn main() {
     let in_pt = AffinePoint::from_u32s(POINT_G, Rc::clone(&curve));
     let expected_pt = AffinePoint::from_u32s(EXPECTED, Rc::clone(&curve));
 
-    let mut result = AffinePoint::new([0u32; 8], [0u32; 8], Rc::clone(&curve));
-    risc0_bigint2::ec::double(&in_pt, &mut result);
+    let result = risc0_bigint2::ec::double(&in_pt);
     assert_eq!(result, expected_pt);
 }
