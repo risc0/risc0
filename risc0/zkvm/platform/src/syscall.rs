@@ -933,6 +933,7 @@ pub unsafe extern "C" fn sys_prove_zkr(
 /// # Safety
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
+#[stability::unstable]
 pub unsafe extern "C" fn sys_keccak(
     input_ptr: *const u8,
     len: usize,

@@ -85,8 +85,8 @@ use core::cell::OnceCell;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_keccak, sys_log,
-        sys_pause, syscall_2, SyscallName, DIGEST_BYTES, DIGEST_WORDS,
+        self, sys_cycle_count, sys_exit, sys_fork, sys_halt, sys_input, sys_log, sys_pause,
+        syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -136,6 +136,7 @@ pub(crate) fn init() {
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         #[allow(static_mut_refs)]
+        #[cfg(feature = "unstable")]
         if KECCAK_BATCHER.has_data() {
             KECCAK_BATCHER.finalize_transcript();
         }
@@ -483,10 +484,12 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 
 /// take an input, and delim and returns a host-generated keccak hash.
 #[no_mangle]
+#[cfg(feature = "unstable")]
 pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
+    use risc0_zkvm_platform::syscall::{DIGEST_BYTES, DIGEST_WORDS};
     let nondet_digest = [0u8; DIGEST_BYTES];
     unsafe {
-        sys_keccak(
+        risc0_zkvm_platform::syscall::sys_keccak(
             input.as_ptr(),
             input.len(),
             nondet_digest.as_ptr() as *mut [u32; DIGEST_WORDS],
@@ -500,4 +503,5 @@ pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
 }
 
 /// Used for batching keccak proofs
+#[cfg(feature = "unstable")]
 pub static mut KECCAK_BATCHER: KeccakBatcher = KeccakBatcher::init();
