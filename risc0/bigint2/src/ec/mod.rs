@@ -16,7 +16,6 @@
 mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
-use std::rc::Rc;
 
 use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
 
@@ -42,7 +41,11 @@ pub struct WeierstrassCurve<const WIDTH: usize> {
 
 impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
     // TODO this constructor is prone to misuse, ideal to have named fields
-    pub fn new(prime: [u32; WIDTH], a: [u32; WIDTH], b: [u32; WIDTH]) -> WeierstrassCurve<WIDTH> {
+    pub const fn new(
+        prime: [u32; WIDTH],
+        a: [u32; WIDTH],
+        b: [u32; WIDTH],
+    ) -> WeierstrassCurve<WIDTH> {
         WeierstrassCurve {
             buffer: [prime, a, b],
         }
@@ -60,14 +63,14 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
 pub struct AffinePoint<const WIDTH: usize> {
     buffer: [[u32; WIDTH]; 2],
     /// curve containing this point
-    curve: Rc<WeierstrassCurve<WIDTH>>,
+    curve: &'static WeierstrassCurve<WIDTH>,
 }
 
 impl<const WIDTH: usize> AffinePoint<WIDTH> {
     pub fn new(
         x: [u32; WIDTH],
         y: [u32; WIDTH],
-        curve: Rc<WeierstrassCurve<WIDTH>>,
+        curve: &'static WeierstrassCurve<WIDTH>,
     ) -> AffinePoint<WIDTH> {
         AffinePoint {
             buffer: [x, y],
@@ -88,7 +91,7 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
     /// Input interpreted as little-endian with x coordinate before y coordinate
     pub fn from_u32s(
         data: [[u32; WIDTH]; 2],
-        curve: Rc<WeierstrassCurve<WIDTH>>,
+        curve: &'static WeierstrassCurve<WIDTH>,
     ) -> AffinePoint<WIDTH> {
         AffinePoint {
             buffer: data,
@@ -155,13 +158,13 @@ pub fn mul<const WIDTH: usize>(
     // Return the result, based on which buffer was written to last.
     let result_scalar = if result_flip { result2 } else { result1 };
 
-    AffinePoint::from_u32s(result_scalar, point.curve.clone())
+    AffinePoint::from_u32s(result_scalar, point.curve)
 }
 
 pub fn double<const WIDTH: usize>(point: &AffinePoint<WIDTH>) -> AffinePoint<WIDTH> {
     let mut buffer = [[0u32; WIDTH]; 2];
     double_raw(point.as_u32s(), point.curve.as_u32s(), &mut buffer);
-    AffinePoint::from_u32s(buffer, point.curve.clone())
+    AffinePoint::from_u32s(buffer, point.curve)
 }
 
 fn double_raw<const WIDTH: usize>(
@@ -196,7 +199,7 @@ pub fn add<const WIDTH: usize>(
         lhs.curve.as_u32s(),
         &mut buffer,
     );
-    AffinePoint::from_u32s(buffer, lhs.curve.clone())
+    AffinePoint::from_u32s(buffer, lhs.curve)
 }
 
 fn add_raw<const WIDTH: usize>(

@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
-
 use risc0_bigint2::ec::{AffinePoint, WeierstrassCurve, SECP256K1_PRIME};
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
+const CURVE: WeierstrassCurve<8> =
+    WeierstrassCurve::<8>::new(SECP256K1_PRIME, [0u32; 8], [7, 0, 0, 0, 0, 0, 0, 0]);
+
 fn main() {
-    let curve = Rc::new(WeierstrassCurve::<8>::new(
-        SECP256K1_PRIME,
-        [0u32; 8],
-        [7, 0, 0, 0, 0, 0, 0, 0],
-    ));
     const POINT_G: [[u32; 8]; 2] = [
         [
             0x16F81798, 0x59F2815B, 0x2DCE28D9, 0x029BFCDB, 0xCE870B07, 0x55A06295, 0xF9DCBBAC,
@@ -45,8 +41,8 @@ fn main() {
         ],
     ];
 
-    let in_pt = AffinePoint::from_u32s(POINT_G, Rc::clone(&curve));
-    let expected_pt = AffinePoint::from_u32s(EXPECTED, Rc::clone(&curve));
+    let in_pt = AffinePoint::from_u32s(POINT_G, &CURVE);
+    let expected_pt = AffinePoint::from_u32s(EXPECTED, &CURVE);
 
     let result = risc0_bigint2::ec::double(&in_pt);
     assert_eq!(result, expected_pt);
