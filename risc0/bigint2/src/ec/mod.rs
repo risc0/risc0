@@ -101,10 +101,6 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
     ///
     /// Little-endian, x coordinate before y coordinate
     #[cfg(feature = "num-bigint-dig")]
-    pub fn to_u32s(&self) -> &[[u32; WIDTH]; 2] {
-        todo!();
-    }
-
     /// Read the point from concatenated u32s for x and y
     ///
     /// Input interpreted as little-endian with x coordinate before y coordinate
