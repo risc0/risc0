@@ -64,9 +64,6 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
     pub fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
         &self.buffer
     }
-    pub fn to_u32s(&self) -> &[[u32; WIDTH]; 3] {
-        todo!();
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
