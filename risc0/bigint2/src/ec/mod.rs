@@ -93,7 +93,6 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
     /// Little-endian, x coordinate before y coordinate
     /// TODO: Where to doc this next bit
     /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
-    #[cfg(not(feature = "num-bigint-dig"))]
     pub fn as_u32s(&self) -> &[[u32; WIDTH]; 2] {
         &self.buffer
     }
