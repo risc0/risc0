@@ -61,7 +61,6 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
     /// The curve as concatenated u32s
     ///
     /// Little-endian, prime then a then b
-    #[cfg(not(feature = "num-bigint-dig"))]
     pub fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
         &self.buffer
     }
