@@ -27,17 +27,6 @@ pub trait ToBigInt2Buffer<const WIDTH: usize> {
     fn from_u32_array(array: [u32; WIDTH]) -> Self;
 }
 
-// TODO re-enable this if using generic inputs based on this.
-// impl<const WIDTH: usize> ToBigInt2Buffer<WIDTH> for [u32; WIDTH] {
-//     fn to_u32_array(&self) -> [u32; WIDTH] {
-//         *self
-//     }
-
-//     fn from_u32_array(array: [u32; WIDTH]) -> Self {
-//         array
-//     }
-// }
-
 #[cfg(feature = "num-bigint")]
 impl<const WIDTH: usize> ToBigInt2Buffer<WIDTH> for num_bigint::BigUint {
     fn to_u32_array(&self) -> [u32; WIDTH] {
