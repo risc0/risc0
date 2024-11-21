@@ -215,9 +215,7 @@ impl CoprocessorCallback for CoprocessorProxy {
             })),
         };
         tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        let reply: pb::api::OnIoReply = self.conn.send_recv(request).map_io_err()?;
         tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
@@ -735,7 +733,7 @@ fn build_env<'a>(
         env_builder.segment_path(Path::new(&request.segment_path));
     }
     if request.coprocessor {
-        let proxy = CoprocessorProxy::new(conn.try_clone()?);
+        let proxy = CoprocessorProxy::new(conn.clone());
         env_builder.coprocessor_callback(proxy);
     }
 
