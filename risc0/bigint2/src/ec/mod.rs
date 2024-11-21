@@ -217,9 +217,9 @@ fn add_raw<const WIDTH: usize>(
     }
 }
 
-// TODO can the pos be u32?
-fn bit<const WIDTH: usize>(scalar: &[u32; WIDTH], bit: u64) -> bool {
-    let bits_per_digit = 32u64;
+/// Checks if the bit at the position is set.
+fn bit<const WIDTH: usize>(scalar: &[u32; WIDTH], bit: u32) -> bool {
+    let bits_per_digit = 32u32;
     if let Ok(digit_index) = usize::try_from(bit / bits_per_digit) {
         if let Some(digit) = scalar.get(digit_index) {
             let bit_mask = (1u32) << (bit % bits_per_digit);
@@ -229,8 +229,17 @@ fn bit<const WIDTH: usize>(scalar: &[u32; WIDTH], bit: u64) -> bool {
     false
 }
 
-fn bits<const WIDTH: usize>(scalar: &[u32; WIDTH]) -> u64 {
-    scalar.iter().map(|d| d.count_ones() as u64).sum()
+/// Returns the minimum number of bits required to represent the scalar
+fn bits<const WIDTH: usize>(scalar: &[u32; WIDTH]) -> u32 {
+    // Find the highest set bit by scanning from most significant word
+    for (i, &word) in scalar.iter().rev().enumerate() {
+        if word != 0 {
+            // Found highest non-zero word
+            // Calculate total bits: (WIDTH - 1 - i) * 32 + (32 - leading_zeros)
+            return (WIDTH - 1 - i) as u32 * 32 + (32 - word.leading_zeros());
+        }
+    }
+    0
 }
 
 #[cfg(test)]
