@@ -18,6 +18,7 @@ use std::{
     net::{SocketAddr, TcpListener},
     path::PathBuf,
     rc::Rc,
+    sync::{Arc, Mutex},
     thread,
 };
 
@@ -58,7 +59,9 @@ impl TestClientConnector {
 impl Connector for TestClientConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         let (stream, _) = self.listener.accept()?;
-        Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
+        Ok(ConnectionWrapper::new(Arc::new(Mutex::new(
+            TcpConnection::new(stream),
+        ))))
     }
 }
 
