@@ -49,8 +49,11 @@ use crate::{
         env::{AssumptionReceipts, CoprocessorCallbackRef, ProveZkrRequest},
         posix_io::PosixIo,
     },
-    Assumption, AssumptionReceipt, ExecutorEnv, ProveKeccakRequest,
+    Assumption, AssumptionReceipt, ExecutorEnv,
 };
+
+#[cfg(feature = "unstable")]
+use crate::ProveKeccakRequest;
 
 use self::{
     args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, keccak::SysKeccak,

@@ -199,6 +199,7 @@ impl<'a> ExecutorImpl<'a> {
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = self.syscall_table.assumptions_used.take();
         let pending_zkrs = self.syscall_table.pending_zkrs.take();
+        let pending_keccaks = self.syscall_table.pending_keccaks.take();
 
         if let Some(profiler) = self.profiler.take() {
             let report = profiler.borrow_mut().finalize_to_vec();
@@ -219,6 +220,7 @@ impl<'a> ExecutorImpl<'a> {
             result.pre_state,
             result.post_state,
             pending_zkrs,
+            pending_keccaks,
         );
 
         tracing::info!("execution time: {elapsed:?}");
