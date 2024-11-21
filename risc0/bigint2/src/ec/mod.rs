@@ -189,7 +189,6 @@ pub fn add<const WIDTH: usize>(
 ) {
     // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
     // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
-    // assert_eq!(lhs.curve, rhs.curve);
     add_raw(
         lhs.as_u32s(),
         rhs.as_u32s(),
