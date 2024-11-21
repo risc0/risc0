@@ -37,6 +37,7 @@ pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 /// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH` of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so the maximum bitwidth will be `32 * WIDTH`)
 #[derive(Debug, Eq, PartialEq)]
 pub struct WeierstrassCurve<const WIDTH: usize> {
+    // buffer[0] is the prime, buffer[1] is a, buffer[2] is b
     buffer: [[u32; WIDTH]; 3],
 }
 
