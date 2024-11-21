@@ -36,8 +36,8 @@ use crate::{
     prove_zkr,
     recursion::identity_p254,
     AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
-    Receipt, ReceiptClaim, Segment, SegmentReceipt, SuccinctReceipt, TraceCallback, TraceEvent,
-    VerifierContext,
+    Receipt, ReceiptClaim, Segment, SegmentReceipt, Session, SuccinctReceipt, TraceCallback,
+    TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -816,7 +816,7 @@ fn execute_redis(
     conn: &mut ConnectionWrapper,
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
-) -> Result<crate::Session> {
+) -> Result<Session> {
     use redis::{Client, Commands, SetExpiry, SetOptions};
     use std::{
         sync::{
@@ -883,7 +883,9 @@ fn execute_redis(
 
     drop(sender);
 
-    join_handle.join().expect("redis task failure");
+    join_handle
+        .join()
+        .map_err(|err| anyhow!("redis task join failed: {err:?}"))?;
 
     session
 }
@@ -892,7 +894,7 @@ fn execute_default(
     conn: &mut ConnectionWrapper,
     exec: &mut ExecutorImpl,
     segments_out: &pb::api::AssetRequest,
-) -> Result<crate::Session> {
+) -> Result<Session> {
     exec.run_with_callback(|segment| {
         let segment_bytes = bincode::serialize(&segment)?;
         let asset = pb::api::Asset::from_bytes(
