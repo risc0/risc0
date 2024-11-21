@@ -31,6 +31,7 @@ impl BootstrapProtos {
 
         prost_build::Config::new()
             .out_dir("risc0/zkvm/src/host/protos")
+            .skip_debug(["api.Asset", "api.OnIoReply", "api.SliceIo", "api.PosixCmd"])
             .compile_protos(
                 &[
                     "risc0/zkvm/src/host/protos/api.proto",

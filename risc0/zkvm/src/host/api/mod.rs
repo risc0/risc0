@@ -21,14 +21,15 @@ pub(crate) mod server;
 mod tests;
 
 use std::{
-    io::{Read, Write},
+    cell::RefCell,
+    io::{Error as IoError, ErrorKind as IoErrorKind, Read, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command},
     sync::{
         atomic::{AtomicBool, Ordering},
         mpsc::channel,
-        Arc,
+        Arc, Mutex,
     },
     thread,
     time::Duration,
@@ -59,15 +60,17 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 trait RootMessage: Message {}
 
 pub trait Connection {
-    fn stream(&self) -> &TcpStream;
+    fn stream(&mut self) -> &mut TcpStream;
     fn close(&mut self) -> Result<i32>;
-    #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection + Send>>;
 }
 
+#[derive(Clone)]
 pub struct ConnectionWrapper {
-    inner: Box<dyn Connection + Send>,
-    buf: Vec<u8>,
+    inner: Arc<Mutex<dyn Connection + Send>>,
+}
+
+thread_local! {
+    static LOCAL_BUF: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
 }
 
 impl RootMessage for pb::api::HelloRequest {}
@@ -89,39 +92,56 @@ impl RootMessage for pb::api::IdentityP254Reply {}
 impl RootMessage for pb::api::CompressRequest {}
 impl RootMessage for pb::api::CompressReply {}
 
+fn lock_err() -> IoError {
+    IoError::new(IoErrorKind::WouldBlock, "Failed to lock connection mutex")
+}
+
 impl ConnectionWrapper {
-    fn new(inner: Box<dyn Connection + Send>) -> Self {
-        Self {
-            inner,
-            buf: Vec::new(),
-        }
+    fn new(inner: Arc<Mutex<dyn Connection + Send>>) -> Self {
+        Self { inner }
     }
 
     fn send<T: RootMessage>(&mut self, msg: T) -> Result<()> {
-        let len = msg.encoded_len();
-        self.buf.clear();
-        self.buf.put_u32_le(len as u32);
-        msg.encode(&mut self.buf)?;
-        Ok(self.inner.stream().write_all(&self.buf)?)
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        self.inner_send(guard.stream(), msg)
     }
 
     fn recv<T: Default + RootMessage>(&mut self) -> Result<T> {
-        let mut stream = self.inner.stream();
-        self.buf.resize(4, 0);
-        stream.read_exact(&mut self.buf)?;
-        let len = self.buf.as_slice().get_u32_le() as usize;
-        self.buf.resize(len, 0);
-        stream.read_exact(&mut self.buf)?;
-        Ok(T::decode(self.buf.as_slice())?)
-    }
-
-    fn close(&mut self) -> Result<i32> {
-        self.inner.close()
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        self.inner_recv(guard.stream())
     }
 
     #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Self> {
-        Ok(Self::new(self.inner.try_clone()?))
+    fn send_recv<S: RootMessage, R: Default + RootMessage>(&mut self, msg: S) -> Result<R> {
+        let mut guard = self.inner.lock().map_err(|_| lock_err())?;
+        let stream = guard.stream();
+        self.inner_send(stream, msg)?;
+        self.inner_recv(stream)
+    }
+
+    fn close(&mut self) -> Result<i32> {
+        self.inner.lock().map_err(|_| lock_err())?.close()
+    }
+
+    fn inner_send<T: RootMessage>(&self, stream: &mut TcpStream, msg: T) -> Result<()> {
+        let len = msg.encoded_len();
+        LOCAL_BUF.with_borrow_mut(|buf| {
+            buf.clear();
+            buf.put_u32_le(len as u32);
+            msg.encode(buf)?;
+            Ok(stream.write_all(buf)?)
+        })
+    }
+
+    fn inner_recv<T: Default + RootMessage>(&self, stream: &mut TcpStream) -> Result<T> {
+        LOCAL_BUF.with_borrow_mut(|buf| {
+            buf.resize(4, 0);
+            stream.read_exact(buf)?;
+            let len = buf.as_slice().get_u32_le() as usize;
+            buf.resize(len, 0);
+            stream.read_exact(buf)?;
+            Ok(T::decode(buf.as_slice())?)
+        })
     }
 }
 
@@ -241,9 +261,9 @@ impl Connector for ParentProcessConnector {
             err
         })?;
 
-        Ok(ConnectionWrapper::new(Box::new(
+        Ok(ConnectionWrapper::new(Arc::new(Mutex::new(
             ParentProcessConnection::new(child, stream),
-        )))
+        ))))
     }
 }
 
@@ -266,7 +286,9 @@ impl Connector for TcpConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         tracing::debug!("connect");
         let stream = TcpStream::connect(&self.addr)?;
-        Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
+        Ok(ConnectionWrapper::new(Arc::new(Mutex::new(
+            TcpConnection::new(stream),
+        ))))
     }
 }
 
@@ -287,18 +309,13 @@ impl ParentProcessConnection {
 }
 
 impl Connection for ParentProcessConnection {
-    fn stream(&self) -> &TcpStream {
-        &self.stream
+    fn stream(&mut self) -> &mut TcpStream {
+        &mut self.stream
     }
 
     fn close(&mut self) -> Result<i32> {
         let status = self.child.wait()?;
         Ok(status.code().unwrap_or_default())
-    }
-
-    #[cfg(feature = "prove")]
-    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
-        unimplemented!()
     }
 }
 
@@ -311,16 +328,12 @@ impl TcpConnection {
 
 #[cfg(feature = "prove")]
 impl Connection for TcpConnection {
-    fn stream(&self) -> &TcpStream {
-        &self.stream
+    fn stream(&mut self) -> &mut TcpStream {
+        &mut self.stream
     }
 
     fn close(&mut self) -> Result<i32> {
         Ok(0)
-    }
-
-    fn try_clone(&self) -> Result<Box<dyn Connection + Send>> {
-        Ok(Box::new(Self::new(self.stream.try_clone()?)))
     }
 }
 

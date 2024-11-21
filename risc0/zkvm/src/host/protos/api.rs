@@ -426,6 +426,7 @@ pub struct RedisParams {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[prost(skip_debug)]
 pub struct Asset {
     #[prost(oneof = "asset::Kind", tags = "1, 2, 3")]
     pub kind: ::core::option::Option<asset::Kind>,
@@ -434,6 +435,7 @@ pub struct Asset {
 pub mod asset {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[prost(skip_debug)]
     pub enum Kind {
         #[prost(bytes, tag = "1")]
         Inline(::prost::alloc::vec::Vec<u8>),
@@ -523,6 +525,7 @@ pub mod on_io_request {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[prost(skip_debug)]
 pub struct SliceIo {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
@@ -539,6 +542,7 @@ pub struct PosixIo {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[prost(skip_debug)]
 pub struct PosixCmd {
     #[prost(oneof = "posix_cmd::Kind", tags = "1, 2")]
     pub kind: ::core::option::Option<posix_cmd::Kind>,
@@ -547,6 +551,7 @@ pub struct PosixCmd {
 pub mod posix_cmd {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[prost(skip_debug)]
     pub enum Kind {
         #[prost(uint32, tag = "1")]
         Read(u32),
@@ -618,6 +623,7 @@ pub mod coprocessor_request {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[prost(skip_debug)]
 pub struct OnIoReply {
     #[prost(oneof = "on_io_reply::Kind", tags = "1, 2")]
     pub kind: ::core::option::Option<on_io_reply::Kind>,
@@ -626,6 +632,7 @@ pub struct OnIoReply {
 pub mod on_io_reply {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[prost(skip_debug)]
     pub enum Kind {
         #[prost(bytes, tag = "1")]
         Ok(::prost::alloc::vec::Vec<u8>),
