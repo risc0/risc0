@@ -11,13 +11,13 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug: [slug] }));
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: {
+export async function generateMetadata(props: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }) {
+  const params = await props.params;
+
   if (!params.slug[0]) {
     return;
   }

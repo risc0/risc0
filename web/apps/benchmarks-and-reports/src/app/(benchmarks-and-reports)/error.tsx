@@ -2,6 +2,6 @@
 
 import { ErrorMessage, type ErrorMessageProps } from "shared/client/components/error-message";
 
-export default function RootError({ ...rest }: ErrorMessageProps) {
+export default function BenchmarksAndReportsError({ ...rest }: ErrorMessageProps) {
   return <ErrorMessage {...rest} />;
 }

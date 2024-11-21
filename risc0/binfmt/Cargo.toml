@@ -22,9 +22,6 @@ serde = { version = "1.0", default-features = false, features = [
   "derive",
   "alloc",
 ] }
-# Work-around for https://github.com/near/borsh-rs/issues/319
-# Remove once borsh-derive 1.5.3 is released.
-syn = { version = "2.0.81", default-features = false }
 tracing = { version = "0.1", default-features = false }
 
 [package.metadata.docs.rs]

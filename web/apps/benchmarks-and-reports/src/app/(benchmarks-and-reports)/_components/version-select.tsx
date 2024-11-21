@@ -1,7 +1,6 @@
 "use client";
 
-import { useLocalStorage } from "@risc0/ui/hooks/use-local-storage";
-import { useMounted } from "@risc0/ui/hooks/use-mounted";
+import { useIsMounted } from "@risc0/ui/hooks/use-is-mounted";
 import {
   Select,
   SelectContent,
@@ -16,15 +15,16 @@ import { startTransition, useEffect } from "react";
 import { useProgressBar } from "shared/client/providers/progress-bar-provider";
 import type { Version } from "~/types/version";
 import { VERSIONS } from "~/versions";
+import { useVersion } from "../_hooks/use-version";
 
 export function VersionSelect() {
   const { version } = useParams<{ version: Version }>();
   const router = useRouter();
   const pathname = usePathname();
-  const mounted = useMounted();
+  const isMounted = useIsMounted();
   const progress = useProgressBar();
   const pathnameParts = pathname.split("/").filter(Boolean);
-  const [_versionLocalStorage, setVersionLocalStorage] = useLocalStorage<string | undefined>("version", undefined);
+  const { setVersion: setVersionLocalStorage } = useVersion();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -33,7 +33,7 @@ export function VersionSelect() {
     }
   }, []);
 
-  function onValueChange(value) {
+  function onValueChange(value: Version) {
     const [_, ...pathnameWithoutVersion] = pathnameParts;
 
     setVersionLocalStorage(value);
@@ -46,9 +46,9 @@ export function VersionSelect() {
     });
   }
 
-  return mounted && version ? (
+  return isMounted && version ? (
     <Select onValueChange={onValueChange} value={version}>
-      <SelectTrigger size="sm">
+      <SelectTrigger size="sm" aria-label="version select">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
