@@ -19,8 +19,8 @@ use include_bytes_aligned::include_bytes_aligned;
 
 use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
 
-const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
-const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
+const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
+const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
 
 /// The secp256k1 curve's prime as u32 digits, least significant digit first
 const SECP256K1_PRIME: [u32; EC_256_WIDTH_WORDS] = [
