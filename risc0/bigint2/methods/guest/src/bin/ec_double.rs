@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(feature = "unstable")]
 use risc0_bigint2::ec::{AffinePoint, Secp256k1Curve};
 #[allow(unused)]
 use risc0_zkvm::guest::env;
