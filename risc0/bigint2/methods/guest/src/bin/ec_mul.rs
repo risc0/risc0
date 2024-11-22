@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_bigint2::ec::{AffinePoint, WeierstrassCurve};
+use risc0_bigint2::ec::{AffinePoint, Curve, WeierstrassCurve};
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
@@ -27,6 +27,13 @@ const CURVE: &WeierstrassCurve<8> = &WeierstrassCurve::<8>::new(
     [0u32; 8],
     [7, 0, 0, 0, 0, 0, 0, 0],
 );
+
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum TestSecp256k1Curve {}
+
+impl Curve<8> for TestSecp256k1Curve {
+    const CURVE: &'static WeierstrassCurve<8> = CURVE;
+}
 
 fn main() {
     let scalar = [
@@ -54,7 +61,7 @@ fn main() {
         ],
     );
 
-    let mut result = AffinePoint::new_unchecked([0u32; 8], [0u32; 8]);
-    risc0_bigint2::ec::mul(&scalar, &point, CURVE, &mut result);
+    let mut result = AffinePoint::<8, TestSecp256k1Curve>::new_unchecked([0u32; 8], [0u32; 8]);
+    point.mul(&scalar, &mut result);
     assert_eq!(result, expected);
 }
