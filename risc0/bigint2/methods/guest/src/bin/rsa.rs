@@ -15,15 +15,27 @@
 #[cfg(feature = "num-bigint-dig")]
 extern crate num_bigint_dig as num_bigint;
 
-use num_bigint::BigUint;
-
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
+#[cfg(any(feature = "num-bigint-dig", feature = "num-bigint"))]
 fn main() {
-    let (base, modulus): (BigUint, BigUint) = env::read();
+    use num_bigint::BigUint;
+    use risc0_bigint2::ToBigInt2Buffer;
 
-    let result = risc0_bigint2::rsa::modpow_65537(&base, &modulus);
+    let (base, modulus): (BigUint, BigUint) = env::read();
+    let base = base.to_u32_array();
+    let modulus = modulus.to_u32_array();
+
+    let mut result = [0u32; risc0_bigint2::rsa::RSA_3072_WIDTH_WORDS];
+    risc0_bigint2::rsa::modpow_65537(&base, &modulus, &mut result);
+
+    let result = BigUint::from_slice(&result);
 
     env::commit(&result);
+}
+
+#[cfg(not(any(feature = "num-bigint-dig", feature = "num-bigint")))]
+fn main() {
+    panic!("No bigint library enabled");
 }
