@@ -33,15 +33,12 @@ const SECP256K1_CURVE: &WeierstrassCurve<EC_256_WIDTH_WORDS> =
         [7, 0, 0, 0, 0, 0, 0, 0],
     );
 
-#[stability::unstable]
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
-#[stability::unstable]
 pub trait Curve<const WIDTH: usize> {
     const CURVE: &'static WeierstrassCurve<WIDTH>;
 }
 
-#[stability::unstable]
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Secp256k1Curve {}
 
@@ -52,7 +49,6 @@ impl Curve<EC_256_WIDTH_WORDS> for Secp256k1Curve {
 /// An elliptic curve over a prime field
 ///
 /// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH` of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so the maximum bitwidth will be `32 * WIDTH`)
-#[stability::unstable]
 #[derive(Debug, Eq, PartialEq)]
 pub struct WeierstrassCurve<const WIDTH: usize> {
     // buffer[0] is the prime, buffer[1] is a, buffer[2] is b
@@ -80,13 +76,11 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
 }
 impl WeierstrassCurve<EC_256_WIDTH_WORDS> {
     /// The secp256k1 curve configuration.
-    #[stability::unstable]
     pub const fn secp256k1() -> &'static WeierstrassCurve<EC_256_WIDTH_WORDS> {
         SECP256K1_CURVE
     }
 }
 
-#[stability::unstable]
 #[derive(Clone, Debug, Eq, PartialEq, Copy)]
 pub struct AffinePoint<const WIDTH: usize, C> {
     buffer: [[u32; WIDTH]; 2],
@@ -96,7 +90,6 @@ pub struct AffinePoint<const WIDTH: usize, C> {
 impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     /// Constructs an affine point from x and y coordinates, without checking that it is on
     /// a specific curve.
-    #[stability::unstable]
     pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH, C> {
         AffinePoint {
             buffer: [x, y],
@@ -108,14 +101,12 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     /// Little-endian, x coordinate before y coordinate
     /// TODO: Where to doc this next bit
     /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
-    #[stability::unstable]
     pub fn as_u32s(&self) -> &[[u32; WIDTH]; 2] {
         &self.buffer
     }
 }
 
 impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
-    #[stability::unstable]
     pub fn mul(&self, scalar: &[u32; WIDTH], result: &mut AffinePoint<WIDTH, C>) {
         // This assumes `pt` is actually on the curve
         // This assumption isn't checked here, so other code must ensure it's met
