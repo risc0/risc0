@@ -568,7 +568,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
 
         let cycles = verify_program_size as usize + 1;
-        tracing::info!("bigint2: {cycles} cycles");
+        tracing::debug!("bigint2: {cycles} cycles");
 
         self.pending.cycles += cycles;
         self.pending.pc = self.pc + WORD_SIZE;
