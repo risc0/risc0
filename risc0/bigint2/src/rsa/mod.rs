@@ -18,19 +18,36 @@ mod tests;
 use include_bytes_aligned::include_bytes_aligned;
 
 use crate::ffi::sys_bigint2_3;
-use crate::WORD_SIZE;
 
 #[stability::unstable]
 pub const RSA_3072_WIDTH_WORDS: usize = 3072 / 32;
 #[stability::unstable]
-pub const RSA_3072_WIDTH_BYTES: usize = RSA_3072_WIDTH_WORDS * WORD_SIZE;
+pub const RSA_4096_WIDTH_WORDS: usize = 4096 / 32;
 
 const BLOB: &[u8] = include_bytes_aligned!(4, "modpow_65537.blob");
 
-type RsaArray = [u32; RSA_3072_WIDTH_WORDS];
+#[stability::unstable]
+pub fn modpow_65537_3072(
+    base: &[u32; RSA_3072_WIDTH_WORDS],
+    modulus: &[u32; RSA_3072_WIDTH_WORDS],
+    result: &mut [u32; RSA_3072_WIDTH_WORDS],
+) {
+    unsafe {
+        sys_bigint2_3(
+            BLOB.as_ptr(),
+            base.as_ptr(),
+            modulus.as_ptr(),
+            result.as_mut_ptr(),
+        );
+    }
+}
 
 #[stability::unstable]
-pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut [u32; RSA_3072_WIDTH_WORDS]) {
+pub fn modpow_65537_4096(
+    base: &[u32; RSA_4096_WIDTH_WORDS],
+    modulus: &[u32; RSA_4096_WIDTH_WORDS],
+    result: &mut [u32; RSA_4096_WIDTH_WORDS],
+) {
     unsafe {
         sys_bigint2_3(
             BLOB.as_ptr(),
