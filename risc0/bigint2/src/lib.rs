@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #[stability::unstable]
+#[cfg(features = "unstable)]
 pub mod ec;
 pub mod ffi;
 #[stability::unstable]
