@@ -19,6 +19,7 @@ pub mod rsa;
 pub(crate) const WORD_SIZE: usize = 4;
 
 /// Trait for converting values to a u32 array to be used for bigint2 acceleration.
+#[stability::unstable]
 pub trait ToBigInt2Buffer<const WIDTH: usize> {
     /// Convert value to a u32 array to be used for bigint2 acceleration.
     fn to_u32_array(&self) -> [u32; WIDTH];

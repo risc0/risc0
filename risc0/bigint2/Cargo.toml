@@ -10,6 +10,7 @@ repository = { workspace = true }
 include_bytes_aligned = "0.1"
 num-bigint = { version = "0.4", default-features = false, optional = true }
 num-bigint-dig = { version = "0.8", default-features = false, optional = true }
+stability = "0.2"
 
 [dev-dependencies]
 tracing = "0.1"
