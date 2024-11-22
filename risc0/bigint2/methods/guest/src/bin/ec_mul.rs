@@ -12,19 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_bigint2::ec::{AffinePoint, WeierstrassCurve, SECP256K1_PRIME};
+use risc0_bigint2::ec::{AffinePoint, WeierstrassCurve};
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
-const CURVE: WeierstrassCurve<8> =
-    WeierstrassCurve::<8>::new(SECP256K1_PRIME, [0u32; 8], [7, 0, 0, 0, 0, 0, 0, 0]);
+// NOTE: This is manually constructed, to ensure changes to the API do not limit the ability to
+//       define a custom curve.
+// This is the secp256k1 curve.
+const CURVE: &WeierstrassCurve<8> = &WeierstrassCurve::<8>::new(
+    [
+        0xFFFFFC2F, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+        0xFFFFFFFF,
+    ],
+    [0u32; 8],
+    [7, 0, 0, 0, 0, 0, 0, 0],
+);
 
 fn main() {
     let scalar = [
         0x409f9918, 0xd218afb5, 0x81d5a9ae, 0x1aabde69, 0xe5cd569f, 0x478b33e5, 0xd5ff94e4,
         0x232ad1e3,
     ];
-    let point = AffinePoint::new(
+    let point = AffinePoint::new_unchecked(
         [
             0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
             0x79be667e,
@@ -33,9 +42,8 @@ fn main() {
             0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
             0x483ada77,
         ],
-        &CURVE,
     );
-    let expected = AffinePoint::new(
+    let expected = AffinePoint::new_unchecked(
         [
             0xd430a92d, 0x5fdd93b4, 0x23c8434f, 0x1616b5ae, 0x2570e09c, 0x673f0dec, 0xb6bdef51,
             0x2985d840,
@@ -44,9 +52,9 @@ fn main() {
             0x34ab3c01, 0x0abd13e0, 0x8060d279, 0xa37beeeb, 0xb083593d, 0x4679f415, 0x6c4af2e8,
             0x1af7251d,
         ],
-        &CURVE,
     );
 
-    let result = risc0_bigint2::ec::mul(&scalar, &point);
+    let mut result = AffinePoint::new_unchecked([0u32; 8], [0u32; 8]);
+    risc0_bigint2::ec::mul(&scalar, &point, CURVE, &mut result);
     assert_eq!(result, expected);
 }

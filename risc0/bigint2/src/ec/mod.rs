@@ -23,10 +23,11 @@ const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "add.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "double.blob");
 
 /// The secp256k1 curve's prime as u32 digits, least significant digit first
-/// TODO: public?
-pub const SECP256K1_PRIME: [u32; 8] = [
+const SECP256K1_PRIME: [u32; 8] = [
     0xFFFFFC2F, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
 ];
+const SECP256K1_CURVE: &WeierstrassCurve<8> =
+    &WeierstrassCurve::<8>::new(SECP256K1_PRIME, [0u32; 8], [7, 0, 0, 0, 0, 0, 0, 0]);
 
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
@@ -54,28 +55,27 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
     /// The curve as concatenated u32s
     ///
     /// Little-endian, prime then a then b
-    pub fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
+    fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
         &self.buffer
+    }
+}
+impl WeierstrassCurve<8> {
+    /// The secp256k1 curve configuration.
+    pub const fn secp256k1() -> &'static WeierstrassCurve<8> {
+        SECP256K1_CURVE
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AffinePoint<const WIDTH: usize> {
     buffer: [[u32; WIDTH]; 2],
-    /// curve containing this point
-    curve: &'static WeierstrassCurve<WIDTH>,
 }
 
 impl<const WIDTH: usize> AffinePoint<WIDTH> {
-    pub fn new(
-        x: [u32; WIDTH],
-        y: [u32; WIDTH],
-        curve: &'static WeierstrassCurve<WIDTH>,
-    ) -> AffinePoint<WIDTH> {
-        AffinePoint {
-            buffer: [x, y],
-            curve,
-        }
+    /// Constructs an affine point from x and y coordinates, without checking that it is on
+    /// a specific curve.
+    pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH> {
+        AffinePoint { buffer: [x, y] }
     }
     /// The point as concatenated u32s for x and y
     ///
@@ -85,30 +85,19 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
     pub fn as_u32s(&self) -> &[[u32; WIDTH]; 2] {
         &self.buffer
     }
-
-    /// Read the point from concatenated u32s for x and y
-    ///
-    /// Input interpreted as little-endian with x coordinate before y coordinate
-    pub fn from_u32s(
-        data: [[u32; WIDTH]; 2],
-        curve: &'static WeierstrassCurve<WIDTH>,
-    ) -> AffinePoint<WIDTH> {
-        AffinePoint {
-            buffer: data,
-            curve,
-        }
-    }
 }
 
 pub fn mul<const WIDTH: usize>(
     scalar: &[u32; WIDTH],
     point: &AffinePoint<WIDTH>,
-) -> AffinePoint<WIDTH> {
+    curve: &'static WeierstrassCurve<WIDTH>,
+    result: &mut AffinePoint<WIDTH>,
+) {
     // This assumes `pt` is actually on the curve
     // This assumption isn't checked here, so other code must ensure it's met
     // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
 
-    let curve = point.curve.as_u32s();
+    let curve = curve.as_u32s();
 
     // Initialize two values to alternate writes to avoid unnecessary copies.
     let mut result_flip = false;
@@ -156,15 +145,16 @@ pub fn mul<const WIDTH: usize>(
     }
 
     // Return the result, based on which buffer was written to last.
-    let result_scalar = if result_flip { result2 } else { result1 };
-
-    AffinePoint::from_u32s(result_scalar, point.curve)
+    let result_point = if result_flip { result2 } else { result1 };
+    result.buffer = result_point;
 }
 
-pub fn double<const WIDTH: usize>(point: &AffinePoint<WIDTH>) -> AffinePoint<WIDTH> {
-    let mut buffer = [[0u32; WIDTH]; 2];
-    double_raw(point.as_u32s(), point.curve.as_u32s(), &mut buffer);
-    AffinePoint::from_u32s(buffer, point.curve)
+pub fn double<const WIDTH: usize>(
+    point: &AffinePoint<WIDTH>,
+    curve: &'static WeierstrassCurve<WIDTH>,
+    result: &mut AffinePoint<WIDTH>,
+) {
+    double_raw(point.as_u32s(), curve.as_u32s(), &mut result.buffer);
 }
 
 fn double_raw<const WIDTH: usize>(
@@ -188,18 +178,17 @@ fn double_raw<const WIDTH: usize>(
 pub fn add<const WIDTH: usize>(
     lhs: &AffinePoint<WIDTH>,
     rhs: &AffinePoint<WIDTH>,
-) -> AffinePoint<WIDTH> {
+    curve: &'static WeierstrassCurve<WIDTH>,
+    result: &mut AffinePoint<WIDTH>,
+) {
     // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
     // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
-    assert_eq!(lhs.curve, rhs.curve);
-    let mut buffer = [[0u32; WIDTH]; 2];
     add_raw(
         lhs.as_u32s(),
         rhs.as_u32s(),
-        lhs.curve.as_u32s(),
-        &mut buffer,
+        curve.as_u32s(),
+        &mut result.buffer,
     );
-    AffinePoint::from_u32s(buffer, lhs.curve)
 }
 
 fn add_raw<const WIDTH: usize>(
