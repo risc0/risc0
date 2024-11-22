@@ -72,7 +72,8 @@ pub struct AffinePoint<const WIDTH: usize> {
 }
 
 impl<const WIDTH: usize> AffinePoint<WIDTH> {
-    /// Constructs an affine point, without checking that it is on a specific curve.
+    /// Constructs an affine point from x and y coordinates, without checking that it is on
+    /// a specific curve.
     pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH> {
         AffinePoint { buffer: [x, y] }
     }
@@ -83,13 +84,6 @@ impl<const WIDTH: usize> AffinePoint<WIDTH> {
     /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
     pub fn as_u32s(&self) -> &[[u32; WIDTH]; 2] {
         &self.buffer
-    }
-
-    /// Read the point from concatenated u32s for x and y
-    ///
-    /// Input interpreted as little-endian with x coordinate before y coordinate
-    pub fn from_u32s(data: [[u32; WIDTH]; 2]) -> AffinePoint<WIDTH> {
-        AffinePoint { buffer: data }
     }
 }
 

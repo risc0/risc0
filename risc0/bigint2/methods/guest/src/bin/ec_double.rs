@@ -40,8 +40,8 @@ fn main() {
 
     let curve = WeierstrassCurve::secp256k1();
 
-    let in_pt = AffinePoint::from_u32s(POINT_G);
-    let expected_pt = AffinePoint::from_u32s(EXPECTED);
+    let in_pt = AffinePoint::new_unchecked(POINT_G[0], POINT_G[1]);
+    let expected_pt = AffinePoint::new_unchecked(EXPECTED[0], EXPECTED[1]);
 
     let mut result = AffinePoint::new_unchecked([0u32; 8], [0u32; 8]);
     risc0_bigint2::ec::double(&in_pt, curve, &mut result);
