@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[stability::unstable]
-#[cfg(features = "unstable)]
+#[cfg(features = "unstable")]
 pub mod ec;
+
 pub mod ffi;
-#[stability::unstable]
+#[cfg(features = "unstable")]
 pub mod rsa;
 
+// This is used by the unstable modules so isn't actually dead
+#[allow(dead_code)]
 pub(crate) const WORD_SIZE: usize = 4;
 
 /// Trait for converting values to a u32 array to be used for bigint2 acceleration.

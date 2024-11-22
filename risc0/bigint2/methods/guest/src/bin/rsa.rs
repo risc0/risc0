@@ -15,20 +15,23 @@
 #[cfg(feature = "num-bigint-dig")]
 extern crate num_bigint_dig as num_bigint;
 
+#[cfg(feature = "unstable")]
+use risc0_bigint2::rsa::{RSA_3072_WIDTH_WORDS, modpow_65537};
+#[cfg(feature = "unstable")]
+use risc0_bigint2::ToBigInt2Buffer;
 #[allow(unused)]
 use risc0_zkvm::guest::env;
 
 #[cfg(any(feature = "num-bigint-dig", feature = "num-bigint"))]
 fn main() {
     use num_bigint::BigUint;
-    use risc0_bigint2::ToBigInt2Buffer;
 
     let (base, modulus): (BigUint, BigUint) = env::read();
     let base = base.to_u32_array();
     let modulus = modulus.to_u32_array();
 
-    let mut result = [0u32; risc0_bigint2::rsa::RSA_3072_WIDTH_WORDS];
-    risc0_bigint2::rsa::modpow_65537(&base, &modulus, &mut result);
+    let mut result = [0u32; RSA_3072_WIDTH_WORDS];
+    modpow_65537(&base, &modulus, &mut result);
 
     let result = BigUint::from_slice(&result);
 
