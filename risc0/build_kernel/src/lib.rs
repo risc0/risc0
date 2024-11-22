@@ -200,7 +200,9 @@ impl KernelBuild {
 
                 let mut cmd = maybe_sccache("nvcc");
                 cmd.arg("-c");
-
+                // Rust defaults to PIE executables, so we compile with -fPIC
+                // to ensure linking compatibility
+                cmd.args(["-Xcompiler", "-fPIC"]);
                 if env::var_os("NVCC_PREPEND_FLAGS").is_none()
                     && env::var_os("NVCC_APPEND_FLAGS").is_none()
                 {
@@ -244,6 +246,9 @@ impl KernelBuild {
         let dlink = out_dir.join(format!("{output}_dlink.o"));
         let mut cmd = Command::new("nvcc");
         cmd.arg("--device-link");
+        // Rust defaults to PIE executables, so we compile with -fPIC
+        // to ensure linking compatibility
+        cmd.args(["-Xcompiler", "-fPIC"]);
         cmd.arg("-o");
         cmd.arg(&dlink);
         cmd.args(&obj_paths);
