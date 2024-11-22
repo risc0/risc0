@@ -239,7 +239,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 self.pager.undo();
                 let used_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
                 let po2_padding = (1 << segment_po2) - used_cycles;
-                tracing::info!(
+                tracing::debug!(
                     "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, padding: {po2_padding}, pending: {:?}",
                     self.insn_cycles,
                     self.pager.cycles,
