@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[stability::unstable]
 pub mod ec;
 pub mod ffi;
+#[stability::unstable]
 pub mod rsa;
 
 pub(crate) const WORD_SIZE: usize = 4;
