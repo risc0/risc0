@@ -519,8 +519,8 @@ impl Client {
             if !client_version.pre.is_empty() {
                 client_version.pre = semver::Prerelease::EMPTY;
             }
-            client_version
-        };
+            Ok(client_version)
+        }
     }
 
     fn connect(&self) -> Result<ConnectionWrapper> {
