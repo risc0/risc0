@@ -4105,7 +4105,9 @@ dependencies = [
  "puffin_http",
  "risc0-bigint2-methods",
  "risc0-zkvm",
+ "stability",
  "test-log",
+ "tracing",
  "tracing-subscriber 0.3.18",
 ]
 

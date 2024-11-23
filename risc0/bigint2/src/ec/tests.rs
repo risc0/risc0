@@ -16,11 +16,13 @@ use risc0_bigint2_methods::{EC_ADD_ELF, EC_DOUBLE_ELF, EC_MUL_ELF};
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
 };
+use std::time::Instant;
 use test_log::test;
 
 #[test]
 fn ec_add() {
     let env = ExecutorEnv::builder().build().unwrap();
+    let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
         .unwrap()
         .run()
@@ -28,14 +30,18 @@ fn ec_add() {
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 
     let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    prover
+    let prove_info = prover
         .prove_session(&VerifierContext::default(), &session)
         .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 }
 
 #[test]
 fn ec_double() {
     let env = ExecutorEnv::builder().build().unwrap();
+    let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EC_DOUBLE_ELF)
         .unwrap()
         .run()
@@ -43,14 +49,18 @@ fn ec_double() {
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 
     let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    prover
+    let prove_info = prover
         .prove_session(&VerifierContext::default(), &session)
         .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 }
 
 #[test]
 fn ec_mul() {
     let env = ExecutorEnv::builder().build().unwrap();
+    let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EC_MUL_ELF)
         .unwrap()
         .run()
@@ -58,7 +68,10 @@ fn ec_mul() {
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 
     let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-    prover
+    let prove_info = prover
         .prove_session(&VerifierContext::default(), &session)
         .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 }
