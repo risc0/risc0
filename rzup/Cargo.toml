@@ -1,5 +1,6 @@
 [package]
 name = "rzup"
+description = "utility to install the RISC Zero toolchain"
 version = "0.2.2"
 edition = { workspace = true }
 license = { workspace = true }
