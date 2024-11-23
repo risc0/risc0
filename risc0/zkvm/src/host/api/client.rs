@@ -508,10 +508,26 @@ impl Client {
         result
     }
 
+    fn get_client_version() -> Result<semver::Version> {
+        #[cfg(not(feature = "r0vm-ver-compat"))]
+        {
+            get_version().map_err(|err| anyhow!(err))
+        }
+        #[cfg(feature = "r0vm-ver-compat")]
+        {
+            let mut client_version = get_version().map_err(|err| anyhow!(err))?;
+            if !client_version.pre.is_empty() {
+                client_version.pre = semver::Prerelease::EMPTY;
+            }
+            client_version
+        };
+    }
+
     fn connect(&self) -> Result<ConnectionWrapper> {
         let mut conn = self.connector.connect()?;
 
-        let client_version = get_version().map_err(|err| anyhow!(err))?;
+        let client_version = Self::get_client_version()?;
+
         let request = pb::api::HelloRequest {
             version: Some(client_version.clone().into()),
         };
