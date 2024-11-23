@@ -385,19 +385,20 @@ impl Toolchain {
         Ok(())
     }
 
-    pub fn build(&self, version: Option<&str>) -> Result<()> {
+    pub fn build(&self, tag: Option<&str>) -> Result<()> {
         match self {
             Toolchain::Rust => {
                 let source_url = self.git_url();
-                let tag = version.unwrap_or("risc0");
+                let tag = tag.unwrap_or("risc0");
                 let root_dir = if let Ok(dir) = std::env::var("RISC0_BUILD_DIR") {
                     PathBuf::from(dir)
                 } else {
                     dirs::home_dir()
                         .context("Could not determine home dir. Set RISC0_BUILD_DIR env var!")?
-                        .join(".rzup")
+                        .join(".risc0")
+                        .join("build")
                 };
-                let build_dir = root_dir.join(format!("build-{}", self.to_str()));
+                let build_dir = root_dir.join(format!("{}-toolchain", self.to_str()));
                 let toolchains_root_dir = rzup_home()?.join("toolchains");
                 let target = Target::host_target().ok_or_else(|| {
                     RzupError::Other("Failed to determine the host target".to_string())

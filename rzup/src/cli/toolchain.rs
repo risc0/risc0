@@ -20,16 +20,17 @@ use clap::Subcommand;
 #[command(
     arg_required_else_help = true,
     subcommand_required = true,
-    after_help = "Toolchain help"
+    after_help = cli::help::TOOLCHAIN_HELP
 )]
 pub enum ToolchainSubcmd {
     /// List installed toolchains
     List,
+    /// Install a specific toolchain
     #[command(after_help = cli::help::TOOLCHAIN_HELP, aliases = ["add"])]
     Install {
         /// Toolchain name (rust or cpp)
         toolchain: String,
-        /// Version tag of the toolchain to install
+        /// An optional version tag of the toolchain to install
         version: Option<String>,
         /// Force installation, removing existing installations and downloads
         #[arg(short, long)]
@@ -40,12 +41,12 @@ pub enum ToolchainSubcmd {
         /// Toolchain name (rust or cpp)
         toolchain: String,
     },
-    /// Build a toolchain
+    /// Build a toolchain from source
     Build {
         /// Toolchain name (rust or cpp)
         toolchain: String,
-        /// Version tag or commit hash of the toolchain to build
-        version: Option<String>,
+        /// An optional git tag or commit of the toolchain to build
+        tag: Option<String>,
     },
 }
 
@@ -70,9 +71,9 @@ pub async fn handler(subcmd: ToolchainSubcmd) -> Result<()> {
             let toolchain = toolchain.parse::<Toolchain>()?;
             toolchain.unlink(toolchain.to_str()) // TODO: More specific uninstall - by name
         }
-        ToolchainSubcmd::Build { toolchain, version } => {
+        ToolchainSubcmd::Build { toolchain, tag } => {
             let toolchain = toolchain.parse::<Toolchain>()?;
-            toolchain.build(version.as_deref())
+            toolchain.build(tag.as_deref())
         }
     }
 }
