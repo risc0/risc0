@@ -52,14 +52,14 @@ text_io = "0.1.12"
 tokio = { version = "1", features = ["rt"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 xz = "0.1.0"
-zip = { version = "2.1", optional = true }
+zip = { version = "2.2", optional = true }
 
 [build-dependencies]
 risc0-build = { workspace = true, optional = true }
 tracing-subscriber = { version = "0.3", features = [
   "env-filter",
 ], optional = true }
-zip = { version = "2.1", optional = true }
+zip = { version = "2.2", optional = true }
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
