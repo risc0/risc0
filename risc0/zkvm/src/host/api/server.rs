@@ -886,7 +886,13 @@ fn execute_redis(
             let mut redis_err_opt = redis_err.lock().unwrap();
             let redis_err_inner = redis_err_opt.take();
             return Err(match redis_err_inner {
-                Some(redis_thread_err) => anyhow!(redis_thread_err),
+                Some(redis_thread_err) => {
+                    tracing::error!(
+                        "Redis err: {redis_thread_err} root: {:?}",
+                        redis_thread_err.root_cause()
+                    );
+                    anyhow!(redis_thread_err)
+                }
                 None => send_err.into(),
             });
         }
