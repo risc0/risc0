@@ -9,7 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = "1.0"
-cargo_metadata = "0.18"
+cargo_metadata = "0.19"
 dirs = "5.0"
 docker-generate = "0.1"
 hex = "0.4"
