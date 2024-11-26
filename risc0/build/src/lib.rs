@@ -441,7 +441,10 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
             .unwrap()
             .join("cpp/bin/riscv32-unknown-elf-gcc");
         cmd.env("CC", cc_path)
-            .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+            .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")
+            // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
+            // feature is available.
+            .env("RISC0_FEATURE_bigint2", "");
     }
 
     cmd.env("RUSTC", rustc)
