@@ -428,19 +428,21 @@ impl Hasher {
 }
 
 fn maybe_sccache(inner: &str) -> Command {
-    let sccache = which::which("sccache");
-    if let Ok(sccache) = sccache {
-        let mut cmd = Command::new(sccache);
-        cmd.arg(inner);
-        cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
-        if env::var("RISC0_CUDA_SCCACHE_RECACHE").is_ok() {
-            cmd.env("SCCACHE_RECACHE", "1");
-        }
-        cmd
-    } else {
-        println!(
-            "cargo:warning=It is highly recommended to install sccache when building CUDA kernels."
-        );
-        Command::new(inner)
-    }
+    // There seems to be issues with sccahe and nvcc. Disabling for now.
+    // let sccache = which::which("sccache");
+    // if let Ok(sccache) = sccache {
+    //     let mut cmd = Command::new(sccache);
+    //     cmd.arg(inner);
+    //     cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
+    //     if env::var("RISC0_CUDA_SCCACHE_RECACHE").is_ok() {
+    //         cmd.env("SCCACHE_RECACHE", "1");
+    //     }
+    //     cmd
+    // } else {
+    //     println!(
+    //         "cargo:warning=It is highly recommended to install sccache when building CUDA kernels."
+    //     );
+    //     Command::new(inner)
+    // }
+    Command::new(inner)
 }
