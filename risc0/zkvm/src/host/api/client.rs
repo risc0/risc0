@@ -653,18 +653,25 @@ impl Client {
                         }
                         pb::api::client_callback::Kind::SessionDone(session) => {
                             return match session.session {
-                                Some(session) => Ok(SessionInfo {
-                                    segments,
-                                    journal: Journal::new(session.journal),
-                                    exit_code: session
-                                        .exit_code
-                                        .ok_or(malformed_err())?
-                                        .try_into()?,
-                                    receipt_claim: pb::core::ReceiptClaim::decode(
-                                        session.receipt_claim.ok_or(malformed_err())?.as_bytes()?,
-                                    )?
-                                    .try_into()?,
-                                }),
+                                Some(session) => {
+                                    let receipt_claim = match session.receipt_claim {
+                                        Some(claim) => Some(
+                                            pb::core::ReceiptClaim::decode(claim.as_bytes()?)?
+                                                .try_into()?,
+                                        ),
+                                        None => None,
+                                    };
+
+                                    Ok(SessionInfo {
+                                        segments,
+                                        journal: Journal::new(session.journal),
+                                        exit_code: session
+                                            .exit_code
+                                            .ok_or(malformed_err())?
+                                            .try_into()?,
+                                        receipt_claim,
+                                    })
+                                }
                                 None => Err(malformed_err()),
                             }
                         }

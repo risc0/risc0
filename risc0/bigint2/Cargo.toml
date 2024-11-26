@@ -1,5 +1,6 @@
 [package]
 name = "risc0-bigint2"
+description = "RISC Zero's Big Integer Accelerator"
 version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
