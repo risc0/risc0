@@ -5,7 +5,9 @@ import { tryit } from "radash";
 export async function fetchBenchmarks() {
   const tryFetch = tryit(fetch);
   const [error, response] = await tryFetch("https://risc0.github.io/ghpages/dev/bench/data.js", {
-    cache: "no-store",
+    next: {
+      revalidate: 60,
+    },
   });
 
   // error handling

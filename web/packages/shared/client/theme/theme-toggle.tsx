@@ -3,7 +3,7 @@
 import { Button } from "@risc0/ui/button";
 import { cn } from "@risc0/ui/cn";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@risc0/ui/dropdown-menu";
-import { useMounted } from "@risc0/ui/hooks/use-mounted";
+import { useIsMounted } from "@risc0/ui/hooks/use-is-mounted";
 import { CheckIcon, SunMoonIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -22,9 +22,9 @@ function ButtonBase() {
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
-  const mounted = useMounted();
+  const isMounted = useIsMounted();
 
-  if (!mounted) {
+  if (!isMounted) {
     return <ButtonBase />;
   }
 

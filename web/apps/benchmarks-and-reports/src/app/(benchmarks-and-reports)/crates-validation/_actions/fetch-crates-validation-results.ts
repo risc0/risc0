@@ -10,7 +10,9 @@ export async function fetchCratesValidationResults({
   const [error, response] = await tryFetch(
     `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
     {
-      next: { revalidate: 180, tags: ["fetch-crates-validation-results"] }, // 3 minutes cache
+      next: {
+        revalidate: 60,
+      },
     },
   );
 
@@ -19,5 +21,5 @@ export async function fetchCratesValidationResults({
     throw error || new Error("Failed to fetch");
   }
 
-  return await response.json();
+  return (await response.json()) as CratesIoValidationTableSchema[];
 }
