@@ -179,7 +179,7 @@ __device__ constexpr inline FpExt operator+(Fp a, FpExt b) {
   return b + a;
 }
 
-// Promote a to FpExt, then add.
+// Add negative b
 __device__ constexpr inline FpExt operator-(Fp a, FpExt b) {
   return a + (-b);
 }
