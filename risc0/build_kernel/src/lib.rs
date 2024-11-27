@@ -83,6 +83,20 @@ impl KernelBuild {
         self
     }
 
+    /// Add a file which will be compiled
+    pub fn file_opt<P: AsRef<Path>>(&mut self, _p: P, _opt: usize) -> &mut KernelBuild {
+        self
+    }
+
+    /// Add files which will be compiled
+    pub fn files_opt<P>(&mut self, _p: P, _opt: usize) -> &mut KernelBuild
+    where
+        P: IntoIterator,
+        P::Item: AsRef<Path>,
+    {
+        self
+    }
+
     /// Add a dependency
     pub fn dep<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
         self.deps.push(p.as_ref().to_path_buf());
