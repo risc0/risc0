@@ -2,7 +2,58 @@
 
 ## Next (upcoming release)
 
+## [v1.2.0 (2024-11-26)](https://github.com/risc0/risc0/releases/tag/v1.2.0)
+
+### 🔥 Performance Improvements
+
+* Enable big integer acceleration in the rv32im circuit. The new `risc0-bigint2` crate contains code that facilitate acceleration.
+* Accelerate RSA signature verification. Acceleration reduces RSA verification from ~15M cycles to 163k cycles.
+### ⚡️ Features
+
+* Add support for deferred assumptions. This is used as a foundation for precompiles such as the up-coming keccak precompile.
+* Add union recursion program use to aggregate receipts. API will be solidified in future revisions.
+* Add experimental APIs used to accelerate keccak. This enables keccak hashes to be computed in an unconstrained environment but does not prove the soundness of the hashes themselves.
+* Update guest code to use Rust toolchain version `1.81.0`.
+* Change visibility of groth16 proof to facilitate development to enable writing on-chain verifiers themselves.
+* Add `seal_size` method to receipt types.
+* Make Bonsai Dependencies Optional under client feature flag.
+* `bonsai-sdk`: added preflight journal fetching.
+* Plumb `ReceiptClaim` through `SessionInfo` and client-server to facilitate local testing.
+* Support wider range of client/server use cases including verification.
+* `r0vm`: add `r0vm-ver-compat` feature flag to relax r0vm server version checks.
+* `risc0-build`: allow guest methods binary targets to customize required-features and skip building such targets if not all required features were provided.
+* Enable forwarding custom rustc flags to guest builds.
+* Change `cargo risczero datasheet` to use guest code written in assembly to generate consistent cycle counts.
+* `risc0-zkp`: Export `poseidon2` constants.
+* `risc0-zkp`: add changes to support extended field element use by `zirgen` code generation.
+* Use remark linter on website.
+
 ### Fixes
+
+* Client/server: fix concurrent access to `TcpSocket`.
+* Run `clippy` more widely on risc0 repository using all targets and address warnings and errors.
+* Fix: gate `env::read_buffered()` behind the 'std' feature
+* Fix missing cstdint include for cuda builds.
+
+### 🚨 Breaking Changes
+
+* Drop `risc0-circuit-bigint` in favor of `risc0-circuit-bigint2`.
+
+## [v1.1.3 (2024-11-08)](https://github.com/risc0/risc0/releases/tag/v1.1.3)
+
+### 🔥 Performance Improvements
+
+* Add `poly_divide` kernel. This achieves proving speeds of 1.5 MHz on a 4090 GPU for proving rv32im programs.
+
+### ⚡️ Features
+
+* Enable environment variable to configure Bonsai poll time and reduce default.
+* Client server: add an option to use redis.
+
+### Fixes
+
+* Fix cpp toolchain support for docker guest builds.
+* Fix bugs in data sheet.
 
 ### 🚨 Breaking Changes
 
@@ -13,6 +64,17 @@
   trust the host, which leads to risk that code designed for running on the
   host may result in insecure behavior when run in the guest. Disabling
   environment variables and args by default mitigates this risk.
+
+## [v1.1.2 (2024-10-02)](https://github.com/risc0/risc0/releases/tag/v1.1.2)
+
+### 🛠 Fixes
+
+* Allow static mut references in specific places
+* Update reqwest and downloader
+
+## [v1.1.1 (2024-09-23)](https://github.com/risc0/risc0/releases/tag/v1.1.1)
+
+Support wider range of client/server use cases.
 
 ## [v1.1.0 (2024-09-09)](https://github.com/risc0/risc0/releases/tag/v1.1.0)
 
