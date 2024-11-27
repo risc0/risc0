@@ -53,4 +53,4 @@ After you update your installation, be sure to update your project's RISC Zero c
 [release tag]: https://github.com/risc0/risc0/releases
 [Rust]: https://www.rust-lang.org
 [rustup]: https://rustup.rs
-[rzup-repo]: https://github.com/risc0/risc0/tree/main/rzup
+[rzup-repo]: https://github.com/risc0/risc0/tree/release-1.2/rzup
