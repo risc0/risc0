@@ -93,6 +93,8 @@ const char* launchKernel(void (*kernel)(ExpTypes...),
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }

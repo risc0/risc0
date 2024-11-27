@@ -41,6 +41,8 @@ const char* risc0_circuit_rv32im_cuda_eval_check(Fp* check,
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }

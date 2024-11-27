@@ -416,6 +416,8 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
     }
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }
@@ -460,6 +462,8 @@ const char* risc0_circuit_rv32im_cuda_step_compute_accum(AccumContext* ctx,
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }
@@ -497,6 +501,8 @@ const char* risc0_circuit_rv32im_cuda_step_verify_accum(AccumContext* ctx,
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }
