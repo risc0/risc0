@@ -35,10 +35,14 @@ const SECP256K1_CURVE: &WeierstrassCurve<EC_256_WIDTH_WORDS> =
 
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
+/// Generic static curve configuration.
 pub trait Curve<const WIDTH: usize> {
     const CURVE: &'static WeierstrassCurve<WIDTH>;
 }
 
+/// An implementation of [Curve] for secp256k1.
+///
+/// This type should be used as a generic for [AffinePoint].
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Secp256k1Curve {}
 
@@ -74,13 +78,8 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
         &self.buffer
     }
 }
-impl WeierstrassCurve<EC_256_WIDTH_WORDS> {
-    /// The secp256k1 curve configuration.
-    pub const fn secp256k1() -> &'static WeierstrassCurve<EC_256_WIDTH_WORDS> {
-        SECP256K1_CURVE
-    }
-}
 
+/// An affine point on an elliptic curve.
 #[derive(Debug, Eq, PartialEq)]
 pub struct AffinePoint<const WIDTH: usize, C> {
     buffer: [[u32; WIDTH]; 2],
@@ -102,6 +101,7 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
         is_zero: true,
         _marker: std::marker::PhantomData,
     };
+
     /// Constructs an affine point from x and y coordinates, without checking that it is on
     /// a specific curve.
     pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH, C> {
@@ -120,12 +120,14 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
         &self.buffer
     }
 
+    /// Returns true if the point is the identity element (point at zero/infinity).
     pub fn is_zero(&self) -> bool {
         self.is_zero
     }
 }
 
 impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
+    /// Elliptic curve multiplication of the point by a scalar.
     pub fn mul(&self, scalar: &[u32; WIDTH], result: &mut AffinePoint<WIDTH, C>) {
         // This assumes `pt` is actually on the curve
         // This assumption isn't checked here, so other code must ensure it's met
@@ -180,38 +182,48 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         *result = if result_flip { result2 } else { result1 };
     }
 
+    /// Elliptic curve doubling of the affine point.
     #[stability::unstable]
     pub fn double(&self, result: &mut Self) {
         let curve = C::CURVE;
+        // If the point is zero, can short-circuit and return the identity point.
         if self.is_zero {
             *result = *self;
         } else {
             unsafe {
                 double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
             }
+            // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
             result.is_zero = false;
         }
     }
 
+    /// Elliptic curve addition of the affine point.
     #[stability::unstable]
     pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
         let curve = C::CURVE;
-        // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
-        // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
+
+        // If the left or right value is zero, can return the other value.
         if self.is_zero {
             *result = *rhs;
         } else if rhs.is_zero {
             *result = *self;
         } else if self.buffer[0] == rhs.buffer[0] {
+            // X coordinates are the same, so either we double the value if it's the same point,
+            // or return the identity if it's different (not on the curve).
             if self.buffer[1] != rhs.buffer[1] {
+                // x == x, y == -y, so the result is the identity point
                 result.is_zero = true;
             } else {
+                // P + P, which can be done with a double call.
                 unsafe {
                     double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
                 }
+                // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.is_zero = false;
             }
         } else {
+            // X coordinates are different, so we can add the points as normal.
             unsafe {
                 add_raw(
                     self.as_u32s(),
@@ -220,6 +232,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                     &mut result.buffer,
                 );
             }
+            // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
             result.is_zero = false;
         }
     }
