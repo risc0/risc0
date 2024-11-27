@@ -52,9 +52,8 @@ fn build_cuda_kernels(cxx_root: &Path) {
             "kernels/zkp/cuda/supra/api.cu",
             "kernels/zkp/cuda/supra/ntt.cu",
         ])
+        .deps(["kernels/zkp/cuda", "kernels/zkp/cuda/supra"])
         .flag("-DFEATURE_BABY_BEAR")
-        .include("kernels/zkp/cuda")
-        .include("kernels/zkp/cuda/supra")
         .include(cxx_root)
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_zkp_cuda");

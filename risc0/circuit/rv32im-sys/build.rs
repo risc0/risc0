@@ -59,7 +59,7 @@ fn build_cuda_kernels() {
             "kernels/cuda/step_verify_bytes.cu",
             "kernels/cuda/step_verify_mem.cu",
         ])
-        .include("kernels/cuda")
+        .deps(["kernels/cuda"])
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
