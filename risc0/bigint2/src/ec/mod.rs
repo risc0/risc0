@@ -190,11 +190,16 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         if self.is_zero {
             *result = *self;
         } else {
-            unsafe {
-                double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+            if self.buffer[1] != [0u32; WIDTH] {
+                unsafe {
+                    double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+                }
+                // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
+                result.is_zero = false;
+            } else {
+                // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
+                result.is_zero = true;
             }
-            // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
-            result.is_zero = false;
         }
     }
 
