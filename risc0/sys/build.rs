@@ -52,20 +52,9 @@ fn build_cuda_kernels(cxx_root: &Path) {
             "kernels/zkp/cuda/supra/api.cu",
             "kernels/zkp/cuda/supra/ntt.cu",
         ])
-        .deps([
-            "kernels/zkp/cuda/cuda.h",
-            "kernels/zkp/cuda/fp.h",
-            "kernels/zkp/cuda/fpext.h",
-            "kernels/zkp/cuda/kernels.h",
-            "kernels/zkp/cuda/sha256.h",
-            "kernels/zkp/cuda/supra/fp.h",
-            "kernels/zkp/cuda/supra/calc_prefix_operation.cuh",
-            "kernels/zkp/cuda/supra/fp.h",
-            "kernels/zkp/cuda/supra/poly_divide.cuh",
-            "kernels/zkp/cuda/supra/poseidon2.cuh",
-            "kernels/zkp/cuda/supra/poseidon2_constants.cuh",
-        ])
         .flag("-DFEATURE_BABY_BEAR")
+        .include("kernels/zkp/cuda")
+        .include("kernels/zkp/cuda/supra")
         .include(cxx_root)
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_zkp_cuda");

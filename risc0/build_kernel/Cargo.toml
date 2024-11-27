@@ -8,11 +8,14 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-cc = { version = "1.1", features = ["parallel"] }
 directories = "5.0"
 glob = "0.3"
 hex = "0.4"
 rayon = "1.10"
 sha2 = "0.10"
 tempfile = "3.12"
-which = "6.0"
+
+[dependencies.cc]
+git = "https://github.com/risc0/rust-lang-cc-rs"
+rev = "665c78ff2cee688d7c7830f3b230f486774de4ac"
+features = ["parallel"]

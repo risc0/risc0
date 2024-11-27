@@ -38,7 +38,6 @@ pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
     files: Vec<PathBuf>,
-    files_opt: Vec<(PathBuf, usize)>,
     inc_dirs: Vec<PathBuf>,
     deps: Vec<PathBuf>,
 }
@@ -49,7 +48,6 @@ impl KernelBuild {
             kernel_type,
             flags: Vec::new(),
             files: Vec::new(),
-            files_opt: Vec::new(),
             inc_dirs: Vec::new(),
             deps: Vec::new(),
         }
@@ -85,24 +83,6 @@ impl KernelBuild {
         self
     }
 
-    /// Add a file which will be compiled
-    pub fn file_opt<P: AsRef<Path>>(&mut self, p: P, opt: usize) -> &mut KernelBuild {
-        self.files_opt.push((p.as_ref().to_path_buf(), opt));
-        self
-    }
-
-    /// Add files which will be compiled
-    pub fn files_opt<P>(&mut self, p: P, opt: usize) -> &mut KernelBuild
-    where
-        P: IntoIterator,
-        P::Item: AsRef<Path>,
-    {
-        for file in p.into_iter() {
-            self.file_opt(file, opt);
-        }
-        self
-    }
-
     /// Add a dependency
     pub fn dep<P: AsRef<Path>>(&mut self, p: P) -> &mut KernelBuild {
         self.deps.push(p.as_ref().to_path_buf());
@@ -122,14 +102,12 @@ impl KernelBuild {
     }
 
     pub fn compile(&mut self, output: &str) {
+        println!("cargo:rerun-if-env-changed=RISC0_SKIP_BUILD_KERNELS");
         for src in self.files.iter() {
-            println!("cargo:rerun-if-changed={}", src.display());
-        }
-        for (src, _) in self.files_opt.iter() {
-            println!("cargo:rerun-if-changed={}", src.display());
+            rerun_if_changed(src);
         }
         for dep in self.deps.iter() {
-            println!("cargo:rerun-if-changed={}", dep.display());
+            rerun_if_changed(dep);
         }
         match &self.kernel_type {
             KernelType::Cpp => self.compile_cpp(output),
@@ -159,115 +137,52 @@ impl KernelBuild {
     }
 
     fn compile_cuda(&mut self, output: &str) {
-        const DEFAULT_OPT_LEVEL: usize = 3;
-
-        fn enable_debug(output: &str) -> bool {
-            if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
-                return debug.contains(output);
-            }
-            false
-        }
-
         println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
-        println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
-        println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-        println!("cargo:rerun-if-env-changed=RISC0_CUDA_SCCACHE_RECACHE");
-        println!("cargo:rerun-if-env-changed=RISC0_CUDA_TIME");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDART_LINKAGE");
 
         for inc_dir in self.inc_dirs.iter() {
-            for inc in glob::glob(&format!("{}/**/*.h", inc_dir.display())).unwrap() {
-                println!("cargo:rerun-if-changed={}", inc.unwrap().display());
-            }
+            rerun_if_changed(inc_dir);
         }
 
-        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
-        let out_path = out_dir.join(format!("lib{output}.a"));
-
-        let files: Vec<_> = self
-            .files
-            .iter()
-            .map(|x| (x.as_path(), DEFAULT_OPT_LEVEL))
-            .chain(self.files_opt.iter().map(|(x, y)| (x.as_path(), *y)))
-            .collect();
-        let obj_paths: Vec<_> = files
-            .into_par_iter()
-            .map(|(src, opt_level)| {
-                let obj_path = out_dir.join(src).with_extension("").with_extension("o");
-                if let Some(parent) = obj_path.parent() {
-                    fs::create_dir_all(parent).unwrap();
-                }
-
-                let mut cmd = maybe_sccache("nvcc");
-                cmd.arg("-c");
-
-                if env::var_os("NVCC_PREPEND_FLAGS").is_none()
-                    && env::var_os("NVCC_APPEND_FLAGS").is_none()
-                {
-                    cmd.arg("-arch=native");
-                }
-
-                cmd.arg("--device-c");
-
-                if enable_debug(output) {
-                    cmd.arg("-G");
-                } else {
-                    let opt_level = env::var("RISC0_CUDA_OPT").unwrap_or(opt_level.to_string());
-                    cmd.arg(format!("-O{opt_level}"));
-                    cmd.arg("-Xptxas").arg(format!("-O{opt_level}"));
-                }
-
-                for inc_dir in self.inc_dirs.iter() {
-                    cmd.arg("-I").arg(inc_dir);
-                }
-
-                for flag in self.flags.iter() {
-                    cmd.arg(flag);
-                }
-
-                if let Some(time_file) = env::var_os("RISC0_CUDA_TIME") {
-                    cmd.arg("--time");
-                    cmd.arg(time_file);
-                }
-
-                cmd.arg(src);
-                cmd.arg("-o").arg(&obj_path);
-                println!("Running: {:?}", cmd);
-                let status = cmd.status().unwrap();
-                if !status.success() {
-                    panic!("CUDA kernels: compilation failed");
-                }
-                obj_path
-            })
-            .collect();
-
-        let dlink = out_dir.join(format!("{output}_dlink.o"));
-        let mut cmd = Command::new("nvcc");
-        cmd.arg("--device-link");
-        cmd.arg("-o");
-        cmd.arg(&dlink);
-        cmd.args(&obj_paths);
-        println!("Running: {:?}", cmd);
-        let status = cmd.status().unwrap();
-        if !status.success() {
-            panic!("CUDA kernels: device linking failed");
+        if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+            let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
+            let out_path = out_dir.join(format!("lib{output}-skip.a"));
+            fs::OpenOptions::new()
+                .create(true)
+                .truncate(true)
+                .write(true)
+                .open(&out_path)
+                .unwrap();
+            println!("cargo:{}={}", output, out_path.display());
+            return;
         }
 
-        let mut cmd = Command::new("ar");
-        cmd.arg("rs");
-        cmd.arg(&out_path);
-        cmd.args(&obj_paths);
-        cmd.arg(&dlink);
-        println!("Running: {:?}", cmd);
-        let status = cmd.status().unwrap();
-        if !status.success() {
-            panic!("CUDA kernels: archive creation failed");
+        let mut build = cc::Build::new();
+
+        for file in self.files.iter() {
+            build.file(file);
         }
 
-        println!("cargo:rustc-link-lib=static={output}");
-        println!("cargo:rustc-link-search=native={}", out_dir.display());
-        println!("cargo:rustc-link-lib=cudart_static");
-        println!("cargo:{}={}", output, out_path.display());
+        for inc in self.inc_dirs.iter() {
+            build.include(inc);
+        }
+
+        for flag in self.flags.iter() {
+            build.flag(flag);
+        }
+
+        let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
+
+        build
+            .cuda(true)
+            .cudart(&cudart)
+            .debug(false)
+            .flag("-diag-suppress=177")
+            .flag("-diag-suppress=2922")
+            .flag("-Xcudafe")
+            .flag("--display_error_number")
+            .compile(output);
     }
 
     fn compile_metal(&mut self, output: &str) {
@@ -342,10 +257,10 @@ impl KernelBuild {
         inner: F,
     ) {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
-        let out_path = out_dir.join(output).with_extension(extension);
-        let sys_inc_dir = out_dir.join("_sys_");
-
         if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
+            let out_path = out_dir
+                .join("skip-".to_string() + output)
+                .with_extension(extension);
             fs::OpenOptions::new()
                 .create(true)
                 .truncate(true)
@@ -355,6 +270,9 @@ impl KernelBuild {
             println!("cargo:{}={}", output, out_path.display());
             return;
         }
+
+        let out_path = out_dir.join(output).with_extension(extension);
+        let sys_inc_dir = out_dir.join("_sys_");
 
         let cache_dir = risc0_cache();
         if !cache_dir.is_dir() {
@@ -427,22 +345,6 @@ impl Hasher {
     }
 }
 
-fn maybe_sccache(inner: &str) -> Command {
-    // There seems to be issues with sccahe and nvcc. Disabling for now.
-    // let sccache = which::which("sccache");
-    // if let Ok(sccache) = sccache {
-    //     let mut cmd = Command::new(sccache);
-    //     cmd.arg(inner);
-    //     cmd.env("SCCACHE_IDLE_TIMEOUT", "0");
-    //     if env::var("RISC0_CUDA_SCCACHE_RECACHE").is_ok() {
-    //         cmd.env("SCCACHE_RECACHE", "1");
-    //     }
-    //     cmd
-    // } else {
-    //     println!(
-    //         "cargo:warning=It is highly recommended to install sccache when building CUDA kernels."
-    //     );
-    //     Command::new(inner)
-    // }
-    Command::new(inner)
+fn rerun_if_changed<P: AsRef<Path>>(path: P) {
+    println!("cargo:rerun-if-changed={}", path.as_ref().display());
 }
