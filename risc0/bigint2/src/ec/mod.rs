@@ -39,7 +39,7 @@ pub trait Curve<const WIDTH: usize> {
     const CURVE: &'static WeierstrassCurve<WIDTH>;
 }
 
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Secp256k1Curve {}
 
 impl Curve<EC_256_WIDTH_WORDS> for Secp256k1Curve {
@@ -81,12 +81,20 @@ impl WeierstrassCurve<EC_256_WIDTH_WORDS> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Copy)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct AffinePoint<const WIDTH: usize, C> {
     buffer: [[u32; WIDTH]; 2],
     is_zero: bool,
     _marker: std::marker::PhantomData<C>,
 }
+
+// Manual clone and copy implementations to not require C to be Copy/Clone
+impl<const WIDTH: usize, C> Clone for AffinePoint<WIDTH, C> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+impl<const WIDTH: usize, C> Copy for AffinePoint<WIDTH, C> {}
 
 impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     pub const IDENTITY: AffinePoint<WIDTH, C> = AffinePoint {
@@ -118,10 +126,7 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
 }
 
 impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
-    pub fn mul(&self, scalar: &[u32; WIDTH], result: &mut AffinePoint<WIDTH, C>)
-    where
-        C: Copy,
-    {
+    pub fn mul(&self, scalar: &[u32; WIDTH], result: &mut AffinePoint<WIDTH, C>) {
         // This assumes `pt` is actually on the curve
         // This assumption isn't checked here, so other code must ensure it's met
         // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
@@ -177,10 +182,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
 
     // TODO resolve clone/copy bound issue (shoudn't need C to be Copy)
     #[stability::unstable]
-    pub fn double(&self, result: &mut Self)
-    where
-        C: Copy,
-    {
+    pub fn double(&self, result: &mut Self) {
         let curve = C::CURVE;
         if self.is_zero {
             *result = *self;
@@ -193,10 +195,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
     }
 
     #[stability::unstable]
-    pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>)
-    where
-        C: Copy,
-    {
+    pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
         let curve = C::CURVE;
         // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
         // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
