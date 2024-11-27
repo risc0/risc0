@@ -23,7 +23,10 @@ use risc0_circuit_recursion_sys::ffi::{
 };
 use risc0_zkp::{
     adapter::{CircuitProveDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    field::{
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+        Elem,
+    },
     hal::cpu::SyncSlice,
 };
 
@@ -128,10 +131,30 @@ impl PolyFp<BabyBear> for CircuitImpl {
         steps: usize,
         mix: &[BabyBearExtElem],
         args: &[&[BabyBearElem]],
-    ) -> BabyBearExtElem {
+    ) -> Result<BabyBearExtElem> {
         let args: Vec<*const BabyBearElem> = args.iter().map(|x| (*x).as_ptr()).collect();
+        let mut err = RawError::default();
+        let mut result = BabyBearExtElem::ZERO;
         unsafe {
-            risc0_circuit_recursion_poly_fp(cycle, steps, mix.as_ptr(), args.as_ptr(), args.len())
+            risc0_circuit_recursion_poly_fp(
+                &mut err,
+                cycle,
+                steps,
+                mix.as_ptr(),
+                args.as_ptr(),
+                &mut result,
+            )
+        };
+        if err.msg.is_null() {
+            Ok(result)
+        } else {
+            let what = unsafe {
+                let str = risc0_circuit_recursion_string_ptr(err.msg);
+                let msg = CStr::from_ptr(str).to_str().unwrap().to_string();
+                risc0_circuit_recursion_string_free(err.msg);
+                msg
+            };
+            Err(anyhow!(what))
         }
     }
 }

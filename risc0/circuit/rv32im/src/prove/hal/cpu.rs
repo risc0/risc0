@@ -128,7 +128,7 @@ where
         let args: &[&[BabyBearElem]] = &[ctrl, out, data, mix, accum];
 
         (0..domain).into_par_iter().for_each(|cycle| {
-            let tot = CIRCUIT.poly_fp(cycle, domain, poly_mix_pows, args);
+            let tot = CIRCUIT.poly_fp(cycle, domain, poly_mix_pows, args).unwrap();
             let x = BabyBearElem::ROU_FWD[po2 + EXP_PO2].pow(cycle);
             // TODO: what is this magic number 3?
             let y = (BabyBearElem::new(3) * x).pow(1 << po2);

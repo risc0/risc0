@@ -186,6 +186,11 @@ impl KernelBuild {
             build.flag(flag);
         }
 
+        if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none()
+        {
+            build.flag("-arch=native");
+        }
+
         let cudart = env::var("RISC0_CUDART_LINKAGE").unwrap_or("static".to_string());
 
         build

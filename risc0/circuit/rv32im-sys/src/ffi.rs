@@ -105,9 +105,11 @@ extern "C" {
     );
 
     pub fn risc0_circuit_rv32im_poly_fp(
+        err: *mut RawError,
         cycle: usize,
         steps: usize,
         poly_mix: *const BabyBearExtElem,
         args: *const *const BabyBearElem,
-    ) -> BabyBearExtElem;
+        result: *mut BabyBearExtElem,
+    ) -> u32;
 }
