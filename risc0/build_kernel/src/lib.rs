@@ -202,7 +202,7 @@ impl KernelBuild {
             .flag("-Xcudafe")
             .flag("--display_error_number")
             .flag("-Xcompiler")
-            .flag("-Wno-unused-function")
+            .flag("-Wno-missing-braces,-Wno-unused-function")
             .compile(output);
     }
 

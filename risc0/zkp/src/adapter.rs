@@ -108,7 +108,7 @@ pub trait PolyFp<F: Field> {
         steps: usize,
         mix: &[F::ExtElem],
         args: &[&[F::Elem]],
-    ) -> Result<F::ExtElem>;
+    ) -> F::ExtElem;
 }
 
 pub trait PolyExt<F: Field> {

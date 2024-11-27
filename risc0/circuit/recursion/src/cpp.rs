@@ -131,7 +131,7 @@ impl PolyFp<BabyBear> for CircuitImpl {
         steps: usize,
         mix: &[BabyBearExtElem],
         args: &[&[BabyBearElem]],
-    ) -> Result<BabyBearExtElem> {
+    ) -> BabyBearExtElem {
         let args: Vec<*const BabyBearElem> = args.iter().map(|x| (*x).as_ptr()).collect();
         let mut err = RawError::default();
         let mut result = BabyBearExtElem::ZERO;
@@ -156,6 +156,7 @@ impl PolyFp<BabyBear> for CircuitImpl {
             };
             Err(anyhow!(what))
         }
+        .unwrap()
     }
 }
 
