@@ -180,7 +180,6 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         *result = if result_flip { result2 } else { result1 };
     }
 
-    // TODO resolve clone/copy bound issue (shoudn't need C to be Copy)
     #[stability::unstable]
     pub fn double(&self, result: &mut Self) {
         let curve = C::CURVE;
