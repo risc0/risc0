@@ -37,6 +37,7 @@
 
 #include <array>
 #include <cstdint>
+#include <exception>
 
 using namespace risc0;
 using namespace risc0::circuit::rv32im;

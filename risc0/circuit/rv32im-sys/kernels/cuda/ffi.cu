@@ -22,7 +22,7 @@
 
 #include <cstring>
 #include <cuda_runtime.h>
-#include <stdexcept>
+#include <exception>
 #include <thrust/execution_policy.h>
 #include <thrust/host_vector.h>
 #include <thrust/sort.h>
@@ -414,7 +414,7 @@ const char* risc0_circuit_rv32im_cuda_witgen(uint32_t mode,
 
       run_stage<StepVerifyBytes>(stream, cfg, ctx.ctx, mode, last_cycle, ctrl, io, data);
     }
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
   }
   return nullptr;
@@ -458,7 +458,7 @@ const char* risc0_circuit_rv32im_cuda_step_compute_accum(AccumContext* ctx,
     par_step_compute_accum<<<cfg.grid, cfg.block, 0, stream>>>(
         ctx, steps, count, ctrl, io, data, mix, accum);
     CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
   }
   return nullptr;
@@ -495,7 +495,7 @@ const char* risc0_circuit_rv32im_cuda_step_verify_accum(AccumContext* ctx,
     par_step_verify_accum<<<cfg.grid, cfg.block, 0, stream>>>(
         ctx, steps, count, ctrl, io, data, mix, accum);
     CUDA_OK(cudaStreamSynchronize(stream));
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
   }
   return nullptr;
