@@ -211,6 +211,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                 unsafe {
                     double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
                 }
+                result.is_zero = false;
             }
         } else {
             unsafe {
@@ -221,6 +222,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                     &mut result.buffer,
                 );
             }
+            result.is_zero = false;
         }
     }
 }
