@@ -29,6 +29,7 @@ fn main() {
 }
 
 fn build_cpu_kernels() {
+    println!("cargo:rerun-if-changed=cxx");
     KernelBuild::new(KernelType::Cpp)
         .files([
             "cxx/bigint.cpp",
@@ -58,14 +59,7 @@ fn build_cuda_kernels() {
             "kernels/cuda/step_verify_bytes.cu",
             "kernels/cuda/step_verify_mem.cu",
         ])
-        .deps([
-            "kernels/cuda/bigint.cu",
-            "kernels/cuda/context.h",
-            "kernels/cuda/extern.h",
-            "kernels/cuda/extern.cuh",
-            "kernels/cuda/kernels.h",
-            "kernels/cuda/layout.cu.inc",
-        ])
+        .deps(["kernels/cuda"])
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())

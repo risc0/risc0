@@ -22,7 +22,7 @@ use risc0_circuit_rv32im_sys::ffi::{
     risc0_circuit_string_free, risc0_circuit_string_ptr, RawAccumContext, RawError,
 };
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_zkp::{adapter::PolyFp, hal::cpu::SyncSlice};
+use risc0_zkp::{adapter::PolyFp, field::Elem, hal::cpu::SyncSlice};
 
 use crate::CircuitImpl;
 
@@ -45,7 +45,19 @@ impl PolyFp<BabyBear> for CircuitImpl {
         args: &[&[BabyBearElem]],
     ) -> BabyBearExtElem {
         let args: Vec<*const BabyBearElem> = args.iter().map(|x| (*x).as_ptr()).collect();
-        unsafe { risc0_circuit_rv32im_poly_fp(cycle, steps, mix.as_ptr(), args.as_ptr()) }
+        self.ffi_wrap(|err| unsafe {
+            let mut result = BabyBearExtElem::ZERO;
+            risc0_circuit_rv32im_poly_fp(
+                err,
+                cycle,
+                steps,
+                mix.as_ptr(),
+                args.as_ptr(),
+                &mut result,
+            );
+            result
+        })
+        .unwrap()
     }
 }
 
