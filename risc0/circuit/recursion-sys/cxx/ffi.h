@@ -43,6 +43,9 @@ template <typename T, typename F> T ffi_wrap(risc0_error* err, T val, F fn) {
   } catch (const std::exception& ex) {
     err->msg = new risc0_string{ex.what()};
     return val;
+  } catch (...) {
+    err->msg = new risc0_string{"Generic exception"};
+    return val;
   }
 }
 
