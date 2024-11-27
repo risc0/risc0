@@ -365,9 +365,9 @@ void risc0_circuit_rv32im_calc_prefix_products(risc0_error* err, AccumContext* c
   });
 }
 
-uint32_t risc0_circuit_rv32im_poly_fp(
+void risc0_circuit_rv32im_poly_fp(
     risc0_error* err, size_t cycle, size_t steps, FpExt* poly_mix, Fp** args, FpExt* result) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
+  ffi_wrap<uint32_t>(err, 0, [&] {
     *result = circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
     return 0;
   });

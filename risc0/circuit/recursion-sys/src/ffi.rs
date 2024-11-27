@@ -107,7 +107,7 @@ extern "C" {
         poly_mixs: *const BabyBearExtElem,
         args_ptr: *const *const BabyBearElem,
         result: *mut BabyBearExtElem,
-    ) -> u32;
+    );
 }
 
 pub fn get_trampoline<F>(_closure: &F) -> Callback

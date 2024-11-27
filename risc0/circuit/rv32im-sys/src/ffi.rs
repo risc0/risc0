@@ -111,5 +111,5 @@ extern "C" {
         poly_mix: *const BabyBearExtElem,
         args: *const *const BabyBearElem,
         result: *mut BabyBearExtElem,
-    ) -> u32;
+    );
 }
