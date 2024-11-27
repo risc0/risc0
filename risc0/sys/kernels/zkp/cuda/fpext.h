@@ -112,27 +112,27 @@ struct FpExt {
     return result;
   }
 
-  __device__ constexpr FpExt operator+=(Fp rhs) {
-    elems[0] += rhs;
-    return *this;
-  }
+  // __device__ constexpr FpExt operator+=(Fp rhs) {
+  //   elems[0] += rhs;
+  //   return *this;
+  // }
 
-  __device__ constexpr FpExt operator+(Fp rhs) const {
-    FpExt result = *this;
-    result += rhs;
-    return result;
-  }
+  // __device__ constexpr FpExt operator+(Fp rhs) const {
+  //   FpExt result = *this;
+  //   result += rhs;
+  //   return result;
+  // }
 
-  __device__ constexpr FpExt operator-=(Fp rhs) {
-    elems[0] -= rhs;
-    return *this;
-  }
+  // __device__ constexpr FpExt operator-=(Fp rhs) {
+  //   elems[0] -= rhs;
+  //   return *this;
+  // }
 
-  __device__ constexpr FpExt operator-(Fp rhs) const {
-    FpExt result = *this;
-    result -= rhs;
-    return result;
-  }
+  // __device__ constexpr FpExt operator-(Fp rhs) const {
+  //   FpExt result = *this;
+  //   result -= rhs;
+  //   return result;
+  // }
 
   // Now we get to the interesting case of multiplication.  Basically, multiply out the polynomial
   // representations, and then reduce module x^4 - B, which means powers >= 4 get shifted back 4 and
@@ -174,15 +174,15 @@ __device__ constexpr inline FpExt operator*(Fp a, FpExt b) {
   return b * a;
 }
 
-// Commutate the two arguments
-__device__ constexpr inline FpExt operator+(Fp a, FpExt b) {
-  return b + a;
-}
+// // Commutate the two arguments
+// __device__ constexpr inline FpExt operator+(Fp a, FpExt b) {
+//   return b + a;
+// }
 
-// Add negative b
-__device__ constexpr inline FpExt operator-(Fp a, FpExt b) {
-  return a + (-b);
-}
+// // Add negative b
+// __device__ constexpr inline FpExt operator-(Fp a, FpExt b) {
+//   return a + (-b);
+// }
 
 /// Raise an FpExt to a power
 __device__ constexpr inline FpExt pow(FpExt x, size_t n) {
