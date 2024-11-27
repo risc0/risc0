@@ -39,7 +39,7 @@ pub trait Curve<const WIDTH: usize> {
     const CURVE: &'static WeierstrassCurve<WIDTH>;
 }
 
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy)]
 pub enum Secp256k1Curve {}
 
 impl Curve<EC_256_WIDTH_WORDS> for Secp256k1Curve {
@@ -84,15 +84,22 @@ impl WeierstrassCurve<EC_256_WIDTH_WORDS> {
 #[derive(Clone, Debug, Eq, PartialEq, Copy)]
 pub struct AffinePoint<const WIDTH: usize, C> {
     buffer: [[u32; WIDTH]; 2],
+    is_zero: bool,
     _marker: std::marker::PhantomData<C>,
 }
 
 impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
+    pub const IDENTITY: AffinePoint<WIDTH, C> = AffinePoint {
+        buffer: [[0u32; WIDTH]; 2],
+        is_zero: true,
+        _marker: std::marker::PhantomData,
+    };
     /// Constructs an affine point from x and y coordinates, without checking that it is on
     /// a specific curve.
     pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH, C> {
         AffinePoint {
             buffer: [x, y],
+            is_zero: false,
             _marker: std::marker::PhantomData,
         }
     }
@@ -104,24 +111,29 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     pub fn as_u32s(&self) -> &[[u32; WIDTH]; 2] {
         &self.buffer
     }
+
+    pub fn is_zero(&self) -> bool {
+        self.is_zero
+    }
 }
 
 impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
-    pub fn mul(&self, scalar: &[u32; WIDTH], result: &mut AffinePoint<WIDTH, C>) {
+    pub fn mul(&self, scalar: &[u32; WIDTH], result: &mut AffinePoint<WIDTH, C>)
+    where
+        C: Copy,
+    {
         // This assumes `pt` is actually on the curve
         // This assumption isn't checked here, so other code must ensure it's met
         // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
 
-        let curve = C::CURVE.as_u32s();
-
         // Initialize two values to alternate writes to avoid unnecessary copies.
         let mut result_flip = false;
-        let mut result1 = [[0u32; WIDTH]; 2];
-        let mut result2 = [[0u32; WIDTH]; 2];
+        let mut result1 = AffinePoint::IDENTITY;
+        let mut result2 = AffinePoint::IDENTITY;
 
         // Note: the first value can be an uninitialized value.
-        let mut doubled_pt1 = self.buffer;
-        let mut doubled_pt2 = self.buffer;
+        let mut doubled_pt1 = *self;
+        let mut doubled_pt2 = *self;
 
         let mut first_write = true;
         for pos in 0..bits(scalar) {
@@ -146,12 +158,12 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                     first_write = false;
                     *next_result = *current_doubled;
                 } else {
-                    add_raw(current_result, current_doubled, curve, next_result);
+                    current_result.add(current_doubled, next_result);
                 }
                 result_flip = !result_flip;
             }
 
-            double_raw(current_doubled, curve, next_doubled);
+            current_doubled.double(next_doubled);
         }
 
         // Assert that some value was written to the result.
@@ -160,31 +172,60 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         }
 
         // Return the result, based on which buffer was written to last.
-        let result_point = if result_flip { result2 } else { result1 };
-        result.buffer = result_point;
+        *result = if result_flip { result2 } else { result1 };
     }
 
+    // TODO resolve clone/copy bound issue (shoudn't need C to be Copy)
     #[stability::unstable]
-    pub fn double(&self, result: &mut Self) {
+    pub fn double(&self, result: &mut Self)
+    where
+        C: Copy,
+    {
         let curve = C::CURVE;
-        double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+        if self.is_zero {
+            *result = *self;
+        } else {
+            unsafe {
+                double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+            }
+            result.is_zero = false;
+        }
     }
 
     #[stability::unstable]
-    pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
+    pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>)
+    where
+        C: Copy,
+    {
         let curve = C::CURVE;
         // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
         // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
-        add_raw(
-            self.as_u32s(),
-            rhs.as_u32s(),
-            curve.as_u32s(),
-            &mut result.buffer,
-        );
+        if self.is_zero {
+            *result = *rhs;
+        } else if rhs.is_zero {
+            *result = *self;
+        } else if self.buffer[0] == rhs.buffer[0] {
+            if self.buffer[1] != rhs.buffer[1] {
+                result.is_zero = true;
+            } else {
+                unsafe {
+                    double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+                }
+            }
+        } else {
+            unsafe {
+                add_raw(
+                    self.as_u32s(),
+                    rhs.as_u32s(),
+                    curve.as_u32s(),
+                    &mut result.buffer,
+                );
+            }
+        }
     }
 }
 
-fn double_raw<const WIDTH: usize>(
+unsafe fn double_raw<const WIDTH: usize>(
     point: &[[u32; WIDTH]; 2],
     curve: &[[u32; WIDTH]; 3],
     result: &mut [[u32; WIDTH]; 2],
@@ -202,7 +243,7 @@ fn double_raw<const WIDTH: usize>(
     }
 }
 
-fn add_raw<const WIDTH: usize>(
+unsafe fn add_raw<const WIDTH: usize>(
     lhs: &[[u32; WIDTH]; 2],
     rhs: &[[u32; WIDTH]; 2],
     curve: &[[u32; WIDTH]; 3],
