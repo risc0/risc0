@@ -197,7 +197,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.is_zero = false;
             } else {
-                // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
+                // DO NOT REMOVE: in this case a zero has been computed and the buffer is ignored
                 result.is_zero = true;
             }
         }
