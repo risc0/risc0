@@ -101,12 +101,13 @@ extern "C" {
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_recursion_poly_fp(
+        err: *mut RawError,
         cycle: usize,
         steps: usize,
         poly_mixs: *const BabyBearExtElem,
         args_ptr: *const *const BabyBearElem,
-        args_len: usize,
-    ) -> BabyBearExtElem;
+        result: *mut BabyBearExtElem,
+    );
 }
 
 pub fn get_trampoline<F>(_closure: &F) -> Callback
