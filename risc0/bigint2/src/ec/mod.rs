@@ -197,17 +197,15 @@ unsafe fn double_raw<const WIDTH: usize>(
     curve: &[[u32; WIDTH]; 3],
     result: &mut [[u32; WIDTH]; 2],
 ) {
-    unsafe {
-        // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
-        // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
-        // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-        sys_bigint2_3(
-            DOUBLE_BLOB.as_ptr(),
-            point.as_ptr() as *const u32,
-            curve.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
+    // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
+    // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
+    sys_bigint2_3(
+        DOUBLE_BLOB.as_ptr(),
+        point.as_ptr() as *const u32,
+        curve.as_ptr() as *const u32,
+        result.as_mut_ptr() as *mut u32,
+    );
 }
 
 unsafe fn add_raw<const WIDTH: usize>(
@@ -216,18 +214,16 @@ unsafe fn add_raw<const WIDTH: usize>(
     curve: &[[u32; WIDTH]; 3],
     result: &mut [[u32; WIDTH]; 2],
 ) {
-    unsafe {
-        // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
-        // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
-        // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-        sys_bigint2_4(
-            ADD_BLOB.as_ptr(),
-            lhs.as_ptr() as *const u32,
-            rhs.as_ptr() as *const u32,
-            curve.as_ptr() as *const u32,
-            result.as_mut_ptr() as *mut u32,
-        );
-    }
+    // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
+    // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
+    // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
+    sys_bigint2_4(
+        ADD_BLOB.as_ptr(),
+        lhs.as_ptr() as *const u32,
+        rhs.as_ptr() as *const u32,
+        curve.as_ptr() as *const u32,
+        result.as_mut_ptr() as *mut u32,
+    );
 }
 
 /// Checks if the bit at the position is set.
