@@ -18,6 +18,7 @@ anyhow = { version = "1.0", features = ["backtrace"] }
 bincode = "1.3"
 bonsai-sdk = { workspace = true }
 cargo_metadata = { version = "0.18" }
+cargo-platform = "=0.1.8"
 clap = { version = "4.5", features = ["derive", "env"] }
 const_format = "0.2"
 dirs = "5.0"
