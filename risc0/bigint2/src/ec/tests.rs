@@ -75,9 +75,9 @@ fn ec_add_basic() {
         prove_info
             .receipt
             .journal
-            .decode::<([[u32; 8]; 2], bool)>()
+            .decode::<Option<[[u32; 8]; 2]>>()
             .unwrap(),
-        (expected, false)
+        Some(expected)
     );
     tracing::info!("Runtime: {}", elapsed.as_millis());
     tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
@@ -128,9 +128,9 @@ fn ec_double_basic() {
         prove_info
             .receipt
             .journal
-            .decode::<([[u32; 8]; 2], bool)>()
+            .decode::<Option<[[u32; 8]; 2]>>()
             .unwrap(),
-        (expected, false)
+        Some(expected)
     );
     tracing::info!("Runtime: {}", elapsed.as_millis());
     tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
@@ -186,9 +186,9 @@ fn ec_add_point_plus_identity() {
         prove_info
             .receipt
             .journal
-            .decode::<([[u32; 8]; 2], bool)>()
+            .decode::<Option<[[u32; 8]; 2]>>()
             .unwrap(),
-        (point.unwrap(), false)
+        point
     );
 }
 
@@ -223,9 +223,9 @@ fn ec_add_identity_plus_point() {
         prove_info
             .receipt
             .journal
-            .decode::<([[u32; 8]; 2], bool)>()
+            .decode::<Option<[[u32; 8]; 2]>>()
             .unwrap(),
-        (point.unwrap(), false)
+        point
     );
 }
 
@@ -263,9 +263,9 @@ fn ec_add_point_plus_negative() {
         prove_info
             .receipt
             .journal
-            .decode::<([[u32; 8]; 2], bool)>()
+            .decode::<Option<[[u32; 8]; 2]>>()
             .unwrap(),
-        ([[0; 8]; 2], true) // Returns identity point
+        None
     );
 }
 
@@ -290,9 +290,9 @@ fn ec_double_identity() {
         prove_info
             .receipt
             .journal
-            .decode::<([[u32; 8]; 2], bool)>()
+            .decode::<Option<[[u32; 8]; 2]>>()
             .unwrap(),
-        ([[0; 8]; 2], true)
+        None
     );
 }
 
@@ -323,8 +323,8 @@ fn ec_double_point_with_zero_y() {
         prove_info
             .receipt
             .journal
-            .decode::<([[u32; 8]; 2], bool)>()
+            .decode::<Option<[[u32; 8]; 2]>>()
             .unwrap(),
-        ([[0; 8]; 2], true)
+        None
     );
 }

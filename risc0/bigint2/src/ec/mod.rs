@@ -60,13 +60,17 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
             _marker: std::marker::PhantomData,
         }
     }
-    /// The point as concatenated u32s for x and y
+    /// The point as concatenated u32s for x and y. This function returns `None` if the point is at
+    /// zero/infinity and `Some` with the coordinates otherwise.
     ///
     /// Little-endian, x coordinate before y coordinate
-    /// TODO: Where to doc this next bit
     /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
-    pub fn as_u32s(&self) -> &[[u32; WIDTH]; 2] {
-        &self.buffer
+    pub fn as_u32s(&self) -> Option<&[[u32; WIDTH]; 2]> {
+        if self.infinity {
+            None
+        } else {
+            Some(&self.buffer)
+        }
     }
 
     /// Returns true if the point is the identity element (point at zero/infinity).
@@ -136,12 +140,10 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
     pub fn double(&self, result: &mut Self) {
         let curve = C::CURVE;
         // If the point is zero, can short-circuit and return the identity point.
-        if self.infinity {
-            *result = *self;
-        } else {
+        if let Some(point) = self.as_u32s() {
             if self.buffer[1] != [0u32; WIDTH] {
                 unsafe {
-                    double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+                    double_raw(point, curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.infinity = false;
@@ -149,6 +151,8 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                 // DO NOT REMOVE: in this case a zero has been computed and the buffer is ignored
                 result.infinity = true;
             }
+        } else {
+            *result = *self;
         }
     }
 
@@ -158,20 +162,25 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         let curve = C::CURVE;
 
         // If the left or right value is zero, can return the other value.
-        if self.infinity {
+        let Some(lhs) = self.as_u32s() else {
             *result = *rhs;
-        } else if rhs.infinity {
+            return;
+        };
+        let Some(rhs) = rhs.as_u32s() else {
             *result = *self;
-        } else if self.buffer[0] == rhs.buffer[0] {
+            return;
+        };
+
+        if lhs[0] == rhs[0] {
             // X coordinates are the same, so either we double the value if it's the same point,
             // or return the identity if it's different (not on the curve).
-            if self.buffer[1] != rhs.buffer[1] {
+            if self.buffer[1] != rhs[1] {
                 // x == x, y == -y, so the result is the identity point
                 result.infinity = true;
             } else {
                 // P + P, which can be done with a double call.
                 unsafe {
-                    double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+                    double_raw(lhs, curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.infinity = false;
@@ -179,12 +188,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         } else {
             // X coordinates are different, so we can add the points as normal.
             unsafe {
-                add_raw(
-                    self.as_u32s(),
-                    rhs.as_u32s(),
-                    curve.as_u32s(),
-                    &mut result.buffer,
-                );
+                add_raw(lhs, rhs, curve.as_u32s(), &mut result.buffer);
             }
             // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
             result.infinity = false;

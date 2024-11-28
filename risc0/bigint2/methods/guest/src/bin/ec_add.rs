@@ -29,5 +29,5 @@ fn main() {
     let mut result = AffinePoint::<8, Secp256k1Curve>::IDENTITY;
     lhs.add(&rhs, &mut result);
 
-    env::commit(&(result.as_u32s(), result.is_infinity()));
+    env::commit(&result.as_u32s());
 }
