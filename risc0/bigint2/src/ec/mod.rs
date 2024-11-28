@@ -24,9 +24,42 @@ const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
 
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
-mod curve;
+mod secp256k1;
+pub use secp256k1::Secp256k1Curve;
 
-pub use curve::{Curve, Secp256k1Curve, WeierstrassCurve};
+/// Generic static curve configuration.
+pub trait Curve<const WIDTH: usize> {
+    const CURVE: &'static WeierstrassCurve<WIDTH>;
+}
+
+/// An elliptic curve over a prime field
+///
+/// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH` of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so the maximum bitwidth will be `32 * WIDTH`)
+#[derive(Debug, Eq, PartialEq)]
+pub struct WeierstrassCurve<const WIDTH: usize> {
+    // buffer[0] is the prime, buffer[1] is a, buffer[2] is b
+    buffer: [[u32; WIDTH]; 3],
+}
+
+impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
+    // TODO this constructor is prone to misuse, ideal to have named fields
+    pub const fn new(
+        prime: [u32; WIDTH],
+        a: [u32; WIDTH],
+        b: [u32; WIDTH],
+    ) -> WeierstrassCurve<WIDTH> {
+        WeierstrassCurve {
+            buffer: [prime, a, b],
+        }
+    }
+
+    /// The curve as concatenated u32s
+    ///
+    /// Little-endian, prime then a then b
+    pub(crate) fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
+        &self.buffer
+    }
+}
 
 /// An affine point on an elliptic curve.
 #[derive(Debug, Eq, PartialEq)]
@@ -143,7 +176,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         if let Some(point) = self.as_u32s() {
             if self.buffer[1] != [0u32; WIDTH] {
                 unsafe {
-                    double_raw(point, curve.as_u32s(), &mut result.buffer);
+                    double_raw(point, secp256k1.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.infinity = false;
@@ -180,7 +213,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
             } else {
                 // P + P, which can be done with a double call.
                 unsafe {
-                    double_raw(lhs, curve.as_u32s(), &mut result.buffer);
+                    double_raw(lhs, secp256k1.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.infinity = false;
@@ -188,7 +221,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         } else {
             // X coordinates are different, so we can add the points as normal.
             unsafe {
-                add_raw(lhs, rhs, curve.as_u32s(), &mut result.buffer);
+                add_raw(lhs, rhs, secp256k1.as_u32s(), &mut result.buffer);
             }
             // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
             result.infinity = false;

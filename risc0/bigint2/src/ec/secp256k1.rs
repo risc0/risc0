@@ -25,11 +25,6 @@ const SECP256K1_CURVE: &WeierstrassCurve<EC_256_WIDTH_WORDS> =
         [7, 0, 0, 0, 0, 0, 0, 0],
     );
 
-/// Generic static curve configuration.
-pub trait Curve<const WIDTH: usize> {
-    const CURVE: &'static WeierstrassCurve<WIDTH>;
-}
-
 /// An implementation of [Curve] for secp256k1.
 ///
 /// This type should be used as a generic for [AffinePoint].
@@ -38,33 +33,4 @@ pub enum Secp256k1Curve {}
 
 impl Curve<EC_256_WIDTH_WORDS> for Secp256k1Curve {
     const CURVE: &'static WeierstrassCurve<EC_256_WIDTH_WORDS> = SECP256K1_CURVE;
-}
-
-/// An elliptic curve over a prime field
-///
-/// The curve is given in short Weierstrass form y^2 = x^3 + ax + b. It supports a maximum `WIDTH` of its prime (and hence all coefficients and coordinates) given as number of 32-bit words (so the maximum bitwidth will be `32 * WIDTH`)
-#[derive(Debug, Eq, PartialEq)]
-pub struct WeierstrassCurve<const WIDTH: usize> {
-    // buffer[0] is the prime, buffer[1] is a, buffer[2] is b
-    buffer: [[u32; WIDTH]; 3],
-}
-
-impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
-    // TODO this constructor is prone to misuse, ideal to have named fields
-    pub const fn new(
-        prime: [u32; WIDTH],
-        a: [u32; WIDTH],
-        b: [u32; WIDTH],
-    ) -> WeierstrassCurve<WIDTH> {
-        WeierstrassCurve {
-            buffer: [prime, a, b],
-        }
-    }
-
-    /// The curve as concatenated u32s
-    ///
-    /// Little-endian, prime then a then b
-    pub(crate) fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
-        &self.buffer
-    }
 }
