@@ -176,7 +176,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         if let Some(point) = self.as_u32s() {
             if self.buffer[1] != [0u32; WIDTH] {
                 unsafe {
-                    double_raw(point, secp256k1.as_u32s(), &mut result.buffer);
+                    double_raw(point, curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.infinity = false;
@@ -213,7 +213,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
             } else {
                 // P + P, which can be done with a double call.
                 unsafe {
-                    double_raw(lhs, secp256k1.as_u32s(), &mut result.buffer);
+                    double_raw(lhs, curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.infinity = false;
@@ -221,7 +221,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         } else {
             // X coordinates are different, so we can add the points as normal.
             unsafe {
-                add_raw(lhs, rhs, secp256k1.as_u32s(), &mut result.buffer);
+                add_raw(lhs, rhs, curve.as_u32s(), &mut result.buffer);
             }
             // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
             result.infinity = false;

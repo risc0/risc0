@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::EC_256_WIDTH_WORDS;
+use super::{Curve, WeierstrassCurve, EC_256_WIDTH_WORDS};
 
 /// The secp256k1 curve's prime as u32 digits, least significant digit first
 const SECP256K1_PRIME: [u32; EC_256_WIDTH_WORDS] = [
