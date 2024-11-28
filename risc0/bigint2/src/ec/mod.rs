@@ -32,7 +32,7 @@ pub use curve::{Curve, Secp256k1Curve, WeierstrassCurve};
 #[derive(Debug, Eq, PartialEq)]
 pub struct AffinePoint<const WIDTH: usize, C> {
     buffer: [[u32; WIDTH]; 2],
-    is_zero: bool,
+    infinity: bool,
     _marker: std::marker::PhantomData<C>,
 }
 
@@ -47,7 +47,7 @@ impl<const WIDTH: usize, C> Copy for AffinePoint<WIDTH, C> {}
 impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     pub const IDENTITY: AffinePoint<WIDTH, C> = AffinePoint {
         buffer: [[0u32; WIDTH]; 2],
-        is_zero: true,
+        infinity: true,
         _marker: std::marker::PhantomData,
     };
 
@@ -56,7 +56,7 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH, C> {
         AffinePoint {
             buffer: [x, y],
-            is_zero: false,
+            infinity: false,
             _marker: std::marker::PhantomData,
         }
     }
@@ -70,8 +70,8 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     }
 
     /// Returns true if the point is the identity element (point at zero/infinity).
-    pub fn is_zero(&self) -> bool {
-        self.is_zero
+    pub fn is_infinity(&self) -> bool {
+        self.infinity
     }
 }
 
@@ -136,7 +136,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
     pub fn double(&self, result: &mut Self) {
         let curve = C::CURVE;
         // If the point is zero, can short-circuit and return the identity point.
-        if self.is_zero {
+        if self.infinity {
             *result = *self;
         } else {
             if self.buffer[1] != [0u32; WIDTH] {
@@ -144,10 +144,10 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                     double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
-                result.is_zero = false;
+                result.infinity = false;
             } else {
                 // DO NOT REMOVE: in this case a zero has been computed and the buffer is ignored
-                result.is_zero = true;
+                result.infinity = true;
             }
         }
     }
@@ -158,23 +158,23 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         let curve = C::CURVE;
 
         // If the left or right value is zero, can return the other value.
-        if self.is_zero {
+        if self.infinity {
             *result = *rhs;
-        } else if rhs.is_zero {
+        } else if rhs.infinity {
             *result = *self;
         } else if self.buffer[0] == rhs.buffer[0] {
             // X coordinates are the same, so either we double the value if it's the same point,
             // or return the identity if it's different (not on the curve).
             if self.buffer[1] != rhs.buffer[1] {
                 // x == x, y == -y, so the result is the identity point
-                result.is_zero = true;
+                result.infinity = true;
             } else {
                 // P + P, which can be done with a double call.
                 unsafe {
                     double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
-                result.is_zero = false;
+                result.infinity = false;
             }
         } else {
             // X coordinates are different, so we can add the points as normal.
@@ -187,7 +187,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                 );
             }
             // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
-            result.is_zero = false;
+            result.infinity = false;
         }
     }
 }
