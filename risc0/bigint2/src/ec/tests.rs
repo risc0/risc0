@@ -154,3 +154,177 @@ fn ec_mul() {
     tracing::info!("Runtime: {}", elapsed.as_millis());
     tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
 }
+
+#[test]
+fn ec_add_point_plus_identity() {
+    let point: Option<[[u32; 8]; 2]> = Some([
+        [
+            0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
+            0x79be667e,
+        ],
+        [
+            0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
+            0x483ada77,
+        ],
+    ]);
+    let identity: Option<[[u32; 8]; 2]> = None;
+
+    let env = ExecutorEnv::builder()
+        .write(&(point, identity))
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    assert_eq!(
+        prove_info
+            .receipt
+            .journal
+            .decode::<([[u32; 8]; 2], bool)>()
+            .unwrap(),
+        (point.unwrap(), false)
+    );
+}
+
+#[test]
+fn ec_add_identity_plus_point() {
+    let point: Option<[[u32; 8]; 2]> = Some([
+        [
+            0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
+            0x79be667e,
+        ],
+        [
+            0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
+            0x483ada77,
+        ],
+    ]);
+    let identity: Option<[[u32; 8]; 2]> = None;
+
+    let env = ExecutorEnv::builder()
+        .write(&(identity, point))
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    assert_eq!(
+        prove_info
+            .receipt
+            .journal
+            .decode::<([[u32; 8]; 2], bool)>()
+            .unwrap(),
+        (point.unwrap(), false)
+    );
+}
+
+#[test]
+fn ec_add_point_plus_negative() {
+    let point: Option<[[u32; 8]; 2]> = Some([
+        [
+            0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
+            0x79be667e,
+        ],
+        [
+            0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465,
+            0x483ada77,
+        ],
+    ]);
+    let neg_point: Option<[[u32; 8]; 2]> = Some([
+        point.unwrap()[0], // Same x coordinate
+        [0; 8],            // Different y coordinate (using 0 for simplicity)
+    ]);
+
+    let env = ExecutorEnv::builder()
+        .write(&(point, neg_point))
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, EC_ADD_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    assert_eq!(
+        prove_info
+            .receipt
+            .journal
+            .decode::<([[u32; 8]; 2], bool)>()
+            .unwrap(),
+        ([[0; 8]; 2], true) // Returns identity point
+    );
+}
+
+#[test]
+fn ec_double_identity() {
+    let identity: Option<[[u32; 8]; 2]> = None;
+
+    let env = ExecutorEnv::builder()
+        .write(&identity)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, EC_DOUBLE_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    assert_eq!(
+        prove_info
+            .receipt
+            .journal
+            .decode::<([[u32; 8]; 2], bool)>()
+            .unwrap(),
+        ([[0; 8]; 2], true)
+    );
+}
+
+#[test]
+fn ec_double_point_with_zero_y() {
+    let point_with_zero_y: Option<[[u32; 8]; 2]> = Some([
+        [
+            0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac,
+            0x79be667e,
+        ],
+        [0; 8], // y = 0
+    ]);
+
+    let env = ExecutorEnv::builder()
+        .write(&point_with_zero_y)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, EC_DOUBLE_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    assert_eq!(
+        prove_info
+            .receipt
+            .journal
+            .decode::<([[u32; 8]; 2], bool)>()
+            .unwrap(),
+        ([[0; 8]; 2], true)
+    );
+}
