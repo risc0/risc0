@@ -15,12 +15,18 @@
 use risc0_bigint2::ec::{AffinePoint, Secp256k1Curve};
 use risc0_zkvm::guest::env;
 
-fn main() {
-    let (lhs, rhs): ([[u32; 8]; 2], [[u32; 8]; 2]) = env::read();
-    let lhs = AffinePoint::new_unchecked(lhs[0], lhs[1]);
-    let rhs = AffinePoint::new_unchecked(rhs[0], rhs[1]);
+fn input_point() -> AffinePoint<8, Secp256k1Curve> {
+    let point: Option<[[u32; 8]; 2]> = env::read();
+    point
+        .map(|[x, y]| AffinePoint::new_unchecked(x, y))
+        .unwrap_or(AffinePoint::IDENTITY)
+}
 
-    let mut result = AffinePoint::<8, Secp256k1Curve>::new_unchecked([0u32; 8], [0u32; 8]);
+fn main() {
+    let lhs = input_point();
+    let rhs = input_point();
+
+    let mut result = AffinePoint::<8, Secp256k1Curve>::IDENTITY;
     lhs.add(&rhs, &mut result);
 
     env::commit(&(result.as_u32s(), result.is_zero()));
