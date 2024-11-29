@@ -153,7 +153,7 @@ fn create_dockerfile(
     .concat()
     .join(" ");
 
-    let build = DockerFile::new()
+    let mut build = DockerFile::new()
         .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
         .workdir("/src")
         .copy(".", ".")
@@ -164,7 +164,25 @@ fn create_dockerfile(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
         )])
-        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
+        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
+
+    let compile_time_env = guest_opts
+        .use_docker
+        .clone()
+        .expect("use_docker is None")
+        .compile_time_env
+        .unwrap_or_default();
+
+    let compile_time_env = compile_time_env
+        .iter()
+        .map(|(k, v)| (k.as_str(), v.as_str()))
+        .collect::<Vec<_>>();
+
+    if !compile_time_env.is_empty() {
+        build = build.env(&compile_time_env);
+    }
+
+    build = build
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)
