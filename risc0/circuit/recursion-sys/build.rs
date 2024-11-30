@@ -52,7 +52,7 @@ fn build_cuda_kernels() {
             "kernels/cuda/step_compute_accum.cu",
             "kernels/cuda/step_verify_accum.cu",
         ])
-        .deps(["kernels/cuda/kernels.h"])
+        .deps(["kernels/cuda"])
         .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
         .include(env::var("DEP_SPPARK_ROOT").unwrap())
         .compile("risc0_recursion_cuda");
