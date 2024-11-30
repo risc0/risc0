@@ -154,6 +154,7 @@ impl KernelBuild {
         println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=RISC0_CUDART_LINKAGE");
+        println!("cargo:rerun-if-env-changed=NVCC_CCBIN");
 
         for inc_dir in self.inc_dirs.iter() {
             rerun_if_changed(inc_dir);
@@ -202,8 +203,15 @@ impl KernelBuild {
             .flag("-Xcudafe")
             .flag("--display_error_number")
             .flag("-Xcompiler")
-            .flag("-Wno-missing-braces,-Wno-unused-function")
-            .compile(output);
+            .flag("-Wno-missing-braces,-Wno-unused-function");
+
+        let custom_cc_bin = env::var("NVCC_CCBIN");
+
+        if let Ok(cc_bin) = custom_cc_bin {
+            build.flag(&format!("-ccbin={}", cc_bin));
+        }
+
+        build.compile(output);
     }
 
     fn compile_metal(&mut self, output: &str) {
