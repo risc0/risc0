@@ -254,13 +254,7 @@ impl Server {
             .ok_or(malformed_err())?
             .try_into()
             .map_err(|err: semver::Error| anyhow!(err))?;
-
-        #[cfg(not(feature = "r0vm-ver-compat"))]
-        let check_client_func = check_client_version;
-        #[cfg(feature = "r0vm-ver-compat")]
-        let check_client_func = check_client_version_compat;
-
-        if !check_client_func(&client_version, &server_version) {
+        if !check_client_version(&client_version, &server_version) {
             let msg = format!(
                 "incompatible client version: {client_version}, server version: {server_version}"
             );
@@ -802,7 +796,6 @@ impl pb::api::Asset {
     }
 }
 
-#[allow(dead_code)]
 fn check_client_version(client: &semver::Version, server: &semver::Version) -> bool {
     if server.pre.is_empty() {
         let comparator = semver::Comparator {
@@ -818,18 +811,13 @@ fn check_client_version(client: &semver::Version, server: &semver::Version) -> b
     }
 }
 
-#[allow(dead_code)]
-fn check_client_version_compat(client: &semver::Version, server: &semver::Version) -> bool {
-    client.major == server.major
-}
-
 #[cfg(feature = "redis")]
 fn execute_redis(
     conn: &mut ConnectionWrapper,
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<Session> {
-    use redis::{Client, Commands, ConnectionLike, SetExpiry, SetOptions};
+    use redis::{Client, Commands, SetExpiry, SetOptions};
     use std::{
         sync::{
             mpsc::{sync_channel, Receiver},
@@ -861,27 +849,11 @@ fn execute_redis(
                 .get_connection()
                 .context("Failed to get redis connection")?;
             while let Ok((segment_key, segment)) = receiver.recv() {
-                if !connection.is_open() {
-                    connection = client
-                        .get_connection()
-                        .context("Failed to get redis connection")?;
-                }
                 let segment_bytes =
                     bincode::serialize(&segment).context("Failed to deserialize segment")?;
-                match connection.set_options(segment_key.clone(), segment_bytes.clone(), opts) {
-                    Ok(()) => (),
-                    Err(err) => {
-                        tracing::warn!(
-                            "Failed to set redis key with TTL, trying again. Error: {err}"
-                        );
-                        connection = client
-                            .get_connection()
-                            .context("Failed to get redis connection")?;
-                        let _: () = connection
-                            .set_options(segment_key.clone(), segment_bytes, opts)
-                            .context("Failed to set redis key with TTL again")?;
-                    }
-                };
+                let _: () = connection
+                    .set_options(segment_key.clone(), segment_bytes, opts)
+                    .context("Failed to set redis key with TTL")?;
                 let asset = pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Redis(segment_key)),
                 };
@@ -902,13 +874,7 @@ fn execute_redis(
             let mut redis_err_opt = redis_err.lock().unwrap();
             let redis_err_inner = redis_err_opt.take();
             return Err(match redis_err_inner {
-                Some(redis_thread_err) => {
-                    tracing::error!(
-                        "Redis err: {redis_thread_err} root: {:?}",
-                        redis_thread_err.root_cause()
-                    );
-                    anyhow!(redis_thread_err)
-                }
+                Some(redis_thread_err) => anyhow!(redis_thread_err),
                 None => send_err.into(),
             });
         }
@@ -976,19 +942,15 @@ fn send_segment_done_msg(
 mod tests {
     use semver::Version;
 
-    use super::{check_client_version, check_client_version_compat};
-
-    fn test_inner(check_func: fn(&Version, &Version) -> bool, client: &str, server: &str) -> bool {
-        check_func(
-            &Version::parse(client).unwrap(),
-            &Version::parse(server).unwrap(),
-        )
-    }
+    use super::check_client_version;
 
     #[test]
     fn check_version() {
         fn test(client: &str, server: &str) -> bool {
-            test_inner(check_client_version, client, server)
+            check_client_version(
+                &Version::parse(client).unwrap(),
+                &Version::parse(server).unwrap(),
+            )
         }
 
         assert!(test("0.18.0", "0.18.0"));
@@ -997,24 +959,11 @@ mod tests {
         assert!(test("0.19.0", "0.18.0"));
         assert!(test("1.0.0", "0.18.0"));
         assert!(test("1.1.0", "1.0.0"));
-        assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
 
-        assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
         assert!(!test("0.18.0", "0.19.0"));
         assert!(!test("0.18.0", "1.0.0"));
-    }
 
-    #[test]
-    fn check_version_compat() {
-        fn test(client: &str, server: &str) -> bool {
-            test_inner(check_client_version_compat, client, server)
-        }
-
-        assert!(test("1.1.0", "1.1.0"));
-        assert!(test("1.1.1", "1.1.1"));
-        assert!(test("1.2.0", "1.1.1"));
-        assert!(test("1.2.0-rc.1", "1.1.1"));
-
-        assert!(!test("2.0.0", "1.1.1"));
+        assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
+        assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
     }
 }

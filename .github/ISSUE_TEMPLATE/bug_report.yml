@@ -29,7 +29,7 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
-      description: Provide a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example) the steps that led to the discovery of the issue.
+      description: Provide a [minimal reporducable example](https://stackoverflow.com/help/minimal-reproducible-example) the steps that led to the discovery of the issue.
       # placeholder: Describe what you were doing so we can reproduce the problem.
     validations:
       required: true

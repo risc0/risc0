@@ -200,7 +200,6 @@ pub struct PolyExtStepDef {
 #[derive(Debug)]
 pub enum PolyExtStep {
     Const(u32),
-    ConstExt(u32, u32, u32, u32),
     Get(usize),
     GetGlobal(Arg, usize),
     Add(Var, Var),
@@ -226,11 +225,6 @@ impl PolyExtStep {
                 let elem = F::Elem::from_u64(*value as u64);
                 trace_if_enabled!("[{}] {self:?} -> {elem:?}", fp_vars.len());
                 fp_vars.push(F::ExtElem::from_subfield(&elem));
-            }
-            PolyExtStep::ConstExt(x0, x1, x2, x3) => {
-                let elem = F::ExtElem::from_u32_words(&[*x0, *x1, *x2, *x3]);
-                trace_if_enabled!("[{}] {self:?} -> {elem:?}", fp_vars.len());
-                fp_vars.push(elem);
             }
             PolyExtStep::Get(tap) => {
                 let val = u[*tap];

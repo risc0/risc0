@@ -37,7 +37,6 @@
 
 #include <array>
 #include <cstdint>
-#include <exception>
 
 using namespace risc0;
 using namespace risc0::circuit::rv32im;
@@ -365,12 +364,12 @@ void risc0_circuit_rv32im_calc_prefix_products(risc0_error* err, AccumContext* c
   });
 }
 
-void risc0_circuit_rv32im_poly_fp(
-    risc0_error* err, size_t cycle, size_t steps, FpExt* poly_mix, Fp** args, FpExt* result) {
-  ffi_wrap<uint32_t>(err, 0, [&] {
-    *result = circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
-    return 0;
-  });
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+#endif
+
+FpExt risc0_circuit_rv32im_poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
+  return circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
 }
 
 const char* risc0_circuit_string_ptr(risc0_string* str) {

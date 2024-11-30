@@ -71,7 +71,7 @@ impl Executor for LocalProver {
             segments,
             journal: session.journal.unwrap_or_default(),
             exit_code: session.exit_code,
-            receipt_claim: Some(receipt_claim),
+            receipt_claim,
         })
     }
 }

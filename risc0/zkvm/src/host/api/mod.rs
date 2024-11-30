@@ -405,7 +405,7 @@ pub struct SessionInfo {
 
     /// The [ReceiptClaim] associated with the executed session. This receipt claim is what will be
     /// proven if this session is passed to the Prover.
-    pub receipt_claim: Option<ReceiptClaim>,
+    pub receipt_claim: ReceiptClaim,
 }
 
 impl SessionInfo {

@@ -29,7 +29,7 @@ fs2 = "0.4"
 fs_extra = "1.3.0"
 hex = "0.4"
 human-repr = { version = "1.0", features = ["1024"] }
-regex = "1.11.1"
+regex = "1.11.0"
 reqwest = { version = "0.12", default-features = false, features = [
   "json",
   "rustls-tls",
@@ -79,4 +79,3 @@ experimental = [
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
 redis = ["risc0-zkvm/redis"]
-r0vm-ver-compat = ["risc0-r0vm/r0vm-ver-compat"]
