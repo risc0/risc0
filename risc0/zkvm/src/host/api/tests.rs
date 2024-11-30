@@ -462,7 +462,7 @@ fn coprocessor_handler() {
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 #[cfg(feature = "redis")]
 async fn redis_asset() {
     let url = "127.0.0.1:6379";
@@ -490,4 +490,27 @@ async fn redis_asset() {
         }),
     )
     .await;
+}
+
+#[test(tokio::test)]
+#[cfg(feature = "redis")]
+#[ignore]
+// Extra test to talk to a real redis instance, doing heavier exec work for manual testing.
+// Ignored for manual testing
+async fn redis_asset_external_node() {
+    let url = "127.0.0.1:6379";
+    let redis_params = super::RedisParams {
+        url: format!("redis://{url}"),
+        key: "key".to_string(),
+        ttl: 180,
+    };
+
+    let binary = Asset::Inline(MULTI_TEST_ELF.into());
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles: 1000000000 })
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut client = TestClient::new();
+    let _session_info = client.execute_redis(env, binary, redis_params);
 }

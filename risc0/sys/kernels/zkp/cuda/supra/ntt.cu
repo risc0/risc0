@@ -24,6 +24,8 @@ extern "C" RustError::by_value sppark_init() {
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
@@ -51,6 +53,8 @@ extern "C" RustError::by_value sppark_batch_expand(
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
@@ -81,6 +85,8 @@ sppark_batch_NTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
@@ -111,6 +117,8 @@ sppark_batch_iNTT(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_count) {
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
@@ -136,6 +144,8 @@ sppark_batch_zk_shift(fr_t* d_inout, uint32_t lg_domain_size, uint32_t poly_coun
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
