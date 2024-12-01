@@ -198,20 +198,14 @@ impl KernelBuild {
             .cuda(true)
             .cudart(&cudart)
             .debug(false)
+            .ccbin(false)
             .flag("-diag-suppress=177")
             .flag("-diag-suppress=2922")
             .flag("-Xcudafe")
             .flag("--display_error_number")
             .flag("-Xcompiler")
-            .flag("-Wno-missing-braces,-Wno-unused-function");
-
-        let custom_cc_bin = env::var("NVCC_CCBIN");
-
-        if let Ok(cc_bin) = custom_cc_bin {
-            build.flag(&format!("-ccbin={}", cc_bin));
-        }
-
-        build.compile(output);
+            .flag("-Wno-missing-braces,-Wno-unused-function")
+            .compile(output);
     }
 
     fn compile_metal(&mut self, output: &str) {
