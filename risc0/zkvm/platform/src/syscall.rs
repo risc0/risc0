@@ -542,7 +542,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
 /// varies from POSIX semantics.  Notably:
 ///
 /// * The read length is specified in words, not bytes.  (The output
-/// length is still returned in bytes)
+///   length is still returned in bytes)
 ///
 /// * If not all data is available, `sys_read_words` will return a short read.
 ///
