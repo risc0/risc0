@@ -13,7 +13,7 @@ release = false
 [dependencies]
 anyhow = "1.0.93"
 cfg-if = "1.0.0"
-clap = { version = "4.5.20", features = ["derive"] }
+clap = { version = "4.5.21", features = ["derive"] }
 dirs = "5.0.1"
 downloader = "0.2.8"
 flate2 = "1.0.34"
