@@ -118,7 +118,7 @@ jobs:
       - examples
       - docker
       - test
-      # - test-crates
+      - test-crates
       - web
     runs-on: ubuntu-latest
     steps:
