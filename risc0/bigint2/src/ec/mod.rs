@@ -204,7 +204,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
 
         if lhs[0] == rhs[0] {
             // X coordinates are the same, so either we double the value if it's the same point,
-            // or return the identity if it's different (not on the curve).
+            // or return the identity if it's different (and so lhs = -rhs).
             if self.buffer[1] != rhs[1] {
                 // x == x, y == -y, so the result is the identity point
                 result.identity = true;
