@@ -16,7 +16,7 @@ use std::process::Command;
 
 #[test]
 fn test_waldo() {
-    if cfg!(feature = "cuda") {
+    let feature = if cfg!(feature = "cuda") {
         "cuda"
     } else {
         "default"
