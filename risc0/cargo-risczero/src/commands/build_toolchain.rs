@@ -76,7 +76,7 @@ impl BuildToolchain {
             let tool = tool?;
             let tool_name = tool.file_name();
             eprintln!("copy tool: {tool_name:?}");
-            std::fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+            std::fs::copy(tool.path(), target_bin_dir.join(tool_name))?;
         }
 
         RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &out.toolchain_dir)?;
