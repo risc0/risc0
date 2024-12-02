@@ -159,8 +159,8 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
             current_doubled.double(next_doubled);
         }
 
-        // Assert that some value was written to the result.
         if first_write {
+            // Multiplied by zero, which is the identity point.
             *result = AffinePoint::IDENTITY;
         } else {
             // Return the result, based on which buffer was written to last.
