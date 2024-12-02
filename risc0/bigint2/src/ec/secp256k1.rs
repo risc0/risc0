@@ -15,7 +15,7 @@
 use super::{Curve, WeierstrassCurve, EC_256_WIDTH_WORDS};
 
 /// The secp256k1 curve's prime as u32 digits, least significant digit first
-const SECP256K1_PRIME: [u32; EC_256_WIDTH_WORDS] = [
+pub(crate) const SECP256K1_PRIME: [u32; EC_256_WIDTH_WORDS] = [
     0xFFFFFC2F, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
 ];
 const SECP256K1_CURVE: &WeierstrassCurve<EC_256_WIDTH_WORDS> =

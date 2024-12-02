@@ -19,6 +19,8 @@ use risc0_zkvm::{
 use std::time::Instant;
 use test_log::test;
 
+use crate::ec::secp256k1::SECP256K1_PRIME;
+
 #[test]
 fn ec_add_basic() {
     let lhs: Option<[[u32; 8]; 2]> = Some([
@@ -241,10 +243,16 @@ fn ec_add_point_plus_negative() {
             0x483ada77,
         ],
     ]);
-    let neg_point: Option<[[u32; 8]; 2]> = Some([
-        point.unwrap()[0], // Same x coordinate
-        [0; 8],            // Different y coordinate (using 0 for simplicity)
-    ]);
+    let x = point.unwrap()[0];
+    let neg_y = {
+        let mut y = point.unwrap()[1];
+        for i in 0..8 {
+            // Ignoring carries for this test case.
+            y[i] = SECP256K1_PRIME[i] - y[i];
+        }
+        y
+    };
+    let neg_point: Option<[[u32; 8]; 2]> = Some([x, neg_y]);
 
     let env = ExecutorEnv::builder()
         .write(&(point, neg_point))
