@@ -65,7 +65,7 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
 #[derive(Debug, Eq, PartialEq)]
 pub struct AffinePoint<const WIDTH: usize, C> {
     buffer: [[u32; WIDTH]; 2],
-    infinity: bool,
+    identity: bool,
     _marker: std::marker::PhantomData<C>,
 }
 
@@ -80,7 +80,7 @@ impl<const WIDTH: usize, C> Copy for AffinePoint<WIDTH, C> {}
 impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     pub const IDENTITY: AffinePoint<WIDTH, C> = AffinePoint {
         buffer: [[0u32; WIDTH]; 2],
-        infinity: true,
+        identity: true,
         _marker: std::marker::PhantomData,
     };
 
@@ -89,7 +89,7 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH, C> {
         AffinePoint {
             buffer: [x, y],
-            infinity: false,
+            identity: false,
             _marker: std::marker::PhantomData,
         }
     }
@@ -99,7 +99,7 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     /// Little-endian, x coordinate before y coordinate
     /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
     pub fn as_u32s(&self) -> Option<&[[u32; WIDTH]; 2]> {
-        if self.infinity {
+        if self.identity {
             None
         } else {
             Some(&self.buffer)
@@ -107,8 +107,8 @@ impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
     }
 
     /// Returns true if the point is the identity element (point at zero/infinity).
-    pub fn is_infinity(&self) -> bool {
-        self.infinity
+    pub fn is_identity(&self) -> bool {
+        self.identity
     }
 }
 
@@ -179,10 +179,10 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                     double_raw(point, curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
-                result.infinity = false;
+                result.identity = false;
             } else {
                 // DO NOT REMOVE: in this case a zero has been computed and the buffer is ignored
-                result.infinity = true;
+                result.identity = true;
             }
         } else {
             *result = *self;
@@ -209,14 +209,14 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
             // or return the identity if it's different (not on the curve).
             if self.buffer[1] != rhs[1] {
                 // x == x, y == -y, so the result is the identity point
-                result.infinity = true;
+                result.identity = true;
             } else {
                 // P + P, which can be done with a double call.
                 unsafe {
                     double_raw(lhs, curve.as_u32s(), &mut result.buffer);
                 }
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
-                result.infinity = false;
+                result.identity = false;
             }
         } else {
             // X coordinates are different, so we can add the points as normal.
@@ -224,7 +224,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                 add_raw(lhs, rhs, curve.as_u32s(), &mut result.buffer);
             }
             // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
-            result.infinity = false;
+            result.identity = false;
         }
     }
 }
