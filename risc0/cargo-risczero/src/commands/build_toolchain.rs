@@ -39,6 +39,9 @@ pub struct BuildToolchain {
 
 /// Output info of a successful rust toolchain build.
 pub struct RustBuildOutput {
+    // NOTE: target is currently unused, and the code loops over files in the build directory
+    // instead. Is this something that should be changed?
+    #[allow(dead_code)]
     pub target: String,
     pub toolchain_dir: PathBuf,
 }
