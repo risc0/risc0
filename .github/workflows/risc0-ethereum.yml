@@ -122,7 +122,7 @@ jobs:
         run: python -m pip install --upgrade toml
       - name: Install risczero toolchain
         run: |
-          cargo install --force --path risc0/cargo-risczero
+          cargo install --locked --force --path risc0/cargo-risczero
           cargo run --bin rzup -- --verbose install rust $RISC0_RUST_TOOLCHAIN_VERSION
           cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         working-directory: risc0
