@@ -161,11 +161,11 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
 
         // Assert that some value was written to the result.
         if first_write {
-            panic!("Multiplication by zero forbidden as affine coordinates can't represent the point at infinity");
+            *result = AffinePoint::IDENTITY;
+        } else {
+            // Return the result, based on which buffer was written to last.
+            *result = if result_flip { result2 } else { result1 };
         }
-
-        // Return the result, based on which buffer was written to last.
-        *result = if result_flip { result2 } else { result1 };
     }
 
     /// Elliptic curve doubling of the affine point.
