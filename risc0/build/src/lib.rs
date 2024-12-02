@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(clippy::needless_doctest_main)]
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
@@ -773,7 +774,7 @@ fn do_embed_methods<G: GuestBuilder>(
                 &guest_build_opts,
             )
             .unwrap();
-            guest_methods_docker(&guest_pkg, &get_out_dir())
+            guest_methods_docker(&guest_pkg, get_out_dir())
         } else {
             let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
             build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);

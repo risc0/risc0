@@ -18,7 +18,7 @@
 //!
 //! 1. Conjectured soundness using the Toy Problem Conjecture from ethSTARK
 //! 2. Conjectured soundness using Conjecture 8.4 from [Proximity Gaps] and
-//!   Conjecture 2.3 from [DEEP-FRI]
+//!    Conjecture 2.3 from [DEEP-FRI]
 //! 3. Proven soundness in the list-decoding regime
 //! 4. Proven soundness in the unique-decoding regime
 //!
