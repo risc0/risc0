@@ -175,9 +175,7 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         // If the point is zero, can short-circuit and return the identity point.
         if let Some(point) = self.as_u32s() {
             if self.buffer[1] != [0u32; WIDTH] {
-                unsafe {
-                    double_raw(point, curve.as_u32s(), &mut result.buffer);
-                }
+                double_raw(point, curve.as_u32s(), &mut result.buffer);
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.identity = false;
             } else {
@@ -212,24 +210,24 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
                 result.identity = true;
             } else {
                 // P + P, which can be done with a double call.
-                unsafe {
-                    double_raw(lhs, curve.as_u32s(), &mut result.buffer);
-                }
+                double_raw(lhs, curve.as_u32s(), &mut result.buffer);
                 // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
                 result.identity = false;
             }
         } else {
             // X coordinates are different, so we can add the points as normal.
-            unsafe {
-                add_raw(lhs, rhs, curve.as_u32s(), &mut result.buffer);
-            }
+            add_raw(lhs, rhs, curve.as_u32s(), &mut result.buffer);
             // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
             result.identity = false;
         }
     }
 }
 
-unsafe fn double_raw<const WIDTH: usize>(
+/// Doubles a point on the curve.
+///
+/// Note: this function assumes that identity point cases are handled before calling, otherwise
+/// this function will panic in the host.
+fn double_raw<const WIDTH: usize>(
     point: &[[u32; WIDTH]; 2],
     curve: &[[u32; WIDTH]; 3],
     result: &mut [[u32; WIDTH]; 2],
@@ -237,15 +235,21 @@ unsafe fn double_raw<const WIDTH: usize>(
     // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
     // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
     // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-    sys_bigint2_3(
-        DOUBLE_BLOB.as_ptr(),
-        point.as_ptr() as *const u32,
-        curve.as_ptr() as *const u32,
-        result.as_mut_ptr() as *mut u32,
-    );
+    unsafe {
+        sys_bigint2_3(
+            DOUBLE_BLOB.as_ptr(),
+            point.as_ptr() as *const u32,
+            curve.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
 }
 
-unsafe fn add_raw<const WIDTH: usize>(
+/// Adds two points on the curve.
+///
+/// Note: this function assumes that identity point cases are handled before calling, otherwise
+/// this function will panic in the host.
+fn add_raw<const WIDTH: usize>(
     lhs: &[[u32; WIDTH]; 2],
     rhs: &[[u32; WIDTH]; 2],
     curve: &[[u32; WIDTH]; 3],
@@ -254,13 +258,15 @@ unsafe fn add_raw<const WIDTH: usize>(
     // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
     // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
     // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
-    sys_bigint2_4(
-        ADD_BLOB.as_ptr(),
-        lhs.as_ptr() as *const u32,
-        rhs.as_ptr() as *const u32,
-        curve.as_ptr() as *const u32,
-        result.as_mut_ptr() as *mut u32,
-    );
+    unsafe {
+        sys_bigint2_4(
+            ADD_BLOB.as_ptr(),
+            lhs.as_ptr() as *const u32,
+            rhs.as_ptr() as *const u32,
+            curve.as_ptr() as *const u32,
+            result.as_mut_ptr() as *mut u32,
+        );
+    }
 }
 
 /// Checks if the bit at the position is set.
