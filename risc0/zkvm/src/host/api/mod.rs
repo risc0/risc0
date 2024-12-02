@@ -254,11 +254,10 @@ impl Connector for ParentProcessConnector {
         });
 
         let stream = rx.recv_timeout(CONNECT_TIMEOUT);
-        let stream = stream.map_err(|err| {
+        let stream = stream.inspect_err(|_| {
             shutdown.store(true, Ordering::Relaxed);
             let _ = TcpStream::connect(addr);
             handle.join().unwrap();
-            err
         })?;
 
         Ok(ConnectionWrapper::new(Arc::new(Mutex::new(

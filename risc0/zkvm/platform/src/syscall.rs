@@ -542,7 +542,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
 /// varies from POSIX semantics.  Notably:
 ///
 /// * The read length is specified in words, not bytes.  (The output
-/// length is still returned in bytes)
+///   length is still returned in bytes)
 ///
 /// * If not all data is available, `sys_read_words` will return a short read.
 ///
@@ -895,8 +895,7 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 /// `control_id` must be aligned and dereferenceable.
 ///
 /// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_zkr(
     claim_digest: *const [u32; DIGEST_WORDS],
@@ -931,8 +930,7 @@ pub unsafe extern "C" fn sys_prove_zkr(
 /// invoked during `hasher.finalize(...)`
 ///
 /// # Safety
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_keccak(
     input_ptr: *const u8,
@@ -961,8 +959,7 @@ pub unsafe extern "C" fn sys_keccak(
 /// `control_root` must be aligned and dereferenceable.
 ///
 /// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_keccak(
     po2: usize,
@@ -1017,7 +1014,7 @@ macro_rules! impl_sys_bigint2 {
         /// # Safety
         ///
         /// `blob_ptr` and all arguments must be aligned and dereferenceable.
-        #[cfg_attr(feature = "export-syscalls", no_mangle)]
+        #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
         #[stability::unstable]
         pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
             $(, $a2: *const u32
