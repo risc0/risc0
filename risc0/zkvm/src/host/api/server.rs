@@ -727,7 +727,7 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<crate::Session> {
-    use redis::{Client, Commands, SetExpiry, SetOptions};
+    use redis::{Client, Commands, ConnectionLike, SetExpiry, SetOptions};
     use std::{
         sync::{
             mpsc::{sync_channel, Receiver},
