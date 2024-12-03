@@ -110,7 +110,7 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 ### Extended Auxiliary Execution Trace
 
-- Using the transcript-thus-far as an entropy-source, we choose some random extension field elements, using a SHA-2 CRNG.
+- Using the transcript-thus-far as an entropy-source, we choose some random extension field elements, using an SHA-2 CRNG.
 - Then, the Prover uses the randomness to generate the `auxiliary/accum columns`. The Prover computes the Low-Degree Extension of the auxiliary columns to form the Extended Auxiliary Execution Trace.
 - The Prover commits the Extended Auxiliary Execution Trace to a Merkle tree and sends the Merkle root to the Verifier.
 - Using the transcript-thus-far as an entropy-source, we choose a random `constraint mixing parameter` $\alpha$, using a SHA-2 CRNG.
