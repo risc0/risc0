@@ -172,7 +172,7 @@ If data is loaded from the host to restrict guest program size, the most signifi
 Loading data into the guest costs instruction cycles, as does data processing.
 
 There are workarounds for data limitations if the data is only included to ensure that its integrity becomes part of the proof of computation.
-If the data can be processed externally and simply needs to be verifiably unchanged, consider processing data externally and sending the guest a Merkle proof or (if no processing is needed) generating a SHA of a large dataset.
+If the data can be processed externally and simply needs to be verifiably unchanged, consider processing data externally and sending the guest a Merkle proof or (if no processing is needed) generating an SHA of a large dataset.
 
 In the future, we plan to lift these processing limitations using continuations and recursion.
 
