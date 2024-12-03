@@ -71,11 +71,13 @@ pub const CHECKED_COEFFS_PER_POLY: usize = 16;
 /// circuit definition.
 pub struct CircuitImpl;
 
+#[allow(clippy::new_without_default)]
 impl CircuitImpl {
     pub const fn new() -> Self {
         CircuitImpl
     }
 }
+
 pub const CIRCUIT: CircuitImpl = CircuitImpl::new();
 
 impl TapsProvider for CircuitImpl {

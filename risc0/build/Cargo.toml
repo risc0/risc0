@@ -27,3 +27,4 @@ all-features = true
 [features]
 docker = []
 guest-list = []
+unstable = []

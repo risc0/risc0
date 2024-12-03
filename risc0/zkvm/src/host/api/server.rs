@@ -829,7 +829,7 @@ fn execute_redis(
     exec: &mut ExecutorImpl,
     params: super::RedisParams,
 ) -> Result<Session> {
-    use redis::{Client, Commands, SetExpiry, SetOptions};
+    use redis::{Client, Commands, ConnectionLike, SetExpiry, SetOptions};
     use std::{
         sync::{
             mpsc::{sync_channel, Receiver},
@@ -861,11 +861,27 @@ fn execute_redis(
                 .get_connection()
                 .context("Failed to get redis connection")?;
             while let Ok((segment_key, segment)) = receiver.recv() {
+                if !connection.is_open() {
+                    connection = client
+                        .get_connection()
+                        .context("Failed to get redis connection")?;
+                }
                 let segment_bytes =
                     bincode::serialize(&segment).context("Failed to deserialize segment")?;
-                let _: () = connection
-                    .set_options(segment_key.clone(), segment_bytes, opts)
-                    .context("Failed to set redis key with TTL")?;
+                match connection.set_options(segment_key.clone(), segment_bytes.clone(), opts) {
+                    Ok(()) => (),
+                    Err(err) => {
+                        tracing::warn!(
+                            "Failed to set redis key with TTL, trying again. Error: {err}"
+                        );
+                        connection = client
+                            .get_connection()
+                            .context("Failed to get redis connection")?;
+                        let _: () = connection
+                            .set_options(segment_key.clone(), segment_bytes, opts)
+                            .context("Failed to set redis key with TTL again")?;
+                    }
+                };
                 let asset = pb::api::Asset {
                     kind: Some(pb::api::asset::Kind::Redis(segment_key)),
                 };
