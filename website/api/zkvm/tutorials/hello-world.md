@@ -32,10 +32,9 @@ available to the guest before execution. It does it by adding `input` to the
 executor environment, which is responsible for managing guest-readable memory.
 When the prover executes the program, it can access input:
 
-```rust
+```rust ignore
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
-#[allow(clippy::needless_doctest_main)]
 fn main() {
     let input: u32 = 7;
     let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
