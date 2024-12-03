@@ -537,7 +537,7 @@ impl Toolchain {
             let tool = tool?;
             let tool_name = tool.file_name();
             eprintln!("copy tool: {tool_name:?}");
-            fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+            fs::copy(tool.path(), target_bin_dir.join(tool_name))?;
         }
 
         Ok(())
