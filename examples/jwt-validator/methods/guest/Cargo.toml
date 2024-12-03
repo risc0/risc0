@@ -9,6 +9,7 @@ edition = "2021"
 jwt-core = { path = "../../core/" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
   "std",
+  "unstable",
 ] }
 
 [patch.crates-io]
