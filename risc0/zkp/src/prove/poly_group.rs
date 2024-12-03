@@ -34,12 +34,13 @@ use crate::{
 /// 2) Do evaluation of the polynomials at 'randomly' chosen points
 /// 3) Mix the polynomials via a random set of linear coefficients
 /// 4) Access the raw values in the evaluation domain to 'evaluate' the
-/// constraint polynomial
+///    constraint polynomial
 ///
 /// The poly group holds 3 buffers:
 /// 1) The per-polynomial coefficients, used for evaluation + mixing
 /// 2) The points evaluated on the domain in question (for the 'col' part of
-/// merkle proofs) 3) The Merkle tree itself.
+///    merkle proofs)
+/// 3) The Merkle tree itself.
 ///
 /// PolyGroups are constructed from two basic sources: steps of a computations,
 /// and a single higher degree polynomial that has been split into lower degree

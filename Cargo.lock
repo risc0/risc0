@@ -922,6 +922,7 @@ dependencies = [
  "anyhow",
  "bincode",
  "bonsai-sdk",
+ "cargo-platform",
  "cargo_metadata",
  "clap 4.5.4",
  "const_format",

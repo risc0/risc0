@@ -31,8 +31,6 @@ members = [
   "wordle",
   "wordle/core",
   "xgboost",
-  "zkevm-demo",
-  "zkevm-demo/core",
 ]
 
 # Always optimize; otherwise tests take excessively long.

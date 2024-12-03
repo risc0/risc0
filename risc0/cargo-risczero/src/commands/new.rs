@@ -204,7 +204,7 @@ risc0_zkvm::guest::entry!(main);\n";
         for (filepath, content) in PROJECT_TEMPLATED_FILES {
             std::fs::write(
                 root.join(filepath),
-                &Self::gen_file(&content, template_variables.clone()),
+                Self::gen_file(content, template_variables.clone()),
             )?;
         }
 
