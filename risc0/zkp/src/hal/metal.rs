@@ -850,49 +850,49 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         self.hash.as_ref().unwrap().get_hash_suite()
     }
 
-    #[cfg(feature = "metal_prefix_products")]
-    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
-        let block_size = 256;
-        let grain_size = 16;
-        let threadgroup_size = block_size * grain_size;
-        let io_size = io.size() as u64;
-        let threadgroups = (io_size + threadgroup_size - 1) / threadgroup_size;
-        let threadgroups_per_grid = MTLSize::new(threadgroups, 1, 1);
-        let threads_per_threadgroup = MTLSize::new(block_size, 1, 1);
-        let params = Params::ThreadGroups(threadgroups_per_grid, threads_per_threadgroup);
+    //#[cfg(feature = "metal_prefix_products")]
+    //fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+    //    let block_size = 256;
+    //    let grain_size = 16;
+    //    let threadgroup_size = block_size * grain_size;
+    //    let io_size = io.size() as u64;
+    //    let threadgroups = (io_size + threadgroup_size - 1) / threadgroup_size;
+    //    let threadgroups_per_grid = MTLSize::new(threadgroups, 1, 1);
+    //    let threads_per_threadgroup = MTLSize::new(block_size, 1, 1);
+    //    let params = Params::ThreadGroups(threadgroups_per_grid, threads_per_threadgroup);
 
-        let partial_products = self.alloc_extelem("partial_products", block_size as usize);
+    //    let partial_products = self.alloc_extelem("partial_products", block_size as usize);
 
-        let kernel = self.kernels.get("reduce").unwrap();
-        let args = &[partial_products.as_arg(), io.as_arg()];
-        self.dispatch(kernel, args, 0, Some(params.clone()));
+    //    let kernel = self.kernels.get("reduce").unwrap();
+    //    let args = &[partial_products.as_arg(), io.as_arg()];
+    //    self.dispatch(kernel, args, 0, Some(params.clone()));
 
-        // partial_products.view(|view| {
-        //     println!("partial_products");
-        //     let items: Vec<_> = view.iter().enumerate().collect();
-        //     for (i, x) in items {
-        //         println!("{i}: {x:?}");
-        //     }
-        // });
+    //    // partial_products.view(|view| {
+    //    //     println!("partial_products");
+    //    //     let items: Vec<_> = view.iter().enumerate().collect();
+    //    //     for (i, x) in items {
+    //    //         println!("{i}: {x:?}");
+    //    //     }
+    //    // });
 
-        let kernel = self.kernels.get("prefix_products_single").unwrap();
-        let args = &[partial_products.as_arg(), partial_products.as_arg()];
-        self.dispatch(kernel, args, 0, Some(params.clone()));
+    //    let kernel = self.kernels.get("prefix_products_single").unwrap();
+    //    let args = &[partial_products.as_arg(), partial_products.as_arg()];
+    //    self.dispatch(kernel, args, 0, Some(params.clone()));
 
-        // partial_products.view(|view| {
-        //     println!("partial_products");
-        //     let items: Vec<_> = view.iter().enumerate().collect();
-        //     for (i, x) in items {
-        //         println!("{i}: {x:?}");
-        //     }
-        // });
+    //    // partial_products.view(|view| {
+    //    //     println!("partial_products");
+    //    //     let items: Vec<_> = view.iter().enumerate().collect();
+    //    //     for (i, x) in items {
+    //    //         println!("{i}: {x:?}");
+    //    //     }
+    //    // });
 
-        let kernel = self.kernels.get("prefix_products").unwrap();
-        let args = &[io.as_arg(), partial_products.as_arg()];
-        self.dispatch(kernel, args, 0, Some(params));
-    }
+    //    let kernel = self.kernels.get("prefix_products").unwrap();
+    //    let args = &[io.as_arg(), partial_products.as_arg()];
+    //    self.dispatch(kernel, args, 0, Some(params));
+    //}
 
-    #[cfg(not(feature = "metal_prefix_products"))]
+    //#[cfg(not(feature = "metal_prefix_products"))]
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
         io.view_mut(|io| {
             for i in 1..io.len() {
