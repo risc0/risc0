@@ -39,6 +39,9 @@ pub struct BuildToolchain {
 
 /// Output info of a successful rust toolchain build.
 pub struct RustBuildOutput {
+    // NOTE: target is currently unused, and the code loops over files in the build directory
+    // instead. Is this something that should be changed?
+    #[allow(dead_code)]
     pub target: String,
     pub toolchain_dir: PathBuf,
 }
@@ -73,7 +76,7 @@ impl BuildToolchain {
             let tool = tool?;
             let tool_name = tool.file_name();
             eprintln!("copy tool: {tool_name:?}");
-            std::fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+            std::fs::copy(tool.path(), target_bin_dir.join(tool_name))?;
         }
 
         RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &out.toolchain_dir)?;

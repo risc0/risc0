@@ -295,9 +295,9 @@ mod tests {
             }
         }
     }
-    pub fn test_field_ops<F: Elem>(p_u64: u64)
+    pub fn test_field_ops<F>(p_u64: u64)
     where
-        F: Into<u64> + From<u64> + Debug,
+        F: Elem + Into<u64> + From<u64> + Debug,
     {
         // For testing, we do 128-bit arithmetic so we don't have to worry about
         // overflows.

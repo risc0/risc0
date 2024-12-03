@@ -33,7 +33,7 @@ available to the guest before execution. It does it by adding `input` to the
 executor environment, which is responsible for managing guest-readable memory.
 When the prover executes the program, it can access input:
 
-```rust
+```rust ignore
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {

@@ -402,7 +402,7 @@ jobs:
         uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
           crate: cargo-semver-checks
-          version: "0.31.0"
+          version: "0.36.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
         # There seems to be a bug in cargo-semver-checks that can't locate the platform crate...
         # All other excluded crates aren't published and therefore do not need this check
