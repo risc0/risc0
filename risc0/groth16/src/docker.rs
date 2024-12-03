@@ -57,7 +57,7 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .arg("run")
         .arg("--rm")
         .arg("-v")
-        .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
+        .arg(format!("{}:/mnt", work_dir.to_string_lossy()))
         .arg("risczero/risc0-groth16-prover:v2024-05-17.1")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

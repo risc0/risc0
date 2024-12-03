@@ -11,13 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 use risc0_zkvm::Receipt;
 use risc0_zkvm_receipts::{FIB_ID, FIB_RECEIPT};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 wasm_bindgen_test_configure!(run_in_browser);
 
+#[allow(dead_code)]
 // `test_verify` runs a unit test in the browser, so it can use browser APIs.
 #[wasm_bindgen_test]
 fn test_verify() {
