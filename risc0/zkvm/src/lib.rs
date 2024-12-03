@@ -119,6 +119,7 @@ pub use {
     },
 };
 
+#[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "bonsai")]
 pub use self::host::client::prove::bonsai::BonsaiProver;
 
