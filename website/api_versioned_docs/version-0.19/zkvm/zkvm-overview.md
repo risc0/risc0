@@ -57,7 +57,7 @@ Options for generating proofs using GPU acceleration and skipping proof generati
 
 ## Micro Architecture
 
-The zkVM is a verifiable computer that works like a real embedded RISC-V micro-processor. This enables developers to more easily develop zk powerful applications.
+The zkVM is a verifiable computer that works like a real embedded RISC-V microprocessor. This enables developers to more easily develop zk powerful applications.
 
 ### Continuations for limitless computations
 
