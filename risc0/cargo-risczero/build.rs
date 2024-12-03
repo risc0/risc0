@@ -26,7 +26,7 @@ mod runtime {
         let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
 
         let rust_runtime =
-            build_rust_runtime_with_features(&["getrandom", "sys-getenv", "sys-args"]);
+            build_rust_runtime_with_features(&["getrandom", "sys-getenv", "sys-args", "unstable"]);
         let f = fs::File::create(out_dir.join("cargo-risczero.zip")).unwrap();
         let mut zip = ZipWriter::new(f);
         let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
