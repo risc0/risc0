@@ -34,6 +34,7 @@ risc0-circuit-keccak-methods = { path = "methods" }
 risc0-zkvm = { workspace = true, features = [
   "std",
   "unstable",
+  "prove",
 ], default-features = false }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -54,6 +55,5 @@ prove = [
   "dep:risc0-circuit-keccak-sys",
   "dep:risc0-sys",
   "dep:zip",
-  "risc0-zkvm/prove",
   "risc0-circuit-recursion/prove",
 ]

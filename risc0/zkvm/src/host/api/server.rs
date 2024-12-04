@@ -224,6 +224,13 @@ impl CoprocessorCallback for CoprocessorProxy {
             pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
         }
     }
+
+    fn prove_keccak(
+        &mut self,
+        _request: crate::host::client::env::ProveKeccakRequest,
+    ) -> Result<crate::host::client::env::ProveKeccakResponse> {
+        todo!()
+    }
 }
 
 impl Server {

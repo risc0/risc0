@@ -966,9 +966,10 @@ pub unsafe extern "C" fn sys_prove_keccak(
     input: *const u32,
     input_len: usize,
     control_root: *const [u32; DIGEST_WORDS],
+    claim_digest: *const [u32; DIGEST_WORDS],
 ) {
     let Return(a0, _) = unsafe {
-        syscall_4(
+        syscall_5(
             nr::SYS_PROVE_KECCAK,
             null_mut(),
             0,
@@ -976,6 +977,7 @@ pub unsafe extern "C" fn sys_prove_keccak(
             input as u32,
             input_len as u32,
             control_root as u32,
+            claim_digest as u32,
         )
     };
 
