@@ -26,7 +26,7 @@ const BLOB: &[u8] = include_bytes_aligned!(4, "modpow_65537.blob");
 
 type RsaArray = [u32; RSA_4096_WIDTH_WORDS];
 
-pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut [u32; RSA_4096_WIDTH_WORDS]) {
+pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut RsaArray) {
     unsafe {
         sys_bigint2_3(
             BLOB.as_ptr(),
@@ -35,4 +35,10 @@ pub fn modpow_65537(base: &RsaArray, modulus: &RsaArray, result: &mut [u32; RSA_
             result.as_mut_ptr(),
         );
     }
+    // An honest host will always return a result less than the modulus.
+    // A dishonest prover could return a result greater than the modulus that differs by a multiple
+    // of the modulus, e.g. they could return `4` (instead of `1`) as the answer to `1^65537 % 3`,
+    // since `4 - 1 = 3`.
+    // Therefore, we check that we are in the honest case.
+    assert!(crate::is_less(&result, &modulus));
 }
