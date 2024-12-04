@@ -84,7 +84,7 @@ impl<'a, 'b> ChildExecutor<'a, 'b> {
         syscall_table.posix_io = Rc::new(RefCell::new(posix_io));
 
         // avoid the possibility of fork bombs.
-        syscall_table.inner.remove(&SYS_FORK.as_str().to_string());
+        syscall_table.inner.remove(SYS_FORK.as_str());
 
         Ok(Self {
             ctx,

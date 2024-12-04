@@ -61,7 +61,7 @@ fn main() {
         ],
     );
 
-    let mut result = AffinePoint::<8, TestSecp256k1Curve>::new_unchecked([0u32; 8], [0u32; 8]);
+    let mut result = AffinePoint::<8, TestSecp256k1Curve>::IDENTITY;
     point.mul(&scalar, &mut result);
     assert_eq!(result, expected);
 }

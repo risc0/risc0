@@ -20,6 +20,7 @@
 #include "vendor/nvtx3/nvtx3.hpp"
 
 #include <cstdint>
+#include <exception>
 
 extern "C" {
 
@@ -135,7 +136,7 @@ const char* risc0_zkp_cuda_combos_prepare(FpExt* combos,
     CudaStream stream;
     combos_prepare<<<1, 1, 0, stream>>>(
         combos, coeffU, regsCount, regSizes, regComboIds, cycles, mix, checkSize, comboCount);
-  } catch (const std::runtime_error& err) {
+  } catch (const std::exception& err) {
     return strdup(err.what());
   }
   return nullptr;
