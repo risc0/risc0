@@ -243,6 +243,12 @@ fn double_raw<const WIDTH: usize>(
             result.as_mut_ptr() as *mut u32,
         );
     }
+    // An honest host will always return a result less than the curve's prime in each coordinate.
+    // A dishonest prover can sometimes return a result greater than the prime, so enforce that
+    // we're in the honest case.
+    let prime = curve[0];
+    assert!(crate::is_less(&result[0], &prime));
+    assert!(crate::is_less(&result[1], &prime));
 }
 
 /// Adds two points on the curve.
@@ -267,6 +273,12 @@ fn add_raw<const WIDTH: usize>(
             result.as_mut_ptr() as *mut u32,
         );
     }
+    // An honest host will always return a result less than the curve's prime in each coordinate.
+    // A dishonest prover can sometimes return a result greater than the prime, so enforce that
+    // we're in the honest case.
+    let prime = curve[0];
+    assert!(crate::is_less(&result[0], &prime));
+    assert!(crate::is_less(&result[1], &prime));
 }
 
 /// Checks if the bit at the position is set.
