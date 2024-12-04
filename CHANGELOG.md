@@ -7,7 +7,7 @@
 ### 🔥 Performance Improvements
 
 * Enable big integer acceleration in the rv32im circuit. The new `risc0-bigint2` crate contains code that facilitates acceleration.
-* Accelerate RSA signature verification. Acceleration reduces RSA verification from ~15M cycles to 163k cycles.
+* Accelerate RSA signature verification via bigint precompiles. Performance improvements vary by use case; as one example, our [JWT validator example](https://github.com/risc0/risc0/tree/main/examples/jwt-validator) went from ~15M cycles to ~166k cycles.
 
 ### ⚡️ Features
 
