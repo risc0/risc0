@@ -2,12 +2,13 @@
 
 ## Next (upcoming release)
 
-## [v1.2.0 (2024-11-26)](https://github.com/risc0/risc0/releases/tag/v1.2.0)
+## [v1.2.0 (2024-12-04)](https://github.com/risc0/risc0/releases/tag/v1.2.0)
 
 ### 🔥 Performance Improvements
 
 * Enable big integer acceleration in the rv32im circuit. The new `risc0-bigint2` crate contains code that facilitate acceleration.
 * Accelerate RSA signature verification. Acceleration reduces RSA verification from ~15M cycles to 163k cycles.
+
 ### ⚡️ Features
 
 * Add support for deferred assumptions. This is used as a foundation for precompiles such as the up-coming keccak precompile.
