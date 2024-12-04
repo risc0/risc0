@@ -6,7 +6,7 @@
 
 ### 🔥 Performance Improvements
 
-* Enable big integer acceleration in the rv32im circuit. The new `risc0-bigint2` crate contains code that facilitate acceleration.
+* Enable big integer acceleration in the rv32im circuit. The new `risc0-bigint2` crate contains code that facilitates acceleration.
 * Accelerate RSA signature verification. Acceleration reduces RSA verification from ~15M cycles to 163k cycles.
 
 ### ⚡️ Features
