@@ -67,6 +67,7 @@ impl Bootstrap {
     pub fn run(&self) {
         let poseidon2_control_ids = Self::generate_rv32im_control_ids();
         Self::generate_recursion_control_ids(poseidon2_control_ids);
+        keccak::bootstrap();
     }
 
     fn generate_rv32im_control_ids() -> Vec<(String, Digest)> {
@@ -208,5 +209,46 @@ impl Bootstrap {
         let encoded_program = get_zkr("identity.zkr").unwrap();
         let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
         program.compute_control_id(Poseidon254HashSuite::new_suite())
+    }
+}
+
+mod keccak {
+    use std::process::Command;
+
+    use risc0_circuit_keccak::{prove::zkr::get_zkr_u32s, KECCAK_PO2, RECURSION_PO2};
+    use risc0_circuit_recursion::prove::Program;
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
+    use risc0_zkvm::recursion::MerkleGroup;
+
+    const CONTROL_ID_PATH: &str = "risc0/circuit/keccak/src/control_id.rs";
+
+    fn compute_control_id(po2: usize) -> Digest {
+        let encoded_program = get_zkr_u32s(&format!("keccak_lift_{}.zkr", po2)).unwrap();
+        let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        program.compute_control_id(hash_suite)
+    }
+
+    fn compute_control_root(control_id: Digest) -> Digest {
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        let hashfn = hash_suite.hashfn.as_ref();
+        let group = MerkleGroup::new(vec![control_id]).unwrap();
+        group.calc_root(hashfn)
+    }
+
+    pub(crate) fn bootstrap() {
+        let control_id = compute_control_id(KECCAK_PO2);
+        let control_root = compute_control_root(control_id);
+        let contents = format!(
+            include_str!("templates/control_id_keccak.rs"),
+            control_id, control_root
+        );
+        std::fs::write(CONTROL_ID_PATH, contents).unwrap();
+
+        // Use rustfmt to format the file.
+        Command::new("rustfmt")
+            .arg(CONTROL_ID_PATH)
+            .status()
+            .expect("failed to format {CONTROL_ID_PATH}");
     }
 }
