@@ -43,7 +43,7 @@ The guest program is the part of the application that gets proven.
 
 To prove correct execution of the [guest program]:
 
-1. The [guest program] is compiled to an [ELF binary]. <br/>
+1. The [guest program] is compiled to an [ELF binary]. <br />
 2. The [executor] runs the [ELF binary] and records the [session].
 3. The [prover] checks and proves the validity of the [session], outputting a
    [receipt].
@@ -83,19 +83,19 @@ accessible. To learn more, read the article on [continuations].
 
 ## Next Steps
 
-_Ready to start building zkVM applications?_ <br/>
+_Ready to start building zkVM applications?_ <br />
 Check out [zkVM Quickstart][quickstart] & [Guest Code 101][guest program].
 
-_Want to browse some examples?_ <br/>
+_Want to browse some examples?_ <br />
 Check out the [zkVM example applications][examples].
 
-_Curious about performance?_ <br/>
+_Curious about performance?_ <br />
 Check the [performance benchmarks][benchmarks] page.
 
-_Looking for information about blockchain integration?_ <br/>
+_Looking for information about blockchain integration?_ <br />
 Check out [Bonsai].
 
-_Curious about Zeth?_<br/>
+_Curious about Zeth?_<br />
 Read the [article][zeth].
 
 [alloy]: https://github.com/alloy-rs

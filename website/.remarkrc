@@ -15,6 +15,7 @@
 		"remark-directive",
 		"remark-remove-url-trailing-slash",
 		"remark-math",
+		"remark-mdx",
 		"./remark-append-md.js",
 		["remark-lint-no-emphasis-as-heading", false],
 		["remark-lint-no-shortcut-reference-link", false],

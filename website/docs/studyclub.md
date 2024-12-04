@@ -4,16 +4,16 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 
 ## Upcoming Sessions
 
-**February 14: Proof Composition** <br/>
-**Victor Graf** <br/>
+**February 14: Proof Composition** <br />
+**Victor Graf** <br />
 
 As of our v0.20 release, the zkVM supports verification of RISC Zero receipts inside the RISC Zero guest through a feature known as composition.
 With this feature, multiple zkVM programs can be composed and produce a single receipt that verifies all computation done to reach the final result.
 
 This session of study club will discuss how to use proof composition, how proof composition works behind the scenes, and what use cases this unlocks.
 
-All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
-Join the session: [Zoom link] <br/>
+All sessions are hosted at **9am Pacific / 5PM UTC**. <br />
+Join the session: [Zoom link] <br />
 
 Join the conversation on [Discord](https://discord.gg/risczero).
 

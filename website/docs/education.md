@@ -16,7 +16,7 @@ The materials here are intended to support learners of all backgrounds to make s
 If there's a piece of our tech stack that you're struggling to make sense of, please [open an issue] to help us improve.
 Or find us on [Discord] and ask us there!
 
-_Looking for documentation?_<br/>
+_Looking for documentation?_<br />
 Check out the [dev docs].
 
 [blog]: https://risczero.com/blog

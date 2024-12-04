@@ -20,7 +20,7 @@ The [RISC Zero Foundry Template][foundry-template] provides a minimal applicatio
 
 ### DAO Governance Example
 
-This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard][governor-standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [\~160 lines of Rust][signature-aggregation], a gas savings of ~77% is achieved with significant room for optimizations.
+This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard][governor-standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [\~160 lines of Rust][signature-aggregation], a gas savings of \~77% is achieved with significant room for optimizations.
 
 [blockchain-examples]: https://github.com/risc0/risc0-ethereum/tree/release-1.1/examples
 [foundry-template]: https://github.com/risc0/risc0-foundry-template

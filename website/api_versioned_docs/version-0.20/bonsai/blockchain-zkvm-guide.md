@@ -1,6 +1,6 @@
 # A Blockchain Developer's Guide to the zkVM
 
-<!-- TODO(scratch#231): Update this document and "RISC Zero on Ethereum" to improve and consolidate -->
+{/* TODO(scratch#231): Update this document and "RISC Zero on Ethereum" to improve and consolidate */}
 
 In order to prove code using RISC Zero, you need to write the code you want proven.
 That is, you'll need to write a [guest program][term-guest-program] for the [zkVM][term-zkvm].

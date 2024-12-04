@@ -8,7 +8,7 @@ At a high level, here's how it works:
 
 ![Bonsai ETH Relay overview](/img/eth-relay-diagram.jpg)
 
-<!-- TODO: Highlight the relay sections of this diagram -->
+{/* TODO: Highlight the relay sections of this diagram */}
 
 Our Bonsai-ETH Relay acts as a middle-man between your app contract and the Bonsai proving service. In order to use the Bonsai ETH Relay, dApp developers must have completed the following steps:
 

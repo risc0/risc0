@@ -12,7 +12,7 @@ Bonsai is highly parallelized, highly performant and can horizontally scale. To 
 Whether you're looking to take heavy computations off-chain or need to generate proofs for your trustless, verifiable software, Bonsai can help.
 Check out our [Bonsai Quick Start] page, and start building!
 
-**Please note that Bonsai is still in development. <br/>
+**Please note that Bonsai is still in development. <br />
 [Request access here], and do not use Bonsai in production.**
 
 ![Bonsai overview](/img/bonsai_architecture.png)
