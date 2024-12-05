@@ -94,7 +94,7 @@ pub struct Session {
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
 
-    /// A list of pending ZKR proof requests.
+    /// A list of pending keccak proof requests.
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
 }
