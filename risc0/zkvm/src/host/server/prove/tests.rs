@@ -650,7 +650,7 @@ mod sys_verify {
         serde::to_vec,
         sha::Digestible,
         Assumption, CoprocessorCallback, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
-        ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, RECURSION_PO2,
+        ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, RECURSION_PO2,
     };
 
     fn prove_hello_commit() -> Receipt {
@@ -958,18 +958,27 @@ mod sys_verify {
     }
 
     struct Coprocessor {
-        pub(crate) requests: Vec<ProveZkrRequest>,
+        pub(crate) zkr_requests: Vec<ProveZkrRequest>,
+        pub(crate) keccak_requests: Vec<ProveKeccakRequest>,
     }
 
     impl Coprocessor {
         fn new() -> Self {
-            Self { requests: vec![] }
+            Self {
+                zkr_requests: vec![],
+                keccak_requests: vec![],
+            }
         }
     }
 
     impl CoprocessorCallback for Coprocessor {
         fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> anyhow::Result<()> {
-            self.requests.push(proof_request);
+            self.zkr_requests.push(proof_request);
+            Ok(())
+        }
+
+        fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> anyhow::Result<()> {
+            self.keccak_requests.push(proof_request);
             Ok(())
         }
     }
@@ -1016,7 +1025,8 @@ mod sys_verify {
 
         // Because we added an already proven assumption, there should be no
         // request to invoke the coprocessor.
-        assert!(coprocessor.borrow().requests.is_empty());
+        assert!(coprocessor.borrow().zkr_requests.is_empty());
+        assert!(coprocessor.borrow().keccak_requests.is_empty());
     }
 }
 
