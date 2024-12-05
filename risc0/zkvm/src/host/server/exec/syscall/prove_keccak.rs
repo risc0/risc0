@@ -43,8 +43,7 @@ impl Syscall for SysProveKeccak {
         let claim = ctx.load_digest_from_register(REG_A7)?;
 
         let proof_request = ProveKeccakRequest {
-            claim_digest: claim,
-            po2: po2 as u64,
+            po2: po2 as usize,
             input,
         };
 

@@ -79,11 +79,8 @@ pub struct ProveZkrRequest {
 /// A Keccak proof request.
 #[stability::unstable]
 pub struct ProveKeccakRequest {
-    /// The digest of the claim that this ZKR program is expected to produce.
-    pub claim_digest: Digest,
-
     /// Po2 of keccak circuit to run
-    pub po2: u64,
+    pub po2: usize,
 
     /// Input transcript to provide to the keccak circuit
     pub input: Vec<u8>,
