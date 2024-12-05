@@ -74,4 +74,5 @@ NondetRegStruct x8 = exec_Reg(ctx,arg3, LAYOUT_LOOKUP(layout4, round));
 return ControlStateStruct{
   .cycleType = x5,   .subType = x6,   .block = x7,   .round = x8};
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

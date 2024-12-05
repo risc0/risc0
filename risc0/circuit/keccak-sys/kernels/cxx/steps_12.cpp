@@ -2378,4 +2378,5 @@ x14 = x52;
 return TopStruct{
 };
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

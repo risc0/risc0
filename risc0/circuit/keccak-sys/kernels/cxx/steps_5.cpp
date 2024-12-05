@@ -315,4 +315,5 @@ EQZ((x25 - arg0), "OneHot(zirgen/circuit/keccak2/one_hot.zir:11)");
 return OneHot_12_Struct{
   .bits = x2};
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

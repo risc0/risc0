@@ -8,11 +8,8 @@
 
 namespace risc0::circuit::keccak::cuda {
 
-
-
-__device__ FpExt keccak_55(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
+__device__ FpExt keccak_55(
+    uint32_t idx, uint32_t size, Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
   Fp x0(0);
   Fp x1 = arg4[351 * size + ((idx - INV_RATE * 0) & mask)];
@@ -1884,8 +1881,13 @@ __device__ FpExt keccak_55(uint32_t idx,
   return x1399;
 }
 __device__ FpExt keccak_50(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
+                           uint32_t size,
+                           Fp* arg0,
+                           FpExt arg1,
+                           FpExt arg2,
+                           FpExt arg3,
+                           FpExt arg4,
+                           const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0(0);
   Fp x1(32768);
@@ -3135,8 +3137,13 @@ __device__ FpExt keccak_50(uint32_t idx,
   return x1222;
 }
 __device__ FpExt keccak_45(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
+                           uint32_t size,
+                           Fp* arg0,
+                           FpExt arg1,
+                           FpExt arg2,
+                           FpExt arg3,
+                           FpExt arg4,
+                           const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0(32768);
   Fp x1(16384);
@@ -4649,9 +4656,8 @@ __device__ FpExt keccak_45(uint32_t idx,
 
   return x1450;
 }
-__device__ FpExt keccak_40(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
+__device__ FpExt keccak_40(
+    uint32_t idx, uint32_t size, Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
   Fp x0(0);
   Fp x1(4);
@@ -6176,9 +6182,8 @@ __device__ FpExt keccak_40(uint32_t idx,
 
   return x1519;
 }
-__device__ FpExt keccak_35(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
+__device__ FpExt
+keccak_35(uint32_t idx, uint32_t size, Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
   uint32_t mask = size - 1;
   Fp x0(2);
   Fp x1 = arg3[626 * size + ((idx - INV_RATE * 3) & mask)];
@@ -8026,9 +8031,8 @@ __device__ FpExt keccak_35(uint32_t idx,
 
   return x1465;
 }
-__device__ FpExt keccak_30(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
+__device__ FpExt
+keccak_30(uint32_t idx, uint32_t size, Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
   uint32_t mask = size - 1;
   Fp x0(2);
   Fp x1 = arg3[305 * size + ((idx - INV_RATE * 3) & mask)];
@@ -9870,9 +9874,8 @@ __device__ FpExt keccak_30(uint32_t idx,
 
   return x1571;
 }
-__device__ FpExt keccak_25(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
+__device__ FpExt
+keccak_25(uint32_t idx, uint32_t size, Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
   uint32_t mask = size - 1;
   Fp x0(2);
   Fp x1(1);
@@ -11391,8 +11394,14 @@ __device__ FpExt keccak_25(uint32_t idx,
   return x1337;
 }
 __device__ FpExt keccak_20(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, FpExt arg5, const Fp* arg6) {
+                           uint32_t size,
+                           Fp* arg0,
+                           FpExt arg1,
+                           FpExt arg2,
+                           FpExt arg3,
+                           FpExt arg4,
+                           FpExt arg5,
+                           const Fp* arg6) {
   uint32_t mask = size - 1;
   Fp x0(2);
   Fp x1 = arg6[731 * size + ((idx - INV_RATE * 0) & mask)];
@@ -13344,8 +13353,13 @@ __device__ FpExt keccak_20(uint32_t idx,
   return x1860;
 }
 __device__ FpExt keccak_15(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
+                           uint32_t size,
+                           Fp* arg0,
+                           FpExt arg1,
+                           FpExt arg2,
+                           FpExt arg3,
+                           FpExt arg4,
+                           const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0(65536);
   Fp x1(1);
@@ -14873,8 +14887,13 @@ __device__ FpExt keccak_15(uint32_t idx,
   return x1473;
 }
 __device__ FpExt keccak_10(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
+                           uint32_t size,
+                           Fp* arg0,
+                           FpExt arg1,
+                           FpExt arg2,
+                           FpExt arg3,
+                           FpExt arg4,
+                           const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0(65536);
   Fp x1(1);
@@ -16210,8 +16229,13 @@ __device__ FpExt keccak_10(uint32_t idx,
   return x1248;
 }
 __device__ FpExt keccak_5(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
+                          uint32_t size,
+                          Fp* arg0,
+                          FpExt arg1,
+                          FpExt arg2,
+                          FpExt arg3,
+                          FpExt arg4,
+                          const Fp* arg5) {
   uint32_t mask = size - 1;
   Fp x0(65536);
   Fp x1(1);
@@ -17607,9 +17631,8 @@ __device__ FpExt keccak_5(uint32_t idx,
 
   return x1328;
 }
-__device__ FpExt keccak_0(uint32_t idx,
-                        uint32_t size
-                        , Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
+__device__ FpExt
+keccak_0(uint32_t idx, uint32_t size, Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
   uint32_t mask = size - 1;
   Fp x0(23520);
   Fp x1(52505);
@@ -19478,4 +19501,4 @@ __device__ FpExt keccak_0(uint32_t idx,
   return x1863;
 }
 
-}  // namespace risc0::circuit::keccak::cuda
+} // namespace risc0::circuit::keccak::cuda

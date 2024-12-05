@@ -15,8 +15,8 @@
 #include "buffers.h"
 #include "fp.h"
 #include "fpext.h"
-#include "witgen.h"
 #include "steps.h"
+#include "witgen.h"
 
 #include "vendor/poolstl.hpp"
 
@@ -78,7 +78,7 @@ void stepExec(ExecBuffers& buffers, PreflightTrace& preflight, size_t cycle) {
   step_Top(ctx, &data, &global);
 }
 
-} // namespace risc0
+} // namespace risc0::circuit::keccak::cpu
 
 constexpr size_t kStepModeParallel = 0;
 constexpr size_t kStepModeSeqForward = 1;
@@ -86,7 +86,7 @@ constexpr size_t kStepModeSeqReverse = 2;
 
 extern "C" {
 
-  using namespace risc0::circuit::keccak::cpu;
+using namespace risc0::circuit::keccak::cpu;
 
 const char* risc0_circuit_keccak_cpu_witgen(uint32_t mode,
                                             ExecBuffers* buffers,

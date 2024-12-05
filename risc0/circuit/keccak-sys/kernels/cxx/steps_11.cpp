@@ -8077,4 +8077,5 @@ Val16Array x6413 = Val16Array{arg2.sflat[0]._super, arg2.sflat[1]._super, arg2.s
 TopStateStruct x6414 = exec_TopState(ctx,x6411, x6412, x6413, LAYOUT_LOOKUP(layout4, _super));
 return x6414;
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

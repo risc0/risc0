@@ -67,4 +67,5 @@ extern TopStateStruct exec_KeccakRound34_0_(ExecContext& ctx,TopStateStruct arg0
 extern TopStateStruct exec_KeccakRound34_1_(ExecContext& ctx,TopStateStruct arg0, TopStateStruct arg1, TopStateStruct arg2, Val arg3, BoundLayout<KeccakRound34_1_Layout> layout4)  ;
 extern TopStruct exec_Top(ExecContext& ctx,BoundLayout<TopLayout> layout0, GlobalBuf global1)  ;
 extern void step_Top(ExecContext& ctx,MutableBuf data0, GlobalBuf global1)  ;
-}
+
+} // namespace risc0::circuit::keccak::cpu

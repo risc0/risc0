@@ -42,4 +42,5 @@ BoundLayout<TopLayout> x2 = BIND_LAYOUT(kLayout_Top, data0);
 TopStruct x3 = exec_Top(ctx,x2, global1);
 return ;
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

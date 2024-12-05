@@ -93,14 +93,16 @@ fn build_cuda_kernels() {
         "kernels/cuda/steps_7.cu",
         "kernels/cuda/steps_8.cu",
         "kernels/cuda/steps_9.cu",
-        "kernels/cuda/steps_10.cu",
+        // "kernels/cuda/steps_10.cu",
+        // "kernels/cuda/steps_11.cu",
+        "kernels/cuda/steps_12.cu",
         "kernels/cuda/steps_13.cu",
         "kernels/cuda/steps_14.cu",
         "kernels/cuda/steps_15.cu",
         "kernels/cuda/ffi_supra.cu",
     ];
 
-    let special = ["kernels/cuda/steps_11.cu", "kernels/cuda/steps_12.cu"];
+    let special = ["kernels/cuda/steps_10.cu", "kernels/cuda/steps_11.cu"];
 
     let objs = std::thread::scope(|s| -> Vec<PathBuf> {
         let regular_objs = s.spawn(|| base().files(regular).compile_intermediates());
@@ -117,11 +119,7 @@ fn build_cuda_kernels() {
     });
 
     base()
-        .files([
-            "kernels/cuda/ffi.cu",
-            // rust's cc::Build needs more than one .cu file to pass the right options to the compiler to link in extra object files.
-            "kernels/cuda/empty.cu",
-        ])
+        .files(["kernels/cuda/ffi.cu", "kernels/cuda/empty.cu"])
         .objects(objs)
         .compile(output);
 }

@@ -178,4 +178,5 @@ extern __device__ TopStruct exec_Top(ExecContext& ctx,
                                      BoundLayout<TopLayout> layout0,
                                      GlobalBuf global1);
 extern __device__ void step_Top(ExecContext& ctx, MutableBuf data0, GlobalBuf global1);
+
 } // namespace risc0::circuit::keccak::cuda

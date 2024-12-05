@@ -821,4 +821,5 @@ return WrapOneHot_SuperStruct{
 return WrapOneHotStruct{
   ._super = x2};
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

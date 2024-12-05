@@ -94,4 +94,5 @@ x9 = x18;
 ControlStateStruct x19 = back_ControlState(ctx,0, LAYOUT_LOOKUP(layout1, _super._super));
 return x19;
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

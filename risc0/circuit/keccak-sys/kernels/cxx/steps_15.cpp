@@ -55,4 +55,5 @@ NondetRegStruct x5 = back_Reg(ctx,distance0, LAYOUT_LOOKUP(layout1, round));
 return ControlStateStruct{
   .cycleType = x2,   .subType = x3,   .block = x4,   .round = x5};
 }
-}
+
+} // namespace risc0::circuit::keccak::cpu

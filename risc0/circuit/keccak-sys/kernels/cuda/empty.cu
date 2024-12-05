@@ -12,3 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// rust's cc::Build needs more than one .cu file to pass the proper
+/// options to the cuda compiler, so this file can be used as a
+/// placeholder if we only need to compile a single .cu file.
