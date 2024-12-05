@@ -88,6 +88,7 @@ pub enum MultiTestSpec {
     SysForkJournalPanic,
     SysInput(Digest),
     SysKeccak,
+    SysKeccakPermute,
     SysLogInvalidAddr,
     SysProveZkr {
         // Control id of ZKR to execute
