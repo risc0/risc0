@@ -22,6 +22,7 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
+    host::client::env::ProveKeccakRequest,
     host::client::env::ProveZkrRequest,
     receipt::{
         merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
@@ -30,8 +31,7 @@ use crate::{
     },
     receipt_claim::Unknown,
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
-    ProveInfo, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats,
-    TraceEvent,
+    ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
 mod ver {

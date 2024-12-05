@@ -28,16 +28,16 @@ use crate::{
     get_prover_server, get_version,
     host::{
         client::{
-            env::{CoprocessorCallback, ProveZkrRequest},
+            env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
         },
         server::session::NullSegmentRef,
     },
     prove_keccak, prove_zkr,
     recursion::identity_p254,
-    AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt,
-    ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim, Segment, SegmentReceipt, Session,
-    SuccinctReceipt, TraceCallback, TraceEvent, VerifierContext,
+    AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
+    Receipt, ReceiptClaim, Segment, SegmentReceipt, Session, SuccinctReceipt, TraceCallback,
+    TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -227,7 +227,6 @@ impl CoprocessorCallback for CoprocessorProxy {
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
         let request = pb::api::ServerReply {
-            // TODO: copy pasta from prove_zkr. can we reduce boilerplate here?
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
                     kind: Some(pb::api::on_io_request::Kind::Coprocessor(
@@ -237,7 +236,7 @@ impl CoprocessorCallback for CoprocessorProxy {
                                     input: proof_request.input,
                                     po2: proof_request.po2 as u64,
                                     receipt_out: None,
-                                    claim_digest: Some(proof_request.claim_digest.try_into()?),
+                                    claim_digest: Some(proof_request.claim_digest.into()),
                                 }
                             })),
                         },

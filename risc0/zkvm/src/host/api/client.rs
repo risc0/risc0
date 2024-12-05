@@ -30,7 +30,7 @@ use crate::{
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim,
+    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -242,7 +242,7 @@ impl Client {
     #[stability::unstable]
     pub fn prove_keccak<Claim>(
         &self,
-        proof_request: ProveKeccakRequest,
+        proof_request: crate::host::client::env::ProveKeccakRequest,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt<Claim>>
     where
@@ -257,7 +257,7 @@ impl Client {
                     input: proof_request.input,
                     po2: proof_request.po2 as u64,
                     receipt_out: Some(receipt_out.try_into()?),
-                    claim_digest: Some(proof_request.claim_digest.try_into()?),
+                    claim_digest: Some(proof_request.claim_digest.into()),
                 },
             )),
         };
