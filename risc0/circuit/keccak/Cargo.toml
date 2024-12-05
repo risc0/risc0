@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-anyhow = "1.0"
+anyhow = { version = "1.0", default-features = false }
 paste = "1.0"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }

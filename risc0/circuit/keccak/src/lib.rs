@@ -17,11 +17,15 @@ mod control_id;
 pub mod prove;
 #[cfg(test)]
 mod tests;
+#[cfg(feature = "prove")]
 pub(crate) mod zirgen;
 
+#[cfg(feature = "prove")]
 use anyhow::Result;
+#[cfg(feature = "prove")]
 use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
+#[cfg(feature = "prove")]
 use self::zirgen::CircuitImpl;
 
 pub const KECCAK_PO2: usize = 17;
@@ -32,6 +36,7 @@ pub use self::control_id::{KECCAK_CONTROL_ID, KECCAK_CONTROL_ROOT};
 
 pub type Seal = Vec<u32>;
 
+#[cfg(feature = "prove")]
 pub fn verify(seal: &Seal) -> Result<()> {
     let hash_suite = Poseidon2HashSuite::new_suite();
 
