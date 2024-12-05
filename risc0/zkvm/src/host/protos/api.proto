@@ -17,6 +17,7 @@ message ServerRequest {
     CompressRequest compress = 8;
     VerifyRequest verify = 9;
     ProveZkrRequest prove_zkr = 10;
+    ProveKeccakRequest prove_keccak = 11;
   }
 }
 
@@ -60,11 +61,10 @@ message ProveSegmentReply {
 }
 
 message ProveZkrRequest {
-  base.Digest claim_digest = 1;
-  base.Digest control_id = 2;
-  bytes input = 3;
+  base.Digest control_id = 1;
+  bytes input = 2;
   // This is optional in the context of a CoprocessorRequest
-  AssetRequest receipt_out = 4;
+  AssetRequest receipt_out = 3;
 }
 
 message ProveZkrReply {
@@ -75,6 +75,25 @@ message ProveZkrReply {
 }
 
 message ProveZkrResult {
+  Asset receipt = 1;
+}
+
+message ProveKeccakRequest {
+  base.Digest claim_digest = 1;
+  uint64 po2 = 2;
+  bytes input = 3;
+  // This is optional in the context of a CoprocessorRequest // todo - why is this optional?
+  AssetRequest receipt_out = 4;
+}
+
+message ProveKeccakReply {
+  oneof kind {
+    ProveKeccakResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message ProveKeccakResult {
   Asset receipt = 1;
 }
 
@@ -318,6 +337,7 @@ message TraceEvent {
 message CoprocessorRequest {
   oneof kind {
     ProveZkrRequest prove_zkr = 1;
+    ProveKeccakRequest prove_keccak = 2;
   }
 }
 

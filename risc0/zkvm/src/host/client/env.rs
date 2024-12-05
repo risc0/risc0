@@ -79,6 +79,9 @@ pub struct ProveZkrRequest {
 /// A Keccak proof request.
 #[stability::unstable]
 pub struct ProveKeccakRequest {
+    /// The digest of the claim that this ZKR program is expected to produce.
+    pub claim_digest: Digest,
+
     /// Po2 of keccak circuit to run
     pub po2: usize,
 
@@ -100,7 +103,7 @@ pub trait CoprocessorCallback {
     /// Request that a proof of a ZKR is produced.
     fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
     /// Request that a proof of a ZKR is produced, returning the assumption to be added to the assumption table.
-    fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<ProveKeccakResponse>;
+    fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 }
 
 pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;

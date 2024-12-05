@@ -30,7 +30,7 @@ use crate::{
         client::{env::ProveZkrRequest, prove::get_r0vm_path},
     },
     receipt::{AssumptionReceipt, SegmentReceipt, SuccinctReceipt},
-    ExecutorEnv, Journal, ProveInfo, ProverOpts, Receipt, ReceiptClaim,
+    ExecutorEnv, Journal, ProveInfo, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -228,6 +228,52 @@ impl Client {
                 receipt_pb.try_into()
             }
             pb::api::prove_zkr_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Prove the specified keccak proof request.
+    #[stability::unstable]
+    pub fn prove_keccak<Claim>(
+        &self,
+        proof_request: ProveKeccakRequest,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt<Claim>>
+    where
+        Claim: risc0_binfmt::Digestible + std::fmt::Debug + Clone + serde::Serialize,
+        crate::MaybePruned<Claim>: TryFrom<pb::core::MaybePruned, Error = anyhow::Error>,
+    {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::ProveKeccak(
+                pb::api::ProveKeccakRequest {
+                    input: proof_request.input,
+                    po2: proof_request.po2 as u64,
+                    receipt_out: Some(receipt_out.try_into()?),
+                    claim_digest: Some(proof_request.claim_digest.try_into()?),
+                },
+            )),
+        };
+
+        tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::ProveKeccakReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::prove_keccak_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::prove_keccak_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -794,6 +840,12 @@ impl Client {
                 let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
                 let mut coprocessor = coprocessor.borrow_mut();
                 coprocessor.prove_zkr(proof_request)
+            }
+            pb::api::coprocessor_request::Kind::ProveKeccak(proof_request) => {
+                let proof_request = proof_request.try_into()?;
+                let coprocessor = env.coprocessor.clone().ok_or(malformed_err())?;
+                let mut coprocessor = coprocessor.borrow_mut();
+                coprocessor.prove_keccak(proof_request)
             }
         }
     }

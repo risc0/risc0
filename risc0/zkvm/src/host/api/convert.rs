@@ -30,7 +30,8 @@ use crate::{
     },
     receipt_claim::Unknown,
     Assumption, Assumptions, ExitCode, Groth16Receipt, Input, Journal, MaybePruned, Output,
-    ProveInfo, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
+    ProveInfo, ProveKeccakRequest, ProverOpts, Receipt, ReceiptClaim, ReceiptKind, SessionStats,
+    TraceEvent,
 };
 
 mod ver {
@@ -1023,6 +1024,18 @@ impl TryFrom<pb::api::ProveZkrRequest> for ProveZkrRequest {
             claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
             control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
             input: value.input,
+        })
+    }
+}
+
+impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
+        Ok(Self {
+            input: value.input,
+            po2: value.po2 as usize,
+            claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
         })
     }
 }

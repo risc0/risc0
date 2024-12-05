@@ -120,6 +120,12 @@ pub fn main() {
         return;
     }
 
+    // register keccak zkr - todo: find a better way to do this...
+    risc0_zkvm::register_zkr(
+        &risc0_circuit_keccak::KECCAK_CONTROL_ID,
+        risc0_circuit_keccak::prove::zkr::get_zkr,
+    );
+
     if let Some(port) = args.mode.port {
         run_server(port);
         return;

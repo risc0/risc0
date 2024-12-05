@@ -4335,6 +4335,7 @@ dependencies = [
  "bincode",
  "bytemuck",
  "clap 4.5.20",
+ "risc0-circuit-keccak",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "temp-env",

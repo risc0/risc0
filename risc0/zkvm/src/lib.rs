@@ -100,6 +100,7 @@ pub use {
     self::host::{
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
+        keccak::prove_keccak,
         recursion::{
             prove::{prove_zkr, register_zkr},
             RECURSION_PO2,
