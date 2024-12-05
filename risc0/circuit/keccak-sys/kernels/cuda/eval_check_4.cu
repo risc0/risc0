@@ -6,11 +6,11 @@
 
 #include <cstdint>
 
-namespace risc0::circuit::top {
+namespace risc0::circuit::keccak::cuda {
 
 
 
-__device__ FpExt top_51(uint32_t idx,
+__device__ FpExt keccak_51(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
@@ -1546,11 +1546,11 @@ __device__ FpExt top_51(uint32_t idx,
   arg0[29] = x1457;
   Fp x1458 = x512 + x1443;
   arg0[15] = x1458;
-  auto x1459 = top_50(idx, size, arg0, arg1, arg2, arg3, arg4, arg5);
+  auto x1459 = keccak_50(idx, size, arg0, arg1, arg2, arg3, arg4, arg5);
 
   return x1459;
 }
-__device__ FpExt top_46(uint32_t idx,
+__device__ FpExt keccak_46(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
@@ -3065,11 +3065,11 @@ __device__ FpExt top_46(uint32_t idx,
   Fp x1450 = x1449 + x1435;
   Fp x1451 = x1450 + x1436;
   arg0[116] = x1451;
-  auto x1452 = top_45(idx, size, arg0, arg1, arg2, arg3, arg4, arg5);
+  auto x1452 = keccak_45(idx, size, arg0, arg1, arg2, arg3, arg4, arg5);
 
   return x1452;
 }
-__device__ FpExt top_41(uint32_t idx,
+__device__ FpExt keccak_41(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
@@ -4601,11 +4601,11 @@ __device__ FpExt top_41(uint32_t idx,
   Fp x1525 = x1524 + x508;
   Fp x1526 = x1525 + x509;
   arg0[540] = x1526;
-  auto x1527 = top_40(idx, size, arg0, x1523, arg2, arg3, arg4);
+  auto x1527 = keccak_40(idx, size, arg0, x1523, arg2, arg3, arg4);
 
   return x1527;
 }
-__device__ FpExt top_36(uint32_t idx,
+__device__ FpExt keccak_36(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
   uint32_t mask = size - 1;
@@ -6455,11 +6455,11 @@ __device__ FpExt top_36(uint32_t idx,
   Fp x1383 = x1382 * x1380;
   Fp x1384 = x1381 - x1383;
   arg0[1918] = x1384;
-  auto x1385 = top_35(idx, size, arg0, arg1, arg2, arg3);
+  auto x1385 = keccak_35(idx, size, arg0, arg1, arg2, arg3);
 
   return x1385;
 }
-__device__ FpExt top_31(uint32_t idx,
+__device__ FpExt keccak_31(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
   uint32_t mask = size - 1;
@@ -8251,11 +8251,11 @@ __device__ FpExt top_31(uint32_t idx,
   Fp x1522 = x1521 * x815;
   Fp x1523 = x1520 - x1522;
   arg0[3413] = x1523;
-  auto x1524 = top_30(idx, size, arg0, arg1, arg2, arg3);
+  auto x1524 = keccak_30(idx, size, arg0, arg1, arg2, arg3);
 
   return x1524;
 }
-__device__ FpExt top_26(uint32_t idx,
+__device__ FpExt keccak_26(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, const Fp* arg3) {
   uint32_t mask = size - 1;
@@ -9877,11 +9877,11 @@ __device__ FpExt top_26(uint32_t idx,
   Fp x1430 = x1429 * x1427;
   Fp x1431 = x1428 - x1430;
   arg0[4636] = x1431;
-  auto x1432 = top_25(idx, size, arg0, arg1, arg2, arg3);
+  auto x1432 = keccak_25(idx, size, arg0, arg1, arg2, arg3);
 
   return x1432;
 }
-__device__ FpExt top_21(uint32_t idx,
+__device__ FpExt keccak_21(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, FpExt arg5, const Fp* arg6) {
   uint32_t mask = size - 1;
@@ -12216,11 +12216,11 @@ __device__ FpExt top_21(uint32_t idx,
   Fp x1863 = arg0[5101];
   Fp x1864 = x1863 - x465;
   arg0[5102] = x1864;
-  auto x1865 = top_20(idx, size, arg0, x1862, arg2, arg3, arg4, arg5, arg6);
+  auto x1865 = keccak_20(idx, size, arg0, x1862, arg2, arg3, arg4, arg5, arg6);
 
   return x1865;
 }
-__device__ FpExt top_16(uint32_t idx,
+__device__ FpExt keccak_16(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
@@ -13505,11 +13505,11 @@ __device__ FpExt top_16(uint32_t idx,
   Fp x1208 = x1207 * x158;
   Fp x1209 = x1206 + x1208;
   arg0[6316] = x1209;
-  auto x1210 = top_15(idx, size, arg0, x745, arg2, arg3, arg4, arg5);
+  auto x1210 = keccak_15(idx, size, arg0, x745, arg2, arg3, arg4, arg5);
 
   return x1210;
 }
-__device__ FpExt top_11(uint32_t idx,
+__device__ FpExt keccak_11(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
@@ -14974,11 +14974,11 @@ __device__ FpExt top_11(uint32_t idx,
   arg0[7082] = x1406;
   Fp x1407 = x1406 * x157;
   arg0[7061] = x1407;
-  auto x1408 = top_10(idx, size, arg0, x1153, arg2, arg3, arg4, arg5);
+  auto x1408 = keccak_10(idx, size, arg0, x1153, arg2, arg3, arg4, arg5);
 
   return x1408;
 }
-__device__ FpExt top_6(uint32_t idx,
+__device__ FpExt keccak_6(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, FpExt arg4, const Fp* arg5) {
   uint32_t mask = size - 1;
@@ -16268,11 +16268,11 @@ __device__ FpExt top_6(uint32_t idx,
   Fp x1250 = arg0[50];
   Fp x1251 = x1250 + x1248;
   arg0[7795] = x1251;
-  auto x1252 = top_5(idx, size, arg0, x551, arg2, arg3, arg4, arg5);
+  auto x1252 = keccak_5(idx, size, arg0, x551, arg2, arg3, arg4, arg5);
 
   return x1252;
 }
-__device__ FpExt top_1(uint32_t idx,
+__device__ FpExt keccak_1(uint32_t idx,
                         uint32_t size
                         , Fp* arg0, FpExt arg1, FpExt arg2, FpExt arg3, const Fp* arg4) {
   uint32_t mask = size - 1;
@@ -17885,9 +17885,9 @@ __device__ FpExt top_1(uint32_t idx,
   FpExt x1606 = arg2 + x17 * x1605 * poly_mix[1901];
   Fp x1607 = arg0[8180];
   FpExt x1608 = arg3 + poly_mix[0] * x1607;
-  auto x1609 = top_0(idx, size, arg0, x1608, x1606, arg4);
+  auto x1609 = keccak_0(idx, size, arg0, x1608, x1606, arg4);
 
   return x1609;
 }
 
-}  // namespace risc0::circuit::top
+}  // namespace risc0::circuit::keccak::cuda
