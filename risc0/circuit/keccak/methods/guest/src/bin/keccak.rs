@@ -21,7 +21,13 @@ fn main() {
     let (claim_digest, input): (Digest, Vec<u32>) = env::read();
 
     unsafe {
-        sys_prove_keccak(0, input.as_ptr(), input.len(), KECCAK_CONTROL_ROOT.as_ref());
+        sys_prove_keccak(
+            0,
+            input.as_ptr(),
+            input.len(),
+            KECCAK_CONTROL_ROOT.as_ref(),
+            claim_digest.as_ref(),
+        );
     }
     env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
 }

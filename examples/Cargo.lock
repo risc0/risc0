@@ -3344,6 +3344,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-keccak"
+version = "1.3.0-alpha.1"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "cfg-if",
+ "paste",
+ "rayon",
+ "risc0-binfmt",
+ "risc0-circuit-keccak-sys",
+ "risc0-circuit-recursion",
+ "risc0-core",
+ "risc0-sys",
+ "risc0-zkp",
+ "tracing",
+ "zip",
+]
+
+[[package]]
+name = "risc0-circuit-keccak-sys"
+version = "1.3.0-alpha.1"
+dependencies = [
+ "cc",
+ "derive_more 1.0.0",
+ "glob",
+ "risc0-build-kernel",
+ "risc0-core",
+ "risc0-sys",
+]
+
+[[package]]
 name = "risc0-circuit-recursion"
 version = "1.3.0-alpha.1"
 dependencies = [
@@ -3524,6 +3555,7 @@ dependencies = [
  "rayon",
  "risc0-binfmt",
  "risc0-build",
+ "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
