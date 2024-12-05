@@ -109,14 +109,13 @@ impl ProverServer for ProverImpl {
             zkr_receipts.insert(assumption, receipt);
         }
 
-        let mut keccak_receipts = HashMap::new();
         for proof_request in session.pending_keccaks.iter() {
             let receipt = prove_keccak(proof_request.po2, &proof_request.input)?;
             let assumption = Assumption {
                 claim: receipt.claim.digest(),
                 control_root: receipt.control_root()?,
             };
-            keccak_receipts.insert(assumption, receipt);
+            zkr_receipts.insert(assumption, receipt);
         }
 
         // TODO: add test case for when a single session refers to the same assumption multiple times
