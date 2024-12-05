@@ -5,27 +5,27 @@ edition = "2021"
 default-run = "main"
 
 [dependencies]
-anyhow = "1.0.75"
-clap = { version = "4.5.4", features = ["derive"] }
-colored = "2.0.4"
-db-dump = "0.7.9"
-handlebars = "4.5.0"
-indicatif = "0.17.7"
-reqwest = { version = "0.12.5", default-features = false, features = [
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+colored = "2"
+db-dump = "0.7"
+handlebars = "4.3"
+indicatif = "0.17"
+reqwest = { version = "0.12", default-features = false, features = [
   "rustls-tls",
   "stream",
 ] }
 semver = { version = "1.0.18", features = ["serde"] }
-serde = { version = "1.0.197", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.107"
 serde_valid = { version = "0.16.3", features = ["yaml"] }
 serde_yaml = "0.9.25"
-strum = { version = "0.25.0", features = ["derive"] }
-tempfile = "3.8.1"
-tokio = { version = "1.35.0", features = ["full"] }
-tokio-stream = "0.1.14"
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+strum = { version = "0.25", features = ["derive"] }
+tempfile = "3"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
-rstest = "0.18.2"
+rstest = "0.18"
