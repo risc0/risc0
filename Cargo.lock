@@ -973,7 +973,7 @@ dependencies = [
  "bincode",
  "bonsai-sdk",
  "cargo_metadata",
- "clap 4.5.20",
+ "clap 4.5.22",
  "const_format",
  "dirs",
  "downloader",
@@ -1115,9 +1115,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.20"
+version = "4.5.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97f376d85a664d5837dbae44bf546e6477a679ff6610010f17276f686d867e8"
+checksum = "69371e34337c4c984bbe322360c2547210bf632eb2814bbe78a6e87a2935bd2b"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -1125,9 +1125,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.20"
+version = "4.5.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19bc80abd44e4bed93ca373a0704ccbd1b710dc5749406201bb018272808dc54"
+checksum = "6e24c1b4099818523236a8ca881d2b45db98dadfb4625cf6608c12069fcbbde1"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1300,7 +1300,7 @@ dependencies = [
  "anes",
  "cast",
  "ciborium",
- "clap 4.5.20",
+ "clap 4.5.22",
  "criterion-plot",
  "is-terminal",
  "itertools 0.10.5",
@@ -4097,7 +4097,7 @@ name = "risc0-bigint2"
 version = "1.3.0-alpha.1"
 dependencies = [
  "anyhow",
- "clap 4.5.20",
+ "clap 4.5.22",
  "include_bytes_aligned",
  "num-bigint 0.4.6",
  "num-bigint-dig",
@@ -4334,7 +4334,7 @@ dependencies = [
  "assert_fs",
  "bincode",
  "bytemuck",
- "clap 4.5.20",
+ "clap 4.5.22",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "temp-env",
@@ -4358,7 +4358,7 @@ name = "risc0-tools"
 version = "1.3.0-alpha.1"
 dependencies = [
  "assert_cmd",
- "clap 4.5.20",
+ "clap 4.5.22",
  "risc0-zkvm",
  "tempfile",
 ]
@@ -4408,7 +4408,7 @@ dependencies = [
  "bytes",
  "chrono",
  "ciborium",
- "clap 4.5.20",
+ "clap 4.5.22",
  "crypto-bigint",
  "elf",
  "enum-iterator",
@@ -4658,7 +4658,7 @@ version = "0.2.2"
 dependencies = [
  "anyhow",
  "cfg-if",
- "clap 4.5.20",
+ "clap 4.5.22",
  "dirs",
  "downloader",
  "flate2",
@@ -6188,7 +6188,7 @@ name = "xtask"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "clap 4.5.20",
+ "clap 4.5.22",
  "hex",
  "prost-build",
  "protobuf-src",
