@@ -32,6 +32,21 @@ pub trait ToBigInt2Buffer<const WIDTH: usize> {
     fn from_u32_array(array: [u32; WIDTH]) -> Self;
 }
 
+#[cfg(feature = "unstable")]
+#[inline]
+// Checks if two u32 arrays representing big integers with little-endian digit order satisfy lhs < rhs
+fn is_less<const N: usize>(lhs: &[u32; N], rhs: &[u32; N]) -> bool {
+    for i in (0..N).rev() {
+        if lhs[i] < rhs[i] {
+            return true;
+        }
+        if lhs[i] > rhs[i] {
+            return false;
+        }
+    }
+    false
+}
+
 #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
 const _: () = {
     assert!(
