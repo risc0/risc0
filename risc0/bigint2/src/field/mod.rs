@@ -31,10 +31,12 @@ const EXTFIELDADD_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfieldadd_256.b
 const EXTFIELDMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfieldmul_256.blob");
 const EXTFIELDSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfieldsub_256.blob");
 
+// TODO: All of these need guards against returning results >= prime/modulus
+
 pub fn modadd_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
-    prime: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
     unsafe {
@@ -42,7 +44,7 @@ pub fn modadd_256(
             MODADD_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            prime.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -50,14 +52,14 @@ pub fn modadd_256(
 
 pub fn modinv_256(
     inp: &[u32; FIELD_256_WIDTH_WORDS],
-    prime: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
     unsafe {
         sys_bigint2_3(
             MODINV_256_BLOB.as_ptr(),
             inp.as_ptr() as *const u32,
-            prime.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -66,7 +68,7 @@ pub fn modinv_256(
 pub fn modmul_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
-    prime: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
     unsafe {
@@ -74,7 +76,7 @@ pub fn modmul_256(
             MODMUL_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            prime.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -83,7 +85,7 @@ pub fn modmul_256(
 pub fn modsub_256(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
-    prime: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
     unsafe {
@@ -91,16 +93,17 @@ pub fn modsub_256(
             MODSUB_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            prime.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
 }
 
+// TODO: Make it clearer that these functions are for degree 2 extensions
 pub fn extfieldadd_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
-    prime: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
     unsafe {
@@ -108,7 +111,7 @@ pub fn extfieldadd_256(
             EXTFIELDADD_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            prime.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -117,7 +120,7 @@ pub fn extfieldadd_256(
 pub fn extfieldmul_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
-    prime: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
     unsafe {
@@ -125,7 +128,7 @@ pub fn extfieldmul_256(
             EXTFIELDMUL_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            prime.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
@@ -134,7 +137,7 @@ pub fn extfieldmul_256(
 pub fn extfieldsub_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
-    prime: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
     unsafe {
@@ -142,7 +145,7 @@ pub fn extfieldsub_256(
             EXTFIELDSUB_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
-            prime.as_ptr() as *const u32,
+            modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );
     }
