@@ -18,7 +18,7 @@ use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
 pub const KECCAK_CONTROL_ID: Digest =
-    digest!("d67ee915cfecf608336cad09b34700682c55d634768444646b7d8c1ab2c33048");
+    digest!("0d1c2772c28cca62aa8568112406502d1d7c3241cbc6d9442159c60f73451560");
 
 pub const KECCAK_CONTROL_ROOT: Digest =
-    digest!("8c5212747d718367b331b4682cbb584aac81d5151df0366e0530f4144fd9b853");
+    digest!("125fbb2d94fa6e033e55a7538e082029be45324b884e543d3859f3549fef174a");
