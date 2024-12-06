@@ -22,16 +22,16 @@
 
 using namespace risc0;
 
-namespace risc0::circuit::top {
+namespace risc0::circuit::keccak {
 
 FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args);
 
-} // namespace risc0::circuit::top
+} // namespace risc0::circuit::keccak
 
 extern "C" const char* risc0_circuit_keccak_cpu_poly_fp(
     size_t cycle, size_t steps, FpExt* poly_mix, Fp** args, FpExt* result) {
   try {
-    *result = circuit::top::poly_fp(cycle, steps, poly_mix, args);
+    *result = circuit::keccak::poly_fp(cycle, steps, poly_mix, args);
   } catch (const std::exception& err) {
     return strdup(err.what());
   }
