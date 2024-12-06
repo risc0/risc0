@@ -533,23 +533,14 @@ jobs:
         working-directory: tools/crates-validator/
       - name: Create working directory
         run: mkdir -p ${{ runner.temp }}/crate-validation/
-      - name: Generate the profile
-        run: |
-          target/release/gen-profiles \
-          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
-          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
-          -c $TOP_N_CRATES
-        working-directory: tools/crates-validator/
       - name: Validate profiles
         run: |
           target/release/main \
           -p ${{ github.workspace }} \
-          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -P profiles/profiles-10.yaml \
           -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
-      - name: Delete input profile
-        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
         if: always()
       - run: sccache --show-stats
