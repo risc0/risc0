@@ -229,10 +229,11 @@ impl PolyExtStep {
             }
             PolyExtStep::ConstExt(x0, x1, x2, x3) => {
                 let elem = F::ExtElem::from_subelems([
-                  F::Elem::from_u64(*x0 as u64),
-                  F::Elem::from_u64(*x1 as u64),
-                  F::Elem::from_u64(*x2 as u64),
-                  F::Elem::from_u64(*x3 as u64)]);
+                    F::Elem::from_u64(*x0 as u64),
+                    F::Elem::from_u64(*x1 as u64),
+                    F::Elem::from_u64(*x2 as u64),
+                    F::Elem::from_u64(*x3 as u64),
+                ]);
                 trace_if_enabled!("[{}] {self:?} -> {elem:?}", fp_vars.len());
                 fp_vars.push(elem);
             }
