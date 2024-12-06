@@ -22,7 +22,6 @@ fn main() {
 
     unsafe {
         sys_prove_keccak(
-            0,
             input.as_ptr(),
             input.len(),
             KECCAK_CONTROL_ROOT.as_ref(),

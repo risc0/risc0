@@ -234,9 +234,7 @@ impl CoprocessorCallback for CoprocessorProxy {
                             kind: Some(pb::api::coprocessor_request::Kind::ProveKeccak({
                                 pb::api::ProveKeccakRequest {
                                     input: proof_request.input,
-                                    po2: proof_request.po2 as u64,
                                     receipt_out: None,
-                                    claim_digest: Some(proof_request.claim_digest.into()),
                                 }
                             })),
                         },
@@ -521,8 +519,7 @@ impl Server {
         request: pb::api::ProveKeccakRequest,
     ) -> Result<()> {
         fn inner(request: pb::api::ProveKeccakRequest) -> Result<pb::api::ProveKeccakReply> {
-            let po2 = request.po2;
-            let receipt = prove_keccak(po2 as usize, &request.input)?;
+            let receipt = prove_keccak(&request.input)?;
 
             let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();

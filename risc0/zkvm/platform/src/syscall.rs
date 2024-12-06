@@ -962,18 +962,16 @@ pub unsafe extern "C" fn sys_keccak(
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_keccak(
-    po2: usize,
     input: *const u32,
     input_len: usize,
     control_root: *const [u32; DIGEST_WORDS],
     claim_digest: *const [u32; DIGEST_WORDS],
 ) {
     let Return(a0, _) = unsafe {
-        syscall_5(
+        syscall_4(
             nr::SYS_PROVE_KECCAK,
             null_mut(),
             0,
-            po2 as u32,
             input as u32,
             input_len as u32,
             control_root as u32,

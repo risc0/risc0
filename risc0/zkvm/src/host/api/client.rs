@@ -255,9 +255,7 @@ impl Client {
             kind: Some(pb::api::server_request::Kind::ProveKeccak(
                 pb::api::ProveKeccakRequest {
                     input: proof_request.input,
-                    po2: proof_request.po2 as u64,
                     receipt_out: Some(receipt_out.try_into()?),
-                    claim_digest: Some(proof_request.claim_digest.into()),
                 },
             )),
         };

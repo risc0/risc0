@@ -24,7 +24,7 @@ use risc0_zkp::core::digest::{Digest, DIGEST_SHORTS};
 use crate::{receipt::SuccinctReceipt, recursion, Unknown};
 
 /// Generate a keccak proof that has been lifted.
-pub fn prove_keccak(_po2: usize, input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
+pub fn prove_keccak(input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
     let input: &[KeccakState] = bytemuck::cast_slice(input);
     let prover = keccak_prover().unwrap();
     let seal = prover

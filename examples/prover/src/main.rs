@@ -26,7 +26,8 @@ use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
 use risc0_zkp::digest;
 use risc0_zkvm::{
     sha::Digest, ApiClient, Asset, AssetRequest, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt, Unknown,
+    MaybePruned, ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt,
+    Unknown,
 };
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
@@ -59,8 +60,11 @@ impl CoprocessorCallback for Coprocessor {
 
     fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
         let client = ApiClient::from_env().unwrap();
-        let claim_digest = proof_request.claim_digest;
         let receipt = client.prove_keccak(proof_request, AssetRequest::Inline)?;
+        let claim_digest = match receipt.claim {
+            MaybePruned::Value(_) => unimplemented!(), // unknown is always pruned so if we get to this branch, something went wrong...
+            MaybePruned::Pruned(claim_digest) => claim_digest,
+        };
         self.receipts.insert(claim_digest, receipt);
         Ok(())
     }

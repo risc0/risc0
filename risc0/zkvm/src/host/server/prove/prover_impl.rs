@@ -110,7 +110,7 @@ impl ProverServer for ProverImpl {
         }
 
         for proof_request in session.pending_keccaks.iter() {
-            let receipt = prove_keccak(proof_request.po2, &proof_request.input)?;
+            let receipt = prove_keccak(&proof_request.input)?;
             let assumption = Assumption {
                 claim: receipt.claim.digest(),
                 control_root: receipt.control_root()?,

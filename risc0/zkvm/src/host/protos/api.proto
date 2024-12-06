@@ -80,11 +80,9 @@ message ProveZkrResult {
 }
 
 message ProveKeccakRequest {
-  base.Digest claim_digest = 1;
-  uint64 po2 = 2;
-  bytes input = 3;
+  bytes input = 1;
   // This is optional in the context of a CoprocessorRequest
-  AssetRequest receipt_out = 4;
+  AssetRequest receipt_out = 2;
 }
 
 message ProveKeccakReply {

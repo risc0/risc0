@@ -1032,10 +1032,6 @@ impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
-        Ok(Self {
-            input: value.input,
-            po2: value.po2 as usize,
-            claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
-        })
+        Ok(Self { input: value.input })
     }
 }
