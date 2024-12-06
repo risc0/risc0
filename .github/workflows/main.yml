@@ -36,7 +36,6 @@ jobs:
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
       crates-validation: ${{ steps.filter.outputs.crates-validation }}
-      crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       risc0: ${{ steps.filter.outputs.risc0 }}
@@ -76,9 +75,6 @@ jobs:
               - *base
               - risc0/**
               - tools/crates-validator/**
-            crates-validator:
-              - *base
-              - tools/crates-validator/**
             doc:
               - *base
               - bonsai/sdk/**
@@ -111,7 +107,6 @@ jobs:
       - check-external
       - check-template
       - clippy
-      - crates-validator
       - crates-validation
       - doc
       - docs-rs
@@ -496,22 +491,6 @@ jobs:
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test-no-std/Cargo.toml
       - run: sccache --show-stats
 
-  crates-validator:
-    if: needs.changes.outputs.crates-validator == 'true'
-    needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
-    env:
-      RISC0_BUILD_LOCKED: 1
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: macOS-default
-      - run: cargo test
-        working-directory: tools/crates-validator
-      - run: sccache --show-stats
-
   crates-validation:
     if: needs.changes.outputs.crates-validation == 'true'
     needs: changes
@@ -529,27 +508,20 @@ jobs:
       - run: cargo run --bin rzup -- --verbose install cpp $RISC0_CPP_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo test
+        working-directory: tools/crates-validator/
       - run: cargo build --release
         working-directory: tools/crates-validator/
       - name: Create working directory
         run: mkdir -p ${{ runner.temp }}/crate-validation/
-      - name: Generate the profile
-        run: |
-          target/release/gen-profiles \
-          -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yml \
-          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
-          -c $TOP_N_CRATES
-        working-directory: tools/crates-validator/
       - name: Validate profiles
         run: |
           target/release/main \
           -p ${{ github.workspace }} \
-          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -P profiles/profiles-10.yaml \
           -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
-      - name: Delete input profile
-        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
         if: always()
       - run: sccache --show-stats
