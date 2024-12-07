@@ -67,7 +67,7 @@ fn build_cuda_kernels() {
             .flag("-diag-suppress=2922")
             .flag("-std=c++17")
             .flag("-Xcompiler")
-            .flag("-Wno-unused-function")
+            .flag("-Wno-unused-function,-Wno-unused-parameter")
             .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
             .include(env::var("DEP_SPPARK_ROOT").unwrap());
         if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none()
@@ -83,6 +83,8 @@ fn build_cuda_kernels() {
         "kernels/cuda/eval_check_2.cu",
         "kernels/cuda/eval_check_3.cu",
         "kernels/cuda/eval_check_4.cu",
+        "kernels/cuda/steps_0.cu",
+        "kernels/cuda/steps_1.cu",
         "kernels/cuda/steps_2.cu",
         "kernels/cuda/steps_3.cu",
         "kernels/cuda/steps_4.cu",
@@ -91,17 +93,16 @@ fn build_cuda_kernels() {
         "kernels/cuda/steps_7.cu",
         "kernels/cuda/steps_8.cu",
         "kernels/cuda/steps_9.cu",
-        "kernels/cuda/steps_10.cu",
-        "kernels/cuda/steps_11.cu",
+        // "kernels/cuda/steps_10.cu",
+        // "kernels/cuda/steps_11.cu",
         "kernels/cuda/steps_12.cu",
         "kernels/cuda/steps_13.cu",
         "kernels/cuda/steps_14.cu",
         "kernels/cuda/steps_15.cu",
-        "kernels/cuda/steps_16.cu",
         "kernels/cuda/ffi_supra.cu",
     ];
 
-    let special = ["kernels/cuda/steps_0.cu", "kernels/cuda/steps_1.cu"];
+    let special = ["kernels/cuda/steps_10.cu", "kernels/cuda/steps_11.cu"];
 
     let objs = std::thread::scope(|s| -> Vec<PathBuf> {
         let regular_objs = s.spawn(|| base().files(regular).compile_intermediates());
@@ -118,7 +119,7 @@ fn build_cuda_kernels() {
     });
 
     base()
-        .files(["kernels/cuda/ffi.cu", "kernels/cuda/steps.cu"])
+        .files(["kernels/cuda/ffi.cu", "kernels/cuda/empty.cu"])
         .objects(objs)
         .compile(output);
 }

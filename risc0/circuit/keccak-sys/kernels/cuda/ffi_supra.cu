@@ -19,7 +19,7 @@
 
 #include <exception>
 
-namespace risc0::circuit::top {
+namespace risc0::circuit::keccak::cuda {
 
 __constant__ FpExt poly_mix[kNumPolyMixPows];
 
@@ -45,11 +45,11 @@ __global__ void eval_check(Fp* check,
   }
 }
 
-} // namespace risc0::circuit::top
+} // namespace risc0::circuit::keccak::cuda
 
 extern "C" {
 
-using namespace risc0::circuit::top;
+using namespace risc0::circuit::keccak::cuda;
 
 const char* risc0_circuit_keccak_cuda_eval_check(Fp* check,
                                                  const Fp* ctrl,
