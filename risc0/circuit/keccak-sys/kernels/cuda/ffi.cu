@@ -17,6 +17,7 @@
 #include "fp.h"
 #include "fpext.h"
 #include "witgen.h"
+#include "steps.cuh"
 
 #include <cstdint>
 #include <cstdio>
@@ -24,11 +25,8 @@
 #include <string.h>
 
 using namespace risc0;
-using namespace risc0::impl;
 
-namespace risc0 {
-
-namespace impl {
+namespace risc0::circuit::keccak::cuda {
 
 struct ExecBuffers {
   Buffer global;
@@ -42,8 +40,6 @@ struct ScatterInfo {
   uint16_t count;
   uint32_t bits;
 };
-
-extern __device__ void step_Top(ExecContext& ctx, MutableBuf data0, GlobalBuf global1);
 
 __device__ void
 nextStep(Buffer* bufData, Buffer* bufGlobal, PreflightTrace* preflight, uint32_t cycle) {
@@ -113,15 +109,15 @@ __global__ void scatter_preflight(Fp* into,
   }
 }
 
-} // namespace impl
-
-} // namespace risc0
+} // namespace risc0::circuit::keccak::cuda
 
 constexpr size_t kStepModeSeqParallel = 0;
 constexpr size_t kStepModeSeqForward = 1;
 constexpr size_t kStepModeSeqReverse = 2;
 
 extern "C" {
+
+using namespace risc0::circuit::keccak::cuda;
 
 const char* risc0_circuit_keccak_cuda_witgen(uint32_t mode,
                                              ExecBuffers* buffers,

@@ -1,7 +1,7 @@
 struct NondetRegLayout {
   Reg _super;
 };
-using NondetRegLayout12LayoutArray = cuda::std::array<NondetRegLayout,12>;
+using NondetRegLayout12LayoutArray = ::cuda::std::array<NondetRegLayout,12>;
 struct WrapOneHotLayout {
   NondetRegLayout12LayoutArray _super;
 };
@@ -81,9 +81,9 @@ struct TopControlStateLayout {
 struct OneHot_12_Layout {
   NondetRegLayout12LayoutArray _super;
 };
-using NondetRegLayout800LayoutArray = cuda::std::array<NondetRegLayout,800>;
-using NondetRegLayout100LayoutArray = cuda::std::array<NondetRegLayout,100>;
-using NondetRegLayout16LayoutArray = cuda::std::array<NondetRegLayout,16>;
+using NondetRegLayout800LayoutArray = ::cuda::std::array<NondetRegLayout,800>;
+using NondetRegLayout100LayoutArray = ::cuda::std::array<NondetRegLayout,100>;
+using NondetRegLayout16LayoutArray = ::cuda::std::array<NondetRegLayout,16>;
 struct TopStateLayout {
   NondetRegLayout800LayoutArray bits;
   NondetRegLayout100LayoutArray kflat;
@@ -105,11 +105,11 @@ struct WriteCycleLayout {
   TopStateLayout _super;
   UnpackReg_800__16_Layout bits;
 };
-using NondetRegLayout64LayoutArray = cuda::std::array<NondetRegLayout,64>;
+using NondetRegLayout64LayoutArray = ::cuda::std::array<NondetRegLayout,64>;
 struct ThetaP1_Super_SuperLayout {
   NondetRegLayout64LayoutArray _super;
 };
-using ThetaP1_Super_SuperLayout5LayoutArray = cuda::std::array<ThetaP1_Super_SuperLayout,5>;
+using ThetaP1_Super_SuperLayout5LayoutArray = ::cuda::std::array<ThetaP1_Super_SuperLayout,5>;
 struct ThetaP1Layout {
   ThetaP1_Super_SuperLayout5LayoutArray _super;
 };
@@ -117,7 +117,7 @@ struct KeccakRound0Layout {
   TopStateLayout _super;
   ThetaP1Layout b;
 };
-using NondetRegLayout24LayoutArray = cuda::std::array<NondetRegLayout,24>;
+using NondetRegLayout24LayoutArray = ::cuda::std::array<NondetRegLayout,24>;
 struct OneHot_24_Layout {
   NondetRegLayout24LayoutArray _super;
 };
@@ -135,18 +135,18 @@ struct KeccakRound34_1_Layout {
   TopStateLayout _super;
   IotaLayout _0;
 };
-using NondetRegLayout8LayoutArray = cuda::std::array<NondetRegLayout,8>;
+using NondetRegLayout8LayoutArray = ::cuda::std::array<NondetRegLayout,8>;
 struct OneHot_8_Layout {
   NondetRegLayout8LayoutArray _super;
 };
-using NondetRegLayout4LayoutArray = cuda::std::array<NondetRegLayout,4>;
+using NondetRegLayout4LayoutArray = ::cuda::std::array<NondetRegLayout,4>;
 struct OneHot_4_Layout {
   NondetRegLayout4LayoutArray _super;
 };
 struct LoadWinLayout {
   OneHot_4_Layout blockSelect;
 };
-using NondetRegLayout32LayoutArray = cuda::std::array<NondetRegLayout,32>;
+using NondetRegLayout32LayoutArray = ::cuda::std::array<NondetRegLayout,32>;
 struct UnpackReg_32__16_Layout {
   NondetRegLayout32LayoutArray _super;
 };
@@ -165,7 +165,7 @@ struct DoShaStepLayout {
   CarryAndExpandLayout a;
   CarryAndExpandLayout e;
 };
-using DoShaStepLayout8LayoutArray = cuda::std::array<DoShaStepLayout,8>;
+using DoShaStepLayout8LayoutArray = ::cuda::std::array<DoShaStepLayout,8>;
 struct ShaCycleLayout {
   TopStateLayout _super;
   OneHot_8_Layout oneHot;
@@ -181,7 +181,7 @@ struct ShaCycleLayout {
   DoShaStepLayout step7;
   DoShaStepLayout8LayoutArray steps;
 };
-using CarryAndExpandLayout4LayoutArray = cuda::std::array<CarryAndExpandLayout,4>;
+using CarryAndExpandLayout4LayoutArray = ::cuda::std::array<CarryAndExpandLayout,4>;
 struct ShaNextBlockCycleLayout {
   TopStateLayout _super;
   CarryAndExpandLayout4LayoutArray totA;
@@ -220,41 +220,41 @@ struct _globalLayout {
 struct NondetRegStruct {
   Val _super;
 };
-using Val5Array = cuda::std::array<Val,5>;
-using Val64Array = cuda::std::array<Val,64>;
-using Val64Array5Array = cuda::std::array<Val64Array,5>;
-using Val64Array5Array5Array = cuda::std::array<Val64Array5Array,5>;
+using Val5Array = ::cuda::std::array<Val,5>;
+using Val64Array = ::cuda::std::array<Val,64>;
+using Val64Array5Array = ::cuda::std::array<Val64Array,5>;
+using Val64Array5Array5Array = ::cuda::std::array<Val64Array5Array,5>;
 struct ThetaP1_Super_Super_SuperStruct {
   NondetRegStruct _super;
 };
-using ThetaP1_Super_Super_SuperStruct64Array = cuda::std::array<ThetaP1_Super_Super_SuperStruct,64>;
+using ThetaP1_Super_Super_SuperStruct64Array = ::cuda::std::array<ThetaP1_Super_Super_SuperStruct,64>;
 struct ThetaP1_Super_SuperStruct {
   ThetaP1_Super_Super_SuperStruct64Array _super;
 };
-using ThetaP1_Super_SuperStruct5Array = cuda::std::array<ThetaP1_Super_SuperStruct,5>;
+using ThetaP1_Super_SuperStruct5Array = ::cuda::std::array<ThetaP1_Super_SuperStruct,5>;
 struct ThetaP1Struct {
   ThetaP1_Super_SuperStruct5Array _super;
 };
-using Val24Array = cuda::std::array<Val,24>;
-using NondetRegStruct24Array = cuda::std::array<NondetRegStruct,24>;
+using Val24Array = ::cuda::std::array<Val,24>;
+using NondetRegStruct24Array = ::cuda::std::array<NondetRegStruct,24>;
 struct OneHot_24_Struct {
   NondetRegStruct24Array _super;
 };
 struct RoundToArray_Super_SuperStruct {
   Val _super;
 };
-using RoundToArray_Super_SuperStruct64Array = cuda::std::array<RoundToArray_Super_SuperStruct,64>;
+using RoundToArray_Super_SuperStruct64Array = ::cuda::std::array<RoundToArray_Super_SuperStruct,64>;
 struct RoundToArrayStruct {
   RoundToArray_Super_SuperStruct64Array _super;
 };
 struct Iota_Super_Super_Super_SuperStruct {
   Val64Array _super;
 };
-using Iota_Super_Super_Super_SuperStruct5Array = cuda::std::array<Iota_Super_Super_Super_SuperStruct,5>;
+using Iota_Super_Super_Super_SuperStruct5Array = ::cuda::std::array<Iota_Super_Super_Super_SuperStruct,5>;
 struct Iota_Super_SuperStruct {
   Iota_Super_Super_Super_SuperStruct5Array _super;
 };
-using Iota_Super_SuperStruct5Array = cuda::std::array<Iota_Super_SuperStruct,5>;
+using Iota_Super_SuperStruct5Array = ::cuda::std::array<Iota_Super_SuperStruct,5>;
 struct IotaStruct {
   Iota_Super_SuperStruct5Array _super;
 };
@@ -262,43 +262,43 @@ struct CarryExtractStruct {
   Val carry;
   Val out;
 };
-using Val2Array = cuda::std::array<Val,2>;
+using Val2Array = ::cuda::std::array<Val,2>;
 struct DivStruct {
   Val _super;
 };
-using DivStruct32Array = cuda::std::array<DivStruct,32>;
-using Val32Array = cuda::std::array<Val,32>;
+using DivStruct32Array = ::cuda::std::array<DivStruct,32>;
+using Val32Array = ::cuda::std::array<Val,32>;
 struct UnpackReg_32__16__SuperStruct {
   NondetRegStruct _super;
 };
-using UnpackReg_32__16__SuperStruct32Array = cuda::std::array<UnpackReg_32__16__SuperStruct,32>;
+using UnpackReg_32__16__SuperStruct32Array = ::cuda::std::array<UnpackReg_32__16__SuperStruct,32>;
 struct UnpackReg_32__16_Struct {
   UnpackReg_32__16__SuperStruct32Array _super;
 };
-using Val800Array = cuda::std::array<Val,800>;
+using Val800Array = ::cuda::std::array<Val,800>;
 struct TopStateBitsStruct {
   NondetRegStruct _super;
 };
-using TopStateBitsStruct800Array = cuda::std::array<TopStateBitsStruct,800>;
-using Val100Array = cuda::std::array<Val,100>;
+using TopStateBitsStruct800Array = ::cuda::std::array<TopStateBitsStruct,800>;
+using Val100Array = ::cuda::std::array<Val,100>;
 struct TopStateKflatStruct {
   NondetRegStruct _super;
 };
-using TopStateKflatStruct100Array = cuda::std::array<TopStateKflatStruct,100>;
-using Val16Array = cuda::std::array<Val,16>;
-using NondetRegStruct16Array = cuda::std::array<NondetRegStruct,16>;
+using TopStateKflatStruct100Array = ::cuda::std::array<TopStateKflatStruct,100>;
+using Val16Array = ::cuda::std::array<Val,16>;
+using NondetRegStruct16Array = ::cuda::std::array<NondetRegStruct,16>;
 struct TopStateStruct {
   TopStateBitsStruct800Array bits;
   TopStateKflatStruct100Array kflat;
   NondetRegStruct16Array sflat;
 };
-using Val8Array = cuda::std::array<Val,8>;
-using NondetRegStruct8Array = cuda::std::array<NondetRegStruct,8>;
+using Val8Array = ::cuda::std::array<Val,8>;
+using NondetRegStruct8Array = ::cuda::std::array<NondetRegStruct,8>;
 struct OneHot_8_Struct {
   NondetRegStruct8Array _super;
 };
-using Val32Array4Array = cuda::std::array<Val32Array,4>;
-using Val32Array16Array = cuda::std::array<Val32Array,16>;
+using Val32Array4Array = ::cuda::std::array<Val32Array,4>;
+using Val32Array16Array = ::cuda::std::array<Val32Array,16>;
 struct ShaStateStruct {
   Val32Array4Array a;
   Val32Array4Array e;
@@ -310,50 +310,50 @@ struct DoShaStepStruct {
   UnpackReg_32__16_Struct e;
   ShaStateStruct newState;
 };
-using Val4Array = cuda::std::array<Val,4>;
-using NondetRegStruct4Array = cuda::std::array<NondetRegStruct,4>;
+using Val4Array = ::cuda::std::array<Val,4>;
+using NondetRegStruct4Array = ::cuda::std::array<NondetRegStruct,4>;
 struct OneHot_4_Struct {
   NondetRegStruct4Array _super;
 };
-using Val2Array8Array = cuda::std::array<Val2Array,8>;
+using Val2Array8Array = ::cuda::std::array<Val2Array,8>;
 struct LoadWinStruct {
   Val2Array8Array _super;
 };
 struct Pack_32__16__Super_SuperStruct {
   Val _super;
 };
-using Pack_32__16__Super_SuperStruct2Array = cuda::std::array<Pack_32__16__Super_SuperStruct,2>;
+using Pack_32__16__Super_SuperStruct2Array = ::cuda::std::array<Pack_32__16__Super_SuperStruct,2>;
 struct Pack_32__16_Struct {
   Pack_32__16__Super_SuperStruct2Array _super;
 };
-using Pack_32__16_Struct4Array = cuda::std::array<Pack_32__16_Struct,4>;
-using NondetRegStruct2Array = cuda::std::array<NondetRegStruct,2>;
+using Pack_32__16_Struct4Array = ::cuda::std::array<Pack_32__16_Struct,4>;
+using NondetRegStruct2Array = ::cuda::std::array<NondetRegStruct,2>;
 struct ShaNextBlockCyclePrevA_SuperStruct {
   NondetRegStruct2Array _super;
 };
-using ShaNextBlockCyclePrevA_SuperStruct4Array = cuda::std::array<ShaNextBlockCyclePrevA_SuperStruct,4>;
+using ShaNextBlockCyclePrevA_SuperStruct4Array = ::cuda::std::array<ShaNextBlockCyclePrevA_SuperStruct,4>;
 struct ShaNextBlockCyclePrevE_SuperStruct {
   NondetRegStruct2Array _super;
 };
-using ShaNextBlockCyclePrevE_SuperStruct4Array = cuda::std::array<ShaNextBlockCyclePrevE_SuperStruct,4>;
-using UnpackReg_32__16_Struct4Array = cuda::std::array<UnpackReg_32__16_Struct,4>;
-using Val50Array = cuda::std::array<Val,50>;
-using DivStruct800Array = cuda::std::array<DivStruct,800>;
+using ShaNextBlockCyclePrevE_SuperStruct4Array = ::cuda::std::array<ShaNextBlockCyclePrevE_SuperStruct,4>;
+using UnpackReg_32__16_Struct4Array = ::cuda::std::array<UnpackReg_32__16_Struct,4>;
+using Val50Array = ::cuda::std::array<Val,50>;
+using DivStruct800Array = ::cuda::std::array<DivStruct,800>;
 struct UnpackReg_800__16__SuperStruct {
   NondetRegStruct _super;
 };
-using UnpackReg_800__16__SuperStruct800Array = cuda::std::array<UnpackReg_800__16__SuperStruct,800>;
+using UnpackReg_800__16__SuperStruct800Array = ::cuda::std::array<UnpackReg_800__16__SuperStruct,800>;
 struct UnpackReg_800__16_Struct {
   UnpackReg_800__16__SuperStruct800Array _super;
 };
 struct ReadCycleLoadStruct {
   NondetRegStruct _super;
 };
-using ReadCycleLoadStruct100Array = cuda::std::array<ReadCycleLoadStruct,100>;
-using TopStateKflatStruct50Array = cuda::std::array<TopStateKflatStruct,50>;
+using ReadCycleLoadStruct100Array = ::cuda::std::array<ReadCycleLoadStruct,100>;
+using TopStateKflatStruct50Array = ::cuda::std::array<TopStateKflatStruct,50>;
 struct DigestRegValuesStruct {
 };
-using DigestRegValuesStruct16Array = cuda::std::array<DigestRegValuesStruct,16>;
+using DigestRegValuesStruct16Array = ::cuda::std::array<DigestRegValuesStruct,16>;
 struct DigestRegStruct {
 };
 struct ControlStateStruct {
@@ -362,18 +362,18 @@ struct ControlStateStruct {
   NondetRegStruct block;
   NondetRegStruct round;
 };
-using Val12Array = cuda::std::array<Val,12>;
+using Val12Array = ::cuda::std::array<Val,12>;
 struct OneHot_12__SuperStruct {
   NondetRegStruct _super;
 };
-using OneHot_12__SuperStruct12Array = cuda::std::array<OneHot_12__SuperStruct,12>;
+using OneHot_12__SuperStruct12Array = ::cuda::std::array<OneHot_12__SuperStruct,12>;
 struct OneHot_12_Struct {
   OneHot_12__SuperStruct12Array bits;
 };
 struct WrapOneHot_SuperStruct {
   NondetRegStruct _super;
 };
-using WrapOneHot_SuperStruct12Array = cuda::std::array<WrapOneHot_SuperStruct,12>;
+using WrapOneHot_SuperStruct12Array = ::cuda::std::array<WrapOneHot_SuperStruct,12>;
 struct WrapOneHotStruct {
   WrapOneHot_SuperStruct12Array _super;
 };
