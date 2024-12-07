@@ -15,33 +15,22 @@
 mod control_id;
 #[cfg(feature = "prove")]
 pub mod prove;
-#[cfg(test)]
-mod tests;
+#[cfg(feature = "prove")]
 pub(crate) mod zirgen;
 
-use anyhow::Result;
-use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
+use risc0_zkp::core::digest::Digest;
 
-use self::zirgen::CircuitImpl;
+pub use self::control_id::{KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT};
 
-pub const KECCAK_PO2: usize = 16;
+pub const KECCAK_DEFAULT_PO2: usize = 16;
+
+pub const KECCAK_PO2_RANGE: core::ops::Range<usize> = 14..18;
 
 pub const RECURSION_PO2: usize = 18;
 
-pub use self::control_id::{KECCAK_CONTROL_ID, KECCAK_CONTROL_ROOT};
+pub type KeccakState = [u64; 25];
 
-pub type Seal = Vec<u32>;
-
-pub fn verify(seal: &Seal) -> Result<()> {
-    let hash_suite = Poseidon2HashSuite::new_suite();
-
-    // We don't have a `code' buffer to verify.
-    let check_code_fn = |_: u32, _: &Digest| Ok(());
-
-    Ok(risc0_zkp::verify::verify(
-        &CircuitImpl,
-        &hash_suite,
-        seal,
-        check_code_fn,
-    )?)
+pub fn get_control_id(po2: usize) -> &'static Digest {
+    assert!(KECCAK_PO2_RANGE.contains(&po2), "po2 {po2} out of range");
+    &KECCAK_CONTROL_IDS[po2 - KECCAK_PO2_RANGE.min().unwrap()]
 }

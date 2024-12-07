@@ -168,11 +168,11 @@ where
 
             // TODO: use preflight
             scope!("step_compute_accum", {
-                (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
+                for cycle in 0..(steps - ZK_CYCLES) {
                     CIRCUIT
                         .par_step_compute_accum(steps, cycle, &accum_ctx, args)
                         .unwrap();
-                });
+                }
             });
             scope!("calc_prefix_products", {
                 CIRCUIT.calc_prefix_products(&accum_ctx).unwrap();

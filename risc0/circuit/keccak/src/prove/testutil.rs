@@ -126,12 +126,15 @@ where
     ret
 }
 
-pub fn test_inputs() -> Vec<KeccakState> {
+pub fn test_inputs(po2: usize) -> Vec<KeccakState> {
     let mut state = KeccakState::default();
     let mut pows = 987654321_u64;
     for part in state.as_mut_slice() {
         *part = pows;
         pows = pows.wrapping_mul(123456789);
     }
-    vec![state]
+
+    let cycles = 1 << po2;
+    let count = cycles / 200; // roughly 200 cycles per keccakf
+    vec![state; count]
 }

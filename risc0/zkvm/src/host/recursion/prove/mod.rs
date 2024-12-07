@@ -244,16 +244,20 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 }
 
 /// Prove the specified program identified by the `control_id` using the specified `input`.
-pub fn prove_zkr(control_id: &Digest, input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
+pub fn prove_zkr(
+    control_id: &Digest,
+    allowed_control_ids: Vec<Digest>,
+    input: &[u8],
+) -> Result<SuccinctReceipt<Unknown>> {
     let zkr = get_registered_zkr(control_id)?;
-    let opts = ProverOpts::succinct().with_control_ids(vec![*control_id]);
+    let opts = ProverOpts::succinct().with_control_ids(allowed_control_ids);
     let mut prover = Prover::new(zkr, *control_id, opts.clone());
     prover.add_input(bytemuck::cast_slice(input));
 
     tracing::debug!("Running prover");
     let receipt = prover.run()?;
 
-    tracing::debug!("zkr receipt: {receipt:?}");
+    tracing::trace!("zkr receipt: {receipt:?}");
 
     // Read the claim digest from the second of the global output slots.
     let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(
@@ -359,7 +363,7 @@ pub struct Prover {
 }
 
 impl Prover {
-    fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
+    pub(crate) fn new(program: Program, control_id: Digest, opts: ProverOpts) -> Self {
         Self {
             prover: risc0_circuit_recursion::prove::Prover::new(program, &opts.hashfn),
             control_id,
@@ -573,7 +577,7 @@ impl Prover {
         Ok(prover)
     }
 
-    fn add_input(&mut self, input: &[u32]) {
+    pub(crate) fn add_input(&mut self, input: &[u32]) {
         self.prover.add_input(input)
     }
 

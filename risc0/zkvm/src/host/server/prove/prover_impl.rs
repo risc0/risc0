@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use risc0_circuit_rv32im::prove::SegmentProver;
 
-use super::ProverServer;
+use super::{keccak::prove_keccak, ProverServer};
 use crate::{
     host::{
         client::prove::ReceiptKind,
@@ -100,11 +100,26 @@ impl ProverServer for ProverImpl {
 
         let mut zkr_receipts = HashMap::new();
         for proof_request in session.pending_zkrs.iter() {
-            let receipt = prove_zkr(&proof_request.control_id, &proof_request.input)?;
+            let allowed_control_ids = vec![proof_request.control_id];
+            let receipt = prove_zkr(
+                &proof_request.control_id,
+                allowed_control_ids,
+                &proof_request.input,
+            )?;
             let assumption = Assumption {
                 claim: receipt.claim.digest(),
                 control_root: receipt.control_root()?,
             };
+            zkr_receipts.insert(assumption, receipt);
+        }
+
+        for proof_request in session.pending_keccaks.iter() {
+            let receipt = prove_keccak(proof_request)?;
+            let assumption = Assumption {
+                claim: receipt.claim.digest(),
+                control_root: receipt.control_root()?,
+            };
+            tracing::debug!("adding keccak assumption: {assumption:#?}");
             zkr_receipts.insert(assumption, receipt);
         }
 
@@ -114,9 +129,9 @@ impl ProverServer for ProverImpl {
             .map(|assumption_receipt| match assumption_receipt {
                 AssumptionReceipt::Proven(receipt) => Ok(receipt),
                 AssumptionReceipt::Unresolved(assumption) => {
-                    let receipt = zkr_receipts
-                        .get(&assumption)
-                        .ok_or(anyhow!("no receipt available for unresolved assumption"))?;
+                    let receipt = zkr_receipts.get(&assumption).ok_or(anyhow!(
+                        "no receipt available for unresolved assumption: {assumption:#?}"
+                    ))?;
                     Ok(InnerAssumptionReceipt::Succinct(receipt.clone()))
                 }
             })
