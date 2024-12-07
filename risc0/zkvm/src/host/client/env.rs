@@ -83,19 +83,13 @@ pub struct ProveKeccakRequest {
     pub input: Vec<u8>,
 }
 
-/// A Keccak proof response
-#[stability::unstable]
-pub struct ProveKeccakResponse {
-    /// Request to lift keccak to recursion circuit
-    pub zkr_lift: ProveZkrRequest,
-}
-
 /// A trait that supports the ability to be notified of ZKR proof requests
 /// on-demand.
 #[stability::unstable]
 pub trait CoprocessorCallback {
     /// Request that a proof of a ZKR is produced.
     fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
+
     /// Request that a proof of a ZKR is produced, returning the assumption to be added to the assumption table.
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 }

@@ -16,8 +16,6 @@
 pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
-#[cfg(feature = "prove")]
-pub mod keccak;
 #[cfg(any(feature = "client", feature = "prove"))]
 mod protos;
 pub(crate) mod prove_info;

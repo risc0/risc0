@@ -100,14 +100,13 @@ pub use {
     self::host::{
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
-        keccak::prove_keccak,
         recursion::{
             prove::{prove_zkr, register_zkr},
             RECURSION_PO2,
         },
         server::{
             exec::executor::ExecutorImpl,
-            prove::{get_prover_server, HalPair, ProverServer},
+            prove::{get_prover_server, keccak::prove_keccak, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
                 SimpleSegmentRef,
@@ -146,9 +145,7 @@ pub use {
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 #[cfg(feature = "unstable")]
-pub use self::host::client::env::{
-    CoprocessorCallback, ProveKeccakRequest, ProveKeccakResponse, ProveZkrRequest,
-};
+pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {

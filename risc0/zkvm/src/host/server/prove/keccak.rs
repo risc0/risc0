@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::VecDeque;
+use std::collections::VecDeque;
+
 use anyhow::Result;
 use risc0_binfmt::read_sha_halfs;
-use risc0_circuit_keccak::prove::keccak_prover;
-use risc0_circuit_keccak::prove::KeccakState;
-use risc0_circuit_keccak::{KECCAK_CONTROL_ID, KECCAK_CONTROL_ROOT};
+use risc0_circuit_keccak::{
+    prove::{keccak_prover, KeccakState},
+    KECCAK_CONTROL_ID, KECCAK_CONTROL_ROOT, KECCAK_PO2,
+};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::core::digest::{Digest, DIGEST_SHORTS};
 
-use crate::{receipt::SuccinctReceipt, recursion, Unknown};
+use crate::{prove_zkr, receipt::SuccinctReceipt, Unknown};
 
 /// Generate a keccak proof that has been lifted.
 pub fn prove_keccak(input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
     let input: &[KeccakState] = bytemuck::cast_slice(input);
-    let prover = keccak_prover().unwrap();
-    let seal = prover
-        .prove(input, risc0_circuit_keccak::KECCAK_PO2)
-        .unwrap();
+    let prover = keccak_prover()?;
+    let seal = prover.prove(input, KECCAK_PO2)?;
 
     let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(
         bytemuck::checked::cast_slice::<_, BabyBearElem>(&seal[0..DIGEST_SHORTS])
@@ -39,7 +39,7 @@ pub fn prove_keccak(input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
     ))?;
 
     // Make sure we have a valid seal so we can fail early if anything went wrong
-    prover.verify(&seal).expect("Verification failed");
+    prover.verify(&seal)?;
 
     let claim_sha_input = claim_digest
         .as_words()
@@ -54,7 +54,7 @@ pub fn prove_keccak(input: &[u8]) -> Result<SuccinctReceipt<Unknown>> {
     zkr_input.extend(seal);
     zkr_input.extend(bytemuck::cast_slice(claim_sha_input.as_slice()));
 
-    recursion::prove::prove_zkr(
+    prove_zkr(
         &KECCAK_CONTROL_ID,
         bytemuck::cast_slice(zkr_input.as_slice()),
     )

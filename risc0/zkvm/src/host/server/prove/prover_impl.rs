@@ -17,11 +17,10 @@ use std::collections::HashMap;
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use risc0_circuit_rv32im::prove::SegmentProver;
 
-use super::ProverServer;
+use super::{keccak::prove_keccak, ProverServer};
 use crate::{
     host::{
         client::prove::ReceiptKind,
-        keccak::prove_keccak,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
     },
