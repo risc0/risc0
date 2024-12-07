@@ -106,7 +106,7 @@ pub use {
         },
         server::{
             exec::executor::ExecutorImpl,
-            prove::{get_prover_server, keccak::prove_keccak, HalPair, ProverServer},
+            prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
                 SimpleSegmentRef,
@@ -146,6 +146,11 @@ pub use {
 #[cfg(feature = "client")]
 #[cfg(feature = "unstable")]
 pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+#[cfg(feature = "unstable")]
+pub use self::host::server::prove::keccak::prove_keccak;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {

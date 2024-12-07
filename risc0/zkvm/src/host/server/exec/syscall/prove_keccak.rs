@@ -16,10 +16,7 @@
 
 use anyhow::Result;
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_zkvm_platform::{
-    syscall::reg_abi::{REG_A3, REG_A4, REG_A5, REG_A6},
-    WORD_SIZE,
-};
+use risc0_zkvm_platform::{syscall::reg_abi::*, WORD_SIZE};
 
 use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
 
@@ -35,13 +32,19 @@ impl Syscall for SysProveKeccak {
         ctx: &mut dyn SyscallContext,
         _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let input_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let input_len = ctx.load_register(REG_A4);
-        let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
+        let claim = ctx.load_digest_from_register(REG_A3)?;
+        let po2 = ctx.load_register(REG_A4) as usize;
         let control_root = ctx.load_digest_from_register(REG_A5)?;
-        let claim = ctx.load_digest_from_register(REG_A6)?;
+        let input_ptr = ByteAddr(ctx.load_register(REG_A6));
+        let input_len = ctx.load_register(REG_A7);
+        let input: Vec<u8> = ctx.load_region(input_ptr, input_len * WORD_SIZE as u32)?;
 
-        let proof_request = ProveKeccakRequest { input };
+        let proof_request = ProveKeccakRequest {
+            claim_digest: claim,
+            po2,
+            control_root,
+            input,
+        };
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
             coprocessor.borrow_mut().prove_keccak(proof_request)?;

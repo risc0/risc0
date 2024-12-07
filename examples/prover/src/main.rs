@@ -23,7 +23,6 @@ mod worker;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use anyhow::Result;
-use risc0_circuit_keccak::prove::KeccakState;
 use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
 use risc0_zkp::digest;
 use risc0_zkvm::{
@@ -71,15 +70,6 @@ impl CoprocessorCallback for Coprocessor {
         Ok(())
     }
 }
-pub fn test_inputs() -> Vec<KeccakState> {
-    let mut state = KeccakState::default();
-    let mut pows = 987654321_u64;
-    for part in state.as_mut_slice() {
-        *part = pows;
-        pows = pows.wrapping_mul(123456789);
-    }
-    vec![state]
-}
 
 fn prover_example() {
     println!("Submitting proof request...");
@@ -87,10 +77,9 @@ fn prover_example() {
     let mut task_manager = TaskManager::new();
     let mut planner = Planner::default();
 
-    let input = test_inputs();
-    let input: &[u32] = bytemuck::cast_slice(&input);
-    let claim_digest = digest!("680f716f1ee30dcd2c4f7d9c91540e2c363bc435bee14414e160434bf5f53a46");
-    let to_guest: (Digest, &[u32]) = (claim_digest, input);
+    let po2 = 16;
+    let claim_digest = digest!("822a0c0b9cd04788833b9366addf8343c27563733ec1f3fc4ca405915e1ae162");
+    let to_guest: (Digest, u32) = (claim_digest, po2);
 
     let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
     let env = ExecutorEnv::builder()

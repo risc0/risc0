@@ -31,9 +31,9 @@ use crate::{
             env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
         },
-        server::session::NullSegmentRef,
+        server::{prove::keccak::prove_keccak, session::NullSegmentRef},
     },
-    prove_keccak, prove_zkr,
+    prove_zkr,
     recursion::identity_p254,
     AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
     Receipt, ReceiptClaim, Segment, SegmentReceipt, Session, SuccinctReceipt, TraceCallback,
@@ -233,6 +233,9 @@ impl CoprocessorCallback for CoprocessorProxy {
                         pb::api::CoprocessorRequest {
                             kind: Some(pb::api::coprocessor_request::Kind::ProveKeccak({
                                 pb::api::ProveKeccakRequest {
+                                    claim_digest: Some(proof_request.claim_digest.into()),
+                                    po2: proof_request.po2 as u32,
+                                    control_root: Some(proof_request.control_root.into()),
                                     input: proof_request.input,
                                     receipt_out: None,
                                 }
@@ -482,7 +485,7 @@ impl Server {
     ) -> Result<()> {
         fn inner(request: pb::api::ProveZkrRequest) -> Result<pb::api::ProveZkrReply> {
             let control_id = request.control_id.ok_or(malformed_err())?.try_into()?;
-            let receipt = prove_zkr(&control_id, &request.input)?;
+            let receipt = prove_zkr(&control_id, vec![control_id], &request.input)?;
 
             let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();
@@ -518,13 +521,14 @@ impl Server {
         mut conn: ConnectionWrapper,
         request: pb::api::ProveKeccakRequest,
     ) -> Result<()> {
-        fn inner(request: pb::api::ProveKeccakRequest) -> Result<pb::api::ProveKeccakReply> {
-            let receipt = prove_keccak(&request.input)?;
+        fn inner(request_pb: pb::api::ProveKeccakRequest) -> Result<pb::api::ProveKeccakReply> {
+            let request: ProveKeccakRequest = request_pb.clone().try_into()?;
+            let receipt = prove_keccak(&request)?;
 
             let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
+                &request_pb.receipt_out.ok_or(malformed_err())?,
                 receipt_bytes.into(),
                 "receipt.zkp",
             )?;

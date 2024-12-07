@@ -2,10 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerRequest {
-    #[prost(
-        oneof = "server_request::Kind",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11"
-    )]
+    #[prost(oneof = "server_request::Kind", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11")]
     pub kind: ::core::option::Option<server_request::Kind>,
 }
 /// Nested message and enum types in `ServerRequest`.
@@ -150,10 +147,16 @@ pub struct ProveZkrResult {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ProveKeccakRequest {
-    #[prost(bytes = "vec", tag = "1")]
+    #[prost(message, optional, tag = "1")]
+    pub claim_digest: ::core::option::Option<super::base::Digest>,
+    #[prost(uint32, tag = "2")]
+    pub po2: u32,
+    #[prost(message, optional, tag = "3")]
+    pub control_root: ::core::option::Option<super::base::Digest>,
+    #[prost(bytes = "vec", tag = "4")]
     pub input: ::prost::alloc::vec::Vec<u8>,
-    /// This is optional in the context of a CoprocessorRequest // todo - why is this optional?
-    #[prost(message, optional, tag = "2")]
+    /// This is optional in the context of a CoprocessorRequest
+    #[prost(message, optional, tag = "5")]
     pub receipt_out: ::core::option::Option<AssetRequest>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -362,8 +365,10 @@ pub struct ExecutorEnv {
     #[prost(message, optional, tag = "1")]
     pub binary: ::core::option::Option<Asset>,
     #[prost(map = "string, string", tag = "2")]
-    pub env_vars:
-        ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    pub env_vars: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
     #[prost(string, repeated, tag = "3")]
     pub slice_ios: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(uint32, repeated, tag = "4")]

@@ -3346,7 +3346,6 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
- "clap",
  "paste",
  "rayon",
  "risc0-binfmt",
@@ -3356,7 +3355,6 @@ dependencies = [
  "risc0-sys",
  "risc0-zkp",
  "tracing",
- "tracing-subscriber 0.3.19",
  "zip",
 ]
 
