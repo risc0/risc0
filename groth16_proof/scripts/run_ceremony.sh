@@ -15,7 +15,7 @@ export NODE_OPTIONS="--max-old-space-size=32768"
 # Do initial second stage ceremony setup
 (cd groth16; snarkjs g16s $1 $2 stark_verify_0000.zkey)
 
-# Add a pretend contributon, in reality each person in the ceremony would do this
+# Add a pretend contribution, in reality each person in the ceremony would do this
 (cd groth16; echo 'Entropy' | snarkjs zkey contribute stark_verify_0000.zkey stark_verify_0001.zkey --name="1st Contributor Name" -v)
 
 # Finalize
