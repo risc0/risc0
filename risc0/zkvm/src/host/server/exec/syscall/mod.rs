@@ -19,12 +19,12 @@ mod cycle_count;
 mod fork;
 mod getenv;
 mod keccak;
+mod keccak_permute;
 mod log;
 mod panic;
 mod pipe;
 mod posix_io;
 mod prove_keccak;
-mod keccak_permute;
 mod prove_zkr;
 mod random;
 mod slice_io;
@@ -54,9 +54,9 @@ use crate::{
 
 use self::{
     args::SysArgs, cycle_count::SysCycleCount, fork::SysFork, getenv::SysGetenv, keccak::SysKeccak,
-    log::SysLog, panic::SysPanic, pipe::SysPipe, posix_io::SysRead, posix_io::SysWrite,
-    prove_keccak::SysProveKeccak, prove_zkr::SysProveZkr, random::SysRandom, slice_io::SysSliceIo,
-    verify::SysVerify, keccak_permute::SysKeccakPermute,
+    keccak_permute::SysKeccakPermute, log::SysLog, panic::SysPanic, pipe::SysPipe,
+    posix_io::SysRead, posix_io::SysWrite, prove_keccak::SysProveKeccak, prove_zkr::SysProveZkr,
+    random::SysRandom, slice_io::SysSliceIo, verify::SysVerify,
 };
 
 /// A host-side implementation of a system call.
