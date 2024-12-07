@@ -1239,6 +1239,7 @@ dependencies = [
  "bytemuck",
  "getrandom",
  "hex-literal",
+ "risc0-circuit-keccak",
  "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-methods",
