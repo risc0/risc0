@@ -15,7 +15,12 @@ opt-level = 3
 debug = 1
 
 [package.metadata.risc0]
-rustc-flags = ['--cfg', 'risc0_custom_cfg_test="flagged"']
+rustc-flags = [
+    '--cfg',
+    'risc0_custom_cfg_test="flagged"',
+    '--check-cfg',
+    'cfg(risc0_custom_cfg_test, values("flagged"))'
+]
 
 [package.metadata.release]
 release = false
