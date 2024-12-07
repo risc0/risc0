@@ -111,6 +111,13 @@ where
             .as_ref()
             .ok_or(VerificationError::VerifierParametersMissing)?;
 
+        if params.digest::<sha::Impl>() != self.verifier_parameters {
+            return Err(VerificationError::VerifierParametersMismatch {
+                expected: params.digest::<sha::Impl>(),
+                received: self.verifier_parameters,
+            });
+        }
+
         // Check that the proof system and circuit info strings match what is implemented by this
         // function. Info strings are used a version identifiers, and this verify implementation
         // supports exactly one proof systema and circuit version at a time.
