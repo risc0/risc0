@@ -29,7 +29,7 @@ impl Syscall for SysKeccakPermute {
     ) -> anyhow::Result<(u32, u32)> {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
         let from_guest = &ctx.load_region(buf_ptr, 25 * 8)?;
-        let mut from_guest: [u64; 25] = bytemuck::cast_slice(&from_guest).try_into()?;
+        let mut from_guest: [u64; 25] = bytemuck::cast_slice(from_guest).try_into()?;
 
         keccak::f1600(&mut from_guest);
         to_guest.clone_from_slice(bytemuck::cast_slice(&from_guest));
