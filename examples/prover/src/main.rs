@@ -20,6 +20,8 @@ mod plan;
 mod task_mgr;
 mod worker;
 
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
 use anyhow::Result;
 use risc0_circuit_keccak::prove::KeccakState;
 use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
@@ -29,7 +31,6 @@ use risc0_zkvm::{
     MaybePruned, ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, SuccinctReceipt,
     Unknown,
 };
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use self::{plan::Planner, task_mgr::TaskManager};
 
@@ -62,7 +63,8 @@ impl CoprocessorCallback for Coprocessor {
         let client = ApiClient::from_env().unwrap();
         let receipt = client.prove_keccak(proof_request, AssetRequest::Inline)?;
         let claim_digest = match receipt.claim {
-            MaybePruned::Value(_) => unimplemented!(), // unknown is always pruned so if we get to this branch, something went wrong...
+            // unknown is always pruned so if we get to this branch, something went wrong...
+            MaybePruned::Value(_) => unimplemented!(),
             MaybePruned::Pruned(claim_digest) => claim_digest,
         };
         self.receipts.insert(claim_digest, receipt);
@@ -95,8 +97,6 @@ fn prover_example() {
         .write(&to_guest)
         .unwrap()
         .coprocessor_callback_ref(coprocessor.clone())
-        // Use a low segment size to generate more jobs in this example.
-        .segment_limit_po2(17)
         .build()
         .unwrap();
 
