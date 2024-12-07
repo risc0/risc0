@@ -94,22 +94,9 @@ main() {
   info "rzup has been installed to $RZUP_BIN_DIR"
 
   detect_shell
+  update_profile
 
-  # add rzup to PATH if it isn't already present
-  if [[ ":$PATH:" != *":${RZUP_BIN_DIR}:"* ]]; then
-      info "Adding rzup to PATH in ${PROFILE}"
-      {
-          echo
-          echo "export PATH=\"\$PATH:$RZUP_BIN_DIR\""
-      } >> "$PROFILE"
-      source "$PROFILE"
-  else
-      info "rzup found in PATH"
-  fi
-
-  info "🎉 rzup installed!"
-  echo "Run the following command to install the zkVM:"
-  echo "  rzup install"
+  display_post_install_message
 }
 
 check_rust_installed() {
@@ -164,6 +151,37 @@ detect_shell() {
     ;;
   esac
   info "Detected your preferred shell as ${PREF_SHELL}"
+}
+
+update_profile() {
+  if [[ ":$PATH:" != *":${RZUP_BIN_DIR}:"* ]] && [[ -n "$PROFILE" ]]; then
+    info "Adding rzup to PATH in ${PROFILE}"
+    {
+      echo
+      echo "# Add rzup to PATH"
+      echo "export PATH=\"\$PATH:$RZUP_BIN_DIR\""
+    } >> "$PROFILE"
+  else
+    info "rzup is already in your PATH or manual configuration is required"
+  fi
+}
+
+display_post_install_message() {
+  cat <<EOF
+
+🎉 rzup installed successfully!
+
+To get started, you may need to restart your current shell to reload your PATH.
+
+If rzup is not immediately available, you can configure your current shell by running:
+
+  . "${PROFILE}"            # For bash/zsh/ash/dash/pdksh
+  source "${PROFILE}"       # For fish
+
+Run the following command to install the zkVM:
+  rzup install
+
+EOF
 }
 
 info() {
