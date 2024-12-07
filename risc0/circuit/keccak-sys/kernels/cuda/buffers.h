@@ -19,7 +19,7 @@
 #include <cassert>
 #include <cstdio>
 
-namespace risc0 {
+namespace risc0::circuit::keccak::cuda {
 
 struct Buffer {
   Fp* buf;
@@ -52,4 +52,4 @@ struct Buffer {
   }
 };
 
-} // namespace risc0
+} // namespace risc0::circuit::keccak::cuda

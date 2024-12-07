@@ -13,3219 +13,1697 @@
 // limitations under the License.
 
 #include "steps.cuh"
+#include "witgen.h"
 
-namespace risc0::impl {
+namespace risc0::circuit::keccak::cuda {
 
-__device__ TopStateStruct exec_WriteCycle(ExecContext& ctx,
-                                          TopStateStruct arg0,
-                                          TopStateStruct arg1,
-                                          BoundLayout<WriteCycleLayout> layout2) {
+__device__ NondetRegStruct exec_Xor5(ExecContext& ctx,
+                                     Val5Array arg0,
+                                     BoundLayout<NondetRegLayout> layout1) {
+  // Xor5(zirgen/circuit/keccak2/xor5.zir:7)
+  Val x2 = ((arg0[0] + arg0[1]) + arg0[2]);
+  Val x3 = ((x2 + arg0[3]) + arg0[4]);
+  // Xor5(zirgen/circuit/keccak2/xor5.zir:8)
+  NondetRegStruct x4 = exec_NondetBitReg(ctx, bitAnd(x3, Val(1)), layout1);
+  // Xor5(zirgen/circuit/keccak2/xor5.zir:9)
+  Val x5 = (x3 - x4._super);
+  // Xor5(zirgen/circuit/keccak2/xor5.zir:10)
+  Val x6 = ((x5 * (Val(2) - x5)) * (Val(4) - x5));
+  EQZ(x6, "Xor5(zirgen/circuit/keccak2/xor5.zir:10)");
+  return x4;
+}
+__device__ TopStateStruct exec_ShaNextBlockCycle(ExecContext& ctx,
+                                                 TopStateStruct arg0,
+                                                 BoundLayout<ShaNextBlockCycleLayout> layout1) {
   // Log(<preamble>:22)
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:371)
-  INVOKE_EXTERN(ctx, log, "WriteCycle", std::initializer_list<Val>{});
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:370)
-  TopStateBitsStruct800Array x3 = arg1.bits;
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x4 = x3[0]._super._super;
-  Val x5 = x3[1]._super._super;
-  Val x6 = x3[2]._super._super;
-  Val x7 = x3[3]._super._super;
-  Val x8 = x3[4]._super._super;
-  Val x9 = x3[5]._super._super;
-  Val x10 = x3[6]._super._super;
-  Val x11 = x3[7]._super._super;
-  Val x12 = x3[8]._super._super;
-  Val x13 = x3[9]._super._super;
-  Val x14 = x3[10]._super._super;
-  Val x15 = x3[11]._super._super;
-  Val x16 = x3[12]._super._super;
-  Val x17 = x3[13]._super._super;
-  Val x18 = x3[14]._super._super;
-  Val x19 = x3[15]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x20 = (((x4 + (x5 * Val(2))) + (x6 * Val(4))) + (x7 * Val(8)));
-  Val x21 = (((x20 + (x8 * Val(16))) + (x9 * Val(32))) + (x10 * Val(64)));
-  Val x22 = (((x21 + (x11 * Val(128))) + (x12 * Val(256))) + (x13 * Val(512)));
-  Val x23 = (((x22 + (x14 * Val(1024))) + (x15 * Val(2048))) + (x16 * Val(4096)));
-  Val x24 = (((x23 + (x17 * Val(8192))) + (x18 * Val(16384))) + (x19 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x25 = x3[16]._super._super;
-  Val x26 = x3[17]._super._super;
-  Val x27 = x3[18]._super._super;
-  Val x28 = x3[19]._super._super;
-  Val x29 = x3[20]._super._super;
-  Val x30 = x3[21]._super._super;
-  Val x31 = x3[22]._super._super;
-  Val x32 = x3[23]._super._super;
-  Val x33 = x3[24]._super._super;
-  Val x34 = x3[25]._super._super;
-  Val x35 = x3[26]._super._super;
-  Val x36 = x3[27]._super._super;
-  Val x37 = x3[28]._super._super;
-  Val x38 = x3[29]._super._super;
-  Val x39 = x3[30]._super._super;
-  Val x40 = x3[31]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x41 = (((x25 + (x26 * Val(2))) + (x27 * Val(4))) + (x28 * Val(8)));
-  Val x42 = (((x41 + (x29 * Val(16))) + (x30 * Val(32))) + (x31 * Val(64)));
-  Val x43 = (((x42 + (x32 * Val(128))) + (x33 * Val(256))) + (x34 * Val(512)));
-  Val x44 = (((x43 + (x35 * Val(1024))) + (x36 * Val(2048))) + (x37 * Val(4096)));
-  Val x45 = (((x44 + (x38 * Val(8192))) + (x39 * Val(16384))) + (x40 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:370)
-  TopStateBitsStruct800Array x46 = arg0.bits;
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x47 = x46[0]._super._super;
-  Val x48 = x46[1]._super._super;
-  Val x49 = x46[2]._super._super;
-  Val x50 = x46[3]._super._super;
-  Val x51 = x46[4]._super._super;
-  Val x52 = x46[5]._super._super;
-  Val x53 = x46[6]._super._super;
-  Val x54 = x46[7]._super._super;
-  Val x55 = x46[8]._super._super;
-  Val x56 = x46[9]._super._super;
-  Val x57 = x46[10]._super._super;
-  Val x58 = x46[11]._super._super;
-  Val x59 = x46[12]._super._super;
-  Val x60 = x46[13]._super._super;
-  Val x61 = x46[14]._super._super;
-  Val x62 = x46[15]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x63 = (((x47 + (x48 * Val(2))) + (x49 * Val(4))) + (x50 * Val(8)));
-  Val x64 = (((x63 + (x51 * Val(16))) + (x52 * Val(32))) + (x53 * Val(64)));
-  Val x65 = (((x64 + (x54 * Val(128))) + (x55 * Val(256))) + (x56 * Val(512)));
-  Val x66 = (((x65 + (x57 * Val(1024))) + (x58 * Val(2048))) + (x59 * Val(4096)));
-  Val x67 = (((x66 + (x60 * Val(8192))) + (x61 * Val(16384))) + (x62 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x68 = x46[16]._super._super;
-  Val x69 = x46[17]._super._super;
-  Val x70 = x46[18]._super._super;
-  Val x71 = x46[19]._super._super;
-  Val x72 = x46[20]._super._super;
-  Val x73 = x46[21]._super._super;
-  Val x74 = x46[22]._super._super;
-  Val x75 = x46[23]._super._super;
-  Val x76 = x46[24]._super._super;
-  Val x77 = x46[25]._super._super;
-  Val x78 = x46[26]._super._super;
-  Val x79 = x46[27]._super._super;
-  Val x80 = x46[28]._super._super;
-  Val x81 = x46[29]._super._super;
-  Val x82 = x46[30]._super._super;
-  Val x83 = x46[31]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x84 = (((x68 + (x69 * Val(2))) + (x70 * Val(4))) + (x71 * Val(8)));
-  Val x85 = (((x84 + (x72 * Val(16))) + (x73 * Val(32))) + (x74 * Val(64)));
-  Val x86 = (((x85 + (x75 * Val(128))) + (x76 * Val(256))) + (x77 * Val(512)));
-  Val x87 = (((x86 + (x78 * Val(1024))) + (x79 * Val(2048))) + (x80 * Val(4096)));
-  Val x88 = (((x87 + (x81 * Val(8192))) + (x82 * Val(16384))) + (x83 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x89 = x3[32]._super._super;
-  Val x90 = x3[33]._super._super;
-  Val x91 = x3[34]._super._super;
-  Val x92 = x3[35]._super._super;
-  Val x93 = x3[36]._super._super;
-  Val x94 = x3[37]._super._super;
-  Val x95 = x3[38]._super._super;
-  Val x96 = x3[39]._super._super;
-  Val x97 = x3[40]._super._super;
-  Val x98 = x3[41]._super._super;
-  Val x99 = x3[42]._super._super;
-  Val x100 = x3[43]._super._super;
-  Val x101 = x3[44]._super._super;
-  Val x102 = x3[45]._super._super;
-  Val x103 = x3[46]._super._super;
-  Val x104 = x3[47]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x105 = (((x89 + (x90 * Val(2))) + (x91 * Val(4))) + (x92 * Val(8)));
-  Val x106 = (((x105 + (x93 * Val(16))) + (x94 * Val(32))) + (x95 * Val(64)));
-  Val x107 = (((x106 + (x96 * Val(128))) + (x97 * Val(256))) + (x98 * Val(512)));
-  Val x108 = (((x107 + (x99 * Val(1024))) + (x100 * Val(2048))) + (x101 * Val(4096)));
-  Val x109 = (((x108 + (x102 * Val(8192))) + (x103 * Val(16384))) + (x104 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x110 = x3[48]._super._super;
-  Val x111 = x3[49]._super._super;
-  Val x112 = x3[50]._super._super;
-  Val x113 = x3[51]._super._super;
-  Val x114 = x3[52]._super._super;
-  Val x115 = x3[53]._super._super;
-  Val x116 = x3[54]._super._super;
-  Val x117 = x3[55]._super._super;
-  Val x118 = x3[56]._super._super;
-  Val x119 = x3[57]._super._super;
-  Val x120 = x3[58]._super._super;
-  Val x121 = x3[59]._super._super;
-  Val x122 = x3[60]._super._super;
-  Val x123 = x3[61]._super._super;
-  Val x124 = x3[62]._super._super;
-  Val x125 = x3[63]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x126 = (((x110 + (x111 * Val(2))) + (x112 * Val(4))) + (x113 * Val(8)));
-  Val x127 = (((x126 + (x114 * Val(16))) + (x115 * Val(32))) + (x116 * Val(64)));
-  Val x128 = (((x127 + (x117 * Val(128))) + (x118 * Val(256))) + (x119 * Val(512)));
-  Val x129 = (((x128 + (x120 * Val(1024))) + (x121 * Val(2048))) + (x122 * Val(4096)));
-  Val x130 = (((x129 + (x123 * Val(8192))) + (x124 * Val(16384))) + (x125 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x131 = x46[32]._super._super;
-  Val x132 = x46[33]._super._super;
-  Val x133 = x46[34]._super._super;
-  Val x134 = x46[35]._super._super;
-  Val x135 = x46[36]._super._super;
-  Val x136 = x46[37]._super._super;
-  Val x137 = x46[38]._super._super;
-  Val x138 = x46[39]._super._super;
-  Val x139 = x46[40]._super._super;
-  Val x140 = x46[41]._super._super;
-  Val x141 = x46[42]._super._super;
-  Val x142 = x46[43]._super._super;
-  Val x143 = x46[44]._super._super;
-  Val x144 = x46[45]._super._super;
-  Val x145 = x46[46]._super._super;
-  Val x146 = x46[47]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x147 = (((x131 + (x132 * Val(2))) + (x133 * Val(4))) + (x134 * Val(8)));
-  Val x148 = (((x147 + (x135 * Val(16))) + (x136 * Val(32))) + (x137 * Val(64)));
-  Val x149 = (((x148 + (x138 * Val(128))) + (x139 * Val(256))) + (x140 * Val(512)));
-  Val x150 = (((x149 + (x141 * Val(1024))) + (x142 * Val(2048))) + (x143 * Val(4096)));
-  Val x151 = (((x150 + (x144 * Val(8192))) + (x145 * Val(16384))) + (x146 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x152 = x46[48]._super._super;
-  Val x153 = x46[49]._super._super;
-  Val x154 = x46[50]._super._super;
-  Val x155 = x46[51]._super._super;
-  Val x156 = x46[52]._super._super;
-  Val x157 = x46[53]._super._super;
-  Val x158 = x46[54]._super._super;
-  Val x159 = x46[55]._super._super;
-  Val x160 = x46[56]._super._super;
-  Val x161 = x46[57]._super._super;
-  Val x162 = x46[58]._super._super;
-  Val x163 = x46[59]._super._super;
-  Val x164 = x46[60]._super._super;
-  Val x165 = x46[61]._super._super;
-  Val x166 = x46[62]._super._super;
-  Val x167 = x46[63]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x168 = (((x152 + (x153 * Val(2))) + (x154 * Val(4))) + (x155 * Val(8)));
-  Val x169 = (((x168 + (x156 * Val(16))) + (x157 * Val(32))) + (x158 * Val(64)));
-  Val x170 = (((x169 + (x159 * Val(128))) + (x160 * Val(256))) + (x161 * Val(512)));
-  Val x171 = (((x170 + (x162 * Val(1024))) + (x163 * Val(2048))) + (x164 * Val(4096)));
-  Val x172 = (((x171 + (x165 * Val(8192))) + (x166 * Val(16384))) + (x167 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x173 = x3[64]._super._super;
-  Val x174 = x3[65]._super._super;
-  Val x175 = x3[66]._super._super;
-  Val x176 = x3[67]._super._super;
-  Val x177 = x3[68]._super._super;
-  Val x178 = x3[69]._super._super;
-  Val x179 = x3[70]._super._super;
-  Val x180 = x3[71]._super._super;
-  Val x181 = x3[72]._super._super;
-  Val x182 = x3[73]._super._super;
-  Val x183 = x3[74]._super._super;
-  Val x184 = x3[75]._super._super;
-  Val x185 = x3[76]._super._super;
-  Val x186 = x3[77]._super._super;
-  Val x187 = x3[78]._super._super;
-  Val x188 = x3[79]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x189 = (((x173 + (x174 * Val(2))) + (x175 * Val(4))) + (x176 * Val(8)));
-  Val x190 = (((x189 + (x177 * Val(16))) + (x178 * Val(32))) + (x179 * Val(64)));
-  Val x191 = (((x190 + (x180 * Val(128))) + (x181 * Val(256))) + (x182 * Val(512)));
-  Val x192 = (((x191 + (x183 * Val(1024))) + (x184 * Val(2048))) + (x185 * Val(4096)));
-  Val x193 = (((x192 + (x186 * Val(8192))) + (x187 * Val(16384))) + (x188 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x194 = x3[80]._super._super;
-  Val x195 = x3[81]._super._super;
-  Val x196 = x3[82]._super._super;
-  Val x197 = x3[83]._super._super;
-  Val x198 = x3[84]._super._super;
-  Val x199 = x3[85]._super._super;
-  Val x200 = x3[86]._super._super;
-  Val x201 = x3[87]._super._super;
-  Val x202 = x3[88]._super._super;
-  Val x203 = x3[89]._super._super;
-  Val x204 = x3[90]._super._super;
-  Val x205 = x3[91]._super._super;
-  Val x206 = x3[92]._super._super;
-  Val x207 = x3[93]._super._super;
-  Val x208 = x3[94]._super._super;
-  Val x209 = x3[95]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x210 = (((x194 + (x195 * Val(2))) + (x196 * Val(4))) + (x197 * Val(8)));
-  Val x211 = (((x210 + (x198 * Val(16))) + (x199 * Val(32))) + (x200 * Val(64)));
-  Val x212 = (((x211 + (x201 * Val(128))) + (x202 * Val(256))) + (x203 * Val(512)));
-  Val x213 = (((x212 + (x204 * Val(1024))) + (x205 * Val(2048))) + (x206 * Val(4096)));
-  Val x214 = (((x213 + (x207 * Val(8192))) + (x208 * Val(16384))) + (x209 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x215 = x46[64]._super._super;
-  Val x216 = x46[65]._super._super;
-  Val x217 = x46[66]._super._super;
-  Val x218 = x46[67]._super._super;
-  Val x219 = x46[68]._super._super;
-  Val x220 = x46[69]._super._super;
-  Val x221 = x46[70]._super._super;
-  Val x222 = x46[71]._super._super;
-  Val x223 = x46[72]._super._super;
-  Val x224 = x46[73]._super._super;
-  Val x225 = x46[74]._super._super;
-  Val x226 = x46[75]._super._super;
-  Val x227 = x46[76]._super._super;
-  Val x228 = x46[77]._super._super;
-  Val x229 = x46[78]._super._super;
-  Val x230 = x46[79]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x231 = (((x215 + (x216 * Val(2))) + (x217 * Val(4))) + (x218 * Val(8)));
-  Val x232 = (((x231 + (x219 * Val(16))) + (x220 * Val(32))) + (x221 * Val(64)));
-  Val x233 = (((x232 + (x222 * Val(128))) + (x223 * Val(256))) + (x224 * Val(512)));
-  Val x234 = (((x233 + (x225 * Val(1024))) + (x226 * Val(2048))) + (x227 * Val(4096)));
-  Val x235 = (((x234 + (x228 * Val(8192))) + (x229 * Val(16384))) + (x230 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x236 = x46[80]._super._super;
-  Val x237 = x46[81]._super._super;
-  Val x238 = x46[82]._super._super;
-  Val x239 = x46[83]._super._super;
-  Val x240 = x46[84]._super._super;
-  Val x241 = x46[85]._super._super;
-  Val x242 = x46[86]._super._super;
-  Val x243 = x46[87]._super._super;
-  Val x244 = x46[88]._super._super;
-  Val x245 = x46[89]._super._super;
-  Val x246 = x46[90]._super._super;
-  Val x247 = x46[91]._super._super;
-  Val x248 = x46[92]._super._super;
-  Val x249 = x46[93]._super._super;
-  Val x250 = x46[94]._super._super;
-  Val x251 = x46[95]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x252 = (((x236 + (x237 * Val(2))) + (x238 * Val(4))) + (x239 * Val(8)));
-  Val x253 = (((x252 + (x240 * Val(16))) + (x241 * Val(32))) + (x242 * Val(64)));
-  Val x254 = (((x253 + (x243 * Val(128))) + (x244 * Val(256))) + (x245 * Val(512)));
-  Val x255 = (((x254 + (x246 * Val(1024))) + (x247 * Val(2048))) + (x248 * Val(4096)));
-  Val x256 = (((x255 + (x249 * Val(8192))) + (x250 * Val(16384))) + (x251 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x257 = x3[96]._super._super;
-  Val x258 = x3[97]._super._super;
-  Val x259 = x3[98]._super._super;
-  Val x260 = x3[99]._super._super;
-  Val x261 = x3[100]._super._super;
-  Val x262 = x3[101]._super._super;
-  Val x263 = x3[102]._super._super;
-  Val x264 = x3[103]._super._super;
-  Val x265 = x3[104]._super._super;
-  Val x266 = x3[105]._super._super;
-  Val x267 = x3[106]._super._super;
-  Val x268 = x3[107]._super._super;
-  Val x269 = x3[108]._super._super;
-  Val x270 = x3[109]._super._super;
-  Val x271 = x3[110]._super._super;
-  Val x272 = x3[111]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x273 = (((x257 + (x258 * Val(2))) + (x259 * Val(4))) + (x260 * Val(8)));
-  Val x274 = (((x273 + (x261 * Val(16))) + (x262 * Val(32))) + (x263 * Val(64)));
-  Val x275 = (((x274 + (x264 * Val(128))) + (x265 * Val(256))) + (x266 * Val(512)));
-  Val x276 = (((x275 + (x267 * Val(1024))) + (x268 * Val(2048))) + (x269 * Val(4096)));
-  Val x277 = (((x276 + (x270 * Val(8192))) + (x271 * Val(16384))) + (x272 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x278 = x3[112]._super._super;
-  Val x279 = x3[113]._super._super;
-  Val x280 = x3[114]._super._super;
-  Val x281 = x3[115]._super._super;
-  Val x282 = x3[116]._super._super;
-  Val x283 = x3[117]._super._super;
-  Val x284 = x3[118]._super._super;
-  Val x285 = x3[119]._super._super;
-  Val x286 = x3[120]._super._super;
-  Val x287 = x3[121]._super._super;
-  Val x288 = x3[122]._super._super;
-  Val x289 = x3[123]._super._super;
-  Val x290 = x3[124]._super._super;
-  Val x291 = x3[125]._super._super;
-  Val x292 = x3[126]._super._super;
-  Val x293 = x3[127]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x294 = (((x278 + (x279 * Val(2))) + (x280 * Val(4))) + (x281 * Val(8)));
-  Val x295 = (((x294 + (x282 * Val(16))) + (x283 * Val(32))) + (x284 * Val(64)));
-  Val x296 = (((x295 + (x285 * Val(128))) + (x286 * Val(256))) + (x287 * Val(512)));
-  Val x297 = (((x296 + (x288 * Val(1024))) + (x289 * Val(2048))) + (x290 * Val(4096)));
-  Val x298 = (((x297 + (x291 * Val(8192))) + (x292 * Val(16384))) + (x293 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x299 = x46[96]._super._super;
-  Val x300 = x46[97]._super._super;
-  Val x301 = x46[98]._super._super;
-  Val x302 = x46[99]._super._super;
-  Val x303 = x46[100]._super._super;
-  Val x304 = x46[101]._super._super;
-  Val x305 = x46[102]._super._super;
-  Val x306 = x46[103]._super._super;
-  Val x307 = x46[104]._super._super;
-  Val x308 = x46[105]._super._super;
-  Val x309 = x46[106]._super._super;
-  Val x310 = x46[107]._super._super;
-  Val x311 = x46[108]._super._super;
-  Val x312 = x46[109]._super._super;
-  Val x313 = x46[110]._super._super;
-  Val x314 = x46[111]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x315 = (((x299 + (x300 * Val(2))) + (x301 * Val(4))) + (x302 * Val(8)));
-  Val x316 = (((x315 + (x303 * Val(16))) + (x304 * Val(32))) + (x305 * Val(64)));
-  Val x317 = (((x316 + (x306 * Val(128))) + (x307 * Val(256))) + (x308 * Val(512)));
-  Val x318 = (((x317 + (x309 * Val(1024))) + (x310 * Val(2048))) + (x311 * Val(4096)));
-  Val x319 = (((x318 + (x312 * Val(8192))) + (x313 * Val(16384))) + (x314 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x320 = x46[112]._super._super;
-  Val x321 = x46[113]._super._super;
-  Val x322 = x46[114]._super._super;
-  Val x323 = x46[115]._super._super;
-  Val x324 = x46[116]._super._super;
-  Val x325 = x46[117]._super._super;
-  Val x326 = x46[118]._super._super;
-  Val x327 = x46[119]._super._super;
-  Val x328 = x46[120]._super._super;
-  Val x329 = x46[121]._super._super;
-  Val x330 = x46[122]._super._super;
-  Val x331 = x46[123]._super._super;
-  Val x332 = x46[124]._super._super;
-  Val x333 = x46[125]._super._super;
-  Val x334 = x46[126]._super._super;
-  Val x335 = x46[127]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x336 = (((x320 + (x321 * Val(2))) + (x322 * Val(4))) + (x323 * Val(8)));
-  Val x337 = (((x336 + (x324 * Val(16))) + (x325 * Val(32))) + (x326 * Val(64)));
-  Val x338 = (((x337 + (x327 * Val(128))) + (x328 * Val(256))) + (x329 * Val(512)));
-  Val x339 = (((x338 + (x330 * Val(1024))) + (x331 * Val(2048))) + (x332 * Val(4096)));
-  Val x340 = (((x339 + (x333 * Val(8192))) + (x334 * Val(16384))) + (x335 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x341 = x3[128]._super._super;
-  Val x342 = x3[129]._super._super;
-  Val x343 = x3[130]._super._super;
-  Val x344 = x3[131]._super._super;
-  Val x345 = x3[132]._super._super;
-  Val x346 = x3[133]._super._super;
-  Val x347 = x3[134]._super._super;
-  Val x348 = x3[135]._super._super;
-  Val x349 = x3[136]._super._super;
-  Val x350 = x3[137]._super._super;
-  Val x351 = x3[138]._super._super;
-  Val x352 = x3[139]._super._super;
-  Val x353 = x3[140]._super._super;
-  Val x354 = x3[141]._super._super;
-  Val x355 = x3[142]._super._super;
-  Val x356 = x3[143]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x357 = (((x341 + (x342 * Val(2))) + (x343 * Val(4))) + (x344 * Val(8)));
-  Val x358 = (((x357 + (x345 * Val(16))) + (x346 * Val(32))) + (x347 * Val(64)));
-  Val x359 = (((x358 + (x348 * Val(128))) + (x349 * Val(256))) + (x350 * Val(512)));
-  Val x360 = (((x359 + (x351 * Val(1024))) + (x352 * Val(2048))) + (x353 * Val(4096)));
-  Val x361 = (((x360 + (x354 * Val(8192))) + (x355 * Val(16384))) + (x356 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x362 = x3[144]._super._super;
-  Val x363 = x3[145]._super._super;
-  Val x364 = x3[146]._super._super;
-  Val x365 = x3[147]._super._super;
-  Val x366 = x3[148]._super._super;
-  Val x367 = x3[149]._super._super;
-  Val x368 = x3[150]._super._super;
-  Val x369 = x3[151]._super._super;
-  Val x370 = x3[152]._super._super;
-  Val x371 = x3[153]._super._super;
-  Val x372 = x3[154]._super._super;
-  Val x373 = x3[155]._super._super;
-  Val x374 = x3[156]._super._super;
-  Val x375 = x3[157]._super._super;
-  Val x376 = x3[158]._super._super;
-  Val x377 = x3[159]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x378 = (((x362 + (x363 * Val(2))) + (x364 * Val(4))) + (x365 * Val(8)));
-  Val x379 = (((x378 + (x366 * Val(16))) + (x367 * Val(32))) + (x368 * Val(64)));
-  Val x380 = (((x379 + (x369 * Val(128))) + (x370 * Val(256))) + (x371 * Val(512)));
-  Val x381 = (((x380 + (x372 * Val(1024))) + (x373 * Val(2048))) + (x374 * Val(4096)));
-  Val x382 = (((x381 + (x375 * Val(8192))) + (x376 * Val(16384))) + (x377 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x383 = x46[128]._super._super;
-  Val x384 = x46[129]._super._super;
-  Val x385 = x46[130]._super._super;
-  Val x386 = x46[131]._super._super;
-  Val x387 = x46[132]._super._super;
-  Val x388 = x46[133]._super._super;
-  Val x389 = x46[134]._super._super;
-  Val x390 = x46[135]._super._super;
-  Val x391 = x46[136]._super._super;
-  Val x392 = x46[137]._super._super;
-  Val x393 = x46[138]._super._super;
-  Val x394 = x46[139]._super._super;
-  Val x395 = x46[140]._super._super;
-  Val x396 = x46[141]._super._super;
-  Val x397 = x46[142]._super._super;
-  Val x398 = x46[143]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x399 = (((x383 + (x384 * Val(2))) + (x385 * Val(4))) + (x386 * Val(8)));
-  Val x400 = (((x399 + (x387 * Val(16))) + (x388 * Val(32))) + (x389 * Val(64)));
-  Val x401 = (((x400 + (x390 * Val(128))) + (x391 * Val(256))) + (x392 * Val(512)));
-  Val x402 = (((x401 + (x393 * Val(1024))) + (x394 * Val(2048))) + (x395 * Val(4096)));
-  Val x403 = (((x402 + (x396 * Val(8192))) + (x397 * Val(16384))) + (x398 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x404 = x46[144]._super._super;
-  Val x405 = x46[145]._super._super;
-  Val x406 = x46[146]._super._super;
-  Val x407 = x46[147]._super._super;
-  Val x408 = x46[148]._super._super;
-  Val x409 = x46[149]._super._super;
-  Val x410 = x46[150]._super._super;
-  Val x411 = x46[151]._super._super;
-  Val x412 = x46[152]._super._super;
-  Val x413 = x46[153]._super._super;
-  Val x414 = x46[154]._super._super;
-  Val x415 = x46[155]._super._super;
-  Val x416 = x46[156]._super._super;
-  Val x417 = x46[157]._super._super;
-  Val x418 = x46[158]._super._super;
-  Val x419 = x46[159]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x420 = (((x404 + (x405 * Val(2))) + (x406 * Val(4))) + (x407 * Val(8)));
-  Val x421 = (((x420 + (x408 * Val(16))) + (x409 * Val(32))) + (x410 * Val(64)));
-  Val x422 = (((x421 + (x411 * Val(128))) + (x412 * Val(256))) + (x413 * Val(512)));
-  Val x423 = (((x422 + (x414 * Val(1024))) + (x415 * Val(2048))) + (x416 * Val(4096)));
-  Val x424 = (((x423 + (x417 * Val(8192))) + (x418 * Val(16384))) + (x419 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x425 = x3[160]._super._super;
-  Val x426 = x3[161]._super._super;
-  Val x427 = x3[162]._super._super;
-  Val x428 = x3[163]._super._super;
-  Val x429 = x3[164]._super._super;
-  Val x430 = x3[165]._super._super;
-  Val x431 = x3[166]._super._super;
-  Val x432 = x3[167]._super._super;
-  Val x433 = x3[168]._super._super;
-  Val x434 = x3[169]._super._super;
-  Val x435 = x3[170]._super._super;
-  Val x436 = x3[171]._super._super;
-  Val x437 = x3[172]._super._super;
-  Val x438 = x3[173]._super._super;
-  Val x439 = x3[174]._super._super;
-  Val x440 = x3[175]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x441 = (((x425 + (x426 * Val(2))) + (x427 * Val(4))) + (x428 * Val(8)));
-  Val x442 = (((x441 + (x429 * Val(16))) + (x430 * Val(32))) + (x431 * Val(64)));
-  Val x443 = (((x442 + (x432 * Val(128))) + (x433 * Val(256))) + (x434 * Val(512)));
-  Val x444 = (((x443 + (x435 * Val(1024))) + (x436 * Val(2048))) + (x437 * Val(4096)));
-  Val x445 = (((x444 + (x438 * Val(8192))) + (x439 * Val(16384))) + (x440 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x446 = x3[176]._super._super;
-  Val x447 = x3[177]._super._super;
-  Val x448 = x3[178]._super._super;
-  Val x449 = x3[179]._super._super;
-  Val x450 = x3[180]._super._super;
-  Val x451 = x3[181]._super._super;
-  Val x452 = x3[182]._super._super;
-  Val x453 = x3[183]._super._super;
-  Val x454 = x3[184]._super._super;
-  Val x455 = x3[185]._super._super;
-  Val x456 = x3[186]._super._super;
-  Val x457 = x3[187]._super._super;
-  Val x458 = x3[188]._super._super;
-  Val x459 = x3[189]._super._super;
-  Val x460 = x3[190]._super._super;
-  Val x461 = x3[191]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x462 = (((x446 + (x447 * Val(2))) + (x448 * Val(4))) + (x449 * Val(8)));
-  Val x463 = (((x462 + (x450 * Val(16))) + (x451 * Val(32))) + (x452 * Val(64)));
-  Val x464 = (((x463 + (x453 * Val(128))) + (x454 * Val(256))) + (x455 * Val(512)));
-  Val x465 = (((x464 + (x456 * Val(1024))) + (x457 * Val(2048))) + (x458 * Val(4096)));
-  Val x466 = (((x465 + (x459 * Val(8192))) + (x460 * Val(16384))) + (x461 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x467 = x46[160]._super._super;
-  Val x468 = x46[161]._super._super;
-  Val x469 = x46[162]._super._super;
-  Val x470 = x46[163]._super._super;
-  Val x471 = x46[164]._super._super;
-  Val x472 = x46[165]._super._super;
-  Val x473 = x46[166]._super._super;
-  Val x474 = x46[167]._super._super;
-  Val x475 = x46[168]._super._super;
-  Val x476 = x46[169]._super._super;
-  Val x477 = x46[170]._super._super;
-  Val x478 = x46[171]._super._super;
-  Val x479 = x46[172]._super._super;
-  Val x480 = x46[173]._super._super;
-  Val x481 = x46[174]._super._super;
-  Val x482 = x46[175]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x483 = (((x467 + (x468 * Val(2))) + (x469 * Val(4))) + (x470 * Val(8)));
-  Val x484 = (((x483 + (x471 * Val(16))) + (x472 * Val(32))) + (x473 * Val(64)));
-  Val x485 = (((x484 + (x474 * Val(128))) + (x475 * Val(256))) + (x476 * Val(512)));
-  Val x486 = (((x485 + (x477 * Val(1024))) + (x478 * Val(2048))) + (x479 * Val(4096)));
-  Val x487 = (((x486 + (x480 * Val(8192))) + (x481 * Val(16384))) + (x482 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x488 = x46[176]._super._super;
-  Val x489 = x46[177]._super._super;
-  Val x490 = x46[178]._super._super;
-  Val x491 = x46[179]._super._super;
-  Val x492 = x46[180]._super._super;
-  Val x493 = x46[181]._super._super;
-  Val x494 = x46[182]._super._super;
-  Val x495 = x46[183]._super._super;
-  Val x496 = x46[184]._super._super;
-  Val x497 = x46[185]._super._super;
-  Val x498 = x46[186]._super._super;
-  Val x499 = x46[187]._super._super;
-  Val x500 = x46[188]._super._super;
-  Val x501 = x46[189]._super._super;
-  Val x502 = x46[190]._super._super;
-  Val x503 = x46[191]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x504 = (((x488 + (x489 * Val(2))) + (x490 * Val(4))) + (x491 * Val(8)));
-  Val x505 = (((x504 + (x492 * Val(16))) + (x493 * Val(32))) + (x494 * Val(64)));
-  Val x506 = (((x505 + (x495 * Val(128))) + (x496 * Val(256))) + (x497 * Val(512)));
-  Val x507 = (((x506 + (x498 * Val(1024))) + (x499 * Val(2048))) + (x500 * Val(4096)));
-  Val x508 = (((x507 + (x501 * Val(8192))) + (x502 * Val(16384))) + (x503 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x509 = x3[192]._super._super;
-  Val x510 = x3[193]._super._super;
-  Val x511 = x3[194]._super._super;
-  Val x512 = x3[195]._super._super;
-  Val x513 = x3[196]._super._super;
-  Val x514 = x3[197]._super._super;
-  Val x515 = x3[198]._super._super;
-  Val x516 = x3[199]._super._super;
-  Val x517 = x3[200]._super._super;
-  Val x518 = x3[201]._super._super;
-  Val x519 = x3[202]._super._super;
-  Val x520 = x3[203]._super._super;
-  Val x521 = x3[204]._super._super;
-  Val x522 = x3[205]._super._super;
-  Val x523 = x3[206]._super._super;
-  Val x524 = x3[207]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x525 = (((x509 + (x510 * Val(2))) + (x511 * Val(4))) + (x512 * Val(8)));
-  Val x526 = (((x525 + (x513 * Val(16))) + (x514 * Val(32))) + (x515 * Val(64)));
-  Val x527 = (((x526 + (x516 * Val(128))) + (x517 * Val(256))) + (x518 * Val(512)));
-  Val x528 = (((x527 + (x519 * Val(1024))) + (x520 * Val(2048))) + (x521 * Val(4096)));
-  Val x529 = (((x528 + (x522 * Val(8192))) + (x523 * Val(16384))) + (x524 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x530 = x3[208]._super._super;
-  Val x531 = x3[209]._super._super;
-  Val x532 = x3[210]._super._super;
-  Val x533 = x3[211]._super._super;
-  Val x534 = x3[212]._super._super;
-  Val x535 = x3[213]._super._super;
-  Val x536 = x3[214]._super._super;
-  Val x537 = x3[215]._super._super;
-  Val x538 = x3[216]._super._super;
-  Val x539 = x3[217]._super._super;
-  Val x540 = x3[218]._super._super;
-  Val x541 = x3[219]._super._super;
-  Val x542 = x3[220]._super._super;
-  Val x543 = x3[221]._super._super;
-  Val x544 = x3[222]._super._super;
-  Val x545 = x3[223]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x546 = (((x530 + (x531 * Val(2))) + (x532 * Val(4))) + (x533 * Val(8)));
-  Val x547 = (((x546 + (x534 * Val(16))) + (x535 * Val(32))) + (x536 * Val(64)));
-  Val x548 = (((x547 + (x537 * Val(128))) + (x538 * Val(256))) + (x539 * Val(512)));
-  Val x549 = (((x548 + (x540 * Val(1024))) + (x541 * Val(2048))) + (x542 * Val(4096)));
-  Val x550 = (((x549 + (x543 * Val(8192))) + (x544 * Val(16384))) + (x545 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x551 = x46[192]._super._super;
-  Val x552 = x46[193]._super._super;
-  Val x553 = x46[194]._super._super;
-  Val x554 = x46[195]._super._super;
-  Val x555 = x46[196]._super._super;
-  Val x556 = x46[197]._super._super;
-  Val x557 = x46[198]._super._super;
-  Val x558 = x46[199]._super._super;
-  Val x559 = x46[200]._super._super;
-  Val x560 = x46[201]._super._super;
-  Val x561 = x46[202]._super._super;
-  Val x562 = x46[203]._super._super;
-  Val x563 = x46[204]._super._super;
-  Val x564 = x46[205]._super._super;
-  Val x565 = x46[206]._super._super;
-  Val x566 = x46[207]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x567 = (((x551 + (x552 * Val(2))) + (x553 * Val(4))) + (x554 * Val(8)));
-  Val x568 = (((x567 + (x555 * Val(16))) + (x556 * Val(32))) + (x557 * Val(64)));
-  Val x569 = (((x568 + (x558 * Val(128))) + (x559 * Val(256))) + (x560 * Val(512)));
-  Val x570 = (((x569 + (x561 * Val(1024))) + (x562 * Val(2048))) + (x563 * Val(4096)));
-  Val x571 = (((x570 + (x564 * Val(8192))) + (x565 * Val(16384))) + (x566 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x572 = x46[208]._super._super;
-  Val x573 = x46[209]._super._super;
-  Val x574 = x46[210]._super._super;
-  Val x575 = x46[211]._super._super;
-  Val x576 = x46[212]._super._super;
-  Val x577 = x46[213]._super._super;
-  Val x578 = x46[214]._super._super;
-  Val x579 = x46[215]._super._super;
-  Val x580 = x46[216]._super._super;
-  Val x581 = x46[217]._super._super;
-  Val x582 = x46[218]._super._super;
-  Val x583 = x46[219]._super._super;
-  Val x584 = x46[220]._super._super;
-  Val x585 = x46[221]._super._super;
-  Val x586 = x46[222]._super._super;
-  Val x587 = x46[223]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x588 = (((x572 + (x573 * Val(2))) + (x574 * Val(4))) + (x575 * Val(8)));
-  Val x589 = (((x588 + (x576 * Val(16))) + (x577 * Val(32))) + (x578 * Val(64)));
-  Val x590 = (((x589 + (x579 * Val(128))) + (x580 * Val(256))) + (x581 * Val(512)));
-  Val x591 = (((x590 + (x582 * Val(1024))) + (x583 * Val(2048))) + (x584 * Val(4096)));
-  Val x592 = (((x591 + (x585 * Val(8192))) + (x586 * Val(16384))) + (x587 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x593 = x3[224]._super._super;
-  Val x594 = x3[225]._super._super;
-  Val x595 = x3[226]._super._super;
-  Val x596 = x3[227]._super._super;
-  Val x597 = x3[228]._super._super;
-  Val x598 = x3[229]._super._super;
-  Val x599 = x3[230]._super._super;
-  Val x600 = x3[231]._super._super;
-  Val x601 = x3[232]._super._super;
-  Val x602 = x3[233]._super._super;
-  Val x603 = x3[234]._super._super;
-  Val x604 = x3[235]._super._super;
-  Val x605 = x3[236]._super._super;
-  Val x606 = x3[237]._super._super;
-  Val x607 = x3[238]._super._super;
-  Val x608 = x3[239]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x609 = (((x593 + (x594 * Val(2))) + (x595 * Val(4))) + (x596 * Val(8)));
-  Val x610 = (((x609 + (x597 * Val(16))) + (x598 * Val(32))) + (x599 * Val(64)));
-  Val x611 = (((x610 + (x600 * Val(128))) + (x601 * Val(256))) + (x602 * Val(512)));
-  Val x612 = (((x611 + (x603 * Val(1024))) + (x604 * Val(2048))) + (x605 * Val(4096)));
-  Val x613 = (((x612 + (x606 * Val(8192))) + (x607 * Val(16384))) + (x608 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x614 = x3[240]._super._super;
-  Val x615 = x3[241]._super._super;
-  Val x616 = x3[242]._super._super;
-  Val x617 = x3[243]._super._super;
-  Val x618 = x3[244]._super._super;
-  Val x619 = x3[245]._super._super;
-  Val x620 = x3[246]._super._super;
-  Val x621 = x3[247]._super._super;
-  Val x622 = x3[248]._super._super;
-  Val x623 = x3[249]._super._super;
-  Val x624 = x3[250]._super._super;
-  Val x625 = x3[251]._super._super;
-  Val x626 = x3[252]._super._super;
-  Val x627 = x3[253]._super._super;
-  Val x628 = x3[254]._super._super;
-  Val x629 = x3[255]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x630 = (((x614 + (x615 * Val(2))) + (x616 * Val(4))) + (x617 * Val(8)));
-  Val x631 = (((x630 + (x618 * Val(16))) + (x619 * Val(32))) + (x620 * Val(64)));
-  Val x632 = (((x631 + (x621 * Val(128))) + (x622 * Val(256))) + (x623 * Val(512)));
-  Val x633 = (((x632 + (x624 * Val(1024))) + (x625 * Val(2048))) + (x626 * Val(4096)));
-  Val x634 = (((x633 + (x627 * Val(8192))) + (x628 * Val(16384))) + (x629 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x635 = x46[224]._super._super;
-  Val x636 = x46[225]._super._super;
-  Val x637 = x46[226]._super._super;
-  Val x638 = x46[227]._super._super;
-  Val x639 = x46[228]._super._super;
-  Val x640 = x46[229]._super._super;
-  Val x641 = x46[230]._super._super;
-  Val x642 = x46[231]._super._super;
-  Val x643 = x46[232]._super._super;
-  Val x644 = x46[233]._super._super;
-  Val x645 = x46[234]._super._super;
-  Val x646 = x46[235]._super._super;
-  Val x647 = x46[236]._super._super;
-  Val x648 = x46[237]._super._super;
-  Val x649 = x46[238]._super._super;
-  Val x650 = x46[239]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x651 = (((x635 + (x636 * Val(2))) + (x637 * Val(4))) + (x638 * Val(8)));
-  Val x652 = (((x651 + (x639 * Val(16))) + (x640 * Val(32))) + (x641 * Val(64)));
-  Val x653 = (((x652 + (x642 * Val(128))) + (x643 * Val(256))) + (x644 * Val(512)));
-  Val x654 = (((x653 + (x645 * Val(1024))) + (x646 * Val(2048))) + (x647 * Val(4096)));
-  Val x655 = (((x654 + (x648 * Val(8192))) + (x649 * Val(16384))) + (x650 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x656 = x46[240]._super._super;
-  Val x657 = x46[241]._super._super;
-  Val x658 = x46[242]._super._super;
-  Val x659 = x46[243]._super._super;
-  Val x660 = x46[244]._super._super;
-  Val x661 = x46[245]._super._super;
-  Val x662 = x46[246]._super._super;
-  Val x663 = x46[247]._super._super;
-  Val x664 = x46[248]._super._super;
-  Val x665 = x46[249]._super._super;
-  Val x666 = x46[250]._super._super;
-  Val x667 = x46[251]._super._super;
-  Val x668 = x46[252]._super._super;
-  Val x669 = x46[253]._super._super;
-  Val x670 = x46[254]._super._super;
-  Val x671 = x46[255]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x672 = (((x656 + (x657 * Val(2))) + (x658 * Val(4))) + (x659 * Val(8)));
-  Val x673 = (((x672 + (x660 * Val(16))) + (x661 * Val(32))) + (x662 * Val(64)));
-  Val x674 = (((x673 + (x663 * Val(128))) + (x664 * Val(256))) + (x665 * Val(512)));
-  Val x675 = (((x674 + (x666 * Val(1024))) + (x667 * Val(2048))) + (x668 * Val(4096)));
-  Val x676 = (((x675 + (x669 * Val(8192))) + (x670 * Val(16384))) + (x671 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x677 = x3[256]._super._super;
-  Val x678 = x3[257]._super._super;
-  Val x679 = x3[258]._super._super;
-  Val x680 = x3[259]._super._super;
-  Val x681 = x3[260]._super._super;
-  Val x682 = x3[261]._super._super;
-  Val x683 = x3[262]._super._super;
-  Val x684 = x3[263]._super._super;
-  Val x685 = x3[264]._super._super;
-  Val x686 = x3[265]._super._super;
-  Val x687 = x3[266]._super._super;
-  Val x688 = x3[267]._super._super;
-  Val x689 = x3[268]._super._super;
-  Val x690 = x3[269]._super._super;
-  Val x691 = x3[270]._super._super;
-  Val x692 = x3[271]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x693 = (((x677 + (x678 * Val(2))) + (x679 * Val(4))) + (x680 * Val(8)));
-  Val x694 = (((x693 + (x681 * Val(16))) + (x682 * Val(32))) + (x683 * Val(64)));
-  Val x695 = (((x694 + (x684 * Val(128))) + (x685 * Val(256))) + (x686 * Val(512)));
-  Val x696 = (((x695 + (x687 * Val(1024))) + (x688 * Val(2048))) + (x689 * Val(4096)));
-  Val x697 = (((x696 + (x690 * Val(8192))) + (x691 * Val(16384))) + (x692 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x698 = x3[272]._super._super;
-  Val x699 = x3[273]._super._super;
-  Val x700 = x3[274]._super._super;
-  Val x701 = x3[275]._super._super;
-  Val x702 = x3[276]._super._super;
-  Val x703 = x3[277]._super._super;
-  Val x704 = x3[278]._super._super;
-  Val x705 = x3[279]._super._super;
-  Val x706 = x3[280]._super._super;
-  Val x707 = x3[281]._super._super;
-  Val x708 = x3[282]._super._super;
-  Val x709 = x3[283]._super._super;
-  Val x710 = x3[284]._super._super;
-  Val x711 = x3[285]._super._super;
-  Val x712 = x3[286]._super._super;
-  Val x713 = x3[287]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x714 = (((x698 + (x699 * Val(2))) + (x700 * Val(4))) + (x701 * Val(8)));
-  Val x715 = (((x714 + (x702 * Val(16))) + (x703 * Val(32))) + (x704 * Val(64)));
-  Val x716 = (((x715 + (x705 * Val(128))) + (x706 * Val(256))) + (x707 * Val(512)));
-  Val x717 = (((x716 + (x708 * Val(1024))) + (x709 * Val(2048))) + (x710 * Val(4096)));
-  Val x718 = (((x717 + (x711 * Val(8192))) + (x712 * Val(16384))) + (x713 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x719 = x46[256]._super._super;
-  Val x720 = x46[257]._super._super;
-  Val x721 = x46[258]._super._super;
-  Val x722 = x46[259]._super._super;
-  Val x723 = x46[260]._super._super;
-  Val x724 = x46[261]._super._super;
-  Val x725 = x46[262]._super._super;
-  Val x726 = x46[263]._super._super;
-  Val x727 = x46[264]._super._super;
-  Val x728 = x46[265]._super._super;
-  Val x729 = x46[266]._super._super;
-  Val x730 = x46[267]._super._super;
-  Val x731 = x46[268]._super._super;
-  Val x732 = x46[269]._super._super;
-  Val x733 = x46[270]._super._super;
-  Val x734 = x46[271]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x735 = (((x719 + (x720 * Val(2))) + (x721 * Val(4))) + (x722 * Val(8)));
-  Val x736 = (((x735 + (x723 * Val(16))) + (x724 * Val(32))) + (x725 * Val(64)));
-  Val x737 = (((x736 + (x726 * Val(128))) + (x727 * Val(256))) + (x728 * Val(512)));
-  Val x738 = (((x737 + (x729 * Val(1024))) + (x730 * Val(2048))) + (x731 * Val(4096)));
-  Val x739 = (((x738 + (x732 * Val(8192))) + (x733 * Val(16384))) + (x734 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x740 = x46[272]._super._super;
-  Val x741 = x46[273]._super._super;
-  Val x742 = x46[274]._super._super;
-  Val x743 = x46[275]._super._super;
-  Val x744 = x46[276]._super._super;
-  Val x745 = x46[277]._super._super;
-  Val x746 = x46[278]._super._super;
-  Val x747 = x46[279]._super._super;
-  Val x748 = x46[280]._super._super;
-  Val x749 = x46[281]._super._super;
-  Val x750 = x46[282]._super._super;
-  Val x751 = x46[283]._super._super;
-  Val x752 = x46[284]._super._super;
-  Val x753 = x46[285]._super._super;
-  Val x754 = x46[286]._super._super;
-  Val x755 = x46[287]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x756 = (((x740 + (x741 * Val(2))) + (x742 * Val(4))) + (x743 * Val(8)));
-  Val x757 = (((x756 + (x744 * Val(16))) + (x745 * Val(32))) + (x746 * Val(64)));
-  Val x758 = (((x757 + (x747 * Val(128))) + (x748 * Val(256))) + (x749 * Val(512)));
-  Val x759 = (((x758 + (x750 * Val(1024))) + (x751 * Val(2048))) + (x752 * Val(4096)));
-  Val x760 = (((x759 + (x753 * Val(8192))) + (x754 * Val(16384))) + (x755 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x761 = x3[288]._super._super;
-  Val x762 = x3[289]._super._super;
-  Val x763 = x3[290]._super._super;
-  Val x764 = x3[291]._super._super;
-  Val x765 = x3[292]._super._super;
-  Val x766 = x3[293]._super._super;
-  Val x767 = x3[294]._super._super;
-  Val x768 = x3[295]._super._super;
-  Val x769 = x3[296]._super._super;
-  Val x770 = x3[297]._super._super;
-  Val x771 = x3[298]._super._super;
-  Val x772 = x3[299]._super._super;
-  Val x773 = x3[300]._super._super;
-  Val x774 = x3[301]._super._super;
-  Val x775 = x3[302]._super._super;
-  Val x776 = x3[303]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x777 = (((x761 + (x762 * Val(2))) + (x763 * Val(4))) + (x764 * Val(8)));
-  Val x778 = (((x777 + (x765 * Val(16))) + (x766 * Val(32))) + (x767 * Val(64)));
-  Val x779 = (((x778 + (x768 * Val(128))) + (x769 * Val(256))) + (x770 * Val(512)));
-  Val x780 = (((x779 + (x771 * Val(1024))) + (x772 * Val(2048))) + (x773 * Val(4096)));
-  Val x781 = (((x780 + (x774 * Val(8192))) + (x775 * Val(16384))) + (x776 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x782 = x3[304]._super._super;
-  Val x783 = x3[305]._super._super;
-  Val x784 = x3[306]._super._super;
-  Val x785 = x3[307]._super._super;
-  Val x786 = x3[308]._super._super;
-  Val x787 = x3[309]._super._super;
-  Val x788 = x3[310]._super._super;
-  Val x789 = x3[311]._super._super;
-  Val x790 = x3[312]._super._super;
-  Val x791 = x3[313]._super._super;
-  Val x792 = x3[314]._super._super;
-  Val x793 = x3[315]._super._super;
-  Val x794 = x3[316]._super._super;
-  Val x795 = x3[317]._super._super;
-  Val x796 = x3[318]._super._super;
-  Val x797 = x3[319]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x798 = (((x782 + (x783 * Val(2))) + (x784 * Val(4))) + (x785 * Val(8)));
-  Val x799 = (((x798 + (x786 * Val(16))) + (x787 * Val(32))) + (x788 * Val(64)));
-  Val x800 = (((x799 + (x789 * Val(128))) + (x790 * Val(256))) + (x791 * Val(512)));
-  Val x801 = (((x800 + (x792 * Val(1024))) + (x793 * Val(2048))) + (x794 * Val(4096)));
-  Val x802 = (((x801 + (x795 * Val(8192))) + (x796 * Val(16384))) + (x797 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x803 = x46[288]._super._super;
-  Val x804 = x46[289]._super._super;
-  Val x805 = x46[290]._super._super;
-  Val x806 = x46[291]._super._super;
-  Val x807 = x46[292]._super._super;
-  Val x808 = x46[293]._super._super;
-  Val x809 = x46[294]._super._super;
-  Val x810 = x46[295]._super._super;
-  Val x811 = x46[296]._super._super;
-  Val x812 = x46[297]._super._super;
-  Val x813 = x46[298]._super._super;
-  Val x814 = x46[299]._super._super;
-  Val x815 = x46[300]._super._super;
-  Val x816 = x46[301]._super._super;
-  Val x817 = x46[302]._super._super;
-  Val x818 = x46[303]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x819 = (((x803 + (x804 * Val(2))) + (x805 * Val(4))) + (x806 * Val(8)));
-  Val x820 = (((x819 + (x807 * Val(16))) + (x808 * Val(32))) + (x809 * Val(64)));
-  Val x821 = (((x820 + (x810 * Val(128))) + (x811 * Val(256))) + (x812 * Val(512)));
-  Val x822 = (((x821 + (x813 * Val(1024))) + (x814 * Val(2048))) + (x815 * Val(4096)));
-  Val x823 = (((x822 + (x816 * Val(8192))) + (x817 * Val(16384))) + (x818 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x824 = x46[304]._super._super;
-  Val x825 = x46[305]._super._super;
-  Val x826 = x46[306]._super._super;
-  Val x827 = x46[307]._super._super;
-  Val x828 = x46[308]._super._super;
-  Val x829 = x46[309]._super._super;
-  Val x830 = x46[310]._super._super;
-  Val x831 = x46[311]._super._super;
-  Val x832 = x46[312]._super._super;
-  Val x833 = x46[313]._super._super;
-  Val x834 = x46[314]._super._super;
-  Val x835 = x46[315]._super._super;
-  Val x836 = x46[316]._super._super;
-  Val x837 = x46[317]._super._super;
-  Val x838 = x46[318]._super._super;
-  Val x839 = x46[319]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x840 = (((x824 + (x825 * Val(2))) + (x826 * Val(4))) + (x827 * Val(8)));
-  Val x841 = (((x840 + (x828 * Val(16))) + (x829 * Val(32))) + (x830 * Val(64)));
-  Val x842 = (((x841 + (x831 * Val(128))) + (x832 * Val(256))) + (x833 * Val(512)));
-  Val x843 = (((x842 + (x834 * Val(1024))) + (x835 * Val(2048))) + (x836 * Val(4096)));
-  Val x844 = (((x843 + (x837 * Val(8192))) + (x838 * Val(16384))) + (x839 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x845 = x3[320]._super._super;
-  Val x846 = x3[321]._super._super;
-  Val x847 = x3[322]._super._super;
-  Val x848 = x3[323]._super._super;
-  Val x849 = x3[324]._super._super;
-  Val x850 = x3[325]._super._super;
-  Val x851 = x3[326]._super._super;
-  Val x852 = x3[327]._super._super;
-  Val x853 = x3[328]._super._super;
-  Val x854 = x3[329]._super._super;
-  Val x855 = x3[330]._super._super;
-  Val x856 = x3[331]._super._super;
-  Val x857 = x3[332]._super._super;
-  Val x858 = x3[333]._super._super;
-  Val x859 = x3[334]._super._super;
-  Val x860 = x3[335]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x861 = (((x845 + (x846 * Val(2))) + (x847 * Val(4))) + (x848 * Val(8)));
-  Val x862 = (((x861 + (x849 * Val(16))) + (x850 * Val(32))) + (x851 * Val(64)));
-  Val x863 = (((x862 + (x852 * Val(128))) + (x853 * Val(256))) + (x854 * Val(512)));
-  Val x864 = (((x863 + (x855 * Val(1024))) + (x856 * Val(2048))) + (x857 * Val(4096)));
-  Val x865 = (((x864 + (x858 * Val(8192))) + (x859 * Val(16384))) + (x860 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x866 = x3[336]._super._super;
-  Val x867 = x3[337]._super._super;
-  Val x868 = x3[338]._super._super;
-  Val x869 = x3[339]._super._super;
-  Val x870 = x3[340]._super._super;
-  Val x871 = x3[341]._super._super;
-  Val x872 = x3[342]._super._super;
-  Val x873 = x3[343]._super._super;
-  Val x874 = x3[344]._super._super;
-  Val x875 = x3[345]._super._super;
-  Val x876 = x3[346]._super._super;
-  Val x877 = x3[347]._super._super;
-  Val x878 = x3[348]._super._super;
-  Val x879 = x3[349]._super._super;
-  Val x880 = x3[350]._super._super;
-  Val x881 = x3[351]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x882 = (((x866 + (x867 * Val(2))) + (x868 * Val(4))) + (x869 * Val(8)));
-  Val x883 = (((x882 + (x870 * Val(16))) + (x871 * Val(32))) + (x872 * Val(64)));
-  Val x884 = (((x883 + (x873 * Val(128))) + (x874 * Val(256))) + (x875 * Val(512)));
-  Val x885 = (((x884 + (x876 * Val(1024))) + (x877 * Val(2048))) + (x878 * Val(4096)));
-  Val x886 = (((x885 + (x879 * Val(8192))) + (x880 * Val(16384))) + (x881 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x887 = x46[320]._super._super;
-  Val x888 = x46[321]._super._super;
-  Val x889 = x46[322]._super._super;
-  Val x890 = x46[323]._super._super;
-  Val x891 = x46[324]._super._super;
-  Val x892 = x46[325]._super._super;
-  Val x893 = x46[326]._super._super;
-  Val x894 = x46[327]._super._super;
-  Val x895 = x46[328]._super._super;
-  Val x896 = x46[329]._super._super;
-  Val x897 = x46[330]._super._super;
-  Val x898 = x46[331]._super._super;
-  Val x899 = x46[332]._super._super;
-  Val x900 = x46[333]._super._super;
-  Val x901 = x46[334]._super._super;
-  Val x902 = x46[335]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x903 = (((x887 + (x888 * Val(2))) + (x889 * Val(4))) + (x890 * Val(8)));
-  Val x904 = (((x903 + (x891 * Val(16))) + (x892 * Val(32))) + (x893 * Val(64)));
-  Val x905 = (((x904 + (x894 * Val(128))) + (x895 * Val(256))) + (x896 * Val(512)));
-  Val x906 = (((x905 + (x897 * Val(1024))) + (x898 * Val(2048))) + (x899 * Val(4096)));
-  Val x907 = (((x906 + (x900 * Val(8192))) + (x901 * Val(16384))) + (x902 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x908 = x46[336]._super._super;
-  Val x909 = x46[337]._super._super;
-  Val x910 = x46[338]._super._super;
-  Val x911 = x46[339]._super._super;
-  Val x912 = x46[340]._super._super;
-  Val x913 = x46[341]._super._super;
-  Val x914 = x46[342]._super._super;
-  Val x915 = x46[343]._super._super;
-  Val x916 = x46[344]._super._super;
-  Val x917 = x46[345]._super._super;
-  Val x918 = x46[346]._super._super;
-  Val x919 = x46[347]._super._super;
-  Val x920 = x46[348]._super._super;
-  Val x921 = x46[349]._super._super;
-  Val x922 = x46[350]._super._super;
-  Val x923 = x46[351]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x924 = (((x908 + (x909 * Val(2))) + (x910 * Val(4))) + (x911 * Val(8)));
-  Val x925 = (((x924 + (x912 * Val(16))) + (x913 * Val(32))) + (x914 * Val(64)));
-  Val x926 = (((x925 + (x915 * Val(128))) + (x916 * Val(256))) + (x917 * Val(512)));
-  Val x927 = (((x926 + (x918 * Val(1024))) + (x919 * Val(2048))) + (x920 * Val(4096)));
-  Val x928 = (((x927 + (x921 * Val(8192))) + (x922 * Val(16384))) + (x923 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x929 = x3[352]._super._super;
-  Val x930 = x3[353]._super._super;
-  Val x931 = x3[354]._super._super;
-  Val x932 = x3[355]._super._super;
-  Val x933 = x3[356]._super._super;
-  Val x934 = x3[357]._super._super;
-  Val x935 = x3[358]._super._super;
-  Val x936 = x3[359]._super._super;
-  Val x937 = x3[360]._super._super;
-  Val x938 = x3[361]._super._super;
-  Val x939 = x3[362]._super._super;
-  Val x940 = x3[363]._super._super;
-  Val x941 = x3[364]._super._super;
-  Val x942 = x3[365]._super._super;
-  Val x943 = x3[366]._super._super;
-  Val x944 = x3[367]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x945 = (((x929 + (x930 * Val(2))) + (x931 * Val(4))) + (x932 * Val(8)));
-  Val x946 = (((x945 + (x933 * Val(16))) + (x934 * Val(32))) + (x935 * Val(64)));
-  Val x947 = (((x946 + (x936 * Val(128))) + (x937 * Val(256))) + (x938 * Val(512)));
-  Val x948 = (((x947 + (x939 * Val(1024))) + (x940 * Val(2048))) + (x941 * Val(4096)));
-  Val x949 = (((x948 + (x942 * Val(8192))) + (x943 * Val(16384))) + (x944 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x950 = x3[368]._super._super;
-  Val x951 = x3[369]._super._super;
-  Val x952 = x3[370]._super._super;
-  Val x953 = x3[371]._super._super;
-  Val x954 = x3[372]._super._super;
-  Val x955 = x3[373]._super._super;
-  Val x956 = x3[374]._super._super;
-  Val x957 = x3[375]._super._super;
-  Val x958 = x3[376]._super._super;
-  Val x959 = x3[377]._super._super;
-  Val x960 = x3[378]._super._super;
-  Val x961 = x3[379]._super._super;
-  Val x962 = x3[380]._super._super;
-  Val x963 = x3[381]._super._super;
-  Val x964 = x3[382]._super._super;
-  Val x965 = x3[383]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x966 = (((x950 + (x951 * Val(2))) + (x952 * Val(4))) + (x953 * Val(8)));
-  Val x967 = (((x966 + (x954 * Val(16))) + (x955 * Val(32))) + (x956 * Val(64)));
-  Val x968 = (((x967 + (x957 * Val(128))) + (x958 * Val(256))) + (x959 * Val(512)));
-  Val x969 = (((x968 + (x960 * Val(1024))) + (x961 * Val(2048))) + (x962 * Val(4096)));
-  Val x970 = (((x969 + (x963 * Val(8192))) + (x964 * Val(16384))) + (x965 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x971 = x46[352]._super._super;
-  Val x972 = x46[353]._super._super;
-  Val x973 = x46[354]._super._super;
-  Val x974 = x46[355]._super._super;
-  Val x975 = x46[356]._super._super;
-  Val x976 = x46[357]._super._super;
-  Val x977 = x46[358]._super._super;
-  Val x978 = x46[359]._super._super;
-  Val x979 = x46[360]._super._super;
-  Val x980 = x46[361]._super._super;
-  Val x981 = x46[362]._super._super;
-  Val x982 = x46[363]._super._super;
-  Val x983 = x46[364]._super._super;
-  Val x984 = x46[365]._super._super;
-  Val x985 = x46[366]._super._super;
-  Val x986 = x46[367]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x987 = (((x971 + (x972 * Val(2))) + (x973 * Val(4))) + (x974 * Val(8)));
-  Val x988 = (((x987 + (x975 * Val(16))) + (x976 * Val(32))) + (x977 * Val(64)));
-  Val x989 = (((x988 + (x978 * Val(128))) + (x979 * Val(256))) + (x980 * Val(512)));
-  Val x990 = (((x989 + (x981 * Val(1024))) + (x982 * Val(2048))) + (x983 * Val(4096)));
-  Val x991 = (((x990 + (x984 * Val(8192))) + (x985 * Val(16384))) + (x986 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x992 = x46[368]._super._super;
-  Val x993 = x46[369]._super._super;
-  Val x994 = x46[370]._super._super;
-  Val x995 = x46[371]._super._super;
-  Val x996 = x46[372]._super._super;
-  Val x997 = x46[373]._super._super;
-  Val x998 = x46[374]._super._super;
-  Val x999 = x46[375]._super._super;
-  Val x1000 = x46[376]._super._super;
-  Val x1001 = x46[377]._super._super;
-  Val x1002 = x46[378]._super._super;
-  Val x1003 = x46[379]._super._super;
-  Val x1004 = x46[380]._super._super;
-  Val x1005 = x46[381]._super._super;
-  Val x1006 = x46[382]._super._super;
-  Val x1007 = x46[383]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1008 = (((x992 + (x993 * Val(2))) + (x994 * Val(4))) + (x995 * Val(8)));
-  Val x1009 = (((x1008 + (x996 * Val(16))) + (x997 * Val(32))) + (x998 * Val(64)));
-  Val x1010 = (((x1009 + (x999 * Val(128))) + (x1000 * Val(256))) + (x1001 * Val(512)));
-  Val x1011 = (((x1010 + (x1002 * Val(1024))) + (x1003 * Val(2048))) + (x1004 * Val(4096)));
-  Val x1012 = (((x1011 + (x1005 * Val(8192))) + (x1006 * Val(16384))) + (x1007 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1013 = x3[384]._super._super;
-  Val x1014 = x3[385]._super._super;
-  Val x1015 = x3[386]._super._super;
-  Val x1016 = x3[387]._super._super;
-  Val x1017 = x3[388]._super._super;
-  Val x1018 = x3[389]._super._super;
-  Val x1019 = x3[390]._super._super;
-  Val x1020 = x3[391]._super._super;
-  Val x1021 = x3[392]._super._super;
-  Val x1022 = x3[393]._super._super;
-  Val x1023 = x3[394]._super._super;
-  Val x1024 = x3[395]._super._super;
-  Val x1025 = x3[396]._super._super;
-  Val x1026 = x3[397]._super._super;
-  Val x1027 = x3[398]._super._super;
-  Val x1028 = x3[399]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1029 = (((x1013 + (x1014 * Val(2))) + (x1015 * Val(4))) + (x1016 * Val(8)));
-  Val x1030 = (((x1029 + (x1017 * Val(16))) + (x1018 * Val(32))) + (x1019 * Val(64)));
-  Val x1031 = (((x1030 + (x1020 * Val(128))) + (x1021 * Val(256))) + (x1022 * Val(512)));
-  Val x1032 = (((x1031 + (x1023 * Val(1024))) + (x1024 * Val(2048))) + (x1025 * Val(4096)));
-  Val x1033 = (((x1032 + (x1026 * Val(8192))) + (x1027 * Val(16384))) + (x1028 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1034 = x3[400]._super._super;
-  Val x1035 = x3[401]._super._super;
-  Val x1036 = x3[402]._super._super;
-  Val x1037 = x3[403]._super._super;
-  Val x1038 = x3[404]._super._super;
-  Val x1039 = x3[405]._super._super;
-  Val x1040 = x3[406]._super._super;
-  Val x1041 = x3[407]._super._super;
-  Val x1042 = x3[408]._super._super;
-  Val x1043 = x3[409]._super._super;
-  Val x1044 = x3[410]._super._super;
-  Val x1045 = x3[411]._super._super;
-  Val x1046 = x3[412]._super._super;
-  Val x1047 = x3[413]._super._super;
-  Val x1048 = x3[414]._super._super;
-  Val x1049 = x3[415]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1050 = (((x1034 + (x1035 * Val(2))) + (x1036 * Val(4))) + (x1037 * Val(8)));
-  Val x1051 = (((x1050 + (x1038 * Val(16))) + (x1039 * Val(32))) + (x1040 * Val(64)));
-  Val x1052 = (((x1051 + (x1041 * Val(128))) + (x1042 * Val(256))) + (x1043 * Val(512)));
-  Val x1053 = (((x1052 + (x1044 * Val(1024))) + (x1045 * Val(2048))) + (x1046 * Val(4096)));
-  Val x1054 = (((x1053 + (x1047 * Val(8192))) + (x1048 * Val(16384))) + (x1049 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1055 = x46[384]._super._super;
-  Val x1056 = x46[385]._super._super;
-  Val x1057 = x46[386]._super._super;
-  Val x1058 = x46[387]._super._super;
-  Val x1059 = x46[388]._super._super;
-  Val x1060 = x46[389]._super._super;
-  Val x1061 = x46[390]._super._super;
-  Val x1062 = x46[391]._super._super;
-  Val x1063 = x46[392]._super._super;
-  Val x1064 = x46[393]._super._super;
-  Val x1065 = x46[394]._super._super;
-  Val x1066 = x46[395]._super._super;
-  Val x1067 = x46[396]._super._super;
-  Val x1068 = x46[397]._super._super;
-  Val x1069 = x46[398]._super._super;
-  Val x1070 = x46[399]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1071 = (((x1055 + (x1056 * Val(2))) + (x1057 * Val(4))) + (x1058 * Val(8)));
-  Val x1072 = (((x1071 + (x1059 * Val(16))) + (x1060 * Val(32))) + (x1061 * Val(64)));
-  Val x1073 = (((x1072 + (x1062 * Val(128))) + (x1063 * Val(256))) + (x1064 * Val(512)));
-  Val x1074 = (((x1073 + (x1065 * Val(1024))) + (x1066 * Val(2048))) + (x1067 * Val(4096)));
-  Val x1075 = (((x1074 + (x1068 * Val(8192))) + (x1069 * Val(16384))) + (x1070 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1076 = x46[400]._super._super;
-  Val x1077 = x46[401]._super._super;
-  Val x1078 = x46[402]._super._super;
-  Val x1079 = x46[403]._super._super;
-  Val x1080 = x46[404]._super._super;
-  Val x1081 = x46[405]._super._super;
-  Val x1082 = x46[406]._super._super;
-  Val x1083 = x46[407]._super._super;
-  Val x1084 = x46[408]._super._super;
-  Val x1085 = x46[409]._super._super;
-  Val x1086 = x46[410]._super._super;
-  Val x1087 = x46[411]._super._super;
-  Val x1088 = x46[412]._super._super;
-  Val x1089 = x46[413]._super._super;
-  Val x1090 = x46[414]._super._super;
-  Val x1091 = x46[415]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1092 = (((x1076 + (x1077 * Val(2))) + (x1078 * Val(4))) + (x1079 * Val(8)));
-  Val x1093 = (((x1092 + (x1080 * Val(16))) + (x1081 * Val(32))) + (x1082 * Val(64)));
-  Val x1094 = (((x1093 + (x1083 * Val(128))) + (x1084 * Val(256))) + (x1085 * Val(512)));
-  Val x1095 = (((x1094 + (x1086 * Val(1024))) + (x1087 * Val(2048))) + (x1088 * Val(4096)));
-  Val x1096 = (((x1095 + (x1089 * Val(8192))) + (x1090 * Val(16384))) + (x1091 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1097 = x3[416]._super._super;
-  Val x1098 = x3[417]._super._super;
-  Val x1099 = x3[418]._super._super;
-  Val x1100 = x3[419]._super._super;
-  Val x1101 = x3[420]._super._super;
-  Val x1102 = x3[421]._super._super;
-  Val x1103 = x3[422]._super._super;
-  Val x1104 = x3[423]._super._super;
-  Val x1105 = x3[424]._super._super;
-  Val x1106 = x3[425]._super._super;
-  Val x1107 = x3[426]._super._super;
-  Val x1108 = x3[427]._super._super;
-  Val x1109 = x3[428]._super._super;
-  Val x1110 = x3[429]._super._super;
-  Val x1111 = x3[430]._super._super;
-  Val x1112 = x3[431]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1113 = (((x1097 + (x1098 * Val(2))) + (x1099 * Val(4))) + (x1100 * Val(8)));
-  Val x1114 = (((x1113 + (x1101 * Val(16))) + (x1102 * Val(32))) + (x1103 * Val(64)));
-  Val x1115 = (((x1114 + (x1104 * Val(128))) + (x1105 * Val(256))) + (x1106 * Val(512)));
-  Val x1116 = (((x1115 + (x1107 * Val(1024))) + (x1108 * Val(2048))) + (x1109 * Val(4096)));
-  Val x1117 = (((x1116 + (x1110 * Val(8192))) + (x1111 * Val(16384))) + (x1112 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1118 = x3[432]._super._super;
-  Val x1119 = x3[433]._super._super;
-  Val x1120 = x3[434]._super._super;
-  Val x1121 = x3[435]._super._super;
-  Val x1122 = x3[436]._super._super;
-  Val x1123 = x3[437]._super._super;
-  Val x1124 = x3[438]._super._super;
-  Val x1125 = x3[439]._super._super;
-  Val x1126 = x3[440]._super._super;
-  Val x1127 = x3[441]._super._super;
-  Val x1128 = x3[442]._super._super;
-  Val x1129 = x3[443]._super._super;
-  Val x1130 = x3[444]._super._super;
-  Val x1131 = x3[445]._super._super;
-  Val x1132 = x3[446]._super._super;
-  Val x1133 = x3[447]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1134 = (((x1118 + (x1119 * Val(2))) + (x1120 * Val(4))) + (x1121 * Val(8)));
-  Val x1135 = (((x1134 + (x1122 * Val(16))) + (x1123 * Val(32))) + (x1124 * Val(64)));
-  Val x1136 = (((x1135 + (x1125 * Val(128))) + (x1126 * Val(256))) + (x1127 * Val(512)));
-  Val x1137 = (((x1136 + (x1128 * Val(1024))) + (x1129 * Val(2048))) + (x1130 * Val(4096)));
-  Val x1138 = (((x1137 + (x1131 * Val(8192))) + (x1132 * Val(16384))) + (x1133 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1139 = x46[416]._super._super;
-  Val x1140 = x46[417]._super._super;
-  Val x1141 = x46[418]._super._super;
-  Val x1142 = x46[419]._super._super;
-  Val x1143 = x46[420]._super._super;
-  Val x1144 = x46[421]._super._super;
-  Val x1145 = x46[422]._super._super;
-  Val x1146 = x46[423]._super._super;
-  Val x1147 = x46[424]._super._super;
-  Val x1148 = x46[425]._super._super;
-  Val x1149 = x46[426]._super._super;
-  Val x1150 = x46[427]._super._super;
-  Val x1151 = x46[428]._super._super;
-  Val x1152 = x46[429]._super._super;
-  Val x1153 = x46[430]._super._super;
-  Val x1154 = x46[431]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1155 = (((x1139 + (x1140 * Val(2))) + (x1141 * Val(4))) + (x1142 * Val(8)));
-  Val x1156 = (((x1155 + (x1143 * Val(16))) + (x1144 * Val(32))) + (x1145 * Val(64)));
-  Val x1157 = (((x1156 + (x1146 * Val(128))) + (x1147 * Val(256))) + (x1148 * Val(512)));
-  Val x1158 = (((x1157 + (x1149 * Val(1024))) + (x1150 * Val(2048))) + (x1151 * Val(4096)));
-  Val x1159 = (((x1158 + (x1152 * Val(8192))) + (x1153 * Val(16384))) + (x1154 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1160 = x46[432]._super._super;
-  Val x1161 = x46[433]._super._super;
-  Val x1162 = x46[434]._super._super;
-  Val x1163 = x46[435]._super._super;
-  Val x1164 = x46[436]._super._super;
-  Val x1165 = x46[437]._super._super;
-  Val x1166 = x46[438]._super._super;
-  Val x1167 = x46[439]._super._super;
-  Val x1168 = x46[440]._super._super;
-  Val x1169 = x46[441]._super._super;
-  Val x1170 = x46[442]._super._super;
-  Val x1171 = x46[443]._super._super;
-  Val x1172 = x46[444]._super._super;
-  Val x1173 = x46[445]._super._super;
-  Val x1174 = x46[446]._super._super;
-  Val x1175 = x46[447]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1176 = (((x1160 + (x1161 * Val(2))) + (x1162 * Val(4))) + (x1163 * Val(8)));
-  Val x1177 = (((x1176 + (x1164 * Val(16))) + (x1165 * Val(32))) + (x1166 * Val(64)));
-  Val x1178 = (((x1177 + (x1167 * Val(128))) + (x1168 * Val(256))) + (x1169 * Val(512)));
-  Val x1179 = (((x1178 + (x1170 * Val(1024))) + (x1171 * Val(2048))) + (x1172 * Val(4096)));
-  Val x1180 = (((x1179 + (x1173 * Val(8192))) + (x1174 * Val(16384))) + (x1175 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1181 = x3[448]._super._super;
-  Val x1182 = x3[449]._super._super;
-  Val x1183 = x3[450]._super._super;
-  Val x1184 = x3[451]._super._super;
-  Val x1185 = x3[452]._super._super;
-  Val x1186 = x3[453]._super._super;
-  Val x1187 = x3[454]._super._super;
-  Val x1188 = x3[455]._super._super;
-  Val x1189 = x3[456]._super._super;
-  Val x1190 = x3[457]._super._super;
-  Val x1191 = x3[458]._super._super;
-  Val x1192 = x3[459]._super._super;
-  Val x1193 = x3[460]._super._super;
-  Val x1194 = x3[461]._super._super;
-  Val x1195 = x3[462]._super._super;
-  Val x1196 = x3[463]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1197 = (((x1181 + (x1182 * Val(2))) + (x1183 * Val(4))) + (x1184 * Val(8)));
-  Val x1198 = (((x1197 + (x1185 * Val(16))) + (x1186 * Val(32))) + (x1187 * Val(64)));
-  Val x1199 = (((x1198 + (x1188 * Val(128))) + (x1189 * Val(256))) + (x1190 * Val(512)));
-  Val x1200 = (((x1199 + (x1191 * Val(1024))) + (x1192 * Val(2048))) + (x1193 * Val(4096)));
-  Val x1201 = (((x1200 + (x1194 * Val(8192))) + (x1195 * Val(16384))) + (x1196 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1202 = x3[464]._super._super;
-  Val x1203 = x3[465]._super._super;
-  Val x1204 = x3[466]._super._super;
-  Val x1205 = x3[467]._super._super;
-  Val x1206 = x3[468]._super._super;
-  Val x1207 = x3[469]._super._super;
-  Val x1208 = x3[470]._super._super;
-  Val x1209 = x3[471]._super._super;
-  Val x1210 = x3[472]._super._super;
-  Val x1211 = x3[473]._super._super;
-  Val x1212 = x3[474]._super._super;
-  Val x1213 = x3[475]._super._super;
-  Val x1214 = x3[476]._super._super;
-  Val x1215 = x3[477]._super._super;
-  Val x1216 = x3[478]._super._super;
-  Val x1217 = x3[479]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1218 = (((x1202 + (x1203 * Val(2))) + (x1204 * Val(4))) + (x1205 * Val(8)));
-  Val x1219 = (((x1218 + (x1206 * Val(16))) + (x1207 * Val(32))) + (x1208 * Val(64)));
-  Val x1220 = (((x1219 + (x1209 * Val(128))) + (x1210 * Val(256))) + (x1211 * Val(512)));
-  Val x1221 = (((x1220 + (x1212 * Val(1024))) + (x1213 * Val(2048))) + (x1214 * Val(4096)));
-  Val x1222 = (((x1221 + (x1215 * Val(8192))) + (x1216 * Val(16384))) + (x1217 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1223 = x46[448]._super._super;
-  Val x1224 = x46[449]._super._super;
-  Val x1225 = x46[450]._super._super;
-  Val x1226 = x46[451]._super._super;
-  Val x1227 = x46[452]._super._super;
-  Val x1228 = x46[453]._super._super;
-  Val x1229 = x46[454]._super._super;
-  Val x1230 = x46[455]._super._super;
-  Val x1231 = x46[456]._super._super;
-  Val x1232 = x46[457]._super._super;
-  Val x1233 = x46[458]._super._super;
-  Val x1234 = x46[459]._super._super;
-  Val x1235 = x46[460]._super._super;
-  Val x1236 = x46[461]._super._super;
-  Val x1237 = x46[462]._super._super;
-  Val x1238 = x46[463]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1239 = (((x1223 + (x1224 * Val(2))) + (x1225 * Val(4))) + (x1226 * Val(8)));
-  Val x1240 = (((x1239 + (x1227 * Val(16))) + (x1228 * Val(32))) + (x1229 * Val(64)));
-  Val x1241 = (((x1240 + (x1230 * Val(128))) + (x1231 * Val(256))) + (x1232 * Val(512)));
-  Val x1242 = (((x1241 + (x1233 * Val(1024))) + (x1234 * Val(2048))) + (x1235 * Val(4096)));
-  Val x1243 = (((x1242 + (x1236 * Val(8192))) + (x1237 * Val(16384))) + (x1238 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1244 = x46[464]._super._super;
-  Val x1245 = x46[465]._super._super;
-  Val x1246 = x46[466]._super._super;
-  Val x1247 = x46[467]._super._super;
-  Val x1248 = x46[468]._super._super;
-  Val x1249 = x46[469]._super._super;
-  Val x1250 = x46[470]._super._super;
-  Val x1251 = x46[471]._super._super;
-  Val x1252 = x46[472]._super._super;
-  Val x1253 = x46[473]._super._super;
-  Val x1254 = x46[474]._super._super;
-  Val x1255 = x46[475]._super._super;
-  Val x1256 = x46[476]._super._super;
-  Val x1257 = x46[477]._super._super;
-  Val x1258 = x46[478]._super._super;
-  Val x1259 = x46[479]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1260 = (((x1244 + (x1245 * Val(2))) + (x1246 * Val(4))) + (x1247 * Val(8)));
-  Val x1261 = (((x1260 + (x1248 * Val(16))) + (x1249 * Val(32))) + (x1250 * Val(64)));
-  Val x1262 = (((x1261 + (x1251 * Val(128))) + (x1252 * Val(256))) + (x1253 * Val(512)));
-  Val x1263 = (((x1262 + (x1254 * Val(1024))) + (x1255 * Val(2048))) + (x1256 * Val(4096)));
-  Val x1264 = (((x1263 + (x1257 * Val(8192))) + (x1258 * Val(16384))) + (x1259 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1265 = x3[480]._super._super;
-  Val x1266 = x3[481]._super._super;
-  Val x1267 = x3[482]._super._super;
-  Val x1268 = x3[483]._super._super;
-  Val x1269 = x3[484]._super._super;
-  Val x1270 = x3[485]._super._super;
-  Val x1271 = x3[486]._super._super;
-  Val x1272 = x3[487]._super._super;
-  Val x1273 = x3[488]._super._super;
-  Val x1274 = x3[489]._super._super;
-  Val x1275 = x3[490]._super._super;
-  Val x1276 = x3[491]._super._super;
-  Val x1277 = x3[492]._super._super;
-  Val x1278 = x3[493]._super._super;
-  Val x1279 = x3[494]._super._super;
-  Val x1280 = x3[495]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1281 = (((x1265 + (x1266 * Val(2))) + (x1267 * Val(4))) + (x1268 * Val(8)));
-  Val x1282 = (((x1281 + (x1269 * Val(16))) + (x1270 * Val(32))) + (x1271 * Val(64)));
-  Val x1283 = (((x1282 + (x1272 * Val(128))) + (x1273 * Val(256))) + (x1274 * Val(512)));
-  Val x1284 = (((x1283 + (x1275 * Val(1024))) + (x1276 * Val(2048))) + (x1277 * Val(4096)));
-  Val x1285 = (((x1284 + (x1278 * Val(8192))) + (x1279 * Val(16384))) + (x1280 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1286 = x3[496]._super._super;
-  Val x1287 = x3[497]._super._super;
-  Val x1288 = x3[498]._super._super;
-  Val x1289 = x3[499]._super._super;
-  Val x1290 = x3[500]._super._super;
-  Val x1291 = x3[501]._super._super;
-  Val x1292 = x3[502]._super._super;
-  Val x1293 = x3[503]._super._super;
-  Val x1294 = x3[504]._super._super;
-  Val x1295 = x3[505]._super._super;
-  Val x1296 = x3[506]._super._super;
-  Val x1297 = x3[507]._super._super;
-  Val x1298 = x3[508]._super._super;
-  Val x1299 = x3[509]._super._super;
-  Val x1300 = x3[510]._super._super;
-  Val x1301 = x3[511]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1302 = (((x1286 + (x1287 * Val(2))) + (x1288 * Val(4))) + (x1289 * Val(8)));
-  Val x1303 = (((x1302 + (x1290 * Val(16))) + (x1291 * Val(32))) + (x1292 * Val(64)));
-  Val x1304 = (((x1303 + (x1293 * Val(128))) + (x1294 * Val(256))) + (x1295 * Val(512)));
-  Val x1305 = (((x1304 + (x1296 * Val(1024))) + (x1297 * Val(2048))) + (x1298 * Val(4096)));
-  Val x1306 = (((x1305 + (x1299 * Val(8192))) + (x1300 * Val(16384))) + (x1301 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1307 = x46[480]._super._super;
-  Val x1308 = x46[481]._super._super;
-  Val x1309 = x46[482]._super._super;
-  Val x1310 = x46[483]._super._super;
-  Val x1311 = x46[484]._super._super;
-  Val x1312 = x46[485]._super._super;
-  Val x1313 = x46[486]._super._super;
-  Val x1314 = x46[487]._super._super;
-  Val x1315 = x46[488]._super._super;
-  Val x1316 = x46[489]._super._super;
-  Val x1317 = x46[490]._super._super;
-  Val x1318 = x46[491]._super._super;
-  Val x1319 = x46[492]._super._super;
-  Val x1320 = x46[493]._super._super;
-  Val x1321 = x46[494]._super._super;
-  Val x1322 = x46[495]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1323 = (((x1307 + (x1308 * Val(2))) + (x1309 * Val(4))) + (x1310 * Val(8)));
-  Val x1324 = (((x1323 + (x1311 * Val(16))) + (x1312 * Val(32))) + (x1313 * Val(64)));
-  Val x1325 = (((x1324 + (x1314 * Val(128))) + (x1315 * Val(256))) + (x1316 * Val(512)));
-  Val x1326 = (((x1325 + (x1317 * Val(1024))) + (x1318 * Val(2048))) + (x1319 * Val(4096)));
-  Val x1327 = (((x1326 + (x1320 * Val(8192))) + (x1321 * Val(16384))) + (x1322 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1328 = x46[496]._super._super;
-  Val x1329 = x46[497]._super._super;
-  Val x1330 = x46[498]._super._super;
-  Val x1331 = x46[499]._super._super;
-  Val x1332 = x46[500]._super._super;
-  Val x1333 = x46[501]._super._super;
-  Val x1334 = x46[502]._super._super;
-  Val x1335 = x46[503]._super._super;
-  Val x1336 = x46[504]._super._super;
-  Val x1337 = x46[505]._super._super;
-  Val x1338 = x46[506]._super._super;
-  Val x1339 = x46[507]._super._super;
-  Val x1340 = x46[508]._super._super;
-  Val x1341 = x46[509]._super._super;
-  Val x1342 = x46[510]._super._super;
-  Val x1343 = x46[511]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1344 = (((x1328 + (x1329 * Val(2))) + (x1330 * Val(4))) + (x1331 * Val(8)));
-  Val x1345 = (((x1344 + (x1332 * Val(16))) + (x1333 * Val(32))) + (x1334 * Val(64)));
-  Val x1346 = (((x1345 + (x1335 * Val(128))) + (x1336 * Val(256))) + (x1337 * Val(512)));
-  Val x1347 = (((x1346 + (x1338 * Val(1024))) + (x1339 * Val(2048))) + (x1340 * Val(4096)));
-  Val x1348 = (((x1347 + (x1341 * Val(8192))) + (x1342 * Val(16384))) + (x1343 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1349 = x3[512]._super._super;
-  Val x1350 = x3[513]._super._super;
-  Val x1351 = x3[514]._super._super;
-  Val x1352 = x3[515]._super._super;
-  Val x1353 = x3[516]._super._super;
-  Val x1354 = x3[517]._super._super;
-  Val x1355 = x3[518]._super._super;
-  Val x1356 = x3[519]._super._super;
-  Val x1357 = x3[520]._super._super;
-  Val x1358 = x3[521]._super._super;
-  Val x1359 = x3[522]._super._super;
-  Val x1360 = x3[523]._super._super;
-  Val x1361 = x3[524]._super._super;
-  Val x1362 = x3[525]._super._super;
-  Val x1363 = x3[526]._super._super;
-  Val x1364 = x3[527]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1365 = (((x1349 + (x1350 * Val(2))) + (x1351 * Val(4))) + (x1352 * Val(8)));
-  Val x1366 = (((x1365 + (x1353 * Val(16))) + (x1354 * Val(32))) + (x1355 * Val(64)));
-  Val x1367 = (((x1366 + (x1356 * Val(128))) + (x1357 * Val(256))) + (x1358 * Val(512)));
-  Val x1368 = (((x1367 + (x1359 * Val(1024))) + (x1360 * Val(2048))) + (x1361 * Val(4096)));
-  Val x1369 = (((x1368 + (x1362 * Val(8192))) + (x1363 * Val(16384))) + (x1364 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1370 = x3[528]._super._super;
-  Val x1371 = x3[529]._super._super;
-  Val x1372 = x3[530]._super._super;
-  Val x1373 = x3[531]._super._super;
-  Val x1374 = x3[532]._super._super;
-  Val x1375 = x3[533]._super._super;
-  Val x1376 = x3[534]._super._super;
-  Val x1377 = x3[535]._super._super;
-  Val x1378 = x3[536]._super._super;
-  Val x1379 = x3[537]._super._super;
-  Val x1380 = x3[538]._super._super;
-  Val x1381 = x3[539]._super._super;
-  Val x1382 = x3[540]._super._super;
-  Val x1383 = x3[541]._super._super;
-  Val x1384 = x3[542]._super._super;
-  Val x1385 = x3[543]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1386 = (((x1370 + (x1371 * Val(2))) + (x1372 * Val(4))) + (x1373 * Val(8)));
-  Val x1387 = (((x1386 + (x1374 * Val(16))) + (x1375 * Val(32))) + (x1376 * Val(64)));
-  Val x1388 = (((x1387 + (x1377 * Val(128))) + (x1378 * Val(256))) + (x1379 * Val(512)));
-  Val x1389 = (((x1388 + (x1380 * Val(1024))) + (x1381 * Val(2048))) + (x1382 * Val(4096)));
-  Val x1390 = (((x1389 + (x1383 * Val(8192))) + (x1384 * Val(16384))) + (x1385 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1391 = x46[512]._super._super;
-  Val x1392 = x46[513]._super._super;
-  Val x1393 = x46[514]._super._super;
-  Val x1394 = x46[515]._super._super;
-  Val x1395 = x46[516]._super._super;
-  Val x1396 = x46[517]._super._super;
-  Val x1397 = x46[518]._super._super;
-  Val x1398 = x46[519]._super._super;
-  Val x1399 = x46[520]._super._super;
-  Val x1400 = x46[521]._super._super;
-  Val x1401 = x46[522]._super._super;
-  Val x1402 = x46[523]._super._super;
-  Val x1403 = x46[524]._super._super;
-  Val x1404 = x46[525]._super._super;
-  Val x1405 = x46[526]._super._super;
-  Val x1406 = x46[527]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1407 = (((x1391 + (x1392 * Val(2))) + (x1393 * Val(4))) + (x1394 * Val(8)));
-  Val x1408 = (((x1407 + (x1395 * Val(16))) + (x1396 * Val(32))) + (x1397 * Val(64)));
-  Val x1409 = (((x1408 + (x1398 * Val(128))) + (x1399 * Val(256))) + (x1400 * Val(512)));
-  Val x1410 = (((x1409 + (x1401 * Val(1024))) + (x1402 * Val(2048))) + (x1403 * Val(4096)));
-  Val x1411 = (((x1410 + (x1404 * Val(8192))) + (x1405 * Val(16384))) + (x1406 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1412 = x46[528]._super._super;
-  Val x1413 = x46[529]._super._super;
-  Val x1414 = x46[530]._super._super;
-  Val x1415 = x46[531]._super._super;
-  Val x1416 = x46[532]._super._super;
-  Val x1417 = x46[533]._super._super;
-  Val x1418 = x46[534]._super._super;
-  Val x1419 = x46[535]._super._super;
-  Val x1420 = x46[536]._super._super;
-  Val x1421 = x46[537]._super._super;
-  Val x1422 = x46[538]._super._super;
-  Val x1423 = x46[539]._super._super;
-  Val x1424 = x46[540]._super._super;
-  Val x1425 = x46[541]._super._super;
-  Val x1426 = x46[542]._super._super;
-  Val x1427 = x46[543]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1428 = (((x1412 + (x1413 * Val(2))) + (x1414 * Val(4))) + (x1415 * Val(8)));
-  Val x1429 = (((x1428 + (x1416 * Val(16))) + (x1417 * Val(32))) + (x1418 * Val(64)));
-  Val x1430 = (((x1429 + (x1419 * Val(128))) + (x1420 * Val(256))) + (x1421 * Val(512)));
-  Val x1431 = (((x1430 + (x1422 * Val(1024))) + (x1423 * Val(2048))) + (x1424 * Val(4096)));
-  Val x1432 = (((x1431 + (x1425 * Val(8192))) + (x1426 * Val(16384))) + (x1427 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1433 = x3[544]._super._super;
-  Val x1434 = x3[545]._super._super;
-  Val x1435 = x3[546]._super._super;
-  Val x1436 = x3[547]._super._super;
-  Val x1437 = x3[548]._super._super;
-  Val x1438 = x3[549]._super._super;
-  Val x1439 = x3[550]._super._super;
-  Val x1440 = x3[551]._super._super;
-  Val x1441 = x3[552]._super._super;
-  Val x1442 = x3[553]._super._super;
-  Val x1443 = x3[554]._super._super;
-  Val x1444 = x3[555]._super._super;
-  Val x1445 = x3[556]._super._super;
-  Val x1446 = x3[557]._super._super;
-  Val x1447 = x3[558]._super._super;
-  Val x1448 = x3[559]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1449 = (((x1433 + (x1434 * Val(2))) + (x1435 * Val(4))) + (x1436 * Val(8)));
-  Val x1450 = (((x1449 + (x1437 * Val(16))) + (x1438 * Val(32))) + (x1439 * Val(64)));
-  Val x1451 = (((x1450 + (x1440 * Val(128))) + (x1441 * Val(256))) + (x1442 * Val(512)));
-  Val x1452 = (((x1451 + (x1443 * Val(1024))) + (x1444 * Val(2048))) + (x1445 * Val(4096)));
-  Val x1453 = (((x1452 + (x1446 * Val(8192))) + (x1447 * Val(16384))) + (x1448 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1454 = x3[560]._super._super;
-  Val x1455 = x3[561]._super._super;
-  Val x1456 = x3[562]._super._super;
-  Val x1457 = x3[563]._super._super;
-  Val x1458 = x3[564]._super._super;
-  Val x1459 = x3[565]._super._super;
-  Val x1460 = x3[566]._super._super;
-  Val x1461 = x3[567]._super._super;
-  Val x1462 = x3[568]._super._super;
-  Val x1463 = x3[569]._super._super;
-  Val x1464 = x3[570]._super._super;
-  Val x1465 = x3[571]._super._super;
-  Val x1466 = x3[572]._super._super;
-  Val x1467 = x3[573]._super._super;
-  Val x1468 = x3[574]._super._super;
-  Val x1469 = x3[575]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1470 = (((x1454 + (x1455 * Val(2))) + (x1456 * Val(4))) + (x1457 * Val(8)));
-  Val x1471 = (((x1470 + (x1458 * Val(16))) + (x1459 * Val(32))) + (x1460 * Val(64)));
-  Val x1472 = (((x1471 + (x1461 * Val(128))) + (x1462 * Val(256))) + (x1463 * Val(512)));
-  Val x1473 = (((x1472 + (x1464 * Val(1024))) + (x1465 * Val(2048))) + (x1466 * Val(4096)));
-  Val x1474 = (((x1473 + (x1467 * Val(8192))) + (x1468 * Val(16384))) + (x1469 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1475 = x46[544]._super._super;
-  Val x1476 = x46[545]._super._super;
-  Val x1477 = x46[546]._super._super;
-  Val x1478 = x46[547]._super._super;
-  Val x1479 = x46[548]._super._super;
-  Val x1480 = x46[549]._super._super;
-  Val x1481 = x46[550]._super._super;
-  Val x1482 = x46[551]._super._super;
-  Val x1483 = x46[552]._super._super;
-  Val x1484 = x46[553]._super._super;
-  Val x1485 = x46[554]._super._super;
-  Val x1486 = x46[555]._super._super;
-  Val x1487 = x46[556]._super._super;
-  Val x1488 = x46[557]._super._super;
-  Val x1489 = x46[558]._super._super;
-  Val x1490 = x46[559]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1491 = (((x1475 + (x1476 * Val(2))) + (x1477 * Val(4))) + (x1478 * Val(8)));
-  Val x1492 = (((x1491 + (x1479 * Val(16))) + (x1480 * Val(32))) + (x1481 * Val(64)));
-  Val x1493 = (((x1492 + (x1482 * Val(128))) + (x1483 * Val(256))) + (x1484 * Val(512)));
-  Val x1494 = (((x1493 + (x1485 * Val(1024))) + (x1486 * Val(2048))) + (x1487 * Val(4096)));
-  Val x1495 = (((x1494 + (x1488 * Val(8192))) + (x1489 * Val(16384))) + (x1490 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1496 = x46[560]._super._super;
-  Val x1497 = x46[561]._super._super;
-  Val x1498 = x46[562]._super._super;
-  Val x1499 = x46[563]._super._super;
-  Val x1500 = x46[564]._super._super;
-  Val x1501 = x46[565]._super._super;
-  Val x1502 = x46[566]._super._super;
-  Val x1503 = x46[567]._super._super;
-  Val x1504 = x46[568]._super._super;
-  Val x1505 = x46[569]._super._super;
-  Val x1506 = x46[570]._super._super;
-  Val x1507 = x46[571]._super._super;
-  Val x1508 = x46[572]._super._super;
-  Val x1509 = x46[573]._super._super;
-  Val x1510 = x46[574]._super._super;
-  Val x1511 = x46[575]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1512 = (((x1496 + (x1497 * Val(2))) + (x1498 * Val(4))) + (x1499 * Val(8)));
-  Val x1513 = (((x1512 + (x1500 * Val(16))) + (x1501 * Val(32))) + (x1502 * Val(64)));
-  Val x1514 = (((x1513 + (x1503 * Val(128))) + (x1504 * Val(256))) + (x1505 * Val(512)));
-  Val x1515 = (((x1514 + (x1506 * Val(1024))) + (x1507 * Val(2048))) + (x1508 * Val(4096)));
-  Val x1516 = (((x1515 + (x1509 * Val(8192))) + (x1510 * Val(16384))) + (x1511 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1517 = x3[576]._super._super;
-  Val x1518 = x3[577]._super._super;
-  Val x1519 = x3[578]._super._super;
-  Val x1520 = x3[579]._super._super;
-  Val x1521 = x3[580]._super._super;
-  Val x1522 = x3[581]._super._super;
-  Val x1523 = x3[582]._super._super;
-  Val x1524 = x3[583]._super._super;
-  Val x1525 = x3[584]._super._super;
-  Val x1526 = x3[585]._super._super;
-  Val x1527 = x3[586]._super._super;
-  Val x1528 = x3[587]._super._super;
-  Val x1529 = x3[588]._super._super;
-  Val x1530 = x3[589]._super._super;
-  Val x1531 = x3[590]._super._super;
-  Val x1532 = x3[591]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1533 = (((x1517 + (x1518 * Val(2))) + (x1519 * Val(4))) + (x1520 * Val(8)));
-  Val x1534 = (((x1533 + (x1521 * Val(16))) + (x1522 * Val(32))) + (x1523 * Val(64)));
-  Val x1535 = (((x1534 + (x1524 * Val(128))) + (x1525 * Val(256))) + (x1526 * Val(512)));
-  Val x1536 = (((x1535 + (x1527 * Val(1024))) + (x1528 * Val(2048))) + (x1529 * Val(4096)));
-  Val x1537 = (((x1536 + (x1530 * Val(8192))) + (x1531 * Val(16384))) + (x1532 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1538 = x3[592]._super._super;
-  Val x1539 = x3[593]._super._super;
-  Val x1540 = x3[594]._super._super;
-  Val x1541 = x3[595]._super._super;
-  Val x1542 = x3[596]._super._super;
-  Val x1543 = x3[597]._super._super;
-  Val x1544 = x3[598]._super._super;
-  Val x1545 = x3[599]._super._super;
-  Val x1546 = x3[600]._super._super;
-  Val x1547 = x3[601]._super._super;
-  Val x1548 = x3[602]._super._super;
-  Val x1549 = x3[603]._super._super;
-  Val x1550 = x3[604]._super._super;
-  Val x1551 = x3[605]._super._super;
-  Val x1552 = x3[606]._super._super;
-  Val x1553 = x3[607]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1554 = (((x1538 + (x1539 * Val(2))) + (x1540 * Val(4))) + (x1541 * Val(8)));
-  Val x1555 = (((x1554 + (x1542 * Val(16))) + (x1543 * Val(32))) + (x1544 * Val(64)));
-  Val x1556 = (((x1555 + (x1545 * Val(128))) + (x1546 * Val(256))) + (x1547 * Val(512)));
-  Val x1557 = (((x1556 + (x1548 * Val(1024))) + (x1549 * Val(2048))) + (x1550 * Val(4096)));
-  Val x1558 = (((x1557 + (x1551 * Val(8192))) + (x1552 * Val(16384))) + (x1553 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1559 = x46[576]._super._super;
-  Val x1560 = x46[577]._super._super;
-  Val x1561 = x46[578]._super._super;
-  Val x1562 = x46[579]._super._super;
-  Val x1563 = x46[580]._super._super;
-  Val x1564 = x46[581]._super._super;
-  Val x1565 = x46[582]._super._super;
-  Val x1566 = x46[583]._super._super;
-  Val x1567 = x46[584]._super._super;
-  Val x1568 = x46[585]._super._super;
-  Val x1569 = x46[586]._super._super;
-  Val x1570 = x46[587]._super._super;
-  Val x1571 = x46[588]._super._super;
-  Val x1572 = x46[589]._super._super;
-  Val x1573 = x46[590]._super._super;
-  Val x1574 = x46[591]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1575 = (((x1559 + (x1560 * Val(2))) + (x1561 * Val(4))) + (x1562 * Val(8)));
-  Val x1576 = (((x1575 + (x1563 * Val(16))) + (x1564 * Val(32))) + (x1565 * Val(64)));
-  Val x1577 = (((x1576 + (x1566 * Val(128))) + (x1567 * Val(256))) + (x1568 * Val(512)));
-  Val x1578 = (((x1577 + (x1569 * Val(1024))) + (x1570 * Val(2048))) + (x1571 * Val(4096)));
-  Val x1579 = (((x1578 + (x1572 * Val(8192))) + (x1573 * Val(16384))) + (x1574 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1580 = x46[592]._super._super;
-  Val x1581 = x46[593]._super._super;
-  Val x1582 = x46[594]._super._super;
-  Val x1583 = x46[595]._super._super;
-  Val x1584 = x46[596]._super._super;
-  Val x1585 = x46[597]._super._super;
-  Val x1586 = x46[598]._super._super;
-  Val x1587 = x46[599]._super._super;
-  Val x1588 = x46[600]._super._super;
-  Val x1589 = x46[601]._super._super;
-  Val x1590 = x46[602]._super._super;
-  Val x1591 = x46[603]._super._super;
-  Val x1592 = x46[604]._super._super;
-  Val x1593 = x46[605]._super._super;
-  Val x1594 = x46[606]._super._super;
-  Val x1595 = x46[607]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1596 = (((x1580 + (x1581 * Val(2))) + (x1582 * Val(4))) + (x1583 * Val(8)));
-  Val x1597 = (((x1596 + (x1584 * Val(16))) + (x1585 * Val(32))) + (x1586 * Val(64)));
-  Val x1598 = (((x1597 + (x1587 * Val(128))) + (x1588 * Val(256))) + (x1589 * Val(512)));
-  Val x1599 = (((x1598 + (x1590 * Val(1024))) + (x1591 * Val(2048))) + (x1592 * Val(4096)));
-  Val x1600 = (((x1599 + (x1593 * Val(8192))) + (x1594 * Val(16384))) + (x1595 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1601 = x3[608]._super._super;
-  Val x1602 = x3[609]._super._super;
-  Val x1603 = x3[610]._super._super;
-  Val x1604 = x3[611]._super._super;
-  Val x1605 = x3[612]._super._super;
-  Val x1606 = x3[613]._super._super;
-  Val x1607 = x3[614]._super._super;
-  Val x1608 = x3[615]._super._super;
-  Val x1609 = x3[616]._super._super;
-  Val x1610 = x3[617]._super._super;
-  Val x1611 = x3[618]._super._super;
-  Val x1612 = x3[619]._super._super;
-  Val x1613 = x3[620]._super._super;
-  Val x1614 = x3[621]._super._super;
-  Val x1615 = x3[622]._super._super;
-  Val x1616 = x3[623]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1617 = (((x1601 + (x1602 * Val(2))) + (x1603 * Val(4))) + (x1604 * Val(8)));
-  Val x1618 = (((x1617 + (x1605 * Val(16))) + (x1606 * Val(32))) + (x1607 * Val(64)));
-  Val x1619 = (((x1618 + (x1608 * Val(128))) + (x1609 * Val(256))) + (x1610 * Val(512)));
-  Val x1620 = (((x1619 + (x1611 * Val(1024))) + (x1612 * Val(2048))) + (x1613 * Val(4096)));
-  Val x1621 = (((x1620 + (x1614 * Val(8192))) + (x1615 * Val(16384))) + (x1616 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1622 = x3[624]._super._super;
-  Val x1623 = x3[625]._super._super;
-  Val x1624 = x3[626]._super._super;
-  Val x1625 = x3[627]._super._super;
-  Val x1626 = x3[628]._super._super;
-  Val x1627 = x3[629]._super._super;
-  Val x1628 = x3[630]._super._super;
-  Val x1629 = x3[631]._super._super;
-  Val x1630 = x3[632]._super._super;
-  Val x1631 = x3[633]._super._super;
-  Val x1632 = x3[634]._super._super;
-  Val x1633 = x3[635]._super._super;
-  Val x1634 = x3[636]._super._super;
-  Val x1635 = x3[637]._super._super;
-  Val x1636 = x3[638]._super._super;
-  Val x1637 = x3[639]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1638 = (((x1622 + (x1623 * Val(2))) + (x1624 * Val(4))) + (x1625 * Val(8)));
-  Val x1639 = (((x1638 + (x1626 * Val(16))) + (x1627 * Val(32))) + (x1628 * Val(64)));
-  Val x1640 = (((x1639 + (x1629 * Val(128))) + (x1630 * Val(256))) + (x1631 * Val(512)));
-  Val x1641 = (((x1640 + (x1632 * Val(1024))) + (x1633 * Val(2048))) + (x1634 * Val(4096)));
-  Val x1642 = (((x1641 + (x1635 * Val(8192))) + (x1636 * Val(16384))) + (x1637 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1643 = x46[608]._super._super;
-  Val x1644 = x46[609]._super._super;
-  Val x1645 = x46[610]._super._super;
-  Val x1646 = x46[611]._super._super;
-  Val x1647 = x46[612]._super._super;
-  Val x1648 = x46[613]._super._super;
-  Val x1649 = x46[614]._super._super;
-  Val x1650 = x46[615]._super._super;
-  Val x1651 = x46[616]._super._super;
-  Val x1652 = x46[617]._super._super;
-  Val x1653 = x46[618]._super._super;
-  Val x1654 = x46[619]._super._super;
-  Val x1655 = x46[620]._super._super;
-  Val x1656 = x46[621]._super._super;
-  Val x1657 = x46[622]._super._super;
-  Val x1658 = x46[623]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1659 = (((x1643 + (x1644 * Val(2))) + (x1645 * Val(4))) + (x1646 * Val(8)));
-  Val x1660 = (((x1659 + (x1647 * Val(16))) + (x1648 * Val(32))) + (x1649 * Val(64)));
-  Val x1661 = (((x1660 + (x1650 * Val(128))) + (x1651 * Val(256))) + (x1652 * Val(512)));
-  Val x1662 = (((x1661 + (x1653 * Val(1024))) + (x1654 * Val(2048))) + (x1655 * Val(4096)));
-  Val x1663 = (((x1662 + (x1656 * Val(8192))) + (x1657 * Val(16384))) + (x1658 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1664 = x46[624]._super._super;
-  Val x1665 = x46[625]._super._super;
-  Val x1666 = x46[626]._super._super;
-  Val x1667 = x46[627]._super._super;
-  Val x1668 = x46[628]._super._super;
-  Val x1669 = x46[629]._super._super;
-  Val x1670 = x46[630]._super._super;
-  Val x1671 = x46[631]._super._super;
-  Val x1672 = x46[632]._super._super;
-  Val x1673 = x46[633]._super._super;
-  Val x1674 = x46[634]._super._super;
-  Val x1675 = x46[635]._super._super;
-  Val x1676 = x46[636]._super._super;
-  Val x1677 = x46[637]._super._super;
-  Val x1678 = x46[638]._super._super;
-  Val x1679 = x46[639]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1680 = (((x1664 + (x1665 * Val(2))) + (x1666 * Val(4))) + (x1667 * Val(8)));
-  Val x1681 = (((x1680 + (x1668 * Val(16))) + (x1669 * Val(32))) + (x1670 * Val(64)));
-  Val x1682 = (((x1681 + (x1671 * Val(128))) + (x1672 * Val(256))) + (x1673 * Val(512)));
-  Val x1683 = (((x1682 + (x1674 * Val(1024))) + (x1675 * Val(2048))) + (x1676 * Val(4096)));
-  Val x1684 = (((x1683 + (x1677 * Val(8192))) + (x1678 * Val(16384))) + (x1679 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1685 = x3[640]._super._super;
-  Val x1686 = x3[641]._super._super;
-  Val x1687 = x3[642]._super._super;
-  Val x1688 = x3[643]._super._super;
-  Val x1689 = x3[644]._super._super;
-  Val x1690 = x3[645]._super._super;
-  Val x1691 = x3[646]._super._super;
-  Val x1692 = x3[647]._super._super;
-  Val x1693 = x3[648]._super._super;
-  Val x1694 = x3[649]._super._super;
-  Val x1695 = x3[650]._super._super;
-  Val x1696 = x3[651]._super._super;
-  Val x1697 = x3[652]._super._super;
-  Val x1698 = x3[653]._super._super;
-  Val x1699 = x3[654]._super._super;
-  Val x1700 = x3[655]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1701 = (((x1685 + (x1686 * Val(2))) + (x1687 * Val(4))) + (x1688 * Val(8)));
-  Val x1702 = (((x1701 + (x1689 * Val(16))) + (x1690 * Val(32))) + (x1691 * Val(64)));
-  Val x1703 = (((x1702 + (x1692 * Val(128))) + (x1693 * Val(256))) + (x1694 * Val(512)));
-  Val x1704 = (((x1703 + (x1695 * Val(1024))) + (x1696 * Val(2048))) + (x1697 * Val(4096)));
-  Val x1705 = (((x1704 + (x1698 * Val(8192))) + (x1699 * Val(16384))) + (x1700 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1706 = x3[656]._super._super;
-  Val x1707 = x3[657]._super._super;
-  Val x1708 = x3[658]._super._super;
-  Val x1709 = x3[659]._super._super;
-  Val x1710 = x3[660]._super._super;
-  Val x1711 = x3[661]._super._super;
-  Val x1712 = x3[662]._super._super;
-  Val x1713 = x3[663]._super._super;
-  Val x1714 = x3[664]._super._super;
-  Val x1715 = x3[665]._super._super;
-  Val x1716 = x3[666]._super._super;
-  Val x1717 = x3[667]._super._super;
-  Val x1718 = x3[668]._super._super;
-  Val x1719 = x3[669]._super._super;
-  Val x1720 = x3[670]._super._super;
-  Val x1721 = x3[671]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1722 = (((x1706 + (x1707 * Val(2))) + (x1708 * Val(4))) + (x1709 * Val(8)));
-  Val x1723 = (((x1722 + (x1710 * Val(16))) + (x1711 * Val(32))) + (x1712 * Val(64)));
-  Val x1724 = (((x1723 + (x1713 * Val(128))) + (x1714 * Val(256))) + (x1715 * Val(512)));
-  Val x1725 = (((x1724 + (x1716 * Val(1024))) + (x1717 * Val(2048))) + (x1718 * Val(4096)));
-  Val x1726 = (((x1725 + (x1719 * Val(8192))) + (x1720 * Val(16384))) + (x1721 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1727 = x46[640]._super._super;
-  Val x1728 = x46[641]._super._super;
-  Val x1729 = x46[642]._super._super;
-  Val x1730 = x46[643]._super._super;
-  Val x1731 = x46[644]._super._super;
-  Val x1732 = x46[645]._super._super;
-  Val x1733 = x46[646]._super._super;
-  Val x1734 = x46[647]._super._super;
-  Val x1735 = x46[648]._super._super;
-  Val x1736 = x46[649]._super._super;
-  Val x1737 = x46[650]._super._super;
-  Val x1738 = x46[651]._super._super;
-  Val x1739 = x46[652]._super._super;
-  Val x1740 = x46[653]._super._super;
-  Val x1741 = x46[654]._super._super;
-  Val x1742 = x46[655]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1743 = (((x1727 + (x1728 * Val(2))) + (x1729 * Val(4))) + (x1730 * Val(8)));
-  Val x1744 = (((x1743 + (x1731 * Val(16))) + (x1732 * Val(32))) + (x1733 * Val(64)));
-  Val x1745 = (((x1744 + (x1734 * Val(128))) + (x1735 * Val(256))) + (x1736 * Val(512)));
-  Val x1746 = (((x1745 + (x1737 * Val(1024))) + (x1738 * Val(2048))) + (x1739 * Val(4096)));
-  Val x1747 = (((x1746 + (x1740 * Val(8192))) + (x1741 * Val(16384))) + (x1742 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1748 = x46[656]._super._super;
-  Val x1749 = x46[657]._super._super;
-  Val x1750 = x46[658]._super._super;
-  Val x1751 = x46[659]._super._super;
-  Val x1752 = x46[660]._super._super;
-  Val x1753 = x46[661]._super._super;
-  Val x1754 = x46[662]._super._super;
-  Val x1755 = x46[663]._super._super;
-  Val x1756 = x46[664]._super._super;
-  Val x1757 = x46[665]._super._super;
-  Val x1758 = x46[666]._super._super;
-  Val x1759 = x46[667]._super._super;
-  Val x1760 = x46[668]._super._super;
-  Val x1761 = x46[669]._super._super;
-  Val x1762 = x46[670]._super._super;
-  Val x1763 = x46[671]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1764 = (((x1748 + (x1749 * Val(2))) + (x1750 * Val(4))) + (x1751 * Val(8)));
-  Val x1765 = (((x1764 + (x1752 * Val(16))) + (x1753 * Val(32))) + (x1754 * Val(64)));
-  Val x1766 = (((x1765 + (x1755 * Val(128))) + (x1756 * Val(256))) + (x1757 * Val(512)));
-  Val x1767 = (((x1766 + (x1758 * Val(1024))) + (x1759 * Val(2048))) + (x1760 * Val(4096)));
-  Val x1768 = (((x1767 + (x1761 * Val(8192))) + (x1762 * Val(16384))) + (x1763 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1769 = x3[672]._super._super;
-  Val x1770 = x3[673]._super._super;
-  Val x1771 = x3[674]._super._super;
-  Val x1772 = x3[675]._super._super;
-  Val x1773 = x3[676]._super._super;
-  Val x1774 = x3[677]._super._super;
-  Val x1775 = x3[678]._super._super;
-  Val x1776 = x3[679]._super._super;
-  Val x1777 = x3[680]._super._super;
-  Val x1778 = x3[681]._super._super;
-  Val x1779 = x3[682]._super._super;
-  Val x1780 = x3[683]._super._super;
-  Val x1781 = x3[684]._super._super;
-  Val x1782 = x3[685]._super._super;
-  Val x1783 = x3[686]._super._super;
-  Val x1784 = x3[687]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1785 = (((x1769 + (x1770 * Val(2))) + (x1771 * Val(4))) + (x1772 * Val(8)));
-  Val x1786 = (((x1785 + (x1773 * Val(16))) + (x1774 * Val(32))) + (x1775 * Val(64)));
-  Val x1787 = (((x1786 + (x1776 * Val(128))) + (x1777 * Val(256))) + (x1778 * Val(512)));
-  Val x1788 = (((x1787 + (x1779 * Val(1024))) + (x1780 * Val(2048))) + (x1781 * Val(4096)));
-  Val x1789 = (((x1788 + (x1782 * Val(8192))) + (x1783 * Val(16384))) + (x1784 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1790 = x3[688]._super._super;
-  Val x1791 = x3[689]._super._super;
-  Val x1792 = x3[690]._super._super;
-  Val x1793 = x3[691]._super._super;
-  Val x1794 = x3[692]._super._super;
-  Val x1795 = x3[693]._super._super;
-  Val x1796 = x3[694]._super._super;
-  Val x1797 = x3[695]._super._super;
-  Val x1798 = x3[696]._super._super;
-  Val x1799 = x3[697]._super._super;
-  Val x1800 = x3[698]._super._super;
-  Val x1801 = x3[699]._super._super;
-  Val x1802 = x3[700]._super._super;
-  Val x1803 = x3[701]._super._super;
-  Val x1804 = x3[702]._super._super;
-  Val x1805 = x3[703]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1806 = (((x1790 + (x1791 * Val(2))) + (x1792 * Val(4))) + (x1793 * Val(8)));
-  Val x1807 = (((x1806 + (x1794 * Val(16))) + (x1795 * Val(32))) + (x1796 * Val(64)));
-  Val x1808 = (((x1807 + (x1797 * Val(128))) + (x1798 * Val(256))) + (x1799 * Val(512)));
-  Val x1809 = (((x1808 + (x1800 * Val(1024))) + (x1801 * Val(2048))) + (x1802 * Val(4096)));
-  Val x1810 = (((x1809 + (x1803 * Val(8192))) + (x1804 * Val(16384))) + (x1805 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1811 = x46[672]._super._super;
-  Val x1812 = x46[673]._super._super;
-  Val x1813 = x46[674]._super._super;
-  Val x1814 = x46[675]._super._super;
-  Val x1815 = x46[676]._super._super;
-  Val x1816 = x46[677]._super._super;
-  Val x1817 = x46[678]._super._super;
-  Val x1818 = x46[679]._super._super;
-  Val x1819 = x46[680]._super._super;
-  Val x1820 = x46[681]._super._super;
-  Val x1821 = x46[682]._super._super;
-  Val x1822 = x46[683]._super._super;
-  Val x1823 = x46[684]._super._super;
-  Val x1824 = x46[685]._super._super;
-  Val x1825 = x46[686]._super._super;
-  Val x1826 = x46[687]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1827 = (((x1811 + (x1812 * Val(2))) + (x1813 * Val(4))) + (x1814 * Val(8)));
-  Val x1828 = (((x1827 + (x1815 * Val(16))) + (x1816 * Val(32))) + (x1817 * Val(64)));
-  Val x1829 = (((x1828 + (x1818 * Val(128))) + (x1819 * Val(256))) + (x1820 * Val(512)));
-  Val x1830 = (((x1829 + (x1821 * Val(1024))) + (x1822 * Val(2048))) + (x1823 * Val(4096)));
-  Val x1831 = (((x1830 + (x1824 * Val(8192))) + (x1825 * Val(16384))) + (x1826 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1832 = x46[688]._super._super;
-  Val x1833 = x46[689]._super._super;
-  Val x1834 = x46[690]._super._super;
-  Val x1835 = x46[691]._super._super;
-  Val x1836 = x46[692]._super._super;
-  Val x1837 = x46[693]._super._super;
-  Val x1838 = x46[694]._super._super;
-  Val x1839 = x46[695]._super._super;
-  Val x1840 = x46[696]._super._super;
-  Val x1841 = x46[697]._super._super;
-  Val x1842 = x46[698]._super._super;
-  Val x1843 = x46[699]._super._super;
-  Val x1844 = x46[700]._super._super;
-  Val x1845 = x46[701]._super._super;
-  Val x1846 = x46[702]._super._super;
-  Val x1847 = x46[703]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1848 = (((x1832 + (x1833 * Val(2))) + (x1834 * Val(4))) + (x1835 * Val(8)));
-  Val x1849 = (((x1848 + (x1836 * Val(16))) + (x1837 * Val(32))) + (x1838 * Val(64)));
-  Val x1850 = (((x1849 + (x1839 * Val(128))) + (x1840 * Val(256))) + (x1841 * Val(512)));
-  Val x1851 = (((x1850 + (x1842 * Val(1024))) + (x1843 * Val(2048))) + (x1844 * Val(4096)));
-  Val x1852 = (((x1851 + (x1845 * Val(8192))) + (x1846 * Val(16384))) + (x1847 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1853 = x3[704]._super._super;
-  Val x1854 = x3[705]._super._super;
-  Val x1855 = x3[706]._super._super;
-  Val x1856 = x3[707]._super._super;
-  Val x1857 = x3[708]._super._super;
-  Val x1858 = x3[709]._super._super;
-  Val x1859 = x3[710]._super._super;
-  Val x1860 = x3[711]._super._super;
-  Val x1861 = x3[712]._super._super;
-  Val x1862 = x3[713]._super._super;
-  Val x1863 = x3[714]._super._super;
-  Val x1864 = x3[715]._super._super;
-  Val x1865 = x3[716]._super._super;
-  Val x1866 = x3[717]._super._super;
-  Val x1867 = x3[718]._super._super;
-  Val x1868 = x3[719]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1869 = (((x1853 + (x1854 * Val(2))) + (x1855 * Val(4))) + (x1856 * Val(8)));
-  Val x1870 = (((x1869 + (x1857 * Val(16))) + (x1858 * Val(32))) + (x1859 * Val(64)));
-  Val x1871 = (((x1870 + (x1860 * Val(128))) + (x1861 * Val(256))) + (x1862 * Val(512)));
-  Val x1872 = (((x1871 + (x1863 * Val(1024))) + (x1864 * Val(2048))) + (x1865 * Val(4096)));
-  Val x1873 = (((x1872 + (x1866 * Val(8192))) + (x1867 * Val(16384))) + (x1868 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1874 = x3[720]._super._super;
-  Val x1875 = x3[721]._super._super;
-  Val x1876 = x3[722]._super._super;
-  Val x1877 = x3[723]._super._super;
-  Val x1878 = x3[724]._super._super;
-  Val x1879 = x3[725]._super._super;
-  Val x1880 = x3[726]._super._super;
-  Val x1881 = x3[727]._super._super;
-  Val x1882 = x3[728]._super._super;
-  Val x1883 = x3[729]._super._super;
-  Val x1884 = x3[730]._super._super;
-  Val x1885 = x3[731]._super._super;
-  Val x1886 = x3[732]._super._super;
-  Val x1887 = x3[733]._super._super;
-  Val x1888 = x3[734]._super._super;
-  Val x1889 = x3[735]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1890 = (((x1874 + (x1875 * Val(2))) + (x1876 * Val(4))) + (x1877 * Val(8)));
-  Val x1891 = (((x1890 + (x1878 * Val(16))) + (x1879 * Val(32))) + (x1880 * Val(64)));
-  Val x1892 = (((x1891 + (x1881 * Val(128))) + (x1882 * Val(256))) + (x1883 * Val(512)));
-  Val x1893 = (((x1892 + (x1884 * Val(1024))) + (x1885 * Val(2048))) + (x1886 * Val(4096)));
-  Val x1894 = (((x1893 + (x1887 * Val(8192))) + (x1888 * Val(16384))) + (x1889 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1895 = x46[704]._super._super;
-  Val x1896 = x46[705]._super._super;
-  Val x1897 = x46[706]._super._super;
-  Val x1898 = x46[707]._super._super;
-  Val x1899 = x46[708]._super._super;
-  Val x1900 = x46[709]._super._super;
-  Val x1901 = x46[710]._super._super;
-  Val x1902 = x46[711]._super._super;
-  Val x1903 = x46[712]._super._super;
-  Val x1904 = x46[713]._super._super;
-  Val x1905 = x46[714]._super._super;
-  Val x1906 = x46[715]._super._super;
-  Val x1907 = x46[716]._super._super;
-  Val x1908 = x46[717]._super._super;
-  Val x1909 = x46[718]._super._super;
-  Val x1910 = x46[719]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1911 = (((x1895 + (x1896 * Val(2))) + (x1897 * Val(4))) + (x1898 * Val(8)));
-  Val x1912 = (((x1911 + (x1899 * Val(16))) + (x1900 * Val(32))) + (x1901 * Val(64)));
-  Val x1913 = (((x1912 + (x1902 * Val(128))) + (x1903 * Val(256))) + (x1904 * Val(512)));
-  Val x1914 = (((x1913 + (x1905 * Val(1024))) + (x1906 * Val(2048))) + (x1907 * Val(4096)));
-  Val x1915 = (((x1914 + (x1908 * Val(8192))) + (x1909 * Val(16384))) + (x1910 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x1916 = x46[720]._super._super;
-  Val x1917 = x46[721]._super._super;
-  Val x1918 = x46[722]._super._super;
-  Val x1919 = x46[723]._super._super;
-  Val x1920 = x46[724]._super._super;
-  Val x1921 = x46[725]._super._super;
-  Val x1922 = x46[726]._super._super;
-  Val x1923 = x46[727]._super._super;
-  Val x1924 = x46[728]._super._super;
-  Val x1925 = x46[729]._super._super;
-  Val x1926 = x46[730]._super._super;
-  Val x1927 = x46[731]._super._super;
-  Val x1928 = x46[732]._super._super;
-  Val x1929 = x46[733]._super._super;
-  Val x1930 = x46[734]._super._super;
-  Val x1931 = x46[735]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1932 = (((x1916 + (x1917 * Val(2))) + (x1918 * Val(4))) + (x1919 * Val(8)));
-  Val x1933 = (((x1932 + (x1920 * Val(16))) + (x1921 * Val(32))) + (x1922 * Val(64)));
-  Val x1934 = (((x1933 + (x1923 * Val(128))) + (x1924 * Val(256))) + (x1925 * Val(512)));
-  Val x1935 = (((x1934 + (x1926 * Val(1024))) + (x1927 * Val(2048))) + (x1928 * Val(4096)));
-  Val x1936 = (((x1935 + (x1929 * Val(8192))) + (x1930 * Val(16384))) + (x1931 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x1937 = x3[736]._super._super;
-  Val x1938 = x3[737]._super._super;
-  Val x1939 = x3[738]._super._super;
-  Val x1940 = x3[739]._super._super;
-  Val x1941 = x3[740]._super._super;
-  Val x1942 = x3[741]._super._super;
-  Val x1943 = x3[742]._super._super;
-  Val x1944 = x3[743]._super._super;
-  Val x1945 = x3[744]._super._super;
-  Val x1946 = x3[745]._super._super;
-  Val x1947 = x3[746]._super._super;
-  Val x1948 = x3[747]._super._super;
-  Val x1949 = x3[748]._super._super;
-  Val x1950 = x3[749]._super._super;
-  Val x1951 = x3[750]._super._super;
-  Val x1952 = x3[751]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1953 = (((x1937 + (x1938 * Val(2))) + (x1939 * Val(4))) + (x1940 * Val(8)));
-  Val x1954 = (((x1953 + (x1941 * Val(16))) + (x1942 * Val(32))) + (x1943 * Val(64)));
-  Val x1955 = (((x1954 + (x1944 * Val(128))) + (x1945 * Val(256))) + (x1946 * Val(512)));
-  Val x1956 = (((x1955 + (x1947 * Val(1024))) + (x1948 * Val(2048))) + (x1949 * Val(4096)));
-  Val x1957 = (((x1956 + (x1950 * Val(8192))) + (x1951 * Val(16384))) + (x1952 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x1958 = x3[752]._super._super;
-  Val x1959 = x3[753]._super._super;
-  Val x1960 = x3[754]._super._super;
-  Val x1961 = x3[755]._super._super;
-  Val x1962 = x3[756]._super._super;
-  Val x1963 = x3[757]._super._super;
-  Val x1964 = x3[758]._super._super;
-  Val x1965 = x3[759]._super._super;
-  Val x1966 = x3[760]._super._super;
-  Val x1967 = x3[761]._super._super;
-  Val x1968 = x3[762]._super._super;
-  Val x1969 = x3[763]._super._super;
-  Val x1970 = x3[764]._super._super;
-  Val x1971 = x3[765]._super._super;
-  Val x1972 = x3[766]._super._super;
-  Val x1973 = x3[767]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1974 = (((x1958 + (x1959 * Val(2))) + (x1960 * Val(4))) + (x1961 * Val(8)));
-  Val x1975 = (((x1974 + (x1962 * Val(16))) + (x1963 * Val(32))) + (x1964 * Val(64)));
-  Val x1976 = (((x1975 + (x1965 * Val(128))) + (x1966 * Val(256))) + (x1967 * Val(512)));
-  Val x1977 = (((x1976 + (x1968 * Val(1024))) + (x1969 * Val(2048))) + (x1970 * Val(4096)));
-  Val x1978 = (((x1977 + (x1971 * Val(8192))) + (x1972 * Val(16384))) + (x1973 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x1979 = x46[736]._super._super;
-  Val x1980 = x46[737]._super._super;
-  Val x1981 = x46[738]._super._super;
-  Val x1982 = x46[739]._super._super;
-  Val x1983 = x46[740]._super._super;
-  Val x1984 = x46[741]._super._super;
-  Val x1985 = x46[742]._super._super;
-  Val x1986 = x46[743]._super._super;
-  Val x1987 = x46[744]._super._super;
-  Val x1988 = x46[745]._super._super;
-  Val x1989 = x46[746]._super._super;
-  Val x1990 = x46[747]._super._super;
-  Val x1991 = x46[748]._super._super;
-  Val x1992 = x46[749]._super._super;
-  Val x1993 = x46[750]._super._super;
-  Val x1994 = x46[751]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x1995 = (((x1979 + (x1980 * Val(2))) + (x1981 * Val(4))) + (x1982 * Val(8)));
-  Val x1996 = (((x1995 + (x1983 * Val(16))) + (x1984 * Val(32))) + (x1985 * Val(64)));
-  Val x1997 = (((x1996 + (x1986 * Val(128))) + (x1987 * Val(256))) + (x1988 * Val(512)));
-  Val x1998 = (((x1997 + (x1989 * Val(1024))) + (x1990 * Val(2048))) + (x1991 * Val(4096)));
-  Val x1999 = (((x1998 + (x1992 * Val(8192))) + (x1993 * Val(16384))) + (x1994 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x2000 = x46[752]._super._super;
-  Val x2001 = x46[753]._super._super;
-  Val x2002 = x46[754]._super._super;
-  Val x2003 = x46[755]._super._super;
-  Val x2004 = x46[756]._super._super;
-  Val x2005 = x46[757]._super._super;
-  Val x2006 = x46[758]._super._super;
-  Val x2007 = x46[759]._super._super;
-  Val x2008 = x46[760]._super._super;
-  Val x2009 = x46[761]._super._super;
-  Val x2010 = x46[762]._super._super;
-  Val x2011 = x46[763]._super._super;
-  Val x2012 = x46[764]._super._super;
-  Val x2013 = x46[765]._super._super;
-  Val x2014 = x46[766]._super._super;
-  Val x2015 = x46[767]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x2016 = (((x2000 + (x2001 * Val(2))) + (x2002 * Val(4))) + (x2003 * Val(8)));
-  Val x2017 = (((x2016 + (x2004 * Val(16))) + (x2005 * Val(32))) + (x2006 * Val(64)));
-  Val x2018 = (((x2017 + (x2007 * Val(128))) + (x2008 * Val(256))) + (x2009 * Val(512)));
-  Val x2019 = (((x2018 + (x2010 * Val(1024))) + (x2011 * Val(2048))) + (x2012 * Val(4096)));
-  Val x2020 = (((x2019 + (x2013 * Val(8192))) + (x2014 * Val(16384))) + (x2015 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:376)
-  Val x2021 = x3[768]._super._super;
-  Val x2022 = x3[769]._super._super;
-  Val x2023 = x3[770]._super._super;
-  Val x2024 = x3[771]._super._super;
-  Val x2025 = x3[772]._super._super;
-  Val x2026 = x3[773]._super._super;
-  Val x2027 = x3[774]._super._super;
-  Val x2028 = x3[775]._super._super;
-  Val x2029 = x3[776]._super._super;
-  Val x2030 = x3[777]._super._super;
-  Val x2031 = x3[778]._super._super;
-  Val x2032 = x3[779]._super._super;
-  Val x2033 = x3[780]._super._super;
-  Val x2034 = x3[781]._super._super;
-  Val x2035 = x3[782]._super._super;
-  Val x2036 = x3[783]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x2037 = (((x2021 + (x2022 * Val(2))) + (x2023 * Val(4))) + (x2024 * Val(8)));
-  Val x2038 = (((x2037 + (x2025 * Val(16))) + (x2026 * Val(32))) + (x2027 * Val(64)));
-  Val x2039 = (((x2038 + (x2028 * Val(128))) + (x2029 * Val(256))) + (x2030 * Val(512)));
-  Val x2040 = (((x2039 + (x2031 * Val(1024))) + (x2032 * Val(2048))) + (x2033 * Val(4096)));
-  Val x2041 = (((x2040 + (x2034 * Val(8192))) + (x2035 * Val(16384))) + (x2036 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:377)
-  Val x2042 = x3[784]._super._super;
-  Val x2043 = x3[785]._super._super;
-  Val x2044 = x3[786]._super._super;
-  Val x2045 = x3[787]._super._super;
-  Val x2046 = x3[788]._super._super;
-  Val x2047 = x3[789]._super._super;
-  Val x2048 = x3[790]._super._super;
-  Val x2049 = x3[791]._super._super;
-  Val x2050 = x3[792]._super._super;
-  Val x2051 = x3[793]._super._super;
-  Val x2052 = x3[794]._super._super;
-  Val x2053 = x3[795]._super._super;
-  Val x2054 = x3[796]._super._super;
-  Val x2055 = x3[797]._super._super;
-  Val x2056 = x3[798]._super._super;
-  Val x2057 = x3[799]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x2058 = (((x2042 + (x2043 * Val(2))) + (x2044 * Val(4))) + (x2045 * Val(8)));
-  Val x2059 = (((x2058 + (x2046 * Val(16))) + (x2047 * Val(32))) + (x2048 * Val(64)));
-  Val x2060 = (((x2059 + (x2049 * Val(128))) + (x2050 * Val(256))) + (x2051 * Val(512)));
-  Val x2061 = (((x2060 + (x2052 * Val(1024))) + (x2053 * Val(2048))) + (x2054 * Val(4096)));
-  Val x2062 = (((x2061 + (x2055 * Val(8192))) + (x2056 * Val(16384))) + (x2057 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:378)
-  Val x2063 = x46[768]._super._super;
-  Val x2064 = x46[769]._super._super;
-  Val x2065 = x46[770]._super._super;
-  Val x2066 = x46[771]._super._super;
-  Val x2067 = x46[772]._super._super;
-  Val x2068 = x46[773]._super._super;
-  Val x2069 = x46[774]._super._super;
-  Val x2070 = x46[775]._super._super;
-  Val x2071 = x46[776]._super._super;
-  Val x2072 = x46[777]._super._super;
-  Val x2073 = x46[778]._super._super;
-  Val x2074 = x46[779]._super._super;
-  Val x2075 = x46[780]._super._super;
-  Val x2076 = x46[781]._super._super;
-  Val x2077 = x46[782]._super._super;
-  Val x2078 = x46[783]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x2079 = (((x2063 + (x2064 * Val(2))) + (x2065 * Val(4))) + (x2066 * Val(8)));
-  Val x2080 = (((x2079 + (x2067 * Val(16))) + (x2068 * Val(32))) + (x2069 * Val(64)));
-  Val x2081 = (((x2080 + (x2070 * Val(128))) + (x2071 * Val(256))) + (x2072 * Val(512)));
-  Val x2082 = (((x2081 + (x2073 * Val(1024))) + (x2074 * Val(2048))) + (x2075 * Val(4096)));
-  Val x2083 = (((x2082 + (x2076 * Val(8192))) + (x2077 * Val(16384))) + (x2078 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:379)
-  Val x2084 = x46[784]._super._super;
-  Val x2085 = x46[785]._super._super;
-  Val x2086 = x46[786]._super._super;
-  Val x2087 = x46[787]._super._super;
-  Val x2088 = x46[788]._super._super;
-  Val x2089 = x46[789]._super._super;
-  Val x2090 = x46[790]._super._super;
-  Val x2091 = x46[791]._super._super;
-  Val x2092 = x46[792]._super._super;
-  Val x2093 = x46[793]._super._super;
-  Val x2094 = x46[794]._super._super;
-  Val x2095 = x46[795]._super._super;
-  Val x2096 = x46[796]._super._super;
-  Val x2097 = x46[797]._super._super;
-  Val x2098 = x46[798]._super._super;
-  Val x2099 = x46[799]._super._super;
-  // Pack(zirgen/circuit/keccak2/pack.zir:32)
-  Val x2100 = (((x2084 + (x2085 * Val(2))) + (x2086 * Val(4))) + (x2087 * Val(8)));
-  Val x2101 = (((x2100 + (x2088 * Val(16))) + (x2089 * Val(32))) + (x2090 * Val(64)));
-  Val x2102 = (((x2101 + (x2091 * Val(128))) + (x2092 * Val(256))) + (x2093 * Val(512)));
-  Val x2103 = (((x2102 + (x2094 * Val(1024))) + (x2095 * Val(2048))) + (x2096 * Val(4096)));
-  Val x2104 = (((x2103 + (x2097 * Val(8192))) + (x2098 * Val(16384))) + (x2099 * Val(32768)));
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:370)
-  NondetRegStruct16Array x2105 = arg0.sflat;
-  Val16Array x2106 = Val16Array{x2105[0]._super,
-                                x2105[1]._super,
-                                x2105[2]._super,
-                                x2105[3]._super,
-                                x2105[4]._super,
-                                x2105[5]._super,
-                                x2105[6]._super,
-                                x2105[7]._super,
-                                x2105[8]._super,
-                                x2105[9]._super,
-                                x2105[10]._super,
-                                x2105[11]._super,
-                                x2105[12]._super,
-                                x2105[13]._super,
-                                x2105[14]._super,
-                                x2105[15]._super};
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:382)
-  UnpackReg_800__16_Struct x2107 = exec_SFlatToBits(ctx, x2106, LAYOUT_LOOKUP(layout2, bits));
-  UnpackReg_800__16__SuperStruct800Array x2108 = x2107._super;
-  Val x2109 = x2108[0]._super._super;
-  Val x2110 = x2108[1]._super._super;
-  Val x2111 = x2108[2]._super._super;
-  Val x2112 = x2108[3]._super._super;
-  Val x2113 = x2108[4]._super._super;
-  Val x2114 = x2108[5]._super._super;
-  Val x2115 = x2108[6]._super._super;
-  Val x2116 = x2108[7]._super._super;
-  Val x2117 = x2108[8]._super._super;
-  Val x2118 = x2108[9]._super._super;
-  Val x2119 = x2108[10]._super._super;
-  Val x2120 = x2108[11]._super._super;
-  Val x2121 = x2108[12]._super._super;
-  Val x2122 = x2108[13]._super._super;
-  Val x2123 = x2108[14]._super._super;
-  Val x2124 = x2108[15]._super._super;
-  Val x2125 = x2108[16]._super._super;
-  Val x2126 = x2108[17]._super._super;
-  Val x2127 = x2108[18]._super._super;
-  Val x2128 = x2108[19]._super._super;
-  Val x2129 = x2108[20]._super._super;
-  Val x2130 = x2108[21]._super._super;
-  Val x2131 = x2108[22]._super._super;
-  Val x2132 = x2108[23]._super._super;
-  Val x2133 = x2108[24]._super._super;
-  Val x2134 = x2108[25]._super._super;
-  Val x2135 = x2108[26]._super._super;
-  Val x2136 = x2108[27]._super._super;
-  Val x2137 = x2108[28]._super._super;
-  Val x2138 = x2108[29]._super._super;
-  Val x2139 = x2108[30]._super._super;
-  Val x2140 = x2108[31]._super._super;
-  Val x2141 = x2108[32]._super._super;
-  Val x2142 = x2108[33]._super._super;
-  Val x2143 = x2108[34]._super._super;
-  Val x2144 = x2108[35]._super._super;
-  Val x2145 = x2108[36]._super._super;
-  Val x2146 = x2108[37]._super._super;
-  Val x2147 = x2108[38]._super._super;
-  Val x2148 = x2108[39]._super._super;
-  Val x2149 = x2108[40]._super._super;
-  Val x2150 = x2108[41]._super._super;
-  Val x2151 = x2108[42]._super._super;
-  Val x2152 = x2108[43]._super._super;
-  Val x2153 = x2108[44]._super._super;
-  Val x2154 = x2108[45]._super._super;
-  Val x2155 = x2108[46]._super._super;
-  Val x2156 = x2108[47]._super._super;
-  Val x2157 = x2108[48]._super._super;
-  Val x2158 = x2108[49]._super._super;
-  Val x2159 = x2108[50]._super._super;
-  Val x2160 = x2108[51]._super._super;
-  Val x2161 = x2108[52]._super._super;
-  Val x2162 = x2108[53]._super._super;
-  Val x2163 = x2108[54]._super._super;
-  Val x2164 = x2108[55]._super._super;
-  Val x2165 = x2108[56]._super._super;
-  Val x2166 = x2108[57]._super._super;
-  Val x2167 = x2108[58]._super._super;
-  Val x2168 = x2108[59]._super._super;
-  Val x2169 = x2108[60]._super._super;
-  Val x2170 = x2108[61]._super._super;
-  Val x2171 = x2108[62]._super._super;
-  Val x2172 = x2108[63]._super._super;
-  Val x2173 = x2108[64]._super._super;
-  Val x2174 = x2108[65]._super._super;
-  Val x2175 = x2108[66]._super._super;
-  Val x2176 = x2108[67]._super._super;
-  Val x2177 = x2108[68]._super._super;
-  Val x2178 = x2108[69]._super._super;
-  Val x2179 = x2108[70]._super._super;
-  Val x2180 = x2108[71]._super._super;
-  Val x2181 = x2108[72]._super._super;
-  Val x2182 = x2108[73]._super._super;
-  Val x2183 = x2108[74]._super._super;
-  Val x2184 = x2108[75]._super._super;
-  Val x2185 = x2108[76]._super._super;
-  Val x2186 = x2108[77]._super._super;
-  Val x2187 = x2108[78]._super._super;
-  Val x2188 = x2108[79]._super._super;
-  Val x2189 = x2108[80]._super._super;
-  Val x2190 = x2108[81]._super._super;
-  Val x2191 = x2108[82]._super._super;
-  Val x2192 = x2108[83]._super._super;
-  Val x2193 = x2108[84]._super._super;
-  Val x2194 = x2108[85]._super._super;
-  Val x2195 = x2108[86]._super._super;
-  Val x2196 = x2108[87]._super._super;
-  Val x2197 = x2108[88]._super._super;
-  Val x2198 = x2108[89]._super._super;
-  Val x2199 = x2108[90]._super._super;
-  Val x2200 = x2108[91]._super._super;
-  Val x2201 = x2108[92]._super._super;
-  Val x2202 = x2108[93]._super._super;
-  Val x2203 = x2108[94]._super._super;
-  Val x2204 = x2108[95]._super._super;
-  Val x2205 = x2108[96]._super._super;
-  Val x2206 = x2108[97]._super._super;
-  Val x2207 = x2108[98]._super._super;
-  Val x2208 = x2108[99]._super._super;
-  Val x2209 = x2108[100]._super._super;
-  Val x2210 = x2108[101]._super._super;
-  Val x2211 = x2108[102]._super._super;
-  Val x2212 = x2108[103]._super._super;
-  Val x2213 = x2108[104]._super._super;
-  Val x2214 = x2108[105]._super._super;
-  Val x2215 = x2108[106]._super._super;
-  Val x2216 = x2108[107]._super._super;
-  Val x2217 = x2108[108]._super._super;
-  Val x2218 = x2108[109]._super._super;
-  Val x2219 = x2108[110]._super._super;
-  Val x2220 = x2108[111]._super._super;
-  Val x2221 = x2108[112]._super._super;
-  Val x2222 = x2108[113]._super._super;
-  Val x2223 = x2108[114]._super._super;
-  Val x2224 = x2108[115]._super._super;
-  Val x2225 = x2108[116]._super._super;
-  Val x2226 = x2108[117]._super._super;
-  Val x2227 = x2108[118]._super._super;
-  Val x2228 = x2108[119]._super._super;
-  Val x2229 = x2108[120]._super._super;
-  Val x2230 = x2108[121]._super._super;
-  Val x2231 = x2108[122]._super._super;
-  Val x2232 = x2108[123]._super._super;
-  Val x2233 = x2108[124]._super._super;
-  Val x2234 = x2108[125]._super._super;
-  Val x2235 = x2108[126]._super._super;
-  Val x2236 = x2108[127]._super._super;
-  Val x2237 = x2108[128]._super._super;
-  Val x2238 = x2108[129]._super._super;
-  Val x2239 = x2108[130]._super._super;
-  Val x2240 = x2108[131]._super._super;
-  Val x2241 = x2108[132]._super._super;
-  Val x2242 = x2108[133]._super._super;
-  Val x2243 = x2108[134]._super._super;
-  Val x2244 = x2108[135]._super._super;
-  Val x2245 = x2108[136]._super._super;
-  Val x2246 = x2108[137]._super._super;
-  Val x2247 = x2108[138]._super._super;
-  Val x2248 = x2108[139]._super._super;
-  Val x2249 = x2108[140]._super._super;
-  Val x2250 = x2108[141]._super._super;
-  Val x2251 = x2108[142]._super._super;
-  Val x2252 = x2108[143]._super._super;
-  Val x2253 = x2108[144]._super._super;
-  Val x2254 = x2108[145]._super._super;
-  Val x2255 = x2108[146]._super._super;
-  Val x2256 = x2108[147]._super._super;
-  Val x2257 = x2108[148]._super._super;
-  Val x2258 = x2108[149]._super._super;
-  Val x2259 = x2108[150]._super._super;
-  Val x2260 = x2108[151]._super._super;
-  Val x2261 = x2108[152]._super._super;
-  Val x2262 = x2108[153]._super._super;
-  Val x2263 = x2108[154]._super._super;
-  Val x2264 = x2108[155]._super._super;
-  Val x2265 = x2108[156]._super._super;
-  Val x2266 = x2108[157]._super._super;
-  Val x2267 = x2108[158]._super._super;
-  Val x2268 = x2108[159]._super._super;
-  Val x2269 = x2108[160]._super._super;
-  Val x2270 = x2108[161]._super._super;
-  Val x2271 = x2108[162]._super._super;
-  Val x2272 = x2108[163]._super._super;
-  Val x2273 = x2108[164]._super._super;
-  Val x2274 = x2108[165]._super._super;
-  Val x2275 = x2108[166]._super._super;
-  Val x2276 = x2108[167]._super._super;
-  Val x2277 = x2108[168]._super._super;
-  Val x2278 = x2108[169]._super._super;
-  Val x2279 = x2108[170]._super._super;
-  Val x2280 = x2108[171]._super._super;
-  Val x2281 = x2108[172]._super._super;
-  Val x2282 = x2108[173]._super._super;
-  Val x2283 = x2108[174]._super._super;
-  Val x2284 = x2108[175]._super._super;
-  Val x2285 = x2108[176]._super._super;
-  Val x2286 = x2108[177]._super._super;
-  Val x2287 = x2108[178]._super._super;
-  Val x2288 = x2108[179]._super._super;
-  Val x2289 = x2108[180]._super._super;
-  Val x2290 = x2108[181]._super._super;
-  Val x2291 = x2108[182]._super._super;
-  Val x2292 = x2108[183]._super._super;
-  Val x2293 = x2108[184]._super._super;
-  Val x2294 = x2108[185]._super._super;
-  Val x2295 = x2108[186]._super._super;
-  Val x2296 = x2108[187]._super._super;
-  Val x2297 = x2108[188]._super._super;
-  Val x2298 = x2108[189]._super._super;
-  Val x2299 = x2108[190]._super._super;
-  Val x2300 = x2108[191]._super._super;
-  Val x2301 = x2108[192]._super._super;
-  Val x2302 = x2108[193]._super._super;
-  Val x2303 = x2108[194]._super._super;
-  Val x2304 = x2108[195]._super._super;
-  Val x2305 = x2108[196]._super._super;
-  Val x2306 = x2108[197]._super._super;
-  Val x2307 = x2108[198]._super._super;
-  Val x2308 = x2108[199]._super._super;
-  Val x2309 = x2108[200]._super._super;
-  Val x2310 = x2108[201]._super._super;
-  Val x2311 = x2108[202]._super._super;
-  Val x2312 = x2108[203]._super._super;
-  Val x2313 = x2108[204]._super._super;
-  Val x2314 = x2108[205]._super._super;
-  Val x2315 = x2108[206]._super._super;
-  Val x2316 = x2108[207]._super._super;
-  Val x2317 = x2108[208]._super._super;
-  Val x2318 = x2108[209]._super._super;
-  Val x2319 = x2108[210]._super._super;
-  Val x2320 = x2108[211]._super._super;
-  Val x2321 = x2108[212]._super._super;
-  Val x2322 = x2108[213]._super._super;
-  Val x2323 = x2108[214]._super._super;
-  Val x2324 = x2108[215]._super._super;
-  Val x2325 = x2108[216]._super._super;
-  Val x2326 = x2108[217]._super._super;
-  Val x2327 = x2108[218]._super._super;
-  Val x2328 = x2108[219]._super._super;
-  Val x2329 = x2108[220]._super._super;
-  Val x2330 = x2108[221]._super._super;
-  Val x2331 = x2108[222]._super._super;
-  Val x2332 = x2108[223]._super._super;
-  Val x2333 = x2108[224]._super._super;
-  Val x2334 = x2108[225]._super._super;
-  Val x2335 = x2108[226]._super._super;
-  Val x2336 = x2108[227]._super._super;
-  Val x2337 = x2108[228]._super._super;
-  Val x2338 = x2108[229]._super._super;
-  Val x2339 = x2108[230]._super._super;
-  Val x2340 = x2108[231]._super._super;
-  Val x2341 = x2108[232]._super._super;
-  Val x2342 = x2108[233]._super._super;
-  Val x2343 = x2108[234]._super._super;
-  Val x2344 = x2108[235]._super._super;
-  Val x2345 = x2108[236]._super._super;
-  Val x2346 = x2108[237]._super._super;
-  Val x2347 = x2108[238]._super._super;
-  Val x2348 = x2108[239]._super._super;
-  Val x2349 = x2108[240]._super._super;
-  Val x2350 = x2108[241]._super._super;
-  Val x2351 = x2108[242]._super._super;
-  Val x2352 = x2108[243]._super._super;
-  Val x2353 = x2108[244]._super._super;
-  Val x2354 = x2108[245]._super._super;
-  Val x2355 = x2108[246]._super._super;
-  Val x2356 = x2108[247]._super._super;
-  Val x2357 = x2108[248]._super._super;
-  Val x2358 = x2108[249]._super._super;
-  Val x2359 = x2108[250]._super._super;
-  Val x2360 = x2108[251]._super._super;
-  Val x2361 = x2108[252]._super._super;
-  Val x2362 = x2108[253]._super._super;
-  Val x2363 = x2108[254]._super._super;
-  Val x2364 = x2108[255]._super._super;
-  Val x2365 = x2108[256]._super._super;
-  Val x2366 = x2108[257]._super._super;
-  Val x2367 = x2108[258]._super._super;
-  Val x2368 = x2108[259]._super._super;
-  Val x2369 = x2108[260]._super._super;
-  Val x2370 = x2108[261]._super._super;
-  Val x2371 = x2108[262]._super._super;
-  Val x2372 = x2108[263]._super._super;
-  Val x2373 = x2108[264]._super._super;
-  Val x2374 = x2108[265]._super._super;
-  Val x2375 = x2108[266]._super._super;
-  Val x2376 = x2108[267]._super._super;
-  Val x2377 = x2108[268]._super._super;
-  Val x2378 = x2108[269]._super._super;
-  Val x2379 = x2108[270]._super._super;
-  Val x2380 = x2108[271]._super._super;
-  Val x2381 = x2108[272]._super._super;
-  Val x2382 = x2108[273]._super._super;
-  Val x2383 = x2108[274]._super._super;
-  Val x2384 = x2108[275]._super._super;
-  Val x2385 = x2108[276]._super._super;
-  Val x2386 = x2108[277]._super._super;
-  Val x2387 = x2108[278]._super._super;
-  Val x2388 = x2108[279]._super._super;
-  Val x2389 = x2108[280]._super._super;
-  Val x2390 = x2108[281]._super._super;
-  Val x2391 = x2108[282]._super._super;
-  Val x2392 = x2108[283]._super._super;
-  Val x2393 = x2108[284]._super._super;
-  Val x2394 = x2108[285]._super._super;
-  Val x2395 = x2108[286]._super._super;
-  Val x2396 = x2108[287]._super._super;
-  Val x2397 = x2108[288]._super._super;
-  Val x2398 = x2108[289]._super._super;
-  Val x2399 = x2108[290]._super._super;
-  Val x2400 = x2108[291]._super._super;
-  Val x2401 = x2108[292]._super._super;
-  Val x2402 = x2108[293]._super._super;
-  Val x2403 = x2108[294]._super._super;
-  Val x2404 = x2108[295]._super._super;
-  Val x2405 = x2108[296]._super._super;
-  Val x2406 = x2108[297]._super._super;
-  Val x2407 = x2108[298]._super._super;
-  Val x2408 = x2108[299]._super._super;
-  Val x2409 = x2108[300]._super._super;
-  Val x2410 = x2108[301]._super._super;
-  Val x2411 = x2108[302]._super._super;
-  Val x2412 = x2108[303]._super._super;
-  Val x2413 = x2108[304]._super._super;
-  Val x2414 = x2108[305]._super._super;
-  Val x2415 = x2108[306]._super._super;
-  Val x2416 = x2108[307]._super._super;
-  Val x2417 = x2108[308]._super._super;
-  Val x2418 = x2108[309]._super._super;
-  Val x2419 = x2108[310]._super._super;
-  Val x2420 = x2108[311]._super._super;
-  Val x2421 = x2108[312]._super._super;
-  Val x2422 = x2108[313]._super._super;
-  Val x2423 = x2108[314]._super._super;
-  Val x2424 = x2108[315]._super._super;
-  Val x2425 = x2108[316]._super._super;
-  Val x2426 = x2108[317]._super._super;
-  Val x2427 = x2108[318]._super._super;
-  Val x2428 = x2108[319]._super._super;
-  Val x2429 = x2108[320]._super._super;
-  Val x2430 = x2108[321]._super._super;
-  Val x2431 = x2108[322]._super._super;
-  Val x2432 = x2108[323]._super._super;
-  Val x2433 = x2108[324]._super._super;
-  Val x2434 = x2108[325]._super._super;
-  Val x2435 = x2108[326]._super._super;
-  Val x2436 = x2108[327]._super._super;
-  Val x2437 = x2108[328]._super._super;
-  Val x2438 = x2108[329]._super._super;
-  Val x2439 = x2108[330]._super._super;
-  Val x2440 = x2108[331]._super._super;
-  Val x2441 = x2108[332]._super._super;
-  Val x2442 = x2108[333]._super._super;
-  Val x2443 = x2108[334]._super._super;
-  Val x2444 = x2108[335]._super._super;
-  Val x2445 = x2108[336]._super._super;
-  Val x2446 = x2108[337]._super._super;
-  Val x2447 = x2108[338]._super._super;
-  Val x2448 = x2108[339]._super._super;
-  Val x2449 = x2108[340]._super._super;
-  Val x2450 = x2108[341]._super._super;
-  Val x2451 = x2108[342]._super._super;
-  Val x2452 = x2108[343]._super._super;
-  Val x2453 = x2108[344]._super._super;
-  Val x2454 = x2108[345]._super._super;
-  Val x2455 = x2108[346]._super._super;
-  Val x2456 = x2108[347]._super._super;
-  Val x2457 = x2108[348]._super._super;
-  Val x2458 = x2108[349]._super._super;
-  Val x2459 = x2108[350]._super._super;
-  Val x2460 = x2108[351]._super._super;
-  Val x2461 = x2108[352]._super._super;
-  Val x2462 = x2108[353]._super._super;
-  Val x2463 = x2108[354]._super._super;
-  Val x2464 = x2108[355]._super._super;
-  Val x2465 = x2108[356]._super._super;
-  Val x2466 = x2108[357]._super._super;
-  Val x2467 = x2108[358]._super._super;
-  Val x2468 = x2108[359]._super._super;
-  Val x2469 = x2108[360]._super._super;
-  Val x2470 = x2108[361]._super._super;
-  Val x2471 = x2108[362]._super._super;
-  Val x2472 = x2108[363]._super._super;
-  Val x2473 = x2108[364]._super._super;
-  Val x2474 = x2108[365]._super._super;
-  Val x2475 = x2108[366]._super._super;
-  Val x2476 = x2108[367]._super._super;
-  Val x2477 = x2108[368]._super._super;
-  Val x2478 = x2108[369]._super._super;
-  Val x2479 = x2108[370]._super._super;
-  Val x2480 = x2108[371]._super._super;
-  Val x2481 = x2108[372]._super._super;
-  Val x2482 = x2108[373]._super._super;
-  Val x2483 = x2108[374]._super._super;
-  Val x2484 = x2108[375]._super._super;
-  Val x2485 = x2108[376]._super._super;
-  Val x2486 = x2108[377]._super._super;
-  Val x2487 = x2108[378]._super._super;
-  Val x2488 = x2108[379]._super._super;
-  Val x2489 = x2108[380]._super._super;
-  Val x2490 = x2108[381]._super._super;
-  Val x2491 = x2108[382]._super._super;
-  Val x2492 = x2108[383]._super._super;
-  Val x2493 = x2108[384]._super._super;
-  Val x2494 = x2108[385]._super._super;
-  Val x2495 = x2108[386]._super._super;
-  Val x2496 = x2108[387]._super._super;
-  Val x2497 = x2108[388]._super._super;
-  Val x2498 = x2108[389]._super._super;
-  Val x2499 = x2108[390]._super._super;
-  Val x2500 = x2108[391]._super._super;
-  Val x2501 = x2108[392]._super._super;
-  Val x2502 = x2108[393]._super._super;
-  Val x2503 = x2108[394]._super._super;
-  Val x2504 = x2108[395]._super._super;
-  Val x2505 = x2108[396]._super._super;
-  Val x2506 = x2108[397]._super._super;
-  Val x2507 = x2108[398]._super._super;
-  Val x2508 = x2108[399]._super._super;
-  Val x2509 = x2108[400]._super._super;
-  Val x2510 = x2108[401]._super._super;
-  Val x2511 = x2108[402]._super._super;
-  Val x2512 = x2108[403]._super._super;
-  Val x2513 = x2108[404]._super._super;
-  Val x2514 = x2108[405]._super._super;
-  Val x2515 = x2108[406]._super._super;
-  Val x2516 = x2108[407]._super._super;
-  Val x2517 = x2108[408]._super._super;
-  Val x2518 = x2108[409]._super._super;
-  Val x2519 = x2108[410]._super._super;
-  Val x2520 = x2108[411]._super._super;
-  Val x2521 = x2108[412]._super._super;
-  Val x2522 = x2108[413]._super._super;
-  Val x2523 = x2108[414]._super._super;
-  Val x2524 = x2108[415]._super._super;
-  Val x2525 = x2108[416]._super._super;
-  Val x2526 = x2108[417]._super._super;
-  Val x2527 = x2108[418]._super._super;
-  Val x2528 = x2108[419]._super._super;
-  Val x2529 = x2108[420]._super._super;
-  Val x2530 = x2108[421]._super._super;
-  Val x2531 = x2108[422]._super._super;
-  Val x2532 = x2108[423]._super._super;
-  Val x2533 = x2108[424]._super._super;
-  Val x2534 = x2108[425]._super._super;
-  Val x2535 = x2108[426]._super._super;
-  Val x2536 = x2108[427]._super._super;
-  Val x2537 = x2108[428]._super._super;
-  Val x2538 = x2108[429]._super._super;
-  Val x2539 = x2108[430]._super._super;
-  Val x2540 = x2108[431]._super._super;
-  Val x2541 = x2108[432]._super._super;
-  Val x2542 = x2108[433]._super._super;
-  Val x2543 = x2108[434]._super._super;
-  Val x2544 = x2108[435]._super._super;
-  Val x2545 = x2108[436]._super._super;
-  Val x2546 = x2108[437]._super._super;
-  Val x2547 = x2108[438]._super._super;
-  Val x2548 = x2108[439]._super._super;
-  Val x2549 = x2108[440]._super._super;
-  Val x2550 = x2108[441]._super._super;
-  Val x2551 = x2108[442]._super._super;
-  Val x2552 = x2108[443]._super._super;
-  Val x2553 = x2108[444]._super._super;
-  Val x2554 = x2108[445]._super._super;
-  Val x2555 = x2108[446]._super._super;
-  Val x2556 = x2108[447]._super._super;
-  Val x2557 = x2108[448]._super._super;
-  Val x2558 = x2108[449]._super._super;
-  Val x2559 = x2108[450]._super._super;
-  Val x2560 = x2108[451]._super._super;
-  Val x2561 = x2108[452]._super._super;
-  Val x2562 = x2108[453]._super._super;
-  Val x2563 = x2108[454]._super._super;
-  Val x2564 = x2108[455]._super._super;
-  Val x2565 = x2108[456]._super._super;
-  Val x2566 = x2108[457]._super._super;
-  Val x2567 = x2108[458]._super._super;
-  Val x2568 = x2108[459]._super._super;
-  Val x2569 = x2108[460]._super._super;
-  Val x2570 = x2108[461]._super._super;
-  Val x2571 = x2108[462]._super._super;
-  Val x2572 = x2108[463]._super._super;
-  Val x2573 = x2108[464]._super._super;
-  Val x2574 = x2108[465]._super._super;
-  Val x2575 = x2108[466]._super._super;
-  Val x2576 = x2108[467]._super._super;
-  Val x2577 = x2108[468]._super._super;
-  Val x2578 = x2108[469]._super._super;
-  Val x2579 = x2108[470]._super._super;
-  Val x2580 = x2108[471]._super._super;
-  Val x2581 = x2108[472]._super._super;
-  Val x2582 = x2108[473]._super._super;
-  Val x2583 = x2108[474]._super._super;
-  Val x2584 = x2108[475]._super._super;
-  Val x2585 = x2108[476]._super._super;
-  Val x2586 = x2108[477]._super._super;
-  Val x2587 = x2108[478]._super._super;
-  Val x2588 = x2108[479]._super._super;
-  Val x2589 = x2108[480]._super._super;
-  Val x2590 = x2108[481]._super._super;
-  Val x2591 = x2108[482]._super._super;
-  Val x2592 = x2108[483]._super._super;
-  Val x2593 = x2108[484]._super._super;
-  Val x2594 = x2108[485]._super._super;
-  Val x2595 = x2108[486]._super._super;
-  Val x2596 = x2108[487]._super._super;
-  Val x2597 = x2108[488]._super._super;
-  Val x2598 = x2108[489]._super._super;
-  Val x2599 = x2108[490]._super._super;
-  Val x2600 = x2108[491]._super._super;
-  Val x2601 = x2108[492]._super._super;
-  Val x2602 = x2108[493]._super._super;
-  Val x2603 = x2108[494]._super._super;
-  Val x2604 = x2108[495]._super._super;
-  Val x2605 = x2108[496]._super._super;
-  Val x2606 = x2108[497]._super._super;
-  Val x2607 = x2108[498]._super._super;
-  Val x2608 = x2108[499]._super._super;
-  Val x2609 = x2108[500]._super._super;
-  Val x2610 = x2108[501]._super._super;
-  Val x2611 = x2108[502]._super._super;
-  Val x2612 = x2108[503]._super._super;
-  Val x2613 = x2108[504]._super._super;
-  Val x2614 = x2108[505]._super._super;
-  Val x2615 = x2108[506]._super._super;
-  Val x2616 = x2108[507]._super._super;
-  Val x2617 = x2108[508]._super._super;
-  Val x2618 = x2108[509]._super._super;
-  Val x2619 = x2108[510]._super._super;
-  Val x2620 = x2108[511]._super._super;
-  Val x2621 = x2108[512]._super._super;
-  Val x2622 = x2108[513]._super._super;
-  Val x2623 = x2108[514]._super._super;
-  Val x2624 = x2108[515]._super._super;
-  Val x2625 = x2108[516]._super._super;
-  Val x2626 = x2108[517]._super._super;
-  Val x2627 = x2108[518]._super._super;
-  Val x2628 = x2108[519]._super._super;
-  Val x2629 = x2108[520]._super._super;
-  Val x2630 = x2108[521]._super._super;
-  Val x2631 = x2108[522]._super._super;
-  Val x2632 = x2108[523]._super._super;
-  Val x2633 = x2108[524]._super._super;
-  Val x2634 = x2108[525]._super._super;
-  Val x2635 = x2108[526]._super._super;
-  Val x2636 = x2108[527]._super._super;
-  Val x2637 = x2108[528]._super._super;
-  Val x2638 = x2108[529]._super._super;
-  Val x2639 = x2108[530]._super._super;
-  Val x2640 = x2108[531]._super._super;
-  Val x2641 = x2108[532]._super._super;
-  Val x2642 = x2108[533]._super._super;
-  Val x2643 = x2108[534]._super._super;
-  Val x2644 = x2108[535]._super._super;
-  Val x2645 = x2108[536]._super._super;
-  Val x2646 = x2108[537]._super._super;
-  Val x2647 = x2108[538]._super._super;
-  Val x2648 = x2108[539]._super._super;
-  Val x2649 = x2108[540]._super._super;
-  Val x2650 = x2108[541]._super._super;
-  Val x2651 = x2108[542]._super._super;
-  Val x2652 = x2108[543]._super._super;
-  Val x2653 = x2108[544]._super._super;
-  Val x2654 = x2108[545]._super._super;
-  Val x2655 = x2108[546]._super._super;
-  Val x2656 = x2108[547]._super._super;
-  Val x2657 = x2108[548]._super._super;
-  Val x2658 = x2108[549]._super._super;
-  Val x2659 = x2108[550]._super._super;
-  Val x2660 = x2108[551]._super._super;
-  Val x2661 = x2108[552]._super._super;
-  Val x2662 = x2108[553]._super._super;
-  Val x2663 = x2108[554]._super._super;
-  Val x2664 = x2108[555]._super._super;
-  Val x2665 = x2108[556]._super._super;
-  Val x2666 = x2108[557]._super._super;
-  Val x2667 = x2108[558]._super._super;
-  Val x2668 = x2108[559]._super._super;
-  Val x2669 = x2108[560]._super._super;
-  Val x2670 = x2108[561]._super._super;
-  Val x2671 = x2108[562]._super._super;
-  Val x2672 = x2108[563]._super._super;
-  Val x2673 = x2108[564]._super._super;
-  Val x2674 = x2108[565]._super._super;
-  Val x2675 = x2108[566]._super._super;
-  Val x2676 = x2108[567]._super._super;
-  Val x2677 = x2108[568]._super._super;
-  Val x2678 = x2108[569]._super._super;
-  Val x2679 = x2108[570]._super._super;
-  Val x2680 = x2108[571]._super._super;
-  Val x2681 = x2108[572]._super._super;
-  Val x2682 = x2108[573]._super._super;
-  Val x2683 = x2108[574]._super._super;
-  Val x2684 = x2108[575]._super._super;
-  Val x2685 = x2108[576]._super._super;
-  Val x2686 = x2108[577]._super._super;
-  Val x2687 = x2108[578]._super._super;
-  Val x2688 = x2108[579]._super._super;
-  Val x2689 = x2108[580]._super._super;
-  Val x2690 = x2108[581]._super._super;
-  Val x2691 = x2108[582]._super._super;
-  Val x2692 = x2108[583]._super._super;
-  Val x2693 = x2108[584]._super._super;
-  Val x2694 = x2108[585]._super._super;
-  Val x2695 = x2108[586]._super._super;
-  Val x2696 = x2108[587]._super._super;
-  Val x2697 = x2108[588]._super._super;
-  Val x2698 = x2108[589]._super._super;
-  Val x2699 = x2108[590]._super._super;
-  Val x2700 = x2108[591]._super._super;
-  Val x2701 = x2108[592]._super._super;
-  Val x2702 = x2108[593]._super._super;
-  Val x2703 = x2108[594]._super._super;
-  Val x2704 = x2108[595]._super._super;
-  Val x2705 = x2108[596]._super._super;
-  Val x2706 = x2108[597]._super._super;
-  Val x2707 = x2108[598]._super._super;
-  Val x2708 = x2108[599]._super._super;
-  Val x2709 = x2108[600]._super._super;
-  Val x2710 = x2108[601]._super._super;
-  Val x2711 = x2108[602]._super._super;
-  Val x2712 = x2108[603]._super._super;
-  Val x2713 = x2108[604]._super._super;
-  Val x2714 = x2108[605]._super._super;
-  Val x2715 = x2108[606]._super._super;
-  Val x2716 = x2108[607]._super._super;
-  Val x2717 = x2108[608]._super._super;
-  Val x2718 = x2108[609]._super._super;
-  Val x2719 = x2108[610]._super._super;
-  Val x2720 = x2108[611]._super._super;
-  Val x2721 = x2108[612]._super._super;
-  Val x2722 = x2108[613]._super._super;
-  Val x2723 = x2108[614]._super._super;
-  Val x2724 = x2108[615]._super._super;
-  Val x2725 = x2108[616]._super._super;
-  Val x2726 = x2108[617]._super._super;
-  Val x2727 = x2108[618]._super._super;
-  Val x2728 = x2108[619]._super._super;
-  Val x2729 = x2108[620]._super._super;
-  Val x2730 = x2108[621]._super._super;
-  Val x2731 = x2108[622]._super._super;
-  Val x2732 = x2108[623]._super._super;
-  Val x2733 = x2108[624]._super._super;
-  Val x2734 = x2108[625]._super._super;
-  Val x2735 = x2108[626]._super._super;
-  Val x2736 = x2108[627]._super._super;
-  Val x2737 = x2108[628]._super._super;
-  Val x2738 = x2108[629]._super._super;
-  Val x2739 = x2108[630]._super._super;
-  Val x2740 = x2108[631]._super._super;
-  Val x2741 = x2108[632]._super._super;
-  Val x2742 = x2108[633]._super._super;
-  Val x2743 = x2108[634]._super._super;
-  Val x2744 = x2108[635]._super._super;
-  Val x2745 = x2108[636]._super._super;
-  Val x2746 = x2108[637]._super._super;
-  Val x2747 = x2108[638]._super._super;
-  Val x2748 = x2108[639]._super._super;
-  Val x2749 = x2108[640]._super._super;
-  Val x2750 = x2108[641]._super._super;
-  Val x2751 = x2108[642]._super._super;
-  Val x2752 = x2108[643]._super._super;
-  Val x2753 = x2108[644]._super._super;
-  Val x2754 = x2108[645]._super._super;
-  Val x2755 = x2108[646]._super._super;
-  Val x2756 = x2108[647]._super._super;
-  Val x2757 = x2108[648]._super._super;
-  Val x2758 = x2108[649]._super._super;
-  Val x2759 = x2108[650]._super._super;
-  Val x2760 = x2108[651]._super._super;
-  Val x2761 = x2108[652]._super._super;
-  Val x2762 = x2108[653]._super._super;
-  Val x2763 = x2108[654]._super._super;
-  Val x2764 = x2108[655]._super._super;
-  Val x2765 = x2108[656]._super._super;
-  Val x2766 = x2108[657]._super._super;
-  Val x2767 = x2108[658]._super._super;
-  Val x2768 = x2108[659]._super._super;
-  Val x2769 = x2108[660]._super._super;
-  Val x2770 = x2108[661]._super._super;
-  Val x2771 = x2108[662]._super._super;
-  Val x2772 = x2108[663]._super._super;
-  Val x2773 = x2108[664]._super._super;
-  Val x2774 = x2108[665]._super._super;
-  Val x2775 = x2108[666]._super._super;
-  Val x2776 = x2108[667]._super._super;
-  Val x2777 = x2108[668]._super._super;
-  Val x2778 = x2108[669]._super._super;
-  Val x2779 = x2108[670]._super._super;
-  Val x2780 = x2108[671]._super._super;
-  Val x2781 = x2108[672]._super._super;
-  Val x2782 = x2108[673]._super._super;
-  Val x2783 = x2108[674]._super._super;
-  Val x2784 = x2108[675]._super._super;
-  Val x2785 = x2108[676]._super._super;
-  Val x2786 = x2108[677]._super._super;
-  Val x2787 = x2108[678]._super._super;
-  Val x2788 = x2108[679]._super._super;
-  Val x2789 = x2108[680]._super._super;
-  Val x2790 = x2108[681]._super._super;
-  Val x2791 = x2108[682]._super._super;
-  Val x2792 = x2108[683]._super._super;
-  Val x2793 = x2108[684]._super._super;
-  Val x2794 = x2108[685]._super._super;
-  Val x2795 = x2108[686]._super._super;
-  Val x2796 = x2108[687]._super._super;
-  Val x2797 = x2108[688]._super._super;
-  Val x2798 = x2108[689]._super._super;
-  Val x2799 = x2108[690]._super._super;
-  Val x2800 = x2108[691]._super._super;
-  Val x2801 = x2108[692]._super._super;
-  Val x2802 = x2108[693]._super._super;
-  Val x2803 = x2108[694]._super._super;
-  Val x2804 = x2108[695]._super._super;
-  Val x2805 = x2108[696]._super._super;
-  Val x2806 = x2108[697]._super._super;
-  Val x2807 = x2108[698]._super._super;
-  Val x2808 = x2108[699]._super._super;
-  Val x2809 = x2108[700]._super._super;
-  Val x2810 = x2108[701]._super._super;
-  Val x2811 = x2108[702]._super._super;
-  Val x2812 = x2108[703]._super._super;
-  Val x2813 = x2108[704]._super._super;
-  Val x2814 = x2108[705]._super._super;
-  Val x2815 = x2108[706]._super._super;
-  Val x2816 = x2108[707]._super._super;
-  Val x2817 = x2108[708]._super._super;
-  Val x2818 = x2108[709]._super._super;
-  Val x2819 = x2108[710]._super._super;
-  Val x2820 = x2108[711]._super._super;
-  Val x2821 = x2108[712]._super._super;
-  Val x2822 = x2108[713]._super._super;
-  Val x2823 = x2108[714]._super._super;
-  Val x2824 = x2108[715]._super._super;
-  Val x2825 = x2108[716]._super._super;
-  Val x2826 = x2108[717]._super._super;
-  Val x2827 = x2108[718]._super._super;
-  Val x2828 = x2108[719]._super._super;
-  Val x2829 = x2108[720]._super._super;
-  Val x2830 = x2108[721]._super._super;
-  Val x2831 = x2108[722]._super._super;
-  Val x2832 = x2108[723]._super._super;
-  Val x2833 = x2108[724]._super._super;
-  Val x2834 = x2108[725]._super._super;
-  Val x2835 = x2108[726]._super._super;
-  Val x2836 = x2108[727]._super._super;
-  Val x2837 = x2108[728]._super._super;
-  Val x2838 = x2108[729]._super._super;
-  Val x2839 = x2108[730]._super._super;
-  Val x2840 = x2108[731]._super._super;
-  Val x2841 = x2108[732]._super._super;
-  Val x2842 = x2108[733]._super._super;
-  Val x2843 = x2108[734]._super._super;
-  Val x2844 = x2108[735]._super._super;
-  Val x2845 = x2108[736]._super._super;
-  Val x2846 = x2108[737]._super._super;
-  Val x2847 = x2108[738]._super._super;
-  Val x2848 = x2108[739]._super._super;
-  Val x2849 = x2108[740]._super._super;
-  Val x2850 = x2108[741]._super._super;
-  Val x2851 = x2108[742]._super._super;
-  Val x2852 = x2108[743]._super._super;
-  Val x2853 = x2108[744]._super._super;
-  Val x2854 = x2108[745]._super._super;
-  Val x2855 = x2108[746]._super._super;
-  Val x2856 = x2108[747]._super._super;
-  Val x2857 = x2108[748]._super._super;
-  Val x2858 = x2108[749]._super._super;
-  Val x2859 = x2108[750]._super._super;
-  Val x2860 = x2108[751]._super._super;
-  Val x2861 = x2108[752]._super._super;
-  Val x2862 = x2108[753]._super._super;
-  Val x2863 = x2108[754]._super._super;
-  Val x2864 = x2108[755]._super._super;
-  Val x2865 = x2108[756]._super._super;
-  Val x2866 = x2108[757]._super._super;
-  Val x2867 = x2108[758]._super._super;
-  Val x2868 = x2108[759]._super._super;
-  Val x2869 = x2108[760]._super._super;
-  Val x2870 = x2108[761]._super._super;
-  Val x2871 = x2108[762]._super._super;
-  Val x2872 = x2108[763]._super._super;
-  Val x2873 = x2108[764]._super._super;
-  Val x2874 = x2108[765]._super._super;
-  Val x2875 = x2108[766]._super._super;
-  Val x2876 = x2108[767]._super._super;
-  Val x2877 = x2108[768]._super._super;
-  Val x2878 = x2108[769]._super._super;
-  Val x2879 = x2108[770]._super._super;
-  Val x2880 = x2108[771]._super._super;
-  Val x2881 = x2108[772]._super._super;
-  Val x2882 = x2108[773]._super._super;
-  Val x2883 = x2108[774]._super._super;
-  Val x2884 = x2108[775]._super._super;
-  Val x2885 = x2108[776]._super._super;
-  Val x2886 = x2108[777]._super._super;
-  Val x2887 = x2108[778]._super._super;
-  Val x2888 = x2108[779]._super._super;
-  Val x2889 = x2108[780]._super._super;
-  Val x2890 = x2108[781]._super._super;
-  Val x2891 = x2108[782]._super._super;
-  Val x2892 = x2108[783]._super._super;
-  Val x2893 = x2108[784]._super._super;
-  Val x2894 = x2108[785]._super._super;
-  Val x2895 = x2108[786]._super._super;
-  Val x2896 = x2108[787]._super._super;
-  Val x2897 = x2108[788]._super._super;
-  Val x2898 = x2108[789]._super._super;
-  Val x2899 = x2108[790]._super._super;
-  Val x2900 = x2108[791]._super._super;
-  Val x2901 = x2108[792]._super._super;
-  Val x2902 = x2108[793]._super._super;
-  Val x2903 = x2108[794]._super._super;
-  Val x2904 = x2108[795]._super._super;
-  Val x2905 = x2108[796]._super._super;
-  Val x2906 = x2108[797]._super._super;
-  Val x2907 = x2108[798]._super._super;
-  Val x2908 = x2108[799]._super._super;
-  // WriteCycle(zirgen/circuit/keccak2/top.zir:383)
-  TopStateStruct x2909 = exec_TopState(
-      ctx,
-      Val800Array{
-          x2109, x2110, x2111, x2112, x2113, x2114, x2115, x2116, x2117, x2118, x2119, x2120, x2121,
-          x2122, x2123, x2124, x2125, x2126, x2127, x2128, x2129, x2130, x2131, x2132, x2133, x2134,
-          x2135, x2136, x2137, x2138, x2139, x2140, x2141, x2142, x2143, x2144, x2145, x2146, x2147,
-          x2148, x2149, x2150, x2151, x2152, x2153, x2154, x2155, x2156, x2157, x2158, x2159, x2160,
-          x2161, x2162, x2163, x2164, x2165, x2166, x2167, x2168, x2169, x2170, x2171, x2172, x2173,
-          x2174, x2175, x2176, x2177, x2178, x2179, x2180, x2181, x2182, x2183, x2184, x2185, x2186,
-          x2187, x2188, x2189, x2190, x2191, x2192, x2193, x2194, x2195, x2196, x2197, x2198, x2199,
-          x2200, x2201, x2202, x2203, x2204, x2205, x2206, x2207, x2208, x2209, x2210, x2211, x2212,
-          x2213, x2214, x2215, x2216, x2217, x2218, x2219, x2220, x2221, x2222, x2223, x2224, x2225,
-          x2226, x2227, x2228, x2229, x2230, x2231, x2232, x2233, x2234, x2235, x2236, x2237, x2238,
-          x2239, x2240, x2241, x2242, x2243, x2244, x2245, x2246, x2247, x2248, x2249, x2250, x2251,
-          x2252, x2253, x2254, x2255, x2256, x2257, x2258, x2259, x2260, x2261, x2262, x2263, x2264,
-          x2265, x2266, x2267, x2268, x2269, x2270, x2271, x2272, x2273, x2274, x2275, x2276, x2277,
-          x2278, x2279, x2280, x2281, x2282, x2283, x2284, x2285, x2286, x2287, x2288, x2289, x2290,
-          x2291, x2292, x2293, x2294, x2295, x2296, x2297, x2298, x2299, x2300, x2301, x2302, x2303,
-          x2304, x2305, x2306, x2307, x2308, x2309, x2310, x2311, x2312, x2313, x2314, x2315, x2316,
-          x2317, x2318, x2319, x2320, x2321, x2322, x2323, x2324, x2325, x2326, x2327, x2328, x2329,
-          x2330, x2331, x2332, x2333, x2334, x2335, x2336, x2337, x2338, x2339, x2340, x2341, x2342,
-          x2343, x2344, x2345, x2346, x2347, x2348, x2349, x2350, x2351, x2352, x2353, x2354, x2355,
-          x2356, x2357, x2358, x2359, x2360, x2361, x2362, x2363, x2364, x2365, x2366, x2367, x2368,
-          x2369, x2370, x2371, x2372, x2373, x2374, x2375, x2376, x2377, x2378, x2379, x2380, x2381,
-          x2382, x2383, x2384, x2385, x2386, x2387, x2388, x2389, x2390, x2391, x2392, x2393, x2394,
-          x2395, x2396, x2397, x2398, x2399, x2400, x2401, x2402, x2403, x2404, x2405, x2406, x2407,
-          x2408, x2409, x2410, x2411, x2412, x2413, x2414, x2415, x2416, x2417, x2418, x2419, x2420,
-          x2421, x2422, x2423, x2424, x2425, x2426, x2427, x2428, x2429, x2430, x2431, x2432, x2433,
-          x2434, x2435, x2436, x2437, x2438, x2439, x2440, x2441, x2442, x2443, x2444, x2445, x2446,
-          x2447, x2448, x2449, x2450, x2451, x2452, x2453, x2454, x2455, x2456, x2457, x2458, x2459,
-          x2460, x2461, x2462, x2463, x2464, x2465, x2466, x2467, x2468, x2469, x2470, x2471, x2472,
-          x2473, x2474, x2475, x2476, x2477, x2478, x2479, x2480, x2481, x2482, x2483, x2484, x2485,
-          x2486, x2487, x2488, x2489, x2490, x2491, x2492, x2493, x2494, x2495, x2496, x2497, x2498,
-          x2499, x2500, x2501, x2502, x2503, x2504, x2505, x2506, x2507, x2508, x2509, x2510, x2511,
-          x2512, x2513, x2514, x2515, x2516, x2517, x2518, x2519, x2520, x2521, x2522, x2523, x2524,
-          x2525, x2526, x2527, x2528, x2529, x2530, x2531, x2532, x2533, x2534, x2535, x2536, x2537,
-          x2538, x2539, x2540, x2541, x2542, x2543, x2544, x2545, x2546, x2547, x2548, x2549, x2550,
-          x2551, x2552, x2553, x2554, x2555, x2556, x2557, x2558, x2559, x2560, x2561, x2562, x2563,
-          x2564, x2565, x2566, x2567, x2568, x2569, x2570, x2571, x2572, x2573, x2574, x2575, x2576,
-          x2577, x2578, x2579, x2580, x2581, x2582, x2583, x2584, x2585, x2586, x2587, x2588, x2589,
-          x2590, x2591, x2592, x2593, x2594, x2595, x2596, x2597, x2598, x2599, x2600, x2601, x2602,
-          x2603, x2604, x2605, x2606, x2607, x2608, x2609, x2610, x2611, x2612, x2613, x2614, x2615,
-          x2616, x2617, x2618, x2619, x2620, x2621, x2622, x2623, x2624, x2625, x2626, x2627, x2628,
-          x2629, x2630, x2631, x2632, x2633, x2634, x2635, x2636, x2637, x2638, x2639, x2640, x2641,
-          x2642, x2643, x2644, x2645, x2646, x2647, x2648, x2649, x2650, x2651, x2652, x2653, x2654,
-          x2655, x2656, x2657, x2658, x2659, x2660, x2661, x2662, x2663, x2664, x2665, x2666, x2667,
-          x2668, x2669, x2670, x2671, x2672, x2673, x2674, x2675, x2676, x2677, x2678, x2679, x2680,
-          x2681, x2682, x2683, x2684, x2685, x2686, x2687, x2688, x2689, x2690, x2691, x2692, x2693,
-          x2694, x2695, x2696, x2697, x2698, x2699, x2700, x2701, x2702, x2703, x2704, x2705, x2706,
-          x2707, x2708, x2709, x2710, x2711, x2712, x2713, x2714, x2715, x2716, x2717, x2718, x2719,
-          x2720, x2721, x2722, x2723, x2724, x2725, x2726, x2727, x2728, x2729, x2730, x2731, x2732,
-          x2733, x2734, x2735, x2736, x2737, x2738, x2739, x2740, x2741, x2742, x2743, x2744, x2745,
-          x2746, x2747, x2748, x2749, x2750, x2751, x2752, x2753, x2754, x2755, x2756, x2757, x2758,
-          x2759, x2760, x2761, x2762, x2763, x2764, x2765, x2766, x2767, x2768, x2769, x2770, x2771,
-          x2772, x2773, x2774, x2775, x2776, x2777, x2778, x2779, x2780, x2781, x2782, x2783, x2784,
-          x2785, x2786, x2787, x2788, x2789, x2790, x2791, x2792, x2793, x2794, x2795, x2796, x2797,
-          x2798, x2799, x2800, x2801, x2802, x2803, x2804, x2805, x2806, x2807, x2808, x2809, x2810,
-          x2811, x2812, x2813, x2814, x2815, x2816, x2817, x2818, x2819, x2820, x2821, x2822, x2823,
-          x2824, x2825, x2826, x2827, x2828, x2829, x2830, x2831, x2832, x2833, x2834, x2835, x2836,
-          x2837, x2838, x2839, x2840, x2841, x2842, x2843, x2844, x2845, x2846, x2847, x2848, x2849,
-          x2850, x2851, x2852, x2853, x2854, x2855, x2856, x2857, x2858, x2859, x2860, x2861, x2862,
-          x2863, x2864, x2865, x2866, x2867, x2868, x2869, x2870, x2871, x2872, x2873, x2874, x2875,
-          x2876, x2877, x2878, x2879, x2880, x2881, x2882, x2883, x2884, x2885, x2886, x2887, x2888,
-          x2889, x2890, x2891, x2892, x2893, x2894, x2895, x2896, x2897, x2898, x2899, x2900, x2901,
-          x2902, x2903, x2904, x2905, x2906, x2907, x2908},
-      Val100Array{
-          x24,   x45,   x67,   x88,   x109,  x130,  x151,  x172,  x193,  x214,  x235,  x256,  x277,
-          x298,  x319,  x340,  x361,  x382,  x403,  x424,  x445,  x466,  x487,  x508,  x529,  x550,
-          x571,  x592,  x613,  x634,  x655,  x676,  x697,  x718,  x739,  x760,  x781,  x802,  x823,
-          x844,  x865,  x886,  x907,  x928,  x949,  x970,  x991,  x1012, x1033, x1054, x1075, x1096,
-          x1117, x1138, x1159, x1180, x1201, x1222, x1243, x1264, x1285, x1306, x1327, x1348, x1369,
-          x1390, x1411, x1432, x1453, x1474, x1495, x1516, x1537, x1558, x1579, x1600, x1621, x1642,
-          x1663, x1684, x1705, x1726, x1747, x1768, x1789, x1810, x1831, x1852, x1873, x1894, x1915,
-          x1936, x1957, x1978, x1999, x2020, x2041, x2062, x2083, x2104},
-      x2106,
-      LAYOUT_LOOKUP(layout2, _super));
-  return x2909;
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:236)
+  INVOKE_EXTERN(ctx, log, "ShaNextBlockCycle", std::initializer_list<Val>{});
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:238)
+  Val4Array x2 = Val4Array{Val(0), Val(1), Val(2), Val(3)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:55)
+  Val x3 = (arg0.bits[225]._super._super * Val(2));
+  Val x4 = (arg0.bits[226]._super._super * Val(4));
+  Val x5 = (arg0.bits[227]._super._super * Val(8));
+  Val x6 = (arg0.bits[228]._super._super * Val(16));
+  Val x7 = (arg0.bits[229]._super._super * Val(32));
+  Val x8 = (arg0.bits[230]._super._super * Val(64));
+  Val x9 = (arg0.bits[231]._super._super * Val(128));
+  Val x10 = (arg0.bits[232]._super._super * Val(256));
+  Val x11 = (arg0.bits[233]._super._super * Val(512));
+  Val x12 = (arg0.bits[234]._super._super * Val(1024));
+  Val x13 = (arg0.bits[235]._super._super * Val(2048));
+  Val x14 = (arg0.bits[236]._super._super * Val(4096));
+  Val x15 = (arg0.bits[237]._super._super * Val(8192));
+  Val x16 = (arg0.bits[238]._super._super * Val(16384));
+  Val x17 = (arg0.bits[239]._super._super * Val(32768));
+  Val x18 = (arg0.bits[224]._super._super + x3);
+  Val x19 = (((x18 + x4) + x5) + x6);
+  Val x20 = (((x19 + x7) + x8) + x9);
+  Val x21 = (((x20 + x10) + x11) + x12);
+  Val x22 = (((x21 + x13) + x14) + x15);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x23 =
+      Pack_32__16__Super_SuperStruct{._super = ((x22 + x16) + x17)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x24 = (arg0.bits[241]._super._super * Val(2));
+  Val x25 = (arg0.bits[242]._super._super * Val(4));
+  Val x26 = (arg0.bits[243]._super._super * Val(8));
+  Val x27 = (arg0.bits[244]._super._super * Val(16));
+  Val x28 = (arg0.bits[245]._super._super * Val(32));
+  Val x29 = (arg0.bits[246]._super._super * Val(64));
+  Val x30 = (arg0.bits[247]._super._super * Val(128));
+  Val x31 = (arg0.bits[248]._super._super * Val(256));
+  Val x32 = (arg0.bits[249]._super._super * Val(512));
+  Val x33 = (arg0.bits[250]._super._super * Val(1024));
+  Val x34 = (arg0.bits[251]._super._super * Val(2048));
+  Val x35 = (arg0.bits[252]._super._super * Val(4096));
+  Val x36 = (arg0.bits[253]._super._super * Val(8192));
+  Val x37 = (arg0.bits[254]._super._super * Val(16384));
+  Val x38 = (arg0.bits[255]._super._super * Val(32768));
+  Val x39 = (arg0.bits[240]._super._super + x24);
+  Val x40 = (((x39 + x25) + x26) + x27);
+  Val x41 = (((x40 + x28) + x29) + x30);
+  Val x42 = (((x41 + x31) + x32) + x33);
+  Val x43 = (((x42 + x34) + x35) + x36);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x44 =
+      Pack_32__16__Super_SuperStruct{._super = ((x43 + x37) + x38)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x45 = (arg0.bits[193]._super._super * Val(2));
+  Val x46 = (arg0.bits[194]._super._super * Val(4));
+  Val x47 = (arg0.bits[195]._super._super * Val(8));
+  Val x48 = (arg0.bits[196]._super._super * Val(16));
+  Val x49 = (arg0.bits[197]._super._super * Val(32));
+  Val x50 = (arg0.bits[198]._super._super * Val(64));
+  Val x51 = (arg0.bits[199]._super._super * Val(128));
+  Val x52 = (arg0.bits[200]._super._super * Val(256));
+  Val x53 = (arg0.bits[201]._super._super * Val(512));
+  Val x54 = (arg0.bits[202]._super._super * Val(1024));
+  Val x55 = (arg0.bits[203]._super._super * Val(2048));
+  Val x56 = (arg0.bits[204]._super._super * Val(4096));
+  Val x57 = (arg0.bits[205]._super._super * Val(8192));
+  Val x58 = (arg0.bits[206]._super._super * Val(16384));
+  Val x59 = (arg0.bits[207]._super._super * Val(32768));
+  Val x60 = (arg0.bits[192]._super._super + x45);
+  Val x61 = (((x60 + x46) + x47) + x48);
+  Val x62 = (((x61 + x49) + x50) + x51);
+  Val x63 = (((x62 + x52) + x53) + x54);
+  Val x64 = (((x63 + x55) + x56) + x57);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x65 =
+      Pack_32__16__Super_SuperStruct{._super = ((x64 + x58) + x59)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x66 = (arg0.bits[209]._super._super * Val(2));
+  Val x67 = (arg0.bits[210]._super._super * Val(4));
+  Val x68 = (arg0.bits[211]._super._super * Val(8));
+  Val x69 = (arg0.bits[212]._super._super * Val(16));
+  Val x70 = (arg0.bits[213]._super._super * Val(32));
+  Val x71 = (arg0.bits[214]._super._super * Val(64));
+  Val x72 = (arg0.bits[215]._super._super * Val(128));
+  Val x73 = (arg0.bits[216]._super._super * Val(256));
+  Val x74 = (arg0.bits[217]._super._super * Val(512));
+  Val x75 = (arg0.bits[218]._super._super * Val(1024));
+  Val x76 = (arg0.bits[219]._super._super * Val(2048));
+  Val x77 = (arg0.bits[220]._super._super * Val(4096));
+  Val x78 = (arg0.bits[221]._super._super * Val(8192));
+  Val x79 = (arg0.bits[222]._super._super * Val(16384));
+  Val x80 = (arg0.bits[223]._super._super * Val(32768));
+  Val x81 = (arg0.bits[208]._super._super + x66);
+  Val x82 = (((x81 + x67) + x68) + x69);
+  Val x83 = (((x82 + x70) + x71) + x72);
+  Val x84 = (((x83 + x73) + x74) + x75);
+  Val x85 = (((x84 + x76) + x77) + x78);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x86 =
+      Pack_32__16__Super_SuperStruct{._super = ((x85 + x79) + x80)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x87 = (arg0.bits[161]._super._super * Val(2));
+  Val x88 = (arg0.bits[162]._super._super * Val(4));
+  Val x89 = (arg0.bits[163]._super._super * Val(8));
+  Val x90 = (arg0.bits[164]._super._super * Val(16));
+  Val x91 = (arg0.bits[165]._super._super * Val(32));
+  Val x92 = (arg0.bits[166]._super._super * Val(64));
+  Val x93 = (arg0.bits[167]._super._super * Val(128));
+  Val x94 = (arg0.bits[168]._super._super * Val(256));
+  Val x95 = (arg0.bits[169]._super._super * Val(512));
+  Val x96 = (arg0.bits[170]._super._super * Val(1024));
+  Val x97 = (arg0.bits[171]._super._super * Val(2048));
+  Val x98 = (arg0.bits[172]._super._super * Val(4096));
+  Val x99 = (arg0.bits[173]._super._super * Val(8192));
+  Val x100 = (arg0.bits[174]._super._super * Val(16384));
+  Val x101 = (arg0.bits[175]._super._super * Val(32768));
+  Val x102 = (arg0.bits[160]._super._super + x87);
+  Val x103 = (((x102 + x88) + x89) + x90);
+  Val x104 = (((x103 + x91) + x92) + x93);
+  Val x105 = (((x104 + x94) + x95) + x96);
+  Val x106 = (((x105 + x97) + x98) + x99);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x107 =
+      Pack_32__16__Super_SuperStruct{._super = ((x106 + x100) + x101)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x108 = (arg0.bits[177]._super._super * Val(2));
+  Val x109 = (arg0.bits[178]._super._super * Val(4));
+  Val x110 = (arg0.bits[179]._super._super * Val(8));
+  Val x111 = (arg0.bits[180]._super._super * Val(16));
+  Val x112 = (arg0.bits[181]._super._super * Val(32));
+  Val x113 = (arg0.bits[182]._super._super * Val(64));
+  Val x114 = (arg0.bits[183]._super._super * Val(128));
+  Val x115 = (arg0.bits[184]._super._super * Val(256));
+  Val x116 = (arg0.bits[185]._super._super * Val(512));
+  Val x117 = (arg0.bits[186]._super._super * Val(1024));
+  Val x118 = (arg0.bits[187]._super._super * Val(2048));
+  Val x119 = (arg0.bits[188]._super._super * Val(4096));
+  Val x120 = (arg0.bits[189]._super._super * Val(8192));
+  Val x121 = (arg0.bits[190]._super._super * Val(16384));
+  Val x122 = (arg0.bits[191]._super._super * Val(32768));
+  Val x123 = (arg0.bits[176]._super._super + x108);
+  Val x124 = (((x123 + x109) + x110) + x111);
+  Val x125 = (((x124 + x112) + x113) + x114);
+  Val x126 = (((x125 + x115) + x116) + x117);
+  Val x127 = (((x126 + x118) + x119) + x120);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x128 =
+      Pack_32__16__Super_SuperStruct{._super = ((x127 + x121) + x122)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x129 = (arg0.bits[129]._super._super * Val(2));
+  Val x130 = (arg0.bits[130]._super._super * Val(4));
+  Val x131 = (arg0.bits[131]._super._super * Val(8));
+  Val x132 = (arg0.bits[132]._super._super * Val(16));
+  Val x133 = (arg0.bits[133]._super._super * Val(32));
+  Val x134 = (arg0.bits[134]._super._super * Val(64));
+  Val x135 = (arg0.bits[135]._super._super * Val(128));
+  Val x136 = (arg0.bits[136]._super._super * Val(256));
+  Val x137 = (arg0.bits[137]._super._super * Val(512));
+  Val x138 = (arg0.bits[138]._super._super * Val(1024));
+  Val x139 = (arg0.bits[139]._super._super * Val(2048));
+  Val x140 = (arg0.bits[140]._super._super * Val(4096));
+  Val x141 = (arg0.bits[141]._super._super * Val(8192));
+  Val x142 = (arg0.bits[142]._super._super * Val(16384));
+  Val x143 = (arg0.bits[143]._super._super * Val(32768));
+  Val x144 = (arg0.bits[128]._super._super + x129);
+  Val x145 = (((x144 + x130) + x131) + x132);
+  Val x146 = (((x145 + x133) + x134) + x135);
+  Val x147 = (((x146 + x136) + x137) + x138);
+  Val x148 = (((x147 + x139) + x140) + x141);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x149 =
+      Pack_32__16__Super_SuperStruct{._super = ((x148 + x142) + x143)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x150 = (arg0.bits[145]._super._super * Val(2));
+  Val x151 = (arg0.bits[146]._super._super * Val(4));
+  Val x152 = (arg0.bits[147]._super._super * Val(8));
+  Val x153 = (arg0.bits[148]._super._super * Val(16));
+  Val x154 = (arg0.bits[149]._super._super * Val(32));
+  Val x155 = (arg0.bits[150]._super._super * Val(64));
+  Val x156 = (arg0.bits[151]._super._super * Val(128));
+  Val x157 = (arg0.bits[152]._super._super * Val(256));
+  Val x158 = (arg0.bits[153]._super._super * Val(512));
+  Val x159 = (arg0.bits[154]._super._super * Val(1024));
+  Val x160 = (arg0.bits[155]._super._super * Val(2048));
+  Val x161 = (arg0.bits[156]._super._super * Val(4096));
+  Val x162 = (arg0.bits[157]._super._super * Val(8192));
+  Val x163 = (arg0.bits[158]._super._super * Val(16384));
+  Val x164 = (arg0.bits[159]._super._super * Val(32768));
+  Val x165 = (arg0.bits[144]._super._super + x150);
+  Val x166 = (((x165 + x151) + x152) + x153);
+  Val x167 = (((x166 + x154) + x155) + x156);
+  Val x168 = (((x167 + x157) + x158) + x159);
+  Val x169 = (((x168 + x160) + x161) + x162);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x170 =
+      Pack_32__16__Super_SuperStruct{._super = ((x169 + x163) + x164)};
+  Pack_32__16_Struct4Array x171 = Pack_32__16_Struct4Array{
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x23, x44}},
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x65, x86}},
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x107, x128}},
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x149, x170}}};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:55)
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:239)
+  Val x172 = (arg0.bits[481]._super._super * Val(2));
+  Val x173 = (arg0.bits[482]._super._super * Val(4));
+  Val x174 = (arg0.bits[483]._super._super * Val(8));
+  Val x175 = (arg0.bits[484]._super._super * Val(16));
+  Val x176 = (arg0.bits[485]._super._super * Val(32));
+  Val x177 = (arg0.bits[486]._super._super * Val(64));
+  Val x178 = (arg0.bits[487]._super._super * Val(128));
+  Val x179 = (arg0.bits[488]._super._super * Val(256));
+  Val x180 = (arg0.bits[489]._super._super * Val(512));
+  Val x181 = (arg0.bits[490]._super._super * Val(1024));
+  Val x182 = (arg0.bits[491]._super._super * Val(2048));
+  Val x183 = (arg0.bits[492]._super._super * Val(4096));
+  Val x184 = (arg0.bits[493]._super._super * Val(8192));
+  Val x185 = (arg0.bits[494]._super._super * Val(16384));
+  Val x186 = (arg0.bits[495]._super._super * Val(32768));
+  Val x187 = (arg0.bits[480]._super._super + x172);
+  Val x188 = (((x187 + x173) + x174) + x175);
+  Val x189 = (((x188 + x176) + x177) + x178);
+  Val x190 = (((x189 + x179) + x180) + x181);
+  Val x191 = (((x190 + x182) + x183) + x184);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x192 =
+      Pack_32__16__Super_SuperStruct{._super = ((x191 + x185) + x186)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x193 = (arg0.bits[497]._super._super * Val(2));
+  Val x194 = (arg0.bits[498]._super._super * Val(4));
+  Val x195 = (arg0.bits[499]._super._super * Val(8));
+  Val x196 = (arg0.bits[500]._super._super * Val(16));
+  Val x197 = (arg0.bits[501]._super._super * Val(32));
+  Val x198 = (arg0.bits[502]._super._super * Val(64));
+  Val x199 = (arg0.bits[503]._super._super * Val(128));
+  Val x200 = (arg0.bits[504]._super._super * Val(256));
+  Val x201 = (arg0.bits[505]._super._super * Val(512));
+  Val x202 = (arg0.bits[506]._super._super * Val(1024));
+  Val x203 = (arg0.bits[507]._super._super * Val(2048));
+  Val x204 = (arg0.bits[508]._super._super * Val(4096));
+  Val x205 = (arg0.bits[509]._super._super * Val(8192));
+  Val x206 = (arg0.bits[510]._super._super * Val(16384));
+  Val x207 = (arg0.bits[511]._super._super * Val(32768));
+  Val x208 = (arg0.bits[496]._super._super + x193);
+  Val x209 = (((x208 + x194) + x195) + x196);
+  Val x210 = (((x209 + x197) + x198) + x199);
+  Val x211 = (((x210 + x200) + x201) + x202);
+  Val x212 = (((x211 + x203) + x204) + x205);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x213 =
+      Pack_32__16__Super_SuperStruct{._super = ((x212 + x206) + x207)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x214 = (arg0.bits[449]._super._super * Val(2));
+  Val x215 = (arg0.bits[450]._super._super * Val(4));
+  Val x216 = (arg0.bits[451]._super._super * Val(8));
+  Val x217 = (arg0.bits[452]._super._super * Val(16));
+  Val x218 = (arg0.bits[453]._super._super * Val(32));
+  Val x219 = (arg0.bits[454]._super._super * Val(64));
+  Val x220 = (arg0.bits[455]._super._super * Val(128));
+  Val x221 = (arg0.bits[456]._super._super * Val(256));
+  Val x222 = (arg0.bits[457]._super._super * Val(512));
+  Val x223 = (arg0.bits[458]._super._super * Val(1024));
+  Val x224 = (arg0.bits[459]._super._super * Val(2048));
+  Val x225 = (arg0.bits[460]._super._super * Val(4096));
+  Val x226 = (arg0.bits[461]._super._super * Val(8192));
+  Val x227 = (arg0.bits[462]._super._super * Val(16384));
+  Val x228 = (arg0.bits[463]._super._super * Val(32768));
+  Val x229 = (arg0.bits[448]._super._super + x214);
+  Val x230 = (((x229 + x215) + x216) + x217);
+  Val x231 = (((x230 + x218) + x219) + x220);
+  Val x232 = (((x231 + x221) + x222) + x223);
+  Val x233 = (((x232 + x224) + x225) + x226);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x234 =
+      Pack_32__16__Super_SuperStruct{._super = ((x233 + x227) + x228)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x235 = (arg0.bits[465]._super._super * Val(2));
+  Val x236 = (arg0.bits[466]._super._super * Val(4));
+  Val x237 = (arg0.bits[467]._super._super * Val(8));
+  Val x238 = (arg0.bits[468]._super._super * Val(16));
+  Val x239 = (arg0.bits[469]._super._super * Val(32));
+  Val x240 = (arg0.bits[470]._super._super * Val(64));
+  Val x241 = (arg0.bits[471]._super._super * Val(128));
+  Val x242 = (arg0.bits[472]._super._super * Val(256));
+  Val x243 = (arg0.bits[473]._super._super * Val(512));
+  Val x244 = (arg0.bits[474]._super._super * Val(1024));
+  Val x245 = (arg0.bits[475]._super._super * Val(2048));
+  Val x246 = (arg0.bits[476]._super._super * Val(4096));
+  Val x247 = (arg0.bits[477]._super._super * Val(8192));
+  Val x248 = (arg0.bits[478]._super._super * Val(16384));
+  Val x249 = (arg0.bits[479]._super._super * Val(32768));
+  Val x250 = (arg0.bits[464]._super._super + x235);
+  Val x251 = (((x250 + x236) + x237) + x238);
+  Val x252 = (((x251 + x239) + x240) + x241);
+  Val x253 = (((x252 + x242) + x243) + x244);
+  Val x254 = (((x253 + x245) + x246) + x247);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x255 =
+      Pack_32__16__Super_SuperStruct{._super = ((x254 + x248) + x249)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x256 = (arg0.bits[417]._super._super * Val(2));
+  Val x257 = (arg0.bits[418]._super._super * Val(4));
+  Val x258 = (arg0.bits[419]._super._super * Val(8));
+  Val x259 = (arg0.bits[420]._super._super * Val(16));
+  Val x260 = (arg0.bits[421]._super._super * Val(32));
+  Val x261 = (arg0.bits[422]._super._super * Val(64));
+  Val x262 = (arg0.bits[423]._super._super * Val(128));
+  Val x263 = (arg0.bits[424]._super._super * Val(256));
+  Val x264 = (arg0.bits[425]._super._super * Val(512));
+  Val x265 = (arg0.bits[426]._super._super * Val(1024));
+  Val x266 = (arg0.bits[427]._super._super * Val(2048));
+  Val x267 = (arg0.bits[428]._super._super * Val(4096));
+  Val x268 = (arg0.bits[429]._super._super * Val(8192));
+  Val x269 = (arg0.bits[430]._super._super * Val(16384));
+  Val x270 = (arg0.bits[431]._super._super * Val(32768));
+  Val x271 = (arg0.bits[416]._super._super + x256);
+  Val x272 = (((x271 + x257) + x258) + x259);
+  Val x273 = (((x272 + x260) + x261) + x262);
+  Val x274 = (((x273 + x263) + x264) + x265);
+  Val x275 = (((x274 + x266) + x267) + x268);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x276 =
+      Pack_32__16__Super_SuperStruct{._super = ((x275 + x269) + x270)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x277 = (arg0.bits[433]._super._super * Val(2));
+  Val x278 = (arg0.bits[434]._super._super * Val(4));
+  Val x279 = (arg0.bits[435]._super._super * Val(8));
+  Val x280 = (arg0.bits[436]._super._super * Val(16));
+  Val x281 = (arg0.bits[437]._super._super * Val(32));
+  Val x282 = (arg0.bits[438]._super._super * Val(64));
+  Val x283 = (arg0.bits[439]._super._super * Val(128));
+  Val x284 = (arg0.bits[440]._super._super * Val(256));
+  Val x285 = (arg0.bits[441]._super._super * Val(512));
+  Val x286 = (arg0.bits[442]._super._super * Val(1024));
+  Val x287 = (arg0.bits[443]._super._super * Val(2048));
+  Val x288 = (arg0.bits[444]._super._super * Val(4096));
+  Val x289 = (arg0.bits[445]._super._super * Val(8192));
+  Val x290 = (arg0.bits[446]._super._super * Val(16384));
+  Val x291 = (arg0.bits[447]._super._super * Val(32768));
+  Val x292 = (arg0.bits[432]._super._super + x277);
+  Val x293 = (((x292 + x278) + x279) + x280);
+  Val x294 = (((x293 + x281) + x282) + x283);
+  Val x295 = (((x294 + x284) + x285) + x286);
+  Val x296 = (((x295 + x287) + x288) + x289);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x297 =
+      Pack_32__16__Super_SuperStruct{._super = ((x296 + x290) + x291)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x298 = (arg0.bits[385]._super._super * Val(2));
+  Val x299 = (arg0.bits[386]._super._super * Val(4));
+  Val x300 = (arg0.bits[387]._super._super * Val(8));
+  Val x301 = (arg0.bits[388]._super._super * Val(16));
+  Val x302 = (arg0.bits[389]._super._super * Val(32));
+  Val x303 = (arg0.bits[390]._super._super * Val(64));
+  Val x304 = (arg0.bits[391]._super._super * Val(128));
+  Val x305 = (arg0.bits[392]._super._super * Val(256));
+  Val x306 = (arg0.bits[393]._super._super * Val(512));
+  Val x307 = (arg0.bits[394]._super._super * Val(1024));
+  Val x308 = (arg0.bits[395]._super._super * Val(2048));
+  Val x309 = (arg0.bits[396]._super._super * Val(4096));
+  Val x310 = (arg0.bits[397]._super._super * Val(8192));
+  Val x311 = (arg0.bits[398]._super._super * Val(16384));
+  Val x312 = (arg0.bits[399]._super._super * Val(32768));
+  Val x313 = (arg0.bits[384]._super._super + x298);
+  Val x314 = (((x313 + x299) + x300) + x301);
+  Val x315 = (((x314 + x302) + x303) + x304);
+  Val x316 = (((x315 + x305) + x306) + x307);
+  Val x317 = (((x316 + x308) + x309) + x310);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x318 =
+      Pack_32__16__Super_SuperStruct{._super = ((x317 + x311) + x312)};
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  Val x319 = (arg0.bits[401]._super._super * Val(2));
+  Val x320 = (arg0.bits[402]._super._super * Val(4));
+  Val x321 = (arg0.bits[403]._super._super * Val(8));
+  Val x322 = (arg0.bits[404]._super._super * Val(16));
+  Val x323 = (arg0.bits[405]._super._super * Val(32));
+  Val x324 = (arg0.bits[406]._super._super * Val(64));
+  Val x325 = (arg0.bits[407]._super._super * Val(128));
+  Val x326 = (arg0.bits[408]._super._super * Val(256));
+  Val x327 = (arg0.bits[409]._super._super * Val(512));
+  Val x328 = (arg0.bits[410]._super._super * Val(1024));
+  Val x329 = (arg0.bits[411]._super._super * Val(2048));
+  Val x330 = (arg0.bits[412]._super._super * Val(4096));
+  Val x331 = (arg0.bits[413]._super._super * Val(8192));
+  Val x332 = (arg0.bits[414]._super._super * Val(16384));
+  Val x333 = (arg0.bits[415]._super._super * Val(32768));
+  Val x334 = (arg0.bits[400]._super._super + x319);
+  Val x335 = (((x334 + x320) + x321) + x322);
+  Val x336 = (((x335 + x323) + x324) + x325);
+  Val x337 = (((x336 + x326) + x327) + x328);
+  Val x338 = (((x337 + x329) + x330) + x331);
+  // Pack(zirgen/circuit/keccak2/pack.zir:31)
+  Pack_32__16__Super_SuperStruct x339 =
+      Pack_32__16__Super_SuperStruct{._super = ((x338 + x332) + x333)};
+  Pack_32__16_Struct4Array x340 = Pack_32__16_Struct4Array{
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x192, x213}},
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x234, x255}},
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x276, x297}},
+      Pack_32__16_Struct{._super = Pack_32__16__Super_SuperStruct2Array{x318, x339}}};
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:241)
+  NondetRegStruct2Array x341 = NondetRegStruct2Array{arg0.sflat[0], arg0.sflat[1]};
+  NondetRegStruct2Array x342 = NondetRegStruct2Array{arg0.sflat[2], arg0.sflat[3]};
+  NondetRegStruct2Array x343 = NondetRegStruct2Array{arg0.sflat[4], arg0.sflat[5]};
+  NondetRegStruct2Array x344 = NondetRegStruct2Array{arg0.sflat[6], arg0.sflat[7]};
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:242)
+  NondetRegStruct2Array x345 = NondetRegStruct2Array{arg0.sflat[8], arg0.sflat[9]};
+  NondetRegStruct2Array x346 = NondetRegStruct2Array{arg0.sflat[10], arg0.sflat[11]};
+  NondetRegStruct2Array x347 = NondetRegStruct2Array{arg0.sflat[12], arg0.sflat[13]};
+  NondetRegStruct2Array x348 = NondetRegStruct2Array{arg0.sflat[14], arg0.sflat[15]};
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:244)
+  UnpackReg_32__16_Struct4Array x349 =
+      map(x2,
+          LAYOUT_LOOKUP(layout1, totA),
+          ([&](Val4Array::value_type x350,
+               BoundLayout<CarryAndExpandLayout4LayoutArray::value_type> x351) {
+            // Add2(zirgen/circuit/keccak2/sha2.zir:30)
+            Val x352 = (x171[to_size_t(x350)]._super[0]._super +
+                        ShaNextBlockCyclePrevA_SuperStruct4Array{
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x341},
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x342},
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x343},
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x344}}[to_size_t(x350)]
+                            ._super[0]
+                            ._super);
+            Val x353 = (x171[to_size_t(x350)]._super[1]._super +
+                        ShaNextBlockCyclePrevA_SuperStruct4Array{
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x341},
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x342},
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x343},
+                            ShaNextBlockCyclePrevA_SuperStruct{._super = x344}}[to_size_t(x350)]
+                            ._super[1]
+                            ._super);
+            UnpackReg_32__16_Struct x354 = exec_CarryAndExpand(ctx, Val2Array{x352, x353}, x351);
+            return x354;
+          }));
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:245)
+  UnpackReg_32__16_Struct4Array x355 =
+      map(x2,
+          LAYOUT_LOOKUP(layout1, totE),
+          ([&](Val4Array::value_type x356,
+               BoundLayout<CarryAndExpandLayout4LayoutArray::value_type> x357) {
+            // Add2(zirgen/circuit/keccak2/sha2.zir:30)
+            Val x358 = (x340[to_size_t(x356)]._super[0]._super +
+                        ShaNextBlockCyclePrevE_SuperStruct4Array{
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x345},
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x346},
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x347},
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x348}}[to_size_t(x356)]
+                            ._super[0]
+                            ._super);
+            Val x359 = (x340[to_size_t(x356)]._super[1]._super +
+                        ShaNextBlockCyclePrevE_SuperStruct4Array{
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x345},
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x346},
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x347},
+                            ShaNextBlockCyclePrevE_SuperStruct{._super = x348}}[to_size_t(x356)]
+                            ._super[1]
+                            ._super);
+            UnpackReg_32__16_Struct x360 = exec_CarryAndExpand(ctx, Val2Array{x358, x359}, x357);
+            return x360;
+          }));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:55)
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:257)
+  Val x361 = (x349[0]._super[1]._super._super * Val(2));
+  Val x362 = (x349[0]._super[2]._super._super * Val(4));
+  Val x363 = (x349[0]._super[3]._super._super * Val(8));
+  Val x364 = (x349[0]._super[4]._super._super * Val(16));
+  Val x365 = (x349[0]._super[5]._super._super * Val(32));
+  Val x366 = (x349[0]._super[6]._super._super * Val(64));
+  Val x367 = (x349[0]._super[7]._super._super * Val(128));
+  Val x368 = (x349[0]._super[8]._super._super * Val(256));
+  Val x369 = (x349[0]._super[9]._super._super * Val(512));
+  Val x370 = (x349[0]._super[10]._super._super * Val(1024));
+  Val x371 = (x349[0]._super[11]._super._super * Val(2048));
+  Val x372 = (x349[0]._super[12]._super._super * Val(4096));
+  Val x373 = (x349[0]._super[13]._super._super * Val(8192));
+  Val x374 = (x349[0]._super[14]._super._super * Val(16384));
+  Val x375 = (x349[0]._super[15]._super._super * Val(32768));
+  Val x376 = (x349[0]._super[0]._super._super + x361);
+  Val x377 = (((x376 + x362) + x363) + x364);
+  Val x378 = (((x377 + x365) + x366) + x367);
+  Val x379 = (((x378 + x368) + x369) + x370);
+  Val x380 = (((x379 + x371) + x372) + x373);
+  Val x381 = (x349[0]._super[17]._super._super * Val(2));
+  Val x382 = (x349[0]._super[18]._super._super * Val(4));
+  Val x383 = (x349[0]._super[19]._super._super * Val(8));
+  Val x384 = (x349[0]._super[20]._super._super * Val(16));
+  Val x385 = (x349[0]._super[21]._super._super * Val(32));
+  Val x386 = (x349[0]._super[22]._super._super * Val(64));
+  Val x387 = (x349[0]._super[23]._super._super * Val(128));
+  Val x388 = (x349[0]._super[24]._super._super * Val(256));
+  Val x389 = (x349[0]._super[25]._super._super * Val(512));
+  Val x390 = (x349[0]._super[26]._super._super * Val(1024));
+  Val x391 = (x349[0]._super[27]._super._super * Val(2048));
+  Val x392 = (x349[0]._super[28]._super._super * Val(4096));
+  Val x393 = (x349[0]._super[29]._super._super * Val(8192));
+  Val x394 = (x349[0]._super[30]._super._super * Val(16384));
+  Val x395 = (x349[0]._super[31]._super._super * Val(32768));
+  Val x396 = (x349[0]._super[16]._super._super + x381);
+  Val x397 = (((x396 + x382) + x383) + x384);
+  Val x398 = (((x397 + x385) + x386) + x387);
+  Val x399 = (((x398 + x388) + x389) + x390);
+  Val x400 = (((x399 + x391) + x392) + x393);
+  Val x401 = (x349[1]._super[1]._super._super * Val(2));
+  Val x402 = (x349[1]._super[2]._super._super * Val(4));
+  Val x403 = (x349[1]._super[3]._super._super * Val(8));
+  Val x404 = (x349[1]._super[4]._super._super * Val(16));
+  Val x405 = (x349[1]._super[5]._super._super * Val(32));
+  Val x406 = (x349[1]._super[6]._super._super * Val(64));
+  Val x407 = (x349[1]._super[7]._super._super * Val(128));
+  Val x408 = (x349[1]._super[8]._super._super * Val(256));
+  Val x409 = (x349[1]._super[9]._super._super * Val(512));
+  Val x410 = (x349[1]._super[10]._super._super * Val(1024));
+  Val x411 = (x349[1]._super[11]._super._super * Val(2048));
+  Val x412 = (x349[1]._super[12]._super._super * Val(4096));
+  Val x413 = (x349[1]._super[13]._super._super * Val(8192));
+  Val x414 = (x349[1]._super[14]._super._super * Val(16384));
+  Val x415 = (x349[1]._super[15]._super._super * Val(32768));
+  Val x416 = (x349[1]._super[0]._super._super + x401);
+  Val x417 = (((x416 + x402) + x403) + x404);
+  Val x418 = (((x417 + x405) + x406) + x407);
+  Val x419 = (((x418 + x408) + x409) + x410);
+  Val x420 = (((x419 + x411) + x412) + x413);
+  Val x421 = (x349[1]._super[17]._super._super * Val(2));
+  Val x422 = (x349[1]._super[18]._super._super * Val(4));
+  Val x423 = (x349[1]._super[19]._super._super * Val(8));
+  Val x424 = (x349[1]._super[20]._super._super * Val(16));
+  Val x425 = (x349[1]._super[21]._super._super * Val(32));
+  Val x426 = (x349[1]._super[22]._super._super * Val(64));
+  Val x427 = (x349[1]._super[23]._super._super * Val(128));
+  Val x428 = (x349[1]._super[24]._super._super * Val(256));
+  Val x429 = (x349[1]._super[25]._super._super * Val(512));
+  Val x430 = (x349[1]._super[26]._super._super * Val(1024));
+  Val x431 = (x349[1]._super[27]._super._super * Val(2048));
+  Val x432 = (x349[1]._super[28]._super._super * Val(4096));
+  Val x433 = (x349[1]._super[29]._super._super * Val(8192));
+  Val x434 = (x349[1]._super[30]._super._super * Val(16384));
+  Val x435 = (x349[1]._super[31]._super._super * Val(32768));
+  Val x436 = (x349[1]._super[16]._super._super + x421);
+  Val x437 = (((x436 + x422) + x423) + x424);
+  Val x438 = (((x437 + x425) + x426) + x427);
+  Val x439 = (((x438 + x428) + x429) + x430);
+  Val x440 = (((x439 + x431) + x432) + x433);
+  Val x441 = (x349[2]._super[1]._super._super * Val(2));
+  Val x442 = (x349[2]._super[2]._super._super * Val(4));
+  Val x443 = (x349[2]._super[3]._super._super * Val(8));
+  Val x444 = (x349[2]._super[4]._super._super * Val(16));
+  Val x445 = (x349[2]._super[5]._super._super * Val(32));
+  Val x446 = (x349[2]._super[6]._super._super * Val(64));
+  Val x447 = (x349[2]._super[7]._super._super * Val(128));
+  Val x448 = (x349[2]._super[8]._super._super * Val(256));
+  Val x449 = (x349[2]._super[9]._super._super * Val(512));
+  Val x450 = (x349[2]._super[10]._super._super * Val(1024));
+  Val x451 = (x349[2]._super[11]._super._super * Val(2048));
+  Val x452 = (x349[2]._super[12]._super._super * Val(4096));
+  Val x453 = (x349[2]._super[13]._super._super * Val(8192));
+  Val x454 = (x349[2]._super[14]._super._super * Val(16384));
+  Val x455 = (x349[2]._super[15]._super._super * Val(32768));
+  Val x456 = (x349[2]._super[0]._super._super + x441);
+  Val x457 = (((x456 + x442) + x443) + x444);
+  Val x458 = (((x457 + x445) + x446) + x447);
+  Val x459 = (((x458 + x448) + x449) + x450);
+  Val x460 = (((x459 + x451) + x452) + x453);
+  Val x461 = (x349[2]._super[17]._super._super * Val(2));
+  Val x462 = (x349[2]._super[18]._super._super * Val(4));
+  Val x463 = (x349[2]._super[19]._super._super * Val(8));
+  Val x464 = (x349[2]._super[20]._super._super * Val(16));
+  Val x465 = (x349[2]._super[21]._super._super * Val(32));
+  Val x466 = (x349[2]._super[22]._super._super * Val(64));
+  Val x467 = (x349[2]._super[23]._super._super * Val(128));
+  Val x468 = (x349[2]._super[24]._super._super * Val(256));
+  Val x469 = (x349[2]._super[25]._super._super * Val(512));
+  Val x470 = (x349[2]._super[26]._super._super * Val(1024));
+  Val x471 = (x349[2]._super[27]._super._super * Val(2048));
+  Val x472 = (x349[2]._super[28]._super._super * Val(4096));
+  Val x473 = (x349[2]._super[29]._super._super * Val(8192));
+  Val x474 = (x349[2]._super[30]._super._super * Val(16384));
+  Val x475 = (x349[2]._super[31]._super._super * Val(32768));
+  Val x476 = (x349[2]._super[16]._super._super + x461);
+  Val x477 = (((x476 + x462) + x463) + x464);
+  Val x478 = (((x477 + x465) + x466) + x467);
+  Val x479 = (((x478 + x468) + x469) + x470);
+  Val x480 = (((x479 + x471) + x472) + x473);
+  Val x481 = (x349[3]._super[1]._super._super * Val(2));
+  Val x482 = (x349[3]._super[2]._super._super * Val(4));
+  Val x483 = (x349[3]._super[3]._super._super * Val(8));
+  Val x484 = (x349[3]._super[4]._super._super * Val(16));
+  Val x485 = (x349[3]._super[5]._super._super * Val(32));
+  Val x486 = (x349[3]._super[6]._super._super * Val(64));
+  Val x487 = (x349[3]._super[7]._super._super * Val(128));
+  Val x488 = (x349[3]._super[8]._super._super * Val(256));
+  Val x489 = (x349[3]._super[9]._super._super * Val(512));
+  Val x490 = (x349[3]._super[10]._super._super * Val(1024));
+  Val x491 = (x349[3]._super[11]._super._super * Val(2048));
+  Val x492 = (x349[3]._super[12]._super._super * Val(4096));
+  Val x493 = (x349[3]._super[13]._super._super * Val(8192));
+  Val x494 = (x349[3]._super[14]._super._super * Val(16384));
+  Val x495 = (x349[3]._super[15]._super._super * Val(32768));
+  Val x496 = (x349[3]._super[0]._super._super + x481);
+  Val x497 = (((x496 + x482) + x483) + x484);
+  Val x498 = (((x497 + x485) + x486) + x487);
+  Val x499 = (((x498 + x488) + x489) + x490);
+  Val x500 = (((x499 + x491) + x492) + x493);
+  Val x501 = (x349[3]._super[17]._super._super * Val(2));
+  Val x502 = (x349[3]._super[18]._super._super * Val(4));
+  Val x503 = (x349[3]._super[19]._super._super * Val(8));
+  Val x504 = (x349[3]._super[20]._super._super * Val(16));
+  Val x505 = (x349[3]._super[21]._super._super * Val(32));
+  Val x506 = (x349[3]._super[22]._super._super * Val(64));
+  Val x507 = (x349[3]._super[23]._super._super * Val(128));
+  Val x508 = (x349[3]._super[24]._super._super * Val(256));
+  Val x509 = (x349[3]._super[25]._super._super * Val(512));
+  Val x510 = (x349[3]._super[26]._super._super * Val(1024));
+  Val x511 = (x349[3]._super[27]._super._super * Val(2048));
+  Val x512 = (x349[3]._super[28]._super._super * Val(4096));
+  Val x513 = (x349[3]._super[29]._super._super * Val(8192));
+  Val x514 = (x349[3]._super[30]._super._super * Val(16384));
+  Val x515 = (x349[3]._super[31]._super._super * Val(32768));
+  Val x516 = (x349[3]._super[16]._super._super + x501);
+  Val x517 = (((x516 + x502) + x503) + x504);
+  Val x518 = (((x517 + x505) + x506) + x507);
+  Val x519 = (((x518 + x508) + x509) + x510);
+  Val x520 = (((x519 + x511) + x512) + x513);
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:259)
+  Val x521 = (x355[0]._super[1]._super._super * Val(2));
+  Val x522 = (x355[0]._super[2]._super._super * Val(4));
+  Val x523 = (x355[0]._super[3]._super._super * Val(8));
+  Val x524 = (x355[0]._super[4]._super._super * Val(16));
+  Val x525 = (x355[0]._super[5]._super._super * Val(32));
+  Val x526 = (x355[0]._super[6]._super._super * Val(64));
+  Val x527 = (x355[0]._super[7]._super._super * Val(128));
+  Val x528 = (x355[0]._super[8]._super._super * Val(256));
+  Val x529 = (x355[0]._super[9]._super._super * Val(512));
+  Val x530 = (x355[0]._super[10]._super._super * Val(1024));
+  Val x531 = (x355[0]._super[11]._super._super * Val(2048));
+  Val x532 = (x355[0]._super[12]._super._super * Val(4096));
+  Val x533 = (x355[0]._super[13]._super._super * Val(8192));
+  Val x534 = (x355[0]._super[14]._super._super * Val(16384));
+  Val x535 = (x355[0]._super[15]._super._super * Val(32768));
+  Val x536 = (x355[0]._super[0]._super._super + x521);
+  Val x537 = (((x536 + x522) + x523) + x524);
+  Val x538 = (((x537 + x525) + x526) + x527);
+  Val x539 = (((x538 + x528) + x529) + x530);
+  Val x540 = (((x539 + x531) + x532) + x533);
+  Val x541 = (x355[0]._super[17]._super._super * Val(2));
+  Val x542 = (x355[0]._super[18]._super._super * Val(4));
+  Val x543 = (x355[0]._super[19]._super._super * Val(8));
+  Val x544 = (x355[0]._super[20]._super._super * Val(16));
+  Val x545 = (x355[0]._super[21]._super._super * Val(32));
+  Val x546 = (x355[0]._super[22]._super._super * Val(64));
+  Val x547 = (x355[0]._super[23]._super._super * Val(128));
+  Val x548 = (x355[0]._super[24]._super._super * Val(256));
+  Val x549 = (x355[0]._super[25]._super._super * Val(512));
+  Val x550 = (x355[0]._super[26]._super._super * Val(1024));
+  Val x551 = (x355[0]._super[27]._super._super * Val(2048));
+  Val x552 = (x355[0]._super[28]._super._super * Val(4096));
+  Val x553 = (x355[0]._super[29]._super._super * Val(8192));
+  Val x554 = (x355[0]._super[30]._super._super * Val(16384));
+  Val x555 = (x355[0]._super[31]._super._super * Val(32768));
+  Val x556 = (x355[0]._super[16]._super._super + x541);
+  Val x557 = (((x556 + x542) + x543) + x544);
+  Val x558 = (((x557 + x545) + x546) + x547);
+  Val x559 = (((x558 + x548) + x549) + x550);
+  Val x560 = (((x559 + x551) + x552) + x553);
+  Val x561 = (x355[1]._super[1]._super._super * Val(2));
+  Val x562 = (x355[1]._super[2]._super._super * Val(4));
+  Val x563 = (x355[1]._super[3]._super._super * Val(8));
+  Val x564 = (x355[1]._super[4]._super._super * Val(16));
+  Val x565 = (x355[1]._super[5]._super._super * Val(32));
+  Val x566 = (x355[1]._super[6]._super._super * Val(64));
+  Val x567 = (x355[1]._super[7]._super._super * Val(128));
+  Val x568 = (x355[1]._super[8]._super._super * Val(256));
+  Val x569 = (x355[1]._super[9]._super._super * Val(512));
+  Val x570 = (x355[1]._super[10]._super._super * Val(1024));
+  Val x571 = (x355[1]._super[11]._super._super * Val(2048));
+  Val x572 = (x355[1]._super[12]._super._super * Val(4096));
+  Val x573 = (x355[1]._super[13]._super._super * Val(8192));
+  Val x574 = (x355[1]._super[14]._super._super * Val(16384));
+  Val x575 = (x355[1]._super[15]._super._super * Val(32768));
+  Val x576 = (x355[1]._super[0]._super._super + x561);
+  Val x577 = (((x576 + x562) + x563) + x564);
+  Val x578 = (((x577 + x565) + x566) + x567);
+  Val x579 = (((x578 + x568) + x569) + x570);
+  Val x580 = (((x579 + x571) + x572) + x573);
+  Val x581 = (x355[1]._super[17]._super._super * Val(2));
+  Val x582 = (x355[1]._super[18]._super._super * Val(4));
+  Val x583 = (x355[1]._super[19]._super._super * Val(8));
+  Val x584 = (x355[1]._super[20]._super._super * Val(16));
+  Val x585 = (x355[1]._super[21]._super._super * Val(32));
+  Val x586 = (x355[1]._super[22]._super._super * Val(64));
+  Val x587 = (x355[1]._super[23]._super._super * Val(128));
+  Val x588 = (x355[1]._super[24]._super._super * Val(256));
+  Val x589 = (x355[1]._super[25]._super._super * Val(512));
+  Val x590 = (x355[1]._super[26]._super._super * Val(1024));
+  Val x591 = (x355[1]._super[27]._super._super * Val(2048));
+  Val x592 = (x355[1]._super[28]._super._super * Val(4096));
+  Val x593 = (x355[1]._super[29]._super._super * Val(8192));
+  Val x594 = (x355[1]._super[30]._super._super * Val(16384));
+  Val x595 = (x355[1]._super[31]._super._super * Val(32768));
+  Val x596 = (x355[1]._super[16]._super._super + x581);
+  Val x597 = (((x596 + x582) + x583) + x584);
+  Val x598 = (((x597 + x585) + x586) + x587);
+  Val x599 = (((x598 + x588) + x589) + x590);
+  Val x600 = (((x599 + x591) + x592) + x593);
+  Val x601 = (x355[2]._super[1]._super._super * Val(2));
+  Val x602 = (x355[2]._super[2]._super._super * Val(4));
+  Val x603 = (x355[2]._super[3]._super._super * Val(8));
+  Val x604 = (x355[2]._super[4]._super._super * Val(16));
+  Val x605 = (x355[2]._super[5]._super._super * Val(32));
+  Val x606 = (x355[2]._super[6]._super._super * Val(64));
+  Val x607 = (x355[2]._super[7]._super._super * Val(128));
+  Val x608 = (x355[2]._super[8]._super._super * Val(256));
+  Val x609 = (x355[2]._super[9]._super._super * Val(512));
+  Val x610 = (x355[2]._super[10]._super._super * Val(1024));
+  Val x611 = (x355[2]._super[11]._super._super * Val(2048));
+  Val x612 = (x355[2]._super[12]._super._super * Val(4096));
+  Val x613 = (x355[2]._super[13]._super._super * Val(8192));
+  Val x614 = (x355[2]._super[14]._super._super * Val(16384));
+  Val x615 = (x355[2]._super[15]._super._super * Val(32768));
+  Val x616 = (x355[2]._super[0]._super._super + x601);
+  Val x617 = (((x616 + x602) + x603) + x604);
+  Val x618 = (((x617 + x605) + x606) + x607);
+  Val x619 = (((x618 + x608) + x609) + x610);
+  Val x620 = (((x619 + x611) + x612) + x613);
+  Val x621 = (x355[2]._super[17]._super._super * Val(2));
+  Val x622 = (x355[2]._super[18]._super._super * Val(4));
+  Val x623 = (x355[2]._super[19]._super._super * Val(8));
+  Val x624 = (x355[2]._super[20]._super._super * Val(16));
+  Val x625 = (x355[2]._super[21]._super._super * Val(32));
+  Val x626 = (x355[2]._super[22]._super._super * Val(64));
+  Val x627 = (x355[2]._super[23]._super._super * Val(128));
+  Val x628 = (x355[2]._super[24]._super._super * Val(256));
+  Val x629 = (x355[2]._super[25]._super._super * Val(512));
+  Val x630 = (x355[2]._super[26]._super._super * Val(1024));
+  Val x631 = (x355[2]._super[27]._super._super * Val(2048));
+  Val x632 = (x355[2]._super[28]._super._super * Val(4096));
+  Val x633 = (x355[2]._super[29]._super._super * Val(8192));
+  Val x634 = (x355[2]._super[30]._super._super * Val(16384));
+  Val x635 = (x355[2]._super[31]._super._super * Val(32768));
+  Val x636 = (x355[2]._super[16]._super._super + x621);
+  Val x637 = (((x636 + x622) + x623) + x624);
+  Val x638 = (((x637 + x625) + x626) + x627);
+  Val x639 = (((x638 + x628) + x629) + x630);
+  Val x640 = (((x639 + x631) + x632) + x633);
+  Val x641 = (x355[3]._super[1]._super._super * Val(2));
+  Val x642 = (x355[3]._super[2]._super._super * Val(4));
+  Val x643 = (x355[3]._super[3]._super._super * Val(8));
+  Val x644 = (x355[3]._super[4]._super._super * Val(16));
+  Val x645 = (x355[3]._super[5]._super._super * Val(32));
+  Val x646 = (x355[3]._super[6]._super._super * Val(64));
+  Val x647 = (x355[3]._super[7]._super._super * Val(128));
+  Val x648 = (x355[3]._super[8]._super._super * Val(256));
+  Val x649 = (x355[3]._super[9]._super._super * Val(512));
+  Val x650 = (x355[3]._super[10]._super._super * Val(1024));
+  Val x651 = (x355[3]._super[11]._super._super * Val(2048));
+  Val x652 = (x355[3]._super[12]._super._super * Val(4096));
+  Val x653 = (x355[3]._super[13]._super._super * Val(8192));
+  Val x654 = (x355[3]._super[14]._super._super * Val(16384));
+  Val x655 = (x355[3]._super[15]._super._super * Val(32768));
+  Val x656 = (x355[3]._super[0]._super._super + x641);
+  Val x657 = (((x656 + x642) + x643) + x644);
+  Val x658 = (((x657 + x645) + x646) + x647);
+  Val x659 = (((x658 + x648) + x649) + x650);
+  Val x660 = (((x659 + x651) + x652) + x653);
+  Val x661 = (x355[3]._super[17]._super._super * Val(2));
+  Val x662 = (x355[3]._super[18]._super._super * Val(4));
+  Val x663 = (x355[3]._super[19]._super._super * Val(8));
+  Val x664 = (x355[3]._super[20]._super._super * Val(16));
+  Val x665 = (x355[3]._super[21]._super._super * Val(32));
+  Val x666 = (x355[3]._super[22]._super._super * Val(64));
+  Val x667 = (x355[3]._super[23]._super._super * Val(128));
+  Val x668 = (x355[3]._super[24]._super._super * Val(256));
+  Val x669 = (x355[3]._super[25]._super._super * Val(512));
+  Val x670 = (x355[3]._super[26]._super._super * Val(1024));
+  Val x671 = (x355[3]._super[27]._super._super * Val(2048));
+  Val x672 = (x355[3]._super[28]._super._super * Val(4096));
+  Val x673 = (x355[3]._super[29]._super._super * Val(8192));
+  Val x674 = (x355[3]._super[30]._super._super * Val(16384));
+  Val x675 = (x355[3]._super[31]._super._super * Val(32768));
+  Val x676 = (x355[3]._super[16]._super._super + x661);
+  Val x677 = (((x676 + x662) + x663) + x664);
+  Val x678 = (((x677 + x665) + x666) + x667);
+  Val x679 = (((x678 + x668) + x669) + x670);
+  Val x680 = (((x679 + x671) + x672) + x673);
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:247)
+  Val800Array x681 = Val800Array{Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 x349[3]._super[0]._super._super,
+                                 x349[3]._super[1]._super._super,
+                                 x349[3]._super[2]._super._super,
+                                 x349[3]._super[3]._super._super,
+                                 x349[3]._super[4]._super._super,
+                                 x349[3]._super[5]._super._super,
+                                 x349[3]._super[6]._super._super,
+                                 x349[3]._super[7]._super._super,
+                                 x349[3]._super[8]._super._super,
+                                 x349[3]._super[9]._super._super,
+                                 x349[3]._super[10]._super._super,
+                                 x349[3]._super[11]._super._super,
+                                 x349[3]._super[12]._super._super,
+                                 x349[3]._super[13]._super._super,
+                                 x349[3]._super[14]._super._super,
+                                 x349[3]._super[15]._super._super,
+                                 x349[3]._super[16]._super._super,
+                                 x349[3]._super[17]._super._super,
+                                 x349[3]._super[18]._super._super,
+                                 x349[3]._super[19]._super._super,
+                                 x349[3]._super[20]._super._super,
+                                 x349[3]._super[21]._super._super,
+                                 x349[3]._super[22]._super._super,
+                                 x349[3]._super[23]._super._super,
+                                 x349[3]._super[24]._super._super,
+                                 x349[3]._super[25]._super._super,
+                                 x349[3]._super[26]._super._super,
+                                 x349[3]._super[27]._super._super,
+                                 x349[3]._super[28]._super._super,
+                                 x349[3]._super[29]._super._super,
+                                 x349[3]._super[30]._super._super,
+                                 x349[3]._super[31]._super._super,
+                                 x349[2]._super[0]._super._super,
+                                 x349[2]._super[1]._super._super,
+                                 x349[2]._super[2]._super._super,
+                                 x349[2]._super[3]._super._super,
+                                 x349[2]._super[4]._super._super,
+                                 x349[2]._super[5]._super._super,
+                                 x349[2]._super[6]._super._super,
+                                 x349[2]._super[7]._super._super,
+                                 x349[2]._super[8]._super._super,
+                                 x349[2]._super[9]._super._super,
+                                 x349[2]._super[10]._super._super,
+                                 x349[2]._super[11]._super._super,
+                                 x349[2]._super[12]._super._super,
+                                 x349[2]._super[13]._super._super,
+                                 x349[2]._super[14]._super._super,
+                                 x349[2]._super[15]._super._super,
+                                 x349[2]._super[16]._super._super,
+                                 x349[2]._super[17]._super._super,
+                                 x349[2]._super[18]._super._super,
+                                 x349[2]._super[19]._super._super,
+                                 x349[2]._super[20]._super._super,
+                                 x349[2]._super[21]._super._super,
+                                 x349[2]._super[22]._super._super,
+                                 x349[2]._super[23]._super._super,
+                                 x349[2]._super[24]._super._super,
+                                 x349[2]._super[25]._super._super,
+                                 x349[2]._super[26]._super._super,
+                                 x349[2]._super[27]._super._super,
+                                 x349[2]._super[28]._super._super,
+                                 x349[2]._super[29]._super._super,
+                                 x349[2]._super[30]._super._super,
+                                 x349[2]._super[31]._super._super,
+                                 x349[1]._super[0]._super._super,
+                                 x349[1]._super[1]._super._super,
+                                 x349[1]._super[2]._super._super,
+                                 x349[1]._super[3]._super._super,
+                                 x349[1]._super[4]._super._super,
+                                 x349[1]._super[5]._super._super,
+                                 x349[1]._super[6]._super._super,
+                                 x349[1]._super[7]._super._super,
+                                 x349[1]._super[8]._super._super,
+                                 x349[1]._super[9]._super._super,
+                                 x349[1]._super[10]._super._super,
+                                 x349[1]._super[11]._super._super,
+                                 x349[1]._super[12]._super._super,
+                                 x349[1]._super[13]._super._super,
+                                 x349[1]._super[14]._super._super,
+                                 x349[1]._super[15]._super._super,
+                                 x349[1]._super[16]._super._super,
+                                 x349[1]._super[17]._super._super,
+                                 x349[1]._super[18]._super._super,
+                                 x349[1]._super[19]._super._super,
+                                 x349[1]._super[20]._super._super,
+                                 x349[1]._super[21]._super._super,
+                                 x349[1]._super[22]._super._super,
+                                 x349[1]._super[23]._super._super,
+                                 x349[1]._super[24]._super._super,
+                                 x349[1]._super[25]._super._super,
+                                 x349[1]._super[26]._super._super,
+                                 x349[1]._super[27]._super._super,
+                                 x349[1]._super[28]._super._super,
+                                 x349[1]._super[29]._super._super,
+                                 x349[1]._super[30]._super._super,
+                                 x349[1]._super[31]._super._super,
+                                 x349[0]._super[0]._super._super,
+                                 x349[0]._super[1]._super._super,
+                                 x349[0]._super[2]._super._super,
+                                 x349[0]._super[3]._super._super,
+                                 x349[0]._super[4]._super._super,
+                                 x349[0]._super[5]._super._super,
+                                 x349[0]._super[6]._super._super,
+                                 x349[0]._super[7]._super._super,
+                                 x349[0]._super[8]._super._super,
+                                 x349[0]._super[9]._super._super,
+                                 x349[0]._super[10]._super._super,
+                                 x349[0]._super[11]._super._super,
+                                 x349[0]._super[12]._super._super,
+                                 x349[0]._super[13]._super._super,
+                                 x349[0]._super[14]._super._super,
+                                 x349[0]._super[15]._super._super,
+                                 x349[0]._super[16]._super._super,
+                                 x349[0]._super[17]._super._super,
+                                 x349[0]._super[18]._super._super,
+                                 x349[0]._super[19]._super._super,
+                                 x349[0]._super[20]._super._super,
+                                 x349[0]._super[21]._super._super,
+                                 x349[0]._super[22]._super._super,
+                                 x349[0]._super[23]._super._super,
+                                 x349[0]._super[24]._super._super,
+                                 x349[0]._super[25]._super._super,
+                                 x349[0]._super[26]._super._super,
+                                 x349[0]._super[27]._super._super,
+                                 x349[0]._super[28]._super._super,
+                                 x349[0]._super[29]._super._super,
+                                 x349[0]._super[30]._super._super,
+                                 x349[0]._super[31]._super._super,
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 x355[3]._super[0]._super._super,
+                                 x355[3]._super[1]._super._super,
+                                 x355[3]._super[2]._super._super,
+                                 x355[3]._super[3]._super._super,
+                                 x355[3]._super[4]._super._super,
+                                 x355[3]._super[5]._super._super,
+                                 x355[3]._super[6]._super._super,
+                                 x355[3]._super[7]._super._super,
+                                 x355[3]._super[8]._super._super,
+                                 x355[3]._super[9]._super._super,
+                                 x355[3]._super[10]._super._super,
+                                 x355[3]._super[11]._super._super,
+                                 x355[3]._super[12]._super._super,
+                                 x355[3]._super[13]._super._super,
+                                 x355[3]._super[14]._super._super,
+                                 x355[3]._super[15]._super._super,
+                                 x355[3]._super[16]._super._super,
+                                 x355[3]._super[17]._super._super,
+                                 x355[3]._super[18]._super._super,
+                                 x355[3]._super[19]._super._super,
+                                 x355[3]._super[20]._super._super,
+                                 x355[3]._super[21]._super._super,
+                                 x355[3]._super[22]._super._super,
+                                 x355[3]._super[23]._super._super,
+                                 x355[3]._super[24]._super._super,
+                                 x355[3]._super[25]._super._super,
+                                 x355[3]._super[26]._super._super,
+                                 x355[3]._super[27]._super._super,
+                                 x355[3]._super[28]._super._super,
+                                 x355[3]._super[29]._super._super,
+                                 x355[3]._super[30]._super._super,
+                                 x355[3]._super[31]._super._super,
+                                 x355[2]._super[0]._super._super,
+                                 x355[2]._super[1]._super._super,
+                                 x355[2]._super[2]._super._super,
+                                 x355[2]._super[3]._super._super,
+                                 x355[2]._super[4]._super._super,
+                                 x355[2]._super[5]._super._super,
+                                 x355[2]._super[6]._super._super,
+                                 x355[2]._super[7]._super._super,
+                                 x355[2]._super[8]._super._super,
+                                 x355[2]._super[9]._super._super,
+                                 x355[2]._super[10]._super._super,
+                                 x355[2]._super[11]._super._super,
+                                 x355[2]._super[12]._super._super,
+                                 x355[2]._super[13]._super._super,
+                                 x355[2]._super[14]._super._super,
+                                 x355[2]._super[15]._super._super,
+                                 x355[2]._super[16]._super._super,
+                                 x355[2]._super[17]._super._super,
+                                 x355[2]._super[18]._super._super,
+                                 x355[2]._super[19]._super._super,
+                                 x355[2]._super[20]._super._super,
+                                 x355[2]._super[21]._super._super,
+                                 x355[2]._super[22]._super._super,
+                                 x355[2]._super[23]._super._super,
+                                 x355[2]._super[24]._super._super,
+                                 x355[2]._super[25]._super._super,
+                                 x355[2]._super[26]._super._super,
+                                 x355[2]._super[27]._super._super,
+                                 x355[2]._super[28]._super._super,
+                                 x355[2]._super[29]._super._super,
+                                 x355[2]._super[30]._super._super,
+                                 x355[2]._super[31]._super._super,
+                                 x355[1]._super[0]._super._super,
+                                 x355[1]._super[1]._super._super,
+                                 x355[1]._super[2]._super._super,
+                                 x355[1]._super[3]._super._super,
+                                 x355[1]._super[4]._super._super,
+                                 x355[1]._super[5]._super._super,
+                                 x355[1]._super[6]._super._super,
+                                 x355[1]._super[7]._super._super,
+                                 x355[1]._super[8]._super._super,
+                                 x355[1]._super[9]._super._super,
+                                 x355[1]._super[10]._super._super,
+                                 x355[1]._super[11]._super._super,
+                                 x355[1]._super[12]._super._super,
+                                 x355[1]._super[13]._super._super,
+                                 x355[1]._super[14]._super._super,
+                                 x355[1]._super[15]._super._super,
+                                 x355[1]._super[16]._super._super,
+                                 x355[1]._super[17]._super._super,
+                                 x355[1]._super[18]._super._super,
+                                 x355[1]._super[19]._super._super,
+                                 x355[1]._super[20]._super._super,
+                                 x355[1]._super[21]._super._super,
+                                 x355[1]._super[22]._super._super,
+                                 x355[1]._super[23]._super._super,
+                                 x355[1]._super[24]._super._super,
+                                 x355[1]._super[25]._super._super,
+                                 x355[1]._super[26]._super._super,
+                                 x355[1]._super[27]._super._super,
+                                 x355[1]._super[28]._super._super,
+                                 x355[1]._super[29]._super._super,
+                                 x355[1]._super[30]._super._super,
+                                 x355[1]._super[31]._super._super,
+                                 x355[0]._super[0]._super._super,
+                                 x355[0]._super[1]._super._super,
+                                 x355[0]._super[2]._super._super,
+                                 x355[0]._super[3]._super._super,
+                                 x355[0]._super[4]._super._super,
+                                 x355[0]._super[5]._super._super,
+                                 x355[0]._super[6]._super._super,
+                                 x355[0]._super[7]._super._super,
+                                 x355[0]._super[8]._super._super,
+                                 x355[0]._super[9]._super._super,
+                                 x355[0]._super[10]._super._super,
+                                 x355[0]._super[11]._super._super,
+                                 x355[0]._super[12]._super._super,
+                                 x355[0]._super[13]._super._super,
+                                 x355[0]._super[14]._super._super,
+                                 x355[0]._super[15]._super._super,
+                                 x355[0]._super[16]._super._super,
+                                 x355[0]._super[17]._super._super,
+                                 x355[0]._super[18]._super._super,
+                                 x355[0]._super[19]._super._super,
+                                 x355[0]._super[20]._super._super,
+                                 x355[0]._super[21]._super._super,
+                                 x355[0]._super[22]._super._super,
+                                 x355[0]._super[23]._super._super,
+                                 x355[0]._super[24]._super._super,
+                                 x355[0]._super[25]._super._super,
+                                 x355[0]._super[26]._super._super,
+                                 x355[0]._super[27]._super._super,
+                                 x355[0]._super[28]._super._super,
+                                 x355[0]._super[29]._super._super,
+                                 x355[0]._super[30]._super._super,
+                                 x355[0]._super[31]._super._super,
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0),
+                                 Val(0)};
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:235)
+  Val100Array x682 = Val100Array{
+      arg0.kflat[0]._super._super,  arg0.kflat[1]._super._super,  arg0.kflat[2]._super._super,
+      arg0.kflat[3]._super._super,  arg0.kflat[4]._super._super,  arg0.kflat[5]._super._super,
+      arg0.kflat[6]._super._super,  arg0.kflat[7]._super._super,  arg0.kflat[8]._super._super,
+      arg0.kflat[9]._super._super,  arg0.kflat[10]._super._super, arg0.kflat[11]._super._super,
+      arg0.kflat[12]._super._super, arg0.kflat[13]._super._super, arg0.kflat[14]._super._super,
+      arg0.kflat[15]._super._super, arg0.kflat[16]._super._super, arg0.kflat[17]._super._super,
+      arg0.kflat[18]._super._super, arg0.kflat[19]._super._super, arg0.kflat[20]._super._super,
+      arg0.kflat[21]._super._super, arg0.kflat[22]._super._super, arg0.kflat[23]._super._super,
+      arg0.kflat[24]._super._super, arg0.kflat[25]._super._super, arg0.kflat[26]._super._super,
+      arg0.kflat[27]._super._super, arg0.kflat[28]._super._super, arg0.kflat[29]._super._super,
+      arg0.kflat[30]._super._super, arg0.kflat[31]._super._super, arg0.kflat[32]._super._super,
+      arg0.kflat[33]._super._super, arg0.kflat[34]._super._super, arg0.kflat[35]._super._super,
+      arg0.kflat[36]._super._super, arg0.kflat[37]._super._super, arg0.kflat[38]._super._super,
+      arg0.kflat[39]._super._super, arg0.kflat[40]._super._super, arg0.kflat[41]._super._super,
+      arg0.kflat[42]._super._super, arg0.kflat[43]._super._super, arg0.kflat[44]._super._super,
+      arg0.kflat[45]._super._super, arg0.kflat[46]._super._super, arg0.kflat[47]._super._super,
+      arg0.kflat[48]._super._super, arg0.kflat[49]._super._super, arg0.kflat[50]._super._super,
+      arg0.kflat[51]._super._super, arg0.kflat[52]._super._super, arg0.kflat[53]._super._super,
+      arg0.kflat[54]._super._super, arg0.kflat[55]._super._super, arg0.kflat[56]._super._super,
+      arg0.kflat[57]._super._super, arg0.kflat[58]._super._super, arg0.kflat[59]._super._super,
+      arg0.kflat[60]._super._super, arg0.kflat[61]._super._super, arg0.kflat[62]._super._super,
+      arg0.kflat[63]._super._super, arg0.kflat[64]._super._super, arg0.kflat[65]._super._super,
+      arg0.kflat[66]._super._super, arg0.kflat[67]._super._super, arg0.kflat[68]._super._super,
+      arg0.kflat[69]._super._super, arg0.kflat[70]._super._super, arg0.kflat[71]._super._super,
+      arg0.kflat[72]._super._super, arg0.kflat[73]._super._super, arg0.kflat[74]._super._super,
+      arg0.kflat[75]._super._super, arg0.kflat[76]._super._super, arg0.kflat[77]._super._super,
+      arg0.kflat[78]._super._super, arg0.kflat[79]._super._super, arg0.kflat[80]._super._super,
+      arg0.kflat[81]._super._super, arg0.kflat[82]._super._super, arg0.kflat[83]._super._super,
+      arg0.kflat[84]._super._super, arg0.kflat[85]._super._super, arg0.kflat[86]._super._super,
+      arg0.kflat[87]._super._super, arg0.kflat[88]._super._super, arg0.kflat[89]._super._super,
+      arg0.kflat[90]._super._super, arg0.kflat[91]._super._super, arg0.kflat[92]._super._super,
+      arg0.kflat[93]._super._super, arg0.kflat[94]._super._super, arg0.kflat[95]._super._super,
+      arg0.kflat[96]._super._super, arg0.kflat[97]._super._super, arg0.kflat[98]._super._super,
+      arg0.kflat[99]._super._super};
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:253)
+  Val16Array x683 = Val16Array{((x380 + x374) + x375),
+                               ((x400 + x394) + x395),
+                               ((x420 + x414) + x415),
+                               ((x440 + x434) + x435),
+                               ((x460 + x454) + x455),
+                               ((x480 + x474) + x475),
+                               ((x500 + x494) + x495),
+                               ((x520 + x514) + x515),
+                               ((x540 + x534) + x535),
+                               ((x560 + x554) + x555),
+                               ((x580 + x574) + x575),
+                               ((x600 + x594) + x595),
+                               ((x620 + x614) + x615),
+                               ((x640 + x634) + x635),
+                               ((x660 + x654) + x655),
+                               ((x680 + x674) + x675)};
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:262)
+  TopStateStruct x684 = exec_TopState(ctx, x681, x682, x683, LAYOUT_LOOKUP(layout1, _super));
+  return x684;
+}
+__device__ WrapOneHotStruct back_WrapOneHot(ExecContext& ctx,
+                                            Index distance0,
+                                            BoundLayout<WrapOneHotLayout> layout1) {
+  // WrapOneHot(zirgen/circuit/keccak2/top.zir:470)
+  WrapOneHot_SuperStruct12Array x2 = map(
+      Val12Array{Val(0),
+                 Val(1),
+                 Val(2),
+                 Val(3),
+                 Val(4),
+                 Val(5),
+                 Val(6),
+                 Val(7),
+                 Val(8),
+                 Val(9),
+                 Val(10),
+                 Val(11)},
+      LAYOUT_LOOKUP(layout1, _super),
+      ([&](Val12Array::value_type x3, BoundLayout<NondetRegLayout12LayoutArray::value_type> x4) {
+        NondetRegStruct x5 = back_Reg(ctx, distance0, x4);
+        return WrapOneHot_SuperStruct{._super = x5};
+      }));
+  return WrapOneHotStruct{._super = x2};
 }
 
-} // namespace risc0::impl
+} // namespace risc0::circuit::keccak::cuda

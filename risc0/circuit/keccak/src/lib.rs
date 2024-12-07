@@ -28,7 +28,7 @@ use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 #[cfg(feature = "prove")]
 use self::zirgen::CircuitImpl;
 
-pub const KECCAK_PO2: usize = 17;
+pub const KECCAK_PO2: usize = 16;
 
 pub const RECURSION_PO2: usize = 18;
 
