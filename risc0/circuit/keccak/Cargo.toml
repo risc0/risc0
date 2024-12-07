@@ -37,7 +37,6 @@ risc0-zkvm = { workspace = true, features = [
   "unstable",
   "prove",
 ], default-features = false }
-serial_test = "3.2"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

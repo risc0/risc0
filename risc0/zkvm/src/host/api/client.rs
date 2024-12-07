@@ -171,9 +171,9 @@ impl Client {
             )),
         };
         // tracing::trace!("tx: {request:?}");
-        conn.send(request)?;
+        conn.send(request).context("tx request failed")?;
 
-        let reply: pb::api::ProveSegmentReply = conn.recv()?;
+        let reply: pb::api::ProveSegmentReply = conn.recv().context("rx reply failed")?;
 
         let result = match reply.kind.ok_or(malformed_err())? {
             pb::api::prove_segment_reply::Kind::Ok(result) => {

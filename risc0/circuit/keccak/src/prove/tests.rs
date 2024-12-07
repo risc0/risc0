@@ -137,6 +137,7 @@ fn lift_16() {
 }
 
 #[test]
+#[ignore] // causes OOM in some environments
 fn lift_17() {
     run_test(
         17,
