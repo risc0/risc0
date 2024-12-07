@@ -29,16 +29,19 @@ use risc0_zkvm::{
 use test_log::test;
 
 use crate::{
-    control_id::{KECCAK_CONTROL_ID, KECCAK_CONTROL_ROOT},
+    control_id::{KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT},
+    get_control_id,
     prove::{keccak_prover, testutil::test_inputs, zkr::get_zkr, KeccakState},
-    KECCAK_PO2,
+    KECCAK_PO2_RANGE,
 };
 
 static REGISTER_ZKRS: std::sync::Once = std::sync::Once::new();
 
 fn register_zkrs() {
     REGISTER_ZKRS.call_once(|| {
-        register_zkr(&KECCAK_CONTROL_ID, get_zkr);
+        for (po2, control_id) in KECCAK_PO2_RANGE.zip(KECCAK_CONTROL_IDS) {
+            register_zkr(control_id, move || get_zkr(po2));
+        }
     });
 }
 
@@ -49,7 +52,7 @@ impl KeccakCoprocessorCallback for Coprocessor {
         let input: &[KeccakState] = bytemuck::cast_slice(req.input.as_slice());
 
         let prover = keccak_prover()?;
-        let seal = prover.prove(input, KECCAK_PO2)?;
+        let seal = prover.prove(input, req.po2)?;
 
         // Make sure we have a valid seal so we can fail early if anything went wrong
         prover.verify(&seal).expect("Verification failed");
@@ -60,13 +63,14 @@ impl KeccakCoprocessorCallback for Coprocessor {
                 .copied()
                 .map(u32::from),
         ))?;
-        let claim_sha_input = claim_digest
+        tracing::debug!("claim_digest: {claim_digest:?}");
+        let claim_sha_input: Vec<_> = claim_digest
             .as_words()
             .iter()
             .copied()
             .flat_map(|x| [x & 0xffff, x >> 16])
             .map(BabyBearElem::new)
-            .collect::<Vec<_>>();
+            .collect();
 
         let mut zkr_input: Vec<u32> = Vec::new();
         zkr_input.extend(KECCAK_CONTROL_ROOT.as_words());
@@ -74,8 +78,9 @@ impl KeccakCoprocessorCallback for Coprocessor {
         zkr_input.extend(bytemuck::cast_slice(claim_sha_input.as_slice()));
 
         // Lift to recursion circuit
+        let control_id = *get_control_id(req.po2);
         let zkr_lift = ProveZkrRequest {
-            control_id: KECCAK_CONTROL_ID,
+            control_id,
             claim_digest,
             input: bytemuck::cast_slice(zkr_input.as_slice()).into(),
         };
@@ -84,9 +89,9 @@ impl KeccakCoprocessorCallback for Coprocessor {
     }
 }
 
-fn run_test(claim_digest: Digest, input: &[KeccakState]) -> Result<()> {
+fn run_test(po2: u32, claim_digest: Digest, input: &[KeccakState]) -> Result<()> {
     let input: &[u32] = bytemuck::cast_slice(input);
-    let to_guest: (Digest, &[u32]) = (claim_digest, input);
+    let to_guest: (u32, Digest, &[u32]) = (po2, claim_digest, input);
 
     let coprocessor = Rc::new(RefCell::new(Coprocessor));
 
@@ -121,6 +126,7 @@ fn run_test(claim_digest: Digest, input: &[KeccakState]) -> Result<()> {
 fn basic() {
     let inputs = test_inputs();
     run_test(
+        17,
         digest!("680f716f1ee30dcd2c4f7d9c91540e2c363bc435bee14414e160434bf5f53a46"),
         &inputs,
     )

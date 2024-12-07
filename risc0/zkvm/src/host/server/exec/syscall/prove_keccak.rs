@@ -57,7 +57,7 @@ impl Syscall for SysProveKeccak {
         // Request for the ZKR to be lifted into the recursion circuit
         let zkr_proof_request = keccak_response.zkr_lift;
         let claim = zkr_proof_request.claim_digest;
-        eprintln!("claim: {claim:?}");
+        tracing::debug!("claim: {claim:?}");
 
         if let Some(coprocessor) = &ctx.syscall_table().coprocessor {
             coprocessor.borrow_mut().prove_zkr(zkr_proof_request)?;

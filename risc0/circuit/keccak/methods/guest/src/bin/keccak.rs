@@ -18,10 +18,15 @@ use risc0_zkvm_platform::syscall::sys_prove_keccak;
 
 // Computes and proves the result of a given keccak input transcript
 fn main() {
-    let (claim_digest, input): (Digest, Vec<u32>) = env::read();
+    let (po2, claim_digest, input): (u32, Digest, Vec<u32>) = env::read();
 
     unsafe {
-        sys_prove_keccak(0, input.as_ptr(), input.len(), KECCAK_CONTROL_ROOT.as_ref());
+        sys_prove_keccak(
+            po2 as usize,
+            input.as_ptr(),
+            input.len(),
+            KECCAK_CONTROL_ROOT.as_ref(),
+        );
     }
     env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
 }

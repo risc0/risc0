@@ -24,11 +24,13 @@ use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
 use self::zirgen::CircuitImpl;
 
-pub const KECCAK_PO2: usize = 16;
+pub const KECCAK_DEFAULT_PO2: usize = 17;
+
+pub const KECCAK_PO2_RANGE: core::ops::Range<usize> = 14..18;
 
 pub const RECURSION_PO2: usize = 18;
 
-pub use self::control_id::{KECCAK_CONTROL_ID, KECCAK_CONTROL_ROOT};
+pub use self::control_id::{KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT};
 
 pub type Seal = Vec<u32>;
 
@@ -44,4 +46,9 @@ pub fn verify(seal: &Seal) -> Result<()> {
         seal,
         check_code_fn,
     )?)
+}
+
+pub fn get_control_id(po2: usize) -> &'static Digest {
+    assert!(KECCAK_PO2_RANGE.contains(&po2), "po2 {po2} out of range");
+    &KECCAK_CONTROL_IDS[po2 - KECCAK_PO2_RANGE.min().unwrap()]
 }

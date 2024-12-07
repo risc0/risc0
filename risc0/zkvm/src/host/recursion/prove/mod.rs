@@ -253,7 +253,7 @@ pub fn prove_zkr(control_id: &Digest, input: &[u8]) -> Result<SuccinctReceipt<Un
     tracing::debug!("Running prover");
     let receipt = prover.run()?;
 
-    tracing::debug!("zkr receipt: {receipt:?}");
+    tracing::trace!("zkr receipt: {receipt:?}");
 
     // Read the claim digest from the second of the global output slots.
     let claim_digest: Digest = read_sha_halfs(&mut VecDeque::from_iter(

@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_circuit_keccak::prove::{keccak_prover, KeccakState};
+use std::time::Instant;
 
 use clap::Parser;
-use std::time::Instant;
+use risc0_circuit_keccak::prove::{keccak_prover, KeccakState};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
 #[command(about, version, author)]
 struct Cli {
-    #[arg(long, default_value_t = risc0_circuit_keccak::KECCAK_PO2)]
+    #[arg(long, default_value_t = risc0_circuit_keccak::KECCAK_DEFAULT_PO2)]
     /// Circuit PO2
     po2: usize,
 
@@ -69,9 +69,10 @@ fn main() {
         tot_time += run_time;
     }
     println!(
-        "{} runs of PO2={po2} completed in {tot_time:.3}s, avg={:.3}s, {:.3} cycles/sec",
+        "{} runs of PO2={po2} completed in {tot_time:.3}s, avg={:.3}s, {:.3} cycles/sec, {:.3} keccak/sec",
         args.count,
         tot_time / (args.count as f64),
-        (args.count * cycles) as f64 / tot_time
+        (args.count * cycles) as f64 / tot_time,
+        (args.count * count) as f64 / tot_time,
     );
 }
