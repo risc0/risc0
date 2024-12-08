@@ -32,6 +32,7 @@ pub struct RawPreflightTrace {
     pub preimages: *const [u64; 25],
     pub preimages_count: u32,
     pub preimage_idxs: *const u32,
+    pub run_order: *const u32,
 }
 
 #[repr(C)]

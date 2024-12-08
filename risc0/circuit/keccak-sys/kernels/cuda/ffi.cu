@@ -16,8 +16,8 @@
 #include "cuda.h"
 #include "fp.h"
 #include "fpext.h"
-#include "witgen.h"
 #include "steps.cuh"
+#include "witgen.h"
 
 #include <cstdint>
 #include <cstdio>
@@ -44,7 +44,7 @@ struct ScatterInfo {
 __device__ void
 nextStep(Buffer* bufData, Buffer* bufGlobal, PreflightTrace* preflight, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
-  ExecContext ctx(*preflight, cycle);
+  ExecContext ctx(*preflight, preflight->runOrder[cycle], preflight->curPreimage[cycle]);
   MutableBufObj data(ctx, *bufData);
   GlobalBufObj global(ctx, *bufGlobal);
   step_Top(ctx, &data, &global);
@@ -155,7 +155,14 @@ const char* risc0_circuit_keccak_cuda_witgen(uint32_t mode,
                        lastCycle * sizeof(uint32_t),
                        cudaMemcpyHostToDevice));
 
+    CUDA_OK(cudaMalloc(&d_preflight->runOrder, lastCycle * sizeof(uint32_t)));
+    CUDA_OK(cudaMemcpy(d_preflight->runOrder,
+                       preflight->runOrder,
+                       lastCycle * sizeof(uint32_t),
+                       cudaMemcpyHostToDevice));
+
     CudaStream stream;
+
     auto cfg = getSimpleConfig(lastCycle);
     switch (mode) {
     case kStepModeSeqParallel:

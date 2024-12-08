@@ -21,7 +21,7 @@ use risc0_circuit_keccak_sys::ScatterInfo;
 use risc0_core::field::Elem as _;
 use risc0_zkp::hal::Hal;
 
-use super::preflight::PreflightTrace;
+use super::preflight::{ForwardPreflightOrder, PreflightCycleOrder, PreflightTrace};
 use crate::zirgen::circuit::{CircuitField, ExtVal, Val};
 
 pub(crate) struct MetaBuffer<H: Hal> {
@@ -47,15 +47,16 @@ where
 }
 
 #[derive(Clone, Copy, PartialEq)]
+#[allow(dead_code)]
 pub(crate) enum StepMode {
     Parallel,
-    #[cfg(test)]
     SeqForward,
-    #[cfg(test)]
     SeqReverse,
 }
 
 pub(crate) trait CircuitWitnessGenerator<H: Hal> {
+    type PreferredPreflightOrder: PreflightCycleOrder;
+
     fn scatter_preflight(
         &self,
         into: &MetaBuffer<H>,
@@ -63,10 +64,10 @@ pub(crate) trait CircuitWitnessGenerator<H: Hal> {
         data: &[u32],
     ) -> Result<()>;
 
-    fn generate_witness(
+    fn generate_witness<Order: PreflightCycleOrder>(
         &self,
         mode: StepMode,
-        preflight: &PreflightTrace,
+        preflight: &PreflightTrace<Order>,
         global: &MetaBuffer<H>,
         data: &MetaBuffer<H>,
     ) -> Result<()>;

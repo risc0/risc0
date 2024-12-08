@@ -101,7 +101,7 @@ where
         scope!("prove");
 
         let cycles: usize = 1 << po2;
-        let preflight = PreflightTrace::new(inputs, cycles);
+        let preflight = PreflightTrace::<C::PreferredPreflightOrder>::new(inputs, cycles);
 
         let global = MetaBuffer::new("global", self.hal.as_ref(), 1, REGCOUNT_GLOBAL, true);
         let code = MetaBuffer::new("code", self.hal.as_ref(), cycles, REGCOUNT_CODE, true);

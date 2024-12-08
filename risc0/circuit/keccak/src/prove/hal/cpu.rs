@@ -40,12 +40,17 @@ use crate::{
     },
 };
 
-use super::{CircuitWitnessGenerator, MetaBuffer, PreflightTrace, StepMode};
+use super::{
+    CircuitWitnessGenerator, ForwardPreflightOrder, MetaBuffer, PreflightCycleOrder,
+    PreflightTrace, StepMode,
+};
 
 #[derive(Default)]
 pub struct CpuCircuitHal;
 
 impl CircuitWitnessGenerator<CpuHal<CircuitField>> for CpuCircuitHal {
+    type PreferredPreflightOrder = ForwardPreflightOrder;
+
     fn scatter_preflight(
         &self,
         into: &MetaBuffer<CpuHal<CircuitField>>,
@@ -70,16 +75,16 @@ impl CircuitWitnessGenerator<CpuHal<CircuitField>> for CpuCircuitHal {
         Ok(())
     }
 
-    fn generate_witness(
+    fn generate_witness<O: PreflightCycleOrder>(
         &self,
         mode: StepMode,
-        preflight: &PreflightTrace,
+        preflight: &PreflightTrace<O>,
         global: &MetaBuffer<CpuHal<CircuitField>>,
         data: &MetaBuffer<CpuHal<CircuitField>>,
     ) -> Result<()> {
         scope!("witgen");
 
-        let cycles = preflight.preimage_idxs.len();
+        let cycles = preflight.cycle;
         assert_eq!(cycles, data.rows);
         tracing::debug!("witgen: {cycles}");
 
@@ -99,10 +104,23 @@ impl CircuitWitnessGenerator<CpuHal<CircuitField>> for CpuCircuitHal {
                 checked_reads: data.checked_reads,
             },
         };
+        let run_order: Vec<u32> = preflight
+            .cycles
+            .values()
+            .flatten()
+            .map(|c| c.cycle)
+            .collect();
+        let preimage_idx: Vec<u32> = preflight
+            .cycles
+            .values()
+            .flatten()
+            .map(|c| c.preimage_idx)
+            .collect();
         let preflight = RawPreflightTrace {
             preimages: preflight.preimages.as_ptr(),
             preimages_count: preflight.preimages.len() as u32,
-            preimage_idxs: preflight.preimage_idxs.as_ptr(),
+            preimage_idxs: preimage_idx.as_ptr(),
+            run_order: run_order.as_ptr(),
         };
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cpu_witgen(mode as u32, &buffers, &preflight, cycles as u32)
