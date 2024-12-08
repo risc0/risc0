@@ -56,7 +56,7 @@ pub const BLOCK_WORDS: usize = DIGEST_WORDS * 2;
 pub const BLOCK_BYTES: usize = DIGEST_BYTES * 2;
 
 /// Standard SHA-256 initialization vector.
-pub static SHA256_INIT: Digest = Digest::new([
+pub const SHA256_INIT: Digest = Digest::new([
     0x6a09e667_u32.to_be(),
     0xbb67ae85_u32.to_be(),
     0x3c6ef372_u32.to_be(),

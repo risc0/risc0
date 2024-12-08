@@ -937,6 +937,7 @@ dependencies = [
  "bytemuck",
  "getrandom",
  "hex",
+ "keccak",
  "risc0-binfmt",
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",

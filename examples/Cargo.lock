@@ -3550,6 +3550,7 @@ dependencies = [
  "elf",
  "getrandom",
  "hex",
+ "keccak",
  "lazy-regex",
  "num-bigint 0.4.6",
  "num-traits",

@@ -83,6 +83,8 @@ use alloc::{
 use anyhow::Result;
 use bytemuck::Pod;
 use core::cell::OnceCell;
+#[cfg(feature = "unstable")]
+use risc0_circuit_keccak::KeccakState;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
@@ -102,7 +104,7 @@ use crate::{
 };
 
 #[cfg(feature = "unstable")]
-use self::batcher::KeccakBatcher;
+use self::batcher::{Keccak2Batcher, KeccakBatcher};
 pub use self::{
     read::{FdReader, Read},
     verify::{verify, verify_assumption, verify_integrity, VerifyIntegrityError},
@@ -142,6 +144,9 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
         if KECCAK_BATCHER.has_data() {
             KECCAK_BATCHER.finalize_transcript();
         }
+
+        #[cfg(feature = "unstable")]
+        KECCAK2_BATCHER.finalize();
 
         #[allow(static_mut_refs)]
         let hasher = HASHER.take();
@@ -504,6 +509,16 @@ pub fn keccak_digest(input: &[u8], _delim: u8) -> Result<[u8; 32]> {
     Ok(nondet_digest)
 }
 
+/// get an updated keccak state
+#[cfg(feature = "unstable")]
+pub fn keccak_update(in_state: &KeccakState) -> KeccakState {
+    unsafe { KECCAK2_BATCHER.update(in_state) }
+}
+
 /// Used for batching keccak proofs
 #[cfg(feature = "unstable")]
 pub static mut KECCAK_BATCHER: KeccakBatcher = KeccakBatcher::init();
+
+/// Used for batching keccak proofs
+#[cfg(feature = "unstable")]
+pub static mut KECCAK2_BATCHER: Keccak2Batcher = Keccak2Batcher::init();

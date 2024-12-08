@@ -74,6 +74,10 @@ pub mod reg_abi {
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
+pub const KECCACK_STATE_BYTES: usize = 200;
+pub const KECCACK_STATE_WORDS: usize = 200 / WORD_SIZE;
+pub const KECCACK_STATE_DWORDS: usize = 200 / 8;
+
 /// Number of words in each cycle received using the SOFTWARE ecall
 pub const IO_CHUNK_WORDS: usize = 4;
 
@@ -137,6 +141,7 @@ pub mod nr {
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_KECCAK);
+    declare_syscall!(pub SYS_KECCAK_PERMUTE);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
@@ -947,6 +952,22 @@ pub unsafe extern "C" fn sys_keccak(
     );
 }
 
+/// Permute the keccak state on the host
+///
+/// # Safety
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
+#[stability::unstable]
+pub unsafe extern "C" fn sys_keccak_permute(
+    in_state: *const [u64; KECCACK_STATE_DWORDS],
+    out_state: *mut [u64; KECCACK_STATE_DWORDS],
+) {
+    syscall_1(
+        nr::SYS_KECCAK_PERMUTE,
+        out_state as *mut u32,
+        KECCACK_STATE_WORDS,
+        in_state as u32,
+    );
+}
 /// Executes the keccak circuit, and then executes the lift predicate
 /// in the recursion circuit.
 ///
