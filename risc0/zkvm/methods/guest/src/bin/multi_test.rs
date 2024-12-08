@@ -651,6 +651,9 @@ fn main() {
                 digest!("a1b1e7b58b6e1ab761bd4f55cc763d9eef886b26e0942e4a3916d0c465f3d962")
             );
         }
+        MultiTestSpec::KeccakPermute => {
+            let _out_state = env::keccak_update(&test_inputs());
+        }
     }
 }
 

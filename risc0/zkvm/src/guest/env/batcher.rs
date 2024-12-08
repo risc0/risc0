@@ -45,6 +45,7 @@ impl Keccak2Batcher {
         let mut out_state = KeccakState::default();
         unsafe { sys_keccak_permute(in_state, &mut out_state) };
         self.sha_single_keccak(in_state);
+        self.sha_single_keccak(&out_state);
         self.inputs.push(*in_state);
         if self.inputs.len() == MAX_KECCAK_INPUTS {
             // we've reached the limit. Create a proof request.

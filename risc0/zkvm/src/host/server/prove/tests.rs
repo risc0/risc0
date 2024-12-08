@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::register_zkr;
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
+use risc0_circuit_keccak::get_control_id;
+use risc0_circuit_keccak::prove::zkr::get_keccak_zkr;
+use risc0_circuit_keccak::KECCAK_PO2_RANGE;
 use risc0_circuit_rv32im::prove::emu::testutil;
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
@@ -156,6 +160,29 @@ fn run_keccak() {
     prover.prove(env, MULTI_TEST_ELF).unwrap();
 
     let spec = MultiTestSpec::TinyKeccak;
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let prover = get_prover_server(&opts).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
+}
+
+#[test]
+fn run_keccak2() {
+    static REGISTER_ZKRS: std::sync::Once = std::sync::Once::new();
+
+    fn register_zkrs() {
+        REGISTER_ZKRS.call_once(|| {
+            for po2 in KECCAK_PO2_RANGE {
+                register_zkr(get_control_id(po2), move || get_keccak_zkr(po2));
+            }
+        });
+    }
+    register_zkrs();
+    let spec = MultiTestSpec::KeccakPermute;
     let env = ExecutorEnv::builder()
         .write(&spec)
         .unwrap()

@@ -51,6 +51,7 @@ pub enum MultiTestSpec {
     EventTrace,
     Fault,
     Halt(u8),
+    KeccakPermute,
     LibM,
     Oom,
     OutOfBounds,
