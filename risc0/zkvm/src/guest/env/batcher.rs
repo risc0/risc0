@@ -87,7 +87,7 @@ impl Keccak2Batcher {
 
     fn reset(&mut self) {
         self.claim_state = SHA256_INIT;
-        self.inputs = vec![];
+        self.inputs.clear();
     }
 
     fn sha_single_keccak(&mut self, keccak_in_state: &KeccakState) {
