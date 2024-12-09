@@ -1558,7 +1558,6 @@ dependencies = [
  "bytes",
  "getrandom",
  "hex",
- "keccak",
  "lazy-regex",
  "prost",
  "risc0-binfmt",
