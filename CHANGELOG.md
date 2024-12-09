@@ -114,7 +114,7 @@ Support wider range of client/server use cases.
   development only.
 * Add an optional embedded allocator to the zkVM guest. By default, the zkvm
   uses an allocator that does not deallocate heap memory. The embedded allocator
-  deallocates and is useful for long running guest programs.
+  deallocates and is useful for long-running guest programs.
 * Add experimental support for `sys_fork`. This syscall allows the zkVM to
   execute unconstrained code. The RISC-V code executed within this system call
   will not be encoded as a part of the trace execution. This can be used to
