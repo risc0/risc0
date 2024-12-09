@@ -576,6 +576,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "include_bytes_aligned"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ee796ad498c8d9a1d68e477df8f754ed784ef875de1414ebdaf169f70a6a784"
+
+[[package]]
 name = "indexmap"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -596,13 +602,15 @@ dependencies = [
 
 [[package]]
 name = "k256"
-version = "0.13.1"
-source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?tag=k256/v0.13.1-risczero.1#5fea17d53fbaa0ff72dbe16da3ee2c2d02f2490c"
+version = "0.13.3"
+source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?branch=austin/bigint2#c2750428558944954af5fe147b01a67711a65062"
 dependencies = [
+ "bytemuck",
  "cfg-if",
  "ecdsa",
  "elliptic-curve",
  "once_cell",
+ "risc0-bigint2",
  "serdect",
  "sha2",
 ]
@@ -822,6 +830,16 @@ checksum = "f8dd2a808d456c4a54e300a23e9f5a67e122c3024119acbfd73e3bf664491cb2"
 dependencies = [
  "hmac",
  "subtle",
+]
+
+[[package]]
+name = "risc0-bigint2"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f4c185a3bfaee681eed5bfac1440128184bf0b6544c345fb4d7bd4317c909fb"
+dependencies = [
+ "include_bytes_aligned",
+ "stability",
 ]
 
 [[package]]
