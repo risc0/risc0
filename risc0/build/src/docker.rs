@@ -153,13 +153,20 @@ fn create_dockerfile(
     .concat()
     .join(" ");
 
-    let build = DockerFile::new()
+    let mut build = DockerFile::new()
         .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[("CARGO_TARGET_DIR", "target")]);
+
+    #[cfg(feature = "unstable")]
+    {
+        build = build.env(&[("RISC0_FEATURE_bigint2", "")]);
+    }
+
+    build = build
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
