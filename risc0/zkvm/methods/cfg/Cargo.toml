@@ -24,3 +24,8 @@ rustc-flags = [
 
 [package.metadata.release]
 release = false
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+  'cfg(risc0_custom_cfg_test, values("flagged"))',
+] }

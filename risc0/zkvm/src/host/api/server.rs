@@ -28,10 +28,10 @@ use crate::{
     get_prover_server, get_version,
     host::{
         client::{
-            env::{CoprocessorCallback, ProveZkrRequest},
+            env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest},
             slice_io::SliceIo,
         },
-        server::session::NullSegmentRef,
+        server::{prove::keccak::prove_keccak, session::NullSegmentRef},
     },
     prove_zkr,
     recursion::identity_p254,
@@ -224,6 +224,39 @@ impl CoprocessorCallback for CoprocessorProxy {
             pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
         }
     }
+
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        let request = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Coprocessor(
+                        pb::api::CoprocessorRequest {
+                            kind: Some(pb::api::coprocessor_request::Kind::ProveKeccak({
+                                pb::api::ProveKeccakRequest {
+                                    claim_digest: Some(proof_request.claim_digest.into()),
+                                    po2: proof_request.po2 as u32,
+                                    control_root: Some(proof_request.control_root.into()),
+                                    input: proof_request.input,
+                                    receipt_out: None,
+                                }
+                            })),
+                        },
+                    )),
+                })),
+            })),
+        };
+        tracing::trace!("tx: {request:?}");
+        self.conn.send(request)?;
+
+        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        tracing::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
+    }
 }
 
 impl Server {
@@ -292,6 +325,9 @@ impl Server {
             pb::api::server_request::Kind::Compress(request) => self.on_compress(conn, request),
             pb::api::server_request::Kind::Verify(request) => self.on_verify(conn, request),
             pb::api::server_request::Kind::ProveZkr(request) => self.on_prove_zkr(conn, request),
+            pb::api::server_request::Kind::ProveKeccak(request) => {
+                self.on_prove_keccak(conn, request)
+            }
         }
     }
 
@@ -449,7 +485,7 @@ impl Server {
     ) -> Result<()> {
         fn inner(request: pb::api::ProveZkrRequest) -> Result<pb::api::ProveZkrReply> {
             let control_id = request.control_id.ok_or(malformed_err())?.try_into()?;
-            let receipt = prove_zkr(&control_id, &request.input)?;
+            let receipt = prove_zkr(&control_id, vec![control_id], &request.input)?;
 
             let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();
@@ -470,6 +506,44 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::ProveZkrReply {
             kind: Some(pb::api::prove_zkr_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
+                },
+            )),
+        });
+
+        tracing::trace!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_prove_keccak(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ProveKeccakRequest,
+    ) -> Result<()> {
+        fn inner(request_pb: pb::api::ProveKeccakRequest) -> Result<pb::api::ProveKeccakReply> {
+            let request: ProveKeccakRequest = request_pb.clone().try_into()?;
+            let receipt = prove_keccak(&request)?;
+
+            let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request_pb.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ProveKeccakReply {
+                kind: Some(pb::api::prove_keccak_reply::Kind::Ok(
+                    pb::api::ProveKeccakResult {
+                        receipt: Some(asset),
+                    },
+                )),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ProveKeccakReply {
+            kind: Some(pb::api::prove_keccak_reply::Kind::Error(
                 pb::api::GenericError {
                     reason: err.to_string(),
                 },
