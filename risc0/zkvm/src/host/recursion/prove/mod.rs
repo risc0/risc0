@@ -245,13 +245,13 @@ pub fn identity_p254(a: &SuccinctReceipt<ReceiptClaim>) -> Result<SuccinctReceip
 
 /// Prove the specified program identified by the `control_id` using the specified `input`.
 pub fn prove_zkr(
+    program: Program,
     control_id: &Digest,
     allowed_control_ids: Vec<Digest>,
     input: &[u8],
 ) -> Result<SuccinctReceipt<Unknown>> {
-    let zkr = get_registered_zkr(control_id)?;
     let opts = ProverOpts::succinct().with_control_ids(allowed_control_ids);
-    let mut prover = Prover::new(zkr, *control_id, opts.clone());
+    let mut prover = Prover::new(program, *control_id, opts.clone());
     prover.add_input(bytemuck::cast_slice(input));
 
     tracing::debug!("Running prover");
@@ -281,6 +281,16 @@ pub fn prove_zkr(
         claim: MaybePruned::<Unknown>::Pruned(claim_digest),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
+}
+
+/// Prove the specified program identified by the `control_id` using the specified `input`.
+pub fn prove_registered_zkr(
+    control_id: &Digest,
+    allowed_control_ids: Vec<Digest>,
+    input: &[u8],
+) -> Result<SuccinctReceipt<Unknown>> {
+    let zkr = get_registered_zkr(control_id)?;
+    prove_zkr(zkr, control_id, allowed_control_ids, input)
 }
 
 /// Registers a function to retrieve a recursion program (zkr) based on a control id.

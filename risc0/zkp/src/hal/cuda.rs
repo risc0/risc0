@@ -14,6 +14,7 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc, sync::OnceLock};
 
+use anyhow::Context as _;
 use cust::{
     device::DeviceAttribute,
     memory::{DeviceCopy, DevicePointer, GpuBuffer},
@@ -39,16 +40,6 @@ use crate::{
     FRI_FOLD,
 };
 
-fn context() -> &'static Context {
-    static ONCE: OnceLock<Context> = OnceLock::new();
-    ONCE.get_or_init(|| {
-        let device = Device::get_device(0).unwrap();
-        let context = Context::new(device).unwrap();
-        context.set_flags(ContextFlags::SCHED_AUTO).unwrap();
-        context
-    })
-}
-
 // The GPU becomes unstable as the number of concurrent provers grow.
 fn singleton() -> &'static ReentrantMutex<()> {
     static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
@@ -67,7 +58,7 @@ unsafe impl DeviceCopy for DeviceExtElem {}
 
 pub trait CudaHash {
     /// Create a hash implementation
-    fn new(hal: &CudaHal<Self>) -> Self;
+    fn new() -> Self;
 
     /// Run the hash_fold function
     fn hash_fold(&self, io: &BufferImpl<Digest>, output_size: usize);
@@ -84,7 +75,7 @@ pub struct CudaHashSha256 {
 }
 
 impl CudaHash for CudaHashSha256 {
-    fn new(_hal: &CudaHal<Self>) -> Self {
+    fn new() -> Self {
         CudaHashSha256 {
             suite: Sha256HashSuite::new_suite(),
         }
@@ -140,7 +131,7 @@ pub struct CudaHashPoseidon2 {
 }
 
 impl CudaHash for CudaHashPoseidon2 {
-    fn new(_hal: &CudaHal<Self>) -> Self {
+    fn new() -> Self {
         CudaHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
         }
@@ -180,7 +171,7 @@ impl CudaHash for CudaHashPoseidon2 {
     }
 }
 
-pub struct CudaHal<Hash: CudaHash + ?Sized> {
+pub struct CudaHal<Hash: CudaHash> {
     pub max_threads: u32,
     hash: Option<Box<Hash>>,
     _context: Context,
@@ -199,10 +190,10 @@ impl RawBuffer {
     pub fn new(name: &'static str, size: usize) -> Self {
         tracing::trace!("alloc: {size} bytes, {name}");
         tracker().lock().unwrap().alloc(size);
-        Self {
-            name,
-            buf: unsafe { DeviceBuffer::uninitialized(size).unwrap() },
-        }
+        let buf = unsafe { DeviceBuffer::uninitialized(size) }
+            .context(format!("allocation failed on {name}: {size} bytes"))
+            .unwrap();
+        Self { name, buf }
     }
 
     pub fn set_u32(&mut self, value: u32) {
@@ -358,14 +349,16 @@ impl<CH: CudaHash> CudaHal<CH> {
         let max_threads = device
             .get_attribute(DeviceAttribute::MaxThreadsPerBlock)
             .unwrap();
-        let _context = context().clone();
+        let context = Context::new(device).unwrap();
+        context.set_flags(ContextFlags::SCHED_AUTO).unwrap();
+
         let mut hal = Self {
             max_threads: max_threads as u32,
-            _context,
+            _context: context,
             hash: None,
             _lock,
         };
-        let hash = Box::new(CH::new(&hal));
+        let hash = Box::new(CH::new());
         hal.hash = Some(hash);
         hal
     }

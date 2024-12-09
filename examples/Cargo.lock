@@ -3370,11 +3370,13 @@ name = "risc0-circuit-keccak-sys"
 version = "1.3.0-alpha.1"
 dependencies = [
  "cc",
+ "cust",
  "derive_more 1.0.0",
  "glob",
  "risc0-build-kernel",
  "risc0-core",
  "risc0-sys",
+ "sppark",
 ]
 
 [[package]]
@@ -3550,6 +3552,7 @@ dependencies = [
  "elf",
  "getrandom",
  "hex",
+ "keccak",
  "lazy-regex",
  "num-bigint 0.4.6",
  "num-traits",

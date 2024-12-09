@@ -26,14 +26,14 @@ use alloc::{
 use core::arch::asm;
 
 use getrandom::getrandom;
-use hex_literal::hex;
-use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
+use risc0_circuit_keccak::KeccakState;
+use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
         env::{self, FdReader, FdWriter, Read as _, Write as _},
         memory_barrier, sha,
     },
-    sha::{Digest, Sha256},
+    sha::{Digest, Sha256, SHA256_INIT},
     Assumption, ReceiptClaim,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS};
@@ -41,12 +41,11 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
-        sys_read, sys_read_words, sys_write, DIGEST_BYTES, DIGEST_WORDS,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak_permute, sys_log, sys_pipe,
+        sys_prove_zkr, sys_read, sys_read_words, sys_sha_compress, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
-use tiny_keccak::{Hasher, Keccak};
 
 risc0_zkvm::entry!(main);
 
@@ -62,9 +61,6 @@ fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
-const KECCAK_TEST_DATA_01: &[u8] = b"The quick brown fox jumps over the lazy dog.";
-const KECCAK_TEST_DATA_02_PT_1: &[u8] = b"Commander Roderick Blaine looked frantically around the bridge. where his officers were directing repairs with low and urgent voices, surgeons assisting at a difficult operation. The gray steel compartment was a confusion of activities, each orderly by itself but the overall impression was of chaos. Screens above one helmsman's station showed the planet below and the other, ships in orbit near MacArthur, but everywhere else the panel covers had been removed from consoles, test instruments were clipped into their insides, and technicians stood by with color-coded electronic assemblies to replace everything that seemed doubtful. Thumps and whines sounded through the ship 89 somewhere aft the engineering crew worked on the hull.";
-const KECCAK_TEST_DATA_02_PT_2: &[u8] = b"These words were uttered in July 1805 by Anna Pavlovna Scherer, a distinguished lady of the court, and confidential maid-of-honour to the Empress Marya Fyodorovna. It was her greeting to Prince Vassily, a man high in rank and office, who was the first to arrive at";
 fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
@@ -435,101 +431,163 @@ fn main() {
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
         }
-        MultiTestSpec::SysKeccak => {
-            let expected: [u8; DIGEST_BYTES] = [
-                71, 23, 50, 133, 168, 215, 52, 30, 94, 151, 47, 198, 119, 40, 99, 132, 248, 2, 248,
-                239, 66, 165, 236, 95, 3, 187, 250, 37, 76, 176, 31, 173,
-            ];
-            let output = [0u8; DIGEST_BYTES];
-            let data = b"hello world";
+        MultiTestSpec::SysKeccakPermute => {
+            // Test vectors are from KeccakCodePackage
+            let input = [0u64; 25];
+            let mut output1 = [0u64; 25];
+
             unsafe {
-                sys_keccak(
-                    data as *const u8,
-                    data.len(),
-                    output.as_ptr() as *mut [u32; DIGEST_WORDS],
-                )
+                sys_keccak_permute(&input as *const [u64; 25], &mut output1 as *mut [u64; 25]);
             };
-            assert_eq!(&expected, &output);
 
-            // test_keccak_01.txt
-            let _output1 = env::keccak_digest(KECCAK_TEST_DATA_01, 0x1).unwrap();
-
-            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
-
-            assert_eq!(
-                digest.as_bytes(),
-                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
-            );
-
-            // test_keccak_02.txt
-            let output1 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_1, 0x1).unwrap();
             assert_eq!(
                 output1,
-                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
+                [
+                    0xF1258F7940E1DDE7,
+                    0x84D5CCF933C0478A,
+                    0xD598261EA65AA9EE,
+                    0xBD1547306F80494D,
+                    0x8B284E056253D057,
+                    0xFF97A42D7F8E6FD4,
+                    0x90FEE5A0A44647C4,
+                    0x8C5BDA0CD6192E76,
+                    0xAD30A6F71B19059C,
+                    0x30935AB7D08FFC64,
+                    0xEB5AA93F2317D635,
+                    0xA9A6E6260D712103,
+                    0x81A57C16DBCF555F,
+                    0x43B831CD0347C826,
+                    0x01F22F1A11A5569F,
+                    0x05E5635A21D9AE61,
+                    0x64BEFEF28CC970F2,
+                    0x613670957BC46611,
+                    0xB87C5A554FD00ECB,
+                    0x8C3EE88A1CCF32C8,
+                    0x940C7922AE3A2614,
+                    0x1841F924A2C509E4,
+                    0x16F53526E70465C2,
+                    0x75F644E97F30A13B,
+                    0xEAF1FF7B5CECA249,
+                ]
             );
 
-            let output2 = env::keccak_digest(KECCAK_TEST_DATA_02_PT_2, 0x1).unwrap();
+            let mut output2 = [0u64; 25];
+            unsafe {
+                sys_keccak_permute(&output1 as *const [u64; 25], &mut output2 as *mut [u64; 25]);
+            };
+
             assert_eq!(
                 output2,
-                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
+                [
+                    0x2D5C954DF96ECB3C,
+                    0x6A332CD07057B56D,
+                    0x093D8D1270D76B6C,
+                    0x8A20D9B25569D094,
+                    0x4F9C4F99E5E7F156,
+                    0xF957B9A2DA65FB38,
+                    0x85773DAE1275AF0D,
+                    0xFAF4F247C3D810F7,
+                    0x1F1B9EE6F79A8759,
+                    0xE4FECC0FEE98B425,
+                    0x68CE61B6B9CE68A1,
+                    0xDEEA66C4BA8F974F,
+                    0x33C43D836EAFB1F5,
+                    0xE00654042719DBD9,
+                    0x7CF8A9F009831265,
+                    0xFD5449A6BF174743,
+                    0x97DDAD33D8994B40,
+                    0x48EAD5FC5D0BE774,
+                    0xE3B8C8EE55B7B03C,
+                    0x91A0226E649E42E9,
+                    0x900E3129E7BADD7B,
+                    0x202A9EC5FAA3CCE8,
+                    0x5B3402464E1C3DB6,
+                    0x609F4E62A44C1059,
+                    0x20D06CD26A8FBF5C,
+                ]
             );
 
-            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
+            let input: KeccakState = test_inputs();
+
+            let mut output = [0u64; 25];
+            unsafe {
+                sys_keccak_permute(
+                    input.as_ptr() as *const [u64; 25],
+                    &mut output as *mut [u64; 25],
+                );
+            };
+
+            let mut sha_state = SHA256_INIT;
+            sha_state = sha_single_keccak(&sha_state, &input);
+            sha_state = sha_single_keccak(&sha_state, &output);
+
+            for word in sha_state.as_mut_words().iter_mut() {
+                *word = word.to_be();
+            }
             assert_eq!(
-                digest.as_bytes(),
-                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
+                sha_state,
+                digest!("680f716f1ee30dcd2c4f7d9c91540e2c363bc435bee14414e160434bf5f53a46")
+            );
+
+            // generate hash for large number of keccak states
+            let po2 = 17; // 128K
+            let cycles = 1 << po2;
+            let count = cycles / 200; // roughly 200 cycles per keccakf
+            let mut sha_state = SHA256_INIT;
+
+            for _ in 0..count {
+                sha_state = sha_single_keccak(&sha_state, &input);
+                sha_state = sha_single_keccak(&sha_state, &output);
+            }
+            for word in sha_state.as_mut_words().iter_mut() {
+                *word = word.to_be();
+            }
+
+            assert_eq!(
+                sha_state,
+                digest!("a1b1e7b58b6e1ab761bd4f55cc763d9eef886b26e0942e4a3916d0c465f3d962")
             );
         }
-        MultiTestSpec::TinyKeccak => {
-            // test_keccak_01.txt
-            let mut hasher = Keccak::v256();
-            hasher.update(KECCAK_TEST_DATA_01);
-            let mut output = [0u8; DIGEST_BYTES];
-            hasher.finalize(output.as_mut_slice());
-
-            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
-
-            assert_eq!(
-                digest.as_bytes(),
-                hex!("b39574638e980a6e7cec17b3fd54474809b09293fcda5947573f6678268a23c7")
-            );
-
-            // test_keccak_02.txt
-            let mut hasher1 = Keccak::v256();
-            let mut output1 = [0u8; DIGEST_BYTES];
-            hasher1.update(KECCAK_TEST_DATA_02_PT_1);
-
-            let mut hasher2 = Keccak::v256();
-            let mut output2 = [0u8; DIGEST_BYTES];
-            hasher2.update(KECCAK_TEST_DATA_02_PT_2);
-
-            hasher1.finalize(&mut output1);
-            assert_eq!(
-                output1,
-                hex!("28c3f5c69c21be780e5508d355ebf7d5e060f203ca8717447b71cb44544df5c7")
-            );
-
-            hasher2.finalize(&mut output2);
-            assert_eq!(
-                output2,
-                hex!("4bdc1874a3125f1f911fe8c76ac8443a6ec623ef91bc58eabf54c5762097894d")
-            );
-
-            let digest = unsafe { env::KECCAK_BATCHER.finalize_transcript() };
-            assert_eq!(
-                digest.as_bytes(),
-                hex!("420e6b2cc4cd396ecf6b7e4c8b4c1c1e88c3589534b581fd133793a6e53006f1")
-            );
-        }
-        MultiTestSpec::BigKeccak => {
-            // test_keccak_02.txt
-            let data = &[0u8; 100_001];
-            let mut hasher = Keccak::v256();
-            let mut output = [0u8; DIGEST_BYTES];
-            hasher.update(data);
-
-            hasher.finalize(&mut output);
-            assert!(!unsafe { env::KECCAK_BATCHER.has_data() })
+        MultiTestSpec::KeccakPermute => {
+            let _out_state = env::keccak_update(&test_inputs());
         }
     }
+}
+
+fn sha_single_keccak(sha_in_state: &Digest, keccak_state: &KeccakState) -> Digest {
+    let mut sha_out_state: Digest = sha_in_state.clone();
+    let mut to_hash = [0u32; 64];
+    to_hash[..50].clone_from_slice(bytemuck::cast_slice(keccak_state));
+
+    let to_hash: &[Digest] = bytemuck::cast_slice(&to_hash);
+    for i in 0..4 {
+        let mut blk1: [u32; DIGEST_WORDS] = to_hash[i * 2].into();
+        for word in blk1.iter_mut() {
+            *word = word.to_be();
+        }
+        let mut blk2: [u32; DIGEST_WORDS] = to_hash[i * 2 + 1].into();
+        for word in blk2.iter_mut() {
+            *word = word.to_be();
+        }
+
+        unsafe {
+            sys_sha_compress(
+                sha_out_state.as_mut(),
+                sha_out_state.as_ref(),
+                blk1.as_ptr() as *const [u32; DIGEST_WORDS],
+                blk2.as_ptr() as *const [u32; DIGEST_WORDS],
+            )
+        };
+    }
+    sha_out_state
+}
+
+fn test_inputs() -> KeccakState {
+    let mut state = KeccakState::default();
+    let mut pows = 987654321_u64;
+    for part in state.as_mut_slice() {
+        *part = pows;
+        pows = pows.wrapping_mul(123456789);
+    }
+    state
 }
