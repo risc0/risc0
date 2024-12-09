@@ -45,6 +45,7 @@ pub enum Major {
     PageFault,
     ECallCopyIn,
     BigInt,
+    BigInt2,
     Halt,
     MuxSize,
 }

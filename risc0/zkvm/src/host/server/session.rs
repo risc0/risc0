@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{
-        client::env::{ProveZkrRequest, SegmentPath},
+        client::env::{ProveKeccakRequest, ProveZkrRequest, SegmentPath},
         prove_info::SessionStats,
     },
     sha::Digest,
@@ -74,6 +74,12 @@ pub struct Session {
     /// padding.
     pub user_cycles: u64,
 
+    /// The number of cycles needed for paging operations.
+    pub paging_cycles: u64,
+
+    /// The number of cycles needed for the proof system which includes padding up to the nearest power of 2.
+    pub reserved_cycles: u64,
+
     /// Total number of cycles that a prover experiences. This includes overhead
     /// associated with continuations and padding up to the nearest power of 2.
     pub total_cycles: u64,
@@ -87,6 +93,10 @@ pub struct Session {
     /// A list of pending ZKR proof requests.
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
+
+    /// A list of pending keccak proof requests.
+    // TODO: make this scalable so we don't OOM
+    pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
 }
 
 /// The execution trace of a portion of a program.
@@ -147,10 +157,13 @@ impl Session {
         post_image: MemoryImage,
         assumptions: Vec<(Assumption, AssumptionReceipt)>,
         user_cycles: u64,
+        paging_cycles: u64,
+        padding_cycles: u64,
         total_cycles: u64,
         pre_state: SystemState,
         post_state: SystemState,
         pending_zkrs: Vec<ProveZkrRequest>,
+        pending_keccaks: Vec<ProveKeccakRequest>,
     ) -> Self {
         Self {
             segments,
@@ -161,10 +174,13 @@ impl Session {
             assumptions,
             hooks: Vec::new(),
             user_cycles,
+            paging_cycles,
+            reserved_cycles: padding_cycles,
             total_cycles,
             pre_state,
             post_state,
             pending_zkrs,
+            pending_keccaks,
         }
     }
 
@@ -232,12 +248,28 @@ impl Session {
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
     pub fn log(&self) {
-        let cycle_efficiency = self.user_cycles as f64 / self.total_cycles as f64 * 100.0;
-
         tracing::info!("number of segments: {}", self.segments.len());
         tracing::info!("total cycles: {}", self.total_cycles);
-        tracing::info!("user cycles: {}", self.user_cycles);
-        tracing::debug!("cycle efficiency: {}%", cycle_efficiency as u32);
+        tracing::info!(
+            "user cycles: {} ({:.2}%)",
+            self.user_cycles,
+            self.user_cycles as f64 / self.total_cycles as f64 * 100.0
+        );
+        tracing::info!(
+            "paging cycles: {} ({:.2}%)",
+            self.paging_cycles,
+            self.paging_cycles as f64 / self.total_cycles as f64 * 100.0
+        );
+        tracing::info!(
+            "reserved cycles: {} ({:.2}%)",
+            self.reserved_cycles,
+            self.reserved_cycles as f64 / self.total_cycles as f64 * 100.0
+        );
+
+        assert_eq!(
+            self.total_cycles,
+            self.user_cycles + self.paging_cycles + self.reserved_cycles
+        );
     }
 
     /// Returns stats for the session
@@ -248,6 +280,8 @@ impl Session {
             segments: self.segments.len(),
             total_cycles: self.total_cycles,
             user_cycles: self.user_cycles,
+            paging_cycles: self.paging_cycles,
+            reserved_cycles: self.reserved_cycles,
         }
     }
 }

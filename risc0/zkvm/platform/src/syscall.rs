@@ -74,13 +74,6 @@ pub mod reg_abi {
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
-pub mod rsa {
-    pub const RSA_EXPONENT: usize = 65537;
-    pub const WIDTH_BITS: usize = 3072;
-    pub const WIDTH_BYTES: usize = WIDTH_BITS / 8;
-    pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
-}
-
 /// Number of words in each cycle received using the SOFTWARE ecall
 pub const IO_CHUNK_WORDS: usize = 4;
 
@@ -143,12 +136,13 @@ pub mod nr {
     declare_syscall!(pub SYS_EXIT);
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
+    declare_syscall!(pub SYS_KECCAK);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
+    declare_syscall!(pub SYS_PROVE_KECCAK);
     declare_syscall!(pub SYS_PROVE_ZKR);
     declare_syscall!(pub SYS_RANDOM);
-    declare_syscall!(pub SYS_RSA);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
     declare_syscall!(pub SYS_WRITE);
@@ -356,25 +350,6 @@ pub extern "C" fn sys_input(index: u32) -> u32 {
 
 /// # Safety
 ///
-/// `recv_buf`, `in_base`, and `in_modulus` must be aligned and dereferenceable.
-#[stability::unstable]
-#[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe extern "C" fn sys_rsa(
-    recv_buf: *mut [u32; rsa::WIDTH_WORDS],
-    in_base: *const [u32; rsa::WIDTH_WORDS],
-    in_modulus: *const [u32; rsa::WIDTH_WORDS],
-) {
-    syscall_2(
-        nr::SYS_RSA,
-        recv_buf as *mut u32,
-        rsa::WIDTH_WORDS,
-        in_base as u32,
-        in_modulus as u32,
-    );
-}
-
-/// # Safety
-///
 /// `out_state`, `in_state`, `block1_ptr`, and `block2_ptr` must be aligned and
 /// dereferenceable.
 #[inline(always)]
@@ -567,7 +542,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
 /// varies from POSIX semantics.  Notably:
 ///
 /// * The read length is specified in words, not bytes.  (The output
-/// length is still returned in bytes)
+///   length is still returned in bytes)
 ///
 /// * If not all data is available, `sys_read_words` will return a short read.
 ///
@@ -917,11 +892,11 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 ///
 /// # Safety
 ///
+/// `claim_digest` must be aligned and dereferenceable.
 /// `control_id` must be aligned and dereferenceable.
-///
+/// `control_root` must be aligned and dereferenceable.
 /// `input` must be aligned and have `input_len` u32s dereferenceable
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_zkr(
     claim_digest: *const [u32; DIGEST_WORDS],
@@ -948,6 +923,70 @@ pub unsafe extern "C" fn sys_prove_zkr(
     // included for forwards-compatibility.
     if a0 != 0 {
         const MSG: &[u8] = "sys_prove_zkr returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+}
+
+/// Get a keccak hash from the host with the given input data - should be
+/// invoked during `hasher.finalize(...)`
+///
+/// # Safety
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
+#[stability::unstable]
+pub unsafe extern "C" fn sys_keccak(
+    input_ptr: *const u8,
+    len: usize,
+    out_state: *mut [u32; DIGEST_WORDS],
+) {
+    syscall_2(
+        nr::SYS_KECCAK,
+        out_state as *mut u32,
+        DIGEST_WORDS,
+        input_ptr as u32,
+        len as u32,
+    );
+}
+
+/// Executes the keccak circuit, and then executes the lift predicate
+/// in the recursion circuit.
+///
+/// This only triggers the execution of the circuits; it does not add
+/// any assumptions.  In order to prove that it executed correctly,
+/// users must calculate the claim digest and add it to the list of
+/// assumptions.
+///
+/// # Safety
+///
+/// `claim_digest` must be aligned and dereferenceable.
+/// `control_root` must be aligned and dereferenceable.
+/// `input` must be aligned and have `input_len` u32s dereferenceable
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
+#[stability::unstable]
+pub unsafe extern "C" fn sys_prove_keccak(
+    claim_digest: *const [u32; DIGEST_WORDS],
+    po2: usize,
+    control_root: *const [u32; DIGEST_WORDS],
+    input: *const u32,
+    input_len: usize,
+) {
+    let Return(a0, _) = unsafe {
+        syscall_5(
+            nr::SYS_PROVE_KECCAK,
+            null_mut(),
+            0,
+            claim_digest as u32,
+            po2 as u32,
+            control_root as u32,
+            input as u32,
+            input_len as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // Currently, this should always be the case. This check is
+    // included for forwards-compatibility.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_prove_keccak returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 }
@@ -979,15 +1018,15 @@ macro_rules! impl_sys_bigint2 {
         /// # Safety
         ///
         /// `blob_ptr` and all arguments must be aligned and dereferenceable.
-        #[cfg_attr(feature = "export-syscalls", no_mangle)]
+        #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
         #[stability::unstable]
-        pub unsafe extern "C" fn $func_name(blob_ptr: *const u32, a1: *mut u32
-            $(, $a2: *mut u32
-                $(, $a3: *mut u32
-                    $(, $a4: *mut u32
-                        $(, $a5: *mut u32
-                            $(, $a6: *mut u32
-                                $(, $a7: *mut u32)?
+        pub unsafe extern "C" fn $func_name(blob_ptr: *const u8, a1: *const u32
+            $(, $a2: *const u32
+                $(, $a3: *const u32
+                    $(, $a4: *const u32
+                        $(, $a5: *const u32
+                            $(, $a6: *const u32
+                                $(, $a7: *const u32)?
                             )?
                         )?
                     )?
@@ -1000,7 +1039,7 @@ macro_rules! impl_sys_bigint2 {
                 let nondet_program_ptr = (header.add(1)) as *const u32;
                 let verify_program_ptr = nondet_program_ptr.add((*header).nondet_program_size as usize);
                 let consts_ptr = verify_program_ptr.add((*header).verify_program_size as usize);
-                let temp_space = ((*header).consts_size as usize) << 2;
+                let temp_space = ((*header).temp_size as usize) << 2;
 
                 ::core::arch::asm!(
                     "sub sp, sp, {temp_space}",

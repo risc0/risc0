@@ -168,7 +168,7 @@ You can find detailed information in the [version management design][version-man
 
 <br/>
 
-### Optimism Sepolia (11110)
+### Optimism Sepolia (11155420)
 
 | Contract                                   | Address                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |

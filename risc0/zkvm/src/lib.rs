@@ -119,6 +119,7 @@ pub use {
     },
 };
 
+#[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "bonsai")]
 pub use self::host::client::prove::bonsai::BonsaiProver;
 
@@ -144,7 +145,12 @@ pub use {
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 #[cfg(feature = "unstable")]
-pub use self::host::client::env::{CoprocessorCallback, ProveZkrRequest};
+pub use self::host::client::env::{CoprocessorCallback, ProveKeccakRequest, ProveZkrRequest};
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+#[cfg(feature = "unstable")]
+pub use self::host::server::prove::keccak::prove_keccak;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use {

@@ -18,6 +18,7 @@ use std::{
     net::{SocketAddr, TcpListener},
     path::PathBuf,
     rc::Rc,
+    sync::{Arc, Mutex},
     thread,
 };
 
@@ -39,8 +40,8 @@ use crate::{
     receipt::SuccinctReceipt,
     recursion::{prove::zkr::test_recursion_circuit, MerkleGroup},
     register_zkr, ApiClient, ApiServer, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt, SessionInfo,
-    SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt,
+    SessionInfo, SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -58,7 +59,9 @@ impl TestClientConnector {
 impl Connector for TestClientConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         let (stream, _) = self.listener.accept()?;
-        Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
+        Ok(ConnectionWrapper::new(Arc::new(Mutex::new(
+            TcpConnection::new(stream),
+        ))))
     }
 }
 
@@ -131,6 +134,13 @@ impl TestClient {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.prove_zkr(request, receipt_out)
+        })
+    }
+
+    fn prove_keccak(&self, request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
+        with_server(self.addr, || {
+            let receipt_out = AssetRequest::Path(self.get_work_path());
+            self.client.prove_keccak(request, receipt_out)
         })
     }
 
@@ -393,6 +403,13 @@ impl CoprocessorCallback for Coprocessor {
         self.receipt = Some(receipt);
         Ok(())
     }
+
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        let client = TestClient::new();
+        let receipt = client.prove_keccak(proof_request);
+        self.receipt = Some(receipt);
+        Ok(())
+    }
 }
 
 #[test]
@@ -459,7 +476,7 @@ fn coprocessor_handler() {
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
-#[tokio::test]
+#[test(tokio::test)]
 #[cfg(feature = "redis")]
 async fn redis_asset() {
     let url = "127.0.0.1:6379";
@@ -487,4 +504,27 @@ async fn redis_asset() {
         }),
     )
     .await;
+}
+
+#[test(tokio::test)]
+#[cfg(feature = "redis")]
+#[ignore]
+// Extra test to talk to a real redis instance, doing heavier exec work for manual testing.
+// Ignored for manual testing
+async fn redis_asset_external_node() {
+    let url = "127.0.0.1:6379";
+    let redis_params = super::RedisParams {
+        url: format!("redis://{url}"),
+        key: "key".to_string(),
+        ttl: 180,
+    };
+
+    let binary = Asset::Inline(MULTI_TEST_ELF.into());
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles: 1000000000 })
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut client = TestClient::new();
+    let _session_info = client.execute_redis(env, binary, redis_params);
 }

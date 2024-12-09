@@ -25,6 +25,8 @@ sppark_poseidon2_fold(poseidon_out_t* d_out, const poseidon_in_t* d_in, size_t n
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
@@ -48,6 +50,8 @@ sppark_poseidon2_rows(poseidon_out_t* d_out, const fr_t* d_in, uint32_t count, u
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
@@ -102,6 +106,8 @@ sppark_calc_prefix_operation(Fp4* in_elems, uint32_t count, Operation op) {
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};
@@ -139,6 +145,8 @@ supra_poly_divide(Fp4 d_inout[], size_t len, Fp4* remainder, const Fp4& pow) {
   } catch (const cuda_error& e) {
     gpu.sync();
     return RustError{e.code(), e.what()};
+  } catch (...) {
+    return RustError(cudaErrorUnknown, "Generic exception");
   }
 
   return RustError{cudaSuccess};

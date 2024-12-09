@@ -34,7 +34,7 @@ struct HaltCycleLayout {
   Reg userExitCode;
   Reg writeAddr;
 };
-using Reg16LayoutArray = std::array<Reg, 16>;
+using Reg17LayoutArray = std::array<Reg, 17>;
 using Reg2LayoutArray = std::array<Reg, 2>;
 struct PcRegLayout {
   Reg2LayoutArray twits;
@@ -45,7 +45,7 @@ struct BodyStepLayout {
   Reg userMode;
   RamHeaderLayout header;
   HaltCycleLayout majorMux;
-  Reg16LayoutArray majorSelect;
+  Reg17LayoutArray majorSelect;
   PcRegLayout pc;
 };
 struct Mux0Layout {
@@ -78,14 +78,13 @@ constexpr TopLayout kDataLayout =
                                                                                                   Reg3LayoutArray{
                                                                                                       /*offset=*/
                                                                                                       3,
-                                                                                                      /*offset=*/
-                                                                                                      4,
+                                                                                                      /*offset=*/4,
                                                                                                       /*offset=*/
                                                                                                       5}}},
-                                         .majorMux = HaltCycleLayout{.sysExitCode = /*offset=*/117,
-                                                                     .userExitCode = /*offset=*/118,
-                                                                     .writeAddr = /*offset=*/119},
-                                         .majorSelect = Reg16LayoutArray{/*offset=*/101,
+                                         .majorMux = HaltCycleLayout{.sysExitCode = /*offset=*/118,
+                                                                     .userExitCode = /*offset=*/119,
+                                                                     .writeAddr = /*offset=*/120},
+                                         .majorSelect = Reg17LayoutArray{/*offset=*/101,
                                                                          /*offset=*/102,
                                                                          /*offset=*/103,
                                                                          /*offset=*/104,
@@ -100,7 +99,8 @@ constexpr TopLayout kDataLayout =
                                                                          /*offset=*/113,
                                                                          /*offset=*/114,
                                                                          /*offset=*/115,
-                                                                         /*offset=*/116},
+                                                                         /*offset=*/116,
+                                                                         /*offset=*/117},
                                          .pc = PcRegLayout{.twits = Reg2LayoutArray{/*offset=*/70,
                                                                                     /*offset=*/71},
                                                            .bytes = Reg3LayoutArray{/*offset=*/6,

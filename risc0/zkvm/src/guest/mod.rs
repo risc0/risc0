@@ -78,12 +78,13 @@
 #![deny(missing_docs)]
 
 pub mod env;
-pub use risc0_zkp::core::hash::sha;
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
 
 use risc0_zkvm_platform::syscall::sys_panic;
+
+pub use risc0_zkp::core::hash::sha;
 
 pub use crate::entry;
 

@@ -37,7 +37,7 @@ use risc0_zkp::{
             BufferImpl as CudaBuffer, CudaHal, CudaHalPoseidon2, CudaHalSha256, CudaHash,
             CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
         },
-        Buffer, CircuitHal, Hal,
+        AccumPreflight, Buffer, CircuitHal, Hal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -72,6 +72,7 @@ impl<CH: CudaHash> CudaCircuitHal<CH> {
 struct AccumContext {
     ram: DevicePointer<DeviceExtElem>,
     bytes: DevicePointer<DeviceExtElem>,
+    is_par_safe: DevicePointer<u8>,
 }
 
 extern "C" {
@@ -208,6 +209,7 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
     fn accumulate(
         &self,
+        preflight: &AccumPreflight,
         ctrl: &CudaBuffer<BabyBearElem>,
         io: &CudaBuffer<BabyBearElem>,
         data: &CudaBuffer<BabyBearElem>,
@@ -225,9 +227,12 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let bytes = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
         let bytes = DeviceBuffer::from_slice(&bytes).unwrap();
 
+        let is_par_safe = DeviceBuffer::from_slice(&preflight.is_par_safe).unwrap();
+
         let ctx = AccumContext {
             ram: ram.as_device_ptr(),
             bytes: bytes.as_device_ptr(),
+            is_par_safe: is_par_safe.as_device_ptr(),
         };
         let ctx = DeviceBox::new(&ctx).unwrap();
 

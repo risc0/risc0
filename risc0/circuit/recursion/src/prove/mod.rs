@@ -38,7 +38,7 @@ use risc0_zkp::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem,
     },
-    hal::{cpu::CpuHal, CircuitHal, Hal},
+    hal::{cpu::CpuHal, AccumPreflight, CircuitHal, Hal},
     prove::adapter::ProveAdapter,
     ZK_CYCLES,
 };
@@ -374,7 +374,9 @@ impl Prover {
                     hal.copy_from_elem("io", &adapter.get_io().as_slice())
                 );
 
-                circuit_hal.accumulate(&ctrl, &io, &data, &mix, &accum, steps);
+                // The recursion circuit doesn't make use of the preflight.
+                let preflight = AccumPreflight::default();
+                circuit_hal.accumulate(&preflight, &ctrl, &io, &data, &mix, &accum, steps);
 
                 prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
 
