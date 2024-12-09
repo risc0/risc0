@@ -661,7 +661,7 @@ pub unsafe extern "C" fn sys_getenv(
             }
         }
         if !allowed {
-            const MSG_1: &[u8] = "sys_getenv not enabaled for var".as_bytes();
+            const MSG_1: &[u8] = "sys_getenv not enabled for var".as_bytes();
             unsafe { sys_log(MSG_1.as_ptr(), MSG_1.len()) };
             unsafe { sys_log(varname, varname_len) };
             const MSG_2: &[u8] = "sys_getenv is disabled; can be enabled with the sys-getenv feature flag on risc0-zkvm-platform".as_bytes();
