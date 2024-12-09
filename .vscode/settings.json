@@ -36,6 +36,12 @@
   "files.eol": "\n",
   "git.ignoreLimitWarning": true,
   "files.associations": {
+    "*.h.inc": "cpp",
+    "*.cpp.inc": "cpp",
+    "*.cu": "cuda",
+    "*.cuh.inc": "cuda",
+    "*.cu.inc": "cuda",
+    "*.rs.inc": "rust",
     "*.sh": "shellscript",
     "*.py": "python",
     "*.cl": "c",

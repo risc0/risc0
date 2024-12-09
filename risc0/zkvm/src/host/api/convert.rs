@@ -22,6 +22,7 @@ use serde::Serialize;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, RedisParams};
 use crate::{
+    host::client::env::ProveKeccakRequest,
     host::client::env::ProveZkrRequest,
     receipt::{
         merkle::MerkleProof, segment::decode_receipt_claim_from_seal, CompositeReceipt,
@@ -1022,6 +1023,19 @@ impl TryFrom<pb::api::ProveZkrRequest> for ProveZkrRequest {
         Ok(Self {
             claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
             control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
+            input: value.input,
+        })
+    }
+}
+
+impl TryFrom<pb::api::ProveKeccakRequest> for ProveKeccakRequest {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::api::ProveKeccakRequest) -> Result<Self> {
+        Ok(Self {
+            claim_digest: value.claim_digest.ok_or(malformed_err())?.try_into()?,
+            po2: value.po2 as usize,
+            control_root: value.control_root.ok_or(malformed_err())?.try_into()?,
             input: value.input,
         })
     }

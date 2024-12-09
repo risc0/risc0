@@ -40,8 +40,8 @@ use crate::{
     receipt::SuccinctReceipt,
     recursion::{prove::zkr::test_recursion_circuit, MerkleGroup},
     register_zkr, ApiClient, ApiServer, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt, SessionInfo,
-    SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt,
+    SessionInfo, SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -134,6 +134,13 @@ impl TestClient {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.prove_zkr(request, receipt_out)
+        })
+    }
+
+    fn prove_keccak(&self, request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
+        with_server(self.addr, || {
+            let receipt_out = AssetRequest::Path(self.get_work_path());
+            self.client.prove_keccak(request, receipt_out)
         })
     }
 
@@ -393,6 +400,13 @@ impl CoprocessorCallback for Coprocessor {
     fn prove_zkr(&mut self, proof_request: ProveZkrRequest) -> Result<()> {
         let client = TestClient::new();
         let receipt = client.prove_zkr(proof_request);
+        self.receipt = Some(receipt);
+        Ok(())
+    }
+
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        let client = TestClient::new();
+        let receipt = client.prove_keccak(proof_request);
         self.receipt = Some(receipt);
         Ok(())
     }
