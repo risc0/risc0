@@ -625,7 +625,7 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
 // Some environment variable names are considered safe by default to use in the guest, provided by
 // the host, and are included in this list. It may be useful to allow guest developers to register
 // additional variable names as part of their guest program.
-const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE"];
+const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE", b"RUST_LIB_BACKTRACE"];
 
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
