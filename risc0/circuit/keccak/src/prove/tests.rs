@@ -26,8 +26,8 @@ use crate::{
 
 #[test]
 fn basic() {
-    let inputs = test_inputs();
     let po2 = 8; // 256
+    let inputs = test_inputs(po2);
     let prover = keccak_prover().unwrap();
     let seal = prover.prove(&inputs, po2).unwrap();
     prover.verify(&seal).expect("Verification failed");
@@ -50,8 +50,8 @@ fn fwd_rev_ab() {
         }
     }
 
-    let inputs = test_inputs();
     let po2 = 8;
+    let inputs = test_inputs(po2);
     let cycles: usize = 1 << po2;
     let preflight = PreflightTrace::new(&inputs, cycles);
 

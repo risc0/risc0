@@ -29,12 +29,12 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-namespace risc0 {
+namespace risc0::circuit::keccak::cuda {
 
 using Val = Fp;
 using ExtVal = FpExt;
 
-using KeccakState = cuda::std::array<uint64_t, 25>;
+using KeccakState = ::cuda::std::array<uint64_t, 25>;
 
 struct PreflightTrace {
   // All the preimages
@@ -46,8 +46,6 @@ struct PreflightTrace {
   // Which 'preimage' each cycle is working on (to answer extern calls)
   uint32_t* curPreimage;
 };
-
-namespace impl {
 
 struct ExecContext {
 public:
@@ -192,7 +190,7 @@ __device__ inline Val load(ExecContext& ctx, BoundLayout<Reg> reg, size_t back) 
 }
 
 __device__ inline ExtVal loadExt(ExecContext& ctx, BoundLayout<Reg> reg, size_t back) {
-  cuda::std::array<Fp, EXT_SIZE> elems;
+  ::cuda::std::array<Fp, EXT_SIZE> elems;
   for (size_t i = 0; i < EXT_SIZE; i++) {
     elems[i] = reg.buf->load(reg.layout.col + i, back);
   }
@@ -206,8 +204,8 @@ __device__ inline ExtVal loadExt(ExecContext& ctx, BoundLayout<Reg> reg, size_t 
 
 // Map + reduce support
 template <typename T1, typename F, size_t N>
-__device__ inline auto map(cuda::std::array<T1, N> a, F f) {
-  cuda::std::array<decltype(f(a[0])), N> out;
+__device__ inline auto map(::cuda::std::array<T1, N> a, F f) {
+  ::cuda::std::array<decltype(f(a[0])), N> out;
   for (size_t i = 0; i < N; i++) {
     out[i] = f(a[i]);
   }
@@ -215,8 +213,8 @@ __device__ inline auto map(cuda::std::array<T1, N> a, F f) {
 }
 
 template <typename T1, typename T2, typename F, size_t N>
-__device__ inline auto map(cuda::std::array<T1, N> a, cuda::std::array<T2, N> b, F f) {
-  cuda::std::array<decltype(f(a[0], b[0])), N> out;
+__device__ inline auto map(::cuda::std::array<T1, N> a, ::cuda::std::array<T2, N> b, F f) {
+  ::cuda::std::array<decltype(f(a[0], b[0])), N> out;
   for (size_t i = 0; i < N; i++) {
     out[i] = f(a[i], b[i]);
   }
@@ -224,8 +222,8 @@ __device__ inline auto map(cuda::std::array<T1, N> a, cuda::std::array<T2, N> b,
 }
 
 template <typename T1, typename T2, typename F, size_t N>
-__device__ inline auto map(cuda::std::array<T1, N> a, const BoundLayout<T2>& b, F f) {
-  cuda::std::array<decltype(f(a[0], BoundLayout(b.layout[0], b.buf))), N> out;
+__device__ inline auto map(::cuda::std::array<T1, N> a, const BoundLayout<T2>& b, F f) {
+  ::cuda::std::array<decltype(f(a[0], BoundLayout(b.layout[0], b.buf))), N> out;
   for (size_t i = 0; i < N; i++) {
     out[i] = f(a[i], BoundLayout(b.layout[i], b.buf));
   }
@@ -233,7 +231,7 @@ __device__ inline auto map(cuda::std::array<T1, N> a, const BoundLayout<T2>& b, 
 }
 
 template <typename T1, typename T2, typename F, size_t N>
-__device__ inline auto reduce(cuda::std::array<T1, N> elems, T2 start, F f) {
+__device__ inline auto reduce(::cuda::std::array<T1, N> elems, T2 start, F f) {
   T2 cur = start;
   for (size_t i = 0; i < N; i++) {
     cur = f(cur, elems[i]);
@@ -243,7 +241,7 @@ __device__ inline auto reduce(cuda::std::array<T1, N> elems, T2 start, F f) {
 
 template <typename T1, typename T2, typename T3, typename F, size_t N>
 __device__ inline auto
-reduce(cuda::std::array<T1, N> elems, T2 start, const BoundLayout<T3>& b, F f) {
+reduce(::cuda::std::array<T1, N> elems, T2 start, const BoundLayout<T3>& b, F f) {
   T2 cur = start;
   for (size_t i = 0; i < N; i++) {
     cur = f(cur, elems[i], BoundLayout(b.layout[i], b.buf));
@@ -305,6 +303,4 @@ __device__ inline Val extern_nextPreimage(ExecContext& ctx) {
 
 #include "layout.cu.inc"
 
-} // namespace impl
-
-} // namespace risc0
+} // namespace risc0::circuit::keccak::cuda
