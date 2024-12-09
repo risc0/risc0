@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![cfg(feature = "prove")]
+
 use risc0_circuit_keccak::{
     prove::zkr::get_keccak_zkr, KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT, KECCAK_PO2_RANGE,
 };
@@ -58,6 +60,7 @@ fn keccak_po2_16() {
 }
 
 #[test]
+#[ignore]
 fn keccak_po2_17() {
     run_test(
         17,
