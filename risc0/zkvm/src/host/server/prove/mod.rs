@@ -23,7 +23,6 @@ mod tests;
 use std::rc::Rc;
 
 use anyhow::{anyhow, bail, ensure, Result};
-use risc0_circuit_rv32im::prove::segment_prover;
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::hal::{CircuitHal, Hal};
 
@@ -238,6 +237,5 @@ pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         return Ok(Rc::new(DevModeProver));
     }
 
-    let prover = segment_prover(&opts.hashfn)?;
-    Ok(Rc::new(ProverImpl::new(opts.clone(), prover)))
+    Ok(Rc::new(ProverImpl::new(opts.clone())))
 }

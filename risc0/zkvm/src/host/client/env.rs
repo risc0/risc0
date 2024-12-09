@@ -92,14 +92,14 @@ pub struct ProveKeccakRequest {
     pub input: Vec<u8>,
 }
 
-/// A trait that supports the ability to be notified of ZKR proof requests
+/// A trait that supports the ability to be notified of proof requests
 /// on-demand.
 #[stability::unstable]
 pub trait CoprocessorCallback {
-    /// Request that a proof of a ZKR is produced.
+    /// Request that a ZKR proof is produced.
     fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
 
-    /// Request that a proof of a ZKR is produced, returning the assumption to be added to the assumption table.
+    /// Request that a keccak proof is produced.
     fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 }
 

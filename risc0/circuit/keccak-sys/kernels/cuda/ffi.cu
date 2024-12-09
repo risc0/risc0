@@ -16,8 +16,8 @@
 #include "cuda.h"
 #include "fp.h"
 #include "fpext.h"
-#include "witgen.h"
 #include "steps.cuh"
+#include "witgen.h"
 
 #include <cstdint>
 #include <cstdio>
@@ -41,26 +41,85 @@ struct ScatterInfo {
   uint32_t bits;
 };
 
-__device__ void
-nextStep(Buffer* bufData, Buffer* bufGlobal, PreflightTrace* preflight, uint32_t cycle) {
+struct ScatterContext {
+  ScatterInfo* d_infos;
+
+  ScatterContext(const ScatterInfo* infos, size_t count) {
+    CUDA_OK(cudaMalloc(&d_infos, count * sizeof(ScatterInfo)));
+    CUDA_OK(cudaMemcpy(d_infos, infos, count * sizeof(ScatterInfo), cudaMemcpyHostToDevice));
+  }
+
+  ~ScatterContext() { cudaFree(d_infos); }
+};
+
+struct DeviceContext {
+  Buffer* data;
+  Buffer* global;
+  PreflightTrace* preflight;
+};
+
+struct HostContext {
+  DeviceContext* ctx;
+
+  HostContext(ExecBuffers* buffers, PreflightTrace* preflight, size_t cycles) {
+    CUDA_OK(cudaMallocManaged(&ctx, sizeof(DeviceContext)));
+
+    CUDA_OK(cudaMallocManaged(&ctx->data, sizeof(Buffer)));
+    ctx->data->buf = buffers->data.buf;
+    ctx->data->rows = buffers->data.rows;
+    ctx->data->cols = buffers->data.cols;
+    ctx->data->checkedReads = buffers->data.checkedReads;
+
+    CUDA_OK(cudaMallocManaged(&ctx->global, sizeof(Buffer)));
+    ctx->global->buf = buffers->global.buf;
+    ctx->global->rows = buffers->global.rows;
+    ctx->global->cols = buffers->global.cols;
+    ctx->global->checkedReads = buffers->global.checkedReads;
+
+    CUDA_OK(cudaMallocManaged(&ctx->preflight, sizeof(PreflightTrace)));
+
+    CUDA_OK(cudaMalloc(&ctx->preflight->preimages, preflight->preimagesSize * sizeof(KeccakState)));
+    CUDA_OK(cudaMemcpy(ctx->preflight->preimages,
+                       preflight->preimages,
+                       preflight->preimagesSize * sizeof(KeccakState),
+                       cudaMemcpyHostToDevice));
+
+    ctx->preflight->preimagesSize = preflight->preimagesSize;
+
+    CUDA_OK(cudaMalloc(&ctx->preflight->curPreimage, cycles * sizeof(uint32_t)));
+    CUDA_OK(cudaMemcpy(ctx->preflight->curPreimage,
+                       preflight->curPreimage,
+                       cycles * sizeof(uint32_t),
+                       cudaMemcpyHostToDevice));
+  }
+
+  ~HostContext() {
+    cudaFree(ctx->preflight->curPreimage);
+    cudaFree(ctx->preflight->preimages);
+    cudaFree(ctx->preflight);
+    cudaFree(ctx->global);
+    cudaFree(ctx->data);
+    cudaFree(ctx);
+  }
+};
+
+__device__ void nextStep(DeviceContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
-  ExecContext ctx(*preflight, cycle);
-  MutableBufObj data(ctx, *bufData);
-  GlobalBufObj global(ctx, *bufGlobal);
-  step_Top(ctx, &data, &global);
+  ExecContext execCtx(*ctx->preflight, cycle);
+  MutableBufObj data(execCtx, *ctx->data);
+  GlobalBufObj global(execCtx, *ctx->global);
+  step_Top(execCtx, &data, &global);
 }
 
-__global__ void
-par_stepExec(Buffer* data, Buffer* global, PreflightTrace* preflight, uint32_t count) {
+__global__ void par_stepExec(DeviceContext* ctx, uint32_t count) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
   }
-  nextStep(data, global, preflight, cycle);
+  nextStep(ctx, cycle);
 }
 
-__global__ void
-rev_stepExec(Buffer* data, Buffer* global, PreflightTrace* preflight, uint32_t count) {
+__global__ void rev_stepExec(DeviceContext* ctx, uint32_t count) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
@@ -68,13 +127,12 @@ rev_stepExec(Buffer* data, Buffer* global, PreflightTrace* preflight, uint32_t c
 
   if (cycle == count - 1) {
     for (uint32_t i = 0; i < count; i++) {
-      nextStep(data, global, preflight, count - i - 1);
+      nextStep(ctx, count - i - 1);
     }
   }
 }
 
-__global__ void
-fwd_stepExec(Buffer* data, Buffer* global, PreflightTrace* preflight, uint32_t count) {
+__global__ void fwd_stepExec(DeviceContext* ctx, uint32_t count) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
@@ -82,7 +140,7 @@ fwd_stepExec(Buffer* data, Buffer* global, PreflightTrace* preflight, uint32_t c
 
   if (cycle == 0) {
     for (uint32_t i = 0; i < count; i++) {
-      nextStep(data, global, preflight, i);
+      nextStep(ctx, i);
     }
   }
 }
@@ -124,48 +182,18 @@ const char* risc0_circuit_keccak_cuda_witgen(uint32_t mode,
                                              PreflightTrace* preflight,
                                              uint32_t lastCycle) {
   try {
-    Buffer* d_data;
-    CUDA_OK(cudaMallocManaged(&d_data, sizeof(Buffer)));
-    d_data->buf = buffers->data.buf;
-    d_data->rows = buffers->data.rows;
-    d_data->cols = buffers->data.cols;
-    d_data->checkedReads = buffers->data.checkedReads;
-
-    Buffer* d_global;
-    CUDA_OK(cudaMallocManaged(&d_global, sizeof(Buffer)));
-    d_global->buf = buffers->global.buf;
-    d_global->rows = buffers->global.rows;
-    d_global->cols = buffers->global.cols;
-    d_global->checkedReads = buffers->global.checkedReads;
-
-    PreflightTrace* d_preflight;
-    CUDA_OK(cudaMallocManaged(&d_preflight, sizeof(PreflightTrace)));
-
-    CUDA_OK(cudaMalloc(&d_preflight->preimages, preflight->preimagesSize * sizeof(KeccakState)));
-    CUDA_OK(cudaMemcpy(d_preflight->preimages,
-                       preflight->preimages,
-                       preflight->preimagesSize * sizeof(KeccakState),
-                       cudaMemcpyHostToDevice));
-
-    d_preflight->preimagesSize = preflight->preimagesSize;
-
-    CUDA_OK(cudaMalloc(&d_preflight->curPreimage, lastCycle * sizeof(uint32_t)));
-    CUDA_OK(cudaMemcpy(d_preflight->curPreimage,
-                       preflight->curPreimage,
-                       lastCycle * sizeof(uint32_t),
-                       cudaMemcpyHostToDevice));
-
+    HostContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
     auto cfg = getSimpleConfig(lastCycle);
     switch (mode) {
     case kStepModeSeqParallel:
-      par_stepExec<<<cfg.grid, cfg.block, 0, stream>>>(d_data, d_global, d_preflight, lastCycle);
+      par_stepExec<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
       break;
     case kStepModeSeqForward:
-      fwd_stepExec<<<cfg.grid, cfg.block, 0, stream>>>(d_data, d_global, d_preflight, lastCycle);
+      fwd_stepExec<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
       break;
     case kStepModeSeqReverse:
-      rev_stepExec<<<cfg.grid, cfg.block, 0, stream>>>(d_data, d_global, d_preflight, lastCycle);
+      rev_stepExec<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
       break;
     }
     CUDA_OK(cudaStreamSynchronize(stream));
@@ -183,13 +211,10 @@ const char* risc0_circuit_keccak_cuda_scatter(Fp* into,
                                               const uint32_t rows,
                                               const uint32_t count) {
   try {
-    ScatterInfo* d_infos;
-    CUDA_OK(cudaMalloc(&d_infos, count * sizeof(ScatterInfo)));
-    CUDA_OK(cudaMemcpy(d_infos, infos, count * sizeof(ScatterInfo), cudaMemcpyHostToDevice));
-
+    ScatterContext ctx(infos, count);
     CudaStream stream;
     auto cfg = getSimpleConfig(count);
-    scatter_preflight<<<cfg.grid, cfg.block, 0, stream>>>(into, d_infos, from, rows, count);
+    scatter_preflight<<<cfg.grid, cfg.block, 0, stream>>>(into, ctx.d_infos, from, rows, count);
     CUDA_OK(cudaStreamSynchronize(stream));
   } catch (const std::exception& err) {
     return strdup(err.what());

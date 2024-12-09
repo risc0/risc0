@@ -33,7 +33,7 @@ use crate::{
         },
         server::{prove::keccak::prove_keccak, session::NullSegmentRef},
     },
-    prove_zkr,
+    prove_registered_zkr,
     recursion::identity_p254,
     AssetRequest, Assumption, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, ProverOpts,
     Receipt, ReceiptClaim, Segment, SegmentReceipt, Session, SuccinctReceipt, TraceCallback,
@@ -485,7 +485,7 @@ impl Server {
     ) -> Result<()> {
         fn inner(request: pb::api::ProveZkrRequest) -> Result<pb::api::ProveZkrReply> {
             let control_id = request.control_id.ok_or(malformed_err())?.try_into()?;
-            let receipt = prove_zkr(&control_id, vec![control_id], &request.input)?;
+            let receipt = prove_registered_zkr(&control_id, vec![control_id], &request.input)?;
 
             let receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();

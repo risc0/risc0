@@ -32,11 +32,6 @@ zip = { version = "2.2", default-features = false, features = [
 clap = { version = "4.5", features = ["derive"] }
 rand = { version = "0.8" }
 risc0-circuit-keccak-methods = { path = "methods" }
-risc0-zkvm = { workspace = true, features = [
-  "std",
-  "unstable",
-  "prove",
-], default-features = false }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -47,7 +42,6 @@ cuda = [
   "risc0-circuit-keccak-sys/cuda",
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
-  "risc0-zkvm/cuda",
 ]
 default = ["prove"]
 # Enables ZKR registration to actually generate proofs.

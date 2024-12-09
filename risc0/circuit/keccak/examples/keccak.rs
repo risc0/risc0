@@ -17,20 +17,20 @@ use std::time::Instant;
 use clap::Parser;
 use risc0_circuit_keccak::{prove::keccak_prover, KeccakState};
 
-/// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
+/// keccak prover benchmarking tool
 #[derive(Parser)]
 #[command(about, version, author)]
 struct Cli {
-    #[arg(long, default_value_t = risc0_circuit_keccak::KECCAK_DEFAULT_PO2)]
     /// Circuit PO2
+    #[arg(long, default_value_t = risc0_circuit_keccak::KECCAK_DEFAULT_PO2)]
     po2: usize,
 
-    #[arg(long, default_value_t = 1)]
     /// Number of proofs to run
+    #[arg(long, default_value_t = 1)]
     count: usize,
 
-    #[arg(long)]
     /// Don't verify the seal
+    #[arg(long)]
     skip_verification: bool,
 }
 
