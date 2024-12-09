@@ -118,11 +118,10 @@ extern "C" uint32_t risc0_circuit_recursion_step_verify_mem(risc0_error* err,
   });
 }
 
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
-#endif
-
-extern "C" FpExt
-risc0_circuit_recursion_poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
-  return circuit::recursion::poly_fp(cycle, steps, poly_mix, args);
+extern "C" void risc0_circuit_recursion_poly_fp(
+    risc0_error* err, size_t cycle, size_t steps, FpExt* poly_mix, Fp** args, FpExt* result) {
+  ffi_wrap<uint32_t>(err, 0, [&] {
+    *result = circuit::recursion::poly_fp(cycle, steps, poly_mix, args);
+    return 0;
+  });
 }

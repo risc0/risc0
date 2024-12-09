@@ -38,7 +38,7 @@
 
 ### 🚨 Breaking Changes
 
-* Drop `risc0-circuit-bigint` in favor of `risc0-circuit-bigint2`.
+* Drop `risc0-circuit-bigint` in favor of `risc0-bigint2`.
 
 ## [v1.1.3 (2024-11-08)](https://github.com/risc0/risc0/releases/tag/v1.1.3)
 
