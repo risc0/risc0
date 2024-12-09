@@ -503,7 +503,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "duplicate",
  "maybe-async",
@@ -2369,6 +2369,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
+name = "lzma-sys"
+version = "0.1.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fda04ab3764e6cde78b9974eec4f779acaba7c4e84b36eca3cf77c581b85d27"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
 name = "malloc_buf"
 version = "0.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2812,6 +2823,12 @@ dependencies = [
  "der",
  "spki",
 ]
+
+[[package]]
+name = "pkg-config"
+version = "0.3.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
 
 [[package]]
 name = "png"
@@ -3298,7 +3315,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "borsh",
@@ -3311,7 +3328,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3328,7 +3345,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "cc",
  "directories",
@@ -3341,7 +3358,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-keccak"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3355,19 +3372,19 @@ dependencies = [
  "risc0-sys",
  "risc0-zkp",
  "tracing",
- "zip",
+ "xz2",
 ]
 
 [[package]]
 name = "risc0-circuit-keccak-methods"
-version = "0.1.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "risc0-build",
 ]
 
 [[package]]
 name = "risc0-circuit-keccak-sys"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "cc",
  "cust",
@@ -3381,7 +3398,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3405,7 +3422,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3416,7 +3433,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "auto_ops",
@@ -3447,7 +3464,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3458,7 +3475,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "bytemuck",
  "nvtx",
@@ -3468,7 +3485,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -3501,7 +3518,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "cust",
@@ -3511,7 +3528,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3540,7 +3557,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "addr2line 0.22.0",
  "anyhow",
@@ -3582,7 +3599,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -3592,7 +3609,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "1.2.0"
+version = "1.2.1-rc.0"
 
 [[package]]
 name = "rkyv"
@@ -5257,6 +5274,15 @@ name = "xgboost-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+]
+
+[[package]]
+name = "xz2"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "388c44dc09d76f1536602ead6d325eb532f5c122f17782bd57fb47baeeb767e2"
+dependencies = [
+ "lzma-sys",
 ]
 
 [[package]]
