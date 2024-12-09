@@ -4228,7 +4228,7 @@ dependencies = [
  "test-log",
  "tracing",
  "tracing-subscriber 0.3.19",
- "zip",
+ "xz2",
 ]
 
 [[package]]
