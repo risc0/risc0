@@ -79,39 +79,31 @@ pub struct ProveZkrRequest {
 /// A Keccak proof request.
 #[stability::unstable]
 pub struct ProveKeccakRequest {
-    /// Po2 of keccak circuit to run
+    /// The digest of the claim that this keccak input is expected to produce.
+    pub claim_digest: Digest,
+
+    /// The requested size of the keccak proof, in powers of 2.
     pub po2: usize,
 
-    /// Input transcript to provide to the keccak circuit
+    /// The control root which identifies a particular keccak circuit revision.
+    pub control_root: Digest,
+
+    /// Input transcript to provide to the keccak circuit.
     pub input: Vec<u8>,
 }
 
-/// A Keccak proof response
-#[stability::unstable]
-pub struct ProveKeccakResponse {
-    /// Request to lift keccak to recursion circuit
-    pub zkr_lift: ProveZkrRequest,
-}
-
-/// A trait that supports the ability to be notified of ZKR proof requests
+/// A trait that supports the ability to be notified of proof requests
 /// on-demand.
 #[stability::unstable]
 pub trait CoprocessorCallback {
-    /// Request that a proof of a ZKR is produced.
+    /// Request that a ZKR proof is produced.
     fn prove_zkr(&mut self, request: ProveZkrRequest) -> Result<()>;
+
+    /// Request that a keccak proof is produced.
+    fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<()>;
 }
 
 pub type CoprocessorCallbackRef<'a> = Rc<RefCell<dyn CoprocessorCallback + 'a>>;
-
-/// A trait that supports the ability to be notified of keccak proof requests
-/// on-demand.
-#[stability::unstable]
-pub trait KeccakCoprocessorCallback {
-    /// Request that a proof of a ZKR is produced, returning the assumption to be added to the assumption table.
-    fn prove_keccak(&mut self, request: ProveKeccakRequest) -> Result<ProveKeccakResponse>;
-}
-
-pub type KeccakCoprocessorCallbackRef<'a> = Rc<RefCell<dyn KeccakCoprocessorCallback + 'a>>;
 
 /// Container for assumptions in the executor environment.
 #[derive(Default)]
@@ -136,7 +128,6 @@ pub struct ExecutorEnv<'a> {
     pub(crate) pprof_out: Option<PathBuf>,
     pub(crate) input_digest: Option<Digest>,
     pub(crate) coprocessor: Option<CoprocessorCallbackRef<'a>>,
-    pub(crate) keccak_coprocessor: Option<KeccakCoprocessorCallbackRef<'a>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -451,16 +442,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
     #[stability::unstable]
     pub fn coprocessor_callback_ref(&mut self, callback: CoprocessorCallbackRef<'a>) -> &mut Self {
         self.inner.coprocessor = Some(callback);
-        self
-    }
-
-    /// Add a callback for keccak coprocessor requests.
-    #[stability::unstable]
-    pub fn keccak_coprocessor_callback_ref(
-        &mut self,
-        callback: KeccakCoprocessorCallbackRef<'a>,
-    ) -> &mut Self {
-        self.inner.keccak_coprocessor = Some(callback);
         self
     }
 }

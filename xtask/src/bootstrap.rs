@@ -15,6 +15,7 @@
 use std::{borrow::Borrow, collections::HashSet, fmt::Write, process::Command};
 
 use clap::Parser;
+use risc0_circuit_keccak::{prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
 use risc0_circuit_recursion::zkr::{get_all_zkrs, get_zkr};
 use risc0_zkp::{
     core::{
@@ -38,6 +39,7 @@ pub struct Bootstrap;
 
 const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
+const CONTROL_ID_PATH_KECCAK: &str = "risc0/circuit/keccak/src/control_id.rs";
 
 const MIN_LIFT_PO2: usize = 14;
 
@@ -67,7 +69,14 @@ impl Bootstrap {
     pub fn run(&self) {
         let poseidon2_control_ids = Self::generate_rv32im_control_ids();
         Self::generate_recursion_control_ids(poseidon2_control_ids);
-        keccak::bootstrap();
+        Self::bootstrap_keccak();
+    }
+
+    fn rustfmt(path: &str) {
+        Command::new("rustfmt")
+            .arg(path)
+            .status()
+            .expect("failed to format {path}");
     }
 
     fn generate_rv32im_control_ids() -> Vec<(String, Digest)> {
@@ -95,10 +104,7 @@ impl Bootstrap {
         std::fs::write(CONTROL_ID_PATH_RV32IM, contents).unwrap();
 
         // Use rustfmt to format the file.
-        Command::new("rustfmt")
-            .arg(CONTROL_ID_PATH_RV32IM)
-            .status()
-            .expect("failed to format {CONTROL_ID_PATH_RV32IM}");
+        Self::rustfmt(CONTROL_ID_PATH_RV32IM);
 
         // Return the control IDs that should be included in the allowed control IDs that are used
         // by default in segment receipt verification, and in forming the control root.
@@ -180,10 +186,7 @@ impl Bootstrap {
         std::fs::write(CONTROL_ID_PATH_RECURSION, contents).unwrap();
 
         // Use rustfmt to format the file.
-        Command::new("rustfmt")
-            .arg(CONTROL_ID_PATH_RECURSION)
-            .status()
-            .expect("failed to format {CONTROL_ID_PATH_RECURSION}");
+        Self::rustfmt(CONTROL_ID_PATH_RECURSION);
     }
 
     pub fn generate_recursion_control_ids_with_hash(
@@ -210,45 +213,40 @@ impl Bootstrap {
         let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
         program.compute_control_id(Poseidon254HashSuite::new_suite())
     }
-}
 
-mod keccak {
-    use std::process::Command;
-
-    use risc0_circuit_keccak::{prove::zkr::get_zkr_u32s, KECCAK_PO2, RECURSION_PO2};
-    use risc0_circuit_recursion::prove::Program;
-    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
-    use risc0_zkvm::recursion::MerkleGroup;
-
-    const CONTROL_ID_PATH: &str = "risc0/circuit/keccak/src/control_id.rs";
-
-    fn compute_control_id(po2: usize) -> Digest {
-        let encoded_program = get_zkr_u32s(&format!("keccak_lift_{}.zkr", po2)).unwrap();
-        let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        program.compute_control_id(hash_suite)
-    }
-
-    fn compute_control_root(control_id: Digest) -> Digest {
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        let hashfn = hash_suite.hashfn.as_ref();
-        let group = MerkleGroup::new(vec![control_id]).unwrap();
-        group.calc_root(hashfn)
-    }
-
-    pub(crate) fn bootstrap() {
-        let control_id = compute_control_id(KECCAK_PO2);
-        let control_root = compute_control_root(control_id);
+    fn bootstrap_keccak() {
+        let control_ids = Self::generate_keccak_control_ids();
+        let control_root = Self::generate_keccak_control_root(
+            control_ids.iter().map(|(_name, digest)| *digest).collect(),
+        );
         let contents = format!(
             include_str!("templates/control_id_keccak.rs"),
-            control_id, control_root
+            Self::format_control_ids(control_ids),
+            control_root
         );
-        std::fs::write(CONTROL_ID_PATH, contents).unwrap();
+        std::fs::write(CONTROL_ID_PATH_KECCAK, contents).unwrap();
 
         // Use rustfmt to format the file.
-        Command::new("rustfmt")
-            .arg(CONTROL_ID_PATH)
-            .status()
-            .expect("failed to format {CONTROL_ID_PATH}");
+        Self::rustfmt(CONTROL_ID_PATH_KECCAK);
+    }
+
+    fn generate_keccak_control_ids() -> Vec<(String, Digest)> {
+        let mut ret = vec![];
+        for po2 in KECCAK_PO2_RANGE {
+            let program = get_keccak_zkr(po2).unwrap();
+            let hash_suite = Poseidon2HashSuite::new_suite();
+            ret.push((
+                format!("keccak_lift po2={po2}"),
+                program.compute_control_id(hash_suite),
+            ))
+        }
+        ret
+    }
+
+    fn generate_keccak_control_root(control_ids: Vec<Digest>) -> Digest {
+        let hash_suite = Poseidon2HashSuite::new_suite();
+        let hashfn = hash_suite.hashfn.as_ref();
+        let group = MerkleGroup::new(control_ids).unwrap();
+        group.calc_root(hashfn)
     }
 }

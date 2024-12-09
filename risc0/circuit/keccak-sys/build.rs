@@ -40,6 +40,7 @@ fn build_cuda_kernels() {
 
     println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
     println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
+    println!("cargo:rerun-if-env-changed=SCCACHE_RECACHE");
     rerun_if_changed("kernels/cuda");
 
     if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
@@ -57,70 +58,23 @@ fn build_cuda_kernels() {
 
     env::set_var("SCCACHE_IDLE_TIMEOUT", "0");
 
-    fn base() -> cc::Build {
-        let mut base = cc::Build::new();
-        base.cuda(true)
-            .cudart("static")
-            .debug(false)
-            .flag("-diag-suppress=177")
-            .flag("-diag-suppress=550")
-            .flag("-diag-suppress=2922")
-            .flag("-std=c++17")
-            .flag("-Xcompiler")
-            .flag("-Wno-unused-function")
-            .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
-            .include(env::var("DEP_SPPARK_ROOT").unwrap());
-        if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none()
-        {
-            base.flag("-arch=native");
-        }
-        base
+    let mut build = cc::Build::new();
+    build
+        .cuda(true)
+        .cudart("static")
+        .debug(false)
+        .flag("-diag-suppress=177")
+        .flag("-diag-suppress=550")
+        .flag("-diag-suppress=2922")
+        .flag("-std=c++17")
+        .flag("-Xcompiler")
+        .flag("-Wno-unused-function,-Wno-unused-parameter")
+        .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
+        .include(env::var("DEP_SPPARK_ROOT").unwrap());
+    if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
+        build.flag("-arch=native");
     }
-
-    let regular = [
-        "kernels/cuda/eval_check_0.cu",
-        "kernels/cuda/eval_check_1.cu",
-        "kernels/cuda/eval_check_2.cu",
-        "kernels/cuda/eval_check_3.cu",
-        "kernels/cuda/eval_check_4.cu",
-        "kernels/cuda/steps_2.cu",
-        "kernels/cuda/steps_3.cu",
-        "kernels/cuda/steps_4.cu",
-        "kernels/cuda/steps_5.cu",
-        "kernels/cuda/steps_6.cu",
-        "kernels/cuda/steps_7.cu",
-        "kernels/cuda/steps_8.cu",
-        "kernels/cuda/steps_9.cu",
-        "kernels/cuda/steps_10.cu",
-        "kernels/cuda/steps_11.cu",
-        "kernels/cuda/steps_12.cu",
-        "kernels/cuda/steps_13.cu",
-        "kernels/cuda/steps_14.cu",
-        "kernels/cuda/steps_15.cu",
-        "kernels/cuda/steps_16.cu",
-        "kernels/cuda/ffi_supra.cu",
-    ];
-
-    let special = ["kernels/cuda/steps_0.cu", "kernels/cuda/steps_1.cu"];
-
-    let objs = std::thread::scope(|s| -> Vec<PathBuf> {
-        let regular_objs = s.spawn(|| base().files(regular).compile_intermediates());
-        let special_objs = s.spawn(|| {
-            base()
-                .files(special)
-                .flag("-Xptxas")
-                .flag("-O1")
-                .compile_intermediates()
-        });
-        let regular_objs = regular_objs.join().unwrap();
-        let special_objs = special_objs.join().unwrap();
-        [regular_objs, special_objs].concat()
-    });
-
-    base()
-        .files(["kernels/cuda/ffi.cu", "kernels/cuda/steps.cu"])
-        .objects(objs)
-        .compile(output);
+    build.files(glob_paths("kernels/cuda/*.cu")).compile(output);
 }
 
 fn rerun_if_changed<P: AsRef<Path>>(path: P) {

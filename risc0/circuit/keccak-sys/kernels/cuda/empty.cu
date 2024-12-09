@@ -12,22 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_circuit_keccak::prove::{keccak_prover, KeccakState};
-
-fn main() {
-    let mut state = KeccakState::default();
-    let mut pows = 987654321_u64;
-    for part in state.as_mut_slice() {
-        *part = pows;
-        pows = pows.wrapping_mul(123456789);
-    }
-
-    let po2 = 17; // 128K
-    let cycles = 1 << po2;
-    let count = cycles / 200; // roughly 200 cycles per keccakf
-    let inputs = vec![state; count];
-
-    let prover = keccak_prover().unwrap();
-    let seal = prover.prove(&inputs, po2).unwrap();
-    prover.verify(&seal).expect("Verification failed");
-}
+/// rust's cc::Build needs more than one .cu file to pass the proper
+/// options to the cuda compiler, so this file can be used as a
+/// placeholder if we only need to compile a single .cu file.

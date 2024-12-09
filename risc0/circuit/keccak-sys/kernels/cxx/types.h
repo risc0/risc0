@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "steps.cuh"
+namespace risc0::circuit::keccak::cpu {
 
-namespace risc0::impl {
+#include "types.h.inc"
 
-#include "steps.cu.inc"
-
-} // namespace risc0::impl
+}
