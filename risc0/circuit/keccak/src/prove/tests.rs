@@ -15,21 +15,13 @@
 use std::rc::Rc;
 
 use cfg_if::cfg_if;
-use risc0_circuit_keccak_methods::{KECCAK_ELF, KECCAK_ID};
-use risc0_zkp::{
-    core::digest::Digest,
-    digest,
-    hal::{Buffer as _, Hal as _},
-};
-use risc0_zkvm::{get_prover_server, register_zkr, ExecutorEnv, ProverOpts};
+use risc0_zkp::hal::{Buffer as _, Hal as _};
 use test_log::test;
 
-use super::{testutil::test_inputs, zkr::get_keccak_zkr};
+use super::testutil::test_inputs;
 use crate::{
-    get_control_id,
     prove::{keccak_prover, CircuitWitnessGenerator as _, MetaBuffer, PreflightTrace, StepMode},
     zirgen::circuit::*,
-    KECCAK_PO2_RANGE,
 };
 
 #[test]
@@ -87,60 +79,4 @@ fn fwd_rev_ab() {
     };
 
     assert_eq!(fwd_data, rev_data);
-}
-
-static REGISTER_ZKRS: std::sync::Once = std::sync::Once::new();
-
-fn register_zkrs() {
-    REGISTER_ZKRS.call_once(|| {
-        for po2 in KECCAK_PO2_RANGE {
-            register_zkr(get_control_id(po2), move || get_keccak_zkr(po2));
-        }
-    });
-}
-
-fn run_test(po2: usize, claim_digest: Digest) {
-    let to_guest: (Digest, u32) = (claim_digest, po2 as u32);
-
-    let env = ExecutorEnv::builder()
-        .write(&to_guest)
-        .unwrap()
-        .build()
-        .unwrap();
-
-    register_zkrs();
-
-    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
-
-    // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, KECCAK_ELF).unwrap().receipt;
-
-    // Make sure this receipt actually depends on the assumption;
-    // otherwise this test might give a false negative.
-    assert!(!receipt
-        .inner
-        .composite()
-        .unwrap()
-        .assumption_receipts
-        .is_empty());
-
-    // Make sure the receipt verifies OK
-    receipt.verify(KECCAK_ID).unwrap();
-}
-
-#[test]
-fn lift_16() {
-    run_test(
-        16,
-        digest!("822a0c0b9cd04788833b9366addf8343c27563733ec1f3fc4ca405915e1ae162"),
-    );
-}
-
-#[test]
-#[ignore] // causes OOM in some environments
-fn lift_17() {
-    run_test(
-        17,
-        digest!("a1b1e7b58b6e1ab761bd4f55cc763d9eef886b26e0942e4a3916d0c465f3d962"),
-    );
 }

@@ -1195,12 +1195,7 @@ fn heap_bug_zkvm_527() {
 }
 
 #[test]
-fn big_keccak() {
-    run_test(MultiTestSpec::BigKeccak);
-}
-
-#[test]
-fn keccak_permute() {
+fn sys_keccak_permute() {
     run_test(MultiTestSpec::SysKeccakPermute);
 }
 

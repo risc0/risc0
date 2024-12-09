@@ -15,10 +15,9 @@
 use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
-use risc0_circuit_keccak::{get_control_id, prove::zkr::get_keccak_zkr, KECCAK_PO2_RANGE};
 use risc0_zkvm::{
-    compute_image_id, get_prover_server, register_zkr, ApiServer, ExecutorEnv, ExecutorImpl,
-    ProverOpts, ProverServer, VerifierContext,
+    compute_image_id, get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts,
+    ProverServer, VerifierContext,
 };
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
@@ -119,11 +118,6 @@ pub fn main() {
         let image_id = compute_image_id(&elf).unwrap();
         println!("{image_id}");
         return;
-    }
-
-    // register keccak zkrs - todo: find a better way to do this...
-    for po2 in KECCAK_PO2_RANGE {
-        register_zkr(get_control_id(po2), move || get_keccak_zkr(po2));
     }
 
     if let Some(port) = args.mode.port {

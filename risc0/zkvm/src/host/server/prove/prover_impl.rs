@@ -15,7 +15,7 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
-use risc0_circuit_rv32im::prove::SegmentProver;
+use risc0_circuit_rv32im::prove::segment_prover;
 
 use super::{keccak::prove_keccak, ProverServer};
 use crate::{
@@ -24,7 +24,7 @@ use crate::{
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
     },
-    prove_zkr,
+    prove_registered_zkr,
     receipt::{
         segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
@@ -37,16 +37,12 @@ use crate::{
 /// An implementation of a Prover that runs locally.
 pub struct ProverImpl {
     opts: ProverOpts,
-    segment_prover: Box<dyn SegmentProver>,
 }
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts, segment_prover: Box<dyn SegmentProver>) -> Self {
-        Self {
-            opts,
-            segment_prover,
-        }
+    pub fn new(opts: ProverOpts) -> Self {
+        Self { opts }
     }
 }
 
@@ -101,7 +97,7 @@ impl ProverServer for ProverImpl {
         let mut zkr_receipts = HashMap::new();
         for proof_request in session.pending_zkrs.iter() {
             let allowed_control_ids = vec![proof_request.control_id];
-            let receipt = prove_zkr(
+            let receipt = prove_registered_zkr(
                 &proof_request.control_id,
                 allowed_control_ids,
                 &proof_request.input,
@@ -199,7 +195,8 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let seal = self.segment_prover.prove_segment(&segment.inner)?;
+        let segment_prover = segment_prover(&self.opts.hashfn)?;
+        let seal = segment_prover.prove_segment(&segment.inner)?;
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();

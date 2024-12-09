@@ -103,6 +103,7 @@ hotbench = { workspace = true }
 human-repr = { version = "1.0", features = ["1024"] }
 puffin = "0.19"
 puffin_http = "0.16"
+risc0-circuit-keccak-methods = { path = "../circuit/keccak/methods" }
 risc0-zkvm-methods = { path = "methods", features = ["std"] }
 serde_json = "1.0"
 serde_with = "3.11"
