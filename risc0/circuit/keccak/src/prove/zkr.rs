@@ -12,66 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::{Cursor, Read as _};
+use std::io::Read as _;
 
-use anyhow::{Context as _, Result};
+use anyhow::Result;
 use risc0_circuit_recursion::prove::Program;
-use zip::ZipArchive;
+use xz2::read::XzDecoder;
 
-use crate::RECURSION_PO2;
+use crate::{KECCAK_PO2_RANGE, RECURSION_PO2};
 
-const ZKR_ZIP: &[u8] = include_bytes!("keccak_zkr.zip");
+const ZKRS: &[&[u8]] = &[
+    include_bytes!("keccak_lift_14.zkr.xz"),
+    include_bytes!("keccak_lift_15.zkr.xz"),
+    include_bytes!("keccak_lift_16.zkr.xz"),
+    include_bytes!("keccak_lift_17.zkr.xz"),
+    include_bytes!("keccak_lift_18.zkr.xz"),
+];
 
 pub fn get_keccak_zkr(po2: usize) -> Result<Program> {
-    let name = format!("keccak_lift_{po2}.zkr");
-
-    let mut zip = ZipArchive::new(Cursor::new(ZKR_ZIP))?;
-    let mut entry = zip
-        .by_name(&name)
-        .with_context(|| format!("Failed to read {name}"))?;
-
-    let mut bytes = Vec::new();
-    entry.read_to_end(&mut bytes)?;
+    let idx = po2 - KECCAK_PO2_RANGE.min().unwrap();
+    let mut decoder = XzDecoder::new(ZKRS[idx]);
+    let mut bytes = vec![];
+    decoder.read_to_end(&mut bytes)?;
     let u32s = bytemuck::cast_slice(&bytes);
-
     Ok(Program::from_encoded(u32s, RECURSION_PO2))
-}
-
-#[cfg(test)]
-mod tests {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
-    use risc0_zkvm::recursion::MerkleGroup;
-
-    use crate::{control_id::KECCAK_CONTROL_ROOT, KECCAK_CONTROL_IDS, KECCAK_PO2_RANGE};
-
-    use super::get_keccak_zkr;
-
-    fn compute_control_ids() -> Vec<Digest> {
-        let mut ret = vec![];
-        for po2 in KECCAK_PO2_RANGE {
-            let program = get_keccak_zkr(po2).unwrap();
-            let hash_suite = Poseidon2HashSuite::new_suite();
-            ret.push(program.compute_control_id(hash_suite))
-        }
-        ret
-    }
-
-    fn compute_control_root() -> Digest {
-        let control_ids = compute_control_ids();
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        let hashfn = hash_suite.hashfn.as_ref();
-        let group = MerkleGroup::new(control_ids).unwrap();
-        group.calc_root(hashfn)
-    }
-
-    // Makes sure our included control IDs are what we expect
-    #[test]
-    fn control_ids() {
-        assert_eq!(KECCAK_CONTROL_IDS, compute_control_ids());
-    }
-
-    #[test]
-    fn control_roots() {
-        assert_eq!(KECCAK_CONTROL_ROOT, compute_control_root());
-    }
 }

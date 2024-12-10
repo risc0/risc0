@@ -74,6 +74,10 @@ pub mod reg_abi {
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
+pub const KECCACK_STATE_BYTES: usize = 200;
+pub const KECCACK_STATE_WORDS: usize = 200 / WORD_SIZE;
+pub const KECCACK_STATE_DWORDS: usize = 200 / 8;
+
 /// Number of words in each cycle received using the SOFTWARE ecall
 pub const IO_CHUNK_WORDS: usize = 4;
 
@@ -137,6 +141,7 @@ pub mod nr {
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_KECCAK);
+    declare_syscall!(pub SYS_KECCAK_PERMUTE);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
@@ -620,7 +625,7 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
 // Some environment variable names are considered safe by default to use in the guest, provided by
 // the host, and are included in this list. It may be useful to allow guest developers to register
 // additional variable names as part of their guest program.
-const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE"];
+const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE", b"RUST_LIB_BACKTRACE"];
 
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
@@ -656,7 +661,7 @@ pub unsafe extern "C" fn sys_getenv(
             }
         }
         if !allowed {
-            const MSG_1: &[u8] = "sys_getenv not enabaled for var".as_bytes();
+            const MSG_1: &[u8] = "sys_getenv not enabled for var".as_bytes();
             unsafe { sys_log(MSG_1.as_ptr(), MSG_1.len()) };
             unsafe { sys_log(varname, varname_len) };
             const MSG_2: &[u8] = "sys_getenv is disabled; can be enabled with the sys-getenv feature flag on risc0-zkvm-platform".as_bytes();
@@ -947,6 +952,22 @@ pub unsafe extern "C" fn sys_keccak(
     );
 }
 
+/// Permute the keccak state on the host
+///
+/// # Safety
+#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
+#[stability::unstable]
+pub unsafe extern "C" fn sys_keccak_permute(
+    in_state: *const [u64; KECCACK_STATE_DWORDS],
+    out_state: *mut [u64; KECCACK_STATE_DWORDS],
+) {
+    syscall_1(
+        nr::SYS_KECCAK_PERMUTE,
+        out_state as *mut u32,
+        KECCACK_STATE_WORDS,
+        in_state as u32,
+    );
+}
 /// Executes the keccak circuit, and then executes the lift predicate
 /// in the recursion circuit.
 ///

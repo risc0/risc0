@@ -49,12 +49,12 @@ use super::{CircuitWitnessGenerator, MetaBuffer, PreflightCycleOrder, PreflightT
 use crate::prove::preflight::ControlState;
 
 pub struct CudaCircuitHal<CH: CudaHash> {
-    _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
-        Self { _hal: hal }
+        Self { hal }
     }
 }
 
@@ -81,7 +81,7 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         from: &[u32],
     ) -> Result<()> {
         scope!("scatter");
-        let from = self._hal.copy_from_u32("from", from);
+        let from = self.hal.copy_from_u32("from", from);
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_scatter(
                 into.buf.as_device_ptr(),

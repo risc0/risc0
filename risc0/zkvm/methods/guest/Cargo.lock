@@ -924,9 +924,9 @@ dependencies = [
 
 [[package]]
 name = "postcard"
-version = "1.0.8"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a55c51ee6c0db07e68448e336cf8ea4131a620edefebf9893e759b2d793420f8"
+checksum = "170a2601f67cc9dba8edd8c4870b15f71a6a2dc196daec8c83f72b59dff628a8"
 dependencies = [
  "cobs",
  "heapless",
@@ -1238,12 +1238,12 @@ dependencies = [
  "bytemuck",
  "getrandom",
  "hex-literal",
+ "risc0-circuit-keccak",
  "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",
  "rsa",
- "tiny-keccak",
 ]
 
 [[package]]
@@ -1549,15 +1549,6 @@ checksum = "8b9ef9bad013ada3808854ceac7b46812a6465ba368859a37e2100283d2d719c"
 dependencies = [
  "cfg-if",
  "once_cell",
-]
-
-[[package]]
-name = "tiny-keccak"
-version = "2.0.2"
-source = "git+https://github.com/risc0/tiny-keccak.git?rev=11b6495b4f102bae3ac6ed975b9c91cf52995af4#11b6495b4f102bae3ac6ed975b9c91cf52995af4"
-dependencies = [
- "anyhow",
- "crunchy",
 ]
 
 [[package]]

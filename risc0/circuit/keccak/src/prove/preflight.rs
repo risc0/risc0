@@ -311,12 +311,12 @@ impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
             cycle: 0,
         };
 
-        // 100 zeros @ offset zero (for whereever we need zero)
+        // 100 zeros @ offset zero (for wherever we need zero)
         for _ in 0..100 {
             ret.data.push(0);
         }
 
-        // Initalize sha state (and current data offset)
+        // Initialize sha state (and current data offset)
         let mut cur_sha = SHA_INIT;
         let mut sflat = ret.write_sha_state(&cur_sha);
 
