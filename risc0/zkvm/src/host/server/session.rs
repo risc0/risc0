@@ -15,11 +15,16 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{collections::BTreeSet, fs, path::PathBuf};
+use std::{
+    collections::{BTreeSet, HashMap},
+    fs,
+    path::PathBuf,
+};
 
 use anyhow::{ensure, Result};
+use enum_map::EnumMap;
 use risc0_binfmt::{MemoryImage, SystemState};
-use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
+use risc0_circuit_rv32im::prove::{emu::exec::EcallMetric, segment::Segment as CircuitSegment};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -31,6 +36,8 @@ use crate::{
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
     ReceiptClaim,
 };
+
+use super::exec::syscall::{SyscallKind, SyscallMetric};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -97,6 +104,12 @@ pub struct Session {
     /// A list of pending keccak proof requests.
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
+
+    /// ecall metrics grouped by name.
+    pub(crate) ecall_metrics: HashMap<String, EcallMetric>,
+
+    /// syscall metrics grouped by kind.
+    pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
 }
 
 /// The execution trace of a portion of a program.
@@ -164,6 +177,8 @@ impl Session {
         post_state: SystemState,
         pending_zkrs: Vec<ProveZkrRequest>,
         pending_keccaks: Vec<ProveKeccakRequest>,
+        ecall_metrics: HashMap<String, EcallMetric>,
+        syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
     ) -> Self {
         Self {
             segments,
@@ -181,6 +196,8 @@ impl Session {
             post_state,
             pending_zkrs,
             pending_keccaks,
+            ecall_metrics,
+            syscall_metrics,
         }
     }
 
@@ -248,23 +265,44 @@ impl Session {
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
     pub fn log(&self) {
-        tracing::info!("number of segments: {}", self.segments.len());
-        tracing::info!("total cycles: {}", self.total_cycles);
-        tracing::info!(
+        if std::env::var_os("RISC0_INFO").is_none() {
+            return;
+        }
+
+        let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
+
+        eprintln!("number of segments: {}", self.segments.len());
+        eprintln!("total cycles: {}", self.total_cycles);
+        eprintln!(
             "user cycles: {} ({:.2}%)",
             self.user_cycles,
-            self.user_cycles as f64 / self.total_cycles as f64 * 100.0
+            pct(self.user_cycles)
         );
-        tracing::info!(
+        eprintln!(
             "paging cycles: {} ({:.2}%)",
             self.paging_cycles,
-            self.paging_cycles as f64 / self.total_cycles as f64 * 100.0
+            pct(self.paging_cycles)
         );
-        tracing::info!(
+        eprintln!(
             "reserved cycles: {} ({:.2}%)",
             self.reserved_cycles,
-            self.reserved_cycles as f64 / self.total_cycles as f64 * 100.0
+            pct(self.reserved_cycles)
         );
+
+        eprintln!("ecalls");
+        for (name, metric) in self.ecall_metrics.iter() {
+            eprintln!(
+                "\t{name}, count: {}, cycles: {}, ({:.2}%)",
+                metric.count,
+                metric.cycles,
+                pct(metric.cycles)
+            );
+        }
+
+        eprintln!("syscalls");
+        for (name, metric) in self.syscall_metrics.iter() {
+            eprintln!("\t{name:?}, count: {}, size: {}", metric.count, metric.size);
+        }
 
         assert_eq!(
             self.total_cycles,

@@ -141,7 +141,6 @@ pub mod nr {
     declare_syscall!(pub SYS_FORK);
     declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_KECCAK);
-    declare_syscall!(pub SYS_KECCAK_PERMUTE);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_PIPE);
@@ -932,37 +931,17 @@ pub unsafe extern "C" fn sys_prove_zkr(
     }
 }
 
-/// Get a keccak hash from the host with the given input data - should be
-/// invoked during `hasher.finalize(...)`
-///
-/// # Safety
-#[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
-#[stability::unstable]
-pub unsafe extern "C" fn sys_keccak(
-    input_ptr: *const u8,
-    len: usize,
-    out_state: *mut [u32; DIGEST_WORDS],
-) {
-    syscall_2(
-        nr::SYS_KECCAK,
-        out_state as *mut u32,
-        DIGEST_WORDS,
-        input_ptr as u32,
-        len as u32,
-    );
-}
-
 /// Permute the keccak state on the host
 ///
 /// # Safety
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
-pub unsafe extern "C" fn sys_keccak_permute(
+pub unsafe extern "C" fn sys_keccak(
     in_state: *const [u64; KECCACK_STATE_DWORDS],
     out_state: *mut [u64; KECCACK_STATE_DWORDS],
 ) {
     syscall_1(
-        nr::SYS_KECCAK_PERMUTE,
+        nr::SYS_KECCAK,
         out_state as *mut u32,
         KECCACK_STATE_WORDS,
         in_state as u32,

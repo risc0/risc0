@@ -2356,3 +2356,47 @@ name = "zeroize"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ced3678a2879b30306d323f4542626697a464a97c0a07c9aebf7ebca65cd4dde"
+
+[[patch.unused]]
+name = "risc0-binfmt"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-build"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-build-kernel"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-circuit-keccak"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-circuit-recursion"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-circuit-rv32im"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-core"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-sys"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-zkp"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-zkvm"
+version = "1.2.1-rc.0"
+
+[[patch.unused]]
+name = "risc0-zkvm-platform"
+version = "1.2.1-rc.0"

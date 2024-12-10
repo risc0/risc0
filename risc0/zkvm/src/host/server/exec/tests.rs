@@ -1195,8 +1195,8 @@ fn heap_bug_zkvm_527() {
 }
 
 #[test]
-fn sys_keccak_permute() {
-    run_test(MultiTestSpec::SysKeccakPermute);
+fn sys_keccak() {
+    run_test(MultiTestSpec::SysKeccak);
 }
 
 #[cfg(feature = "docker")]

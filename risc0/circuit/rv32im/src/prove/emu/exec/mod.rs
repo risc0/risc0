@@ -15,10 +15,18 @@
 #[cfg(test)]
 mod tests;
 
-use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
+use std::{
+    array,
+    cell::RefCell,
+    collections::{BTreeSet, HashMap},
+    io::Cursor,
+    mem,
+    rc::Rc,
+};
 
 use anyhow::{bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
+use enum_map::{Enum, EnumMap};
 use num_bigint::BigUint;
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
@@ -112,14 +120,33 @@ pub struct ExecutorResult {
     pub pre_state: SystemState,
     pub post_state: SystemState,
     pub output_digest: Option<Digest>,
+    pub ecall_metrics: HashMap<String, EcallMetric>,
+}
+
+#[derive(Clone, Copy, Debug, Enum)]
+enum EcallKind {
+    BigInt,
+    BigInt2,
+    Input,
+    Software,
+    Sha2,
+}
+
+#[derive(Debug, Default)]
+pub struct EcallMetric {
+    pub count: u64,
+    pub cycles: u64,
 }
 
 #[derive(Default)]
+struct EcallMetrics(EnumMap<EcallKind, EcallMetric>);
+
+#[derive(Default)]
 struct SessionCycles {
-    user: usize,
-    paging: usize,
-    reserved: usize,
-    total: usize,
+    total: u64,
+    user: u64,
+    paging: u64,
+    reserved: u64,
 }
 
 pub struct SimpleSession {
@@ -136,6 +163,7 @@ struct PendingState {
     output_digest: Option<Digest>,
     exit_code: Option<ExitCode>,
     events: BTreeSet<TraceEvent>,
+    ecall: Option<EcallKind>,
 }
 
 pub struct Executor<'a, 'b, S: Syscall> {
@@ -150,6 +178,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     pending: PendingState,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     cycles: SessionCycles,
+    ecall_metrics: EcallMetrics,
 }
 
 impl PendingState {
@@ -159,6 +188,7 @@ impl PendingState {
         self.syscall = None;
         self.output_digest = None;
         self.exit_code = None;
+        self.ecall = None;
     }
 }
 
@@ -187,9 +217,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 output_digest: None,
                 exit_code: None,
                 events: BTreeSet::new(),
+                ecall: None,
             },
             trace,
             cycles: SessionCycles::default(),
+            ecall_metrics: Default::default(),
         }
     }
 
@@ -220,7 +252,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             if let Some(max_cycles) = max_cycles {
-                if self.cycles.user >= max_cycles as usize {
+                if self.cycles.user >= max_cycles {
                     bail!("Session limit exceeded");
                 }
             }
@@ -262,8 +294,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 })?;
                 segments += 1;
                 self.cycles.total += 1 << segment_po2;
-                self.cycles.paging += self.pager.cycles;
-                self.cycles.reserved += po2_padding + RESERVED_CYCLES;
+                self.cycles.paging += self.pager.cycles as u64;
+                self.cycles.reserved += (po2_padding + RESERVED_CYCLES) as u64;
                 self.pager.clear();
                 self.insn_cycles = 0;
 
@@ -293,8 +325,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         })?;
         segments += 1;
         self.cycles.total += 1 << po2;
-        self.cycles.paging += self.pager.cycles;
-        self.cycles.reserved += po2_padding + RESERVED_CYCLES;
+        self.cycles.paging += self.pager.cycles as u64;
+        self.cycles.reserved += (po2_padding + RESERVED_CYCLES) as u64;
 
         // NOTE: When a segment ends in a Halted(_) state, the post_state will be null.
         let post_state = match exit_code {
@@ -305,17 +337,20 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             _ => post_state,
         };
 
+        let ecall_metrics = std::mem::take(&mut self.ecall_metrics);
+
         Ok(ExecutorResult {
             segments,
             exit_code,
             post_image: self.pager.image.clone(),
-            user_cycles: self.cycles.user.try_into()?,
-            paging_cycles: self.cycles.paging.try_into()?,
-            reserved_cycles: self.cycles.reserved.try_into()?,
-            total_cycles: self.cycles.total.try_into()?,
+            user_cycles: self.cycles.user,
+            paging_cycles: self.cycles.paging,
+            reserved_cycles: self.cycles.reserved,
+            total_cycles: self.cycles.total,
             pre_state: initial_state,
             post_state,
             output_digest: self.output_digest,
+            ecall_metrics: ecall_metrics.into(),
         })
     }
 
@@ -324,7 +359,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             trace
                 .borrow_mut()
                 .trace_callback(TraceEvent::InstructionStart {
-                    cycle: self.cycles.user.try_into()?,
+                    cycle: self.cycles.user,
                     pc: self.pc.0,
                     insn: self.pending.insn,
                 })?;
@@ -336,7 +371,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         self.pc = self.pending.pc;
         self.insn_cycles += self.pending.cycles;
-        self.cycles.user += self.pending.cycles;
+        self.cycles.user += self.pending.cycles as u64;
+
+        if let Some(kind) = self.pending.ecall.take() {
+            self.ecall_metrics.0[kind].count += 1;
+            self.ecall_metrics.0[kind].cycles += self.pending.cycles as u64;
+        }
+
         self.pending.cycles = 0;
         self.pending.events.clear();
         if let Some(syscall) = self.pending.syscall.take() {
@@ -389,6 +430,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         let word = self.input_digest.as_words()[a0];
         self.store_register(REG_A0, word)?;
 
+        self.pending.ecall = Some(EcallKind::Input);
         self.pending.cycles += 1;
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -441,6 +483,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         tracing::trace!("{syscall:08x?}");
 
+        self.pending.ecall = Some(EcallKind::Software);
         self.pending.cycles += chunks + 1; // syscallBody + syscallFini
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -492,6 +535,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         self.store_region_into_guest(state_out_ptr, bytemuck::cast_slice(&state))?;
 
+        self.pending.ecall = Some(EcallKind::Sha2);
         self.pending.cycles += sha_cycles(count as usize);
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -542,6 +586,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             self.store_u32_into_guest(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
         }
 
+        self.pending.ecall = Some(EcallKind::BigInt);
         self.pending.cycles += BIGINT_CYCLES;
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -568,8 +613,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         self.load_region_from_guest(consts_ptr, consts_size * WORD_SIZE as u32)?;
 
         let cycles = verify_program_size as usize + 1;
-        tracing::info!("bigint2: {cycles} cycles");
 
+        self.pending.ecall = Some(EcallKind::BigInt2);
         self.pending.cycles += cycles;
         self.pending.pc = self.pc + WORD_SIZE;
 
@@ -796,7 +841,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
 
 impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     fn get_cycle(&self) -> u64 {
-        self.cycles.user as u64
+        self.cycles.user
     }
 
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
@@ -873,4 +918,21 @@ pub fn execute_elf<S: Syscall>(
         syscall_handler,
         input_digest,
     )
+}
+
+impl From<EcallMetrics> for HashMap<String, EcallMetric> {
+    fn from(metrics: EcallMetrics) -> Self {
+        let mut ret = HashMap::new();
+        for (kind, metric) in metrics.0 {
+            let name = match kind {
+                EcallKind::BigInt => "bigint",
+                EcallKind::BigInt2 => "bigint2",
+                EcallKind::Input => "input",
+                EcallKind::Software => "software",
+                EcallKind::Sha2 => "sha2",
+            };
+            ret.insert(name.to_string(), metric);
+        }
+        ret
+    }
 }
