@@ -1100,15 +1100,3 @@ dependencies = [
  "quote",
  "syn 2.0.87",
 ]
-
-[[patch.unused]]
-name = "risc0-build"
-version = "1.2.1-rc.0"
-
-[[patch.unused]]
-name = "risc0-build-kernel"
-version = "1.2.1-rc.0"
-
-[[patch.unused]]
-name = "risc0-sys"
-version = "1.2.1-rc.0"
