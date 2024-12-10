@@ -112,6 +112,9 @@ no longer be required.
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
+[^2]: Some tagged releases of this crate may depend on updated precompiles.
+    See [Stability](#stability) for more details.
+
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [cargo-patch]: https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section
 [commit-lockfile]: https://blog.rust-lang.org/2023/08/29/committing-lockfiles.html
