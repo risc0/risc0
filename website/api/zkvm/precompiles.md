@@ -69,7 +69,7 @@ cargo update -p sha2 --precise 0.10.8
 
 > Note: To ensure that the patch is being applied, search for the crate in the `Cargo.lock` file
 > of your guest to ensure that it references the fork repository. It is generally good practice to
-> commit the `Cargo.lock` file to git, to ensure versions don't get accidentally updated.
+> [commit the `Cargo.lock` file to git][commit-lockfile], to ensure versions don't get accidentally updated.
 
 When using cryptography indirectly, e.g. via the `cookie`, `oauth2`, or `revm`,
 crates it may be possible to enable acceleration support without code changes by
@@ -90,20 +90,24 @@ RustCrypto's secp256k1 ECDSA library. This fork starts from the base
 implementation, and changes the core operations to use the accelerated 256-bit
 elliptic curve instructions. E.g. [`lincomb`][lincomb].
 
+## Stability
+
+Certain versions of patches for some crates (e.g. `k256`, `rsa`) depend on more optimized
+precompiles that are still undergoing revision and review, and so users must opt-in to these
+features by setting the `"unstable"` [feature flag][feature-flag] on the `risc0-zkvm` crate used by
+the zkVM guest and by the `risc0-build` crate used to build the guest. These also require using
+versions `>1.2.0` of `risc0` crates. For users who need a stable, production-ready version we are
+working on stablizing these precompiles as soon as possible, and the `"unstable"` feature flag will
+no longer be required.
+
+
 [^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
-[^2]: Certain versions of patches for this crate depend on our more optimized precompiles that are
-    still undergoing revision and review, and so users must opt-in to these features by setting the
-    `"unstable"` [feature flag][feature-flag] on the `risc0-zkvm` crate used by the zkVM guest and by the
-    `risc0-build` crate used to build the guest. These also require using versions `>1.2.0` of
-    `risc0` crates. For users who need a stable, production-ready version we are working on
-    stablizing these precompiles as soon as possible, and the `"unstable"` feature flag will no
-    longer be required.
-
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [cargo-patch]: https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section
+[commit-lockfile]: https://blog.rust-lang.org/2023/08/29/committing-lockfiles.html
 [curve25519-dalek]: https://github.com/risc0/curve25519-dalek/tree/risczero
 [discord-url]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-1.2/examples/ecdsa
