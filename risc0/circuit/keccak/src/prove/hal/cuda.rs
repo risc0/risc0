@@ -45,7 +45,8 @@ use crate::{
     },
 };
 
-use super::{CircuitWitnessGenerator, MetaBuffer, PreflightTrace, StepMode};
+use super::{CircuitWitnessGenerator, MetaBuffer, PreflightCycleOrder, PreflightTrace, StepMode};
+use crate::prove::preflight::ControlState;
 
 pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
@@ -57,7 +58,22 @@ impl<CH: CudaHash> CudaCircuitHal<CH> {
     }
 }
 
+pub(crate) struct CudaPreflightOrder;
+
+// Reorder our processing so that we process each mux arm together.
+// This cuts down on warp divergence at the expense of coalescing
+// fewer memory operations.
+impl PreflightCycleOrder for CudaPreflightOrder {
+    type Key = (u8, u8);
+
+    fn key_for_cycle(state: &ControlState) -> Self::Key {
+        (state.cycle_type, state.sub_type)
+    }
+}
+
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
+    type PreferredPreflightOrder = CudaPreflightOrder;
+
     fn scatter_preflight(
         &self,
         into: &MetaBuffer<CudaHal<CH>>,
@@ -77,16 +93,16 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         })
     }
 
-    fn generate_witness(
+    fn generate_witness<O: PreflightCycleOrder>(
         &self,
         mode: StepMode,
-        preflight: &PreflightTrace,
+        preflight: &PreflightTrace<O>,
         global: &MetaBuffer<CudaHal<CH>>,
         data: &MetaBuffer<CudaHal<CH>>,
     ) -> Result<()> {
         scope!("witgen");
 
-        let cycles = preflight.preimage_idxs.len();
+        let cycles = preflight.cycle;
         assert_eq!(cycles, data.rows);
         tracing::debug!("witgen: {cycles}");
 
@@ -106,10 +122,19 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
                 checked_reads: data.checked_reads,
             },
         };
+
+        let (run_order, preimage_idx): (Vec<u32>, Vec<u32>) = preflight
+            .cycles
+            .values()
+            .flatten()
+            .map(|c| (c.cycle, c.preimage_idx))
+            .collect();
+
         let preflight = RawPreflightTrace {
             preimages: preflight.preimages.as_ptr(),
             preimages_count: preflight.preimages.len() as u32,
-            preimage_idxs: preflight.preimage_idxs.as_ptr(),
+            preimage_idxs: preimage_idx.as_ptr(),
+            run_order: run_order.as_ptr(),
         };
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)

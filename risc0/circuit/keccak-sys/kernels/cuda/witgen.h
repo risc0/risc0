@@ -45,15 +45,20 @@ struct PreflightTrace {
 
   // Which 'preimage' each cycle is working on (to answer extern calls)
   uint32_t* curPreimage;
+
+  // Order of cycles to process
+  uint32_t* runOrder;
 };
 
 struct ExecContext {
 public:
-  __device__ ExecContext(PreflightTrace& preflight, size_t cycle)
-      : preflight(preflight), cycle(cycle) {}
+  __device__ ExecContext(PreflightTrace& preflight, size_t cycle, size_t curPreimage)
+      : preflight(preflight), cycle(cycle), curPreimage(curPreimage) {}
 
   PreflightTrace& preflight;
   size_t cycle;
+  // Current preimage index for this cycle.
+  size_t curPreimage;
 };
 
 struct BufferObj {
@@ -287,14 +292,14 @@ __device__ inline Val extern_getPreimage(ExecContext& ctx, Val idx) {
   // printf("extern_getPreimage\n");
   uint32_t idxLow = idx.asUInt32() % 4;
   uint32_t idxHigh = idx.asUInt32() / 4;
-  uint32_t preimageIdx = ctx.preflight.curPreimage[ctx.cycle];
+  uint32_t preimageIdx = ctx.curPreimage;
   const KeccakState& preimages = ctx.preflight.preimages[preimageIdx];
   return (preimages[idxHigh] >> (16 * idxLow)) & 0xffff;
 }
 
 __device__ inline Val extern_nextPreimage(ExecContext& ctx) {
   // printf("extern_nextPreimage\n");
-  return ctx.preflight.curPreimage[ctx.cycle] != ctx.preflight.preimagesSize;
+  return ctx.curPreimage != ctx.preflight.preimagesSize;
 }
 
 #include "defs.cu.inc"
