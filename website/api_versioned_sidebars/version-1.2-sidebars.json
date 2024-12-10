@@ -148,8 +148,8 @@
         },
         {
           "type": "doc",
-          "label": "Cryptography Acceleration",
-          "id": "zkvm/acceleration"
+          "label": "Precompiles",
+          "id": "zkvm/precompiles"
         },
         {
           "type": "doc",
