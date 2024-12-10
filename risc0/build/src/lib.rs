@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(clippy::needless_doctest_main)]
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
@@ -442,6 +443,12 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
             .join("cpp/bin/riscv32-unknown-elf-gcc");
         cmd.env("CC", cc_path)
             .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
+        // Signal to dependencies, cryptography patches in particular, that the bigint2 zkVM
+        // feature is available. Gated behind unstable to match risc0-zkvm-platform. Note that this
+        // would be seamless if there was a reliable way to tell whether it is enabled in
+        // risc0-zkvm-platform, however, this problem is also temporary.
+        #[cfg(feature = "unstable")]
+        cmd.env("RISC0_FEATURE_bigint2", "");
     }
 
     cmd.env("RUSTC", rustc)
@@ -767,7 +774,7 @@ fn do_embed_methods<G: GuestBuilder>(
                 &guest_build_opts,
             )
             .unwrap();
-            guest_methods_docker(&guest_pkg, &get_out_dir())
+            guest_methods_docker(&guest_pkg, get_out_dir())
         } else {
             let guest_dir = get_guest_dir(&pkg.name, &guest_pkg.name);
             build_guest_package(&guest_pkg, &guest_dir, &guest_build_opts, None);

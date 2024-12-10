@@ -15,16 +15,16 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, bail, ensure, Context, Result};
-use risc0_circuit_rv32im::prove::SegmentProver;
+use risc0_circuit_rv32im::prove::segment_prover;
 
-use super::ProverServer;
+use super::{keccak::prove_keccak, ProverServer};
 use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
         recursion::{identity_p254, join, lift, resolve},
     },
-    prove_zkr,
+    prove_registered_zkr,
     receipt::{
         segment::decode_receipt_claim_from_seal, InnerReceipt, SegmentReceipt, SuccinctReceipt,
     },
@@ -37,16 +37,12 @@ use crate::{
 /// An implementation of a Prover that runs locally.
 pub struct ProverImpl {
     opts: ProverOpts,
-    segment_prover: Box<dyn SegmentProver>,
 }
 
 impl ProverImpl {
     /// Construct a [ProverImpl].
-    pub fn new(opts: ProverOpts, segment_prover: Box<dyn SegmentProver>) -> Self {
-        Self {
-            opts,
-            segment_prover,
-        }
+    pub fn new(opts: ProverOpts) -> Self {
+        Self { opts }
     }
 }
 
@@ -100,11 +96,26 @@ impl ProverServer for ProverImpl {
 
         let mut zkr_receipts = HashMap::new();
         for proof_request in session.pending_zkrs.iter() {
-            let receipt = prove_zkr(&proof_request.control_id, &proof_request.input)?;
+            let allowed_control_ids = vec![proof_request.control_id];
+            let receipt = prove_registered_zkr(
+                &proof_request.control_id,
+                allowed_control_ids,
+                &proof_request.input,
+            )?;
             let assumption = Assumption {
                 claim: receipt.claim.digest(),
                 control_root: receipt.control_root()?,
             };
+            zkr_receipts.insert(assumption, receipt);
+        }
+
+        for proof_request in session.pending_keccaks.iter() {
+            let receipt = prove_keccak(proof_request)?;
+            let assumption = Assumption {
+                claim: receipt.claim.digest(),
+                control_root: receipt.control_root()?,
+            };
+            tracing::debug!("adding keccak assumption: {assumption:#?}");
             zkr_receipts.insert(assumption, receipt);
         }
 
@@ -114,9 +125,9 @@ impl ProverServer for ProverImpl {
             .map(|assumption_receipt| match assumption_receipt {
                 AssumptionReceipt::Proven(receipt) => Ok(receipt),
                 AssumptionReceipt::Unresolved(assumption) => {
-                    let receipt = zkr_receipts
-                        .get(&assumption)
-                        .ok_or(anyhow!("no receipt available for unresolved assumption"))?;
+                    let receipt = zkr_receipts.get(&assumption).ok_or(anyhow!(
+                        "no receipt available for unresolved assumption: {assumption:#?}"
+                    ))?;
                     Ok(InnerAssumptionReceipt::Succinct(receipt.clone()))
                 }
             })
@@ -184,7 +195,8 @@ impl ProverServer for ProverImpl {
             self.opts.max_segment_po2
         );
 
-        let seal = self.segment_prover.prove_segment(&segment.inner)?;
+        let segment_prover = segment_prover(&self.opts.hashfn)?;
+        let seal = segment_prover.prove_segment(&segment.inner)?;
 
         let mut claim = decode_receipt_claim_from_seal(&seal)?;
         claim.output = segment.output.clone().into();

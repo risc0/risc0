@@ -41,7 +41,7 @@ pub fn bit_rev_32(mut x: u32) -> u32 {
     x = ((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4);
     // 11111111000000001111111100000000, 00000000111111110000000011111111
     x = ((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8);
-    (x >> 16) | (x << 16)
+    x.rotate_left(16)
 }
 
 /// Bit-reverses the indices in an array of (1 << n) numbers.

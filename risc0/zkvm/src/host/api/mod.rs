@@ -79,6 +79,7 @@ impl RootMessage for pb::api::ServerRequest {}
 impl RootMessage for pb::api::ServerReply {}
 impl RootMessage for pb::api::GenericReply {}
 impl RootMessage for pb::api::OnIoReply {}
+impl RootMessage for pb::api::ProveKeccakReply {}
 impl RootMessage for pb::api::ProveSegmentReply {}
 impl RootMessage for pb::api::ProveZkrReply {}
 impl RootMessage for pb::api::LiftRequest {}
@@ -136,11 +137,11 @@ impl ConnectionWrapper {
     fn inner_recv<T: Default + RootMessage>(&self, stream: &mut TcpStream) -> Result<T> {
         LOCAL_BUF.with_borrow_mut(|buf| {
             buf.resize(4, 0);
-            stream.read_exact(buf)?;
+            stream.read_exact(buf).context("rx len failed")?;
             let len = buf.as_slice().get_u32_le() as usize;
             buf.resize(len, 0);
-            stream.read_exact(buf)?;
-            Ok(T::decode(buf.as_slice())?)
+            stream.read_exact(buf).context("rx payload failed")?;
+            T::decode(buf.as_slice()).context("rx decode failed")
         })
     }
 }
@@ -254,11 +255,10 @@ impl Connector for ParentProcessConnector {
         });
 
         let stream = rx.recv_timeout(CONNECT_TIMEOUT);
-        let stream = stream.map_err(|err| {
+        let stream = stream.inspect_err(|_| {
             shutdown.store(true, Ordering::Relaxed);
             let _ = TcpStream::connect(addr);
             handle.join().unwrap();
-            err
         })?;
 
         Ok(ConnectionWrapper::new(Arc::new(Mutex::new(

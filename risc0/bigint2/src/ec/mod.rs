@@ -22,28 +22,14 @@ use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
 const ADD_BLOB: &[u8] = include_bytes_aligned!(4, "ec_add_256.blob");
 const DOUBLE_BLOB: &[u8] = include_bytes_aligned!(4, "ec_double_256.blob");
 
-/// The secp256k1 curve's prime as u32 digits, least significant digit first
-const SECP256K1_PRIME: [u32; EC_256_WIDTH_WORDS] = [
-    0xFFFFFC2F, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
-];
-const SECP256K1_CURVE: &WeierstrassCurve<EC_256_WIDTH_WORDS> =
-    &WeierstrassCurve::<EC_256_WIDTH_WORDS>::new(
-        SECP256K1_PRIME,
-        [0u32; EC_256_WIDTH_WORDS],
-        [7, 0, 0, 0, 0, 0, 0, 0],
-    );
-
 pub const EC_256_WIDTH_WORDS: usize = 256 / 32;
 
+mod secp256k1;
+pub use secp256k1::Secp256k1Curve;
+
+/// Generic static curve configuration.
 pub trait Curve<const WIDTH: usize> {
     const CURVE: &'static WeierstrassCurve<WIDTH>;
-}
-
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
-pub enum Secp256k1Curve {}
-
-impl Curve<EC_256_WIDTH_WORDS> for Secp256k1Curve {
-    const CURVE: &'static WeierstrassCurve<EC_256_WIDTH_WORDS> = SECP256K1_CURVE;
 }
 
 /// An elliptic curve over a prime field
@@ -70,129 +56,208 @@ impl<const WIDTH: usize> WeierstrassCurve<WIDTH> {
     /// The curve as concatenated u32s
     ///
     /// Little-endian, prime then a then b
-    fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
+    pub(crate) fn as_u32s(&self) -> &[[u32; WIDTH]; 3] {
         &self.buffer
     }
 }
-impl WeierstrassCurve<EC_256_WIDTH_WORDS> {
-    /// The secp256k1 curve configuration.
-    pub const fn secp256k1() -> &'static WeierstrassCurve<EC_256_WIDTH_WORDS> {
-        SECP256K1_CURVE
-    }
-}
 
-#[derive(Clone, Debug, Eq, PartialEq, Copy)]
+/// An affine point on an elliptic curve.
+#[derive(Debug, Eq, PartialEq)]
 pub struct AffinePoint<const WIDTH: usize, C> {
     buffer: [[u32; WIDTH]; 2],
+    identity: bool,
     _marker: std::marker::PhantomData<C>,
 }
 
+// Manual clone and copy implementations to not require C to be Copy/Clone
+impl<const WIDTH: usize, C> Clone for AffinePoint<WIDTH, C> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+impl<const WIDTH: usize, C> Copy for AffinePoint<WIDTH, C> {}
+
 impl<const WIDTH: usize, C> AffinePoint<WIDTH, C> {
+    pub const IDENTITY: AffinePoint<WIDTH, C> = AffinePoint {
+        buffer: [[0u32; WIDTH]; 2],
+        identity: true,
+        _marker: std::marker::PhantomData,
+    };
+
     /// Constructs an affine point from x and y coordinates, without checking that it is on
     /// a specific curve.
     pub fn new_unchecked(x: [u32; WIDTH], y: [u32; WIDTH]) -> AffinePoint<WIDTH, C> {
         AffinePoint {
             buffer: [x, y],
+            identity: false,
             _marker: std::marker::PhantomData,
         }
     }
-    /// The point as concatenated u32s for x and y
+    /// The point as concatenated u32s for x and y. This function returns `None` if the point is at
+    /// zero/infinity and `Some` with the coordinates otherwise.
     ///
     /// Little-endian, x coordinate before y coordinate
-    /// TODO: Where to doc this next bit
     /// The result is returned as a [[u32; WIDTH]; 2], and the FFI with the guest expects a [u32; WIDTH * 2]. Per https://doc.rust-lang.org/reference/type-layout.html#array-layout they will be laid out the same in memory and this is acceptable.
-    pub fn as_u32s(&self) -> &[[u32; WIDTH]; 2] {
-        &self.buffer
+    pub fn as_u32s(&self) -> Option<&[[u32; WIDTH]; 2]> {
+        if self.identity {
+            None
+        } else {
+            Some(&self.buffer)
+        }
+    }
+
+    /// Returns true if the point is the identity element (point at zero/infinity).
+    pub fn is_identity(&self) -> bool {
+        self.identity
     }
 }
 
 impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
+    /// Elliptic curve multiplication of the point by a scalar.
     pub fn mul(&self, scalar: &[u32; WIDTH], result: &mut AffinePoint<WIDTH, C>) {
         // This assumes `pt` is actually on the curve
         // This assumption isn't checked here, so other code must ensure it's met
         // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
 
-        let curve = C::CURVE.as_u32s();
-
         // Initialize two values to alternate writes to avoid unnecessary copies.
-        let mut result_flip = false;
-        let mut result1 = [[0u32; WIDTH]; 2];
-        let mut result2 = [[0u32; WIDTH]; 2];
+        let mut result_buffer1 = AffinePoint::IDENTITY;
+        let mut result_buffer2 = AffinePoint::IDENTITY;
+
+        let mut result_ptr = &mut result_buffer1;
+        let mut result_scratch = &mut result_buffer2;
 
         // Note: the first value can be an uninitialized value.
-        let mut doubled_pt1 = self.buffer;
-        let mut doubled_pt2 = self.buffer;
+        let mut doubled_pt_buffer1 = *self;
+        let mut doubled_pt_buffer2 = *self;
+
+        let mut doubled_point = &mut doubled_pt_buffer1;
+        let mut doubled_point_scratch = &mut doubled_pt_buffer2;
 
         let mut first_write = true;
         for pos in 0..bits(scalar) {
-            // Alternate between the doubled value. Immutable reference is to the current value,
-            // mutable reference is to the other that can be written to.
-            // Note: This is not using a boolean flag because `pos%2` is less cycles.
-            let (current_doubled, next_doubled) = if pos % 2 == 0 {
-                (&doubled_pt2, &mut doubled_pt1)
-            } else {
-                (&doubled_pt1, &mut doubled_pt2)
-            };
-
             if bit(scalar, pos) {
-                // Alternate buffers to write to and use as current value.
-                let (current_result, next_result) = if result_flip {
-                    (&result2, &mut result1)
-                } else {
-                    (&result1, &mut result2)
-                };
-
                 if first_write {
                     first_write = false;
-                    *next_result = *current_doubled;
+                    *result_ptr = *doubled_point;
                 } else {
-                    add_raw(current_result, current_doubled, curve, next_result);
+                    result_ptr.add_internal(doubled_point, result_scratch);
+                    // Swap references to result buffers to update the result.
+                    core::mem::swap(&mut result_ptr, &mut result_scratch);
                 }
-                result_flip = !result_flip;
             }
 
-            double_raw(current_doubled, curve, next_doubled);
+            doubled_point.double_internal(doubled_point_scratch);
+            // Swap references to doubled point buffers to update the current doubled value.
+            core::mem::swap(&mut doubled_point, &mut doubled_point_scratch);
         }
 
-        // Assert that some value was written to the result.
         if first_write {
-            panic!("Multiplication by zero forbidden as affine coordinates can't represent the point at infinity");
+            // Multiplied by zero, which is the identity point.
+            *result = AffinePoint::IDENTITY;
+        } else {
+            // Copy the value from the buffer most recently written to.
+            *result = *result_ptr;
         }
 
-        // Return the result, based on which buffer was written to last.
-        let result_point = if result_flip { result2 } else { result1 };
-        result.buffer = result_point;
+        // Check that the final result is less than the curve's prime.
+        let prime = C::CURVE.buffer[0];
+        assert!(crate::is_less(&result_ptr.buffer[0], &prime));
+        assert!(crate::is_less(&result_ptr.buffer[1], &prime));
     }
 
+    /// Elliptic curve doubling of the affine point.
     #[stability::unstable]
     pub fn double(&self, result: &mut Self) {
-        let curve = C::CURVE;
-        double_raw(self.as_u32s(), curve.as_u32s(), &mut result.buffer);
+        self.double_internal(result);
+
+        // An honest host will always return a result less than the curve's prime in each coordinate.
+        // A dishonest prover can sometimes return a result greater than the prime, so enforce that
+        // we're in the honest case.
+        let prime = C::CURVE.buffer[0];
+        assert!(crate::is_less(&result.buffer[0], &prime));
+        assert!(crate::is_less(&result.buffer[1], &prime));
     }
 
+    /// [double] without checking the result is less than the curve's prime.
+    #[inline]
+    fn double_internal(&self, result: &mut Self) {
+        let curve = C::CURVE;
+        // If the point is zero, can short-circuit and return the identity point.
+        if let Some(point) = self.as_u32s() {
+            if self.buffer[1] != [0u32; WIDTH] {
+                double_raw(point, curve.as_u32s(), &mut result.buffer);
+                // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
+                result.identity = false;
+            } else {
+                // DO NOT REMOVE: in this case a zero has been computed and the buffer is ignored
+                result.identity = true;
+            }
+        } else {
+            *result = *self;
+        }
+    }
+
+    /// Elliptic curve addition of the affine point.
     #[stability::unstable]
     pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
+        self.add_internal(rhs, result);
+
+        // An honest host will always return a result less than the curve's prime in each coordinate.
+        // A dishonest prover can sometimes return a result greater than the prime, so enforce that
+        // we're in the honest case.
+        let prime = C::CURVE.buffer[0];
+        assert!(crate::is_less(&result.buffer[0], &prime));
+        assert!(crate::is_less(&result.buffer[1], &prime));
+    }
+
+    #[inline]
+    fn add_internal(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
         let curve = C::CURVE;
-        // TODO: Do we want to check for P + P, P - P? It isn't necessary for soundness -- it will fail
-        // an EQZ if you try -- but maybe a pretty error here would be good DevEx?
-        add_raw(
-            self.as_u32s(),
-            rhs.as_u32s(),
-            curve.as_u32s(),
-            &mut result.buffer,
-        );
+
+        // If the left or right value is zero, can return the other value.
+        let Some(lhs) = self.as_u32s() else {
+            *result = *rhs;
+            return;
+        };
+        let Some(rhs) = rhs.as_u32s() else {
+            *result = *self;
+            return;
+        };
+
+        if lhs[0] == rhs[0] {
+            // X coordinates are the same, so either we double the value if it's the same point,
+            // or return the identity if it's different (and so lhs = -rhs).
+            if self.buffer[1] != rhs[1] {
+                // x == x, y == -y, so the result is the identity point
+                result.identity = true;
+            } else {
+                // P + P, which can be done with a double call.
+                double_raw(lhs, curve.as_u32s(), &mut result.buffer);
+                // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
+                result.identity = false;
+            }
+        } else {
+            // X coordinates are different, so we can add the points as normal.
+            add_raw(lhs, rhs, curve.as_u32s(), &mut result.buffer);
+            // DO NOT REMOVE: the result is unchecked, and only the buffer is updated above
+            result.identity = false;
+        }
     }
 }
 
+/// Doubles a point on the curve.
+///
+/// Note: this function assumes that identity point cases are handled before calling, otherwise
+/// this function will panic in the host.
 fn double_raw<const WIDTH: usize>(
     point: &[[u32; WIDTH]; 2],
     curve: &[[u32; WIDTH]; 3],
     result: &mut [[u32; WIDTH]; 2],
 ) {
+    // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
+    // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
+    // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
     unsafe {
-        // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
-        // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
-        // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
         sys_bigint2_3(
             DOUBLE_BLOB.as_ptr(),
             point.as_ptr() as *const u32,
@@ -202,16 +267,20 @@ fn double_raw<const WIDTH: usize>(
     }
 }
 
+/// Adds two points on the curve.
+///
+/// Note: this function assumes that identity point cases are handled before calling, otherwise
+/// this function will panic in the host.
 fn add_raw<const WIDTH: usize>(
     lhs: &[[u32; WIDTH]; 2],
     rhs: &[[u32; WIDTH]; 2],
     curve: &[[u32; WIDTH]; 3],
     result: &mut [[u32; WIDTH]; 2],
 ) {
+    // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
+    // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
+    // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
     unsafe {
-        // Because [[u32; WIDTH]; 2] and [u32; WIDTH * 2] are laid out the same way, this `as` is safe
-        // (and similarly with [[u32; WIDTH]; 3] and [u32; WIDTH * 3])
-        // See https://doc.rust-lang.org/reference/type-layout.html#array-layout
         sys_bigint2_4(
             ADD_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,

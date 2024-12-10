@@ -326,13 +326,7 @@ void risc0_circuit_rv32im_step_compute_accum(
     risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
   ffi_wrap<uint32_t>(err, 0, [&] {
     // printf("step_compute_accum(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
-    AccumContext* actx = static_cast<AccumContext*>(ctx);
-    if (cycle == 0 || actx->isParSafe[cycle]) {
-      circuit::rv32im::step_compute_accum(ctx, steps, cycle++, args);
-      while (cycle < steps && !actx->isParSafe[cycle]) {
-        circuit::rv32im::step_compute_accum(ctx, steps, cycle++, args);
-      }
-    }
+    circuit::rv32im::step_compute_accum(ctx, steps, cycle, args);
     return 0;
   });
 }
