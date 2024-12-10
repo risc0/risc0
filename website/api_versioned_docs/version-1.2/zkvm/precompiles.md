@@ -75,6 +75,13 @@ When using cryptography indirectly, e.g. via the `cookie`, `oauth2`, or `revm`,
 crates it may be possible to enable acceleration support without code changes by
 applying a [Cargo patch][cargo-patch].
 
+Several of our precompiles are still undergoing revision and
+review, and so users must opt-in to these features by setting the `"unstable"`
+feature flag on the `risc0-zkvm` crate used by the zkVM guest and by the
+`risc0-build` crate used to build the guest. For users who need a stable,
+production-ready version we are working on stablizing these precompiles as soon
+as possible.
+
 An example of how to use these crates to accelerate ECDSA signature verification
 can be in the [ECDSA example][ecdsa]. Note the [use of the patched
 versions][ecdsa-patched] of `sha2`, `crypto-bigint` and `k256` crates used in
