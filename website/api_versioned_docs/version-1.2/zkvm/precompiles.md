@@ -38,11 +38,11 @@ Make sure that your dependency gives the same version of the crate as listed in
 the patch tag. In this example, the dependency would be
 ```toml
 [dependencies]
-sha2 = "0.10.6"
+sha2 = "=0.10.6"
 ```
 
-In some situations, particularly for crates you've used before with patch
-version updates, you may need to regenerate your `lock` file. For example:
+In some situations, for example when a patch is used indirectly, you may
+need to update the version specifically to update your lockfile. For example:
 ```toml
 cargo update -p sha2 --precise 0.10.6
 ```
