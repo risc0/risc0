@@ -31,7 +31,7 @@ each fork's repository on GitHub.
 
 | Crate | Versions supported | Patch Statement Example |
 |-------|-------------------|------------------------|
-| [`ed25519-dalek`](https://github.com/risc0/ed25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-dalek", tag = "curve25519-4.1.2-risczero.0" }` |
+| [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-dalek", tag = "curve25519-4.1.2-risczero.0" }` |
 
 ### RSA
 
@@ -54,6 +54,9 @@ If using `tag = "sha2-v0.10.8-risczero.0"`, the dependency should be:
 ```toml
 [dependencies]
 sha2 = "=0.10.8"
+
+[patch.crates-io]
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }
 ```
 
 In some situations, for example when a patch is used indirectly, you may
