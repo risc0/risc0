@@ -14,11 +14,12 @@ k256 = { version = "=0.13.3", features = [
   "expose-field",
   "std",
   "ecdsa",
-], default_features = false }
+], default-features = false }
 nalgebra = "0.32"
 risc0-benchmark-lib = { path = "../../shared", default-features = false }
 risc0-zkvm = { path = "../../../risc0/zkvm", default-features = false, features = [
   "std",
+  "unstable"
 ] }
 risc0-zkp = { path = "../../../risc0/zkp", default-features = false }
 sha3 = { version = "0.10", default-features = false }
