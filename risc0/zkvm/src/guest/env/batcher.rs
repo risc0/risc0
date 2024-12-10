@@ -14,27 +14,48 @@
 
 use alloc::vec;
 
-use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2};
+use risc0_circuit_keccak::{
+    KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KECCAK_PO2_RANGE,
+};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{
     sys_keccak_permute, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
 };
 
 const KECCAK_PERMUTE_CYCLES: usize = 200;
-const MAX_KECCAK_CYCLES: usize = 1 << KECCAK_DEFAULT_PO2;
-const MAX_KECCAK_INPUTS: usize = MAX_KECCAK_CYCLES / KECCAK_PERMUTE_CYCLES;
 
 /// This struct implements the batching of calls to the keccak accelerator.
+#[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
     inputs: Vec<KeccakState>,
+    po2: u32,
 }
 
 impl Keccak2Batcher {
-    pub const fn init() -> Self {
+    fn max_keccak_inputs(&self) -> usize {
+        let max_keccak_cycles: usize = 1 << self.po2;
+        max_keccak_cycles / KECCAK_PERMUTE_CYCLES
+    }
+
+    pub fn new() -> Self {
+        let po2 = match std::env::var("RISC0_KECCAK_PO2") {
+            Err(_) => KECCAK_DEFAULT_PO2 as u32,
+            Ok(po2) => {
+                let po2 = po2.parse::<u32>().unwrap();
+                if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+                    panic!(
+                        "invalid keccak po2 {po2}. Expected range: {:?}",
+                        KECCAK_PO2_RANGE
+                    );
+                }
+                po2
+            }
+        };
         Self {
             claim_state: SHA256_INIT,
             inputs: vec![],
+            po2,
         }
     }
 
@@ -44,7 +65,7 @@ impl Keccak2Batcher {
         self.sha_single_keccak(in_state);
         self.sha_single_keccak(&out_state);
         self.inputs.push(*in_state);
-        if self.inputs.len() == MAX_KECCAK_INPUTS {
+        if self.inputs.len() == self.max_keccak_inputs() {
             // we've reached the limit. Create a proof request.
             self.finalize();
         }
@@ -64,7 +85,7 @@ impl Keccak2Batcher {
         unsafe {
             sys_prove_keccak(
                 claim_digest.as_ref(),
-                KECCAK_DEFAULT_PO2,
+                self.po2,
                 KECCAK_CONTROL_ROOT.as_ref(),
                 input.as_ptr(),
                 input.len(),

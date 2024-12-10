@@ -24,9 +24,10 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bytemuck::Pod;
 use bytes::Bytes;
+use risc0_circuit_keccak::KECCAK_PO2_RANGE;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
@@ -118,6 +119,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) args: Vec<String>,
     pub(crate) segment_limit_po2: Option<u32>,
+    pub(crate) keccak_po2: Option<u32>,
     pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
@@ -175,6 +177,17 @@ impl<'a> ExecutorEnvBuilder<'a> {
             }
         }
 
+        if let Ok(po2) = std::env::var("RISC0_PPROF_OUT") {
+            let po2 = po2.parse::<u32>()?;
+            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+                bail!(
+                    "invalid keccak po2 {po2}. Expected range: {:?}",
+                    KECCAK_PO2_RANGE
+                );
+            }
+            inner.keccak_po2 = Some(po2);
+        }
+
         Ok(inner)
     }
 
@@ -191,6 +204,21 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.segment_limit_po2 = Some(limit);
+        self
+    }
+
+    /// Set powers of 2 cycles for keccak proofs
+    ///
+    /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
+    /// roughly linear with the segment size, so lowering this value by 1 will cut memory
+    /// consumpton by about half.
+    ///
+    /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
+    /// either up or down, may result in better proving performance.
+    ///
+    /// Given value must be within [risc0_keccak_circuit::KECCAK_PO2_RANGE].
+    pub fn keccak_po2(&mut self, limit: u32) -> &mut Self {
+        self.inner.keccak_po2 = Some(limit);
         self
     }
 
