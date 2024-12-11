@@ -15,24 +15,48 @@
 use risc0_circuit_keccak_sys::ScatterInfo;
 use risc0_core::scope;
 use risc0_zkp::core::digest::DIGEST_WORDS;
+use std::collections::BTreeMap;
+use std::marker::PhantomData;
 
 use super::KeccakState;
 use crate::zirgen::circuit::LAYOUT_TOP;
 
 type ThetaB = [u64; 5];
 
-pub(crate) struct PreflightTrace {
-    pub preimages: Vec<KeccakState>,
-    pub preimage_idxs: Vec<u32>, // per cycle
-    pub data: Vec<u32>,
-    pub scatter: Vec<ScatterInfo>,
+pub(crate) struct PreflightCycle {
+    pub cycle: u32,
+    pub preimage_idx: u32,
 }
 
-struct ControlState {
-    cycle_type: u8,
-    sub_type: u8,
-    block: u8,
-    round: u8,
+pub(crate) trait PreflightCycleOrder {
+    type Key: Ord;
+
+    fn key_for_cycle(state: &ControlState) -> Self::Key;
+}
+
+// Default is to run straight through in cycle order.
+#[derive(Default, Clone, Copy)]
+pub(crate) struct ForwardPreflightOrder;
+
+impl PreflightCycleOrder for ForwardPreflightOrder {
+    type Key = ();
+    fn key_for_cycle(_: &ControlState) -> Self::Key {}
+}
+
+pub(crate) struct PreflightTrace<Order: PreflightCycleOrder = ForwardPreflightOrder> {
+    order: PhantomData<Order>,
+    pub cycle: usize,
+    pub preimages: Vec<KeccakState>,
+    pub data: Vec<u32>,
+    pub scatter: Vec<ScatterInfo>,
+    pub cycles: BTreeMap<Order::Key, Vec<PreflightCycle>>,
+}
+
+pub(crate) struct ControlState {
+    pub cycle_type: u8,
+    pub sub_type: u8,
+    pub block: u8,
+    pub round: u8,
 }
 
 impl ControlState {
@@ -273,16 +297,18 @@ fn chi_iota(s: &mut KeccakState, round: usize) {
     s[0] ^= KECCAK_IOTA[round];
 }
 
-impl PreflightTrace {
+impl<Order: PreflightCycleOrder> PreflightTrace<Order> {
     pub(crate) fn new(inputs: &[KeccakState], cycles: usize) -> Self {
         scope!("preflight");
 
         let mut cur_idx = 0;
         let mut ret = Self {
+            order: PhantomData,
             preimages: inputs.to_vec(),
-            preimage_idxs: vec![],
             data: vec![],
             scatter: vec![],
+            cycles: BTreeMap::new(),
+            cycle: 0,
         };
 
         // 100 zeros @ offset zero (for wherever we need zero)
@@ -342,7 +368,7 @@ impl PreflightTrace {
             ret.write_sha(&mut cur_sha, &data, kflat, &mut sflat, cur_idx, false);
         }
 
-        while ret.preimage_idxs.len() < cycles {
+        while ret.cycle < cycles {
             ret.add_cycle(Control::Shutdown, 0, 0, sflat, cur_idx);
         }
 
@@ -351,7 +377,7 @@ impl PreflightTrace {
 
     fn add_cycle(&mut self, ctrl: Control, bits: u32, kflat: u32, sflat: u32, preimage_idx: u32) {
         let offset = self.data.len() as u32;
-        let cycle = self.preimage_idxs.len() as u32;
+        let cycle = self.cycle as u32;
         let ctrl_state = ctrl.as_state();
         self.data.push(ctrl_state.as_u32());
         self.scatter.push(ScatterInfo {
@@ -388,7 +414,14 @@ impl PreflightTrace {
             sflat,
             16,
         );
-        self.preimage_idxs.push(preimage_idx);
+        self.cycles
+            .entry(Order::key_for_cycle(&ctrl_state))
+            .or_default()
+            .push(PreflightCycle {
+                cycle,
+                preimage_idx,
+            });
+        self.cycle += 1
     }
 
     fn write_sha_state(&mut self, state: &ShaState) -> u32 {
