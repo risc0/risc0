@@ -114,8 +114,8 @@ __device__ void nextStep(DeviceContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
   ExecContext execCtx(
       *ctx->preflight, ctx->preflight->runOrder[cycle], ctx->preflight->curPreimage[cycle]);
-  MutableBufObj data(execCtx, *ctx->data);
-  GlobalBufObj global(execCtx, *ctx->global);
+  MutableBufObj data(*ctx->data);
+  GlobalBufObj global(*ctx->global);
   step_Top(execCtx, &data, &global);
 }
 
