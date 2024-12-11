@@ -64,7 +64,7 @@ fn keccak_po2_16() {
 fn keccak_po2_17() {
     run_test(
         17,
-        digest!("a1b1e7b58b6e1ab761bd4f55cc763d9eef886b26e0942e4a3916d0c465f3d962"),
+        digest!("a920de1111b7fa680c29f0dbd8eea64a3b9e2994de1b242e30f53fd8cd727ba2"),
     );
 }
 

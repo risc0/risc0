@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::ptr::addr_of;
+
 use alloc::vec;
 
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2};
@@ -23,6 +25,9 @@ use risc0_zkvm_platform::syscall::{
 const KECCAK_PERMUTE_CYCLES: usize = 200;
 const MAX_KECCAK_CYCLES: usize = 1 << KECCAK_DEFAULT_PO2;
 const MAX_KECCAK_INPUTS: usize = MAX_KECCAK_CYCLES / KECCAK_PERMUTE_CYCLES;
+
+const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
+static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
 
 /// This struct implements the batching of calls to the keccak accelerator.
 pub struct Keccak2Batcher {
@@ -88,29 +93,33 @@ impl Keccak2Batcher {
         self.inputs.clear();
     }
 
-    fn sha_single_keccak(&mut self, keccak_in_state: &KeccakState) {
-        let mut to_hash = [0u32; 64];
-        to_hash[..50].clone_from_slice(bytemuck::cast_slice(keccak_in_state));
-
-        let to_hash: &[Digest] = bytemuck::cast_slice(&to_hash);
-        for i in 0..4 {
-            let mut blk1: [u32; DIGEST_WORDS] = to_hash[i * 2].into();
-            for word in blk1.iter_mut() {
-                *word = word.to_be();
-            }
-            let mut blk2: [u32; DIGEST_WORDS] = to_hash[i * 2 + 1].into();
-            for word in blk2.iter_mut() {
-                *word = word.to_be();
-            }
-
+    fn sha_single_keccak(&mut self, keccak_state: &KeccakState) {
+        let keccak_state_u32: *const u32 =
+            unsafe { core::intrinsics::transmute(keccak_state.as_ptr()) };
+        for i in 0..3 {
             unsafe {
                 sys_sha_compress(
                     self.claim_state.as_mut(),
                     self.claim_state.as_ref(),
-                    blk1.as_ptr() as *const [u32; DIGEST_WORDS],
-                    blk2.as_ptr() as *const [u32; DIGEST_WORDS],
+                    keccak_state_u32.add(i * 16) as *const [u32; DIGEST_WORDS],
+                    keccak_state_u32.add(i * 16 + 8) as *const [u32; DIGEST_WORDS],
                 )
             };
         }
+
+        // any last words?
+        unsafe {
+            LAST_WORDS[0] = *keccak_state_u32.add(48);
+            LAST_WORDS[1] = *keccak_state_u32.add(49);
+        }
+
+        unsafe {
+            sys_sha_compress(
+                self.claim_state.as_mut(),
+                self.claim_state.as_ref(),
+                addr_of!(LAST_WORDS),
+                &ZEROES as *const [u32; DIGEST_WORDS],
+            )
+        };
     }
 }

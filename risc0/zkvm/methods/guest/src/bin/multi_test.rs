@@ -519,9 +519,7 @@ fn main() {
             };
 
             let mut sha_state = SHA256_INIT;
-            guest::env::log("before");
             sha_state = unsafe { sha_single_keccak(&sha_state, &input) };
-            guest::env::log("after");
             sha_state = unsafe { sha_single_keccak(&sha_state, &output) };
 
             for word in sha_state.as_mut_words().iter_mut() {
@@ -529,7 +527,7 @@ fn main() {
             }
             assert_eq!(
                 sha_state,
-                digest!("680f716f1ee30dcd2c4f7d9c91540e2c363bc435bee14414e160434bf5f53a46")
+                digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c")
             );
 
             // generate hash for large number of keccak states
@@ -548,7 +546,7 @@ fn main() {
 
             assert_eq!(
                 sha_state,
-                digest!("a1b1e7b58b6e1ab761bd4f55cc763d9eef886b26e0942e4a3916d0c465f3d962")
+                digest!("a920de1111b7fa680c29f0dbd8eea64a3b9e2994de1b242e30f53fd8cd727ba2")
             );
         }
         MultiTestSpec::KeccakPermute => {
