@@ -572,10 +572,17 @@ static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
 
 pub unsafe fn sha_single_keccak(sha_in_state: &Digest, keccak_state: &KeccakState) -> Digest {
     let keccak_state_u32: *const u32 = core::intrinsics::transmute(keccak_state.as_ptr());
-    let mut sha_out_state: Digest = sha_in_state.clone();
+    let mut sha_out_state: Digest = Digest::default();
+    unsafe {
+        sys_sha_compress(
+            sha_out_state.as_mut(),
+            sha_in_state.as_ref(),
+            keccak_state_u32 as *const [u32; DIGEST_WORDS],
+            keccak_state_u32.add(8) as *const [u32; DIGEST_WORDS],
+        )
+    };
 
-    // let to_hash: &[Digest] = bytemuck::cast_slice(&to_hash);
-    for i in 0..3 {
+    for i in 1..3 {
         unsafe {
             sys_sha_compress(
                 sha_out_state.as_mut(),
