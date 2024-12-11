@@ -329,7 +329,7 @@ and [256-bit modular multiplication][bigint]. By implementing these operations
 directly in the "hardware" of the zkVM, programs that use these accelerators
 execute faster and can be proven with significantly less resources [^2].
 
-For more information about cryptography acceleration, [cryptography
+For more information about cryptography precompiles, [cryptography
 precompiles][precompiles].
 
 Using the accelerator, a SHA-256 compress operation typically takes 68 cycles

@@ -326,8 +326,8 @@ and [256-bit modular multiplication][bigint]. By implementing these operations
 directly in the "hardware" of the zkVM, programs that use these accelerators
 execute faster and can be proven with significantly less resources [^3].
 
-For more information about cryptography acceleration, [cryptography
-acceleration][acceleration].
+For more information about cryptography precompiles, [cryptography
+acceleration][precompiles].
 
 Using the accelerator, a SHA-256 compress operation typically takes 68 cycles
 per 64-byte block and 6 cycles to initialize. A 256-bit modular multiply takes
@@ -391,7 +391,7 @@ machine, and the `cuda` feature enabled.
   - Try setting `codegen-units = 1`.
 - When you need a map, use `BTreeMap` instead of `HashMap`.
 - When you need to hash data, use the [accelerated implementation of
-  SHA-256][acceleration].
+  SHA-256][precompiles].
 - Look for places where you are copying or (de)serializing data when not
   necessary.
 
@@ -493,7 +493,7 @@ below.
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read.html
-[acceleration]: ./acceleration.md
+[precompiles]: ./precompiles.md
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [algorithm]: https://briansmith.org/ecc-inversion-addition-chains-01
 [alignment]: https://doc.rust-lang.org/reference/type-layout.html#the-alignment-modifiers

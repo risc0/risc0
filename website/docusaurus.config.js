@@ -112,6 +112,9 @@ export default async function createConfigAsync() {
                 ),
               ];
             }
+            if (existingPath.includes("/api/zkvm/acceleration")) {
+              return [existingPath.replace("/api/zkvm/precompiles", "/api/zkvm/acceleration")];
+            }
 
             if (existingPath.includes("/api/zkvm")) {
               return [existingPath.replace("/api/zkvm", "/zkvm")];
@@ -185,7 +188,7 @@ export default async function createConfigAsync() {
               type: "docsVersionDropdown",
               position: "right",
               docsPluginId: "api",
-              class: "docsVersionDropdown",
+              className: "docsVersionDropdown",
             },
             {
               href: "https://www.risczero.com/blog",
