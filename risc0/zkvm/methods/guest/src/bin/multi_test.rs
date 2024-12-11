@@ -23,13 +23,14 @@ use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
 };
-use core::arch::asm;
+use core::{arch::asm, ptr::addr_of};
 
 use getrandom::getrandom;
 use risc0_circuit_keccak::KeccakState;
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
+        self,
         env::{self, FdReader, FdWriter, Read as _, Write as _},
         memory_barrier, sha,
     },
@@ -518,8 +519,10 @@ fn main() {
             };
 
             let mut sha_state = SHA256_INIT;
-            sha_state = sha_single_keccak(&sha_state, &input);
-            sha_state = sha_single_keccak(&sha_state, &output);
+            guest::env::log("before");
+            sha_state = unsafe { sha_single_keccak(&sha_state, &input) };
+            guest::env::log("after");
+            sha_state = unsafe { sha_single_keccak(&sha_state, &output) };
 
             for word in sha_state.as_mut_words().iter_mut() {
                 *word = word.to_be();
@@ -536,8 +539,8 @@ fn main() {
             let mut sha_state = SHA256_INIT;
 
             for _ in 0..count {
-                sha_state = sha_single_keccak(&sha_state, &input);
-                sha_state = sha_single_keccak(&sha_state, &output);
+                sha_state = unsafe { sha_single_keccak(&sha_state, &input) };
+                sha_state = unsafe { sha_single_keccak(&sha_state, &output) };
             }
             for word in sha_state.as_mut_words().iter_mut() {
                 *word = word.to_be();
