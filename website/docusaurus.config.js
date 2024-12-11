@@ -112,12 +112,12 @@ export default async function createConfigAsync() {
                 ),
               ];
             }
-            if (existingPath.includes("/zkvm/acceleration")) {
+            if (existingPath.includes("/zkvm/precompiles")) {
               return [
                 existingPath.replace("/zkvm/precompiles", "/zkvm/acceleration"),
               ];
             }
-            if (existingPath.includes("/zkvm/developer-guide/acceleration")) {
+            if (existingPath.includes("/zkvm/developer-guide/precompiles")) {
               return [
                 existingPath.replace(
                   "/zkvm/developer-guide/precompiles",
