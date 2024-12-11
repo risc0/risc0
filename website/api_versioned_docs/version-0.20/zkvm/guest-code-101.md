@@ -49,7 +49,7 @@ list, but include some highlights here:
   [`env::log`]
 
 For more information on optimization & performance, see our pages on
-[Cryptography Acceleration][precompiles] and [Benchmarking][benchmarks].
+[Cryptography Precompiles][precompiles] and [Benchmarking][benchmarks].
 
 ## Boilerplate before `main()`
 

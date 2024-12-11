@@ -1,4 +1,4 @@
-# Cryptography Acceleration
+# Cryptography Precompiles
 
 RISC Zero's rv32im implementation includes a number of specialized extension circuits, including two "accelerators" for cryptographic functions: SHA-256 and [256-bit modular multiplication](https://github.com/risc0/risc0/pull/466), referred to as "bigint" multiplication. By implementing these operations directly in the "hardware" of the zkVM, programs that use these accelerators execute faster and can be proven with significantly less resources [^1].
 
