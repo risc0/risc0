@@ -7,7 +7,7 @@ By implementing these operations directly in the "hardware" of
 the zkVM, programs that use these precompiles execute faster and can be proven
 with significantly less resources [^1].
 
-## Accelerated Crates
+## Patched Crates
 
 We have patched several popular cryptographic Rust crates to create
 "accelerated" versions that integrate our precompiles.
@@ -39,7 +39,7 @@ each fork's repository on GitHub.
 |-------|-------------------|------------------------|
 | [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases) | 0.9.6 | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }` [^2] |
 
-### Other Accelerated Crates
+### Other Patched Crates
 
 | Crate | Versions supported | Patch Statement Example |
 |-------|-------------------|------------------------|
@@ -72,7 +72,7 @@ cargo update -p sha2 --precise 0.10.8
 > [commit the `Cargo.lock` file to git][commit-lockfile], to ensure versions don't get accidentally updated.
 
 When using cryptography indirectly, e.g. via the `cookie`, `oauth2`, or `revm`,
-crates it may be possible to enable acceleration support without code changes by
+crates it may be possible to enable precompile support without code changes by
 applying a [Cargo patch][cargo-patch].
 
 An example of how to use these crates to accelerate ECDSA signature verification
@@ -87,7 +87,7 @@ It's possible to add precompile support for your own crates.
 An example of how to do this can be found in this [diff of RISC Zero's k256
 crate fork][k256-diff], which shows the code changes needed to accelerate
 RustCrypto's secp256k1 ECDSA library. This fork starts from the base
-implementation, and changes the core operations to use the accelerated 256-bit
+implementation, and changes the core operations to use the precompiled 256-bit
 elliptic curve instructions. E.g. [`lincomb`][lincomb].
 
 ## Stability
