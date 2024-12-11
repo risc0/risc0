@@ -554,34 +554,6 @@ fn main() {
     }
 }
 
-fn sha_single_keccak(sha_in_state: &Digest, keccak_state: &KeccakState) -> Digest {
-    let mut sha_out_state: Digest = sha_in_state.clone();
-    let mut to_hash = [0u32; 64];
-    to_hash[..50].clone_from_slice(bytemuck::cast_slice(keccak_state));
-
-    let to_hash: &[Digest] = bytemuck::cast_slice(&to_hash);
-    for i in 0..4 {
-        let mut blk1: [u32; DIGEST_WORDS] = to_hash[i * 2].into();
-        for word in blk1.iter_mut() {
-            *word = word.to_be();
-        }
-        let mut blk2: [u32; DIGEST_WORDS] = to_hash[i * 2 + 1].into();
-        for word in blk2.iter_mut() {
-            *word = word.to_be();
-        }
-
-        unsafe {
-            sys_sha_compress(
-                sha_out_state.as_mut(),
-                sha_out_state.as_ref(),
-                blk1.as_ptr() as *const [u32; DIGEST_WORDS],
-                blk2.as_ptr() as *const [u32; DIGEST_WORDS],
-            )
-        };
-    }
-    sha_out_state
-}
-
 fn test_inputs() -> KeccakState {
     let mut state = KeccakState::default();
     let mut pows = 987654321_u64;
@@ -590,4 +562,37 @@ fn test_inputs() -> KeccakState {
         pows = pows.wrapping_mul(123456789);
     }
     state
+}
+
+const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
+static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
+
+pub unsafe fn sha_single_keccak(sha_in_state: &Digest, keccak_state: &KeccakState) -> Digest {
+    let keccak_state_u32: *const u32 = core::intrinsics::transmute(keccak_state.as_ptr());
+    let mut sha_out_state: Digest = sha_in_state.clone();
+
+    // let to_hash: &[Digest] = bytemuck::cast_slice(&to_hash);
+    for i in 0..3 {
+        unsafe {
+            sys_sha_compress(
+                sha_out_state.as_mut(),
+                sha_out_state.as_ref(),
+                keccak_state_u32.add(i * 16) as *const [u32; DIGEST_WORDS],
+                keccak_state_u32.add(i * 16 + 8) as *const [u32; DIGEST_WORDS],
+            )
+        };
+    }
+
+    // any last words?
+    LAST_WORDS[0] = *keccak_state_u32.add(48);
+    LAST_WORDS[1] = *keccak_state_u32.add(49);
+    unsafe {
+        sys_sha_compress(
+            sha_out_state.as_mut(),
+            sha_out_state.as_ref(),
+            addr_of!(LAST_WORDS),
+            &ZEROES as *const [u32; DIGEST_WORDS],
+        )
+    };
+    sha_out_state
 }
