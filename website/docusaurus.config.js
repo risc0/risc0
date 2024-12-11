@@ -112,21 +112,16 @@ export default async function createConfigAsync() {
                 ),
               ];
             }
-            if (existingPath.includes("/api/zkvm/acceleration")) {
+            if (existingPath.includes("/zkvm/acceleration")) {
               return [
-                existingPath.replace(
-                  "/api/zkvm/precompiles",
-                  "/api/zkvm/acceleration",
-                ),
+                existingPath.replace("/zkvm/precompiles", "/zkvm/acceleration"),
               ];
             }
-            if (
-              existingPath.includes("/api/zkvm/developer-guide/acceleration")
-            ) {
+            if (existingPath.includes("/zkvm/developer-guide/acceleration")) {
               return [
                 existingPath.replace(
-                  "/api/zkvm/developer-guide/precompiles",
-                  "/api/zkvm/developer-guide/acceleration",
+                  "/zkvm/developer-guide/precompiles",
+                  "/zkvm/developer-guide/acceleration",
                 ),
               ];
             }
