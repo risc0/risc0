@@ -17,32 +17,32 @@ each fork's repository on GitHub.
 
 ### Hash Functions
 
-| Crate | Versions supported | Patch Statement Example |
-|-------|-------------------|------------------------|
+| Crate                                                         | Versions supported            | Patch Statement Example                                                                          |
+| ------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
 | [`sha2`](https://github.com/risc0/RustCrypto-hashes/releases) | 0.10.8, 0.10.7, 0.10.6, 0.9.9 | `sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }` |
 
 ### ECDSA
 
-| Crate | Versions supported | Patch Statement Example |
-|-------|-------------------|------------------------|
+| Crate                                                                  | Versions supported             | Patch Statement Example                                                                                        |
+| ---------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
 | [`k256`](https://github.com/risc0/RustCrypto-elliptic-curves/releases) | 0.13.4, 0.13.3, 0.13.2, 0.13.1 | `k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.3-risczero.1" }` [^2] |
 
 ### EDDSA
 
-| Crate | Versions supported | Patch Statement Example |
-|-------|-------------------|------------------------|
+| Crate                                                                    | Versions supported  | Patch Statement Example                                                                                   |
+| ------------------------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------- |
 | [`curve25519-dalek`](https://github.com/risc0/curve25519-dalek/releases) | 4.1.2, 4.1.1, 4.1.0 | `ed25519-dalek = { git = "https://github.com/risc0/ed25519-dalek", tag = "curve25519-4.1.2-risczero.0" }` |
 
 ### RSA
 
-| Crate | Versions supported | Patch Statement Example |
-|-------|-------------------|------------------------|
-| [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases) | 0.9.6 | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }` [^2] |
+| Crate                                                     | Versions supported | Patch Statement Example                                                                     |
+| --------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------- |
+| [`rsa`](https://github.com/risc0/RustCrypto-RSA/releases) | 0.9.6              | `rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }` [^2] |
 
 ### Other Patched Crates
 
-| Crate | Versions supported | Patch Statement Example |
-|-------|-------------------|------------------------|
+| Crate                                                                         | Versions supported         | Patch Statement Example                                                                                    |
+| ----------------------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | [`crypto-bigint`](https://github.com/risc0/RustCrypto-crypto-bigint/releases) | 0.5.5, 0.5.4, 0.5.3, 0.5.2 | `crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.5-risczero.0" }` |
 
 Make sure that your dependency gives the same patch version of the crate as listed in
@@ -101,10 +101,10 @@ versions `>=1.2.0` of `risc0` crates. For users who need a stable, production-re
 working on stablizing these precompiles as soon as possible, and the `"unstable"` feature flag will
 no longer be required.
 
-
 [^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
+
 [^2]: Some tagged releases of this crate may depend on updated precompiles.
     See [Stability](#stability) for more details.
 
