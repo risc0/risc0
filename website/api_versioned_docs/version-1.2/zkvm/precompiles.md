@@ -49,7 +49,8 @@ Make sure that your dependency gives the same patch version of the crate as list
 the git tag of the patch. If you need other patch versions or crates than listed here, please reach
 out to us on [Discord][discord-url] or otherwise!
 
-If using `tag = "sha2-v0.10.8-risczero.0"`, the dependency should be:
+If using `tag = "sha2-v0.10.8-risczero.0"`, the dependency should be defined as a
+[git dependency][git-dep]:
 
 ```toml
 [dependencies]
@@ -110,7 +111,6 @@ no longer be required.
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [cargo-patch]: https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section
 [commit-lockfile]: https://blog.rust-lang.org/2023/08/29/committing-lockfiles.html
-[curve25519-dalek]: https://github.com/risc0/curve25519-dalek/tree/risczero
 [discord-url]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/release-1.2/examples/ecdsa
 [ecdsa-patched]: https://github.com/risc0/risc0/blob/release-1.2/examples/ecdsa/methods/guest/Cargo.toml#L13-L18
@@ -118,8 +118,4 @@ no longer be required.
 [git-dep]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
 [k256-diff]: https://github.com/risc0/RustCrypto-elliptic-curves/compare/k256/v0.13.3..k256/v0.13.3-risczero.1
 [lincomb]: https://github.com/risc0/RustCrypto-elliptic-curves/blob/k256/v0.13.3-risczero.1/k256/src/arithmetic/mul.rs#L349-L377
-[RustCrypto-crypto-bigint]: https://github.com/risc0/RustCrypto-crypto-bigint/tree/risczero
-[RustCrypto-elliptic-curves]: https://github.com/risc0/RustCrypto-elliptic-curves/tree/risczero
-[RustCrypto-hashes]: https://github.com/risc0/RustCrypto-hashes/tree/risczero
-[RustCrypto-RSA]: https://github.com/risc0/RustCrypto-RSA/tree/risc0
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
