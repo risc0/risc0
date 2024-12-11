@@ -152,7 +152,6 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 Thanks for reading! If you have questions or feedback, we'd love to hear from you on Discord or Twitter.
 
-[precompiles]: /api/zkvm/precompiles
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
 [ethSTARK]: https://eprint.iacr.org/2021/582.pdf
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
@@ -160,6 +159,7 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [Image ID]: /terminology#image-id
 [log derivative]: https://eprint.iacr.org/2022/1530.pdf
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
+[precompiles]: /api/zkvm/precompiles
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [STARK]: ../reference-docs/about-starks.md
 [Winterfell]: https://github.com/facebook/winterfell

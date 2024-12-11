@@ -493,7 +493,6 @@ below.
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read_slice.html
 [`env::read`]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/guest/env/fn.read.html
-[precompiles]: ./precompiles.md
 [AES-NI]: https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors
 [algorithm]: https://briansmith.org/ecc-inversion-addition-chains-01
 [alignment]: https://doc.rust-lang.org/reference/type-layout.html#the-alignment-modifiers
@@ -522,6 +521,7 @@ below.
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [perf-book]: https://nnethercote.github.io/perf-book
 [pprof]: https://github.com/google/pprof
+[precompiles]: ./precompiles.md
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
