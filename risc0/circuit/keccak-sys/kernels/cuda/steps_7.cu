@@ -31,34 +31,31 @@ __device__ void step_Top_6(ExecContext& ctx, MutableBuf arg0) {
   return;
 }
 __device__ void step_Top_22(ExecContext& ctx, MutableBuf arg0) {
-  // ControlState(zirgen/circuit/keccak2/top.zir:405)
-  Val x1 = get(ctx, arg0, 14, 1);
   // ShaNextBlock(zirgen/circuit/keccak2/top.zir:428)
   // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:463)
-  Val x2 = (x1 - Val(3));
+  Val x1 = (get(ctx, arg0, 14, 1) - Val(3));
   // IsZero(zirgen/circuit/keccak2/is_zero.zir:8)
-  set(ctx, arg0, 934, isz(x2));
-  Val x3 = get(ctx, arg0, 934, 0);
+  set(ctx, arg0, 934, isz(x1));
   // IsZero(zirgen/circuit/keccak2/is_zero.zir:11)
-  set(ctx, arg0, 935, inv_0(x2));
+  set(ctx, arg0, 935, inv_0(x1));
   // ShaNextBlock(zirgen/circuit/keccak2/top.zir:429)
-  Val x4 = (Val(1) - x3);
-  // Reg(<preamble>:4)
+  Val x2 = (Val(1) - get(ctx, arg0, 934, 0));
   // ShaNextBlock(zirgen/circuit/keccak2/top.zir:430)
-  set(ctx, arg0, 936, (x3 * (Val(1) - get(ctx, arg0, 13, 1))));
-  Val x5 = get(ctx, arg0, 936, 0);
+  Val x3 = (get(ctx, arg0, 934, 0) * (Val(1) - get(ctx, arg0, 13, 1)));
+  // Reg(<preamble>:4)
+  set(ctx, arg0, 936, x3);
   // ShaNextBlock(zirgen/circuit/keccak2/top.zir:431)
-  Val x6 = ((Val(1) - x4) - x5);
+  Val x4 = ((Val(1) - x2) - get(ctx, arg0, 936, 0));
   // ShaNextBlock(zirgen/circuit/keccak2/top.zir:433)
-  Val x7 = (x1 + Val(1));
-  if (to_size_t(x4)) {
+  Val x5 = (get(ctx, arg0, 14, 1) + Val(1));
+  if (to_size_t(x2)) {
     // ShaNextBlock(zirgen/circuit/keccak2/top.zir:432)
     step_Top_17(ctx, arg0);
   }
-  if (to_size_t(x5)) {
+  if (to_size_t(get(ctx, arg0, 936, 0))) {
     step_Top_18(ctx, arg0);
   }
-  if (to_size_t(x6)) {
+  if (to_size_t(x4)) {
     step_Top_21(ctx, arg0);
   }
   return;

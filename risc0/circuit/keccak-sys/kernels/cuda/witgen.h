@@ -183,7 +183,7 @@ __device__ inline void store(ExecContext& ctx, BoundLayout<Reg> reg, Val val) {
 }
 
 __device__ inline void set(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {
-  static_cast<GlobalBufObj*>(buf)->store(ctx, offset, val);
+  static_cast<MutableBufObj*>(buf)->store(ctx, offset, val);
 }
 
 __device__ inline void setGlobal(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {

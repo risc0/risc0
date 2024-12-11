@@ -30,12 +30,8 @@ __device__ void step_Top_8(ExecContext& ctx, MutableBuf arg0) {
   return;
 }
 __device__ void step_Top_24(ExecContext& ctx, MutableBuf arg0) {
-  // ControlState(zirgen/circuit/keccak2/top.zir:405)
-  Val x1 = get(ctx, arg0, 14, 1);
-  // ControlState(zirgen/circuit/keccak2/top.zir:406)
-  Val x2 = get(ctx, arg0, 15, 1);
   // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:451)
-  Val x3 = (Val(1) - get(ctx, arg0, 13, 1));
+  Val x1 = (Val(1) - get(ctx, arg0, 13, 1));
   if (to_size_t(get(ctx, arg0, 0, 1))) {
     // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:448)
     step_Top_1(ctx, arg0);
