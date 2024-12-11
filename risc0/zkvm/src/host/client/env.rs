@@ -216,7 +216,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
     /// either up or down, may result in better proving performance.
     ///
-    /// Given value must be within [risc0_keccak_circuit::KECCAK_PO2_RANGE].
+    /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE].
     pub fn keccak_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.keccak_po2 = Some(limit);
         self

@@ -1000,7 +1000,7 @@ pub unsafe extern "C" fn sys_prove_keccak(
             null_mut(),
             0,
             claim_digest as u32,
-            po2 as u32,
+            po2,
             control_root as u32,
             input as u32,
             input_len as u32,
