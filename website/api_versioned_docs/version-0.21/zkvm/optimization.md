@@ -327,7 +327,7 @@ directly in the "hardware" of the zkVM, programs that use these accelerators
 execute faster and can be proven with significantly less resources [^3].
 
 For more information about cryptography precompiles, [cryptography
-acceleration][precompiles].
+precompiles][precompiles].
 
 Using the accelerator, a SHA-256 compress operation typically takes 68 cycles
 per 64-byte block and 6 cycles to initialize. A 256-bit modular multiply takes
