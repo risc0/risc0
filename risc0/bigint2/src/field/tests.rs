@@ -94,7 +94,6 @@ fn modinv() {
 
 #[test]
 fn modmul() {
-    // TODO: I think we have problems if modulus isn't the full bitwidth
     const LHS: &[u8] = b"04";
     const RHS: &[u8] = b"07";
     const MODULUS: &[u8] = b"05";
