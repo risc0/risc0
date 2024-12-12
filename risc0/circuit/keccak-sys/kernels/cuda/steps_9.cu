@@ -17,22 +17,23 @@
 
 namespace risc0::circuit::keccak::cuda {
 
-<<<<<<< HEAD
 __device__ void step_Top_8(ExecContext& ctx, MutableBuf arg0) {
-  // ControlState(zirgen/circuit/keccak2/top.zir:403)
-  // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:458)
+  // Reg(<preamble>:4)
+  // ControlState(zirgen/circuit/keccak2/top.zir:401)
+  // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:456)
+  // Top(zirgen/circuit/keccak2/top.zir:481)
   set(ctx, arg0, 12, Val(6));
-  // ControlState(zirgen/circuit/keccak2/top.zir:404)
+  // ControlState(zirgen/circuit/keccak2/top.zir:402)
   set(ctx, arg0, 13, Val(0));
-  // ControlState(zirgen/circuit/keccak2/top.zir:405)
+  // ControlState(zirgen/circuit/keccak2/top.zir:403)
   set(ctx, arg0, 14, Val(0));
-  // ControlState(zirgen/circuit/keccak2/top.zir:406)
+  // ControlState(zirgen/circuit/keccak2/top.zir:404)
   set(ctx, arg0, 15, get(ctx, arg0, 15, 1));
   return;
 }
 __device__ void step_Top_24(ExecContext& ctx, MutableBuf arg0) {
   if (to_size_t(get(ctx, arg0, 0, 1))) {
-    // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:448)
+    // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:446)
     step_Top_1(ctx, arg0);
   }
   if (to_size_t(get(ctx, arg0, 1, 1))) {
@@ -69,202 +70,78 @@ __device__ void step_Top_24(ExecContext& ctx, MutableBuf arg0) {
     step_Top_23(ctx, arg0);
   }
   return;
-=======
-__device__ OneHot_24_Struct exec_OneHot_24_(ExecContext& ctx,
-                                            Val arg0,
-                                            BoundLayout<OneHot_24_Layout> layout1) {
+}
+__device__ void step_Top_40(ExecContext& ctx, MutableBuf arg0) {
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
   // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
-  NondetBitRegStruct24Array x2 = map(
-      Val24Array{Val(0),  Val(1),  Val(2),  Val(3),  Val(4),  Val(5),  Val(6),  Val(7),
-                 Val(8),  Val(9),  Val(10), Val(11), Val(12), Val(13), Val(14), Val(15),
-                 Val(16), Val(17), Val(18), Val(19), Val(20), Val(21), Val(22), Val(23)},
-      LAYOUT_LOOKUP(layout1, _super),
-      ([&](Val24Array::value_type x3, BoundLayout<NondetRegLayout24LayoutArray::value_type> x4) {
-        NondetBitRegStruct x5 = exec_NondetBitReg(ctx, isz((x3 - arg0)), x4);
-        return x5;
-      }));
-  // OneHot(zirgen/circuit/keccak2/one_hot.zir:9)
-  Val x6 = (x2[0]._super._super + x2[1]._super._super);
-  Val x7 = ((x6 + x2[2]._super._super) + x2[3]._super._super);
-  Val x8 = ((x7 + x2[4]._super._super) + x2[5]._super._super);
-  Val x9 = ((x8 + x2[6]._super._super) + x2[7]._super._super);
-  Val x10 = ((x9 + x2[8]._super._super) + x2[9]._super._super);
-  Val x11 = ((x10 + x2[10]._super._super) + x2[11]._super._super);
-  Val x12 = ((x11 + x2[12]._super._super) + x2[13]._super._super);
-  Val x13 = ((x12 + x2[14]._super._super) + x2[15]._super._super);
-  Val x14 = ((x13 + x2[16]._super._super) + x2[17]._super._super);
-  Val x15 = ((x14 + x2[18]._super._super) + x2[19]._super._super);
-  Val x16 = ((x15 + x2[20]._super._super) + x2[21]._super._super);
-  Val x17 = ((x16 + x2[22]._super._super) + x2[23]._super._super);
-  EQZ((x17 - Val(1)), "OneHot(zirgen/circuit/keccak2/one_hot.zir:9)");
-  // OneHot(zirgen/circuit/keccak2/one_hot.zir:11)
-  Val x18 = (x2[2]._super._super * Val(2));
-  Val x19 = (x2[3]._super._super * Val(3));
-  Val x20 = (x2[4]._super._super * Val(4));
-  Val x21 = (x2[5]._super._super * Val(5));
-  Val x22 = (x2[6]._super._super * Val(6));
-  Val x23 = (x2[7]._super._super * Val(7));
-  Val x24 = (x2[8]._super._super * Val(8));
-  Val x25 = (x2[9]._super._super * Val(9));
-  Val x26 = (x2[10]._super._super * Val(10));
-  Val x27 = (x2[11]._super._super * Val(11));
-  Val x28 = (x2[12]._super._super * Val(12));
-  Val x29 = (x2[13]._super._super * Val(13));
-  Val x30 = (x2[14]._super._super * Val(14));
-  Val x31 = (x2[15]._super._super * Val(15));
-  Val x32 = (x2[16]._super._super * Val(16));
-  Val x33 = (x2[17]._super._super * Val(17));
-  Val x34 = (x2[18]._super._super * Val(18));
-  Val x35 = (x2[19]._super._super * Val(19));
-  Val x36 = (x2[20]._super._super * Val(20));
-  Val x37 = (x2[21]._super._super * Val(21));
-  Val x38 = (x2[22]._super._super * Val(22));
-  Val x39 = (x2[23]._super._super * Val(23));
-  Val x40 = (x2[1]._super._super + x18);
-  Val x41 = (((x40 + x19) + x20) + x21);
-  Val x42 = (((x41 + x22) + x23) + x24);
-  Val x43 = (((x42 + x25) + x26) + x27);
-  Val x44 = (((x43 + x28) + x29) + x30);
-  Val x45 = (((x44 + x31) + x32) + x33);
-  Val x46 = (((x45 + x34) + x35) + x36);
-  Val x47 = (((x46 + x37) + x38) + x39);
-  EQZ((x47 - arg0), "OneHot(zirgen/circuit/keccak2/one_hot.zir:11)");
-  return OneHot_24_Struct{._super = x2};
-}
-__device__ TopStateStruct exec_InitCycle(ExecContext& ctx, BoundLayout<TopStateLayout> layout0) {
-  // Log(<preamble>:22)
-  // InitCycle(zirgen/circuit/keccak2/top.zir:305)
-  INVOKE_EXTERN(ctx, log, "InitCycle", std::initializer_list<Val>{});
-  // InitCycle(zirgen/circuit/keccak2/top.zir:314)
-  TopStateStruct x1 = exec_TopState(
-      ctx,
-      Val800Array{
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-          Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)},
-      Val100Array{Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0),
-                  Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0), Val(0)},
-      Val16Array{Val(58983),
-                 Val(27145),
-                 Val(44677),
-                 Val(47975),
-                 Val(62322),
-                 Val(15470),
-                 Val(62778),
-                 Val(42319),
-                 Val(21119),
-                 Val(20750),
-                 Val(26764),
-                 Val(39685),
-                 Val(55723),
-                 Val(8067),
-                 Val(52505),
-                 Val(23520)},
-      layout0);
-  return x1;
-}
-__device__ WrapOneHotStruct exec_WrapOneHot(ExecContext& ctx,
-                                            OneHot_12_Struct arg0,
-                                            BoundLayout<WrapOneHotLayout> layout1) {
-  // WrapOneHot(zirgen/circuit/keccak2/top.zir:468)
-  WrapOneHot_SuperStruct12Array x2 = map(
-      Val12Array{Val(0),
-                 Val(1),
-                 Val(2),
-                 Val(3),
-                 Val(4),
-                 Val(5),
-                 Val(6),
-                 Val(7),
-                 Val(8),
-                 Val(9),
-                 Val(10),
-                 Val(11)},
-      LAYOUT_LOOKUP(layout1, _super),
-      ([&](Val12Array::value_type x3, BoundLayout<NondetRegLayout12LayoutArray::value_type> x4) {
-        NondetRegStruct x5 = exec_Reg(ctx, arg0.bits[to_size_t(x3)]._super._super._super, x4);
-        return WrapOneHot_SuperStruct{._super = x5};
-      }));
-  return WrapOneHotStruct{._super = x2};
->>>>>>> origin/main
+  // LoadWin(zirgen/circuit/keccak2/top.zir:164)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+  // Top(zirgen/circuit/keccak2/top.zir:499)
+  Val x1 = get(ctx, arg0, 1090, 0);
+  Val x2 = get(ctx, arg0, 1091, 0);
+  // LoadWin(zirgen/circuit/keccak2/top.zir:167)
+  Val x3 = ((get(ctx, arg0, 822, 1) * x1) + (get(ctx, arg0, 854, 1) * x2));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
+  // LoadWin(zirgen/circuit/keccak2/top.zir:164)
+  Val x4 = get(ctx, arg0, 1092, 0);
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:188)
+  Val x5 = get(ctx, arg0, 1081, 0);
+  // LoadWin(zirgen/circuit/keccak2/top.zir:174)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+  Val x6 = ((get(ctx, arg0, 838, 1) * x1) + (get(ctx, arg0, 870, 1) * x2));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:188)
+  Val x7 = get(ctx, arg0, 1082, 0);
+  // LoadWin(zirgen/circuit/keccak2/top.zir:166)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:191)
+  Val x8 =
+      (((x3 + (get(ctx, arg0, 886, 1) * x4)) * x5) + ((x6 + (get(ctx, arg0, 902, 1) * x4)) * x7));
+  // LoadWin(zirgen/circuit/keccak2/top.zir:167)
+  Val x9 = ((get(ctx, arg0, 823, 1) * x1) + (get(ctx, arg0, 855, 1) * x2));
+  // LoadWin(zirgen/circuit/keccak2/top.zir:174)
+  Val x10 = ((get(ctx, arg0, 839, 1) * x1) + (get(ctx, arg0, 871, 1) * x2));
+  // LoadWin(zirgen/circuit/keccak2/top.zir:166)
+  Val x11 =
+      (((x9 + (get(ctx, arg0, 887, 1) * x4)) * x5) + ((x10 + (get(ctx, arg0, 903, 1) * x4)) * x7));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // ExpandBE(zirgen/circuit/keccak2/sha2.zir:54)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:195)
+  set(ctx, arg0, 624, (bitAnd(x11, Val(256)) * Val(2005401601)));
+  set(ctx, arg0, 625, (bitAnd(x11, Val(512)) * Val(2009333761)));
+  set(ctx, arg0, 626, (bitAnd(x11, Val(1024)) * Val(2011299841)));
+  set(ctx, arg0, 627, (bitAnd(x11, Val(2048)) * Val(2012282881)));
+  set(ctx, arg0, 628, (bitAnd(x11, Val(4096)) * Val(2012774401)));
+  set(ctx, arg0, 629, (bitAnd(x11, Val(8192)) * Val(2013020161)));
+  set(ctx, arg0, 630, (bitAnd(x11, Val(16384)) * Val(2013143041)));
+  set(ctx, arg0, 631, (bitAnd(x11, Val(32768)) * Val(2013204481)));
+  set(ctx, arg0, 632, bitAnd(x11, Val(1)));
+  set(ctx, arg0, 633, (bitAnd(x11, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 634, (bitAnd(x11, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 635, (bitAnd(x11, Val(8)) * Val(1761607681)));
+  set(ctx, arg0, 636, (bitAnd(x11, Val(16)) * Val(1887436801)));
+  set(ctx, arg0, 637, (bitAnd(x11, Val(32)) * Val(1950351361)));
+  set(ctx, arg0, 638, (bitAnd(x11, Val(64)) * Val(1981808641)));
+  set(ctx, arg0, 639, (bitAnd(x11, Val(128)) * Val(1997537281)));
+  set(ctx, arg0, 640, (bitAnd(x8, Val(256)) * Val(2005401601)));
+  set(ctx, arg0, 641, (bitAnd(x8, Val(512)) * Val(2009333761)));
+  set(ctx, arg0, 642, (bitAnd(x8, Val(1024)) * Val(2011299841)));
+  set(ctx, arg0, 643, (bitAnd(x8, Val(2048)) * Val(2012282881)));
+  set(ctx, arg0, 644, (bitAnd(x8, Val(4096)) * Val(2012774401)));
+  set(ctx, arg0, 645, (bitAnd(x8, Val(8192)) * Val(2013020161)));
+  set(ctx, arg0, 646, (bitAnd(x8, Val(16384)) * Val(2013143041)));
+  set(ctx, arg0, 647, (bitAnd(x8, Val(32768)) * Val(2013204481)));
+  set(ctx, arg0, 648, bitAnd(x8, Val(1)));
+  set(ctx, arg0, 649, (bitAnd(x8, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 650, (bitAnd(x8, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 651, (bitAnd(x8, Val(8)) * Val(1761607681)));
+  set(ctx, arg0, 652, (bitAnd(x8, Val(16)) * Val(1887436801)));
+  set(ctx, arg0, 653, (bitAnd(x8, Val(32)) * Val(1950351361)));
+  set(ctx, arg0, 654, (bitAnd(x8, Val(64)) * Val(1981808641)));
+  set(ctx, arg0, 655, (bitAnd(x8, Val(128)) * Val(1997537281)));
+  return;
 }
 
 } // namespace risc0::circuit::keccak::cuda

@@ -18,34 +18,35 @@
 namespace risc0::circuit::keccak::cuda {
 
 __device__ void step_Top_1(ExecContext& ctx, MutableBuf arg0) {
-  // ControlState(zirgen/circuit/keccak2/top.zir:403)
-  // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:449)
-  // Top(zirgen/circuit/keccak2/top.zir:483)
+  // Reg(<preamble>:4)
+  // ControlState(zirgen/circuit/keccak2/top.zir:401)
+  // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:447)
+  // Top(zirgen/circuit/keccak2/top.zir:481)
   set(ctx, arg0, 12, Val(0));
-  // ControlState(zirgen/circuit/keccak2/top.zir:404)
+  // ControlState(zirgen/circuit/keccak2/top.zir:402)
   set(ctx, arg0, 13, Val(0));
-  // ControlState(zirgen/circuit/keccak2/top.zir:405)
+  // ControlState(zirgen/circuit/keccak2/top.zir:403)
   set(ctx, arg0, 14, Val(0));
-  // ControlState(zirgen/circuit/keccak2/top.zir:406)
+  // ControlState(zirgen/circuit/keccak2/top.zir:404)
   set(ctx, arg0, 15, Val(0));
   return;
 }
 __device__ void step_Top_17(ExecContext& ctx, MutableBuf arg0) {
-  // ControlState(zirgen/circuit/keccak2/top.zir:403)
-  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:433)
-  // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:463)
+  // ControlState(zirgen/circuit/keccak2/top.zir:401)
+  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:431)
+  // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:461)
   set(ctx, arg0, 12, Val(9));
-  // ControlState(zirgen/circuit/keccak2/top.zir:404)
+  // ControlState(zirgen/circuit/keccak2/top.zir:402)
   set(ctx, arg0, 13, get(ctx, arg0, 13, 1));
-  // ControlState(zirgen/circuit/keccak2/top.zir:405)
+  // ControlState(zirgen/circuit/keccak2/top.zir:403)
   set(ctx, arg0, 14, (get(ctx, arg0, 14, 1) + Val(1)));
-  // ControlState(zirgen/circuit/keccak2/top.zir:406)
+  // ControlState(zirgen/circuit/keccak2/top.zir:404)
   set(ctx, arg0, 15, Val(0));
   return;
 }
 __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   // TopState(zirgen/circuit/keccak2/top.zir:36)
-  // Top(zirgen/circuit/keccak2/top.zir:500)
+  // Top(zirgen/circuit/keccak2/top.zir:498)
   Val x1 = get(ctx, arg0, 16, 2);
   Val x2 = get(ctx, arg0, 17, 2);
   Val x3 = get(ctx, arg0, 18, 2);
@@ -846,12 +847,12 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   Val x798 = get(ctx, arg0, 813, 2);
   Val x799 = get(ctx, arg0, 814, 2);
   Val x800 = get(ctx, arg0, 815, 2);
-  // ControlState(zirgen/circuit/keccak2/top.zir:406)
-  // Top(zirgen/circuit/keccak2/top.zir:479)
+  // ControlState(zirgen/circuit/keccak2/top.zir:404)
+  // Top(zirgen/circuit/keccak2/top.zir:477)
   Val x801 = get(ctx, arg0, 15, 0);
   // Chi(zirgen/circuit/keccak2/keccak.zir:73)
   // KeccakRound34(zirgen/circuit/keccak2/top.zir:117)
-  // Top(zirgen/circuit/keccak2/top.zir:500)
+  // Top(zirgen/circuit/keccak2/top.zir:498)
   Val x802 = ((Val(1) - x33) * x65);
   // BitXor(zirgen/circuit/keccak2/bits.zir:32)
   Val x803 = ((x1 + x802) - ((x1 * Val(2)) * x802));
@@ -3340,7 +3341,6 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   // Iota(zirgen/circuit/keccak2/keccak.zir:125)
   Val x2431 = ((x2430 + x865) - ((x2430 * Val(2)) * x865));
   // Reg(<preamble>:4)
-<<<<<<< HEAD
   // TopState(zirgen/circuit/keccak2/top.zir:36)
   set(ctx, arg0, 16, x803);
   set(ctx, arg0, 17, x805);
@@ -4261,1475 +4261,866 @@ __device__ void step_Top_33(ExecContext& ctx, MutableBuf arg0) {
   set(ctx, arg0, 930, get(ctx, arg0, 930, 1));
   set(ctx, arg0, 931, get(ctx, arg0, 931, 1));
   return;
-=======
-  NondetRegStruct x2 = back_NondetReg(ctx, distance0, layout1);
-  return x2;
 }
-__device__ TopStateStruct exec_KeccakRound0(ExecContext& ctx,
-                                            TopStateStruct arg0,
-                                            TopStateStruct arg1,
-                                            BoundLayout<KeccakRound0Layout> layout2) {
-  // Log(<preamble>:22)
-  // KeccakRound0(zirgen/circuit/keccak2/top.zir:95)
-  INVOKE_EXTERN(ctx, log, "KeccakRound0", std::initializer_list<Val>{});
-  // KeccakRound0(zirgen/circuit/keccak2/top.zir:96)
-  Val64Array x3 = Val64Array{
-      arg0.bits[0]._super._super,  arg0.bits[1]._super._super,  arg0.bits[2]._super._super,
-      arg0.bits[3]._super._super,  arg0.bits[4]._super._super,  arg0.bits[5]._super._super,
-      arg0.bits[6]._super._super,  arg0.bits[7]._super._super,  arg0.bits[8]._super._super,
-      arg0.bits[9]._super._super,  arg0.bits[10]._super._super, arg0.bits[11]._super._super,
-      arg0.bits[12]._super._super, arg0.bits[13]._super._super, arg0.bits[14]._super._super,
-      arg0.bits[15]._super._super, arg0.bits[16]._super._super, arg0.bits[17]._super._super,
-      arg0.bits[18]._super._super, arg0.bits[19]._super._super, arg0.bits[20]._super._super,
-      arg0.bits[21]._super._super, arg0.bits[22]._super._super, arg0.bits[23]._super._super,
-      arg0.bits[24]._super._super, arg0.bits[25]._super._super, arg0.bits[26]._super._super,
-      arg0.bits[27]._super._super, arg0.bits[28]._super._super, arg0.bits[29]._super._super,
-      arg0.bits[30]._super._super, arg0.bits[31]._super._super, arg1.bits[0]._super._super,
-      arg1.bits[1]._super._super,  arg1.bits[2]._super._super,  arg1.bits[3]._super._super,
-      arg1.bits[4]._super._super,  arg1.bits[5]._super._super,  arg1.bits[6]._super._super,
-      arg1.bits[7]._super._super,  arg1.bits[8]._super._super,  arg1.bits[9]._super._super,
-      arg1.bits[10]._super._super, arg1.bits[11]._super._super, arg1.bits[12]._super._super,
-      arg1.bits[13]._super._super, arg1.bits[14]._super._super, arg1.bits[15]._super._super,
-      arg1.bits[16]._super._super, arg1.bits[17]._super._super, arg1.bits[18]._super._super,
-      arg1.bits[19]._super._super, arg1.bits[20]._super._super, arg1.bits[21]._super._super,
-      arg1.bits[22]._super._super, arg1.bits[23]._super._super, arg1.bits[24]._super._super,
-      arg1.bits[25]._super._super, arg1.bits[26]._super._super, arg1.bits[27]._super._super,
-      arg1.bits[28]._super._super, arg1.bits[29]._super._super, arg1.bits[30]._super._super,
-      arg1.bits[31]._super._super};
-  Val64Array x4 = Val64Array{
-      arg0.bits[32]._super._super, arg0.bits[33]._super._super, arg0.bits[34]._super._super,
-      arg0.bits[35]._super._super, arg0.bits[36]._super._super, arg0.bits[37]._super._super,
-      arg0.bits[38]._super._super, arg0.bits[39]._super._super, arg0.bits[40]._super._super,
-      arg0.bits[41]._super._super, arg0.bits[42]._super._super, arg0.bits[43]._super._super,
-      arg0.bits[44]._super._super, arg0.bits[45]._super._super, arg0.bits[46]._super._super,
-      arg0.bits[47]._super._super, arg0.bits[48]._super._super, arg0.bits[49]._super._super,
-      arg0.bits[50]._super._super, arg0.bits[51]._super._super, arg0.bits[52]._super._super,
-      arg0.bits[53]._super._super, arg0.bits[54]._super._super, arg0.bits[55]._super._super,
-      arg0.bits[56]._super._super, arg0.bits[57]._super._super, arg0.bits[58]._super._super,
-      arg0.bits[59]._super._super, arg0.bits[60]._super._super, arg0.bits[61]._super._super,
-      arg0.bits[62]._super._super, arg0.bits[63]._super._super, arg1.bits[32]._super._super,
-      arg1.bits[33]._super._super, arg1.bits[34]._super._super, arg1.bits[35]._super._super,
-      arg1.bits[36]._super._super, arg1.bits[37]._super._super, arg1.bits[38]._super._super,
-      arg1.bits[39]._super._super, arg1.bits[40]._super._super, arg1.bits[41]._super._super,
-      arg1.bits[42]._super._super, arg1.bits[43]._super._super, arg1.bits[44]._super._super,
-      arg1.bits[45]._super._super, arg1.bits[46]._super._super, arg1.bits[47]._super._super,
-      arg1.bits[48]._super._super, arg1.bits[49]._super._super, arg1.bits[50]._super._super,
-      arg1.bits[51]._super._super, arg1.bits[52]._super._super, arg1.bits[53]._super._super,
-      arg1.bits[54]._super._super, arg1.bits[55]._super._super, arg1.bits[56]._super._super,
-      arg1.bits[57]._super._super, arg1.bits[58]._super._super, arg1.bits[59]._super._super,
-      arg1.bits[60]._super._super, arg1.bits[61]._super._super, arg1.bits[62]._super._super,
-      arg1.bits[63]._super._super};
-  Val64Array x5 = Val64Array{
-      arg0.bits[64]._super._super, arg0.bits[65]._super._super, arg0.bits[66]._super._super,
-      arg0.bits[67]._super._super, arg0.bits[68]._super._super, arg0.bits[69]._super._super,
-      arg0.bits[70]._super._super, arg0.bits[71]._super._super, arg0.bits[72]._super._super,
-      arg0.bits[73]._super._super, arg0.bits[74]._super._super, arg0.bits[75]._super._super,
-      arg0.bits[76]._super._super, arg0.bits[77]._super._super, arg0.bits[78]._super._super,
-      arg0.bits[79]._super._super, arg0.bits[80]._super._super, arg0.bits[81]._super._super,
-      arg0.bits[82]._super._super, arg0.bits[83]._super._super, arg0.bits[84]._super._super,
-      arg0.bits[85]._super._super, arg0.bits[86]._super._super, arg0.bits[87]._super._super,
-      arg0.bits[88]._super._super, arg0.bits[89]._super._super, arg0.bits[90]._super._super,
-      arg0.bits[91]._super._super, arg0.bits[92]._super._super, arg0.bits[93]._super._super,
-      arg0.bits[94]._super._super, arg0.bits[95]._super._super, arg1.bits[64]._super._super,
-      arg1.bits[65]._super._super, arg1.bits[66]._super._super, arg1.bits[67]._super._super,
-      arg1.bits[68]._super._super, arg1.bits[69]._super._super, arg1.bits[70]._super._super,
-      arg1.bits[71]._super._super, arg1.bits[72]._super._super, arg1.bits[73]._super._super,
-      arg1.bits[74]._super._super, arg1.bits[75]._super._super, arg1.bits[76]._super._super,
-      arg1.bits[77]._super._super, arg1.bits[78]._super._super, arg1.bits[79]._super._super,
-      arg1.bits[80]._super._super, arg1.bits[81]._super._super, arg1.bits[82]._super._super,
-      arg1.bits[83]._super._super, arg1.bits[84]._super._super, arg1.bits[85]._super._super,
-      arg1.bits[86]._super._super, arg1.bits[87]._super._super, arg1.bits[88]._super._super,
-      arg1.bits[89]._super._super, arg1.bits[90]._super._super, arg1.bits[91]._super._super,
-      arg1.bits[92]._super._super, arg1.bits[93]._super._super, arg1.bits[94]._super._super,
-      arg1.bits[95]._super._super};
-  Val64Array x6 = Val64Array{
-      arg0.bits[96]._super._super,  arg0.bits[97]._super._super,  arg0.bits[98]._super._super,
-      arg0.bits[99]._super._super,  arg0.bits[100]._super._super, arg0.bits[101]._super._super,
-      arg0.bits[102]._super._super, arg0.bits[103]._super._super, arg0.bits[104]._super._super,
-      arg0.bits[105]._super._super, arg0.bits[106]._super._super, arg0.bits[107]._super._super,
-      arg0.bits[108]._super._super, arg0.bits[109]._super._super, arg0.bits[110]._super._super,
-      arg0.bits[111]._super._super, arg0.bits[112]._super._super, arg0.bits[113]._super._super,
-      arg0.bits[114]._super._super, arg0.bits[115]._super._super, arg0.bits[116]._super._super,
-      arg0.bits[117]._super._super, arg0.bits[118]._super._super, arg0.bits[119]._super._super,
-      arg0.bits[120]._super._super, arg0.bits[121]._super._super, arg0.bits[122]._super._super,
-      arg0.bits[123]._super._super, arg0.bits[124]._super._super, arg0.bits[125]._super._super,
-      arg0.bits[126]._super._super, arg0.bits[127]._super._super, arg1.bits[96]._super._super,
-      arg1.bits[97]._super._super,  arg1.bits[98]._super._super,  arg1.bits[99]._super._super,
-      arg1.bits[100]._super._super, arg1.bits[101]._super._super, arg1.bits[102]._super._super,
-      arg1.bits[103]._super._super, arg1.bits[104]._super._super, arg1.bits[105]._super._super,
-      arg1.bits[106]._super._super, arg1.bits[107]._super._super, arg1.bits[108]._super._super,
-      arg1.bits[109]._super._super, arg1.bits[110]._super._super, arg1.bits[111]._super._super,
-      arg1.bits[112]._super._super, arg1.bits[113]._super._super, arg1.bits[114]._super._super,
-      arg1.bits[115]._super._super, arg1.bits[116]._super._super, arg1.bits[117]._super._super,
-      arg1.bits[118]._super._super, arg1.bits[119]._super._super, arg1.bits[120]._super._super,
-      arg1.bits[121]._super._super, arg1.bits[122]._super._super, arg1.bits[123]._super._super,
-      arg1.bits[124]._super._super, arg1.bits[125]._super._super, arg1.bits[126]._super._super,
-      arg1.bits[127]._super._super};
-  Val64Array x7 = Val64Array{
-      arg0.bits[128]._super._super, arg0.bits[129]._super._super, arg0.bits[130]._super._super,
-      arg0.bits[131]._super._super, arg0.bits[132]._super._super, arg0.bits[133]._super._super,
-      arg0.bits[134]._super._super, arg0.bits[135]._super._super, arg0.bits[136]._super._super,
-      arg0.bits[137]._super._super, arg0.bits[138]._super._super, arg0.bits[139]._super._super,
-      arg0.bits[140]._super._super, arg0.bits[141]._super._super, arg0.bits[142]._super._super,
-      arg0.bits[143]._super._super, arg0.bits[144]._super._super, arg0.bits[145]._super._super,
-      arg0.bits[146]._super._super, arg0.bits[147]._super._super, arg0.bits[148]._super._super,
-      arg0.bits[149]._super._super, arg0.bits[150]._super._super, arg0.bits[151]._super._super,
-      arg0.bits[152]._super._super, arg0.bits[153]._super._super, arg0.bits[154]._super._super,
-      arg0.bits[155]._super._super, arg0.bits[156]._super._super, arg0.bits[157]._super._super,
-      arg0.bits[158]._super._super, arg0.bits[159]._super._super, arg1.bits[128]._super._super,
-      arg1.bits[129]._super._super, arg1.bits[130]._super._super, arg1.bits[131]._super._super,
-      arg1.bits[132]._super._super, arg1.bits[133]._super._super, arg1.bits[134]._super._super,
-      arg1.bits[135]._super._super, arg1.bits[136]._super._super, arg1.bits[137]._super._super,
-      arg1.bits[138]._super._super, arg1.bits[139]._super._super, arg1.bits[140]._super._super,
-      arg1.bits[141]._super._super, arg1.bits[142]._super._super, arg1.bits[143]._super._super,
-      arg1.bits[144]._super._super, arg1.bits[145]._super._super, arg1.bits[146]._super._super,
-      arg1.bits[147]._super._super, arg1.bits[148]._super._super, arg1.bits[149]._super._super,
-      arg1.bits[150]._super._super, arg1.bits[151]._super._super, arg1.bits[152]._super._super,
-      arg1.bits[153]._super._super, arg1.bits[154]._super._super, arg1.bits[155]._super._super,
-      arg1.bits[156]._super._super, arg1.bits[157]._super._super, arg1.bits[158]._super._super,
-      arg1.bits[159]._super._super};
-  Val64Array x8 = Val64Array{
-      arg0.bits[160]._super._super, arg0.bits[161]._super._super, arg0.bits[162]._super._super,
-      arg0.bits[163]._super._super, arg0.bits[164]._super._super, arg0.bits[165]._super._super,
-      arg0.bits[166]._super._super, arg0.bits[167]._super._super, arg0.bits[168]._super._super,
-      arg0.bits[169]._super._super, arg0.bits[170]._super._super, arg0.bits[171]._super._super,
-      arg0.bits[172]._super._super, arg0.bits[173]._super._super, arg0.bits[174]._super._super,
-      arg0.bits[175]._super._super, arg0.bits[176]._super._super, arg0.bits[177]._super._super,
-      arg0.bits[178]._super._super, arg0.bits[179]._super._super, arg0.bits[180]._super._super,
-      arg0.bits[181]._super._super, arg0.bits[182]._super._super, arg0.bits[183]._super._super,
-      arg0.bits[184]._super._super, arg0.bits[185]._super._super, arg0.bits[186]._super._super,
-      arg0.bits[187]._super._super, arg0.bits[188]._super._super, arg0.bits[189]._super._super,
-      arg0.bits[190]._super._super, arg0.bits[191]._super._super, arg1.bits[160]._super._super,
-      arg1.bits[161]._super._super, arg1.bits[162]._super._super, arg1.bits[163]._super._super,
-      arg1.bits[164]._super._super, arg1.bits[165]._super._super, arg1.bits[166]._super._super,
-      arg1.bits[167]._super._super, arg1.bits[168]._super._super, arg1.bits[169]._super._super,
-      arg1.bits[170]._super._super, arg1.bits[171]._super._super, arg1.bits[172]._super._super,
-      arg1.bits[173]._super._super, arg1.bits[174]._super._super, arg1.bits[175]._super._super,
-      arg1.bits[176]._super._super, arg1.bits[177]._super._super, arg1.bits[178]._super._super,
-      arg1.bits[179]._super._super, arg1.bits[180]._super._super, arg1.bits[181]._super._super,
-      arg1.bits[182]._super._super, arg1.bits[183]._super._super, arg1.bits[184]._super._super,
-      arg1.bits[185]._super._super, arg1.bits[186]._super._super, arg1.bits[187]._super._super,
-      arg1.bits[188]._super._super, arg1.bits[189]._super._super, arg1.bits[190]._super._super,
-      arg1.bits[191]._super._super};
-  Val64Array x9 = Val64Array{
-      arg0.bits[192]._super._super, arg0.bits[193]._super._super, arg0.bits[194]._super._super,
-      arg0.bits[195]._super._super, arg0.bits[196]._super._super, arg0.bits[197]._super._super,
-      arg0.bits[198]._super._super, arg0.bits[199]._super._super, arg0.bits[200]._super._super,
-      arg0.bits[201]._super._super, arg0.bits[202]._super._super, arg0.bits[203]._super._super,
-      arg0.bits[204]._super._super, arg0.bits[205]._super._super, arg0.bits[206]._super._super,
-      arg0.bits[207]._super._super, arg0.bits[208]._super._super, arg0.bits[209]._super._super,
-      arg0.bits[210]._super._super, arg0.bits[211]._super._super, arg0.bits[212]._super._super,
-      arg0.bits[213]._super._super, arg0.bits[214]._super._super, arg0.bits[215]._super._super,
-      arg0.bits[216]._super._super, arg0.bits[217]._super._super, arg0.bits[218]._super._super,
-      arg0.bits[219]._super._super, arg0.bits[220]._super._super, arg0.bits[221]._super._super,
-      arg0.bits[222]._super._super, arg0.bits[223]._super._super, arg1.bits[192]._super._super,
-      arg1.bits[193]._super._super, arg1.bits[194]._super._super, arg1.bits[195]._super._super,
-      arg1.bits[196]._super._super, arg1.bits[197]._super._super, arg1.bits[198]._super._super,
-      arg1.bits[199]._super._super, arg1.bits[200]._super._super, arg1.bits[201]._super._super,
-      arg1.bits[202]._super._super, arg1.bits[203]._super._super, arg1.bits[204]._super._super,
-      arg1.bits[205]._super._super, arg1.bits[206]._super._super, arg1.bits[207]._super._super,
-      arg1.bits[208]._super._super, arg1.bits[209]._super._super, arg1.bits[210]._super._super,
-      arg1.bits[211]._super._super, arg1.bits[212]._super._super, arg1.bits[213]._super._super,
-      arg1.bits[214]._super._super, arg1.bits[215]._super._super, arg1.bits[216]._super._super,
-      arg1.bits[217]._super._super, arg1.bits[218]._super._super, arg1.bits[219]._super._super,
-      arg1.bits[220]._super._super, arg1.bits[221]._super._super, arg1.bits[222]._super._super,
-      arg1.bits[223]._super._super};
-  Val64Array x10 = Val64Array{
-      arg0.bits[224]._super._super, arg0.bits[225]._super._super, arg0.bits[226]._super._super,
-      arg0.bits[227]._super._super, arg0.bits[228]._super._super, arg0.bits[229]._super._super,
-      arg0.bits[230]._super._super, arg0.bits[231]._super._super, arg0.bits[232]._super._super,
-      arg0.bits[233]._super._super, arg0.bits[234]._super._super, arg0.bits[235]._super._super,
-      arg0.bits[236]._super._super, arg0.bits[237]._super._super, arg0.bits[238]._super._super,
-      arg0.bits[239]._super._super, arg0.bits[240]._super._super, arg0.bits[241]._super._super,
-      arg0.bits[242]._super._super, arg0.bits[243]._super._super, arg0.bits[244]._super._super,
-      arg0.bits[245]._super._super, arg0.bits[246]._super._super, arg0.bits[247]._super._super,
-      arg0.bits[248]._super._super, arg0.bits[249]._super._super, arg0.bits[250]._super._super,
-      arg0.bits[251]._super._super, arg0.bits[252]._super._super, arg0.bits[253]._super._super,
-      arg0.bits[254]._super._super, arg0.bits[255]._super._super, arg1.bits[224]._super._super,
-      arg1.bits[225]._super._super, arg1.bits[226]._super._super, arg1.bits[227]._super._super,
-      arg1.bits[228]._super._super, arg1.bits[229]._super._super, arg1.bits[230]._super._super,
-      arg1.bits[231]._super._super, arg1.bits[232]._super._super, arg1.bits[233]._super._super,
-      arg1.bits[234]._super._super, arg1.bits[235]._super._super, arg1.bits[236]._super._super,
-      arg1.bits[237]._super._super, arg1.bits[238]._super._super, arg1.bits[239]._super._super,
-      arg1.bits[240]._super._super, arg1.bits[241]._super._super, arg1.bits[242]._super._super,
-      arg1.bits[243]._super._super, arg1.bits[244]._super._super, arg1.bits[245]._super._super,
-      arg1.bits[246]._super._super, arg1.bits[247]._super._super, arg1.bits[248]._super._super,
-      arg1.bits[249]._super._super, arg1.bits[250]._super._super, arg1.bits[251]._super._super,
-      arg1.bits[252]._super._super, arg1.bits[253]._super._super, arg1.bits[254]._super._super,
-      arg1.bits[255]._super._super};
-  Val64Array x11 = Val64Array{
-      arg0.bits[256]._super._super, arg0.bits[257]._super._super, arg0.bits[258]._super._super,
-      arg0.bits[259]._super._super, arg0.bits[260]._super._super, arg0.bits[261]._super._super,
-      arg0.bits[262]._super._super, arg0.bits[263]._super._super, arg0.bits[264]._super._super,
-      arg0.bits[265]._super._super, arg0.bits[266]._super._super, arg0.bits[267]._super._super,
-      arg0.bits[268]._super._super, arg0.bits[269]._super._super, arg0.bits[270]._super._super,
-      arg0.bits[271]._super._super, arg0.bits[272]._super._super, arg0.bits[273]._super._super,
-      arg0.bits[274]._super._super, arg0.bits[275]._super._super, arg0.bits[276]._super._super,
-      arg0.bits[277]._super._super, arg0.bits[278]._super._super, arg0.bits[279]._super._super,
-      arg0.bits[280]._super._super, arg0.bits[281]._super._super, arg0.bits[282]._super._super,
-      arg0.bits[283]._super._super, arg0.bits[284]._super._super, arg0.bits[285]._super._super,
-      arg0.bits[286]._super._super, arg0.bits[287]._super._super, arg1.bits[256]._super._super,
-      arg1.bits[257]._super._super, arg1.bits[258]._super._super, arg1.bits[259]._super._super,
-      arg1.bits[260]._super._super, arg1.bits[261]._super._super, arg1.bits[262]._super._super,
-      arg1.bits[263]._super._super, arg1.bits[264]._super._super, arg1.bits[265]._super._super,
-      arg1.bits[266]._super._super, arg1.bits[267]._super._super, arg1.bits[268]._super._super,
-      arg1.bits[269]._super._super, arg1.bits[270]._super._super, arg1.bits[271]._super._super,
-      arg1.bits[272]._super._super, arg1.bits[273]._super._super, arg1.bits[274]._super._super,
-      arg1.bits[275]._super._super, arg1.bits[276]._super._super, arg1.bits[277]._super._super,
-      arg1.bits[278]._super._super, arg1.bits[279]._super._super, arg1.bits[280]._super._super,
-      arg1.bits[281]._super._super, arg1.bits[282]._super._super, arg1.bits[283]._super._super,
-      arg1.bits[284]._super._super, arg1.bits[285]._super._super, arg1.bits[286]._super._super,
-      arg1.bits[287]._super._super};
-  Val64Array x12 = Val64Array{
-      arg0.bits[288]._super._super, arg0.bits[289]._super._super, arg0.bits[290]._super._super,
-      arg0.bits[291]._super._super, arg0.bits[292]._super._super, arg0.bits[293]._super._super,
-      arg0.bits[294]._super._super, arg0.bits[295]._super._super, arg0.bits[296]._super._super,
-      arg0.bits[297]._super._super, arg0.bits[298]._super._super, arg0.bits[299]._super._super,
-      arg0.bits[300]._super._super, arg0.bits[301]._super._super, arg0.bits[302]._super._super,
-      arg0.bits[303]._super._super, arg0.bits[304]._super._super, arg0.bits[305]._super._super,
-      arg0.bits[306]._super._super, arg0.bits[307]._super._super, arg0.bits[308]._super._super,
-      arg0.bits[309]._super._super, arg0.bits[310]._super._super, arg0.bits[311]._super._super,
-      arg0.bits[312]._super._super, arg0.bits[313]._super._super, arg0.bits[314]._super._super,
-      arg0.bits[315]._super._super, arg0.bits[316]._super._super, arg0.bits[317]._super._super,
-      arg0.bits[318]._super._super, arg0.bits[319]._super._super, arg1.bits[288]._super._super,
-      arg1.bits[289]._super._super, arg1.bits[290]._super._super, arg1.bits[291]._super._super,
-      arg1.bits[292]._super._super, arg1.bits[293]._super._super, arg1.bits[294]._super._super,
-      arg1.bits[295]._super._super, arg1.bits[296]._super._super, arg1.bits[297]._super._super,
-      arg1.bits[298]._super._super, arg1.bits[299]._super._super, arg1.bits[300]._super._super,
-      arg1.bits[301]._super._super, arg1.bits[302]._super._super, arg1.bits[303]._super._super,
-      arg1.bits[304]._super._super, arg1.bits[305]._super._super, arg1.bits[306]._super._super,
-      arg1.bits[307]._super._super, arg1.bits[308]._super._super, arg1.bits[309]._super._super,
-      arg1.bits[310]._super._super, arg1.bits[311]._super._super, arg1.bits[312]._super._super,
-      arg1.bits[313]._super._super, arg1.bits[314]._super._super, arg1.bits[315]._super._super,
-      arg1.bits[316]._super._super, arg1.bits[317]._super._super, arg1.bits[318]._super._super,
-      arg1.bits[319]._super._super};
-  Val64Array x13 = Val64Array{
-      arg0.bits[320]._super._super, arg0.bits[321]._super._super, arg0.bits[322]._super._super,
-      arg0.bits[323]._super._super, arg0.bits[324]._super._super, arg0.bits[325]._super._super,
-      arg0.bits[326]._super._super, arg0.bits[327]._super._super, arg0.bits[328]._super._super,
-      arg0.bits[329]._super._super, arg0.bits[330]._super._super, arg0.bits[331]._super._super,
-      arg0.bits[332]._super._super, arg0.bits[333]._super._super, arg0.bits[334]._super._super,
-      arg0.bits[335]._super._super, arg0.bits[336]._super._super, arg0.bits[337]._super._super,
-      arg0.bits[338]._super._super, arg0.bits[339]._super._super, arg0.bits[340]._super._super,
-      arg0.bits[341]._super._super, arg0.bits[342]._super._super, arg0.bits[343]._super._super,
-      arg0.bits[344]._super._super, arg0.bits[345]._super._super, arg0.bits[346]._super._super,
-      arg0.bits[347]._super._super, arg0.bits[348]._super._super, arg0.bits[349]._super._super,
-      arg0.bits[350]._super._super, arg0.bits[351]._super._super, arg1.bits[320]._super._super,
-      arg1.bits[321]._super._super, arg1.bits[322]._super._super, arg1.bits[323]._super._super,
-      arg1.bits[324]._super._super, arg1.bits[325]._super._super, arg1.bits[326]._super._super,
-      arg1.bits[327]._super._super, arg1.bits[328]._super._super, arg1.bits[329]._super._super,
-      arg1.bits[330]._super._super, arg1.bits[331]._super._super, arg1.bits[332]._super._super,
-      arg1.bits[333]._super._super, arg1.bits[334]._super._super, arg1.bits[335]._super._super,
-      arg1.bits[336]._super._super, arg1.bits[337]._super._super, arg1.bits[338]._super._super,
-      arg1.bits[339]._super._super, arg1.bits[340]._super._super, arg1.bits[341]._super._super,
-      arg1.bits[342]._super._super, arg1.bits[343]._super._super, arg1.bits[344]._super._super,
-      arg1.bits[345]._super._super, arg1.bits[346]._super._super, arg1.bits[347]._super._super,
-      arg1.bits[348]._super._super, arg1.bits[349]._super._super, arg1.bits[350]._super._super,
-      arg1.bits[351]._super._super};
-  Val64Array x14 = Val64Array{
-      arg0.bits[352]._super._super, arg0.bits[353]._super._super, arg0.bits[354]._super._super,
-      arg0.bits[355]._super._super, arg0.bits[356]._super._super, arg0.bits[357]._super._super,
-      arg0.bits[358]._super._super, arg0.bits[359]._super._super, arg0.bits[360]._super._super,
-      arg0.bits[361]._super._super, arg0.bits[362]._super._super, arg0.bits[363]._super._super,
-      arg0.bits[364]._super._super, arg0.bits[365]._super._super, arg0.bits[366]._super._super,
-      arg0.bits[367]._super._super, arg0.bits[368]._super._super, arg0.bits[369]._super._super,
-      arg0.bits[370]._super._super, arg0.bits[371]._super._super, arg0.bits[372]._super._super,
-      arg0.bits[373]._super._super, arg0.bits[374]._super._super, arg0.bits[375]._super._super,
-      arg0.bits[376]._super._super, arg0.bits[377]._super._super, arg0.bits[378]._super._super,
-      arg0.bits[379]._super._super, arg0.bits[380]._super._super, arg0.bits[381]._super._super,
-      arg0.bits[382]._super._super, arg0.bits[383]._super._super, arg1.bits[352]._super._super,
-      arg1.bits[353]._super._super, arg1.bits[354]._super._super, arg1.bits[355]._super._super,
-      arg1.bits[356]._super._super, arg1.bits[357]._super._super, arg1.bits[358]._super._super,
-      arg1.bits[359]._super._super, arg1.bits[360]._super._super, arg1.bits[361]._super._super,
-      arg1.bits[362]._super._super, arg1.bits[363]._super._super, arg1.bits[364]._super._super,
-      arg1.bits[365]._super._super, arg1.bits[366]._super._super, arg1.bits[367]._super._super,
-      arg1.bits[368]._super._super, arg1.bits[369]._super._super, arg1.bits[370]._super._super,
-      arg1.bits[371]._super._super, arg1.bits[372]._super._super, arg1.bits[373]._super._super,
-      arg1.bits[374]._super._super, arg1.bits[375]._super._super, arg1.bits[376]._super._super,
-      arg1.bits[377]._super._super, arg1.bits[378]._super._super, arg1.bits[379]._super._super,
-      arg1.bits[380]._super._super, arg1.bits[381]._super._super, arg1.bits[382]._super._super,
-      arg1.bits[383]._super._super};
-  Val64Array x15 = Val64Array{
-      arg0.bits[384]._super._super, arg0.bits[385]._super._super, arg0.bits[386]._super._super,
-      arg0.bits[387]._super._super, arg0.bits[388]._super._super, arg0.bits[389]._super._super,
-      arg0.bits[390]._super._super, arg0.bits[391]._super._super, arg0.bits[392]._super._super,
-      arg0.bits[393]._super._super, arg0.bits[394]._super._super, arg0.bits[395]._super._super,
-      arg0.bits[396]._super._super, arg0.bits[397]._super._super, arg0.bits[398]._super._super,
-      arg0.bits[399]._super._super, arg0.bits[400]._super._super, arg0.bits[401]._super._super,
-      arg0.bits[402]._super._super, arg0.bits[403]._super._super, arg0.bits[404]._super._super,
-      arg0.bits[405]._super._super, arg0.bits[406]._super._super, arg0.bits[407]._super._super,
-      arg0.bits[408]._super._super, arg0.bits[409]._super._super, arg0.bits[410]._super._super,
-      arg0.bits[411]._super._super, arg0.bits[412]._super._super, arg0.bits[413]._super._super,
-      arg0.bits[414]._super._super, arg0.bits[415]._super._super, arg1.bits[384]._super._super,
-      arg1.bits[385]._super._super, arg1.bits[386]._super._super, arg1.bits[387]._super._super,
-      arg1.bits[388]._super._super, arg1.bits[389]._super._super, arg1.bits[390]._super._super,
-      arg1.bits[391]._super._super, arg1.bits[392]._super._super, arg1.bits[393]._super._super,
-      arg1.bits[394]._super._super, arg1.bits[395]._super._super, arg1.bits[396]._super._super,
-      arg1.bits[397]._super._super, arg1.bits[398]._super._super, arg1.bits[399]._super._super,
-      arg1.bits[400]._super._super, arg1.bits[401]._super._super, arg1.bits[402]._super._super,
-      arg1.bits[403]._super._super, arg1.bits[404]._super._super, arg1.bits[405]._super._super,
-      arg1.bits[406]._super._super, arg1.bits[407]._super._super, arg1.bits[408]._super._super,
-      arg1.bits[409]._super._super, arg1.bits[410]._super._super, arg1.bits[411]._super._super,
-      arg1.bits[412]._super._super, arg1.bits[413]._super._super, arg1.bits[414]._super._super,
-      arg1.bits[415]._super._super};
-  Val64Array x16 = Val64Array{
-      arg0.bits[416]._super._super, arg0.bits[417]._super._super, arg0.bits[418]._super._super,
-      arg0.bits[419]._super._super, arg0.bits[420]._super._super, arg0.bits[421]._super._super,
-      arg0.bits[422]._super._super, arg0.bits[423]._super._super, arg0.bits[424]._super._super,
-      arg0.bits[425]._super._super, arg0.bits[426]._super._super, arg0.bits[427]._super._super,
-      arg0.bits[428]._super._super, arg0.bits[429]._super._super, arg0.bits[430]._super._super,
-      arg0.bits[431]._super._super, arg0.bits[432]._super._super, arg0.bits[433]._super._super,
-      arg0.bits[434]._super._super, arg0.bits[435]._super._super, arg0.bits[436]._super._super,
-      arg0.bits[437]._super._super, arg0.bits[438]._super._super, arg0.bits[439]._super._super,
-      arg0.bits[440]._super._super, arg0.bits[441]._super._super, arg0.bits[442]._super._super,
-      arg0.bits[443]._super._super, arg0.bits[444]._super._super, arg0.bits[445]._super._super,
-      arg0.bits[446]._super._super, arg0.bits[447]._super._super, arg1.bits[416]._super._super,
-      arg1.bits[417]._super._super, arg1.bits[418]._super._super, arg1.bits[419]._super._super,
-      arg1.bits[420]._super._super, arg1.bits[421]._super._super, arg1.bits[422]._super._super,
-      arg1.bits[423]._super._super, arg1.bits[424]._super._super, arg1.bits[425]._super._super,
-      arg1.bits[426]._super._super, arg1.bits[427]._super._super, arg1.bits[428]._super._super,
-      arg1.bits[429]._super._super, arg1.bits[430]._super._super, arg1.bits[431]._super._super,
-      arg1.bits[432]._super._super, arg1.bits[433]._super._super, arg1.bits[434]._super._super,
-      arg1.bits[435]._super._super, arg1.bits[436]._super._super, arg1.bits[437]._super._super,
-      arg1.bits[438]._super._super, arg1.bits[439]._super._super, arg1.bits[440]._super._super,
-      arg1.bits[441]._super._super, arg1.bits[442]._super._super, arg1.bits[443]._super._super,
-      arg1.bits[444]._super._super, arg1.bits[445]._super._super, arg1.bits[446]._super._super,
-      arg1.bits[447]._super._super};
-  Val64Array x17 = Val64Array{
-      arg0.bits[448]._super._super, arg0.bits[449]._super._super, arg0.bits[450]._super._super,
-      arg0.bits[451]._super._super, arg0.bits[452]._super._super, arg0.bits[453]._super._super,
-      arg0.bits[454]._super._super, arg0.bits[455]._super._super, arg0.bits[456]._super._super,
-      arg0.bits[457]._super._super, arg0.bits[458]._super._super, arg0.bits[459]._super._super,
-      arg0.bits[460]._super._super, arg0.bits[461]._super._super, arg0.bits[462]._super._super,
-      arg0.bits[463]._super._super, arg0.bits[464]._super._super, arg0.bits[465]._super._super,
-      arg0.bits[466]._super._super, arg0.bits[467]._super._super, arg0.bits[468]._super._super,
-      arg0.bits[469]._super._super, arg0.bits[470]._super._super, arg0.bits[471]._super._super,
-      arg0.bits[472]._super._super, arg0.bits[473]._super._super, arg0.bits[474]._super._super,
-      arg0.bits[475]._super._super, arg0.bits[476]._super._super, arg0.bits[477]._super._super,
-      arg0.bits[478]._super._super, arg0.bits[479]._super._super, arg1.bits[448]._super._super,
-      arg1.bits[449]._super._super, arg1.bits[450]._super._super, arg1.bits[451]._super._super,
-      arg1.bits[452]._super._super, arg1.bits[453]._super._super, arg1.bits[454]._super._super,
-      arg1.bits[455]._super._super, arg1.bits[456]._super._super, arg1.bits[457]._super._super,
-      arg1.bits[458]._super._super, arg1.bits[459]._super._super, arg1.bits[460]._super._super,
-      arg1.bits[461]._super._super, arg1.bits[462]._super._super, arg1.bits[463]._super._super,
-      arg1.bits[464]._super._super, arg1.bits[465]._super._super, arg1.bits[466]._super._super,
-      arg1.bits[467]._super._super, arg1.bits[468]._super._super, arg1.bits[469]._super._super,
-      arg1.bits[470]._super._super, arg1.bits[471]._super._super, arg1.bits[472]._super._super,
-      arg1.bits[473]._super._super, arg1.bits[474]._super._super, arg1.bits[475]._super._super,
-      arg1.bits[476]._super._super, arg1.bits[477]._super._super, arg1.bits[478]._super._super,
-      arg1.bits[479]._super._super};
-  Val64Array x18 = Val64Array{
-      arg0.bits[480]._super._super, arg0.bits[481]._super._super, arg0.bits[482]._super._super,
-      arg0.bits[483]._super._super, arg0.bits[484]._super._super, arg0.bits[485]._super._super,
-      arg0.bits[486]._super._super, arg0.bits[487]._super._super, arg0.bits[488]._super._super,
-      arg0.bits[489]._super._super, arg0.bits[490]._super._super, arg0.bits[491]._super._super,
-      arg0.bits[492]._super._super, arg0.bits[493]._super._super, arg0.bits[494]._super._super,
-      arg0.bits[495]._super._super, arg0.bits[496]._super._super, arg0.bits[497]._super._super,
-      arg0.bits[498]._super._super, arg0.bits[499]._super._super, arg0.bits[500]._super._super,
-      arg0.bits[501]._super._super, arg0.bits[502]._super._super, arg0.bits[503]._super._super,
-      arg0.bits[504]._super._super, arg0.bits[505]._super._super, arg0.bits[506]._super._super,
-      arg0.bits[507]._super._super, arg0.bits[508]._super._super, arg0.bits[509]._super._super,
-      arg0.bits[510]._super._super, arg0.bits[511]._super._super, arg1.bits[480]._super._super,
-      arg1.bits[481]._super._super, arg1.bits[482]._super._super, arg1.bits[483]._super._super,
-      arg1.bits[484]._super._super, arg1.bits[485]._super._super, arg1.bits[486]._super._super,
-      arg1.bits[487]._super._super, arg1.bits[488]._super._super, arg1.bits[489]._super._super,
-      arg1.bits[490]._super._super, arg1.bits[491]._super._super, arg1.bits[492]._super._super,
-      arg1.bits[493]._super._super, arg1.bits[494]._super._super, arg1.bits[495]._super._super,
-      arg1.bits[496]._super._super, arg1.bits[497]._super._super, arg1.bits[498]._super._super,
-      arg1.bits[499]._super._super, arg1.bits[500]._super._super, arg1.bits[501]._super._super,
-      arg1.bits[502]._super._super, arg1.bits[503]._super._super, arg1.bits[504]._super._super,
-      arg1.bits[505]._super._super, arg1.bits[506]._super._super, arg1.bits[507]._super._super,
-      arg1.bits[508]._super._super, arg1.bits[509]._super._super, arg1.bits[510]._super._super,
-      arg1.bits[511]._super._super};
-  Val64Array x19 = Val64Array{
-      arg0.bits[512]._super._super, arg0.bits[513]._super._super, arg0.bits[514]._super._super,
-      arg0.bits[515]._super._super, arg0.bits[516]._super._super, arg0.bits[517]._super._super,
-      arg0.bits[518]._super._super, arg0.bits[519]._super._super, arg0.bits[520]._super._super,
-      arg0.bits[521]._super._super, arg0.bits[522]._super._super, arg0.bits[523]._super._super,
-      arg0.bits[524]._super._super, arg0.bits[525]._super._super, arg0.bits[526]._super._super,
-      arg0.bits[527]._super._super, arg0.bits[528]._super._super, arg0.bits[529]._super._super,
-      arg0.bits[530]._super._super, arg0.bits[531]._super._super, arg0.bits[532]._super._super,
-      arg0.bits[533]._super._super, arg0.bits[534]._super._super, arg0.bits[535]._super._super,
-      arg0.bits[536]._super._super, arg0.bits[537]._super._super, arg0.bits[538]._super._super,
-      arg0.bits[539]._super._super, arg0.bits[540]._super._super, arg0.bits[541]._super._super,
-      arg0.bits[542]._super._super, arg0.bits[543]._super._super, arg1.bits[512]._super._super,
-      arg1.bits[513]._super._super, arg1.bits[514]._super._super, arg1.bits[515]._super._super,
-      arg1.bits[516]._super._super, arg1.bits[517]._super._super, arg1.bits[518]._super._super,
-      arg1.bits[519]._super._super, arg1.bits[520]._super._super, arg1.bits[521]._super._super,
-      arg1.bits[522]._super._super, arg1.bits[523]._super._super, arg1.bits[524]._super._super,
-      arg1.bits[525]._super._super, arg1.bits[526]._super._super, arg1.bits[527]._super._super,
-      arg1.bits[528]._super._super, arg1.bits[529]._super._super, arg1.bits[530]._super._super,
-      arg1.bits[531]._super._super, arg1.bits[532]._super._super, arg1.bits[533]._super._super,
-      arg1.bits[534]._super._super, arg1.bits[535]._super._super, arg1.bits[536]._super._super,
-      arg1.bits[537]._super._super, arg1.bits[538]._super._super, arg1.bits[539]._super._super,
-      arg1.bits[540]._super._super, arg1.bits[541]._super._super, arg1.bits[542]._super._super,
-      arg1.bits[543]._super._super};
-  Val64Array x20 = Val64Array{
-      arg0.bits[544]._super._super, arg0.bits[545]._super._super, arg0.bits[546]._super._super,
-      arg0.bits[547]._super._super, arg0.bits[548]._super._super, arg0.bits[549]._super._super,
-      arg0.bits[550]._super._super, arg0.bits[551]._super._super, arg0.bits[552]._super._super,
-      arg0.bits[553]._super._super, arg0.bits[554]._super._super, arg0.bits[555]._super._super,
-      arg0.bits[556]._super._super, arg0.bits[557]._super._super, arg0.bits[558]._super._super,
-      arg0.bits[559]._super._super, arg0.bits[560]._super._super, arg0.bits[561]._super._super,
-      arg0.bits[562]._super._super, arg0.bits[563]._super._super, arg0.bits[564]._super._super,
-      arg0.bits[565]._super._super, arg0.bits[566]._super._super, arg0.bits[567]._super._super,
-      arg0.bits[568]._super._super, arg0.bits[569]._super._super, arg0.bits[570]._super._super,
-      arg0.bits[571]._super._super, arg0.bits[572]._super._super, arg0.bits[573]._super._super,
-      arg0.bits[574]._super._super, arg0.bits[575]._super._super, arg1.bits[544]._super._super,
-      arg1.bits[545]._super._super, arg1.bits[546]._super._super, arg1.bits[547]._super._super,
-      arg1.bits[548]._super._super, arg1.bits[549]._super._super, arg1.bits[550]._super._super,
-      arg1.bits[551]._super._super, arg1.bits[552]._super._super, arg1.bits[553]._super._super,
-      arg1.bits[554]._super._super, arg1.bits[555]._super._super, arg1.bits[556]._super._super,
-      arg1.bits[557]._super._super, arg1.bits[558]._super._super, arg1.bits[559]._super._super,
-      arg1.bits[560]._super._super, arg1.bits[561]._super._super, arg1.bits[562]._super._super,
-      arg1.bits[563]._super._super, arg1.bits[564]._super._super, arg1.bits[565]._super._super,
-      arg1.bits[566]._super._super, arg1.bits[567]._super._super, arg1.bits[568]._super._super,
-      arg1.bits[569]._super._super, arg1.bits[570]._super._super, arg1.bits[571]._super._super,
-      arg1.bits[572]._super._super, arg1.bits[573]._super._super, arg1.bits[574]._super._super,
-      arg1.bits[575]._super._super};
-  Val64Array x21 = Val64Array{
-      arg0.bits[576]._super._super, arg0.bits[577]._super._super, arg0.bits[578]._super._super,
-      arg0.bits[579]._super._super, arg0.bits[580]._super._super, arg0.bits[581]._super._super,
-      arg0.bits[582]._super._super, arg0.bits[583]._super._super, arg0.bits[584]._super._super,
-      arg0.bits[585]._super._super, arg0.bits[586]._super._super, arg0.bits[587]._super._super,
-      arg0.bits[588]._super._super, arg0.bits[589]._super._super, arg0.bits[590]._super._super,
-      arg0.bits[591]._super._super, arg0.bits[592]._super._super, arg0.bits[593]._super._super,
-      arg0.bits[594]._super._super, arg0.bits[595]._super._super, arg0.bits[596]._super._super,
-      arg0.bits[597]._super._super, arg0.bits[598]._super._super, arg0.bits[599]._super._super,
-      arg0.bits[600]._super._super, arg0.bits[601]._super._super, arg0.bits[602]._super._super,
-      arg0.bits[603]._super._super, arg0.bits[604]._super._super, arg0.bits[605]._super._super,
-      arg0.bits[606]._super._super, arg0.bits[607]._super._super, arg1.bits[576]._super._super,
-      arg1.bits[577]._super._super, arg1.bits[578]._super._super, arg1.bits[579]._super._super,
-      arg1.bits[580]._super._super, arg1.bits[581]._super._super, arg1.bits[582]._super._super,
-      arg1.bits[583]._super._super, arg1.bits[584]._super._super, arg1.bits[585]._super._super,
-      arg1.bits[586]._super._super, arg1.bits[587]._super._super, arg1.bits[588]._super._super,
-      arg1.bits[589]._super._super, arg1.bits[590]._super._super, arg1.bits[591]._super._super,
-      arg1.bits[592]._super._super, arg1.bits[593]._super._super, arg1.bits[594]._super._super,
-      arg1.bits[595]._super._super, arg1.bits[596]._super._super, arg1.bits[597]._super._super,
-      arg1.bits[598]._super._super, arg1.bits[599]._super._super, arg1.bits[600]._super._super,
-      arg1.bits[601]._super._super, arg1.bits[602]._super._super, arg1.bits[603]._super._super,
-      arg1.bits[604]._super._super, arg1.bits[605]._super._super, arg1.bits[606]._super._super,
-      arg1.bits[607]._super._super};
-  Val64Array x22 = Val64Array{
-      arg0.bits[608]._super._super, arg0.bits[609]._super._super, arg0.bits[610]._super._super,
-      arg0.bits[611]._super._super, arg0.bits[612]._super._super, arg0.bits[613]._super._super,
-      arg0.bits[614]._super._super, arg0.bits[615]._super._super, arg0.bits[616]._super._super,
-      arg0.bits[617]._super._super, arg0.bits[618]._super._super, arg0.bits[619]._super._super,
-      arg0.bits[620]._super._super, arg0.bits[621]._super._super, arg0.bits[622]._super._super,
-      arg0.bits[623]._super._super, arg0.bits[624]._super._super, arg0.bits[625]._super._super,
-      arg0.bits[626]._super._super, arg0.bits[627]._super._super, arg0.bits[628]._super._super,
-      arg0.bits[629]._super._super, arg0.bits[630]._super._super, arg0.bits[631]._super._super,
-      arg0.bits[632]._super._super, arg0.bits[633]._super._super, arg0.bits[634]._super._super,
-      arg0.bits[635]._super._super, arg0.bits[636]._super._super, arg0.bits[637]._super._super,
-      arg0.bits[638]._super._super, arg0.bits[639]._super._super, arg1.bits[608]._super._super,
-      arg1.bits[609]._super._super, arg1.bits[610]._super._super, arg1.bits[611]._super._super,
-      arg1.bits[612]._super._super, arg1.bits[613]._super._super, arg1.bits[614]._super._super,
-      arg1.bits[615]._super._super, arg1.bits[616]._super._super, arg1.bits[617]._super._super,
-      arg1.bits[618]._super._super, arg1.bits[619]._super._super, arg1.bits[620]._super._super,
-      arg1.bits[621]._super._super, arg1.bits[622]._super._super, arg1.bits[623]._super._super,
-      arg1.bits[624]._super._super, arg1.bits[625]._super._super, arg1.bits[626]._super._super,
-      arg1.bits[627]._super._super, arg1.bits[628]._super._super, arg1.bits[629]._super._super,
-      arg1.bits[630]._super._super, arg1.bits[631]._super._super, arg1.bits[632]._super._super,
-      arg1.bits[633]._super._super, arg1.bits[634]._super._super, arg1.bits[635]._super._super,
-      arg1.bits[636]._super._super, arg1.bits[637]._super._super, arg1.bits[638]._super._super,
-      arg1.bits[639]._super._super};
-  Val64Array x23 = Val64Array{
-      arg0.bits[640]._super._super, arg0.bits[641]._super._super, arg0.bits[642]._super._super,
-      arg0.bits[643]._super._super, arg0.bits[644]._super._super, arg0.bits[645]._super._super,
-      arg0.bits[646]._super._super, arg0.bits[647]._super._super, arg0.bits[648]._super._super,
-      arg0.bits[649]._super._super, arg0.bits[650]._super._super, arg0.bits[651]._super._super,
-      arg0.bits[652]._super._super, arg0.bits[653]._super._super, arg0.bits[654]._super._super,
-      arg0.bits[655]._super._super, arg0.bits[656]._super._super, arg0.bits[657]._super._super,
-      arg0.bits[658]._super._super, arg0.bits[659]._super._super, arg0.bits[660]._super._super,
-      arg0.bits[661]._super._super, arg0.bits[662]._super._super, arg0.bits[663]._super._super,
-      arg0.bits[664]._super._super, arg0.bits[665]._super._super, arg0.bits[666]._super._super,
-      arg0.bits[667]._super._super, arg0.bits[668]._super._super, arg0.bits[669]._super._super,
-      arg0.bits[670]._super._super, arg0.bits[671]._super._super, arg1.bits[640]._super._super,
-      arg1.bits[641]._super._super, arg1.bits[642]._super._super, arg1.bits[643]._super._super,
-      arg1.bits[644]._super._super, arg1.bits[645]._super._super, arg1.bits[646]._super._super,
-      arg1.bits[647]._super._super, arg1.bits[648]._super._super, arg1.bits[649]._super._super,
-      arg1.bits[650]._super._super, arg1.bits[651]._super._super, arg1.bits[652]._super._super,
-      arg1.bits[653]._super._super, arg1.bits[654]._super._super, arg1.bits[655]._super._super,
-      arg1.bits[656]._super._super, arg1.bits[657]._super._super, arg1.bits[658]._super._super,
-      arg1.bits[659]._super._super, arg1.bits[660]._super._super, arg1.bits[661]._super._super,
-      arg1.bits[662]._super._super, arg1.bits[663]._super._super, arg1.bits[664]._super._super,
-      arg1.bits[665]._super._super, arg1.bits[666]._super._super, arg1.bits[667]._super._super,
-      arg1.bits[668]._super._super, arg1.bits[669]._super._super, arg1.bits[670]._super._super,
-      arg1.bits[671]._super._super};
-  Val64Array x24 = Val64Array{
-      arg0.bits[672]._super._super, arg0.bits[673]._super._super, arg0.bits[674]._super._super,
-      arg0.bits[675]._super._super, arg0.bits[676]._super._super, arg0.bits[677]._super._super,
-      arg0.bits[678]._super._super, arg0.bits[679]._super._super, arg0.bits[680]._super._super,
-      arg0.bits[681]._super._super, arg0.bits[682]._super._super, arg0.bits[683]._super._super,
-      arg0.bits[684]._super._super, arg0.bits[685]._super._super, arg0.bits[686]._super._super,
-      arg0.bits[687]._super._super, arg0.bits[688]._super._super, arg0.bits[689]._super._super,
-      arg0.bits[690]._super._super, arg0.bits[691]._super._super, arg0.bits[692]._super._super,
-      arg0.bits[693]._super._super, arg0.bits[694]._super._super, arg0.bits[695]._super._super,
-      arg0.bits[696]._super._super, arg0.bits[697]._super._super, arg0.bits[698]._super._super,
-      arg0.bits[699]._super._super, arg0.bits[700]._super._super, arg0.bits[701]._super._super,
-      arg0.bits[702]._super._super, arg0.bits[703]._super._super, arg1.bits[672]._super._super,
-      arg1.bits[673]._super._super, arg1.bits[674]._super._super, arg1.bits[675]._super._super,
-      arg1.bits[676]._super._super, arg1.bits[677]._super._super, arg1.bits[678]._super._super,
-      arg1.bits[679]._super._super, arg1.bits[680]._super._super, arg1.bits[681]._super._super,
-      arg1.bits[682]._super._super, arg1.bits[683]._super._super, arg1.bits[684]._super._super,
-      arg1.bits[685]._super._super, arg1.bits[686]._super._super, arg1.bits[687]._super._super,
-      arg1.bits[688]._super._super, arg1.bits[689]._super._super, arg1.bits[690]._super._super,
-      arg1.bits[691]._super._super, arg1.bits[692]._super._super, arg1.bits[693]._super._super,
-      arg1.bits[694]._super._super, arg1.bits[695]._super._super, arg1.bits[696]._super._super,
-      arg1.bits[697]._super._super, arg1.bits[698]._super._super, arg1.bits[699]._super._super,
-      arg1.bits[700]._super._super, arg1.bits[701]._super._super, arg1.bits[702]._super._super,
-      arg1.bits[703]._super._super};
-  Val64Array x25 = Val64Array{
-      arg0.bits[704]._super._super, arg0.bits[705]._super._super, arg0.bits[706]._super._super,
-      arg0.bits[707]._super._super, arg0.bits[708]._super._super, arg0.bits[709]._super._super,
-      arg0.bits[710]._super._super, arg0.bits[711]._super._super, arg0.bits[712]._super._super,
-      arg0.bits[713]._super._super, arg0.bits[714]._super._super, arg0.bits[715]._super._super,
-      arg0.bits[716]._super._super, arg0.bits[717]._super._super, arg0.bits[718]._super._super,
-      arg0.bits[719]._super._super, arg0.bits[720]._super._super, arg0.bits[721]._super._super,
-      arg0.bits[722]._super._super, arg0.bits[723]._super._super, arg0.bits[724]._super._super,
-      arg0.bits[725]._super._super, arg0.bits[726]._super._super, arg0.bits[727]._super._super,
-      arg0.bits[728]._super._super, arg0.bits[729]._super._super, arg0.bits[730]._super._super,
-      arg0.bits[731]._super._super, arg0.bits[732]._super._super, arg0.bits[733]._super._super,
-      arg0.bits[734]._super._super, arg0.bits[735]._super._super, arg1.bits[704]._super._super,
-      arg1.bits[705]._super._super, arg1.bits[706]._super._super, arg1.bits[707]._super._super,
-      arg1.bits[708]._super._super, arg1.bits[709]._super._super, arg1.bits[710]._super._super,
-      arg1.bits[711]._super._super, arg1.bits[712]._super._super, arg1.bits[713]._super._super,
-      arg1.bits[714]._super._super, arg1.bits[715]._super._super, arg1.bits[716]._super._super,
-      arg1.bits[717]._super._super, arg1.bits[718]._super._super, arg1.bits[719]._super._super,
-      arg1.bits[720]._super._super, arg1.bits[721]._super._super, arg1.bits[722]._super._super,
-      arg1.bits[723]._super._super, arg1.bits[724]._super._super, arg1.bits[725]._super._super,
-      arg1.bits[726]._super._super, arg1.bits[727]._super._super, arg1.bits[728]._super._super,
-      arg1.bits[729]._super._super, arg1.bits[730]._super._super, arg1.bits[731]._super._super,
-      arg1.bits[732]._super._super, arg1.bits[733]._super._super, arg1.bits[734]._super._super,
-      arg1.bits[735]._super._super};
-  Val64Array x26 = Val64Array{
-      arg0.bits[736]._super._super, arg0.bits[737]._super._super, arg0.bits[738]._super._super,
-      arg0.bits[739]._super._super, arg0.bits[740]._super._super, arg0.bits[741]._super._super,
-      arg0.bits[742]._super._super, arg0.bits[743]._super._super, arg0.bits[744]._super._super,
-      arg0.bits[745]._super._super, arg0.bits[746]._super._super, arg0.bits[747]._super._super,
-      arg0.bits[748]._super._super, arg0.bits[749]._super._super, arg0.bits[750]._super._super,
-      arg0.bits[751]._super._super, arg0.bits[752]._super._super, arg0.bits[753]._super._super,
-      arg0.bits[754]._super._super, arg0.bits[755]._super._super, arg0.bits[756]._super._super,
-      arg0.bits[757]._super._super, arg0.bits[758]._super._super, arg0.bits[759]._super._super,
-      arg0.bits[760]._super._super, arg0.bits[761]._super._super, arg0.bits[762]._super._super,
-      arg0.bits[763]._super._super, arg0.bits[764]._super._super, arg0.bits[765]._super._super,
-      arg0.bits[766]._super._super, arg0.bits[767]._super._super, arg1.bits[736]._super._super,
-      arg1.bits[737]._super._super, arg1.bits[738]._super._super, arg1.bits[739]._super._super,
-      arg1.bits[740]._super._super, arg1.bits[741]._super._super, arg1.bits[742]._super._super,
-      arg1.bits[743]._super._super, arg1.bits[744]._super._super, arg1.bits[745]._super._super,
-      arg1.bits[746]._super._super, arg1.bits[747]._super._super, arg1.bits[748]._super._super,
-      arg1.bits[749]._super._super, arg1.bits[750]._super._super, arg1.bits[751]._super._super,
-      arg1.bits[752]._super._super, arg1.bits[753]._super._super, arg1.bits[754]._super._super,
-      arg1.bits[755]._super._super, arg1.bits[756]._super._super, arg1.bits[757]._super._super,
-      arg1.bits[758]._super._super, arg1.bits[759]._super._super, arg1.bits[760]._super._super,
-      arg1.bits[761]._super._super, arg1.bits[762]._super._super, arg1.bits[763]._super._super,
-      arg1.bits[764]._super._super, arg1.bits[765]._super._super, arg1.bits[766]._super._super,
-      arg1.bits[767]._super._super};
-  Val64Array x27 = Val64Array{
-      arg0.bits[768]._super._super, arg0.bits[769]._super._super, arg0.bits[770]._super._super,
-      arg0.bits[771]._super._super, arg0.bits[772]._super._super, arg0.bits[773]._super._super,
-      arg0.bits[774]._super._super, arg0.bits[775]._super._super, arg0.bits[776]._super._super,
-      arg0.bits[777]._super._super, arg0.bits[778]._super._super, arg0.bits[779]._super._super,
-      arg0.bits[780]._super._super, arg0.bits[781]._super._super, arg0.bits[782]._super._super,
-      arg0.bits[783]._super._super, arg0.bits[784]._super._super, arg0.bits[785]._super._super,
-      arg0.bits[786]._super._super, arg0.bits[787]._super._super, arg0.bits[788]._super._super,
-      arg0.bits[789]._super._super, arg0.bits[790]._super._super, arg0.bits[791]._super._super,
-      arg0.bits[792]._super._super, arg0.bits[793]._super._super, arg0.bits[794]._super._super,
-      arg0.bits[795]._super._super, arg0.bits[796]._super._super, arg0.bits[797]._super._super,
-      arg0.bits[798]._super._super, arg0.bits[799]._super._super, arg1.bits[768]._super._super,
-      arg1.bits[769]._super._super, arg1.bits[770]._super._super, arg1.bits[771]._super._super,
-      arg1.bits[772]._super._super, arg1.bits[773]._super._super, arg1.bits[774]._super._super,
-      arg1.bits[775]._super._super, arg1.bits[776]._super._super, arg1.bits[777]._super._super,
-      arg1.bits[778]._super._super, arg1.bits[779]._super._super, arg1.bits[780]._super._super,
-      arg1.bits[781]._super._super, arg1.bits[782]._super._super, arg1.bits[783]._super._super,
-      arg1.bits[784]._super._super, arg1.bits[785]._super._super, arg1.bits[786]._super._super,
-      arg1.bits[787]._super._super, arg1.bits[788]._super._super, arg1.bits[789]._super._super,
-      arg1.bits[790]._super._super, arg1.bits[791]._super._super, arg1.bits[792]._super._super,
-      arg1.bits[793]._super._super, arg1.bits[794]._super._super, arg1.bits[795]._super._super,
-      arg1.bits[796]._super._super, arg1.bits[797]._super._super, arg1.bits[798]._super._super,
-      arg1.bits[799]._super._super};
-  // KeccakRound0(zirgen/circuit/keccak2/top.zir:97)
-  ThetaP1Struct x28 =
-      exec_ThetaP1(ctx,
-                   Val64Array5Array5Array{Val64Array5Array{x3, x4, x5, x6, x7},
-                                          Val64Array5Array{x8, x9, x10, x11, x12},
-                                          Val64Array5Array{x13, x14, x15, x16, x17},
-                                          Val64Array5Array{x18, x19, x20, x21, x22},
-                                          Val64Array5Array{x23, x24, x25, x26, x27}},
-                   LAYOUT_LOOKUP(layout2, b));
-  // KeccakRound0(zirgen/circuit/keccak2/top.zir:98)
-  Val800Array x29 = Val800Array{x28._super[0]._super[0]._super._super._super,
-                                x28._super[0]._super[1]._super._super._super,
-                                x28._super[0]._super[2]._super._super._super,
-                                x28._super[0]._super[3]._super._super._super,
-                                x28._super[0]._super[4]._super._super._super,
-                                x28._super[0]._super[5]._super._super._super,
-                                x28._super[0]._super[6]._super._super._super,
-                                x28._super[0]._super[7]._super._super._super,
-                                x28._super[0]._super[8]._super._super._super,
-                                x28._super[0]._super[9]._super._super._super,
-                                x28._super[0]._super[10]._super._super._super,
-                                x28._super[0]._super[11]._super._super._super,
-                                x28._super[0]._super[12]._super._super._super,
-                                x28._super[0]._super[13]._super._super._super,
-                                x28._super[0]._super[14]._super._super._super,
-                                x28._super[0]._super[15]._super._super._super,
-                                x28._super[0]._super[16]._super._super._super,
-                                x28._super[0]._super[17]._super._super._super,
-                                x28._super[0]._super[18]._super._super._super,
-                                x28._super[0]._super[19]._super._super._super,
-                                x28._super[0]._super[20]._super._super._super,
-                                x28._super[0]._super[21]._super._super._super,
-                                x28._super[0]._super[22]._super._super._super,
-                                x28._super[0]._super[23]._super._super._super,
-                                x28._super[0]._super[24]._super._super._super,
-                                x28._super[0]._super[25]._super._super._super,
-                                x28._super[0]._super[26]._super._super._super,
-                                x28._super[0]._super[27]._super._super._super,
-                                x28._super[0]._super[28]._super._super._super,
-                                x28._super[0]._super[29]._super._super._super,
-                                x28._super[0]._super[30]._super._super._super,
-                                x28._super[0]._super[31]._super._super._super,
-                                x28._super[0]._super[32]._super._super._super,
-                                x28._super[0]._super[33]._super._super._super,
-                                x28._super[0]._super[34]._super._super._super,
-                                x28._super[0]._super[35]._super._super._super,
-                                x28._super[0]._super[36]._super._super._super,
-                                x28._super[0]._super[37]._super._super._super,
-                                x28._super[0]._super[38]._super._super._super,
-                                x28._super[0]._super[39]._super._super._super,
-                                x28._super[0]._super[40]._super._super._super,
-                                x28._super[0]._super[41]._super._super._super,
-                                x28._super[0]._super[42]._super._super._super,
-                                x28._super[0]._super[43]._super._super._super,
-                                x28._super[0]._super[44]._super._super._super,
-                                x28._super[0]._super[45]._super._super._super,
-                                x28._super[0]._super[46]._super._super._super,
-                                x28._super[0]._super[47]._super._super._super,
-                                x28._super[0]._super[48]._super._super._super,
-                                x28._super[0]._super[49]._super._super._super,
-                                x28._super[0]._super[50]._super._super._super,
-                                x28._super[0]._super[51]._super._super._super,
-                                x28._super[0]._super[52]._super._super._super,
-                                x28._super[0]._super[53]._super._super._super,
-                                x28._super[0]._super[54]._super._super._super,
-                                x28._super[0]._super[55]._super._super._super,
-                                x28._super[0]._super[56]._super._super._super,
-                                x28._super[0]._super[57]._super._super._super,
-                                x28._super[0]._super[58]._super._super._super,
-                                x28._super[0]._super[59]._super._super._super,
-                                x28._super[0]._super[60]._super._super._super,
-                                x28._super[0]._super[61]._super._super._super,
-                                x28._super[0]._super[62]._super._super._super,
-                                x28._super[0]._super[63]._super._super._super,
-                                x28._super[1]._super[0]._super._super._super,
-                                x28._super[1]._super[1]._super._super._super,
-                                x28._super[1]._super[2]._super._super._super,
-                                x28._super[1]._super[3]._super._super._super,
-                                x28._super[1]._super[4]._super._super._super,
-                                x28._super[1]._super[5]._super._super._super,
-                                x28._super[1]._super[6]._super._super._super,
-                                x28._super[1]._super[7]._super._super._super,
-                                x28._super[1]._super[8]._super._super._super,
-                                x28._super[1]._super[9]._super._super._super,
-                                x28._super[1]._super[10]._super._super._super,
-                                x28._super[1]._super[11]._super._super._super,
-                                x28._super[1]._super[12]._super._super._super,
-                                x28._super[1]._super[13]._super._super._super,
-                                x28._super[1]._super[14]._super._super._super,
-                                x28._super[1]._super[15]._super._super._super,
-                                x28._super[1]._super[16]._super._super._super,
-                                x28._super[1]._super[17]._super._super._super,
-                                x28._super[1]._super[18]._super._super._super,
-                                x28._super[1]._super[19]._super._super._super,
-                                x28._super[1]._super[20]._super._super._super,
-                                x28._super[1]._super[21]._super._super._super,
-                                x28._super[1]._super[22]._super._super._super,
-                                x28._super[1]._super[23]._super._super._super,
-                                x28._super[1]._super[24]._super._super._super,
-                                x28._super[1]._super[25]._super._super._super,
-                                x28._super[1]._super[26]._super._super._super,
-                                x28._super[1]._super[27]._super._super._super,
-                                x28._super[1]._super[28]._super._super._super,
-                                x28._super[1]._super[29]._super._super._super,
-                                x28._super[1]._super[30]._super._super._super,
-                                x28._super[1]._super[31]._super._super._super,
-                                x28._super[1]._super[32]._super._super._super,
-                                x28._super[1]._super[33]._super._super._super,
-                                x28._super[1]._super[34]._super._super._super,
-                                x28._super[1]._super[35]._super._super._super,
-                                x28._super[1]._super[36]._super._super._super,
-                                x28._super[1]._super[37]._super._super._super,
-                                x28._super[1]._super[38]._super._super._super,
-                                x28._super[1]._super[39]._super._super._super,
-                                x28._super[1]._super[40]._super._super._super,
-                                x28._super[1]._super[41]._super._super._super,
-                                x28._super[1]._super[42]._super._super._super,
-                                x28._super[1]._super[43]._super._super._super,
-                                x28._super[1]._super[44]._super._super._super,
-                                x28._super[1]._super[45]._super._super._super,
-                                x28._super[1]._super[46]._super._super._super,
-                                x28._super[1]._super[47]._super._super._super,
-                                x28._super[1]._super[48]._super._super._super,
-                                x28._super[1]._super[49]._super._super._super,
-                                x28._super[1]._super[50]._super._super._super,
-                                x28._super[1]._super[51]._super._super._super,
-                                x28._super[1]._super[52]._super._super._super,
-                                x28._super[1]._super[53]._super._super._super,
-                                x28._super[1]._super[54]._super._super._super,
-                                x28._super[1]._super[55]._super._super._super,
-                                x28._super[1]._super[56]._super._super._super,
-                                x28._super[1]._super[57]._super._super._super,
-                                x28._super[1]._super[58]._super._super._super,
-                                x28._super[1]._super[59]._super._super._super,
-                                x28._super[1]._super[60]._super._super._super,
-                                x28._super[1]._super[61]._super._super._super,
-                                x28._super[1]._super[62]._super._super._super,
-                                x28._super[1]._super[63]._super._super._super,
-                                x28._super[2]._super[0]._super._super._super,
-                                x28._super[2]._super[1]._super._super._super,
-                                x28._super[2]._super[2]._super._super._super,
-                                x28._super[2]._super[3]._super._super._super,
-                                x28._super[2]._super[4]._super._super._super,
-                                x28._super[2]._super[5]._super._super._super,
-                                x28._super[2]._super[6]._super._super._super,
-                                x28._super[2]._super[7]._super._super._super,
-                                x28._super[2]._super[8]._super._super._super,
-                                x28._super[2]._super[9]._super._super._super,
-                                x28._super[2]._super[10]._super._super._super,
-                                x28._super[2]._super[11]._super._super._super,
-                                x28._super[2]._super[12]._super._super._super,
-                                x28._super[2]._super[13]._super._super._super,
-                                x28._super[2]._super[14]._super._super._super,
-                                x28._super[2]._super[15]._super._super._super,
-                                x28._super[2]._super[16]._super._super._super,
-                                x28._super[2]._super[17]._super._super._super,
-                                x28._super[2]._super[18]._super._super._super,
-                                x28._super[2]._super[19]._super._super._super,
-                                x28._super[2]._super[20]._super._super._super,
-                                x28._super[2]._super[21]._super._super._super,
-                                x28._super[2]._super[22]._super._super._super,
-                                x28._super[2]._super[23]._super._super._super,
-                                x28._super[2]._super[24]._super._super._super,
-                                x28._super[2]._super[25]._super._super._super,
-                                x28._super[2]._super[26]._super._super._super,
-                                x28._super[2]._super[27]._super._super._super,
-                                x28._super[2]._super[28]._super._super._super,
-                                x28._super[2]._super[29]._super._super._super,
-                                x28._super[2]._super[30]._super._super._super,
-                                x28._super[2]._super[31]._super._super._super,
-                                x28._super[2]._super[32]._super._super._super,
-                                x28._super[2]._super[33]._super._super._super,
-                                x28._super[2]._super[34]._super._super._super,
-                                x28._super[2]._super[35]._super._super._super,
-                                x28._super[2]._super[36]._super._super._super,
-                                x28._super[2]._super[37]._super._super._super,
-                                x28._super[2]._super[38]._super._super._super,
-                                x28._super[2]._super[39]._super._super._super,
-                                x28._super[2]._super[40]._super._super._super,
-                                x28._super[2]._super[41]._super._super._super,
-                                x28._super[2]._super[42]._super._super._super,
-                                x28._super[2]._super[43]._super._super._super,
-                                x28._super[2]._super[44]._super._super._super,
-                                x28._super[2]._super[45]._super._super._super,
-                                x28._super[2]._super[46]._super._super._super,
-                                x28._super[2]._super[47]._super._super._super,
-                                x28._super[2]._super[48]._super._super._super,
-                                x28._super[2]._super[49]._super._super._super,
-                                x28._super[2]._super[50]._super._super._super,
-                                x28._super[2]._super[51]._super._super._super,
-                                x28._super[2]._super[52]._super._super._super,
-                                x28._super[2]._super[53]._super._super._super,
-                                x28._super[2]._super[54]._super._super._super,
-                                x28._super[2]._super[55]._super._super._super,
-                                x28._super[2]._super[56]._super._super._super,
-                                x28._super[2]._super[57]._super._super._super,
-                                x28._super[2]._super[58]._super._super._super,
-                                x28._super[2]._super[59]._super._super._super,
-                                x28._super[2]._super[60]._super._super._super,
-                                x28._super[2]._super[61]._super._super._super,
-                                x28._super[2]._super[62]._super._super._super,
-                                x28._super[2]._super[63]._super._super._super,
-                                x28._super[3]._super[0]._super._super._super,
-                                x28._super[3]._super[1]._super._super._super,
-                                x28._super[3]._super[2]._super._super._super,
-                                x28._super[3]._super[3]._super._super._super,
-                                x28._super[3]._super[4]._super._super._super,
-                                x28._super[3]._super[5]._super._super._super,
-                                x28._super[3]._super[6]._super._super._super,
-                                x28._super[3]._super[7]._super._super._super,
-                                x28._super[3]._super[8]._super._super._super,
-                                x28._super[3]._super[9]._super._super._super,
-                                x28._super[3]._super[10]._super._super._super,
-                                x28._super[3]._super[11]._super._super._super,
-                                x28._super[3]._super[12]._super._super._super,
-                                x28._super[3]._super[13]._super._super._super,
-                                x28._super[3]._super[14]._super._super._super,
-                                x28._super[3]._super[15]._super._super._super,
-                                x28._super[3]._super[16]._super._super._super,
-                                x28._super[3]._super[17]._super._super._super,
-                                x28._super[3]._super[18]._super._super._super,
-                                x28._super[3]._super[19]._super._super._super,
-                                x28._super[3]._super[20]._super._super._super,
-                                x28._super[3]._super[21]._super._super._super,
-                                x28._super[3]._super[22]._super._super._super,
-                                x28._super[3]._super[23]._super._super._super,
-                                x28._super[3]._super[24]._super._super._super,
-                                x28._super[3]._super[25]._super._super._super,
-                                x28._super[3]._super[26]._super._super._super,
-                                x28._super[3]._super[27]._super._super._super,
-                                x28._super[3]._super[28]._super._super._super,
-                                x28._super[3]._super[29]._super._super._super,
-                                x28._super[3]._super[30]._super._super._super,
-                                x28._super[3]._super[31]._super._super._super,
-                                x28._super[3]._super[32]._super._super._super,
-                                x28._super[3]._super[33]._super._super._super,
-                                x28._super[3]._super[34]._super._super._super,
-                                x28._super[3]._super[35]._super._super._super,
-                                x28._super[3]._super[36]._super._super._super,
-                                x28._super[3]._super[37]._super._super._super,
-                                x28._super[3]._super[38]._super._super._super,
-                                x28._super[3]._super[39]._super._super._super,
-                                x28._super[3]._super[40]._super._super._super,
-                                x28._super[3]._super[41]._super._super._super,
-                                x28._super[3]._super[42]._super._super._super,
-                                x28._super[3]._super[43]._super._super._super,
-                                x28._super[3]._super[44]._super._super._super,
-                                x28._super[3]._super[45]._super._super._super,
-                                x28._super[3]._super[46]._super._super._super,
-                                x28._super[3]._super[47]._super._super._super,
-                                x28._super[3]._super[48]._super._super._super,
-                                x28._super[3]._super[49]._super._super._super,
-                                x28._super[3]._super[50]._super._super._super,
-                                x28._super[3]._super[51]._super._super._super,
-                                x28._super[3]._super[52]._super._super._super,
-                                x28._super[3]._super[53]._super._super._super,
-                                x28._super[3]._super[54]._super._super._super,
-                                x28._super[3]._super[55]._super._super._super,
-                                x28._super[3]._super[56]._super._super._super,
-                                x28._super[3]._super[57]._super._super._super,
-                                x28._super[3]._super[58]._super._super._super,
-                                x28._super[3]._super[59]._super._super._super,
-                                x28._super[3]._super[60]._super._super._super,
-                                x28._super[3]._super[61]._super._super._super,
-                                x28._super[3]._super[62]._super._super._super,
-                                x28._super[3]._super[63]._super._super._super,
-                                x28._super[4]._super[0]._super._super._super,
-                                x28._super[4]._super[1]._super._super._super,
-                                x28._super[4]._super[2]._super._super._super,
-                                x28._super[4]._super[3]._super._super._super,
-                                x28._super[4]._super[4]._super._super._super,
-                                x28._super[4]._super[5]._super._super._super,
-                                x28._super[4]._super[6]._super._super._super,
-                                x28._super[4]._super[7]._super._super._super,
-                                x28._super[4]._super[8]._super._super._super,
-                                x28._super[4]._super[9]._super._super._super,
-                                x28._super[4]._super[10]._super._super._super,
-                                x28._super[4]._super[11]._super._super._super,
-                                x28._super[4]._super[12]._super._super._super,
-                                x28._super[4]._super[13]._super._super._super,
-                                x28._super[4]._super[14]._super._super._super,
-                                x28._super[4]._super[15]._super._super._super,
-                                x28._super[4]._super[16]._super._super._super,
-                                x28._super[4]._super[17]._super._super._super,
-                                x28._super[4]._super[18]._super._super._super,
-                                x28._super[4]._super[19]._super._super._super,
-                                x28._super[4]._super[20]._super._super._super,
-                                x28._super[4]._super[21]._super._super._super,
-                                x28._super[4]._super[22]._super._super._super,
-                                x28._super[4]._super[23]._super._super._super,
-                                x28._super[4]._super[24]._super._super._super,
-                                x28._super[4]._super[25]._super._super._super,
-                                x28._super[4]._super[26]._super._super._super,
-                                x28._super[4]._super[27]._super._super._super,
-                                x28._super[4]._super[28]._super._super._super,
-                                x28._super[4]._super[29]._super._super._super,
-                                x28._super[4]._super[30]._super._super._super,
-                                x28._super[4]._super[31]._super._super._super,
-                                x28._super[4]._super[32]._super._super._super,
-                                x28._super[4]._super[33]._super._super._super,
-                                x28._super[4]._super[34]._super._super._super,
-                                x28._super[4]._super[35]._super._super._super,
-                                x28._super[4]._super[36]._super._super._super,
-                                x28._super[4]._super[37]._super._super._super,
-                                x28._super[4]._super[38]._super._super._super,
-                                x28._super[4]._super[39]._super._super._super,
-                                x28._super[4]._super[40]._super._super._super,
-                                x28._super[4]._super[41]._super._super._super,
-                                x28._super[4]._super[42]._super._super._super,
-                                x28._super[4]._super[43]._super._super._super,
-                                x28._super[4]._super[44]._super._super._super,
-                                x28._super[4]._super[45]._super._super._super,
-                                x28._super[4]._super[46]._super._super._super,
-                                x28._super[4]._super[47]._super._super._super,
-                                x28._super[4]._super[48]._super._super._super,
-                                x28._super[4]._super[49]._super._super._super,
-                                x28._super[4]._super[50]._super._super._super,
-                                x28._super[4]._super[51]._super._super._super,
-                                x28._super[4]._super[52]._super._super._super,
-                                x28._super[4]._super[53]._super._super._super,
-                                x28._super[4]._super[54]._super._super._super,
-                                x28._super[4]._super[55]._super._super._super,
-                                x28._super[4]._super[56]._super._super._super,
-                                x28._super[4]._super[57]._super._super._super,
-                                x28._super[4]._super[58]._super._super._super,
-                                x28._super[4]._super[59]._super._super._super,
-                                x28._super[4]._super[60]._super._super._super,
-                                x28._super[4]._super[61]._super._super._super,
-                                x28._super[4]._super[62]._super._super._super,
-                                x28._super[4]._super[63]._super._super._super,
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0),
-                                Val(0)};
-  // KeccakRound0(zirgen/circuit/keccak2/top.zir:94)
-  Val100Array x30 = Val100Array{
-      arg1.kflat[0]._super._super,  arg1.kflat[1]._super._super,  arg1.kflat[2]._super._super,
-      arg1.kflat[3]._super._super,  arg1.kflat[4]._super._super,  arg1.kflat[5]._super._super,
-      arg1.kflat[6]._super._super,  arg1.kflat[7]._super._super,  arg1.kflat[8]._super._super,
-      arg1.kflat[9]._super._super,  arg1.kflat[10]._super._super, arg1.kflat[11]._super._super,
-      arg1.kflat[12]._super._super, arg1.kflat[13]._super._super, arg1.kflat[14]._super._super,
-      arg1.kflat[15]._super._super, arg1.kflat[16]._super._super, arg1.kflat[17]._super._super,
-      arg1.kflat[18]._super._super, arg1.kflat[19]._super._super, arg1.kflat[20]._super._super,
-      arg1.kflat[21]._super._super, arg1.kflat[22]._super._super, arg1.kflat[23]._super._super,
-      arg1.kflat[24]._super._super, arg1.kflat[25]._super._super, arg1.kflat[26]._super._super,
-      arg1.kflat[27]._super._super, arg1.kflat[28]._super._super, arg1.kflat[29]._super._super,
-      arg1.kflat[30]._super._super, arg1.kflat[31]._super._super, arg1.kflat[32]._super._super,
-      arg1.kflat[33]._super._super, arg1.kflat[34]._super._super, arg1.kflat[35]._super._super,
-      arg1.kflat[36]._super._super, arg1.kflat[37]._super._super, arg1.kflat[38]._super._super,
-      arg1.kflat[39]._super._super, arg1.kflat[40]._super._super, arg1.kflat[41]._super._super,
-      arg1.kflat[42]._super._super, arg1.kflat[43]._super._super, arg1.kflat[44]._super._super,
-      arg1.kflat[45]._super._super, arg1.kflat[46]._super._super, arg1.kflat[47]._super._super,
-      arg1.kflat[48]._super._super, arg1.kflat[49]._super._super, arg1.kflat[50]._super._super,
-      arg1.kflat[51]._super._super, arg1.kflat[52]._super._super, arg1.kflat[53]._super._super,
-      arg1.kflat[54]._super._super, arg1.kflat[55]._super._super, arg1.kflat[56]._super._super,
-      arg1.kflat[57]._super._super, arg1.kflat[58]._super._super, arg1.kflat[59]._super._super,
-      arg1.kflat[60]._super._super, arg1.kflat[61]._super._super, arg1.kflat[62]._super._super,
-      arg1.kflat[63]._super._super, arg1.kflat[64]._super._super, arg1.kflat[65]._super._super,
-      arg1.kflat[66]._super._super, arg1.kflat[67]._super._super, arg1.kflat[68]._super._super,
-      arg1.kflat[69]._super._super, arg1.kflat[70]._super._super, arg1.kflat[71]._super._super,
-      arg1.kflat[72]._super._super, arg1.kflat[73]._super._super, arg1.kflat[74]._super._super,
-      arg1.kflat[75]._super._super, arg1.kflat[76]._super._super, arg1.kflat[77]._super._super,
-      arg1.kflat[78]._super._super, arg1.kflat[79]._super._super, arg1.kflat[80]._super._super,
-      arg1.kflat[81]._super._super, arg1.kflat[82]._super._super, arg1.kflat[83]._super._super,
-      arg1.kflat[84]._super._super, arg1.kflat[85]._super._super, arg1.kflat[86]._super._super,
-      arg1.kflat[87]._super._super, arg1.kflat[88]._super._super, arg1.kflat[89]._super._super,
-      arg1.kflat[90]._super._super, arg1.kflat[91]._super._super, arg1.kflat[92]._super._super,
-      arg1.kflat[93]._super._super, arg1.kflat[94]._super._super, arg1.kflat[95]._super._super,
-      arg1.kflat[96]._super._super, arg1.kflat[97]._super._super, arg1.kflat[98]._super._super,
-      arg1.kflat[99]._super._super};
-  Val16Array x31 = Val16Array{arg1.sflat[0]._super,
-                              arg1.sflat[1]._super,
-                              arg1.sflat[2]._super,
-                              arg1.sflat[3]._super,
-                              arg1.sflat[4]._super,
-                              arg1.sflat[5]._super,
-                              arg1.sflat[6]._super,
-                              arg1.sflat[7]._super,
-                              arg1.sflat[8]._super,
-                              arg1.sflat[9]._super,
-                              arg1.sflat[10]._super,
-                              arg1.sflat[11]._super,
-                              arg1.sflat[12]._super,
-                              arg1.sflat[13]._super,
-                              arg1.sflat[14]._super,
-                              arg1.sflat[15]._super};
-  // KeccakRound0(zirgen/circuit/keccak2/top.zir:98)
-  TopStateStruct x32 = exec_TopState(ctx, x29, x30, x31, LAYOUT_LOOKUP(layout2, _super));
-  return x32;
-}
-__device__ ControlStateStruct exec_ControlState(ExecContext& ctx,
-                                                Val arg0,
-                                                Val arg1,
-                                                Val arg2,
-                                                Val arg3,
-                                                BoundLayout<ControlStateLayout> layout4) {
-  // ControlState(zirgen/circuit/keccak2/top.zir:401)
-  NondetRegStruct x5 = exec_Reg(ctx, arg0, LAYOUT_LOOKUP(layout4, cycleType));
-  // ControlState(zirgen/circuit/keccak2/top.zir:402)
-  NondetRegStruct x6 = exec_Reg(ctx, arg1, LAYOUT_LOOKUP(layout4, subType));
-  // ControlState(zirgen/circuit/keccak2/top.zir:403)
-  NondetRegStruct x7 = exec_Reg(ctx, arg2, LAYOUT_LOOKUP(layout4, block));
-  // ControlState(zirgen/circuit/keccak2/top.zir:404)
-  NondetRegStruct x8 = exec_Reg(ctx, arg3, LAYOUT_LOOKUP(layout4, round));
-  return ControlStateStruct{.cycleType = x5, .subType = x6, .block = x7, .round = x8};
->>>>>>> origin/main
+__device__ void step_Top_49(ExecContext& ctx, MutableBuf arg0) {
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  // Top(zirgen/circuit/keccak2/top.zir:499)
+  Val x1 = get(ctx, arg0, 535, 1);
+  Val x2 = get(ctx, arg0, 546, 1);
+  Val x3 = get(ctx, arg0, 531, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x4 = (x2 * Val(2));
+  Val x5 = ((x2 + x3) - (x4 * x3));
+  Val x6 = (x1 * Val(2));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x7 = get(ctx, arg0, 536, 1);
+  Val x8 = get(ctx, arg0, 547, 1);
+  Val x9 = get(ctx, arg0, 532, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x10 = (x8 * Val(2));
+  Val x11 = ((x8 + x9) - (x10 * x9));
+  Val x12 = (x7 * Val(2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x13 = (((x7 + x11) - (x12 * x11)) * Val(2));
+  Val x14 = (((x1 + x5) - (x6 * x5)) + x13);
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x15 = get(ctx, arg0, 537, 1);
+  Val x16 = get(ctx, arg0, 548, 1);
+  Val x17 = get(ctx, arg0, 533, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x18 = (x16 * Val(2));
+  Val x19 = ((x16 + x17) - (x18 * x17));
+  Val x20 = (x15 * Val(2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x21 = (((x15 + x19) - (x20 * x19)) * Val(4));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x22 = get(ctx, arg0, 538, 1);
+  Val x23 = get(ctx, arg0, 549, 1);
+  Val x24 = get(ctx, arg0, 534, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x25 = (x23 * Val(2));
+  Val x26 = ((x23 + x24) - (x25 * x24));
+  Val x27 = (x22 * Val(2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x28 = (((x22 + x26) - (x27 * x26)) * Val(8));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x29 = get(ctx, arg0, 539, 1);
+  Val x30 = get(ctx, arg0, 550, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x31 = (x30 * Val(2));
+  Val x32 = ((x30 + x1) - (x31 * x1));
+  Val x33 = (x29 * Val(2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x34 = (((x29 + x32) - (x33 * x32)) * Val(16));
+  Val x35 = (((x14 + x21) + x28) + x34);
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x36 = get(ctx, arg0, 540, 1);
+  Val x37 = get(ctx, arg0, 551, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x38 = (x37 * Val(2));
+  Val x39 = ((x37 + x7) - (x38 * x7));
+  Val x40 = (x36 * Val(2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x41 = (((x36 + x39) - (x40 * x39)) * Val(32));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x42 = get(ctx, arg0, 541, 1);
+  Val x43 = get(ctx, arg0, 552, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x44 = (x43 * Val(2));
+  Val x45 = ((x43 + x15) - (x44 * x15));
+  Val x46 = (x42 * Val(2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x47 = (((x42 + x45) - (x46 * x45)) * Val(64));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x48 = get(ctx, arg0, 542, 1);
+  Val x49 = get(ctx, arg0, 553, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x50 = (x49 * Val(2));
+  Val x51 = ((x49 + x22) - (x50 * x22));
+  Val x52 = (x48 * Val(2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x53 = (((x48 + x51) - (x52 * x51)) * Val(128));
+  Val x54 = (((x35 + x41) + x47) + x53);
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x55 = get(ctx, arg0, 543, 1);
+  Val x56 = get(ctx, arg0, 554, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x57 = (x56 * Val(2));
+  Val x58 = ((x56 + x29) - (x57 * x29));
+  Val x59 = ((x55 + x58) - ((x55 * Val(2)) * x58));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x60 = get(ctx, arg0, 544, 1);
+  Val x61 = get(ctx, arg0, 555, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x62 = (x61 * Val(2));
+  Val x63 = ((x61 + x36) - (x62 * x36));
+  Val x64 = ((x60 + x63) - ((x60 * Val(2)) * x63));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x65 = get(ctx, arg0, 545, 1);
+  Val x66 = get(ctx, arg0, 556, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x67 = (x66 * Val(2));
+  Val x68 = ((x66 + x42) - (x67 * x42));
+  Val x69 = ((x65 + x68) - ((x65 * Val(2)) * x68));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x70 = (((x54 + (x59 * Val(256))) + (x64 * Val(512))) + (x69 * Val(1024)));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x71 = get(ctx, arg0, 557, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x72 = (x71 * Val(2));
+  Val x73 = ((x71 + x48) - (x72 * x48));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x74 = (((x2 + x73) - (x4 * x73)) * Val(2048));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x75 = get(ctx, arg0, 558, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x76 = (x75 * Val(2));
+  Val x77 = ((x75 + x55) - (x76 * x55));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x78 = (((x8 + x77) - (x10 * x77)) * Val(4096));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x79 = get(ctx, arg0, 559, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x80 = (x79 * Val(2));
+  Val x81 = ((x79 + x60) - (x80 * x60));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x82 = (((x16 + x81) - (x18 * x81)) * Val(8192));
+  Val x83 = (((x70 + x74) + x78) + x82);
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x84 = get(ctx, arg0, 528, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x85 = (x84 * Val(2));
+  Val x86 = ((x84 + x65) - (x85 * x65));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x87 = (((x23 + x86) - (x25 * x86)) * Val(16384));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x88 = get(ctx, arg0, 529, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x89 = (x88 * Val(2));
+  Val x90 = ((x88 + x2) - (x89 * x2));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x91 = (((x30 + x90) - (x31 * x90)) * Val(32768));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x92 = get(ctx, arg0, 705, 0);
+  Val x93 = get(ctx, arg0, 707, 0);
+  Val x94 = get(ctx, arg0, 698, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x95 = (x93 * Val(2));
+  Val x96 = ((x93 + x94) - (x95 * x94));
+  Val x97 = ((x92 + x96) - ((x92 * Val(2)) * x96));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x98 = get(ctx, arg0, 706, 0);
+  Val x99 = get(ctx, arg0, 708, 0);
+  Val x100 = get(ctx, arg0, 699, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x101 = (x99 * Val(2));
+  Val x102 = ((x99 + x100) - (x101 * x100));
+  Val x103 = ((x98 + x102) - ((x98 * Val(2)) * x102));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x104 = get(ctx, arg0, 709, 0);
+  Val x105 = get(ctx, arg0, 700, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x106 = (x104 * Val(2));
+  Val x107 = ((x104 + x105) - (x106 * x105));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x108 = (((x93 + x107) - (x95 * x107)) * Val(4));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x109 = get(ctx, arg0, 710, 0);
+  Val x110 = get(ctx, arg0, 701, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x111 = (x109 * Val(2));
+  Val x112 = ((x109 + x110) - (x111 * x110));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x113 = (((x99 + x112) - (x101 * x112)) * Val(8));
+  Val x114 = (((x97 + (x103 * Val(2))) + x108) + x113);
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x115 = get(ctx, arg0, 711, 0);
+  Val x116 = get(ctx, arg0, 702, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x117 = (x115 * Val(2));
+  Val x118 = ((x115 + x116) - (x117 * x116));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x119 = (((x104 + x118) - (x106 * x118)) * Val(16));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x120 = get(ctx, arg0, 712, 0);
+  Val x121 = get(ctx, arg0, 703, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x122 = (x120 * Val(2));
+  Val x123 = ((x120 + x121) - (x122 * x121));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x124 = (((x109 + x123) - (x111 * x123)) * Val(32));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x125 = get(ctx, arg0, 713, 0);
+  Val x126 = get(ctx, arg0, 704, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x127 = (x125 * Val(2));
+  Val x128 = ((x125 + x126) - (x127 * x126));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x129 = (((x115 + x128) - (x117 * x128)) * Val(64));
+  Val x130 = (((x114 + x119) + x124) + x129);
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x131 = get(ctx, arg0, 714, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x132 = (x131 * Val(2));
+  Val x133 = ((x131 + x92) - (x132 * x92));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x134 = (((x120 + x133) - (x122 * x133)) * Val(128));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x135 = get(ctx, arg0, 715, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x136 = (x135 * Val(2));
+  Val x137 = ((x135 + x98) - (x136 * x98));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x138 = (((x125 + x137) - (x127 * x137)) * Val(256));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x139 = get(ctx, arg0, 716, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x140 = (x139 * Val(2));
+  Val x141 = ((x139 + x93) - (x140 * x93));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x142 = (((x131 + x141) - (x132 * x141)) * Val(512));
+  Val x143 = (((x130 + x134) + x138) + x142);
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x144 = get(ctx, arg0, 717, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x145 = (x144 * Val(2));
+  Val x146 = ((x144 + x99) - (x145 * x99));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x147 = (((x135 + x146) - (x136 * x146)) * Val(1024));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x148 = get(ctx, arg0, 718, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x149 = (x148 * Val(2));
+  Val x150 = ((x148 + x104) - (x149 * x104));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x151 = (((x139 + x150) - (x140 * x150)) * Val(2048));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x152 = get(ctx, arg0, 719, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x153 = (x152 * Val(2));
+  Val x154 = ((x152 + x109) - (x153 * x109));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x155 = (((x144 + x154) - (x145 * x154)) * Val(4096));
+  Val x156 = (((x143 + x147) + x151) + x155);
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x157 = get(ctx, arg0, 688, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x158 = (x157 * Val(2));
+  Val x159 = ((x157 + x115) - (x158 * x115));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x160 = (((x148 + x159) - (x149 * x159)) * Val(8192));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x161 = get(ctx, arg0, 689, 0);
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:139)
+  Val x162 = (x161 * Val(2));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x163 = ((x161 + x120) - (x162 * x120));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x164 = (((x152 + x163) - (x153 * x163)) * Val(16384));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x165 = get(ctx, arg0, 690, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x166 = (x165 * Val(2));
+  Val x167 = ((x165 + x125) - (x166 * x125));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x168 = (((x157 + x167) - (x158 * x167)) * Val(32768));
+  Val x169 = (((x156 + x160) + x164) + x168);
+  Val x170 = (get(ctx, arg0, 752, 2) + (get(ctx, arg0, 753, 2) * Val(2)));
+  Val x171 = ((x170 + (get(ctx, arg0, 754, 2) * Val(4))) + (get(ctx, arg0, 755, 2) * Val(8)));
+  Val x172 = ((x171 + (get(ctx, arg0, 756, 2) * Val(16))) + (get(ctx, arg0, 757, 2) * Val(32)));
+  Val x173 = ((x172 + (get(ctx, arg0, 758, 2) * Val(64))) + (get(ctx, arg0, 759, 2) * Val(128)));
+  Val x174 = ((x173 + (get(ctx, arg0, 760, 2) * Val(256))) + (get(ctx, arg0, 761, 2) * Val(512)));
+  Val x175 = ((x174 + (get(ctx, arg0, 762, 2) * Val(1024))) + (get(ctx, arg0, 763, 2) * Val(2048)));
+  Val x176 = ((x175 + (get(ctx, arg0, 764, 2) * Val(4096))) + (get(ctx, arg0, 765, 2) * Val(8192)));
+  Val x177 =
+      ((x176 + (get(ctx, arg0, 766, 2) * Val(16384))) + (get(ctx, arg0, 767, 2) * Val(32768)));
+  // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:139)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:192)
+  Val x178 = (get(ctx, arg0, 528, 0) + (get(ctx, arg0, 529, 0) * Val(2)));
+  Val x179 = ((x178 + (get(ctx, arg0, 530, 0) * Val(4))) + (get(ctx, arg0, 531, 0) * Val(8)));
+  Val x180 = ((x179 + (get(ctx, arg0, 532, 0) * Val(16))) + (get(ctx, arg0, 533, 0) * Val(32)));
+  Val x181 = ((x180 + (get(ctx, arg0, 534, 0) * Val(64))) + (get(ctx, arg0, 535, 0) * Val(128)));
+  Val x182 = ((x181 + (get(ctx, arg0, 536, 0) * Val(256))) + (get(ctx, arg0, 537, 0) * Val(512)));
+  Val x183 = ((x182 + (get(ctx, arg0, 538, 0) * Val(1024))) + (get(ctx, arg0, 539, 0) * Val(2048)));
+  Val x184 = ((x183 + (get(ctx, arg0, 540, 0) * Val(4096))) + (get(ctx, arg0, 541, 0) * Val(8192)));
+  Val x185 =
+      ((x184 + (get(ctx, arg0, 542, 0) * Val(16384))) + (get(ctx, arg0, 543, 0) * Val(32768)));
+  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x186 = (((x83 + x87) + x91) + (x169 + (x177 + x185)));
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  Val x187 = (bitAnd(x186, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 1063, bitAnd(x187, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 1064, (bitAnd(x187, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 1065, (bitAnd(x187, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x188 = ((get(ctx, arg0, 1065, 0) * Val(4)) + (get(ctx, arg0, 1064, 0) * Val(2)));
+  Val x189 = (x188 + get(ctx, arg0, 1063, 0));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x190 = (x186 - (x189 * Val(65536)));
+  // Reg(<preamble>:4)
+  // TopState(zirgen/circuit/keccak2/top.zir:36)
+  Val x191 = get(ctx, arg0, 530, 1);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x192 = (x191 * Val(2));
+  Val x193 = ((x191 + x8) - (x192 * x8));
+  Val x194 = (x3 * Val(2));
+  Val x195 = ((x3 + x16) - (x194 * x16));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x196 = (((x43 + x195) - (x44 * x195)) * Val(2));
+  Val x197 = (((x37 + x193) - (x38 * x193)) + x196);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x198 = (x9 * Val(2));
+  Val x199 = ((x9 + x23) - (x198 * x23));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x200 = (((x49 + x199) - (x50 * x199)) * Val(4));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x201 = (x17 * Val(2));
+  Val x202 = ((x17 + x30) - (x201 * x30));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x203 = (((x56 + x202) - (x57 * x202)) * Val(8));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x204 = (x24 * Val(2));
+  Val x205 = ((x24 + x37) - (x204 * x37));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x206 = (((x61 + x205) - (x62 * x205)) * Val(16));
+  Val x207 = (((x197 + x200) + x203) + x206);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x208 = ((x1 + x43) - (x6 * x43));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x209 = (((x66 + x208) - (x67 * x208)) * Val(32));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x210 = ((x7 + x49) - (x12 * x49));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x211 = (((x71 + x210) - (x72 * x210)) * Val(64));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x212 = ((x15 + x56) - (x20 * x56));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x213 = (((x75 + x212) - (x76 * x212)) * Val(128));
+  Val x214 = (((x207 + x209) + x211) + x213);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x215 = ((x22 + x61) - (x27 * x61));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x216 = (((x79 + x215) - (x80 * x215)) * Val(256));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x217 = ((x29 + x66) - (x33 * x66));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x218 = (((x84 + x217) - (x85 * x217)) * Val(512));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x219 = ((x36 + x71) - (x40 * x71));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x220 = (((x88 + x219) - (x89 * x219)) * Val(1024));
+  Val x221 = (((x214 + x216) + x218) + x220);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x222 = ((x42 + x75) - (x46 * x75));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x223 = (((x191 + x222) - (x192 * x222)) * Val(2048));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:76)
+  Val x224 = ((x48 + x79) - (x52 * x79));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x225 = (((x3 + x224) - (x194 * x224)) * Val(4096));
+  Val x226 = (((x9 + x55) - (x198 * x55)) * Val(8192));
+  Val x227 = (((x221 + x223) + x225) + x226);
+  Val x228 = (((x17 + x60) - (x201 * x60)) * Val(16384));
+  Val x229 = (((x24 + x65) - (x204 * x65)) * Val(32768));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x230 = get(ctx, arg0, 691, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x231 = (x230 * Val(2));
+  Val x232 = ((x230 + x131) - (x231 * x131));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x233 = get(ctx, arg0, 692, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x234 = (x233 * Val(2));
+  Val x235 = ((x233 + x135) - (x234 * x135));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x236 = (((x165 + x235) - (x166 * x235)) * Val(2));
+  Val x237 = (((x161 + x232) - (x162 * x232)) + x236);
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x238 = get(ctx, arg0, 693, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x239 = (x238 * Val(2));
+  Val x240 = ((x238 + x139) - (x239 * x139));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x241 = (((x230 + x240) - (x231 * x240)) * Val(4));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x242 = get(ctx, arg0, 694, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x243 = (x242 * Val(2));
+  Val x244 = ((x242 + x144) - (x243 * x144));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x245 = (((x233 + x244) - (x234 * x244)) * Val(8));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x246 = get(ctx, arg0, 695, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x247 = (x246 * Val(2));
+  Val x248 = ((x246 + x148) - (x247 * x148));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x249 = (((x238 + x248) - (x239 * x248)) * Val(16));
+  Val x250 = (((x237 + x241) + x245) + x249);
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x251 = get(ctx, arg0, 696, 0);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x252 = (x251 * Val(2));
+  Val x253 = ((x251 + x152) - (x252 * x152));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x254 = (((x242 + x253) - (x243 * x253)) * Val(32));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:197)
+  Val x255 = get(ctx, arg0, 697, 0);
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x256 = (((x246 + x255) - (x247 * x255)) * Val(64));
+  Val x257 = (((x251 + x94) - (x252 * x94)) * Val(128));
+  Val x258 = (((x250 + x254) + x256) + x257);
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  Val x259 = ((x255 + x100) - ((x255 * Val(2)) * x100));
+  Val x260 = ((x94 + x105) - ((x94 * Val(2)) * x105));
+  Val x261 = ((x100 + x110) - ((x100 * Val(2)) * x110));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x262 = (((x258 + (x259 * Val(256))) + (x260 * Val(512))) + (x261 * Val(1024)));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  Val x263 = ((x105 + x116) - ((x105 * Val(2)) * x116));
+  Val x264 = ((x110 + x121) - ((x110 * Val(2)) * x121));
+  Val x265 = ((x116 + x126) - ((x116 * Val(2)) * x126));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x266 = (((x262 + (x263 * Val(2048))) + (x264 * Val(4096))) + (x265 * Val(8192)));
+  // BitXor(zirgen/circuit/keccak2/bits.zir:32)
+  // XorU32(zirgen/circuit/keccak2/sha2.zir:10)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:77)
+  Val x267 = ((x121 + x92) - ((x121 * Val(2)) * x92));
+  Val x268 = ((x126 + x98) - ((x126 * Val(2)) * x98));
+  // Pack(zirgen/circuit/keccak2/pack.zir:32)
+  // Pack32(zirgen/circuit/keccak2/sha2.zir:72)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  Val x269 = (get(ctx, arg0, 768, 2) + (get(ctx, arg0, 769, 2) * Val(2)));
+  Val x270 = ((x269 + (get(ctx, arg0, 770, 2) * Val(4))) + (get(ctx, arg0, 771, 2) * Val(8)));
+  Val x271 = ((x270 + (get(ctx, arg0, 772, 2) * Val(16))) + (get(ctx, arg0, 773, 2) * Val(32)));
+  Val x272 = ((x271 + (get(ctx, arg0, 774, 2) * Val(64))) + (get(ctx, arg0, 775, 2) * Val(128)));
+  Val x273 = ((x272 + (get(ctx, arg0, 776, 2) * Val(256))) + (get(ctx, arg0, 777, 2) * Val(512)));
+  Val x274 = ((x273 + (get(ctx, arg0, 778, 2) * Val(1024))) + (get(ctx, arg0, 779, 2) * Val(2048)));
+  Val x275 = ((x274 + (get(ctx, arg0, 780, 2) * Val(4096))) + (get(ctx, arg0, 781, 2) * Val(8192)));
+  Val x276 =
+      ((x275 + (get(ctx, arg0, 782, 2) * Val(16384))) + (get(ctx, arg0, 783, 2) * Val(32768)));
+  // ComputeAE(zirgen/circuit/keccak2/sha2.zir:91)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:139)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:192)
+  Val x277 = (get(ctx, arg0, 544, 0) + (get(ctx, arg0, 545, 0) * Val(2)));
+  Val x278 = ((x277 + (get(ctx, arg0, 546, 0) * Val(4))) + (get(ctx, arg0, 547, 0) * Val(8)));
+  Val x279 = ((x278 + (get(ctx, arg0, 548, 0) * Val(16))) + (get(ctx, arg0, 549, 0) * Val(32)));
+  Val x280 = ((x279 + (get(ctx, arg0, 550, 0) * Val(64))) + (get(ctx, arg0, 551, 0) * Val(128)));
+  Val x281 = ((x280 + (get(ctx, arg0, 552, 0) * Val(256))) + (get(ctx, arg0, 553, 0) * Val(512)));
+  Val x282 = ((x281 + (get(ctx, arg0, 554, 0) * Val(1024))) + (get(ctx, arg0, 555, 0) * Val(2048)));
+  Val x283 = ((x282 + (get(ctx, arg0, 556, 0) * Val(4096))) + (get(ctx, arg0, 557, 0) * Val(8192)));
+  Val x284 =
+      ((x283 + (get(ctx, arg0, 558, 0) * Val(16384))) + (get(ctx, arg0, 559, 0) * Val(32768)));
+  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
+  // ComputeW(zirgen/circuit/keccak2/sha2.zir:78)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:137)
+  // ShaCycle(zirgen/circuit/keccak2/top.zir:199)
+  Val x285 = (((x266 + (x267 * Val(16384))) + (x268 * Val(32768))) + (x276 + x284));
+  Val x286 = (((x227 + x228) + x229) + x285);
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
+  // DoShaStep(zirgen/circuit/keccak2/top.zir:138)
+  Val x287 = (x286 + x189);
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  Val x288 = (bitAnd(x287, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 1066, bitAnd(x288, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 1067, (bitAnd(x288, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 1068, (bitAnd(x288, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x289 = ((get(ctx, arg0, 1068, 0) * Val(4)) + (get(ctx, arg0, 1067, 0) * Val(2)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x290 = (x287 - ((x289 + get(ctx, arg0, 1066, 0)) * Val(65536)));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
+  set(ctx, arg0, 752, bitAnd(x190, Val(1)));
+  set(ctx, arg0, 753, (bitAnd(x190, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 754, (bitAnd(x190, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 755, (bitAnd(x190, Val(8)) * Val(1761607681)));
+  set(ctx, arg0, 756, (bitAnd(x190, Val(16)) * Val(1887436801)));
+  set(ctx, arg0, 757, (bitAnd(x190, Val(32)) * Val(1950351361)));
+  set(ctx, arg0, 758, (bitAnd(x190, Val(64)) * Val(1981808641)));
+  set(ctx, arg0, 759, (bitAnd(x190, Val(128)) * Val(1997537281)));
+  set(ctx, arg0, 760, (bitAnd(x190, Val(256)) * Val(2005401601)));
+  set(ctx, arg0, 761, (bitAnd(x190, Val(512)) * Val(2009333761)));
+  set(ctx, arg0, 762, (bitAnd(x190, Val(1024)) * Val(2011299841)));
+  set(ctx, arg0, 763, (bitAnd(x190, Val(2048)) * Val(2012282881)));
+  set(ctx, arg0, 764, (bitAnd(x190, Val(4096)) * Val(2012774401)));
+  set(ctx, arg0, 765, (bitAnd(x190, Val(8192)) * Val(2013020161)));
+  set(ctx, arg0, 766, (bitAnd(x190, Val(16384)) * Val(2013143041)));
+  set(ctx, arg0, 767, (bitAnd(x190, Val(32768)) * Val(2013204481)));
+  set(ctx, arg0, 768, bitAnd(x290, Val(1)));
+  set(ctx, arg0, 769, (bitAnd(x290, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 770, (bitAnd(x290, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 771, (bitAnd(x290, Val(8)) * Val(1761607681)));
+  set(ctx, arg0, 772, (bitAnd(x290, Val(16)) * Val(1887436801)));
+  set(ctx, arg0, 773, (bitAnd(x290, Val(32)) * Val(1950351361)));
+  set(ctx, arg0, 774, (bitAnd(x290, Val(64)) * Val(1981808641)));
+  set(ctx, arg0, 775, (bitAnd(x290, Val(128)) * Val(1997537281)));
+  set(ctx, arg0, 776, (bitAnd(x290, Val(256)) * Val(2005401601)));
+  set(ctx, arg0, 777, (bitAnd(x290, Val(512)) * Val(2009333761)));
+  set(ctx, arg0, 778, (bitAnd(x290, Val(1024)) * Val(2011299841)));
+  set(ctx, arg0, 779, (bitAnd(x290, Val(2048)) * Val(2012282881)));
+  set(ctx, arg0, 780, (bitAnd(x290, Val(4096)) * Val(2012774401)));
+  set(ctx, arg0, 781, (bitAnd(x290, Val(8192)) * Val(2013020161)));
+  set(ctx, arg0, 782, (bitAnd(x290, Val(16384)) * Val(2013143041)));
+  set(ctx, arg0, 783, (bitAnd(x290, Val(32768)) * Val(2013204481)));
+  return;
 }
 
 } // namespace risc0::circuit::keccak::cuda
