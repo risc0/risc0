@@ -1,4 +1,4 @@
-# Cryptography Acceleration
+# Cryptography Precompiles
 
 RISC Zero's rv32im implementation includes a number of specialized extension
 circuits, including two "accelerators" for cryptographic functions: SHA-256 and
