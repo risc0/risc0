@@ -278,6 +278,17 @@ impl BorshDeserialize for Unknown {
     }
 }
 
+/// Each UnionClaim can be used as an inner node in a Merkle tree, the root of
+/// which commits to a set of claims.
+pub struct UnionClaim {
+    // Digest of the "left" Assumption struct.
+    //
+    // The left should always be lesser of the two when interpreting the digest as a big-endian number.
+    DigestVal left;
+    // Digest of the "right" Assumption struct.
+    DigestVal right;
+};
+
 /// Input field in the [ReceiptClaim], committing to a public value accessible to the guest.
 ///
 /// NOTE: This type is currently uninhabited (i.e. it cannot be constructed), and only its digest
