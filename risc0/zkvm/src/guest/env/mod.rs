@@ -155,7 +155,7 @@ pub(crate) fn init() {
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         #[cfg(feature = "unstable")]
-        KECCAK2_BATCHER.get_mut().unwrap().finalize();
+        KECCAK2_BATCHER.take().unwrap().finalize();
 
         #[allow(static_mut_refs)]
         let hasher = HASHER.take();
