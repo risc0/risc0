@@ -26,88 +26,61 @@ __device__ NondetRegStruct exec_Reg(ExecContext& ctx,
   EQZ((arg0 - x2._super), "Reg(<preamble>:5)");
   return x2;
 }
-__device__ OneHot_4_Struct exec_OneHot_4_(ExecContext& ctx,
+__device__ OneHot_8_Struct exec_OneHot_8_(ExecContext& ctx,
                                           Val arg0,
-                                          BoundLayout<OneHot_4_Layout> layout1) {
+                                          BoundLayout<OneHot_8_Layout> layout1) {
   // OneHot(zirgen/circuit/keccak2/one_hot.zir:7)
-  NondetRegStruct4Array x2 =
-      map(Val4Array{Val(0), Val(1), Val(2), Val(3)},
+  NondetBitRegStruct8Array x2 =
+      map(Val8Array{Val(0), Val(1), Val(2), Val(3), Val(4), Val(5), Val(6), Val(7)},
           LAYOUT_LOOKUP(layout1, _super),
-          ([&](Val4Array::value_type x3, BoundLayout<NondetRegLayout4LayoutArray::value_type> x4) {
-            NondetRegStruct x5 = exec_NondetBitReg(ctx, isz((x3 - arg0)), x4);
+          ([&](Val8Array::value_type x3, BoundLayout<NondetRegLayout8LayoutArray::value_type> x4) {
+            NondetBitRegStruct x5 = exec_NondetBitReg(ctx, isz((x3 - arg0)), x4);
             return x5;
           }));
   // OneHot(zirgen/circuit/keccak2/one_hot.zir:9)
-  Val x6 = (x2[0]._super + x2[1]._super);
-  Val x7 = ((x6 + x2[2]._super) + x2[3]._super);
-  EQZ((x7 - Val(1)), "OneHot(zirgen/circuit/keccak2/one_hot.zir:9)");
+  Val x6 = (x2[0]._super._super + x2[1]._super._super);
+  Val x7 = ((x6 + x2[2]._super._super) + x2[3]._super._super);
+  Val x8 = ((x7 + x2[4]._super._super) + x2[5]._super._super);
+  Val x9 = ((x8 + x2[6]._super._super) + x2[7]._super._super);
+  EQZ((x9 - Val(1)), "OneHot(zirgen/circuit/keccak2/one_hot.zir:9)");
   // OneHot(zirgen/circuit/keccak2/one_hot.zir:11)
-  Val x8 = (x2[2]._super * Val(2));
-  Val x9 = (x2[3]._super * Val(3));
-  Val x10 = (x2[1]._super + x8);
-  EQZ(((x10 + x9) - arg0), "OneHot(zirgen/circuit/keccak2/one_hot.zir:11)");
-  return OneHot_4_Struct{._super = x2};
+  Val x10 = (x2[2]._super._super * Val(2));
+  Val x11 = (x2[3]._super._super * Val(3));
+  Val x12 = (x2[4]._super._super * Val(4));
+  Val x13 = (x2[5]._super._super * Val(5));
+  Val x14 = (x2[6]._super._super * Val(6));
+  Val x15 = (x2[7]._super._super * Val(7));
+  Val x16 = (x2[1]._super._super + x10);
+  Val x17 = (((x16 + x11) + x12) + x13);
+  Val x18 = (((x17 + x14) + x15) - arg0);
+  EQZ(x18, "OneHot(zirgen/circuit/keccak2/one_hot.zir:11)");
+  return OneHot_8_Struct{._super = x2};
 }
-__device__ ControlStateStruct exec_ShaNextBlock(ExecContext& ctx,
-                                                ControlStateStruct arg0,
-                                                BoundLayout<ShaNextBlockLayout> layout1) {
-  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:428)
-  Val x2 = (arg0.block._super - Val(3));
+__device__ ControlStateStruct exec_KeccackNextRound(ExecContext& ctx,
+                                                    ControlStateStruct arg0,
+                                                    BoundLayout<KeccackNextRoundLayout> layout1) {
+  // KeccackNextRound(zirgen/circuit/keccak2/top.zir:408)
+  Val x2 = (arg0.round._super - Val(23));
   NondetRegStruct x3 = exec_IsZero(ctx, x2, LAYOUT_LOOKUP(layout1, isLast));
-  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:429)
-  Val x4 = (Val(1) - x3._super);
-  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:430)
-  Val x5 = (Val(1) - arg0.subType._super);
-  NondetRegStruct x6 = exec_Reg(ctx, (x3._super * x5), LAYOUT_LOOKUP(layout1, isSub0));
-  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:431)
-  Val x7 = ((Val(1) - x4) - x6._super);
-  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:433)
-  Val x8 = (arg0.block._super + Val(1));
-  ControlStateStruct x9;
-  if (to_size_t(x4)) {
-    ControlStateStruct x10 = exec_ControlState(
-        ctx, Val(9), arg0.subType._super, x8, Val(0), LAYOUT_LOOKUP(layout1, _super.arm0));
-    x9 = x10;
-  } else if (to_size_t(x6._super)) {
-    // ShaNextBlock(zirgen/circuit/keccak2/top.zir:434)
-    ControlStateStruct x11 =
-        exec_ControlState(ctx, Val(2), Val(0), Val(0), Val(0), LAYOUT_LOOKUP(layout1, _super.arm1));
-    x9 = x11;
-  } else if (to_size_t(x7)) {
-    // NextPreimage(zirgen/circuit/keccak2/top.zir:280)
-    // ShaNextBlock(zirgen/circuit/keccak2/top.zir:436)
-    Val x12 = INVOKE_EXTERN(ctx, nextPreimage);
-    NondetRegStruct x13 = exec_NondetReg(ctx, x12, LAYOUT_LOOKUP(layout1, _super.arm2.more));
-    // AssertBit(zirgen/circuit/keccak2/bits.zir:6)
-    // ShaNextBlock(zirgen/circuit/keccak2/top.zir:437)
-    Val x14 = (Val(1) - x13._super);
-    EQZ((x13._super * x14),
-        "loc(callsite( AssertBit ( zirgen/circuit/keccak2/bits.zir :6:20) at  ShaNextBlock ( "
-        "zirgen/circuit/keccak2/top.zir :437:17)))");
-    ControlStateStruct x15;
-    if (to_size_t(x13._super)) {
-      // ShaNextBlock(zirgen/circuit/keccak2/top.zir:439)
-      ControlStateStruct x16 = exec_ControlState(
-          ctx, Val(1), Val(0), Val(0), Val(0), LAYOUT_LOOKUP(layout1, _super.arm2._super.arm0));
-      x15 = x16;
-    } else if (to_size_t(x14)) {
-      // ShaNextBlock(zirgen/circuit/keccak2/top.zir:441)
-      ControlStateStruct x17 = exec_ControlState(
-          ctx, Val(0), Val(0), Val(0), Val(0), LAYOUT_LOOKUP(layout1, _super.arm2._super.arm1));
-      x15 = x17;
-    } else {
-      assert(0 && "Reached unreachable mux arm");
-    }
-    // ShaNextBlock(zirgen/circuit/keccak2/top.zir:438)
-    ControlStateStruct x18 =
-        back_ControlState(ctx, 0, LAYOUT_LOOKUP(layout1, _super.arm2._super._super));
-    x9 = x18;
+  // KeccackNextRound(zirgen/circuit/keccak2/top.zir:412)
+  Val x4 = (arg0.round._super + Val(1));
+  ControlStateStruct x5;
+  if (to_size_t(x3._super)) {
+    // KeccackNextRound(zirgen/circuit/keccak2/top.zir:410)
+    ControlStateStruct x6 =
+        exec_ControlState(ctx, Val(3), Val(0), Val(0), Val(0), LAYOUT_LOOKUP(layout1, _super.arm0));
+    x5 = x6;
+  } else if (to_size_t((Val(1) - x3._super))) {
+    // KeccackNextRound(zirgen/circuit/keccak2/top.zir:412)
+    ControlStateStruct x7 =
+        exec_ControlState(ctx, Val(4), Val(0), Val(0), x4, LAYOUT_LOOKUP(layout1, _super.arm1));
+    x5 = x7;
   } else {
     assert(0 && "Reached unreachable mux arm");
   }
-  // ShaNextBlock(zirgen/circuit/keccak2/top.zir:432)
-  ControlStateStruct x19 = back_ControlState(ctx, 0, LAYOUT_LOOKUP(layout1, _super._super));
-  return x19;
+  // KeccackNextRound(zirgen/circuit/keccak2/top.zir:409)
+  ControlStateStruct x8 = back_ControlState(ctx, 0, LAYOUT_LOOKUP(layout1, _super._super));
+  return x8;
 }
 
 } // namespace risc0::circuit::keccak::cuda

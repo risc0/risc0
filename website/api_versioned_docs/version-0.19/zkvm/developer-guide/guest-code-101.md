@@ -37,7 +37,7 @@ There are also a number of functions available to support with debugging and per
 - **Print a debug message**<br/>
   [`env::log`]
 
-For more information on optimization & performance, see our pages on [Cryptography Acceleration](acceleration.md) and [Benchmarking](../benchmarks.md).
+For more information on optimization & performance, see our pages on [Cryptography Precompiles](./precompiles.md) and [Benchmarking](../benchmarks.md).
 
 ## Boilerplate before `main()`
 

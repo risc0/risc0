@@ -29,15 +29,18 @@ extern __device__ NondetRegStruct back_Reg(ExecContext& ctx,
 extern __device__ NondetRegStruct exec_Reg(ExecContext& ctx,
                                            Val arg0,
                                            BoundLayout<NondetRegLayout> layout1);
-extern __device__ NondetRegStruct exec_NondetBitReg(ExecContext& ctx,
-                                                    Val arg0,
-                                                    BoundLayout<NondetRegLayout> layout1);
+extern __device__ NondetBitRegStruct back_NondetBitReg(ExecContext& ctx,
+                                                       Index distance0,
+                                                       BoundLayout<NondetRegLayout> layout1);
+extern __device__ NondetBitRegStruct exec_NondetBitReg(ExecContext& ctx,
+                                                       Val arg0,
+                                                       BoundLayout<NondetRegLayout> layout1);
 extern __device__ NondetRegStruct exec_IsZero(ExecContext& ctx,
                                               Val arg0,
                                               BoundLayout<IsZeroLayout> layout1);
-extern __device__ NondetRegStruct exec_Xor5(ExecContext& ctx,
-                                            Val5Array arg0,
-                                            BoundLayout<NondetRegLayout> layout1);
+extern __device__ NondetBitRegStruct exec_Xor5(ExecContext& ctx,
+                                               Val5Array arg0,
+                                               BoundLayout<NondetRegLayout> layout1);
 extern __device__ ThetaP1Struct exec_ThetaP1(ExecContext& ctx,
                                              Val64Array5Array5Array arg0,
                                              BoundLayout<ThetaP1Layout> layout1);
@@ -58,6 +61,9 @@ extern __device__ UnpackReg_32__16_Struct exec_UnpackReg_32__16_(
     ExecContext& ctx, Val2Array arg0, BoundLayout<UnpackReg_32__16_Layout> layout1);
 extern __device__ UnpackReg_32__16_Struct
 exec_CarryAndExpand(ExecContext& ctx, Val2Array arg0, BoundLayout<CarryAndExpandLayout> layout1);
+extern __device__ ExpandBEStruct exec_ExpandBE(ExecContext& ctx,
+                                               Val2Array arg0,
+                                               BoundLayout<ExpandBELayout> layout1);
 extern __device__ TopStateStruct back_TopState(ExecContext& ctx,
                                                Index distance0,
                                                BoundLayout<TopStateLayout> layout1);
