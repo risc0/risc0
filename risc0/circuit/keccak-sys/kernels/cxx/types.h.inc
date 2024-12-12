@@ -147,6 +147,9 @@ struct LoadWinLayout {
   OneHot_4_Layout blockSelect;
 };
 using NondetRegLayout32LayoutArray = std::array<NondetRegLayout, 32>;
+struct ExpandBELayout {
+  NondetRegLayout32LayoutArray _super;
+};
 struct UnpackReg_32__16_Layout {
   NondetRegLayout32LayoutArray _super;
 };
@@ -160,8 +163,13 @@ struct CarryAndExpandLayout {
   CarryExtractLayout lowCarry;
   CarryExtractLayout highCarry;
 };
+struct DoShaStepWLayout {
+  NondetRegLayout32LayoutArray _super;
+  ExpandBELayout arm0;
+  CarryAndExpandLayout arm1;
+};
 struct DoShaStepLayout {
-  CarryAndExpandLayout w;
+  DoShaStepWLayout w;
   CarryAndExpandLayout a;
   CarryAndExpandLayout e;
 };
@@ -220,12 +228,15 @@ struct _globalLayout {
 struct NondetRegStruct {
   Val _super;
 };
+struct NondetBitRegStruct {
+  NondetRegStruct _super;
+};
 using Val5Array = std::array<Val, 5>;
 using Val64Array = std::array<Val, 64>;
 using Val64Array5Array = std::array<Val64Array, 5>;
 using Val64Array5Array5Array = std::array<Val64Array5Array, 5>;
 struct ThetaP1_Super_Super_SuperStruct {
-  NondetRegStruct _super;
+  NondetBitRegStruct _super;
 };
 using ThetaP1_Super_Super_SuperStruct64Array = std::array<ThetaP1_Super_Super_SuperStruct, 64>;
 struct ThetaP1_Super_SuperStruct {
@@ -236,9 +247,9 @@ struct ThetaP1Struct {
   ThetaP1_Super_SuperStruct5Array _super;
 };
 using Val24Array = std::array<Val, 24>;
-using NondetRegStruct24Array = std::array<NondetRegStruct, 24>;
+using NondetBitRegStruct24Array = std::array<NondetBitRegStruct, 24>;
 struct OneHot_24_Struct {
-  NondetRegStruct24Array _super;
+  NondetBitRegStruct24Array _super;
 };
 struct RoundToArray_Super_SuperStruct {
   Val _super;
@@ -269,11 +280,15 @@ struct DivStruct {
 using DivStruct32Array = std::array<DivStruct, 32>;
 using Val32Array = std::array<Val, 32>;
 struct UnpackReg_32__16__SuperStruct {
-  NondetRegStruct _super;
+  NondetBitRegStruct _super;
 };
 using UnpackReg_32__16__SuperStruct32Array = std::array<UnpackReg_32__16__SuperStruct, 32>;
 struct UnpackReg_32__16_Struct {
   UnpackReg_32__16__SuperStruct32Array _super;
+};
+using NondetBitRegStruct32Array = std::array<NondetBitRegStruct, 32>;
+struct ExpandBEStruct {
+  NondetBitRegStruct32Array _super;
 };
 using Val800Array = std::array<Val, 800>;
 struct TopStateBitsStruct {
@@ -293,9 +308,9 @@ struct TopStateStruct {
   NondetRegStruct16Array sflat;
 };
 using Val8Array = std::array<Val, 8>;
-using NondetRegStruct8Array = std::array<NondetRegStruct, 8>;
+using NondetBitRegStruct8Array = std::array<NondetBitRegStruct, 8>;
 struct OneHot_8_Struct {
-  NondetRegStruct8Array _super;
+  NondetBitRegStruct8Array _super;
 };
 using Val32Array4Array = std::array<Val32Array, 4>;
 using Val32Array16Array = std::array<Val32Array, 16>;
@@ -304,16 +319,19 @@ struct ShaStateStruct {
   Val32Array4Array e;
   Val32Array16Array w;
 };
+struct ComponentStruct {
+};
+using ComponentStruct32Array = std::array<ComponentStruct, 32>;
 struct DoShaStepStruct {
-  UnpackReg_32__16_Struct w;
+  NondetBitRegStruct32Array w;
   UnpackReg_32__16_Struct a;
   UnpackReg_32__16_Struct e;
   ShaStateStruct newState;
 };
 using Val4Array = std::array<Val, 4>;
-using NondetRegStruct4Array = std::array<NondetRegStruct, 4>;
+using NondetBitRegStruct4Array = std::array<NondetBitRegStruct, 4>;
 struct OneHot_4_Struct {
-  NondetRegStruct4Array _super;
+  NondetBitRegStruct4Array _super;
 };
 using Val2Array8Array = std::array<Val2Array, 8>;
 struct LoadWinStruct {
@@ -340,7 +358,7 @@ using UnpackReg_32__16_Struct4Array = std::array<UnpackReg_32__16_Struct, 4>;
 using Val50Array = std::array<Val, 50>;
 using DivStruct800Array = std::array<DivStruct, 800>;
 struct UnpackReg_800__16__SuperStruct {
-  NondetRegStruct _super;
+  NondetBitRegStruct _super;
 };
 using UnpackReg_800__16__SuperStruct800Array = std::array<UnpackReg_800__16__SuperStruct, 800>;
 struct UnpackReg_800__16_Struct {
@@ -364,7 +382,7 @@ struct ControlStateStruct {
 };
 using Val12Array = std::array<Val, 12>;
 struct OneHot_12__SuperStruct {
-  NondetRegStruct _super;
+  NondetBitRegStruct _super;
 };
 using OneHot_12__SuperStruct12Array = std::array<OneHot_12__SuperStruct, 12>;
 struct OneHot_12_Struct {
