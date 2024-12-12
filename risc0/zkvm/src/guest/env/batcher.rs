@@ -63,10 +63,11 @@ impl Keccak2Batcher {
     }
 
     pub fn update(&mut self, keccak_state: &mut KeccakState) {
+        self.inputs.push(*keccak_state);
         sha_single_keccak(&mut self.claim_state, keccak_state);
         unsafe { sys_keccak(keccak_state, keccak_state) };
+        // at this point the keccak_state is output state resulting from keccak permutation.
         sha_single_keccak(&mut self.claim_state, keccak_state);
-        self.inputs.push(*keccak_state);
         if self.inputs.len() == self.max_keccak_inputs() {
             // we've reached the limit. Create a proof request.
             self.finalize();
