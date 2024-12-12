@@ -627,7 +627,7 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
 const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[
     b"RUST_BACKTRACE",
     b"RUST_LIB_BACKTRACE",
-    b"RISC0_KECCAK_CYCLES",
+    b"RISC0_KECCAK_PO2",
 ];
 
 /// Retrieves the value of an environment variable, and stores as much
