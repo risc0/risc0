@@ -177,7 +177,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
             }
         }
 
-        if let Ok(po2) = std::env::var("RISC0_PPROF_OUT") {
+        if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
             let po2 = po2.parse::<u32>()?;
             if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
                 bail!(
