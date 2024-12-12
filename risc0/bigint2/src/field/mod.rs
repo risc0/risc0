@@ -105,7 +105,7 @@ pub fn modadd_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modadd_256_unchecked(&lhs, &rhs, &modulus, &mut result);
+    modadd_256_unchecked(&lhs, &rhs, &modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
@@ -117,7 +117,7 @@ pub fn modinv_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modinv_256_unchecked(&inp, &modulus, &mut result);
+    modinv_256_unchecked(&inp, &modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
@@ -130,7 +130,7 @@ pub fn modmul_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modmul_256_unchecked(&lhs, &rhs, &modulus, &mut result);
+    modmul_256_unchecked(&lhs, &rhs, &modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
@@ -143,7 +143,7 @@ pub fn modsub_256(
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
 ) {
-    modsub_256_unchecked(&lhs, &rhs, &modulus, &mut result);
+    modsub_256_unchecked(&lhs, &rhs, &modulus, result);
 
     // An honest host will always return a result less than the modulus. A dishonest prover can
     // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
