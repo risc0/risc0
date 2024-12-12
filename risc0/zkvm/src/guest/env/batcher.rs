@@ -18,9 +18,7 @@ use alloc::vec;
 
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
-use risc0_zkvm_platform::syscall::{
-    sys_keccak_permute, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
-};
+use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
 
 const KECCAK_PERMUTE_CYCLES: usize = 200;
 const MAX_KECCAK_CYCLES: usize = 1 << KECCAK_DEFAULT_PO2;
@@ -42,7 +40,7 @@ impl Keccak2Batcher {
 
     pub fn update(&mut self, keccak_state: &mut KeccakState) {
         sha_single_keccak(&mut self.claim_state, keccak_state);
-        unsafe { sys_keccak_permute(keccak_state, keccak_state) };
+        unsafe { sys_keccak(keccak_state, keccak_state) };
         sha_single_keccak(&mut self.claim_state, keccak_state);
         self.inputs.push(*keccak_state);
         if self.inputs.len() == MAX_KECCAK_INPUTS {

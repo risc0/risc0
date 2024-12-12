@@ -41,8 +41,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak_permute, sys_log, sys_pipe,
-        sys_prove_zkr, sys_read, sys_read_words, sys_write,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
+        sys_read, sys_read_words, sys_write,
     },
     PAGE_SIZE,
 };
@@ -459,15 +459,15 @@ fn main() {
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
         }
-        MultiTestSpec::SysKeccakPermute => {
+        MultiTestSpec::SysKeccak => {
             // Test vectors are from KeccakCodePackage
             let mut state = KeccakState::default();
 
-            unsafe { sys_keccak_permute(&state, &mut state) };
+            unsafe { sys_keccak(&state, &mut state) };
 
             assert_eq!(state, KECCAK_UPDATE);
 
-            unsafe { sys_keccak_permute(&state, &mut state) };
+            unsafe { sys_keccak(&state, &mut state) };
 
             assert_eq!(
                 state,
@@ -503,7 +503,7 @@ fn main() {
         MultiTestSpec::ShaSingleKeccak => {
             let mut sha_state = SHA256_INIT;
             let mut keccak_state = KeccakState::default();
-            unsafe { sys_keccak_permute(&keccak_state, &mut keccak_state) };
+            unsafe { sys_keccak(&keccak_state, &mut keccak_state) };
             sha_single_keccak(&mut sha_state, &keccak_state);
             assert_eq!(
                 sha_state,
