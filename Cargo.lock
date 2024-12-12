@@ -4112,9 +4112,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest-retry"
-version = "0.6.1"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a83df1aaec00176d0fabb65dea13f832d2a446ca99107afc17c5d2d4981221d0"
+checksum = "29c73e4195a6bfbcb174b790d9b3407ab90646976c55de58a6515da25d851178"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4126,6 +4126,7 @@ dependencies = [
  "reqwest",
  "reqwest-middleware",
  "retry-policies",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
  "wasm-timer",
