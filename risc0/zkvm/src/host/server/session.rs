@@ -15,11 +15,7 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{
-    collections::{BTreeSet, HashMap},
-    fs,
-    path::PathBuf,
-};
+use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use anyhow::{ensure, Result};
 use enum_map::EnumMap;
@@ -106,7 +102,7 @@ pub struct Session {
     pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
 
     /// ecall metrics grouped by name.
-    pub(crate) ecall_metrics: HashMap<String, EcallMetric>,
+    pub(crate) ecall_metrics: Vec<(String, EcallMetric)>,
 
     /// syscall metrics grouped by kind.
     pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
@@ -177,7 +173,7 @@ impl Session {
         post_state: SystemState,
         pending_zkrs: Vec<ProveZkrRequest>,
         pending_keccaks: Vec<ProveKeccakRequest>,
-        ecall_metrics: HashMap<String, EcallMetric>,
+        ecall_metrics: Vec<(String, EcallMetric)>,
         syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
     ) -> Self {
         Self {
@@ -271,37 +267,41 @@ impl Session {
 
         let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
 
-        eprintln!("number of segments: {}", self.segments.len());
-        eprintln!("total cycles: {}", self.total_cycles);
-        eprintln!(
-            "user cycles: {} ({:.2}%)",
+        tracing::info!("number of segments: {}", self.segments.len());
+        tracing::info!("{} total cycles", self.total_cycles);
+        tracing::info!(
+            "{} user cycles ({:.2}%)",
             self.user_cycles,
             pct(self.user_cycles)
         );
-        eprintln!(
-            "paging cycles: {} ({:.2}%)",
+        tracing::info!(
+            "{} paging cycles ({:.2}%)",
             self.paging_cycles,
             pct(self.paging_cycles)
         );
-        eprintln!(
-            "reserved cycles: {} ({:.2}%)",
+        tracing::info!(
+            "{} reserved cycles ({:.2}%)",
             self.reserved_cycles,
             pct(self.reserved_cycles)
         );
 
-        eprintln!("ecalls");
-        for (name, metric) in self.ecall_metrics.iter() {
-            eprintln!(
-                "\t{name}, count: {}, cycles: {}, ({:.2}%)",
+        tracing::info!("ecalls");
+        let mut ecall_metrics = self.ecall_metrics.clone();
+        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
+        for (name, metric) in ecall_metrics.iter().rev() {
+            tracing::info!(
+                "\t{} {name} calls, {} cycles, ({:.2}%)",
                 metric.count,
                 metric.cycles,
                 pct(metric.cycles)
             );
         }
 
-        eprintln!("syscalls");
-        for (name, metric) in self.syscall_metrics.iter() {
-            eprintln!("\t{name:?}, count: {}, size: {}", metric.count, metric.size);
+        tracing::info!("syscalls");
+        let mut syscall_metrics: Vec<_> = self.syscall_metrics.iter().collect();
+        syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
+        for (name, metric) in syscall_metrics.iter().rev() {
+            tracing::info!("\t{} {name:?} calls", metric.count);
         }
 
         assert_eq!(

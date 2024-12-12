@@ -15,14 +15,7 @@
 #[cfg(test)]
 mod tests;
 
-use std::{
-    array,
-    cell::RefCell,
-    collections::{BTreeSet, HashMap},
-    io::Cursor,
-    mem,
-    rc::Rc,
-};
+use std::{array, cell::RefCell, collections::BTreeSet, io::Cursor, mem, rc::Rc};
 
 use anyhow::{bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
@@ -120,7 +113,7 @@ pub struct ExecutorResult {
     pub pre_state: SystemState,
     pub post_state: SystemState,
     pub output_digest: Option<Digest>,
-    pub ecall_metrics: HashMap<String, EcallMetric>,
+    pub ecall_metrics: Vec<(String, EcallMetric)>,
 }
 
 #[derive(Clone, Copy, Debug, Enum)]
@@ -132,7 +125,7 @@ enum EcallKind {
     Sha2,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct EcallMetric {
     pub count: u64,
     pub cycles: u64,
@@ -920,19 +913,12 @@ pub fn execute_elf<S: Syscall>(
     )
 }
 
-impl From<EcallMetrics> for HashMap<String, EcallMetric> {
+impl From<EcallMetrics> for Vec<(String, EcallMetric)> {
     fn from(metrics: EcallMetrics) -> Self {
-        let mut ret = HashMap::new();
-        for (kind, metric) in metrics.0 {
-            let name = match kind {
-                EcallKind::BigInt => "bigint",
-                EcallKind::BigInt2 => "bigint2",
-                EcallKind::Input => "input",
-                EcallKind::Software => "software",
-                EcallKind::Sha2 => "sha2",
-            };
-            ret.insert(name.to_string(), metric);
-        }
-        ret
+        metrics
+            .0
+            .into_iter()
+            .map(|(kind, metric)| (format!("{kind:?}"), metric))
+            .collect()
     }
 }
