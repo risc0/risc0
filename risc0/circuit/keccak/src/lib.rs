@@ -26,6 +26,7 @@ pub const KECCAK_DEFAULT_PO2: usize = 17;
 
 pub const KECCAK_PO2_RANGE: core::ops::Range<usize> = 14..18;
 
+// DO NOT MERGE: Deprecate this value.
 pub const RECURSION_PO2: usize = 18;
 
 pub type KeccakState = [u64; 25];

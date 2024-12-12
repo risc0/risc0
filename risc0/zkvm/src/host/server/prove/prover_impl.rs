@@ -22,7 +22,7 @@ use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        recursion::{identity_p254, join, lift, resolve},
+        recursion::{identity_p254, join, join_n, lift, lift_join_n, resolve},
     },
     prove_registered_zkr,
     receipt::{
@@ -147,7 +147,8 @@ impl ProverServer for ProverImpl {
         let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
 
         // Verify the receipt to catch if something is broken in the proving process.
-        composite_receipt.verify_integrity_with_context(ctx)?;
+        // DO NOT MERGE: This takes up to multiple seconds as the size grows. Drop this?
+        // composite_receipt.verify_integrity_with_context(ctx)?;
         check_claims(
             &session_claim,
             "composite",
@@ -215,7 +216,9 @@ impl ProverServer for ProverImpl {
             claim,
             verifier_parameters,
         };
-        receipt.verify_integrity_with_context(ctx)?;
+        // DO NOT MERGE: Should we just drop this? It lasts maybe 10ms each time, which adds up to
+        // 10 seconds at 1000 segments. An issue will be caught at the end if not here.
+        //receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
     }
@@ -230,6 +233,17 @@ impl ProverServer for ProverImpl {
         b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>> {
         join(a, b)
+    }
+
+    fn join_n(
+        &self,
+        receipts: &[SuccinctReceipt<ReceiptClaim>],
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        join_n(receipts)
+    }
+
+    fn lift_join_n(&self, receipts: &[SegmentReceipt]) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        lift_join_n(receipts)
     }
 
     fn resolve(

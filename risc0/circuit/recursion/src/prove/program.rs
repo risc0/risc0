@@ -56,6 +56,21 @@ impl Program {
         prog
     }
 
+    /// Create a [Program] from a stream of data encoded by Zirgen, returning None if the encoded
+    /// program does not fit in the given po2.
+    pub fn try_from_encoded(encoded: &[u32], po2: usize) -> Option<Self> {
+        assert_eq!(encoded.len() % RECURSION_CODE_SIZE, 0);
+        if encoded.len() > (RECURSION_CODE_SIZE * (1 << po2) - ZK_CYCLES) {
+            return None;
+        }
+        let prog = Self {
+            code: encoded.iter().copied().map(BabyBearElem::from).collect(),
+            code_size: RECURSION_CODE_SIZE,
+            po2,
+        };
+        Some(prog)
+    }
+
     /// Total number of rows in the code group for this program.
     pub fn code_rows(&self) -> usize {
         self.code.len() / self.code_size

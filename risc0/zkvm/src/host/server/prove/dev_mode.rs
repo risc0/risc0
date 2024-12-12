@@ -98,6 +98,17 @@ impl ProverServer for DevModeProver {
         unimplemented!("This is unsupported for dev mode.")
     }
 
+    fn join_n(
+        &self,
+        _receipts: &[SuccinctReceipt<ReceiptClaim>],
+    ) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        unimplemented!("This is unsupported for dev mode.")
+    }
+
+    fn lift_join_n(&self, _receipts: &[SegmentReceipt]) -> Result<SuccinctReceipt<ReceiptClaim>> {
+        unimplemented!("This is unsupported for dev mode.")
+    }
+
     fn resolve(
         &self,
         _conditional: &SuccinctReceipt<ReceiptClaim>,

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::RECURSION_PO2;
 use anyhow::{anyhow, bail, Result};
 use risc0_circuit_recursion::control_id::{
     BN254_IDENTITY_CONTROL_ID, POSEIDON2_CONTROL_IDS, SHA256_CONTROL_IDS,
@@ -20,44 +19,73 @@ use risc0_circuit_recursion::control_id::{
 use risc0_circuit_recursion::prove::Program;
 use risc0_zkp::{core::digest::Digest, MAX_CYCLES_PO2, MIN_CYCLES_PO2};
 
-fn get_zkr(name: &str, hashfn: &str) -> Result<(Program, Digest)> {
+fn get_zkr(name: impl AsRef<str>, hashfn: &str, program_po2: usize) -> Result<(Program, Digest)> {
     let control_ids: &[(&str, Digest)] = match hashfn {
         "poseidon2" => &POSEIDON2_CONTROL_IDS,
         "sha-256" => &SHA256_CONTROL_IDS,
         "poseidon_254" => &[("identity.zkr", BN254_IDENTITY_CONTROL_ID)],
-        _ => bail!("no control id found for {name} with {hashfn}"),
+        _ => bail!("no control id found for {} with {hashfn}", name.as_ref()),
     };
 
     Ok((
-        risc0_circuit_recursion::prove::zkr::get_zkr(name, RECURSION_PO2)?,
+        risc0_circuit_recursion::prove::zkr::get_zkr(name.as_ref(), program_po2)?,
         control_ids
             .iter()
             .copied()
-            .find_map(|(n, id)| (n == name).then_some(id))
-            .ok_or(anyhow!("failed to find {name} in the list of control IDs"))?,
+            .find_map(|(n, id)| (n == name.as_ref()).then_some(id))
+            .ok_or(anyhow!(
+                "failed to find {} in the list of control IDs",
+                name.as_ref()
+            ))?,
     ))
 }
 
-pub fn test_recursion_circuit(hashfn: &str) -> Result<(Program, Digest)> {
-    get_zkr("test_recursion_circuit.zkr", hashfn)
+pub fn test_recursion_circuit(hashfn: &str, program_po2: usize) -> Result<(Program, Digest)> {
+    get_zkr("test_recursion_circuit.zkr", hashfn, program_po2)
 }
 
-pub fn lift(po2: usize, hashfn: &str) -> Result<(Program, Digest)> {
-    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
-        get_zkr(&format!("lift_{po2}.zkr"), hashfn)
+// DO NOT MERGE: Consider this breaking change.
+pub fn lift(rv32im_po2: usize, hashfn: &str, program_po2: usize) -> Result<(Program, Digest)> {
+    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&rv32im_po2) {
+        get_zkr(format!("lift_{rv32im_po2}.zkr"), hashfn, program_po2)
     } else {
-        bail!("No rv32im verifier available for po2={po2}")
+        bail!("No rv32im verifier available for po2={rv32im_po2}")
     }
 }
 
-pub fn join(hashfn: &str) -> Result<(Program, Digest)> {
-    get_zkr("join.zkr", hashfn)
+pub fn join(hashfn: &str, program_po2: usize) -> Result<(Program, Digest)> {
+    // Assume join width of 2 and verify po2 equal to the program po2.
+    get_zkr(format!("join2_{program_po2}.zkr"), hashfn, program_po2)
 }
 
-pub fn resolve(hashfn: &str) -> Result<(Program, Digest)> {
-    get_zkr("resolve.zkr", hashfn)
+pub fn join_n(hashfn: &str, program_po2: usize, width: usize) -> Result<(Program, Digest)> {
+    // Assume verify po2 equal to the program po2.
+    get_zkr(
+        format!("join{width}_{program_po2}.zkr"),
+        hashfn,
+        program_po2,
+    )
 }
 
-pub fn identity(hashfn: &str) -> Result<(Program, Digest)> {
-    get_zkr("identity.zkr", hashfn)
+pub fn lift_join_n(
+    rv32im_po2: usize,
+    hashfn: &str,
+    program_po2: usize,
+    width: usize,
+) -> Result<(Program, Digest)> {
+    get_zkr(
+        format!("lift_join{width}_{rv32im_po2}.zkr"),
+        hashfn,
+        program_po2,
+    )
+}
+
+pub fn resolve(hashfn: &str, program_po2: usize) -> Result<(Program, Digest)> {
+    // Assume verify po2 equal to the program po2.
+    get_zkr(format!("resolve_{program_po2}.zkr"), hashfn, program_po2)
+}
+
+pub fn identity(hashfn: &str, program_po2: usize) -> Result<(Program, Digest)> {
+    // Assume verify po2 equal to the program po2.
+    get_zkr(format!("identity_{program_po2}.zkr"), hashfn, program_po2)
 }
