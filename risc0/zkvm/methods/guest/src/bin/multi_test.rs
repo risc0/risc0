@@ -23,15 +23,14 @@ use alloc::{
     alloc::{alloc_zeroed, Layout},
     format, vec,
 };
-use core::{arch::asm, ptr::addr_of};
+use core::arch::asm;
 
 use getrandom::getrandom;
 use risc0_circuit_keccak::KeccakState;
 use risc0_zkp::{core::hash::sha::testutil::test_sha_impl, digest};
 use risc0_zkvm::{
     guest::{
-        self,
-        env::{self, FdReader, FdWriter, Read as _, Write as _},
+        env::{self, testing::sha_single_keccak, FdReader, FdWriter, Read as _, Write as _},
         memory_barrier, sha,
     },
     sha::{Digest, Sha256, SHA256_INIT},
@@ -43,12 +42,40 @@ use risc0_zkvm_platform::{
     memory::{self, SYSTEM},
     syscall::{
         bigint, sys_bigint, sys_exit, sys_fork, sys_keccak_permute, sys_log, sys_pipe,
-        sys_prove_zkr, sys_read, sys_read_words, sys_sha_compress, sys_write, DIGEST_WORDS,
+        sys_prove_zkr, sys_read, sys_read_words, sys_write,
     },
     PAGE_SIZE,
 };
 
 risc0_zkvm::entry!(main);
+
+const KECCAK_UPDATE: KeccakState = [
+    0xF1258F7940E1DDE7,
+    0x84D5CCF933C0478A,
+    0xD598261EA65AA9EE,
+    0xBD1547306F80494D,
+    0x8B284E056253D057,
+    0xFF97A42D7F8E6FD4,
+    0x90FEE5A0A44647C4,
+    0x8C5BDA0CD6192E76,
+    0xAD30A6F71B19059C,
+    0x30935AB7D08FFC64,
+    0xEB5AA93F2317D635,
+    0xA9A6E6260D712103,
+    0x81A57C16DBCF555F,
+    0x43B831CD0347C826,
+    0x01F22F1A11A5569F,
+    0x05E5635A21D9AE61,
+    0x64BEFEF28CC970F2,
+    0x613670957BC46611,
+    0xB87C5A554FD00ECB,
+    0x8C3EE88A1CCF32C8,
+    0x940C7922AE3A2614,
+    0x1841F924A2C509E4,
+    0x16F53526E70465C2,
+    0x75F644E97F30A13B,
+    0xEAF1FF7B5CECA249,
+];
 
 #[inline(never)]
 #[no_mangle]
@@ -434,51 +461,16 @@ fn main() {
         }
         MultiTestSpec::SysKeccakPermute => {
             // Test vectors are from KeccakCodePackage
-            let input = [0u64; 25];
-            let mut output1 = [0u64; 25];
+            let mut state = KeccakState::default();
 
-            unsafe {
-                sys_keccak_permute(&input as *const [u64; 25], &mut output1 as *mut [u64; 25]);
-            };
+            unsafe { sys_keccak_permute(&state, &mut state) };
 
-            assert_eq!(
-                output1,
-                [
-                    0xF1258F7940E1DDE7,
-                    0x84D5CCF933C0478A,
-                    0xD598261EA65AA9EE,
-                    0xBD1547306F80494D,
-                    0x8B284E056253D057,
-                    0xFF97A42D7F8E6FD4,
-                    0x90FEE5A0A44647C4,
-                    0x8C5BDA0CD6192E76,
-                    0xAD30A6F71B19059C,
-                    0x30935AB7D08FFC64,
-                    0xEB5AA93F2317D635,
-                    0xA9A6E6260D712103,
-                    0x81A57C16DBCF555F,
-                    0x43B831CD0347C826,
-                    0x01F22F1A11A5569F,
-                    0x05E5635A21D9AE61,
-                    0x64BEFEF28CC970F2,
-                    0x613670957BC46611,
-                    0xB87C5A554FD00ECB,
-                    0x8C3EE88A1CCF32C8,
-                    0x940C7922AE3A2614,
-                    0x1841F924A2C509E4,
-                    0x16F53526E70465C2,
-                    0x75F644E97F30A13B,
-                    0xEAF1FF7B5CECA249,
-                ]
-            );
+            assert_eq!(state, KECCAK_UPDATE);
 
-            let mut output2 = [0u64; 25];
-            unsafe {
-                sys_keccak_permute(&output1 as *const [u64; 25], &mut output2 as *mut [u64; 25]);
-            };
+            unsafe { sys_keccak_permute(&state, &mut state) };
 
             assert_eq!(
-                output2,
+                state,
                 [
                     0x2D5C954DF96ECB3C,
                     0x6A332CD07057B56D,
@@ -507,100 +499,27 @@ fn main() {
                     0x20D06CD26A8FBF5C,
                 ]
             );
-
-            let input: KeccakState = test_inputs();
-
-            let mut output = [0u64; 25];
-            unsafe {
-                sys_keccak_permute(
-                    input.as_ptr() as *const [u64; 25],
-                    &mut output as *mut [u64; 25],
-                );
-            };
-
+        }
+        MultiTestSpec::ShaSingleKeccak => {
             let mut sha_state = SHA256_INIT;
-            sha_state = unsafe { sha_single_keccak(&sha_state, &input) };
-            sha_state = unsafe { sha_single_keccak(&sha_state, &output) };
-
-            for word in sha_state.as_mut_words().iter_mut() {
-                *word = word.to_be();
-            }
+            let mut keccak_state = KeccakState::default();
+            unsafe { sys_keccak_permute(&keccak_state, &mut keccak_state) };
+            sha_single_keccak(&mut sha_state, &keccak_state);
             assert_eq!(
                 sha_state,
-                digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c")
+                digest!("60ad7130b65fa874a29b3f44aeb6f46bb57cc45aa7f4a9a8db8ab4d378a66f06")
             );
 
-            // generate hash for large number of keccak states
-            let po2 = 17; // 128K
-            let cycles = 1 << po2;
-            let count = cycles / 200; // roughly 200 cycles per keccakf
-            let mut sha_state = SHA256_INIT;
-
-            for _ in 0..count {
-                sha_state = unsafe { sha_single_keccak(&sha_state, &input) };
-                sha_state = unsafe { sha_single_keccak(&sha_state, &output) };
-            }
-            for word in sha_state.as_mut_words().iter_mut() {
-                *word = word.to_be();
-            }
-
+            sha_single_keccak(&mut sha_state, &keccak_state);
             assert_eq!(
                 sha_state,
-                digest!("a920de1111b7fa680c29f0dbd8eea64a3b9e2994de1b242e30f53fd8cd727ba2")
+                digest!("d72929ecbe90afdba8444f4b4e4dae6a3cb0465f67ee5dc12321a390dc7911b3")
             );
         }
-        MultiTestSpec::KeccakPermute => {
-            let _out_state = env::keccak_update(&test_inputs());
+        MultiTestSpec::KeccakUpdate => {
+            let mut state = KeccakState::default();
+            env::keccak_update(&mut state);
+            assert_eq!(state, KECCAK_UPDATE);
         }
     }
-}
-
-fn test_inputs() -> KeccakState {
-    let mut state = KeccakState::default();
-    let mut pows = 987654321_u64;
-    for part in state.as_mut_slice() {
-        *part = pows;
-        pows = pows.wrapping_mul(123456789);
-    }
-    state
-}
-
-const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
-static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
-
-pub unsafe fn sha_single_keccak(sha_in_state: &Digest, keccak_state: &KeccakState) -> Digest {
-    let keccak_state_u32: *const u32 = core::intrinsics::transmute(keccak_state.as_ptr());
-    let mut sha_out_state: Digest = Digest::default();
-    unsafe {
-        sys_sha_compress(
-            sha_out_state.as_mut(),
-            sha_in_state.as_ref(),
-            keccak_state_u32 as *const [u32; DIGEST_WORDS],
-            keccak_state_u32.add(8) as *const [u32; DIGEST_WORDS],
-        )
-    };
-
-    for i in 1..3 {
-        unsafe {
-            sys_sha_compress(
-                sha_out_state.as_mut(),
-                sha_out_state.as_ref(),
-                keccak_state_u32.add(i * 16) as *const [u32; DIGEST_WORDS],
-                keccak_state_u32.add(i * 16 + 8) as *const [u32; DIGEST_WORDS],
-            )
-        };
-    }
-
-    // any last words?
-    LAST_WORDS[0] = *keccak_state_u32.add(48);
-    LAST_WORDS[1] = *keccak_state_u32.add(49);
-    unsafe {
-        sys_sha_compress(
-            sha_out_state.as_mut(),
-            sha_out_state.as_ref(),
-            addr_of!(LAST_WORDS),
-            &ZEROES as *const [u32; DIGEST_WORDS],
-        )
-    };
-    sha_out_state
 }
