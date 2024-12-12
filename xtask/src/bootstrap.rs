@@ -41,7 +41,9 @@ const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 const CONTROL_ID_PATH_KECCAK: &str = "risc0/circuit/keccak/src/control_id.rs";
 
-const MIN_LIFT_PO2: usize = 14;
+const MIN_RV32IM_PO2: usize = 14;
+const MIN_RECURSION_PO2: usize = 18;
+const MAX_JOIN_WIDTH: usize = 12;
 
 impl Bootstrap {
     // Format a list of control IDs, including a description as comments.
@@ -68,7 +70,7 @@ impl Bootstrap {
 
     pub fn run(&self) {
         let poseidon2_control_ids = Self::generate_rv32im_control_ids();
-        Self::generate_recursion_control_ids(poseidon2_control_ids);
+        Self::generate_recursion_control_ids(&poseidon2_control_ids);
         Self::bootstrap_keccak();
     }
 
@@ -111,19 +113,77 @@ impl Bootstrap {
         control_id_poseidon2[..=DEFAULT_MAX_PO2 - MIN_CYCLES_PO2].to_vec()
     }
 
-    fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: Vec<(String, Digest)>) {
+    /*
+     # Must match constants in gen_predicates.cpp
+    MIN_RV32IM_PO2 = 18;
+    MAX_RV32IM_PO2 = 20;
+    MIN_RECURSION_PO2 = 18;
+    MAX_RECURSION_PO2 = 20;
+    MAX_JOIN_WIDTH = 4;
+
+    RV32IM_PO2S = list(range(MIN_RV32IM_PO2, MAX_JOIN_WIDTH+1))
+    RECURSION_PO2S = list(range(MIN_RECURSION_PO2, MAX_RECURSION_PO2+1))
+    JOIN_WIDTHS = list(range(2, MAX_JOIN_WIDTH+1))
+
+    ZKRS = [
+        ("lift_" + str(po2))
+        for po2 in RV32IM_PO2S
+    ] + [
+        ("lift_join" + str(n) + "_" + str(po2))
+        for n in JOIN_WIDTHS
+        for po2 in RV32IM_PO2S
+    ] + [
+        ("join" + str(n) + "_" + str(po2))
+        for n in JOIN_WIDTHS
+        for po2 in RECURSION_PO2S
+    ] + [
+        ("resolve_" + str(po2))
+        for po2 in RECURSION_PO2S
+    ] + [
+        ("identity_" + str(po2))
+        for po2 in RECURSION_PO2S
+    ] + [
+        ("union_" + str(po2))
+        for po2 in RECURSION_PO2S
+    ] + [
+        "test_recursion_circuit",
+    ]
+    */
+
+    // NOTE: Must match allowed_zkr_names in risc0/zkvm/src/receipt/succinct.rs
+    // TODO(victor): Is there a way to resolve this without circular dependencies?
+    fn allowed_recursion_zkr_names() -> HashSet<String> {
+        let rv32im_po2s: Vec<usize> = (MIN_RV32IM_PO2..DEFAULT_MAX_PO2).collect();
+        let recursion_po2s: Vec<usize> = (MIN_RECURSION_PO2..DEFAULT_MAX_PO2).collect();
+        let join_widths: Vec<usize> = (2..MAX_JOIN_WIDTH).collect();
+
+        let mut zkr_names = HashSet::default();
+        zkr_names.extend(rv32im_po2s.iter().map(|po2| format!("lift_{po2}")));
+        zkr_names.extend(rv32im_po2s.iter().flat_map(|po2| {
+            join_widths
+                .iter()
+                .map(move |n| format!("lift_join{n}_{po2}"))
+        }));
+        zkr_names.extend(
+            recursion_po2s
+                .iter()
+                .flat_map(|po2| join_widths.iter().map(move |n| format!("join{n}_{po2}"))),
+        );
+        zkr_names.extend(recursion_po2s.iter().map(|po2| format!("resolve_{po2}")));
+        zkr_names.extend(recursion_po2s.iter().map(|po2| format!("identity_{po2}")));
+        zkr_names.extend(recursion_po2s.iter().map(|po2| format!("union_{po2}")));
+        zkr_names
+    }
+
+    fn generate_recursion_control_ids(poseidon2_rv32im_control_ids: &[(String, Digest)]) {
         // Recursion programs (ZKRs) that are to be included in the allowed set, used in the
         // default verifier context.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
         // set of allowed programs (e.g. accelerators, and po2 22-24). Those programs can be
         // enabled by using a custom VerifierContext.
-        let allowed_zkr_names: HashSet<String> =
-            ["join.zkr", "resolve.zkr", "identity.zkr", "union.zkr"]
-                .map(str::to_string)
-                .into_iter()
-                .chain((MIN_LIFT_PO2..=DEFAULT_MAX_PO2).map(|i| format!("lift_{i}.zkr")))
-                .collect();
+        // DO NOT MERGE: 18
+        let allowed_zkr_names = Self::allowed_recursion_zkr_names();
 
         tracing::info!("Using allowed_zkr_names {allowed_zkr_names:#?}");
 
@@ -138,9 +198,13 @@ impl Bootstrap {
                 .collect::<Vec<_>>()
         );
 
-        let poseidon2_control_ids =
-            Self::generate_recursion_control_ids_with_hash(&zkrs, "poseidon2");
-        let sha256_control_ids = Self::generate_recursion_control_ids_with_hash(&zkrs, "sha-256");
+        let poseidon2_control_ids = Self::generate_recursion_control_ids_with_hash(
+            &zkrs,
+            "poseidon2",
+            RECURSION_TARGET_PO2,
+        );
+        let sha256_control_ids =
+            Self::generate_recursion_control_ids_with_hash(&zkrs, "sha-256", RECURSION_TARGET_PO2);
 
         let allowed_control_ids: Vec<(String, Digest)> = poseidon2_rv32im_control_ids
             .iter()
@@ -152,6 +216,14 @@ impl Bootstrap {
                     .map(|(name, digest)| (format!("recursion {name}"), *digest)),
             )
             .collect();
+        assert_eq!(
+            allowed_control_ids
+                .iter()
+                .map(|(name, _)| name)
+                .cloned()
+                .collect::<HashSet<_>>(),
+            allowed_zkr_names
+        );
         tracing::info!("Calculate allowed_control_ids {allowed_control_ids:#?}");
 
         // Calculate a Merkle root for the allowed control IDs and add it to the file.
@@ -172,7 +244,7 @@ impl Bootstrap {
         tracing::info!("Computed bn254_identity_control_id: {bn254_identity_control_id}");
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
-            MIN_LIFT_PO2,
+            MIN_RV32IM_PO2,
             Self::format_control_ids(&allowed_control_ids),
             allowed_control_root,
             bn254_identity_control_id,
@@ -189,28 +261,38 @@ impl Bootstrap {
         Self::rustfmt(CONTROL_ID_PATH_RECURSION);
     }
 
+    /// Generate control IDs for the ZKRs in the given list with the given hash function.
+    ///
+    /// If a given ZKR does not fit in the po2 (e.g. join4 in po2=18) it will be skipped.
     pub fn generate_recursion_control_ids_with_hash(
         zkrs: &[(String, Vec<u32>)],
         hashfn: &str,
+        po2: usize,
     ) -> Vec<(String, Digest)> {
         let hash_suite = hash_suite_from_name(hashfn).unwrap();
 
         zkrs.iter()
-            .map(|(name, encoded_program)| {
-                let program = Program::from_encoded(encoded_program, RECURSION_PO2);
+            .filter_map(|(name, encoded_program)| {
+                // Try to encode the program in the given po2, but return None if it does not fit.
+                let Some(program) = Program::try_from_encoded(encoded_program, po2) else {
+                    tracing::debug!("skipping {name} at po2 {po2}");
+                    return None;
+                };
 
-                tracing::info!("computing control ID for {name} with {hashfn}");
+                tracing::info!("computing control ID for {name} with {hashfn} at po2 {po2}");
                 let control_id = program.compute_control_id(hash_suite.clone());
 
-                tracing::debug!("{name} control id: {control_id:?}");
-                (name.clone(), control_id)
+                tracing::debug!("{name} at po2 {po2} control id: {control_id:?}");
+                Some((name.clone(), control_id))
             })
             .collect()
     }
 
     pub fn generate_identity_bn254_control_id() -> Digest {
         let encoded_program = get_zkr("identity.zkr").unwrap();
-        let program = Program::from_encoded(&encoded_program, RECURSION_PO2);
+        // TODO(victor): Try running identity_p254 with po2=17.
+        // May be a quick way to double the performance of identity_p254.
+        let program = Program::from_encoded(&encoded_program, 18);
         program.compute_control_id(Poseidon254HashSuite::new_suite())
     }
 
