@@ -17,12 +17,14 @@
 
 namespace risc0::circuit::keccak::cpu {
 void step_Top_5(ExecContext& ctx,MutableBuf arg0)   {
-if (to_size_t(get(ctx,arg0, 13, 1))) {
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:451)
+// ControlState(zirgen/circuit/keccak2/top.zir:404)
 // Top(zirgen/circuit/keccak2/top.zir:483)
+Val x1 = get(ctx,arg0, 13, 1);
+if (to_size_t(x1)) {
+// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:451)
 step_Top_3(ctx,arg0);
 }
-if (to_size_t((Val(1) - get(ctx,arg0, 13, 1)))) {
+if (to_size_t((Val(1) - x1))) {
 step_Top_4(ctx,arg0);
 }
 return ;
@@ -33,11 +35,12 @@ void step_Top_21(ExecContext& ctx,MutableBuf arg0)   {
 // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:463)
 Val x1 = INVOKE_EXTERN(ctx,nextPreimage);
 set(ctx,arg0, 933, x1);
-if (to_size_t(get(ctx,arg0, 933, 0))) {
+Val x2 = get(ctx,arg0, 933, 0);
+if (to_size_t(x2)) {
 // ShaNextBlock(zirgen/circuit/keccak2/top.zir:438)
 step_Top_19(ctx,arg0);
 }
-if (to_size_t((Val(1) - get(ctx,arg0, 933, 0)))) {
+if (to_size_t((Val(1) - x2))) {
 step_Top_20(ctx,arg0);
 }
 return ;

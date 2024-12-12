@@ -218,655 +218,847 @@ __device__ void step_Top_35(ExecContext& ctx, MutableBuf arg0) {
   // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
   set(ctx, arg0, 240, bitAnd(x133, Val(1)));
+  Val x138 = get(ctx, arg0, 240, 0);
   set(ctx, arg0, 241, (bitAnd(x133, Val(2)) * Val(1006632961)));
+  Val x139 = get(ctx, arg0, 241, 0);
   set(ctx, arg0, 242, (bitAnd(x133, Val(4)) * Val(1509949441)));
+  Val x140 = get(ctx, arg0, 242, 0);
   set(ctx, arg0, 243, (bitAnd(x133, Val(8)) * Val(1761607681)));
+  Val x141 = get(ctx, arg0, 243, 0);
   set(ctx, arg0, 244, (bitAnd(x133, Val(16)) * Val(1887436801)));
+  Val x142 = get(ctx, arg0, 244, 0);
   set(ctx, arg0, 245, (bitAnd(x133, Val(32)) * Val(1950351361)));
+  Val x143 = get(ctx, arg0, 245, 0);
   set(ctx, arg0, 246, (bitAnd(x133, Val(64)) * Val(1981808641)));
+  Val x144 = get(ctx, arg0, 246, 0);
   set(ctx, arg0, 247, (bitAnd(x133, Val(128)) * Val(1997537281)));
+  Val x145 = get(ctx, arg0, 247, 0);
   set(ctx, arg0, 248, (bitAnd(x133, Val(256)) * Val(2005401601)));
+  Val x146 = get(ctx, arg0, 248, 0);
   set(ctx, arg0, 249, (bitAnd(x133, Val(512)) * Val(2009333761)));
+  Val x147 = get(ctx, arg0, 249, 0);
   set(ctx, arg0, 250, (bitAnd(x133, Val(1024)) * Val(2011299841)));
+  Val x148 = get(ctx, arg0, 250, 0);
   set(ctx, arg0, 251, (bitAnd(x133, Val(2048)) * Val(2012282881)));
+  Val x149 = get(ctx, arg0, 251, 0);
   set(ctx, arg0, 252, (bitAnd(x133, Val(4096)) * Val(2012774401)));
+  Val x150 = get(ctx, arg0, 252, 0);
   set(ctx, arg0, 253, (bitAnd(x133, Val(8192)) * Val(2013020161)));
+  Val x151 = get(ctx, arg0, 253, 0);
   set(ctx, arg0, 254, (bitAnd(x133, Val(16384)) * Val(2013143041)));
+  Val x152 = get(ctx, arg0, 254, 0);
   set(ctx, arg0, 255, (bitAnd(x133, Val(32768)) * Val(2013204481)));
+  Val x153 = get(ctx, arg0, 255, 0);
   set(ctx, arg0, 256, bitAnd(x137, Val(1)));
+  Val x154 = get(ctx, arg0, 256, 0);
   set(ctx, arg0, 257, (bitAnd(x137, Val(2)) * Val(1006632961)));
+  Val x155 = get(ctx, arg0, 257, 0);
   set(ctx, arg0, 258, (bitAnd(x137, Val(4)) * Val(1509949441)));
+  Val x156 = get(ctx, arg0, 258, 0);
   set(ctx, arg0, 259, (bitAnd(x137, Val(8)) * Val(1761607681)));
+  Val x157 = get(ctx, arg0, 259, 0);
   set(ctx, arg0, 260, (bitAnd(x137, Val(16)) * Val(1887436801)));
+  Val x158 = get(ctx, arg0, 260, 0);
   set(ctx, arg0, 261, (bitAnd(x137, Val(32)) * Val(1950351361)));
+  Val x159 = get(ctx, arg0, 261, 0);
   set(ctx, arg0, 262, (bitAnd(x137, Val(64)) * Val(1981808641)));
+  Val x160 = get(ctx, arg0, 262, 0);
   set(ctx, arg0, 263, (bitAnd(x137, Val(128)) * Val(1997537281)));
+  Val x161 = get(ctx, arg0, 263, 0);
   set(ctx, arg0, 264, (bitAnd(x137, Val(256)) * Val(2005401601)));
+  Val x162 = get(ctx, arg0, 264, 0);
   set(ctx, arg0, 265, (bitAnd(x137, Val(512)) * Val(2009333761)));
+  Val x163 = get(ctx, arg0, 265, 0);
   set(ctx, arg0, 266, (bitAnd(x137, Val(1024)) * Val(2011299841)));
+  Val x164 = get(ctx, arg0, 266, 0);
   set(ctx, arg0, 267, (bitAnd(x137, Val(2048)) * Val(2012282881)));
+  Val x165 = get(ctx, arg0, 267, 0);
   set(ctx, arg0, 268, (bitAnd(x137, Val(4096)) * Val(2012774401)));
+  Val x166 = get(ctx, arg0, 268, 0);
   set(ctx, arg0, 269, (bitAnd(x137, Val(8192)) * Val(2013020161)));
+  Val x167 = get(ctx, arg0, 269, 0);
   set(ctx, arg0, 270, (bitAnd(x137, Val(16384)) * Val(2013143041)));
+  Val x168 = get(ctx, arg0, 270, 0);
   set(ctx, arg0, 271, (bitAnd(x137, Val(32768)) * Val(2013204481)));
+  Val x169 = get(ctx, arg0, 271, 0);
   // Add2(zirgen/circuit/keccak2/sha2.zir:30)
-  Val x138 = (x24 + get(ctx, arg0, 918, 1));
+  Val x170 = (x24 + get(ctx, arg0, 918, 1));
   // Div(<preamble>:19)
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
-  Val x139 = (bitAnd(x138, Val(983040)) * Val(2013235201));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 943, bitAnd(x139, Val(1)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 944, (bitAnd(x139, Val(2)) * Val(1006632961)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 945, (bitAnd(x139, Val(4)) * Val(1509949441)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x140 = ((get(ctx, arg0, 945, 0) * Val(4)) + (get(ctx, arg0, 944, 0) * Val(2)));
-  Val x141 = (x140 + get(ctx, arg0, 943, 0));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x142 = (x138 - (x141 * Val(65536)));
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
-  Val x143 = ((x32 + get(ctx, arg0, 919, 1)) + x141);
-  // Div(<preamble>:19)
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  Val x144 = (bitAnd(x143, Val(983040)) * Val(2013235201));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 946, bitAnd(x144, Val(1)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 947, (bitAnd(x144, Val(2)) * Val(1006632961)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 948, (bitAnd(x144, Val(4)) * Val(1509949441)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x145 = ((get(ctx, arg0, 948, 0) * Val(4)) + (get(ctx, arg0, 947, 0) * Val(2)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x146 = (x143 - ((x145 + get(ctx, arg0, 946, 0)) * Val(65536)));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
-  set(ctx, arg0, 208, bitAnd(x142, Val(1)));
-  set(ctx, arg0, 209, (bitAnd(x142, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 210, (bitAnd(x142, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 211, (bitAnd(x142, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 212, (bitAnd(x142, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 213, (bitAnd(x142, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 214, (bitAnd(x142, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 215, (bitAnd(x142, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 216, (bitAnd(x142, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 217, (bitAnd(x142, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 218, (bitAnd(x142, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 219, (bitAnd(x142, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 220, (bitAnd(x142, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 221, (bitAnd(x142, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 222, (bitAnd(x142, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 223, (bitAnd(x142, Val(32768)) * Val(2013204481)));
-  set(ctx, arg0, 224, bitAnd(x146, Val(1)));
-  set(ctx, arg0, 225, (bitAnd(x146, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 226, (bitAnd(x146, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 227, (bitAnd(x146, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 228, (bitAnd(x146, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 229, (bitAnd(x146, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 230, (bitAnd(x146, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 231, (bitAnd(x146, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 232, (bitAnd(x146, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 233, (bitAnd(x146, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 234, (bitAnd(x146, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 235, (bitAnd(x146, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 236, (bitAnd(x146, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 237, (bitAnd(x146, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 238, (bitAnd(x146, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 239, (bitAnd(x146, Val(32768)) * Val(2013204481)));
-  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
-  Val x147 = (x40 + get(ctx, arg0, 920, 1));
-  // Div(<preamble>:19)
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
-  Val x148 = (bitAnd(x147, Val(983040)) * Val(2013235201));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 949, bitAnd(x148, Val(1)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 950, (bitAnd(x148, Val(2)) * Val(1006632961)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 951, (bitAnd(x148, Val(4)) * Val(1509949441)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x149 = ((get(ctx, arg0, 951, 0) * Val(4)) + (get(ctx, arg0, 950, 0) * Val(2)));
-  Val x150 = (x149 + get(ctx, arg0, 949, 0));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x151 = (x147 - (x150 * Val(65536)));
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
-  Val x152 = ((x48 + get(ctx, arg0, 921, 1)) + x150);
-  // Div(<preamble>:19)
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  Val x153 = (bitAnd(x152, Val(983040)) * Val(2013235201));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 952, bitAnd(x153, Val(1)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 953, (bitAnd(x153, Val(2)) * Val(1006632961)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 954, (bitAnd(x153, Val(4)) * Val(1509949441)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x154 = ((get(ctx, arg0, 954, 0) * Val(4)) + (get(ctx, arg0, 953, 0) * Val(2)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x155 = (x152 - ((x154 + get(ctx, arg0, 952, 0)) * Val(65536)));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
-  set(ctx, arg0, 176, bitAnd(x151, Val(1)));
-  set(ctx, arg0, 177, (bitAnd(x151, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 178, (bitAnd(x151, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 179, (bitAnd(x151, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 180, (bitAnd(x151, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 181, (bitAnd(x151, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 182, (bitAnd(x151, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 183, (bitAnd(x151, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 184, (bitAnd(x151, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 185, (bitAnd(x151, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 186, (bitAnd(x151, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 187, (bitAnd(x151, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 188, (bitAnd(x151, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 189, (bitAnd(x151, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 190, (bitAnd(x151, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 191, (bitAnd(x151, Val(32768)) * Val(2013204481)));
-  set(ctx, arg0, 192, bitAnd(x155, Val(1)));
-  set(ctx, arg0, 193, (bitAnd(x155, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 194, (bitAnd(x155, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 195, (bitAnd(x155, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 196, (bitAnd(x155, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 197, (bitAnd(x155, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 198, (bitAnd(x155, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 199, (bitAnd(x155, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 200, (bitAnd(x155, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 201, (bitAnd(x155, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 202, (bitAnd(x155, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 203, (bitAnd(x155, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 204, (bitAnd(x155, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 205, (bitAnd(x155, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 206, (bitAnd(x155, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 207, (bitAnd(x155, Val(32768)) * Val(2013204481)));
-  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
-  Val x156 = (x56 + get(ctx, arg0, 922, 1));
-  // Div(<preamble>:19)
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
-  Val x157 = (bitAnd(x156, Val(983040)) * Val(2013235201));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 955, bitAnd(x157, Val(1)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 956, (bitAnd(x157, Val(2)) * Val(1006632961)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 957, (bitAnd(x157, Val(4)) * Val(1509949441)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x158 = ((get(ctx, arg0, 957, 0) * Val(4)) + (get(ctx, arg0, 956, 0) * Val(2)));
-  Val x159 = (x158 + get(ctx, arg0, 955, 0));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x160 = (x156 - (x159 * Val(65536)));
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
-  Val x161 = ((x64 + get(ctx, arg0, 923, 1)) + x159);
-  // Div(<preamble>:19)
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  Val x162 = (bitAnd(x161, Val(983040)) * Val(2013235201));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 958, bitAnd(x162, Val(1)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 959, (bitAnd(x162, Val(2)) * Val(1006632961)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 960, (bitAnd(x162, Val(4)) * Val(1509949441)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x163 = ((get(ctx, arg0, 960, 0) * Val(4)) + (get(ctx, arg0, 959, 0) * Val(2)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x164 = (x161 - ((x163 + get(ctx, arg0, 958, 0)) * Val(65536)));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
-  set(ctx, arg0, 144, bitAnd(x160, Val(1)));
-  set(ctx, arg0, 145, (bitAnd(x160, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 146, (bitAnd(x160, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 147, (bitAnd(x160, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 148, (bitAnd(x160, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 149, (bitAnd(x160, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 150, (bitAnd(x160, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 151, (bitAnd(x160, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 152, (bitAnd(x160, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 153, (bitAnd(x160, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 154, (bitAnd(x160, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 155, (bitAnd(x160, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 156, (bitAnd(x160, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 157, (bitAnd(x160, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 158, (bitAnd(x160, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 159, (bitAnd(x160, Val(32768)) * Val(2013204481)));
-  set(ctx, arg0, 160, bitAnd(x164, Val(1)));
-  set(ctx, arg0, 161, (bitAnd(x164, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 162, (bitAnd(x164, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 163, (bitAnd(x164, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 164, (bitAnd(x164, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 165, (bitAnd(x164, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 166, (bitAnd(x164, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 167, (bitAnd(x164, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 168, (bitAnd(x164, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 169, (bitAnd(x164, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 170, (bitAnd(x164, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 171, (bitAnd(x164, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 172, (bitAnd(x164, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 173, (bitAnd(x164, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 174, (bitAnd(x164, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 175, (bitAnd(x164, Val(32768)) * Val(2013204481)));
-  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
-  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:245)
-  Val x165 = (x72 + get(ctx, arg0, 924, 1));
-  // Div(<preamble>:19)
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
-  Val x166 = (bitAnd(x165, Val(983040)) * Val(2013235201));
-  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 961, bitAnd(x166, Val(1)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 962, (bitAnd(x166, Val(2)) * Val(1006632961)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 963, (bitAnd(x166, Val(4)) * Val(1509949441)));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x167 = ((get(ctx, arg0, 963, 0) * Val(4)) + (get(ctx, arg0, 962, 0) * Val(2)));
-  Val x168 = (x167 + get(ctx, arg0, 961, 0));
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x169 = (x165 - (x168 * Val(65536)));
-  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
-  Val x170 = ((x80 + get(ctx, arg0, 925, 1)) + x168);
-  // Div(<preamble>:19)
-  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
   Val x171 = (bitAnd(x170, Val(983040)) * Val(2013235201));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 964, bitAnd(x171, Val(1)));
+  set(ctx, arg0, 943, bitAnd(x171, Val(1)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 965, (bitAnd(x171, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 944, (bitAnd(x171, Val(2)) * Val(1006632961)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 966, (bitAnd(x171, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 945, (bitAnd(x171, Val(4)) * Val(1509949441)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x172 = ((get(ctx, arg0, 966, 0) * Val(4)) + (get(ctx, arg0, 965, 0) * Val(2)));
+  Val x172 = ((get(ctx, arg0, 945, 0) * Val(4)) + (get(ctx, arg0, 944, 0) * Val(2)));
+  Val x173 = (x172 + get(ctx, arg0, 943, 0));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x173 = (x170 - ((x172 + get(ctx, arg0, 964, 0)) * Val(65536)));
+  Val x174 = (x170 - (x173 * Val(65536)));
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
+  Val x175 = ((x32 + get(ctx, arg0, 919, 1)) + x173);
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  Val x176 = (bitAnd(x175, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 946, bitAnd(x176, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 947, (bitAnd(x176, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 948, (bitAnd(x176, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x177 = ((get(ctx, arg0, 948, 0) * Val(4)) + (get(ctx, arg0, 947, 0) * Val(2)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x178 = (x175 - ((x177 + get(ctx, arg0, 946, 0)) * Val(65536)));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
   // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
-  set(ctx, arg0, 496, bitAnd(x169, Val(1)));
-  set(ctx, arg0, 497, (bitAnd(x169, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 498, (bitAnd(x169, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 499, (bitAnd(x169, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 500, (bitAnd(x169, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 501, (bitAnd(x169, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 502, (bitAnd(x169, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 503, (bitAnd(x169, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 504, (bitAnd(x169, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 505, (bitAnd(x169, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 506, (bitAnd(x169, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 507, (bitAnd(x169, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 508, (bitAnd(x169, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 509, (bitAnd(x169, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 510, (bitAnd(x169, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 511, (bitAnd(x169, Val(32768)) * Val(2013204481)));
-  set(ctx, arg0, 512, bitAnd(x173, Val(1)));
-  set(ctx, arg0, 513, (bitAnd(x173, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 514, (bitAnd(x173, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 515, (bitAnd(x173, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 516, (bitAnd(x173, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 517, (bitAnd(x173, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 518, (bitAnd(x173, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 519, (bitAnd(x173, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 520, (bitAnd(x173, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 521, (bitAnd(x173, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 522, (bitAnd(x173, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 523, (bitAnd(x173, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 524, (bitAnd(x173, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 525, (bitAnd(x173, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 526, (bitAnd(x173, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 527, (bitAnd(x173, Val(32768)) * Val(2013204481)));
+  set(ctx, arg0, 208, bitAnd(x174, Val(1)));
+  Val x179 = get(ctx, arg0, 208, 0);
+  set(ctx, arg0, 209, (bitAnd(x174, Val(2)) * Val(1006632961)));
+  Val x180 = get(ctx, arg0, 209, 0);
+  set(ctx, arg0, 210, (bitAnd(x174, Val(4)) * Val(1509949441)));
+  Val x181 = get(ctx, arg0, 210, 0);
+  set(ctx, arg0, 211, (bitAnd(x174, Val(8)) * Val(1761607681)));
+  Val x182 = get(ctx, arg0, 211, 0);
+  set(ctx, arg0, 212, (bitAnd(x174, Val(16)) * Val(1887436801)));
+  Val x183 = get(ctx, arg0, 212, 0);
+  set(ctx, arg0, 213, (bitAnd(x174, Val(32)) * Val(1950351361)));
+  Val x184 = get(ctx, arg0, 213, 0);
+  set(ctx, arg0, 214, (bitAnd(x174, Val(64)) * Val(1981808641)));
+  Val x185 = get(ctx, arg0, 214, 0);
+  set(ctx, arg0, 215, (bitAnd(x174, Val(128)) * Val(1997537281)));
+  Val x186 = get(ctx, arg0, 215, 0);
+  set(ctx, arg0, 216, (bitAnd(x174, Val(256)) * Val(2005401601)));
+  Val x187 = get(ctx, arg0, 216, 0);
+  set(ctx, arg0, 217, (bitAnd(x174, Val(512)) * Val(2009333761)));
+  Val x188 = get(ctx, arg0, 217, 0);
+  set(ctx, arg0, 218, (bitAnd(x174, Val(1024)) * Val(2011299841)));
+  Val x189 = get(ctx, arg0, 218, 0);
+  set(ctx, arg0, 219, (bitAnd(x174, Val(2048)) * Val(2012282881)));
+  Val x190 = get(ctx, arg0, 219, 0);
+  set(ctx, arg0, 220, (bitAnd(x174, Val(4096)) * Val(2012774401)));
+  Val x191 = get(ctx, arg0, 220, 0);
+  set(ctx, arg0, 221, (bitAnd(x174, Val(8192)) * Val(2013020161)));
+  Val x192 = get(ctx, arg0, 221, 0);
+  set(ctx, arg0, 222, (bitAnd(x174, Val(16384)) * Val(2013143041)));
+  Val x193 = get(ctx, arg0, 222, 0);
+  set(ctx, arg0, 223, (bitAnd(x174, Val(32768)) * Val(2013204481)));
+  Val x194 = get(ctx, arg0, 223, 0);
+  set(ctx, arg0, 224, bitAnd(x178, Val(1)));
+  Val x195 = get(ctx, arg0, 224, 0);
+  set(ctx, arg0, 225, (bitAnd(x178, Val(2)) * Val(1006632961)));
+  Val x196 = get(ctx, arg0, 225, 0);
+  set(ctx, arg0, 226, (bitAnd(x178, Val(4)) * Val(1509949441)));
+  Val x197 = get(ctx, arg0, 226, 0);
+  set(ctx, arg0, 227, (bitAnd(x178, Val(8)) * Val(1761607681)));
+  Val x198 = get(ctx, arg0, 227, 0);
+  set(ctx, arg0, 228, (bitAnd(x178, Val(16)) * Val(1887436801)));
+  Val x199 = get(ctx, arg0, 228, 0);
+  set(ctx, arg0, 229, (bitAnd(x178, Val(32)) * Val(1950351361)));
+  Val x200 = get(ctx, arg0, 229, 0);
+  set(ctx, arg0, 230, (bitAnd(x178, Val(64)) * Val(1981808641)));
+  Val x201 = get(ctx, arg0, 230, 0);
+  set(ctx, arg0, 231, (bitAnd(x178, Val(128)) * Val(1997537281)));
+  Val x202 = get(ctx, arg0, 231, 0);
+  set(ctx, arg0, 232, (bitAnd(x178, Val(256)) * Val(2005401601)));
+  Val x203 = get(ctx, arg0, 232, 0);
+  set(ctx, arg0, 233, (bitAnd(x178, Val(512)) * Val(2009333761)));
+  Val x204 = get(ctx, arg0, 233, 0);
+  set(ctx, arg0, 234, (bitAnd(x178, Val(1024)) * Val(2011299841)));
+  Val x205 = get(ctx, arg0, 234, 0);
+  set(ctx, arg0, 235, (bitAnd(x178, Val(2048)) * Val(2012282881)));
+  Val x206 = get(ctx, arg0, 235, 0);
+  set(ctx, arg0, 236, (bitAnd(x178, Val(4096)) * Val(2012774401)));
+  Val x207 = get(ctx, arg0, 236, 0);
+  set(ctx, arg0, 237, (bitAnd(x178, Val(8192)) * Val(2013020161)));
+  Val x208 = get(ctx, arg0, 237, 0);
+  set(ctx, arg0, 238, (bitAnd(x178, Val(16384)) * Val(2013143041)));
+  Val x209 = get(ctx, arg0, 238, 0);
+  set(ctx, arg0, 239, (bitAnd(x178, Val(32768)) * Val(2013204481)));
+  Val x210 = get(ctx, arg0, 239, 0);
   // Add2(zirgen/circuit/keccak2/sha2.zir:30)
-  Val x174 = (x88 + get(ctx, arg0, 926, 1));
+  Val x211 = (x40 + get(ctx, arg0, 920, 1));
   // Div(<preamble>:19)
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
-  Val x175 = (bitAnd(x174, Val(983040)) * Val(2013235201));
+  Val x212 = (bitAnd(x211, Val(983040)) * Val(2013235201));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 967, bitAnd(x175, Val(1)));
+  set(ctx, arg0, 949, bitAnd(x212, Val(1)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 968, (bitAnd(x175, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 950, (bitAnd(x212, Val(2)) * Val(1006632961)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 969, (bitAnd(x175, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 951, (bitAnd(x212, Val(4)) * Val(1509949441)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x176 = ((get(ctx, arg0, 969, 0) * Val(4)) + (get(ctx, arg0, 968, 0) * Val(2)));
-  Val x177 = (x176 + get(ctx, arg0, 967, 0));
+  Val x213 = ((get(ctx, arg0, 951, 0) * Val(4)) + (get(ctx, arg0, 950, 0) * Val(2)));
+  Val x214 = (x213 + get(ctx, arg0, 949, 0));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x178 = (x174 - (x177 * Val(65536)));
+  Val x215 = (x211 - (x214 * Val(65536)));
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
-  Val x179 = ((x96 + get(ctx, arg0, 927, 1)) + x177);
+  Val x216 = ((x48 + get(ctx, arg0, 921, 1)) + x214);
   // Div(<preamble>:19)
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  Val x180 = (bitAnd(x179, Val(983040)) * Val(2013235201));
+  Val x217 = (bitAnd(x216, Val(983040)) * Val(2013235201));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 970, bitAnd(x180, Val(1)));
+  set(ctx, arg0, 952, bitAnd(x217, Val(1)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 971, (bitAnd(x180, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 953, (bitAnd(x217, Val(2)) * Val(1006632961)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 972, (bitAnd(x180, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 954, (bitAnd(x217, Val(4)) * Val(1509949441)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x181 = ((get(ctx, arg0, 972, 0) * Val(4)) + (get(ctx, arg0, 971, 0) * Val(2)));
+  Val x218 = ((get(ctx, arg0, 954, 0) * Val(4)) + (get(ctx, arg0, 953, 0) * Val(2)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x182 = (x179 - ((x181 + get(ctx, arg0, 970, 0)) * Val(65536)));
+  Val x219 = (x216 - ((x218 + get(ctx, arg0, 952, 0)) * Val(65536)));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
   // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
-  set(ctx, arg0, 464, bitAnd(x178, Val(1)));
-  set(ctx, arg0, 465, (bitAnd(x178, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 466, (bitAnd(x178, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 467, (bitAnd(x178, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 468, (bitAnd(x178, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 469, (bitAnd(x178, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 470, (bitAnd(x178, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 471, (bitAnd(x178, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 472, (bitAnd(x178, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 473, (bitAnd(x178, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 474, (bitAnd(x178, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 475, (bitAnd(x178, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 476, (bitAnd(x178, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 477, (bitAnd(x178, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 478, (bitAnd(x178, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 479, (bitAnd(x178, Val(32768)) * Val(2013204481)));
-  set(ctx, arg0, 480, bitAnd(x182, Val(1)));
-  set(ctx, arg0, 481, (bitAnd(x182, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 482, (bitAnd(x182, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 483, (bitAnd(x182, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 484, (bitAnd(x182, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 485, (bitAnd(x182, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 486, (bitAnd(x182, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 487, (bitAnd(x182, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 488, (bitAnd(x182, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 489, (bitAnd(x182, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 490, (bitAnd(x182, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 491, (bitAnd(x182, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 492, (bitAnd(x182, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 493, (bitAnd(x182, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 494, (bitAnd(x182, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 495, (bitAnd(x182, Val(32768)) * Val(2013204481)));
+  set(ctx, arg0, 176, bitAnd(x215, Val(1)));
+  Val x220 = get(ctx, arg0, 176, 0);
+  set(ctx, arg0, 177, (bitAnd(x215, Val(2)) * Val(1006632961)));
+  Val x221 = get(ctx, arg0, 177, 0);
+  set(ctx, arg0, 178, (bitAnd(x215, Val(4)) * Val(1509949441)));
+  Val x222 = get(ctx, arg0, 178, 0);
+  set(ctx, arg0, 179, (bitAnd(x215, Val(8)) * Val(1761607681)));
+  Val x223 = get(ctx, arg0, 179, 0);
+  set(ctx, arg0, 180, (bitAnd(x215, Val(16)) * Val(1887436801)));
+  Val x224 = get(ctx, arg0, 180, 0);
+  set(ctx, arg0, 181, (bitAnd(x215, Val(32)) * Val(1950351361)));
+  Val x225 = get(ctx, arg0, 181, 0);
+  set(ctx, arg0, 182, (bitAnd(x215, Val(64)) * Val(1981808641)));
+  Val x226 = get(ctx, arg0, 182, 0);
+  set(ctx, arg0, 183, (bitAnd(x215, Val(128)) * Val(1997537281)));
+  Val x227 = get(ctx, arg0, 183, 0);
+  set(ctx, arg0, 184, (bitAnd(x215, Val(256)) * Val(2005401601)));
+  Val x228 = get(ctx, arg0, 184, 0);
+  set(ctx, arg0, 185, (bitAnd(x215, Val(512)) * Val(2009333761)));
+  Val x229 = get(ctx, arg0, 185, 0);
+  set(ctx, arg0, 186, (bitAnd(x215, Val(1024)) * Val(2011299841)));
+  Val x230 = get(ctx, arg0, 186, 0);
+  set(ctx, arg0, 187, (bitAnd(x215, Val(2048)) * Val(2012282881)));
+  Val x231 = get(ctx, arg0, 187, 0);
+  set(ctx, arg0, 188, (bitAnd(x215, Val(4096)) * Val(2012774401)));
+  Val x232 = get(ctx, arg0, 188, 0);
+  set(ctx, arg0, 189, (bitAnd(x215, Val(8192)) * Val(2013020161)));
+  Val x233 = get(ctx, arg0, 189, 0);
+  set(ctx, arg0, 190, (bitAnd(x215, Val(16384)) * Val(2013143041)));
+  Val x234 = get(ctx, arg0, 190, 0);
+  set(ctx, arg0, 191, (bitAnd(x215, Val(32768)) * Val(2013204481)));
+  Val x235 = get(ctx, arg0, 191, 0);
+  set(ctx, arg0, 192, bitAnd(x219, Val(1)));
+  Val x236 = get(ctx, arg0, 192, 0);
+  set(ctx, arg0, 193, (bitAnd(x219, Val(2)) * Val(1006632961)));
+  Val x237 = get(ctx, arg0, 193, 0);
+  set(ctx, arg0, 194, (bitAnd(x219, Val(4)) * Val(1509949441)));
+  Val x238 = get(ctx, arg0, 194, 0);
+  set(ctx, arg0, 195, (bitAnd(x219, Val(8)) * Val(1761607681)));
+  Val x239 = get(ctx, arg0, 195, 0);
+  set(ctx, arg0, 196, (bitAnd(x219, Val(16)) * Val(1887436801)));
+  Val x240 = get(ctx, arg0, 196, 0);
+  set(ctx, arg0, 197, (bitAnd(x219, Val(32)) * Val(1950351361)));
+  Val x241 = get(ctx, arg0, 197, 0);
+  set(ctx, arg0, 198, (bitAnd(x219, Val(64)) * Val(1981808641)));
+  Val x242 = get(ctx, arg0, 198, 0);
+  set(ctx, arg0, 199, (bitAnd(x219, Val(128)) * Val(1997537281)));
+  Val x243 = get(ctx, arg0, 199, 0);
+  set(ctx, arg0, 200, (bitAnd(x219, Val(256)) * Val(2005401601)));
+  Val x244 = get(ctx, arg0, 200, 0);
+  set(ctx, arg0, 201, (bitAnd(x219, Val(512)) * Val(2009333761)));
+  Val x245 = get(ctx, arg0, 201, 0);
+  set(ctx, arg0, 202, (bitAnd(x219, Val(1024)) * Val(2011299841)));
+  Val x246 = get(ctx, arg0, 202, 0);
+  set(ctx, arg0, 203, (bitAnd(x219, Val(2048)) * Val(2012282881)));
+  Val x247 = get(ctx, arg0, 203, 0);
+  set(ctx, arg0, 204, (bitAnd(x219, Val(4096)) * Val(2012774401)));
+  Val x248 = get(ctx, arg0, 204, 0);
+  set(ctx, arg0, 205, (bitAnd(x219, Val(8192)) * Val(2013020161)));
+  Val x249 = get(ctx, arg0, 205, 0);
+  set(ctx, arg0, 206, (bitAnd(x219, Val(16384)) * Val(2013143041)));
+  Val x250 = get(ctx, arg0, 206, 0);
+  set(ctx, arg0, 207, (bitAnd(x219, Val(32768)) * Val(2013204481)));
+  Val x251 = get(ctx, arg0, 207, 0);
   // Add2(zirgen/circuit/keccak2/sha2.zir:30)
-  Val x183 = (x104 + get(ctx, arg0, 928, 1));
+  Val x252 = (x56 + get(ctx, arg0, 922, 1));
   // Div(<preamble>:19)
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
-  Val x184 = (bitAnd(x183, Val(983040)) * Val(2013235201));
+  Val x253 = (bitAnd(x252, Val(983040)) * Val(2013235201));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 973, bitAnd(x184, Val(1)));
+  set(ctx, arg0, 955, bitAnd(x253, Val(1)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 974, (bitAnd(x184, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 956, (bitAnd(x253, Val(2)) * Val(1006632961)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 975, (bitAnd(x184, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 957, (bitAnd(x253, Val(4)) * Val(1509949441)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x185 = ((get(ctx, arg0, 975, 0) * Val(4)) + (get(ctx, arg0, 974, 0) * Val(2)));
-  Val x186 = (x185 + get(ctx, arg0, 973, 0));
+  Val x254 = ((get(ctx, arg0, 957, 0) * Val(4)) + (get(ctx, arg0, 956, 0) * Val(2)));
+  Val x255 = (x254 + get(ctx, arg0, 955, 0));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x187 = (x183 - (x186 * Val(65536)));
+  Val x256 = (x252 - (x255 * Val(65536)));
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
-  Val x188 = ((x112 + get(ctx, arg0, 929, 1)) + x186);
+  Val x257 = ((x64 + get(ctx, arg0, 923, 1)) + x255);
   // Div(<preamble>:19)
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  Val x189 = (bitAnd(x188, Val(983040)) * Val(2013235201));
+  Val x258 = (bitAnd(x257, Val(983040)) * Val(2013235201));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 976, bitAnd(x189, Val(1)));
+  set(ctx, arg0, 958, bitAnd(x258, Val(1)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 977, (bitAnd(x189, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 959, (bitAnd(x258, Val(2)) * Val(1006632961)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 978, (bitAnd(x189, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 960, (bitAnd(x258, Val(4)) * Val(1509949441)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x190 = ((get(ctx, arg0, 978, 0) * Val(4)) + (get(ctx, arg0, 977, 0) * Val(2)));
+  Val x259 = ((get(ctx, arg0, 960, 0) * Val(4)) + (get(ctx, arg0, 959, 0) * Val(2)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x191 = (x188 - ((x190 + get(ctx, arg0, 976, 0)) * Val(65536)));
+  Val x260 = (x257 - ((x259 + get(ctx, arg0, 958, 0)) * Val(65536)));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
   // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
-  set(ctx, arg0, 432, bitAnd(x187, Val(1)));
-  set(ctx, arg0, 433, (bitAnd(x187, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 434, (bitAnd(x187, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 435, (bitAnd(x187, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 436, (bitAnd(x187, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 437, (bitAnd(x187, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 438, (bitAnd(x187, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 439, (bitAnd(x187, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 440, (bitAnd(x187, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 441, (bitAnd(x187, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 442, (bitAnd(x187, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 443, (bitAnd(x187, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 444, (bitAnd(x187, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 445, (bitAnd(x187, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 446, (bitAnd(x187, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 447, (bitAnd(x187, Val(32768)) * Val(2013204481)));
-  set(ctx, arg0, 448, bitAnd(x191, Val(1)));
-  set(ctx, arg0, 449, (bitAnd(x191, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 450, (bitAnd(x191, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 451, (bitAnd(x191, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 452, (bitAnd(x191, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 453, (bitAnd(x191, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 454, (bitAnd(x191, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 455, (bitAnd(x191, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 456, (bitAnd(x191, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 457, (bitAnd(x191, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 458, (bitAnd(x191, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 459, (bitAnd(x191, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 460, (bitAnd(x191, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 461, (bitAnd(x191, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 462, (bitAnd(x191, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 463, (bitAnd(x191, Val(32768)) * Val(2013204481)));
+  set(ctx, arg0, 144, bitAnd(x256, Val(1)));
+  Val x261 = get(ctx, arg0, 144, 0);
+  set(ctx, arg0, 145, (bitAnd(x256, Val(2)) * Val(1006632961)));
+  Val x262 = get(ctx, arg0, 145, 0);
+  set(ctx, arg0, 146, (bitAnd(x256, Val(4)) * Val(1509949441)));
+  Val x263 = get(ctx, arg0, 146, 0);
+  set(ctx, arg0, 147, (bitAnd(x256, Val(8)) * Val(1761607681)));
+  Val x264 = get(ctx, arg0, 147, 0);
+  set(ctx, arg0, 148, (bitAnd(x256, Val(16)) * Val(1887436801)));
+  Val x265 = get(ctx, arg0, 148, 0);
+  set(ctx, arg0, 149, (bitAnd(x256, Val(32)) * Val(1950351361)));
+  Val x266 = get(ctx, arg0, 149, 0);
+  set(ctx, arg0, 150, (bitAnd(x256, Val(64)) * Val(1981808641)));
+  Val x267 = get(ctx, arg0, 150, 0);
+  set(ctx, arg0, 151, (bitAnd(x256, Val(128)) * Val(1997537281)));
+  Val x268 = get(ctx, arg0, 151, 0);
+  set(ctx, arg0, 152, (bitAnd(x256, Val(256)) * Val(2005401601)));
+  Val x269 = get(ctx, arg0, 152, 0);
+  set(ctx, arg0, 153, (bitAnd(x256, Val(512)) * Val(2009333761)));
+  Val x270 = get(ctx, arg0, 153, 0);
+  set(ctx, arg0, 154, (bitAnd(x256, Val(1024)) * Val(2011299841)));
+  Val x271 = get(ctx, arg0, 154, 0);
+  set(ctx, arg0, 155, (bitAnd(x256, Val(2048)) * Val(2012282881)));
+  Val x272 = get(ctx, arg0, 155, 0);
+  set(ctx, arg0, 156, (bitAnd(x256, Val(4096)) * Val(2012774401)));
+  Val x273 = get(ctx, arg0, 156, 0);
+  set(ctx, arg0, 157, (bitAnd(x256, Val(8192)) * Val(2013020161)));
+  Val x274 = get(ctx, arg0, 157, 0);
+  set(ctx, arg0, 158, (bitAnd(x256, Val(16384)) * Val(2013143041)));
+  Val x275 = get(ctx, arg0, 158, 0);
+  set(ctx, arg0, 159, (bitAnd(x256, Val(32768)) * Val(2013204481)));
+  Val x276 = get(ctx, arg0, 159, 0);
+  set(ctx, arg0, 160, bitAnd(x260, Val(1)));
+  Val x277 = get(ctx, arg0, 160, 0);
+  set(ctx, arg0, 161, (bitAnd(x260, Val(2)) * Val(1006632961)));
+  Val x278 = get(ctx, arg0, 161, 0);
+  set(ctx, arg0, 162, (bitAnd(x260, Val(4)) * Val(1509949441)));
+  Val x279 = get(ctx, arg0, 162, 0);
+  set(ctx, arg0, 163, (bitAnd(x260, Val(8)) * Val(1761607681)));
+  Val x280 = get(ctx, arg0, 163, 0);
+  set(ctx, arg0, 164, (bitAnd(x260, Val(16)) * Val(1887436801)));
+  Val x281 = get(ctx, arg0, 164, 0);
+  set(ctx, arg0, 165, (bitAnd(x260, Val(32)) * Val(1950351361)));
+  Val x282 = get(ctx, arg0, 165, 0);
+  set(ctx, arg0, 166, (bitAnd(x260, Val(64)) * Val(1981808641)));
+  Val x283 = get(ctx, arg0, 166, 0);
+  set(ctx, arg0, 167, (bitAnd(x260, Val(128)) * Val(1997537281)));
+  Val x284 = get(ctx, arg0, 167, 0);
+  set(ctx, arg0, 168, (bitAnd(x260, Val(256)) * Val(2005401601)));
+  Val x285 = get(ctx, arg0, 168, 0);
+  set(ctx, arg0, 169, (bitAnd(x260, Val(512)) * Val(2009333761)));
+  Val x286 = get(ctx, arg0, 169, 0);
+  set(ctx, arg0, 170, (bitAnd(x260, Val(1024)) * Val(2011299841)));
+  Val x287 = get(ctx, arg0, 170, 0);
+  set(ctx, arg0, 171, (bitAnd(x260, Val(2048)) * Val(2012282881)));
+  Val x288 = get(ctx, arg0, 171, 0);
+  set(ctx, arg0, 172, (bitAnd(x260, Val(4096)) * Val(2012774401)));
+  Val x289 = get(ctx, arg0, 172, 0);
+  set(ctx, arg0, 173, (bitAnd(x260, Val(8192)) * Val(2013020161)));
+  Val x290 = get(ctx, arg0, 173, 0);
+  set(ctx, arg0, 174, (bitAnd(x260, Val(16384)) * Val(2013143041)));
+  Val x291 = get(ctx, arg0, 174, 0);
+  set(ctx, arg0, 175, (bitAnd(x260, Val(32768)) * Val(2013204481)));
+  Val x292 = get(ctx, arg0, 175, 0);
   // Add2(zirgen/circuit/keccak2/sha2.zir:30)
-  Val x192 = (x120 + get(ctx, arg0, 930, 1));
+  // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:245)
+  Val x293 = (x72 + get(ctx, arg0, 924, 1));
   // Div(<preamble>:19)
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
-  Val x193 = (bitAnd(x192, Val(983040)) * Val(2013235201));
+  Val x294 = (bitAnd(x293, Val(983040)) * Val(2013235201));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 979, bitAnd(x193, Val(1)));
+  set(ctx, arg0, 961, bitAnd(x294, Val(1)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 980, (bitAnd(x193, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 962, (bitAnd(x294, Val(2)) * Val(1006632961)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 981, (bitAnd(x193, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 963, (bitAnd(x294, Val(4)) * Val(1509949441)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x194 = ((get(ctx, arg0, 981, 0) * Val(4)) + (get(ctx, arg0, 980, 0) * Val(2)));
-  Val x195 = (x194 + get(ctx, arg0, 979, 0));
+  Val x295 = ((get(ctx, arg0, 963, 0) * Val(4)) + (get(ctx, arg0, 962, 0) * Val(2)));
+  Val x296 = (x295 + get(ctx, arg0, 961, 0));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x196 = (x192 - (x195 * Val(65536)));
+  Val x297 = (x293 - (x296 * Val(65536)));
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
-  Val x197 = ((x128 + get(ctx, arg0, 931, 1)) + x195);
+  Val x298 = ((x80 + get(ctx, arg0, 925, 1)) + x296);
   // Div(<preamble>:19)
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
-  Val x198 = (bitAnd(x197, Val(983040)) * Val(2013235201));
+  Val x299 = (bitAnd(x298, Val(983040)) * Val(2013235201));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
-  set(ctx, arg0, 982, bitAnd(x198, Val(1)));
+  set(ctx, arg0, 964, bitAnd(x299, Val(1)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
-  set(ctx, arg0, 983, (bitAnd(x198, Val(2)) * Val(1006632961)));
+  set(ctx, arg0, 965, (bitAnd(x299, Val(2)) * Val(1006632961)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
-  set(ctx, arg0, 984, (bitAnd(x198, Val(4)) * Val(1509949441)));
+  set(ctx, arg0, 966, (bitAnd(x299, Val(4)) * Val(1509949441)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
-  Val x199 = ((get(ctx, arg0, 984, 0) * Val(4)) + (get(ctx, arg0, 983, 0) * Val(2)));
+  Val x300 = ((get(ctx, arg0, 966, 0) * Val(4)) + (get(ctx, arg0, 965, 0) * Val(2)));
   // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
-  Val x200 = (x197 - ((x199 + get(ctx, arg0, 982, 0)) * Val(65536)));
+  Val x301 = (x298 - ((x300 + get(ctx, arg0, 964, 0)) * Val(65536)));
   // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
   // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
   // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
-  set(ctx, arg0, 400, bitAnd(x196, Val(1)));
-  set(ctx, arg0, 401, (bitAnd(x196, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 402, (bitAnd(x196, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 403, (bitAnd(x196, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 404, (bitAnd(x196, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 405, (bitAnd(x196, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 406, (bitAnd(x196, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 407, (bitAnd(x196, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 408, (bitAnd(x196, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 409, (bitAnd(x196, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 410, (bitAnd(x196, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 411, (bitAnd(x196, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 412, (bitAnd(x196, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 413, (bitAnd(x196, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 414, (bitAnd(x196, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 415, (bitAnd(x196, Val(32768)) * Val(2013204481)));
-  set(ctx, arg0, 416, bitAnd(x200, Val(1)));
-  set(ctx, arg0, 417, (bitAnd(x200, Val(2)) * Val(1006632961)));
-  set(ctx, arg0, 418, (bitAnd(x200, Val(4)) * Val(1509949441)));
-  set(ctx, arg0, 419, (bitAnd(x200, Val(8)) * Val(1761607681)));
-  set(ctx, arg0, 420, (bitAnd(x200, Val(16)) * Val(1887436801)));
-  set(ctx, arg0, 421, (bitAnd(x200, Val(32)) * Val(1950351361)));
-  set(ctx, arg0, 422, (bitAnd(x200, Val(64)) * Val(1981808641)));
-  set(ctx, arg0, 423, (bitAnd(x200, Val(128)) * Val(1997537281)));
-  set(ctx, arg0, 424, (bitAnd(x200, Val(256)) * Val(2005401601)));
-  set(ctx, arg0, 425, (bitAnd(x200, Val(512)) * Val(2009333761)));
-  set(ctx, arg0, 426, (bitAnd(x200, Val(1024)) * Val(2011299841)));
-  set(ctx, arg0, 427, (bitAnd(x200, Val(2048)) * Val(2012282881)));
-  set(ctx, arg0, 428, (bitAnd(x200, Val(4096)) * Val(2012774401)));
-  set(ctx, arg0, 429, (bitAnd(x200, Val(8192)) * Val(2013020161)));
-  set(ctx, arg0, 430, (bitAnd(x200, Val(16384)) * Val(2013143041)));
-  set(ctx, arg0, 431, (bitAnd(x200, Val(32768)) * Val(2013204481)));
+  set(ctx, arg0, 496, bitAnd(x297, Val(1)));
+  Val x302 = get(ctx, arg0, 496, 0);
+  set(ctx, arg0, 497, (bitAnd(x297, Val(2)) * Val(1006632961)));
+  Val x303 = get(ctx, arg0, 497, 0);
+  set(ctx, arg0, 498, (bitAnd(x297, Val(4)) * Val(1509949441)));
+  Val x304 = get(ctx, arg0, 498, 0);
+  set(ctx, arg0, 499, (bitAnd(x297, Val(8)) * Val(1761607681)));
+  Val x305 = get(ctx, arg0, 499, 0);
+  set(ctx, arg0, 500, (bitAnd(x297, Val(16)) * Val(1887436801)));
+  Val x306 = get(ctx, arg0, 500, 0);
+  set(ctx, arg0, 501, (bitAnd(x297, Val(32)) * Val(1950351361)));
+  Val x307 = get(ctx, arg0, 501, 0);
+  set(ctx, arg0, 502, (bitAnd(x297, Val(64)) * Val(1981808641)));
+  Val x308 = get(ctx, arg0, 502, 0);
+  set(ctx, arg0, 503, (bitAnd(x297, Val(128)) * Val(1997537281)));
+  Val x309 = get(ctx, arg0, 503, 0);
+  set(ctx, arg0, 504, (bitAnd(x297, Val(256)) * Val(2005401601)));
+  Val x310 = get(ctx, arg0, 504, 0);
+  set(ctx, arg0, 505, (bitAnd(x297, Val(512)) * Val(2009333761)));
+  Val x311 = get(ctx, arg0, 505, 0);
+  set(ctx, arg0, 506, (bitAnd(x297, Val(1024)) * Val(2011299841)));
+  Val x312 = get(ctx, arg0, 506, 0);
+  set(ctx, arg0, 507, (bitAnd(x297, Val(2048)) * Val(2012282881)));
+  Val x313 = get(ctx, arg0, 507, 0);
+  set(ctx, arg0, 508, (bitAnd(x297, Val(4096)) * Val(2012774401)));
+  Val x314 = get(ctx, arg0, 508, 0);
+  set(ctx, arg0, 509, (bitAnd(x297, Val(8192)) * Val(2013020161)));
+  Val x315 = get(ctx, arg0, 509, 0);
+  set(ctx, arg0, 510, (bitAnd(x297, Val(16384)) * Val(2013143041)));
+  Val x316 = get(ctx, arg0, 510, 0);
+  set(ctx, arg0, 511, (bitAnd(x297, Val(32768)) * Val(2013204481)));
+  Val x317 = get(ctx, arg0, 511, 0);
+  set(ctx, arg0, 512, bitAnd(x301, Val(1)));
+  Val x318 = get(ctx, arg0, 512, 0);
+  set(ctx, arg0, 513, (bitAnd(x301, Val(2)) * Val(1006632961)));
+  Val x319 = get(ctx, arg0, 513, 0);
+  set(ctx, arg0, 514, (bitAnd(x301, Val(4)) * Val(1509949441)));
+  Val x320 = get(ctx, arg0, 514, 0);
+  set(ctx, arg0, 515, (bitAnd(x301, Val(8)) * Val(1761607681)));
+  Val x321 = get(ctx, arg0, 515, 0);
+  set(ctx, arg0, 516, (bitAnd(x301, Val(16)) * Val(1887436801)));
+  Val x322 = get(ctx, arg0, 516, 0);
+  set(ctx, arg0, 517, (bitAnd(x301, Val(32)) * Val(1950351361)));
+  Val x323 = get(ctx, arg0, 517, 0);
+  set(ctx, arg0, 518, (bitAnd(x301, Val(64)) * Val(1981808641)));
+  Val x324 = get(ctx, arg0, 518, 0);
+  set(ctx, arg0, 519, (bitAnd(x301, Val(128)) * Val(1997537281)));
+  Val x325 = get(ctx, arg0, 519, 0);
+  set(ctx, arg0, 520, (bitAnd(x301, Val(256)) * Val(2005401601)));
+  Val x326 = get(ctx, arg0, 520, 0);
+  set(ctx, arg0, 521, (bitAnd(x301, Val(512)) * Val(2009333761)));
+  Val x327 = get(ctx, arg0, 521, 0);
+  set(ctx, arg0, 522, (bitAnd(x301, Val(1024)) * Val(2011299841)));
+  Val x328 = get(ctx, arg0, 522, 0);
+  set(ctx, arg0, 523, (bitAnd(x301, Val(2048)) * Val(2012282881)));
+  Val x329 = get(ctx, arg0, 523, 0);
+  set(ctx, arg0, 524, (bitAnd(x301, Val(4096)) * Val(2012774401)));
+  Val x330 = get(ctx, arg0, 524, 0);
+  set(ctx, arg0, 525, (bitAnd(x301, Val(8192)) * Val(2013020161)));
+  Val x331 = get(ctx, arg0, 525, 0);
+  set(ctx, arg0, 526, (bitAnd(x301, Val(16384)) * Val(2013143041)));
+  Val x332 = get(ctx, arg0, 526, 0);
+  set(ctx, arg0, 527, (bitAnd(x301, Val(32768)) * Val(2013204481)));
+  Val x333 = get(ctx, arg0, 527, 0);
+  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
+  Val x334 = (x88 + get(ctx, arg0, 926, 1));
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
+  Val x335 = (bitAnd(x334, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 967, bitAnd(x335, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 968, (bitAnd(x335, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 969, (bitAnd(x335, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x336 = ((get(ctx, arg0, 969, 0) * Val(4)) + (get(ctx, arg0, 968, 0) * Val(2)));
+  Val x337 = (x336 + get(ctx, arg0, 967, 0));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x338 = (x334 - (x337 * Val(65536)));
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
+  Val x339 = ((x96 + get(ctx, arg0, 927, 1)) + x337);
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  Val x340 = (bitAnd(x339, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 970, bitAnd(x340, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 971, (bitAnd(x340, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 972, (bitAnd(x340, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x341 = ((get(ctx, arg0, 972, 0) * Val(4)) + (get(ctx, arg0, 971, 0) * Val(2)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x342 = (x339 - ((x341 + get(ctx, arg0, 970, 0)) * Val(65536)));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
+  set(ctx, arg0, 464, bitAnd(x338, Val(1)));
+  Val x343 = get(ctx, arg0, 464, 0);
+  set(ctx, arg0, 465, (bitAnd(x338, Val(2)) * Val(1006632961)));
+  Val x344 = get(ctx, arg0, 465, 0);
+  set(ctx, arg0, 466, (bitAnd(x338, Val(4)) * Val(1509949441)));
+  Val x345 = get(ctx, arg0, 466, 0);
+  set(ctx, arg0, 467, (bitAnd(x338, Val(8)) * Val(1761607681)));
+  Val x346 = get(ctx, arg0, 467, 0);
+  set(ctx, arg0, 468, (bitAnd(x338, Val(16)) * Val(1887436801)));
+  Val x347 = get(ctx, arg0, 468, 0);
+  set(ctx, arg0, 469, (bitAnd(x338, Val(32)) * Val(1950351361)));
+  Val x348 = get(ctx, arg0, 469, 0);
+  set(ctx, arg0, 470, (bitAnd(x338, Val(64)) * Val(1981808641)));
+  Val x349 = get(ctx, arg0, 470, 0);
+  set(ctx, arg0, 471, (bitAnd(x338, Val(128)) * Val(1997537281)));
+  Val x350 = get(ctx, arg0, 471, 0);
+  set(ctx, arg0, 472, (bitAnd(x338, Val(256)) * Val(2005401601)));
+  Val x351 = get(ctx, arg0, 472, 0);
+  set(ctx, arg0, 473, (bitAnd(x338, Val(512)) * Val(2009333761)));
+  Val x352 = get(ctx, arg0, 473, 0);
+  set(ctx, arg0, 474, (bitAnd(x338, Val(1024)) * Val(2011299841)));
+  Val x353 = get(ctx, arg0, 474, 0);
+  set(ctx, arg0, 475, (bitAnd(x338, Val(2048)) * Val(2012282881)));
+  Val x354 = get(ctx, arg0, 475, 0);
+  set(ctx, arg0, 476, (bitAnd(x338, Val(4096)) * Val(2012774401)));
+  Val x355 = get(ctx, arg0, 476, 0);
+  set(ctx, arg0, 477, (bitAnd(x338, Val(8192)) * Val(2013020161)));
+  Val x356 = get(ctx, arg0, 477, 0);
+  set(ctx, arg0, 478, (bitAnd(x338, Val(16384)) * Val(2013143041)));
+  Val x357 = get(ctx, arg0, 478, 0);
+  set(ctx, arg0, 479, (bitAnd(x338, Val(32768)) * Val(2013204481)));
+  Val x358 = get(ctx, arg0, 479, 0);
+  set(ctx, arg0, 480, bitAnd(x342, Val(1)));
+  Val x359 = get(ctx, arg0, 480, 0);
+  set(ctx, arg0, 481, (bitAnd(x342, Val(2)) * Val(1006632961)));
+  Val x360 = get(ctx, arg0, 481, 0);
+  set(ctx, arg0, 482, (bitAnd(x342, Val(4)) * Val(1509949441)));
+  Val x361 = get(ctx, arg0, 482, 0);
+  set(ctx, arg0, 483, (bitAnd(x342, Val(8)) * Val(1761607681)));
+  Val x362 = get(ctx, arg0, 483, 0);
+  set(ctx, arg0, 484, (bitAnd(x342, Val(16)) * Val(1887436801)));
+  Val x363 = get(ctx, arg0, 484, 0);
+  set(ctx, arg0, 485, (bitAnd(x342, Val(32)) * Val(1950351361)));
+  Val x364 = get(ctx, arg0, 485, 0);
+  set(ctx, arg0, 486, (bitAnd(x342, Val(64)) * Val(1981808641)));
+  Val x365 = get(ctx, arg0, 486, 0);
+  set(ctx, arg0, 487, (bitAnd(x342, Val(128)) * Val(1997537281)));
+  Val x366 = get(ctx, arg0, 487, 0);
+  set(ctx, arg0, 488, (bitAnd(x342, Val(256)) * Val(2005401601)));
+  Val x367 = get(ctx, arg0, 488, 0);
+  set(ctx, arg0, 489, (bitAnd(x342, Val(512)) * Val(2009333761)));
+  Val x368 = get(ctx, arg0, 489, 0);
+  set(ctx, arg0, 490, (bitAnd(x342, Val(1024)) * Val(2011299841)));
+  Val x369 = get(ctx, arg0, 490, 0);
+  set(ctx, arg0, 491, (bitAnd(x342, Val(2048)) * Val(2012282881)));
+  Val x370 = get(ctx, arg0, 491, 0);
+  set(ctx, arg0, 492, (bitAnd(x342, Val(4096)) * Val(2012774401)));
+  Val x371 = get(ctx, arg0, 492, 0);
+  set(ctx, arg0, 493, (bitAnd(x342, Val(8192)) * Val(2013020161)));
+  Val x372 = get(ctx, arg0, 493, 0);
+  set(ctx, arg0, 494, (bitAnd(x342, Val(16384)) * Val(2013143041)));
+  Val x373 = get(ctx, arg0, 494, 0);
+  set(ctx, arg0, 495, (bitAnd(x342, Val(32768)) * Val(2013204481)));
+  Val x374 = get(ctx, arg0, 495, 0);
+  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
+  Val x375 = (x104 + get(ctx, arg0, 928, 1));
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
+  Val x376 = (bitAnd(x375, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 973, bitAnd(x376, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 974, (bitAnd(x376, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 975, (bitAnd(x376, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x377 = ((get(ctx, arg0, 975, 0) * Val(4)) + (get(ctx, arg0, 974, 0) * Val(2)));
+  Val x378 = (x377 + get(ctx, arg0, 973, 0));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x379 = (x375 - (x378 * Val(65536)));
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
+  Val x380 = ((x112 + get(ctx, arg0, 929, 1)) + x378);
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  Val x381 = (bitAnd(x380, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 976, bitAnd(x381, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 977, (bitAnd(x381, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 978, (bitAnd(x381, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x382 = ((get(ctx, arg0, 978, 0) * Val(4)) + (get(ctx, arg0, 977, 0) * Val(2)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x383 = (x380 - ((x382 + get(ctx, arg0, 976, 0)) * Val(65536)));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
+  set(ctx, arg0, 432, bitAnd(x379, Val(1)));
+  Val x384 = get(ctx, arg0, 432, 0);
+  set(ctx, arg0, 433, (bitAnd(x379, Val(2)) * Val(1006632961)));
+  Val x385 = get(ctx, arg0, 433, 0);
+  set(ctx, arg0, 434, (bitAnd(x379, Val(4)) * Val(1509949441)));
+  Val x386 = get(ctx, arg0, 434, 0);
+  set(ctx, arg0, 435, (bitAnd(x379, Val(8)) * Val(1761607681)));
+  Val x387 = get(ctx, arg0, 435, 0);
+  set(ctx, arg0, 436, (bitAnd(x379, Val(16)) * Val(1887436801)));
+  Val x388 = get(ctx, arg0, 436, 0);
+  set(ctx, arg0, 437, (bitAnd(x379, Val(32)) * Val(1950351361)));
+  Val x389 = get(ctx, arg0, 437, 0);
+  set(ctx, arg0, 438, (bitAnd(x379, Val(64)) * Val(1981808641)));
+  Val x390 = get(ctx, arg0, 438, 0);
+  set(ctx, arg0, 439, (bitAnd(x379, Val(128)) * Val(1997537281)));
+  Val x391 = get(ctx, arg0, 439, 0);
+  set(ctx, arg0, 440, (bitAnd(x379, Val(256)) * Val(2005401601)));
+  Val x392 = get(ctx, arg0, 440, 0);
+  set(ctx, arg0, 441, (bitAnd(x379, Val(512)) * Val(2009333761)));
+  Val x393 = get(ctx, arg0, 441, 0);
+  set(ctx, arg0, 442, (bitAnd(x379, Val(1024)) * Val(2011299841)));
+  Val x394 = get(ctx, arg0, 442, 0);
+  set(ctx, arg0, 443, (bitAnd(x379, Val(2048)) * Val(2012282881)));
+  Val x395 = get(ctx, arg0, 443, 0);
+  set(ctx, arg0, 444, (bitAnd(x379, Val(4096)) * Val(2012774401)));
+  Val x396 = get(ctx, arg0, 444, 0);
+  set(ctx, arg0, 445, (bitAnd(x379, Val(8192)) * Val(2013020161)));
+  Val x397 = get(ctx, arg0, 445, 0);
+  set(ctx, arg0, 446, (bitAnd(x379, Val(16384)) * Val(2013143041)));
+  Val x398 = get(ctx, arg0, 446, 0);
+  set(ctx, arg0, 447, (bitAnd(x379, Val(32768)) * Val(2013204481)));
+  Val x399 = get(ctx, arg0, 447, 0);
+  set(ctx, arg0, 448, bitAnd(x383, Val(1)));
+  Val x400 = get(ctx, arg0, 448, 0);
+  set(ctx, arg0, 449, (bitAnd(x383, Val(2)) * Val(1006632961)));
+  Val x401 = get(ctx, arg0, 449, 0);
+  set(ctx, arg0, 450, (bitAnd(x383, Val(4)) * Val(1509949441)));
+  Val x402 = get(ctx, arg0, 450, 0);
+  set(ctx, arg0, 451, (bitAnd(x383, Val(8)) * Val(1761607681)));
+  Val x403 = get(ctx, arg0, 451, 0);
+  set(ctx, arg0, 452, (bitAnd(x383, Val(16)) * Val(1887436801)));
+  Val x404 = get(ctx, arg0, 452, 0);
+  set(ctx, arg0, 453, (bitAnd(x383, Val(32)) * Val(1950351361)));
+  Val x405 = get(ctx, arg0, 453, 0);
+  set(ctx, arg0, 454, (bitAnd(x383, Val(64)) * Val(1981808641)));
+  Val x406 = get(ctx, arg0, 454, 0);
+  set(ctx, arg0, 455, (bitAnd(x383, Val(128)) * Val(1997537281)));
+  Val x407 = get(ctx, arg0, 455, 0);
+  set(ctx, arg0, 456, (bitAnd(x383, Val(256)) * Val(2005401601)));
+  Val x408 = get(ctx, arg0, 456, 0);
+  set(ctx, arg0, 457, (bitAnd(x383, Val(512)) * Val(2009333761)));
+  Val x409 = get(ctx, arg0, 457, 0);
+  set(ctx, arg0, 458, (bitAnd(x383, Val(1024)) * Val(2011299841)));
+  Val x410 = get(ctx, arg0, 458, 0);
+  set(ctx, arg0, 459, (bitAnd(x383, Val(2048)) * Val(2012282881)));
+  Val x411 = get(ctx, arg0, 459, 0);
+  set(ctx, arg0, 460, (bitAnd(x383, Val(4096)) * Val(2012774401)));
+  Val x412 = get(ctx, arg0, 460, 0);
+  set(ctx, arg0, 461, (bitAnd(x383, Val(8192)) * Val(2013020161)));
+  Val x413 = get(ctx, arg0, 461, 0);
+  set(ctx, arg0, 462, (bitAnd(x383, Val(16384)) * Val(2013143041)));
+  Val x414 = get(ctx, arg0, 462, 0);
+  set(ctx, arg0, 463, (bitAnd(x383, Val(32768)) * Val(2013204481)));
+  Val x415 = get(ctx, arg0, 463, 0);
+  // Add2(zirgen/circuit/keccak2/sha2.zir:30)
+  Val x416 = (x120 + get(ctx, arg0, 930, 1));
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:42)
+  Val x417 = (bitAnd(x416, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 979, bitAnd(x417, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 980, (bitAnd(x417, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 981, (bitAnd(x417, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x418 = ((get(ctx, arg0, 981, 0) * Val(4)) + (get(ctx, arg0, 980, 0) * Val(2)));
+  Val x419 = (x418 + get(ctx, arg0, 979, 0));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x420 = (x416 - (x419 * Val(65536)));
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:43)
+  Val x421 = ((x128 + get(ctx, arg0, 931, 1)) + x419);
+  // Div(<preamble>:19)
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:34)
+  Val x422 = (bitAnd(x421, Val(983040)) * Val(2013235201));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  set(ctx, arg0, 982, bitAnd(x422, Val(1)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:35)
+  set(ctx, arg0, 983, (bitAnd(x422, Val(2)) * Val(1006632961)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:36)
+  set(ctx, arg0, 984, (bitAnd(x422, Val(4)) * Val(1509949441)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:37)
+  Val x423 = ((get(ctx, arg0, 984, 0) * Val(4)) + (get(ctx, arg0, 983, 0) * Val(2)));
+  // CarryExtract(zirgen/circuit/keccak2/sha2.zir:38)
+  Val x424 = (x421 - ((x423 + get(ctx, arg0, 982, 0)) * Val(65536)));
+  // NondetBitReg(zirgen/circuit/keccak2/bits.zir:11)
+  // UnpackReg(zirgen/circuit/keccak2/pack.zir:48)
+  // CarryAndExpand(zirgen/circuit/keccak2/sha2.zir:44)
+  set(ctx, arg0, 400, bitAnd(x420, Val(1)));
+  Val x425 = get(ctx, arg0, 400, 0);
+  set(ctx, arg0, 401, (bitAnd(x420, Val(2)) * Val(1006632961)));
+  Val x426 = get(ctx, arg0, 401, 0);
+  set(ctx, arg0, 402, (bitAnd(x420, Val(4)) * Val(1509949441)));
+  Val x427 = get(ctx, arg0, 402, 0);
+  set(ctx, arg0, 403, (bitAnd(x420, Val(8)) * Val(1761607681)));
+  Val x428 = get(ctx, arg0, 403, 0);
+  set(ctx, arg0, 404, (bitAnd(x420, Val(16)) * Val(1887436801)));
+  Val x429 = get(ctx, arg0, 404, 0);
+  set(ctx, arg0, 405, (bitAnd(x420, Val(32)) * Val(1950351361)));
+  Val x430 = get(ctx, arg0, 405, 0);
+  set(ctx, arg0, 406, (bitAnd(x420, Val(64)) * Val(1981808641)));
+  Val x431 = get(ctx, arg0, 406, 0);
+  set(ctx, arg0, 407, (bitAnd(x420, Val(128)) * Val(1997537281)));
+  Val x432 = get(ctx, arg0, 407, 0);
+  set(ctx, arg0, 408, (bitAnd(x420, Val(256)) * Val(2005401601)));
+  Val x433 = get(ctx, arg0, 408, 0);
+  set(ctx, arg0, 409, (bitAnd(x420, Val(512)) * Val(2009333761)));
+  Val x434 = get(ctx, arg0, 409, 0);
+  set(ctx, arg0, 410, (bitAnd(x420, Val(1024)) * Val(2011299841)));
+  Val x435 = get(ctx, arg0, 410, 0);
+  set(ctx, arg0, 411, (bitAnd(x420, Val(2048)) * Val(2012282881)));
+  Val x436 = get(ctx, arg0, 411, 0);
+  set(ctx, arg0, 412, (bitAnd(x420, Val(4096)) * Val(2012774401)));
+  Val x437 = get(ctx, arg0, 412, 0);
+  set(ctx, arg0, 413, (bitAnd(x420, Val(8192)) * Val(2013020161)));
+  Val x438 = get(ctx, arg0, 413, 0);
+  set(ctx, arg0, 414, (bitAnd(x420, Val(16384)) * Val(2013143041)));
+  Val x439 = get(ctx, arg0, 414, 0);
+  set(ctx, arg0, 415, (bitAnd(x420, Val(32768)) * Val(2013204481)));
+  Val x440 = get(ctx, arg0, 415, 0);
+  set(ctx, arg0, 416, bitAnd(x424, Val(1)));
+  Val x441 = get(ctx, arg0, 416, 0);
+  set(ctx, arg0, 417, (bitAnd(x424, Val(2)) * Val(1006632961)));
+  Val x442 = get(ctx, arg0, 417, 0);
+  set(ctx, arg0, 418, (bitAnd(x424, Val(4)) * Val(1509949441)));
+  Val x443 = get(ctx, arg0, 418, 0);
+  set(ctx, arg0, 419, (bitAnd(x424, Val(8)) * Val(1761607681)));
+  Val x444 = get(ctx, arg0, 419, 0);
+  set(ctx, arg0, 420, (bitAnd(x424, Val(16)) * Val(1887436801)));
+  Val x445 = get(ctx, arg0, 420, 0);
+  set(ctx, arg0, 421, (bitAnd(x424, Val(32)) * Val(1950351361)));
+  Val x446 = get(ctx, arg0, 421, 0);
+  set(ctx, arg0, 422, (bitAnd(x424, Val(64)) * Val(1981808641)));
+  Val x447 = get(ctx, arg0, 422, 0);
+  set(ctx, arg0, 423, (bitAnd(x424, Val(128)) * Val(1997537281)));
+  Val x448 = get(ctx, arg0, 423, 0);
+  set(ctx, arg0, 424, (bitAnd(x424, Val(256)) * Val(2005401601)));
+  Val x449 = get(ctx, arg0, 424, 0);
+  set(ctx, arg0, 425, (bitAnd(x424, Val(512)) * Val(2009333761)));
+  Val x450 = get(ctx, arg0, 425, 0);
+  set(ctx, arg0, 426, (bitAnd(x424, Val(1024)) * Val(2011299841)));
+  Val x451 = get(ctx, arg0, 426, 0);
+  set(ctx, arg0, 427, (bitAnd(x424, Val(2048)) * Val(2012282881)));
+  Val x452 = get(ctx, arg0, 427, 0);
+  set(ctx, arg0, 428, (bitAnd(x424, Val(4096)) * Val(2012774401)));
+  Val x453 = get(ctx, arg0, 428, 0);
+  set(ctx, arg0, 429, (bitAnd(x424, Val(8192)) * Val(2013020161)));
+  Val x454 = get(ctx, arg0, 429, 0);
+  set(ctx, arg0, 430, (bitAnd(x424, Val(16384)) * Val(2013143041)));
+  Val x455 = get(ctx, arg0, 430, 0);
+  set(ctx, arg0, 431, (bitAnd(x424, Val(32768)) * Val(2013204481)));
+  Val x456 = get(ctx, arg0, 431, 0);
   // Pack(zirgen/circuit/keccak2/pack.zir:32)
   // Pack32(zirgen/circuit/keccak2/sha2.zir:55)
   // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:257)
-  Val x201 = (get(ctx, arg0, 240, 0) + (get(ctx, arg0, 241, 0) * Val(2)));
-  Val x202 = ((x201 + (get(ctx, arg0, 242, 0) * Val(4))) + (get(ctx, arg0, 243, 0) * Val(8)));
-  Val x203 = ((x202 + (get(ctx, arg0, 244, 0) * Val(16))) + (get(ctx, arg0, 245, 0) * Val(32)));
-  Val x204 = ((x203 + (get(ctx, arg0, 246, 0) * Val(64))) + (get(ctx, arg0, 247, 0) * Val(128)));
-  Val x205 = ((x204 + (get(ctx, arg0, 248, 0) * Val(256))) + (get(ctx, arg0, 249, 0) * Val(512)));
-  Val x206 = ((x205 + (get(ctx, arg0, 250, 0) * Val(1024))) + (get(ctx, arg0, 251, 0) * Val(2048)));
-  Val x207 = ((x206 + (get(ctx, arg0, 252, 0) * Val(4096))) + (get(ctx, arg0, 253, 0) * Val(8192)));
-  Val x208 =
-      ((x207 + (get(ctx, arg0, 254, 0) * Val(16384))) + (get(ctx, arg0, 255, 0) * Val(32768)));
-  Val x209 = (get(ctx, arg0, 256, 0) + (get(ctx, arg0, 257, 0) * Val(2)));
-  Val x210 = ((x209 + (get(ctx, arg0, 258, 0) * Val(4))) + (get(ctx, arg0, 259, 0) * Val(8)));
-  Val x211 = ((x210 + (get(ctx, arg0, 260, 0) * Val(16))) + (get(ctx, arg0, 261, 0) * Val(32)));
-  Val x212 = ((x211 + (get(ctx, arg0, 262, 0) * Val(64))) + (get(ctx, arg0, 263, 0) * Val(128)));
-  Val x213 = ((x212 + (get(ctx, arg0, 264, 0) * Val(256))) + (get(ctx, arg0, 265, 0) * Val(512)));
-  Val x214 = ((x213 + (get(ctx, arg0, 266, 0) * Val(1024))) + (get(ctx, arg0, 267, 0) * Val(2048)));
-  Val x215 = ((x214 + (get(ctx, arg0, 268, 0) * Val(4096))) + (get(ctx, arg0, 269, 0) * Val(8192)));
-  Val x216 =
-      ((x215 + (get(ctx, arg0, 270, 0) * Val(16384))) + (get(ctx, arg0, 271, 0) * Val(32768)));
-  Val x217 = (get(ctx, arg0, 208, 0) + (get(ctx, arg0, 209, 0) * Val(2)));
-  Val x218 = ((x217 + (get(ctx, arg0, 210, 0) * Val(4))) + (get(ctx, arg0, 211, 0) * Val(8)));
-  Val x219 = ((x218 + (get(ctx, arg0, 212, 0) * Val(16))) + (get(ctx, arg0, 213, 0) * Val(32)));
-  Val x220 = ((x219 + (get(ctx, arg0, 214, 0) * Val(64))) + (get(ctx, arg0, 215, 0) * Val(128)));
-  Val x221 = ((x220 + (get(ctx, arg0, 216, 0) * Val(256))) + (get(ctx, arg0, 217, 0) * Val(512)));
-  Val x222 = ((x221 + (get(ctx, arg0, 218, 0) * Val(1024))) + (get(ctx, arg0, 219, 0) * Val(2048)));
-  Val x223 = ((x222 + (get(ctx, arg0, 220, 0) * Val(4096))) + (get(ctx, arg0, 221, 0) * Val(8192)));
-  Val x224 =
-      ((x223 + (get(ctx, arg0, 222, 0) * Val(16384))) + (get(ctx, arg0, 223, 0) * Val(32768)));
-  Val x225 = (get(ctx, arg0, 224, 0) + (get(ctx, arg0, 225, 0) * Val(2)));
-  Val x226 = ((x225 + (get(ctx, arg0, 226, 0) * Val(4))) + (get(ctx, arg0, 227, 0) * Val(8)));
-  Val x227 = ((x226 + (get(ctx, arg0, 228, 0) * Val(16))) + (get(ctx, arg0, 229, 0) * Val(32)));
-  Val x228 = ((x227 + (get(ctx, arg0, 230, 0) * Val(64))) + (get(ctx, arg0, 231, 0) * Val(128)));
-  Val x229 = ((x228 + (get(ctx, arg0, 232, 0) * Val(256))) + (get(ctx, arg0, 233, 0) * Val(512)));
-  Val x230 = ((x229 + (get(ctx, arg0, 234, 0) * Val(1024))) + (get(ctx, arg0, 235, 0) * Val(2048)));
-  Val x231 = ((x230 + (get(ctx, arg0, 236, 0) * Val(4096))) + (get(ctx, arg0, 237, 0) * Val(8192)));
-  Val x232 =
-      ((x231 + (get(ctx, arg0, 238, 0) * Val(16384))) + (get(ctx, arg0, 239, 0) * Val(32768)));
-  Val x233 = (get(ctx, arg0, 176, 0) + (get(ctx, arg0, 177, 0) * Val(2)));
-  Val x234 = ((x233 + (get(ctx, arg0, 178, 0) * Val(4))) + (get(ctx, arg0, 179, 0) * Val(8)));
-  Val x235 = ((x234 + (get(ctx, arg0, 180, 0) * Val(16))) + (get(ctx, arg0, 181, 0) * Val(32)));
-  Val x236 = ((x235 + (get(ctx, arg0, 182, 0) * Val(64))) + (get(ctx, arg0, 183, 0) * Val(128)));
-  Val x237 = ((x236 + (get(ctx, arg0, 184, 0) * Val(256))) + (get(ctx, arg0, 185, 0) * Val(512)));
-  Val x238 = ((x237 + (get(ctx, arg0, 186, 0) * Val(1024))) + (get(ctx, arg0, 187, 0) * Val(2048)));
-  Val x239 = ((x238 + (get(ctx, arg0, 188, 0) * Val(4096))) + (get(ctx, arg0, 189, 0) * Val(8192)));
-  Val x240 =
-      ((x239 + (get(ctx, arg0, 190, 0) * Val(16384))) + (get(ctx, arg0, 191, 0) * Val(32768)));
-  Val x241 = (get(ctx, arg0, 192, 0) + (get(ctx, arg0, 193, 0) * Val(2)));
-  Val x242 = ((x241 + (get(ctx, arg0, 194, 0) * Val(4))) + (get(ctx, arg0, 195, 0) * Val(8)));
-  Val x243 = ((x242 + (get(ctx, arg0, 196, 0) * Val(16))) + (get(ctx, arg0, 197, 0) * Val(32)));
-  Val x244 = ((x243 + (get(ctx, arg0, 198, 0) * Val(64))) + (get(ctx, arg0, 199, 0) * Val(128)));
-  Val x245 = ((x244 + (get(ctx, arg0, 200, 0) * Val(256))) + (get(ctx, arg0, 201, 0) * Val(512)));
-  Val x246 = ((x245 + (get(ctx, arg0, 202, 0) * Val(1024))) + (get(ctx, arg0, 203, 0) * Val(2048)));
-  Val x247 = ((x246 + (get(ctx, arg0, 204, 0) * Val(4096))) + (get(ctx, arg0, 205, 0) * Val(8192)));
-  Val x248 =
-      ((x247 + (get(ctx, arg0, 206, 0) * Val(16384))) + (get(ctx, arg0, 207, 0) * Val(32768)));
-  Val x249 = (get(ctx, arg0, 144, 0) + (get(ctx, arg0, 145, 0) * Val(2)));
-  Val x250 = ((x249 + (get(ctx, arg0, 146, 0) * Val(4))) + (get(ctx, arg0, 147, 0) * Val(8)));
-  Val x251 = ((x250 + (get(ctx, arg0, 148, 0) * Val(16))) + (get(ctx, arg0, 149, 0) * Val(32)));
-  Val x252 = ((x251 + (get(ctx, arg0, 150, 0) * Val(64))) + (get(ctx, arg0, 151, 0) * Val(128)));
-  Val x253 = ((x252 + (get(ctx, arg0, 152, 0) * Val(256))) + (get(ctx, arg0, 153, 0) * Val(512)));
-  Val x254 = ((x253 + (get(ctx, arg0, 154, 0) * Val(1024))) + (get(ctx, arg0, 155, 0) * Val(2048)));
-  Val x255 = ((x254 + (get(ctx, arg0, 156, 0) * Val(4096))) + (get(ctx, arg0, 157, 0) * Val(8192)));
-  Val x256 =
-      ((x255 + (get(ctx, arg0, 158, 0) * Val(16384))) + (get(ctx, arg0, 159, 0) * Val(32768)));
-  Val x257 = (get(ctx, arg0, 160, 0) + (get(ctx, arg0, 161, 0) * Val(2)));
-  Val x258 = ((x257 + (get(ctx, arg0, 162, 0) * Val(4))) + (get(ctx, arg0, 163, 0) * Val(8)));
-  Val x259 = ((x258 + (get(ctx, arg0, 164, 0) * Val(16))) + (get(ctx, arg0, 165, 0) * Val(32)));
-  Val x260 = ((x259 + (get(ctx, arg0, 166, 0) * Val(64))) + (get(ctx, arg0, 167, 0) * Val(128)));
-  Val x261 = ((x260 + (get(ctx, arg0, 168, 0) * Val(256))) + (get(ctx, arg0, 169, 0) * Val(512)));
-  Val x262 = ((x261 + (get(ctx, arg0, 170, 0) * Val(1024))) + (get(ctx, arg0, 171, 0) * Val(2048)));
-  Val x263 = ((x262 + (get(ctx, arg0, 172, 0) * Val(4096))) + (get(ctx, arg0, 173, 0) * Val(8192)));
-  Val x264 =
-      ((x263 + (get(ctx, arg0, 174, 0) * Val(16384))) + (get(ctx, arg0, 175, 0) * Val(32768)));
+  Val x457 = (((x138 + (x139 * Val(2))) + (x140 * Val(4))) + (x141 * Val(8)));
+  Val x458 = (((x457 + (x142 * Val(16))) + (x143 * Val(32))) + (x144 * Val(64)));
+  Val x459 = (((x458 + (x145 * Val(128))) + (x146 * Val(256))) + (x147 * Val(512)));
+  Val x460 = (((x459 + (x148 * Val(1024))) + (x149 * Val(2048))) + (x150 * Val(4096)));
+  Val x461 = (((x460 + (x151 * Val(8192))) + (x152 * Val(16384))) + (x153 * Val(32768)));
+  Val x462 = (((x154 + (x155 * Val(2))) + (x156 * Val(4))) + (x157 * Val(8)));
+  Val x463 = (((x462 + (x158 * Val(16))) + (x159 * Val(32))) + (x160 * Val(64)));
+  Val x464 = (((x463 + (x161 * Val(128))) + (x162 * Val(256))) + (x163 * Val(512)));
+  Val x465 = (((x464 + (x164 * Val(1024))) + (x165 * Val(2048))) + (x166 * Val(4096)));
+  Val x466 = (((x465 + (x167 * Val(8192))) + (x168 * Val(16384))) + (x169 * Val(32768)));
+  Val x467 = (((x179 + (x180 * Val(2))) + (x181 * Val(4))) + (x182 * Val(8)));
+  Val x468 = (((x467 + (x183 * Val(16))) + (x184 * Val(32))) + (x185 * Val(64)));
+  Val x469 = (((x468 + (x186 * Val(128))) + (x187 * Val(256))) + (x188 * Val(512)));
+  Val x470 = (((x469 + (x189 * Val(1024))) + (x190 * Val(2048))) + (x191 * Val(4096)));
+  Val x471 = (((x470 + (x192 * Val(8192))) + (x193 * Val(16384))) + (x194 * Val(32768)));
+  Val x472 = (((x195 + (x196 * Val(2))) + (x197 * Val(4))) + (x198 * Val(8)));
+  Val x473 = (((x472 + (x199 * Val(16))) + (x200 * Val(32))) + (x201 * Val(64)));
+  Val x474 = (((x473 + (x202 * Val(128))) + (x203 * Val(256))) + (x204 * Val(512)));
+  Val x475 = (((x474 + (x205 * Val(1024))) + (x206 * Val(2048))) + (x207 * Val(4096)));
+  Val x476 = (((x475 + (x208 * Val(8192))) + (x209 * Val(16384))) + (x210 * Val(32768)));
+  Val x477 = (((x220 + (x221 * Val(2))) + (x222 * Val(4))) + (x223 * Val(8)));
+  Val x478 = (((x477 + (x224 * Val(16))) + (x225 * Val(32))) + (x226 * Val(64)));
+  Val x479 = (((x478 + (x227 * Val(128))) + (x228 * Val(256))) + (x229 * Val(512)));
+  Val x480 = (((x479 + (x230 * Val(1024))) + (x231 * Val(2048))) + (x232 * Val(4096)));
+  Val x481 = (((x480 + (x233 * Val(8192))) + (x234 * Val(16384))) + (x235 * Val(32768)));
+  Val x482 = (((x236 + (x237 * Val(2))) + (x238 * Val(4))) + (x239 * Val(8)));
+  Val x483 = (((x482 + (x240 * Val(16))) + (x241 * Val(32))) + (x242 * Val(64)));
+  Val x484 = (((x483 + (x243 * Val(128))) + (x244 * Val(256))) + (x245 * Val(512)));
+  Val x485 = (((x484 + (x246 * Val(1024))) + (x247 * Val(2048))) + (x248 * Val(4096)));
+  Val x486 = (((x485 + (x249 * Val(8192))) + (x250 * Val(16384))) + (x251 * Val(32768)));
+  Val x487 = (((x261 + (x262 * Val(2))) + (x263 * Val(4))) + (x264 * Val(8)));
+  Val x488 = (((x487 + (x265 * Val(16))) + (x266 * Val(32))) + (x267 * Val(64)));
+  Val x489 = (((x488 + (x268 * Val(128))) + (x269 * Val(256))) + (x270 * Val(512)));
+  Val x490 = (((x489 + (x271 * Val(1024))) + (x272 * Val(2048))) + (x273 * Val(4096)));
+  Val x491 = (((x490 + (x274 * Val(8192))) + (x275 * Val(16384))) + (x276 * Val(32768)));
+  Val x492 = (((x277 + (x278 * Val(2))) + (x279 * Val(4))) + (x280 * Val(8)));
+  Val x493 = (((x492 + (x281 * Val(16))) + (x282 * Val(32))) + (x283 * Val(64)));
+  Val x494 = (((x493 + (x284 * Val(128))) + (x285 * Val(256))) + (x286 * Val(512)));
+  Val x495 = (((x494 + (x287 * Val(1024))) + (x288 * Val(2048))) + (x289 * Val(4096)));
+  Val x496 = (((x495 + (x290 * Val(8192))) + (x291 * Val(16384))) + (x292 * Val(32768)));
   // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:259)
-  Val x265 = (get(ctx, arg0, 496, 0) + (get(ctx, arg0, 497, 0) * Val(2)));
-  Val x266 = ((x265 + (get(ctx, arg0, 498, 0) * Val(4))) + (get(ctx, arg0, 499, 0) * Val(8)));
-  Val x267 = ((x266 + (get(ctx, arg0, 500, 0) * Val(16))) + (get(ctx, arg0, 501, 0) * Val(32)));
-  Val x268 = ((x267 + (get(ctx, arg0, 502, 0) * Val(64))) + (get(ctx, arg0, 503, 0) * Val(128)));
-  Val x269 = ((x268 + (get(ctx, arg0, 504, 0) * Val(256))) + (get(ctx, arg0, 505, 0) * Val(512)));
-  Val x270 = ((x269 + (get(ctx, arg0, 506, 0) * Val(1024))) + (get(ctx, arg0, 507, 0) * Val(2048)));
-  Val x271 = ((x270 + (get(ctx, arg0, 508, 0) * Val(4096))) + (get(ctx, arg0, 509, 0) * Val(8192)));
-  Val x272 =
-      ((x271 + (get(ctx, arg0, 510, 0) * Val(16384))) + (get(ctx, arg0, 511, 0) * Val(32768)));
-  Val x273 = (get(ctx, arg0, 512, 0) + (get(ctx, arg0, 513, 0) * Val(2)));
-  Val x274 = ((x273 + (get(ctx, arg0, 514, 0) * Val(4))) + (get(ctx, arg0, 515, 0) * Val(8)));
-  Val x275 = ((x274 + (get(ctx, arg0, 516, 0) * Val(16))) + (get(ctx, arg0, 517, 0) * Val(32)));
-  Val x276 = ((x275 + (get(ctx, arg0, 518, 0) * Val(64))) + (get(ctx, arg0, 519, 0) * Val(128)));
-  Val x277 = ((x276 + (get(ctx, arg0, 520, 0) * Val(256))) + (get(ctx, arg0, 521, 0) * Val(512)));
-  Val x278 = ((x277 + (get(ctx, arg0, 522, 0) * Val(1024))) + (get(ctx, arg0, 523, 0) * Val(2048)));
-  Val x279 = ((x278 + (get(ctx, arg0, 524, 0) * Val(4096))) + (get(ctx, arg0, 525, 0) * Val(8192)));
-  Val x280 =
-      ((x279 + (get(ctx, arg0, 526, 0) * Val(16384))) + (get(ctx, arg0, 527, 0) * Val(32768)));
-  Val x281 = (get(ctx, arg0, 464, 0) + (get(ctx, arg0, 465, 0) * Val(2)));
-  Val x282 = ((x281 + (get(ctx, arg0, 466, 0) * Val(4))) + (get(ctx, arg0, 467, 0) * Val(8)));
-  Val x283 = ((x282 + (get(ctx, arg0, 468, 0) * Val(16))) + (get(ctx, arg0, 469, 0) * Val(32)));
-  Val x284 = ((x283 + (get(ctx, arg0, 470, 0) * Val(64))) + (get(ctx, arg0, 471, 0) * Val(128)));
-  Val x285 = ((x284 + (get(ctx, arg0, 472, 0) * Val(256))) + (get(ctx, arg0, 473, 0) * Val(512)));
-  Val x286 = ((x285 + (get(ctx, arg0, 474, 0) * Val(1024))) + (get(ctx, arg0, 475, 0) * Val(2048)));
-  Val x287 = ((x286 + (get(ctx, arg0, 476, 0) * Val(4096))) + (get(ctx, arg0, 477, 0) * Val(8192)));
-  Val x288 =
-      ((x287 + (get(ctx, arg0, 478, 0) * Val(16384))) + (get(ctx, arg0, 479, 0) * Val(32768)));
-  Val x289 = (get(ctx, arg0, 480, 0) + (get(ctx, arg0, 481, 0) * Val(2)));
-  Val x290 = ((x289 + (get(ctx, arg0, 482, 0) * Val(4))) + (get(ctx, arg0, 483, 0) * Val(8)));
-  Val x291 = ((x290 + (get(ctx, arg0, 484, 0) * Val(16))) + (get(ctx, arg0, 485, 0) * Val(32)));
-  Val x292 = ((x291 + (get(ctx, arg0, 486, 0) * Val(64))) + (get(ctx, arg0, 487, 0) * Val(128)));
-  Val x293 = ((x292 + (get(ctx, arg0, 488, 0) * Val(256))) + (get(ctx, arg0, 489, 0) * Val(512)));
-  Val x294 = ((x293 + (get(ctx, arg0, 490, 0) * Val(1024))) + (get(ctx, arg0, 491, 0) * Val(2048)));
-  Val x295 = ((x294 + (get(ctx, arg0, 492, 0) * Val(4096))) + (get(ctx, arg0, 493, 0) * Val(8192)));
-  Val x296 =
-      ((x295 + (get(ctx, arg0, 494, 0) * Val(16384))) + (get(ctx, arg0, 495, 0) * Val(32768)));
-  Val x297 = (get(ctx, arg0, 432, 0) + (get(ctx, arg0, 433, 0) * Val(2)));
-  Val x298 = ((x297 + (get(ctx, arg0, 434, 0) * Val(4))) + (get(ctx, arg0, 435, 0) * Val(8)));
-  Val x299 = ((x298 + (get(ctx, arg0, 436, 0) * Val(16))) + (get(ctx, arg0, 437, 0) * Val(32)));
-  Val x300 = ((x299 + (get(ctx, arg0, 438, 0) * Val(64))) + (get(ctx, arg0, 439, 0) * Val(128)));
-  Val x301 = ((x300 + (get(ctx, arg0, 440, 0) * Val(256))) + (get(ctx, arg0, 441, 0) * Val(512)));
-  Val x302 = ((x301 + (get(ctx, arg0, 442, 0) * Val(1024))) + (get(ctx, arg0, 443, 0) * Val(2048)));
-  Val x303 = ((x302 + (get(ctx, arg0, 444, 0) * Val(4096))) + (get(ctx, arg0, 445, 0) * Val(8192)));
-  Val x304 =
-      ((x303 + (get(ctx, arg0, 446, 0) * Val(16384))) + (get(ctx, arg0, 447, 0) * Val(32768)));
-  Val x305 = (get(ctx, arg0, 448, 0) + (get(ctx, arg0, 449, 0) * Val(2)));
-  Val x306 = ((x305 + (get(ctx, arg0, 450, 0) * Val(4))) + (get(ctx, arg0, 451, 0) * Val(8)));
-  Val x307 = ((x306 + (get(ctx, arg0, 452, 0) * Val(16))) + (get(ctx, arg0, 453, 0) * Val(32)));
-  Val x308 = ((x307 + (get(ctx, arg0, 454, 0) * Val(64))) + (get(ctx, arg0, 455, 0) * Val(128)));
-  Val x309 = ((x308 + (get(ctx, arg0, 456, 0) * Val(256))) + (get(ctx, arg0, 457, 0) * Val(512)));
-  Val x310 = ((x309 + (get(ctx, arg0, 458, 0) * Val(1024))) + (get(ctx, arg0, 459, 0) * Val(2048)));
-  Val x311 = ((x310 + (get(ctx, arg0, 460, 0) * Val(4096))) + (get(ctx, arg0, 461, 0) * Val(8192)));
-  Val x312 =
-      ((x311 + (get(ctx, arg0, 462, 0) * Val(16384))) + (get(ctx, arg0, 463, 0) * Val(32768)));
-  Val x313 = (get(ctx, arg0, 400, 0) + (get(ctx, arg0, 401, 0) * Val(2)));
-  Val x314 = ((x313 + (get(ctx, arg0, 402, 0) * Val(4))) + (get(ctx, arg0, 403, 0) * Val(8)));
-  Val x315 = ((x314 + (get(ctx, arg0, 404, 0) * Val(16))) + (get(ctx, arg0, 405, 0) * Val(32)));
-  Val x316 = ((x315 + (get(ctx, arg0, 406, 0) * Val(64))) + (get(ctx, arg0, 407, 0) * Val(128)));
-  Val x317 = ((x316 + (get(ctx, arg0, 408, 0) * Val(256))) + (get(ctx, arg0, 409, 0) * Val(512)));
-  Val x318 = ((x317 + (get(ctx, arg0, 410, 0) * Val(1024))) + (get(ctx, arg0, 411, 0) * Val(2048)));
-  Val x319 = ((x318 + (get(ctx, arg0, 412, 0) * Val(4096))) + (get(ctx, arg0, 413, 0) * Val(8192)));
-  Val x320 =
-      ((x319 + (get(ctx, arg0, 414, 0) * Val(16384))) + (get(ctx, arg0, 415, 0) * Val(32768)));
-  Val x321 = (get(ctx, arg0, 416, 0) + (get(ctx, arg0, 417, 0) * Val(2)));
-  Val x322 = ((x321 + (get(ctx, arg0, 418, 0) * Val(4))) + (get(ctx, arg0, 419, 0) * Val(8)));
-  Val x323 = ((x322 + (get(ctx, arg0, 420, 0) * Val(16))) + (get(ctx, arg0, 421, 0) * Val(32)));
-  Val x324 = ((x323 + (get(ctx, arg0, 422, 0) * Val(64))) + (get(ctx, arg0, 423, 0) * Val(128)));
-  Val x325 = ((x324 + (get(ctx, arg0, 424, 0) * Val(256))) + (get(ctx, arg0, 425, 0) * Val(512)));
-  Val x326 = ((x325 + (get(ctx, arg0, 426, 0) * Val(1024))) + (get(ctx, arg0, 427, 0) * Val(2048)));
-  Val x327 = ((x326 + (get(ctx, arg0, 428, 0) * Val(4096))) + (get(ctx, arg0, 429, 0) * Val(8192)));
-  Val x328 =
-      ((x327 + (get(ctx, arg0, 430, 0) * Val(16384))) + (get(ctx, arg0, 431, 0) * Val(32768)));
+  Val x497 = (((x302 + (x303 * Val(2))) + (x304 * Val(4))) + (x305 * Val(8)));
+  Val x498 = (((x497 + (x306 * Val(16))) + (x307 * Val(32))) + (x308 * Val(64)));
+  Val x499 = (((x498 + (x309 * Val(128))) + (x310 * Val(256))) + (x311 * Val(512)));
+  Val x500 = (((x499 + (x312 * Val(1024))) + (x313 * Val(2048))) + (x314 * Val(4096)));
+  Val x501 = (((x500 + (x315 * Val(8192))) + (x316 * Val(16384))) + (x317 * Val(32768)));
+  Val x502 = (((x318 + (x319 * Val(2))) + (x320 * Val(4))) + (x321 * Val(8)));
+  Val x503 = (((x502 + (x322 * Val(16))) + (x323 * Val(32))) + (x324 * Val(64)));
+  Val x504 = (((x503 + (x325 * Val(128))) + (x326 * Val(256))) + (x327 * Val(512)));
+  Val x505 = (((x504 + (x328 * Val(1024))) + (x329 * Val(2048))) + (x330 * Val(4096)));
+  Val x506 = (((x505 + (x331 * Val(8192))) + (x332 * Val(16384))) + (x333 * Val(32768)));
+  Val x507 = (((x343 + (x344 * Val(2))) + (x345 * Val(4))) + (x346 * Val(8)));
+  Val x508 = (((x507 + (x347 * Val(16))) + (x348 * Val(32))) + (x349 * Val(64)));
+  Val x509 = (((x508 + (x350 * Val(128))) + (x351 * Val(256))) + (x352 * Val(512)));
+  Val x510 = (((x509 + (x353 * Val(1024))) + (x354 * Val(2048))) + (x355 * Val(4096)));
+  Val x511 = (((x510 + (x356 * Val(8192))) + (x357 * Val(16384))) + (x358 * Val(32768)));
+  Val x512 = (((x359 + (x360 * Val(2))) + (x361 * Val(4))) + (x362 * Val(8)));
+  Val x513 = (((x512 + (x363 * Val(16))) + (x364 * Val(32))) + (x365 * Val(64)));
+  Val x514 = (((x513 + (x366 * Val(128))) + (x367 * Val(256))) + (x368 * Val(512)));
+  Val x515 = (((x514 + (x369 * Val(1024))) + (x370 * Val(2048))) + (x371 * Val(4096)));
+  Val x516 = (((x515 + (x372 * Val(8192))) + (x373 * Val(16384))) + (x374 * Val(32768)));
+  Val x517 = (((x384 + (x385 * Val(2))) + (x386 * Val(4))) + (x387 * Val(8)));
+  Val x518 = (((x517 + (x388 * Val(16))) + (x389 * Val(32))) + (x390 * Val(64)));
+  Val x519 = (((x518 + (x391 * Val(128))) + (x392 * Val(256))) + (x393 * Val(512)));
+  Val x520 = (((x519 + (x394 * Val(1024))) + (x395 * Val(2048))) + (x396 * Val(4096)));
+  Val x521 = (((x520 + (x397 * Val(8192))) + (x398 * Val(16384))) + (x399 * Val(32768)));
+  Val x522 = (((x400 + (x401 * Val(2))) + (x402 * Val(4))) + (x403 * Val(8)));
+  Val x523 = (((x522 + (x404 * Val(16))) + (x405 * Val(32))) + (x406 * Val(64)));
+  Val x524 = (((x523 + (x407 * Val(128))) + (x408 * Val(256))) + (x409 * Val(512)));
+  Val x525 = (((x524 + (x410 * Val(1024))) + (x411 * Val(2048))) + (x412 * Val(4096)));
+  Val x526 = (((x525 + (x413 * Val(8192))) + (x414 * Val(16384))) + (x415 * Val(32768)));
+  Val x527 = (((x425 + (x426 * Val(2))) + (x427 * Val(4))) + (x428 * Val(8)));
+  Val x528 = (((x527 + (x429 * Val(16))) + (x430 * Val(32))) + (x431 * Val(64)));
+  Val x529 = (((x528 + (x432 * Val(128))) + (x433 * Val(256))) + (x434 * Val(512)));
+  Val x530 = (((x529 + (x435 * Val(1024))) + (x436 * Val(2048))) + (x437 * Val(4096)));
+  Val x531 = (((x530 + (x438 * Val(8192))) + (x439 * Val(16384))) + (x440 * Val(32768)));
+  Val x532 = (((x441 + (x442 * Val(2))) + (x443 * Val(4))) + (x444 * Val(8)));
+  Val x533 = (((x532 + (x445 * Val(16))) + (x446 * Val(32))) + (x447 * Val(64)));
+  Val x534 = (((x533 + (x448 * Val(128))) + (x449 * Val(256))) + (x450 * Val(512)));
+  Val x535 = (((x534 + (x451 * Val(1024))) + (x452 * Val(2048))) + (x453 * Val(4096)));
+  Val x536 = (((x535 + (x454 * Val(8192))) + (x455 * Val(16384))) + (x456 * Val(32768)));
   // Reg(<preamble>:4)
   // TopState(zirgen/circuit/keccak2/top.zir:36)
   // ShaNextBlockCycle(zirgen/circuit/keccak2/top.zir:262)
@@ -998,134 +1190,134 @@ __device__ void step_Top_35(ExecContext& ctx, MutableBuf arg0) {
   set(ctx, arg0, 141, Val(0));
   set(ctx, arg0, 142, Val(0));
   set(ctx, arg0, 143, Val(0));
-  set(ctx, arg0, 144, get(ctx, arg0, 144, 0));
-  set(ctx, arg0, 145, get(ctx, arg0, 145, 0));
-  set(ctx, arg0, 146, get(ctx, arg0, 146, 0));
-  set(ctx, arg0, 147, get(ctx, arg0, 147, 0));
-  set(ctx, arg0, 148, get(ctx, arg0, 148, 0));
-  set(ctx, arg0, 149, get(ctx, arg0, 149, 0));
-  set(ctx, arg0, 150, get(ctx, arg0, 150, 0));
-  set(ctx, arg0, 151, get(ctx, arg0, 151, 0));
-  set(ctx, arg0, 152, get(ctx, arg0, 152, 0));
-  set(ctx, arg0, 153, get(ctx, arg0, 153, 0));
-  set(ctx, arg0, 154, get(ctx, arg0, 154, 0));
-  set(ctx, arg0, 155, get(ctx, arg0, 155, 0));
-  set(ctx, arg0, 156, get(ctx, arg0, 156, 0));
-  set(ctx, arg0, 157, get(ctx, arg0, 157, 0));
-  set(ctx, arg0, 158, get(ctx, arg0, 158, 0));
-  set(ctx, arg0, 159, get(ctx, arg0, 159, 0));
-  set(ctx, arg0, 160, get(ctx, arg0, 160, 0));
-  set(ctx, arg0, 161, get(ctx, arg0, 161, 0));
-  set(ctx, arg0, 162, get(ctx, arg0, 162, 0));
-  set(ctx, arg0, 163, get(ctx, arg0, 163, 0));
-  set(ctx, arg0, 164, get(ctx, arg0, 164, 0));
-  set(ctx, arg0, 165, get(ctx, arg0, 165, 0));
-  set(ctx, arg0, 166, get(ctx, arg0, 166, 0));
-  set(ctx, arg0, 167, get(ctx, arg0, 167, 0));
-  set(ctx, arg0, 168, get(ctx, arg0, 168, 0));
-  set(ctx, arg0, 169, get(ctx, arg0, 169, 0));
-  set(ctx, arg0, 170, get(ctx, arg0, 170, 0));
-  set(ctx, arg0, 171, get(ctx, arg0, 171, 0));
-  set(ctx, arg0, 172, get(ctx, arg0, 172, 0));
-  set(ctx, arg0, 173, get(ctx, arg0, 173, 0));
-  set(ctx, arg0, 174, get(ctx, arg0, 174, 0));
-  set(ctx, arg0, 175, get(ctx, arg0, 175, 0));
-  set(ctx, arg0, 176, get(ctx, arg0, 176, 0));
-  set(ctx, arg0, 177, get(ctx, arg0, 177, 0));
-  set(ctx, arg0, 178, get(ctx, arg0, 178, 0));
-  set(ctx, arg0, 179, get(ctx, arg0, 179, 0));
-  set(ctx, arg0, 180, get(ctx, arg0, 180, 0));
-  set(ctx, arg0, 181, get(ctx, arg0, 181, 0));
-  set(ctx, arg0, 182, get(ctx, arg0, 182, 0));
-  set(ctx, arg0, 183, get(ctx, arg0, 183, 0));
-  set(ctx, arg0, 184, get(ctx, arg0, 184, 0));
-  set(ctx, arg0, 185, get(ctx, arg0, 185, 0));
-  set(ctx, arg0, 186, get(ctx, arg0, 186, 0));
-  set(ctx, arg0, 187, get(ctx, arg0, 187, 0));
-  set(ctx, arg0, 188, get(ctx, arg0, 188, 0));
-  set(ctx, arg0, 189, get(ctx, arg0, 189, 0));
-  set(ctx, arg0, 190, get(ctx, arg0, 190, 0));
-  set(ctx, arg0, 191, get(ctx, arg0, 191, 0));
-  set(ctx, arg0, 192, get(ctx, arg0, 192, 0));
-  set(ctx, arg0, 193, get(ctx, arg0, 193, 0));
-  set(ctx, arg0, 194, get(ctx, arg0, 194, 0));
-  set(ctx, arg0, 195, get(ctx, arg0, 195, 0));
-  set(ctx, arg0, 196, get(ctx, arg0, 196, 0));
-  set(ctx, arg0, 197, get(ctx, arg0, 197, 0));
-  set(ctx, arg0, 198, get(ctx, arg0, 198, 0));
-  set(ctx, arg0, 199, get(ctx, arg0, 199, 0));
-  set(ctx, arg0, 200, get(ctx, arg0, 200, 0));
-  set(ctx, arg0, 201, get(ctx, arg0, 201, 0));
-  set(ctx, arg0, 202, get(ctx, arg0, 202, 0));
-  set(ctx, arg0, 203, get(ctx, arg0, 203, 0));
-  set(ctx, arg0, 204, get(ctx, arg0, 204, 0));
-  set(ctx, arg0, 205, get(ctx, arg0, 205, 0));
-  set(ctx, arg0, 206, get(ctx, arg0, 206, 0));
-  set(ctx, arg0, 207, get(ctx, arg0, 207, 0));
-  set(ctx, arg0, 208, get(ctx, arg0, 208, 0));
-  set(ctx, arg0, 209, get(ctx, arg0, 209, 0));
-  set(ctx, arg0, 210, get(ctx, arg0, 210, 0));
-  set(ctx, arg0, 211, get(ctx, arg0, 211, 0));
-  set(ctx, arg0, 212, get(ctx, arg0, 212, 0));
-  set(ctx, arg0, 213, get(ctx, arg0, 213, 0));
-  set(ctx, arg0, 214, get(ctx, arg0, 214, 0));
-  set(ctx, arg0, 215, get(ctx, arg0, 215, 0));
-  set(ctx, arg0, 216, get(ctx, arg0, 216, 0));
-  set(ctx, arg0, 217, get(ctx, arg0, 217, 0));
-  set(ctx, arg0, 218, get(ctx, arg0, 218, 0));
-  set(ctx, arg0, 219, get(ctx, arg0, 219, 0));
-  set(ctx, arg0, 220, get(ctx, arg0, 220, 0));
-  set(ctx, arg0, 221, get(ctx, arg0, 221, 0));
-  set(ctx, arg0, 222, get(ctx, arg0, 222, 0));
-  set(ctx, arg0, 223, get(ctx, arg0, 223, 0));
-  set(ctx, arg0, 224, get(ctx, arg0, 224, 0));
-  set(ctx, arg0, 225, get(ctx, arg0, 225, 0));
-  set(ctx, arg0, 226, get(ctx, arg0, 226, 0));
-  set(ctx, arg0, 227, get(ctx, arg0, 227, 0));
-  set(ctx, arg0, 228, get(ctx, arg0, 228, 0));
-  set(ctx, arg0, 229, get(ctx, arg0, 229, 0));
-  set(ctx, arg0, 230, get(ctx, arg0, 230, 0));
-  set(ctx, arg0, 231, get(ctx, arg0, 231, 0));
-  set(ctx, arg0, 232, get(ctx, arg0, 232, 0));
-  set(ctx, arg0, 233, get(ctx, arg0, 233, 0));
-  set(ctx, arg0, 234, get(ctx, arg0, 234, 0));
-  set(ctx, arg0, 235, get(ctx, arg0, 235, 0));
-  set(ctx, arg0, 236, get(ctx, arg0, 236, 0));
-  set(ctx, arg0, 237, get(ctx, arg0, 237, 0));
-  set(ctx, arg0, 238, get(ctx, arg0, 238, 0));
-  set(ctx, arg0, 239, get(ctx, arg0, 239, 0));
-  set(ctx, arg0, 240, get(ctx, arg0, 240, 0));
-  set(ctx, arg0, 241, get(ctx, arg0, 241, 0));
-  set(ctx, arg0, 242, get(ctx, arg0, 242, 0));
-  set(ctx, arg0, 243, get(ctx, arg0, 243, 0));
-  set(ctx, arg0, 244, get(ctx, arg0, 244, 0));
-  set(ctx, arg0, 245, get(ctx, arg0, 245, 0));
-  set(ctx, arg0, 246, get(ctx, arg0, 246, 0));
-  set(ctx, arg0, 247, get(ctx, arg0, 247, 0));
-  set(ctx, arg0, 248, get(ctx, arg0, 248, 0));
-  set(ctx, arg0, 249, get(ctx, arg0, 249, 0));
-  set(ctx, arg0, 250, get(ctx, arg0, 250, 0));
-  set(ctx, arg0, 251, get(ctx, arg0, 251, 0));
-  set(ctx, arg0, 252, get(ctx, arg0, 252, 0));
-  set(ctx, arg0, 253, get(ctx, arg0, 253, 0));
-  set(ctx, arg0, 254, get(ctx, arg0, 254, 0));
-  set(ctx, arg0, 255, get(ctx, arg0, 255, 0));
-  set(ctx, arg0, 256, get(ctx, arg0, 256, 0));
-  set(ctx, arg0, 257, get(ctx, arg0, 257, 0));
-  set(ctx, arg0, 258, get(ctx, arg0, 258, 0));
-  set(ctx, arg0, 259, get(ctx, arg0, 259, 0));
-  set(ctx, arg0, 260, get(ctx, arg0, 260, 0));
-  set(ctx, arg0, 261, get(ctx, arg0, 261, 0));
-  set(ctx, arg0, 262, get(ctx, arg0, 262, 0));
-  set(ctx, arg0, 263, get(ctx, arg0, 263, 0));
-  set(ctx, arg0, 264, get(ctx, arg0, 264, 0));
-  set(ctx, arg0, 265, get(ctx, arg0, 265, 0));
-  set(ctx, arg0, 266, get(ctx, arg0, 266, 0));
-  set(ctx, arg0, 267, get(ctx, arg0, 267, 0));
-  set(ctx, arg0, 268, get(ctx, arg0, 268, 0));
-  set(ctx, arg0, 269, get(ctx, arg0, 269, 0));
-  set(ctx, arg0, 270, get(ctx, arg0, 270, 0));
-  set(ctx, arg0, 271, get(ctx, arg0, 271, 0));
+  set(ctx, arg0, 144, x261);
+  set(ctx, arg0, 145, x262);
+  set(ctx, arg0, 146, x263);
+  set(ctx, arg0, 147, x264);
+  set(ctx, arg0, 148, x265);
+  set(ctx, arg0, 149, x266);
+  set(ctx, arg0, 150, x267);
+  set(ctx, arg0, 151, x268);
+  set(ctx, arg0, 152, x269);
+  set(ctx, arg0, 153, x270);
+  set(ctx, arg0, 154, x271);
+  set(ctx, arg0, 155, x272);
+  set(ctx, arg0, 156, x273);
+  set(ctx, arg0, 157, x274);
+  set(ctx, arg0, 158, x275);
+  set(ctx, arg0, 159, x276);
+  set(ctx, arg0, 160, x277);
+  set(ctx, arg0, 161, x278);
+  set(ctx, arg0, 162, x279);
+  set(ctx, arg0, 163, x280);
+  set(ctx, arg0, 164, x281);
+  set(ctx, arg0, 165, x282);
+  set(ctx, arg0, 166, x283);
+  set(ctx, arg0, 167, x284);
+  set(ctx, arg0, 168, x285);
+  set(ctx, arg0, 169, x286);
+  set(ctx, arg0, 170, x287);
+  set(ctx, arg0, 171, x288);
+  set(ctx, arg0, 172, x289);
+  set(ctx, arg0, 173, x290);
+  set(ctx, arg0, 174, x291);
+  set(ctx, arg0, 175, x292);
+  set(ctx, arg0, 176, x220);
+  set(ctx, arg0, 177, x221);
+  set(ctx, arg0, 178, x222);
+  set(ctx, arg0, 179, x223);
+  set(ctx, arg0, 180, x224);
+  set(ctx, arg0, 181, x225);
+  set(ctx, arg0, 182, x226);
+  set(ctx, arg0, 183, x227);
+  set(ctx, arg0, 184, x228);
+  set(ctx, arg0, 185, x229);
+  set(ctx, arg0, 186, x230);
+  set(ctx, arg0, 187, x231);
+  set(ctx, arg0, 188, x232);
+  set(ctx, arg0, 189, x233);
+  set(ctx, arg0, 190, x234);
+  set(ctx, arg0, 191, x235);
+  set(ctx, arg0, 192, x236);
+  set(ctx, arg0, 193, x237);
+  set(ctx, arg0, 194, x238);
+  set(ctx, arg0, 195, x239);
+  set(ctx, arg0, 196, x240);
+  set(ctx, arg0, 197, x241);
+  set(ctx, arg0, 198, x242);
+  set(ctx, arg0, 199, x243);
+  set(ctx, arg0, 200, x244);
+  set(ctx, arg0, 201, x245);
+  set(ctx, arg0, 202, x246);
+  set(ctx, arg0, 203, x247);
+  set(ctx, arg0, 204, x248);
+  set(ctx, arg0, 205, x249);
+  set(ctx, arg0, 206, x250);
+  set(ctx, arg0, 207, x251);
+  set(ctx, arg0, 208, x179);
+  set(ctx, arg0, 209, x180);
+  set(ctx, arg0, 210, x181);
+  set(ctx, arg0, 211, x182);
+  set(ctx, arg0, 212, x183);
+  set(ctx, arg0, 213, x184);
+  set(ctx, arg0, 214, x185);
+  set(ctx, arg0, 215, x186);
+  set(ctx, arg0, 216, x187);
+  set(ctx, arg0, 217, x188);
+  set(ctx, arg0, 218, x189);
+  set(ctx, arg0, 219, x190);
+  set(ctx, arg0, 220, x191);
+  set(ctx, arg0, 221, x192);
+  set(ctx, arg0, 222, x193);
+  set(ctx, arg0, 223, x194);
+  set(ctx, arg0, 224, x195);
+  set(ctx, arg0, 225, x196);
+  set(ctx, arg0, 226, x197);
+  set(ctx, arg0, 227, x198);
+  set(ctx, arg0, 228, x199);
+  set(ctx, arg0, 229, x200);
+  set(ctx, arg0, 230, x201);
+  set(ctx, arg0, 231, x202);
+  set(ctx, arg0, 232, x203);
+  set(ctx, arg0, 233, x204);
+  set(ctx, arg0, 234, x205);
+  set(ctx, arg0, 235, x206);
+  set(ctx, arg0, 236, x207);
+  set(ctx, arg0, 237, x208);
+  set(ctx, arg0, 238, x209);
+  set(ctx, arg0, 239, x210);
+  set(ctx, arg0, 240, x138);
+  set(ctx, arg0, 241, x139);
+  set(ctx, arg0, 242, x140);
+  set(ctx, arg0, 243, x141);
+  set(ctx, arg0, 244, x142);
+  set(ctx, arg0, 245, x143);
+  set(ctx, arg0, 246, x144);
+  set(ctx, arg0, 247, x145);
+  set(ctx, arg0, 248, x146);
+  set(ctx, arg0, 249, x147);
+  set(ctx, arg0, 250, x148);
+  set(ctx, arg0, 251, x149);
+  set(ctx, arg0, 252, x150);
+  set(ctx, arg0, 253, x151);
+  set(ctx, arg0, 254, x152);
+  set(ctx, arg0, 255, x153);
+  set(ctx, arg0, 256, x154);
+  set(ctx, arg0, 257, x155);
+  set(ctx, arg0, 258, x156);
+  set(ctx, arg0, 259, x157);
+  set(ctx, arg0, 260, x158);
+  set(ctx, arg0, 261, x159);
+  set(ctx, arg0, 262, x160);
+  set(ctx, arg0, 263, x161);
+  set(ctx, arg0, 264, x162);
+  set(ctx, arg0, 265, x163);
+  set(ctx, arg0, 266, x164);
+  set(ctx, arg0, 267, x165);
+  set(ctx, arg0, 268, x166);
+  set(ctx, arg0, 269, x167);
+  set(ctx, arg0, 270, x168);
+  set(ctx, arg0, 271, x169);
   set(ctx, arg0, 272, Val(0));
   set(ctx, arg0, 273, Val(0));
   set(ctx, arg0, 274, Val(0));
@@ -1254,134 +1446,134 @@ __device__ void step_Top_35(ExecContext& ctx, MutableBuf arg0) {
   set(ctx, arg0, 397, Val(0));
   set(ctx, arg0, 398, Val(0));
   set(ctx, arg0, 399, Val(0));
-  set(ctx, arg0, 400, get(ctx, arg0, 400, 0));
-  set(ctx, arg0, 401, get(ctx, arg0, 401, 0));
-  set(ctx, arg0, 402, get(ctx, arg0, 402, 0));
-  set(ctx, arg0, 403, get(ctx, arg0, 403, 0));
-  set(ctx, arg0, 404, get(ctx, arg0, 404, 0));
-  set(ctx, arg0, 405, get(ctx, arg0, 405, 0));
-  set(ctx, arg0, 406, get(ctx, arg0, 406, 0));
-  set(ctx, arg0, 407, get(ctx, arg0, 407, 0));
-  set(ctx, arg0, 408, get(ctx, arg0, 408, 0));
-  set(ctx, arg0, 409, get(ctx, arg0, 409, 0));
-  set(ctx, arg0, 410, get(ctx, arg0, 410, 0));
-  set(ctx, arg0, 411, get(ctx, arg0, 411, 0));
-  set(ctx, arg0, 412, get(ctx, arg0, 412, 0));
-  set(ctx, arg0, 413, get(ctx, arg0, 413, 0));
-  set(ctx, arg0, 414, get(ctx, arg0, 414, 0));
-  set(ctx, arg0, 415, get(ctx, arg0, 415, 0));
-  set(ctx, arg0, 416, get(ctx, arg0, 416, 0));
-  set(ctx, arg0, 417, get(ctx, arg0, 417, 0));
-  set(ctx, arg0, 418, get(ctx, arg0, 418, 0));
-  set(ctx, arg0, 419, get(ctx, arg0, 419, 0));
-  set(ctx, arg0, 420, get(ctx, arg0, 420, 0));
-  set(ctx, arg0, 421, get(ctx, arg0, 421, 0));
-  set(ctx, arg0, 422, get(ctx, arg0, 422, 0));
-  set(ctx, arg0, 423, get(ctx, arg0, 423, 0));
-  set(ctx, arg0, 424, get(ctx, arg0, 424, 0));
-  set(ctx, arg0, 425, get(ctx, arg0, 425, 0));
-  set(ctx, arg0, 426, get(ctx, arg0, 426, 0));
-  set(ctx, arg0, 427, get(ctx, arg0, 427, 0));
-  set(ctx, arg0, 428, get(ctx, arg0, 428, 0));
-  set(ctx, arg0, 429, get(ctx, arg0, 429, 0));
-  set(ctx, arg0, 430, get(ctx, arg0, 430, 0));
-  set(ctx, arg0, 431, get(ctx, arg0, 431, 0));
-  set(ctx, arg0, 432, get(ctx, arg0, 432, 0));
-  set(ctx, arg0, 433, get(ctx, arg0, 433, 0));
-  set(ctx, arg0, 434, get(ctx, arg0, 434, 0));
-  set(ctx, arg0, 435, get(ctx, arg0, 435, 0));
-  set(ctx, arg0, 436, get(ctx, arg0, 436, 0));
-  set(ctx, arg0, 437, get(ctx, arg0, 437, 0));
-  set(ctx, arg0, 438, get(ctx, arg0, 438, 0));
-  set(ctx, arg0, 439, get(ctx, arg0, 439, 0));
-  set(ctx, arg0, 440, get(ctx, arg0, 440, 0));
-  set(ctx, arg0, 441, get(ctx, arg0, 441, 0));
-  set(ctx, arg0, 442, get(ctx, arg0, 442, 0));
-  set(ctx, arg0, 443, get(ctx, arg0, 443, 0));
-  set(ctx, arg0, 444, get(ctx, arg0, 444, 0));
-  set(ctx, arg0, 445, get(ctx, arg0, 445, 0));
-  set(ctx, arg0, 446, get(ctx, arg0, 446, 0));
-  set(ctx, arg0, 447, get(ctx, arg0, 447, 0));
-  set(ctx, arg0, 448, get(ctx, arg0, 448, 0));
-  set(ctx, arg0, 449, get(ctx, arg0, 449, 0));
-  set(ctx, arg0, 450, get(ctx, arg0, 450, 0));
-  set(ctx, arg0, 451, get(ctx, arg0, 451, 0));
-  set(ctx, arg0, 452, get(ctx, arg0, 452, 0));
-  set(ctx, arg0, 453, get(ctx, arg0, 453, 0));
-  set(ctx, arg0, 454, get(ctx, arg0, 454, 0));
-  set(ctx, arg0, 455, get(ctx, arg0, 455, 0));
-  set(ctx, arg0, 456, get(ctx, arg0, 456, 0));
-  set(ctx, arg0, 457, get(ctx, arg0, 457, 0));
-  set(ctx, arg0, 458, get(ctx, arg0, 458, 0));
-  set(ctx, arg0, 459, get(ctx, arg0, 459, 0));
-  set(ctx, arg0, 460, get(ctx, arg0, 460, 0));
-  set(ctx, arg0, 461, get(ctx, arg0, 461, 0));
-  set(ctx, arg0, 462, get(ctx, arg0, 462, 0));
-  set(ctx, arg0, 463, get(ctx, arg0, 463, 0));
-  set(ctx, arg0, 464, get(ctx, arg0, 464, 0));
-  set(ctx, arg0, 465, get(ctx, arg0, 465, 0));
-  set(ctx, arg0, 466, get(ctx, arg0, 466, 0));
-  set(ctx, arg0, 467, get(ctx, arg0, 467, 0));
-  set(ctx, arg0, 468, get(ctx, arg0, 468, 0));
-  set(ctx, arg0, 469, get(ctx, arg0, 469, 0));
-  set(ctx, arg0, 470, get(ctx, arg0, 470, 0));
-  set(ctx, arg0, 471, get(ctx, arg0, 471, 0));
-  set(ctx, arg0, 472, get(ctx, arg0, 472, 0));
-  set(ctx, arg0, 473, get(ctx, arg0, 473, 0));
-  set(ctx, arg0, 474, get(ctx, arg0, 474, 0));
-  set(ctx, arg0, 475, get(ctx, arg0, 475, 0));
-  set(ctx, arg0, 476, get(ctx, arg0, 476, 0));
-  set(ctx, arg0, 477, get(ctx, arg0, 477, 0));
-  set(ctx, arg0, 478, get(ctx, arg0, 478, 0));
-  set(ctx, arg0, 479, get(ctx, arg0, 479, 0));
-  set(ctx, arg0, 480, get(ctx, arg0, 480, 0));
-  set(ctx, arg0, 481, get(ctx, arg0, 481, 0));
-  set(ctx, arg0, 482, get(ctx, arg0, 482, 0));
-  set(ctx, arg0, 483, get(ctx, arg0, 483, 0));
-  set(ctx, arg0, 484, get(ctx, arg0, 484, 0));
-  set(ctx, arg0, 485, get(ctx, arg0, 485, 0));
-  set(ctx, arg0, 486, get(ctx, arg0, 486, 0));
-  set(ctx, arg0, 487, get(ctx, arg0, 487, 0));
-  set(ctx, arg0, 488, get(ctx, arg0, 488, 0));
-  set(ctx, arg0, 489, get(ctx, arg0, 489, 0));
-  set(ctx, arg0, 490, get(ctx, arg0, 490, 0));
-  set(ctx, arg0, 491, get(ctx, arg0, 491, 0));
-  set(ctx, arg0, 492, get(ctx, arg0, 492, 0));
-  set(ctx, arg0, 493, get(ctx, arg0, 493, 0));
-  set(ctx, arg0, 494, get(ctx, arg0, 494, 0));
-  set(ctx, arg0, 495, get(ctx, arg0, 495, 0));
-  set(ctx, arg0, 496, get(ctx, arg0, 496, 0));
-  set(ctx, arg0, 497, get(ctx, arg0, 497, 0));
-  set(ctx, arg0, 498, get(ctx, arg0, 498, 0));
-  set(ctx, arg0, 499, get(ctx, arg0, 499, 0));
-  set(ctx, arg0, 500, get(ctx, arg0, 500, 0));
-  set(ctx, arg0, 501, get(ctx, arg0, 501, 0));
-  set(ctx, arg0, 502, get(ctx, arg0, 502, 0));
-  set(ctx, arg0, 503, get(ctx, arg0, 503, 0));
-  set(ctx, arg0, 504, get(ctx, arg0, 504, 0));
-  set(ctx, arg0, 505, get(ctx, arg0, 505, 0));
-  set(ctx, arg0, 506, get(ctx, arg0, 506, 0));
-  set(ctx, arg0, 507, get(ctx, arg0, 507, 0));
-  set(ctx, arg0, 508, get(ctx, arg0, 508, 0));
-  set(ctx, arg0, 509, get(ctx, arg0, 509, 0));
-  set(ctx, arg0, 510, get(ctx, arg0, 510, 0));
-  set(ctx, arg0, 511, get(ctx, arg0, 511, 0));
-  set(ctx, arg0, 512, get(ctx, arg0, 512, 0));
-  set(ctx, arg0, 513, get(ctx, arg0, 513, 0));
-  set(ctx, arg0, 514, get(ctx, arg0, 514, 0));
-  set(ctx, arg0, 515, get(ctx, arg0, 515, 0));
-  set(ctx, arg0, 516, get(ctx, arg0, 516, 0));
-  set(ctx, arg0, 517, get(ctx, arg0, 517, 0));
-  set(ctx, arg0, 518, get(ctx, arg0, 518, 0));
-  set(ctx, arg0, 519, get(ctx, arg0, 519, 0));
-  set(ctx, arg0, 520, get(ctx, arg0, 520, 0));
-  set(ctx, arg0, 521, get(ctx, arg0, 521, 0));
-  set(ctx, arg0, 522, get(ctx, arg0, 522, 0));
-  set(ctx, arg0, 523, get(ctx, arg0, 523, 0));
-  set(ctx, arg0, 524, get(ctx, arg0, 524, 0));
-  set(ctx, arg0, 525, get(ctx, arg0, 525, 0));
-  set(ctx, arg0, 526, get(ctx, arg0, 526, 0));
-  set(ctx, arg0, 527, get(ctx, arg0, 527, 0));
+  set(ctx, arg0, 400, x425);
+  set(ctx, arg0, 401, x426);
+  set(ctx, arg0, 402, x427);
+  set(ctx, arg0, 403, x428);
+  set(ctx, arg0, 404, x429);
+  set(ctx, arg0, 405, x430);
+  set(ctx, arg0, 406, x431);
+  set(ctx, arg0, 407, x432);
+  set(ctx, arg0, 408, x433);
+  set(ctx, arg0, 409, x434);
+  set(ctx, arg0, 410, x435);
+  set(ctx, arg0, 411, x436);
+  set(ctx, arg0, 412, x437);
+  set(ctx, arg0, 413, x438);
+  set(ctx, arg0, 414, x439);
+  set(ctx, arg0, 415, x440);
+  set(ctx, arg0, 416, x441);
+  set(ctx, arg0, 417, x442);
+  set(ctx, arg0, 418, x443);
+  set(ctx, arg0, 419, x444);
+  set(ctx, arg0, 420, x445);
+  set(ctx, arg0, 421, x446);
+  set(ctx, arg0, 422, x447);
+  set(ctx, arg0, 423, x448);
+  set(ctx, arg0, 424, x449);
+  set(ctx, arg0, 425, x450);
+  set(ctx, arg0, 426, x451);
+  set(ctx, arg0, 427, x452);
+  set(ctx, arg0, 428, x453);
+  set(ctx, arg0, 429, x454);
+  set(ctx, arg0, 430, x455);
+  set(ctx, arg0, 431, x456);
+  set(ctx, arg0, 432, x384);
+  set(ctx, arg0, 433, x385);
+  set(ctx, arg0, 434, x386);
+  set(ctx, arg0, 435, x387);
+  set(ctx, arg0, 436, x388);
+  set(ctx, arg0, 437, x389);
+  set(ctx, arg0, 438, x390);
+  set(ctx, arg0, 439, x391);
+  set(ctx, arg0, 440, x392);
+  set(ctx, arg0, 441, x393);
+  set(ctx, arg0, 442, x394);
+  set(ctx, arg0, 443, x395);
+  set(ctx, arg0, 444, x396);
+  set(ctx, arg0, 445, x397);
+  set(ctx, arg0, 446, x398);
+  set(ctx, arg0, 447, x399);
+  set(ctx, arg0, 448, x400);
+  set(ctx, arg0, 449, x401);
+  set(ctx, arg0, 450, x402);
+  set(ctx, arg0, 451, x403);
+  set(ctx, arg0, 452, x404);
+  set(ctx, arg0, 453, x405);
+  set(ctx, arg0, 454, x406);
+  set(ctx, arg0, 455, x407);
+  set(ctx, arg0, 456, x408);
+  set(ctx, arg0, 457, x409);
+  set(ctx, arg0, 458, x410);
+  set(ctx, arg0, 459, x411);
+  set(ctx, arg0, 460, x412);
+  set(ctx, arg0, 461, x413);
+  set(ctx, arg0, 462, x414);
+  set(ctx, arg0, 463, x415);
+  set(ctx, arg0, 464, x343);
+  set(ctx, arg0, 465, x344);
+  set(ctx, arg0, 466, x345);
+  set(ctx, arg0, 467, x346);
+  set(ctx, arg0, 468, x347);
+  set(ctx, arg0, 469, x348);
+  set(ctx, arg0, 470, x349);
+  set(ctx, arg0, 471, x350);
+  set(ctx, arg0, 472, x351);
+  set(ctx, arg0, 473, x352);
+  set(ctx, arg0, 474, x353);
+  set(ctx, arg0, 475, x354);
+  set(ctx, arg0, 476, x355);
+  set(ctx, arg0, 477, x356);
+  set(ctx, arg0, 478, x357);
+  set(ctx, arg0, 479, x358);
+  set(ctx, arg0, 480, x359);
+  set(ctx, arg0, 481, x360);
+  set(ctx, arg0, 482, x361);
+  set(ctx, arg0, 483, x362);
+  set(ctx, arg0, 484, x363);
+  set(ctx, arg0, 485, x364);
+  set(ctx, arg0, 486, x365);
+  set(ctx, arg0, 487, x366);
+  set(ctx, arg0, 488, x367);
+  set(ctx, arg0, 489, x368);
+  set(ctx, arg0, 490, x369);
+  set(ctx, arg0, 491, x370);
+  set(ctx, arg0, 492, x371);
+  set(ctx, arg0, 493, x372);
+  set(ctx, arg0, 494, x373);
+  set(ctx, arg0, 495, x374);
+  set(ctx, arg0, 496, x302);
+  set(ctx, arg0, 497, x303);
+  set(ctx, arg0, 498, x304);
+  set(ctx, arg0, 499, x305);
+  set(ctx, arg0, 500, x306);
+  set(ctx, arg0, 501, x307);
+  set(ctx, arg0, 502, x308);
+  set(ctx, arg0, 503, x309);
+  set(ctx, arg0, 504, x310);
+  set(ctx, arg0, 505, x311);
+  set(ctx, arg0, 506, x312);
+  set(ctx, arg0, 507, x313);
+  set(ctx, arg0, 508, x314);
+  set(ctx, arg0, 509, x315);
+  set(ctx, arg0, 510, x316);
+  set(ctx, arg0, 511, x317);
+  set(ctx, arg0, 512, x318);
+  set(ctx, arg0, 513, x319);
+  set(ctx, arg0, 514, x320);
+  set(ctx, arg0, 515, x321);
+  set(ctx, arg0, 516, x322);
+  set(ctx, arg0, 517, x323);
+  set(ctx, arg0, 518, x324);
+  set(ctx, arg0, 519, x325);
+  set(ctx, arg0, 520, x326);
+  set(ctx, arg0, 521, x327);
+  set(ctx, arg0, 522, x328);
+  set(ctx, arg0, 523, x329);
+  set(ctx, arg0, 524, x330);
+  set(ctx, arg0, 525, x331);
+  set(ctx, arg0, 526, x332);
+  set(ctx, arg0, 527, x333);
   set(ctx, arg0, 528, Val(0));
   set(ctx, arg0, 529, Val(0));
   set(ctx, arg0, 530, Val(0));
@@ -1772,22 +1964,22 @@ __device__ void step_Top_35(ExecContext& ctx, MutableBuf arg0) {
   set(ctx, arg0, 914, get(ctx, arg0, 914, 1));
   set(ctx, arg0, 915, get(ctx, arg0, 915, 1));
   // TopState(zirgen/circuit/keccak2/top.zir:43)
-  set(ctx, arg0, 916, x208);
-  set(ctx, arg0, 917, x216);
-  set(ctx, arg0, 918, x224);
-  set(ctx, arg0, 919, x232);
-  set(ctx, arg0, 920, x240);
-  set(ctx, arg0, 921, x248);
-  set(ctx, arg0, 922, x256);
-  set(ctx, arg0, 923, x264);
-  set(ctx, arg0, 924, x272);
-  set(ctx, arg0, 925, x280);
-  set(ctx, arg0, 926, x288);
-  set(ctx, arg0, 927, x296);
-  set(ctx, arg0, 928, x304);
-  set(ctx, arg0, 929, x312);
-  set(ctx, arg0, 930, x320);
-  set(ctx, arg0, 931, x328);
+  set(ctx, arg0, 916, x461);
+  set(ctx, arg0, 917, x466);
+  set(ctx, arg0, 918, x471);
+  set(ctx, arg0, 919, x476);
+  set(ctx, arg0, 920, x481);
+  set(ctx, arg0, 921, x486);
+  set(ctx, arg0, 922, x491);
+  set(ctx, arg0, 923, x496);
+  set(ctx, arg0, 924, x501);
+  set(ctx, arg0, 925, x506);
+  set(ctx, arg0, 926, x511);
+  set(ctx, arg0, 927, x516);
+  set(ctx, arg0, 928, x521);
+  set(ctx, arg0, 929, x526);
+  set(ctx, arg0, 930, x531);
+  set(ctx, arg0, 931, x536);
   return;
 }
 

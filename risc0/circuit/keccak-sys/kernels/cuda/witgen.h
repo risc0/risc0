@@ -76,7 +76,9 @@ struct MutableBufObj : public BufferObj {
     return buf.get(ctx.cycle - back, col);
   }
 
-  __device__ void store(ExecContext& ctx, size_t col, Val val) override { return buf.set(ctx.cycle, col, val); }
+  __device__ void store(ExecContext& ctx, size_t col, Val val) override {
+    return buf.set(ctx.cycle, col, val);
+  }
 
   Buffer& buf;
 };
@@ -91,7 +93,9 @@ struct GlobalBufObj : public BufferObj {
     return buf.get(0, col);
   }
 
-  __device__ void store(ExecContext& ctx, size_t col, Val val) override { return buf.set(0, col, val); }
+  __device__ void store(ExecContext& ctx, size_t col, Val val) override {
+    return buf.set(0, col, val);
+  }
 
   Buffer& buf;
 };

@@ -30,8 +30,6 @@ __device__ void step_Top_8(ExecContext& ctx, MutableBuf arg0) {
   return;
 }
 __device__ void step_Top_24(ExecContext& ctx, MutableBuf arg0) {
-  // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:451)
-  Val x1 = (Val(1) - get(ctx, arg0, 13, 1));
   if (to_size_t(get(ctx, arg0, 0, 1))) {
     // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:448)
     step_Top_1(ctx, arg0);

@@ -31,25 +31,42 @@ __device__ void step_Top_9(ExecContext& ctx, MutableBuf arg0) {
   return;
 }
 __device__ void step_Top_25(ExecContext& ctx, MutableBuf arg0, GlobalBuf arg1) {
+  // TopState(zirgen/circuit/keccak2/top.zir:43)
+  // Top(zirgen/circuit/keccak2/top.zir:492)
+  Val x2 = get(ctx, arg0, 916, 1);
+  Val x3 = get(ctx, arg0, 917, 1);
+  Val x4 = get(ctx, arg0, 918, 1);
+  Val x5 = get(ctx, arg0, 919, 1);
+  Val x6 = get(ctx, arg0, 920, 1);
+  Val x7 = get(ctx, arg0, 921, 1);
+  Val x8 = get(ctx, arg0, 922, 1);
+  Val x9 = get(ctx, arg0, 923, 1);
+  Val x10 = get(ctx, arg0, 924, 1);
+  Val x11 = get(ctx, arg0, 925, 1);
+  Val x12 = get(ctx, arg0, 926, 1);
+  Val x13 = get(ctx, arg0, 927, 1);
+  Val x14 = get(ctx, arg0, 928, 1);
+  Val x15 = get(ctx, arg0, 929, 1);
+  Val x16 = get(ctx, arg0, 930, 1);
+  Val x17 = get(ctx, arg0, 931, 1);
   // DigestReg(zirgen/circuit/keccak2/top.zir:391)
   // ShutdownCycle(zirgen/circuit/keccak2/top.zir:396)
-  // Top(zirgen/circuit/keccak2/top.zir:492)
-  setGlobal(ctx, arg1, 0, get(ctx, arg0, 916, 1));
-  setGlobal(ctx, arg1, 1, get(ctx, arg0, 917, 1));
-  setGlobal(ctx, arg1, 2, get(ctx, arg0, 918, 1));
-  setGlobal(ctx, arg1, 3, get(ctx, arg0, 919, 1));
-  setGlobal(ctx, arg1, 4, get(ctx, arg0, 920, 1));
-  setGlobal(ctx, arg1, 5, get(ctx, arg0, 921, 1));
-  setGlobal(ctx, arg1, 6, get(ctx, arg0, 922, 1));
-  setGlobal(ctx, arg1, 7, get(ctx, arg0, 923, 1));
-  setGlobal(ctx, arg1, 8, get(ctx, arg0, 924, 1));
-  setGlobal(ctx, arg1, 9, get(ctx, arg0, 925, 1));
-  setGlobal(ctx, arg1, 10, get(ctx, arg0, 926, 1));
-  setGlobal(ctx, arg1, 11, get(ctx, arg0, 927, 1));
-  setGlobal(ctx, arg1, 12, get(ctx, arg0, 928, 1));
-  setGlobal(ctx, arg1, 13, get(ctx, arg0, 929, 1));
-  setGlobal(ctx, arg1, 14, get(ctx, arg0, 930, 1));
-  setGlobal(ctx, arg1, 15, get(ctx, arg0, 931, 1));
+  setGlobal(ctx, arg1, 0, x2);
+  setGlobal(ctx, arg1, 1, x3);
+  setGlobal(ctx, arg1, 2, x4);
+  setGlobal(ctx, arg1, 3, x5);
+  setGlobal(ctx, arg1, 4, x6);
+  setGlobal(ctx, arg1, 5, x7);
+  setGlobal(ctx, arg1, 6, x8);
+  setGlobal(ctx, arg1, 7, x9);
+  setGlobal(ctx, arg1, 8, x10);
+  setGlobal(ctx, arg1, 9, x11);
+  setGlobal(ctx, arg1, 10, x12);
+  setGlobal(ctx, arg1, 11, x13);
+  setGlobal(ctx, arg1, 12, x14);
+  setGlobal(ctx, arg1, 13, x15);
+  setGlobal(ctx, arg1, 14, x16);
+  setGlobal(ctx, arg1, 15, x17);
   // TopState(zirgen/circuit/keccak2/top.zir:36)
   // ShutdownCycle(zirgen/circuit/keccak2/top.zir:399)
   set(ctx, arg0, 16, Val(0));
@@ -954,22 +971,22 @@ __device__ void step_Top_25(ExecContext& ctx, MutableBuf arg0, GlobalBuf arg1) {
   set(ctx, arg0, 914, Val(0));
   set(ctx, arg0, 915, Val(0));
   // TopState(zirgen/circuit/keccak2/top.zir:43)
-  set(ctx, arg0, 916, get(ctx, arg0, 916, 1));
-  set(ctx, arg0, 917, get(ctx, arg0, 917, 1));
-  set(ctx, arg0, 918, get(ctx, arg0, 918, 1));
-  set(ctx, arg0, 919, get(ctx, arg0, 919, 1));
-  set(ctx, arg0, 920, get(ctx, arg0, 920, 1));
-  set(ctx, arg0, 921, get(ctx, arg0, 921, 1));
-  set(ctx, arg0, 922, get(ctx, arg0, 922, 1));
-  set(ctx, arg0, 923, get(ctx, arg0, 923, 1));
-  set(ctx, arg0, 924, get(ctx, arg0, 924, 1));
-  set(ctx, arg0, 925, get(ctx, arg0, 925, 1));
-  set(ctx, arg0, 926, get(ctx, arg0, 926, 1));
-  set(ctx, arg0, 927, get(ctx, arg0, 927, 1));
-  set(ctx, arg0, 928, get(ctx, arg0, 928, 1));
-  set(ctx, arg0, 929, get(ctx, arg0, 929, 1));
-  set(ctx, arg0, 930, get(ctx, arg0, 930, 1));
-  set(ctx, arg0, 931, get(ctx, arg0, 931, 1));
+  set(ctx, arg0, 916, x2);
+  set(ctx, arg0, 917, x3);
+  set(ctx, arg0, 918, x4);
+  set(ctx, arg0, 919, x5);
+  set(ctx, arg0, 920, x6);
+  set(ctx, arg0, 921, x7);
+  set(ctx, arg0, 922, x8);
+  set(ctx, arg0, 923, x9);
+  set(ctx, arg0, 924, x10);
+  set(ctx, arg0, 925, x11);
+  set(ctx, arg0, 926, x12);
+  set(ctx, arg0, 927, x13);
+  set(ctx, arg0, 928, x14);
+  set(ctx, arg0, 929, x15);
+  set(ctx, arg0, 930, x16);
+  set(ctx, arg0, 931, x17);
   return;
 }
 

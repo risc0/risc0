@@ -24,15 +24,14 @@ __device__ void step_Top_13(ExecContext& ctx, MutableBuf arg0) {
   Val x1 = (get(ctx, arg0, 15, 1) - Val(23));
   // IsZero(zirgen/circuit/keccak2/is_zero.zir:8)
   set(ctx, arg0, 933, isz(x1));
+  Val x2 = get(ctx, arg0, 933, 0);
   // IsZero(zirgen/circuit/keccak2/is_zero.zir:11)
   set(ctx, arg0, 934, inv_0(x1));
-  // KeccackNextRound(zirgen/circuit/keccak2/top.zir:414)
-  Val x2 = (get(ctx, arg0, 15, 1) + Val(1));
-  if (to_size_t(get(ctx, arg0, 933, 0))) {
+  if (to_size_t(x2)) {
     // KeccackNextRound(zirgen/circuit/keccak2/top.zir:411)
     step_Top_11(ctx, arg0);
   }
-  if (to_size_t((Val(1) - get(ctx, arg0, 933, 0)))) {
+  if (to_size_t((Val(1) - x2))) {
     step_Top_12(ctx, arg0);
   }
   return;

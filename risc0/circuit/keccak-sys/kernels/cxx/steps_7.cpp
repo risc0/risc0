@@ -35,26 +35,25 @@ void step_Top_22(ExecContext& ctx,MutableBuf arg0)   {
 Val x1 = (get(ctx,arg0, 14, 1) - Val(3));
 // IsZero(zirgen/circuit/keccak2/is_zero.zir:8)
 set(ctx,arg0, 934, isz(x1));
+Val x2 = get(ctx,arg0, 934, 0);
 // IsZero(zirgen/circuit/keccak2/is_zero.zir:11)
 set(ctx,arg0, 935, inv_0(x1));
 // ShaNextBlock(zirgen/circuit/keccak2/top.zir:429)
-Val x2 = (Val(1) - get(ctx,arg0, 934, 0));
-// ShaNextBlock(zirgen/circuit/keccak2/top.zir:430)
-Val x3 = (get(ctx,arg0, 934, 0) * (Val(1) - get(ctx,arg0, 13, 1)));
+Val x3 = (Val(1) - x2);
 // Reg(<preamble>:4)
-set(ctx,arg0, 936, x3);
+// ShaNextBlock(zirgen/circuit/keccak2/top.zir:430)
+set(ctx,arg0, 936, (x2 * (Val(1) - get(ctx,arg0, 13, 1))));
+Val x4 = get(ctx,arg0, 936, 0);
 // ShaNextBlock(zirgen/circuit/keccak2/top.zir:431)
-Val x4 = ((Val(1) - x2) - get(ctx,arg0, 936, 0));
-// ShaNextBlock(zirgen/circuit/keccak2/top.zir:433)
-Val x5 = (get(ctx,arg0, 14, 1) + Val(1));
-if (to_size_t(x2)) {
+Val x5 = ((Val(1) - x3) - x4);
+if (to_size_t(x3)) {
 // ShaNextBlock(zirgen/circuit/keccak2/top.zir:432)
 step_Top_17(ctx,arg0);
 }
-if (to_size_t(get(ctx,arg0, 936, 0))) {
+if (to_size_t(x4)) {
 step_Top_18(ctx,arg0);
 }
-if (to_size_t(x4)) {
+if (to_size_t(x5)) {
 step_Top_21(ctx,arg0);
 }
 return ;

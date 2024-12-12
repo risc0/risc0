@@ -59,7 +59,6 @@ struct PreflightTrace {
 using Val = risc0::Fp;
 using ExtVal = risc0::FpExt;
 
-
 inline size_t to_size_t(Val v) {
   return v.asUInt32();
 }
@@ -139,7 +138,7 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  MutableBufObj( Buffer& buf) : buf(buf) {}
+  MutableBufObj(Buffer& buf) : buf(buf) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
     if (back > ctx.cycle) {
@@ -148,7 +147,9 @@ struct MutableBufObj : public BufferObj {
     return buf.get(ctx.cycle - back, col);
   }
 
-  void store(ExecContext& ctx, size_t col, Val val) override { return buf.set(ctx.cycle, col, val); }
+  void store(ExecContext& ctx, size_t col, Val val) override {
+    return buf.set(ctx.cycle, col, val);
+  }
 
   Buffer& buf;
 };
@@ -160,10 +161,10 @@ struct GlobalBufObj : public BufferObj {
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
     assert(back == 0);
-    return buf.get( 0, col);
+    return buf.get(0, col);
   }
 
-  void store(ExecContext& ctx, size_t col, Val val) override { return buf.set( 0, col, val); }
+  void store(ExecContext& ctx, size_t col, Val val) override { return buf.set(0, col, val); }
 
   Buffer& buf;
 };
@@ -185,44 +186,42 @@ template <typename T> struct BoundLayout {
 #define EQZ(val, loc) eqz(val, loc)
 
 inline void store(ExecContext& ctx, BoundLayout<Reg> reg, Val val) {
-  reg.buf->store(ctx,reg.layout.col, val);
+  reg.buf->store(ctx, reg.layout.col, val);
 }
 
- inline void set(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {
+inline void set(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {
   static_cast<MutableBufObj*>(buf)->store(ctx, offset, val);
 }
 
- inline void setGlobal(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {
+inline void setGlobal(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {
   static_cast<GlobalBufObj*>(buf)->store(ctx, offset, val);
 }
 
 inline void storeExt(ExecContext& ctx, BoundLayout<Reg> reg, ExtVal val) {
   for (size_t i = 0; i < EXT_SIZE; i++) {
-    reg.buf->store(ctx,reg.layout.col + i, val.elems[i]);
+    reg.buf->store(ctx, reg.layout.col + i, val.elems[i]);
   }
 }
 
 inline Val load(ExecContext& ctx, BoundLayout<Reg> reg, size_t back) {
-  return reg.buf->load(ctx,reg.layout.col, back);
+  return reg.buf->load(ctx, reg.layout.col, back);
 }
 
 inline ExtVal loadExt(ExecContext& ctx, BoundLayout<Reg> reg, size_t back) {
   std::array<Fp, EXT_SIZE> elems;
   for (size_t i = 0; i < EXT_SIZE; i++) {
-    elems[i] = reg.buf->load(ctx,reg.layout.col + i, back);
+    elems[i] = reg.buf->load(ctx, reg.layout.col + i, back);
   }
   return FpExt(elems[0], elems[1], elems[2], elems[3]);
 }
 
- inline Val get(ExecContext& ctx, BufferObj* buf, size_t offset, size_t back) {
+inline Val get(ExecContext& ctx, BufferObj* buf, size_t offset, size_t back) {
   return static_cast<MutableBufObj*>(buf)->load(ctx, offset, back);
 }
 
-
- inline Val getGlobal(ExecContext& ctx, BufferObj* buf, size_t offset) {
+inline Val getGlobal(ExecContext& ctx, BufferObj* buf, size_t offset) {
   return static_cast<GlobalBufObj*>(buf)->load(ctx, offset, 0);
 }
-
 
 #define LOAD(reg, back) load(ctx, reg, back)
 #define LOAD_EXT(reg, back) loadExt(ctx, reg, back)
@@ -292,4 +291,4 @@ Val extern_nextPreimage(ExecContext& ctx);
 
 #include "layout.cpp.inc"
 
-}
+} // namespace risc0::circuit::keccak::cpu

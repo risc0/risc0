@@ -29,8 +29,6 @@ set(ctx,arg0, 15, get(ctx,arg0, 15, 1));
 return ;
 }
 void step_Top_24(ExecContext& ctx,MutableBuf arg0)   {
-// ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:451)
-Val x1 = (Val(1) - get(ctx,arg0, 13, 1));
 if (to_size_t(get(ctx,arg0, 0, 1))) {
 // ComputeCurrentStep(zirgen/circuit/keccak2/top.zir:448)
 step_Top_1(ctx,arg0);
