@@ -39,6 +39,7 @@ impl Keccak2Batcher {
     }
 
     pub fn new() -> Self {
+        #[cfg(feature = "std")]
         let po2 = match std::env::var("RISC0_KECCAK_PO2") {
             Err(_) => KECCAK_DEFAULT_PO2 as u32,
             Ok(po2) => {
@@ -52,6 +53,8 @@ impl Keccak2Batcher {
                 po2
             }
         };
+        #[cfg(not(feature = "std"))]
+        let po2 = KECCAK_DEFAULT_PO2;
         Self {
             claim_state: SHA256_INIT,
             inputs: vec![],
