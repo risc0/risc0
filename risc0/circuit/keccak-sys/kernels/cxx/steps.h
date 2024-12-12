@@ -25,9 +25,10 @@ extern NondetRegStruct back_NondetReg(ExecContext& ctx,Index distance0, BoundLay
 extern NondetRegStruct exec_NondetReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
 extern NondetRegStruct back_Reg(ExecContext& ctx,Index distance0, BoundLayout<NondetRegLayout> layout1)  ;
 extern NondetRegStruct exec_Reg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
-extern NondetRegStruct exec_NondetBitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
+extern NondetBitRegStruct back_NondetBitReg(ExecContext& ctx,Index distance0, BoundLayout<NondetRegLayout> layout1)  ;
+extern NondetBitRegStruct exec_NondetBitReg(ExecContext& ctx,Val arg0, BoundLayout<NondetRegLayout> layout1)  ;
 extern NondetRegStruct exec_IsZero(ExecContext& ctx,Val arg0, BoundLayout<IsZeroLayout> layout1)  ;
-extern NondetRegStruct exec_Xor5(ExecContext& ctx,Val5Array arg0, BoundLayout<NondetRegLayout> layout1)  ;
+extern NondetBitRegStruct exec_Xor5(ExecContext& ctx,Val5Array arg0, BoundLayout<NondetRegLayout> layout1)  ;
 extern ThetaP1Struct exec_ThetaP1(ExecContext& ctx,Val64Array5Array5Array arg0, BoundLayout<ThetaP1Layout> layout1)  ;
 extern OneHot_24_Struct exec_OneHot_24_(ExecContext& ctx,Val arg0, BoundLayout<OneHot_24_Layout> layout1)  ;
 extern RoundToArrayStruct exec_RoundToArray(ExecContext& ctx,Val arg0, BoundLayout<RoundToArrayLayout> layout1)  ;
@@ -35,6 +36,7 @@ extern IotaStruct exec_Iota(ExecContext& ctx,Val64Array5Array5Array arg0, Val ar
 extern CarryExtractStruct exec_CarryExtract(ExecContext& ctx,Val arg0, BoundLayout<CarryExtractLayout> layout1)  ;
 extern UnpackReg_32__16_Struct exec_UnpackReg_32__16_(ExecContext& ctx,Val2Array arg0, BoundLayout<UnpackReg_32__16_Layout> layout1)  ;
 extern UnpackReg_32__16_Struct exec_CarryAndExpand(ExecContext& ctx,Val2Array arg0, BoundLayout<CarryAndExpandLayout> layout1)  ;
+extern ExpandBEStruct exec_ExpandBE(ExecContext& ctx,Val2Array arg0, BoundLayout<ExpandBELayout> layout1)  ;
 extern TopStateStruct back_TopState(ExecContext& ctx,Index distance0, BoundLayout<TopStateLayout> layout1)  ;
 extern TopStateStruct exec_TopState(ExecContext& ctx,Val800Array arg0, Val100Array arg1, Val16Array arg2, BoundLayout<TopStateLayout> layout3)  ;
 extern TopStateStruct exec_KeccakRound0(ExecContext& ctx,TopStateStruct arg0, TopStateStruct arg1, BoundLayout<KeccakRound0Layout> layout2)  ;
