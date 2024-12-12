@@ -1,0 +1,3155 @@
+profiles:
+- name: Inflector
+  versions:
+  - 0.11.4
+- name: actix-codec
+  versions:
+  - 0.5.2
+- name: actix-http
+  versions:
+  - 3.9.0
+- name: actix-macros
+  versions:
+  - 0.2.4
+- name: actix-router
+  versions:
+  - 0.5.3
+- name: actix-rt
+  versions:
+  - 2.10.0
+- name: actix-server
+  versions:
+  - 2.5.0
+- name: actix-service
+  versions:
+  - 2.0.2
+- name: actix-utils
+  versions:
+  - 3.0.1
+- name: actix-web
+  versions:
+  - 4.9.0
+- name: actix-web-codegen
+  versions:
+  - 4.3.0
+- name: addr2line
+  versions:
+  - 0.24.2
+- name: adler
+  versions:
+  - 1.0.2
+- name: adler32
+  versions:
+  - 1.2.0
+- name: aead
+  versions:
+  - 0.5.2
+- name: aes
+  versions:
+  - 0.8.4
+- name: aes-gcm
+  versions:
+  - 0.10.3
+- name: ahash
+  versions:
+  - 0.8.11
+- name: aho-corasick
+  versions:
+  - 1.1.3
+- name: aliasable
+  versions:
+  - 0.1.3
+- name: alloc-no-stdlib
+  versions:
+  - 2.0.4
+- name: alloc-stdlib
+  versions:
+  - 0.2.2
+- name: allocator-api2
+  versions:
+  - 0.2.21
+- name: alloy-primitives
+  versions:
+  - 0.8.14
+- name: alloy-rlp
+  versions:
+  - 0.3.9
+- name: alloy-rlp-derive
+  versions:
+  - 0.3.9
+- name: android-tzdata
+  versions:
+  - 0.1.1
+- name: android_system_properties
+  versions:
+  - 0.1.5
+- name: anes
+  versions:
+  - 0.2.0
+- name: ansi_term
+  versions:
+  - 0.12.1
+- name: anstream
+  versions:
+  - 0.6.18
+- name: anstyle
+  versions:
+  - 1.0.10
+- name: anstyle-parse
+  versions:
+  - 0.2.6
+- name: anstyle-query
+  versions:
+  - 1.1.2
+- name: anstyle-wincon
+  versions:
+  - 3.0.6
+- name: anyhow
+  std: true
+  versions:
+  - 1.0.93
+- name: approx
+  versions:
+  - 0.5.1
+- name: arbitrary
+  versions:
+  - 1.4.1
+- name: arc-swap
+  versions:
+  - 1.7.1
+- name: ark-std
+  versions:
+  - 0.5.0
+- name: arrayref
+  versions:
+  - 0.3.9
+- name: arrayvec
+  versions:
+  - 0.7.6
+- name: ascii
+  versions:
+  - 1.1.0
+- name: ascii-canvas
+  versions:
+  - 4.0.0
+- name: asn1-rs
+  versions:
+  - 0.6.2
+- name: asn1-rs-derive
+  versions:
+  - 0.5.1
+- name: asn1-rs-impl
+  versions:
+  - 0.2.0
+- name: assert-json-diff
+  versions:
+  - 2.0.2
+- name: assert_cmd
+  versions:
+  - 2.0.16
+- name: assert_matches
+  versions:
+  - 1.5.0
+- name: async-broadcast
+  versions:
+  - 0.7.1
+- name: async-channel
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 2.3.1
+- name: async-compression
+  versions:
+  - 0.4.18
+- name: async-executor
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 1.13.1
+- name: async-global-executor
+  versions:
+  - 2.4.1
+- name: async-io
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 2.4.0
+- name: async-lock
+  versions:
+  - 3.4.0
+- name: async-process
+  versions:
+  - 2.3.0
+- name: async-recursion
+  versions:
+  - 1.1.1
+- name: async-std
+  versions:
+  - 1.13.0
+- name: async-stream
+  versions:
+  - 0.3.6
+- name: async-stream-impl
+  versions:
+  - 0.3.6
+- name: async-task
+  versions:
+  - 4.7.1
+- name: async-trait
+  versions:
+  - 0.1.83
+- name: atoi
+  versions:
+  - 2.0.0
+- name: atomic
+  versions:
+  - 0.6.0
+- name: atomic-waker
+  versions:
+  - 1.1.2
+- name: atty
+  versions:
+  - 0.2.14
+- name: autocfg
+  versions:
+  - 1.4.0
+- name: aws-config
+  versions:
+  - 1.5.10
+- name: aws-credential-types
+  versions:
+  - 1.2.1
+- name: aws-http
+  versions:
+  - 0.60.6
+- name: aws-sdk-s3
+  versions:
+  - 1.64.0
+- name: aws-sdk-sso
+  versions:
+  - 1.49.0
+- name: aws-sdk-sts
+  versions:
+  - 1.50.0
+- name: aws-sigv4
+  versions:
+  - 1.2.5
+- name: aws-smithy-async
+  versions:
+  - 1.2.1
+- name: aws-smithy-checksums
+  versions:
+  - 0.60.13
+- name: aws-smithy-eventstream
+  versions:
+  - 0.60.5
+- name: aws-smithy-http
+  versions:
+  - 0.60.11
+- name: aws-smithy-json
+  versions:
+  - 0.60.7
+- name: aws-smithy-query
+  versions:
+  - 0.60.7
+- name: aws-smithy-types
+  versions:
+  - 1.2.9
+- name: aws-smithy-xml
+  versions:
+  - 0.60.9
+- name: aws-types
+  versions:
+  - 1.3.3
+- name: axum
+  versions:
+  - 0.7.9
+- name: axum-core
+  versions:
+  - 0.4.5
+- name: axum-macros
+  versions:
+  - 0.4.2
+- name: backoff
+  versions:
+  - 0.4.0
+- name: backtrace
+  versions:
+  - 0.3.74
+- name: backtrace-sys
+  versions:
+  - 0.1.37
+- name: base-x
+  versions:
+  - 0.2.11
+- name: base16ct
+  versions:
+  - 0.2.0
+- name: base64
+  versions:
+  - 0.22.1
+- name: base64-simd
+  versions:
+  - 0.8.0
+- name: base64ct
+  versions:
+  - 1.6.0
+- name: bech32
+  versions:
+  - 0.11.0
+- name: beef
+  versions:
+  - 0.5.2
+- name: bigdecimal
+  versions:
+  - 0.4.6
+- name: bincode
+  versions:
+  - 2.0.0-beta.0
+- name: bindgen
+  versions:
+  - 0.69.5
+- name: bit-set
+  versions:
+  - 0.8.0
+- name: bit-vec
+  versions:
+  - 0.8.0
+- name: bit_field
+  versions:
+  - 0.10.2
+- name: bitflags
+  versions:
+  - 2.6.0
+- name: bitmaps
+  versions:
+  - 3.2.1
+- name: bitvec
+  versions:
+  - 1.0.1
+- name: blake2
+  versions:
+  - 0.11.0-pre.3
+- name: blake2b_simd
+  versions:
+  - 1.0.2
+- name: blake3
+  versions:
+  - 1.5.5
+- name: block-buffer
+  versions:
+  - 0.10.4
+- name: block-modes
+  versions:
+  - 0.9.1
+- name: block-padding
+  versions:
+  - 0.3.3
+- name: blocking
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 1.6.1
+- name: borsh
+  versions:
+  - 1.5.3
+- name: borsh-derive
+  versions:
+  - 1.5.3
+- name: borsh-derive-internal
+  versions:
+  - 0.10.4
+- name: borsh-schema-derive-internal
+  versions:
+  - 0.10.4
+- name: brotli
+  versions:
+  - 7.0.0
+- name: brotli-decompressor
+  versions:
+  - 4.0.1
+- name: bs58
+  versions:
+  - 0.5.1
+- name: bstr
+  versions:
+  - 1.11.0
+- name: bumpalo
+  versions:
+  - 3.16.0
+- name: byte-slice-cast
+  versions:
+  - 1.2.2
+- name: byte-tools
+  versions:
+  - 0.3.1
+- name: bytecheck
+  versions:
+  - 0.8.0
+- name: bytecheck_derive
+  versions:
+  - 0.8.0
+- name: bytecount
+  versions:
+  - 0.6.8
+- name: bytemuck
+  versions:
+  - 1.20.0
+- name: bytemuck_derive
+  versions:
+  - 1.8.0
+- name: byteorder
+  versions:
+  - 1.5.0
+- name: bytes
+  versions:
+  - 1.9.0
+- name: bytes-utils
+  versions:
+  - 0.1.4
+- name: bytesize
+  versions:
+  - 1.3.0
+- name: bytestring
+  versions:
+  - 1.4.0
+- name: bzip2
+  versions:
+  - 0.4.4
+- name: bzip2-sys
+  versions:
+  - 0.1.11+1.0.8
+- name: cache-padded
+  versions:
+  - 1.3.0
+- name: cadence
+  versions:
+  - 1.5.0
+- name: camino
+  versions:
+  - 1.1.9
+- name: cargo-platform
+  versions:
+  - 0.1.9
+- name: cargo_metadata
+  std: true
+  versions:
+  - 0.19.0
+- name: cast
+  versions:
+  - 0.3.0
+- name: castaway
+  versions:
+  - 0.2.3
+- name: cbindgen
+  versions:
+  - 0.27.0
+- name: cc
+  versions:
+  - 1.2.2
+- name: cesu8
+  versions:
+  - 1.1.0
+- name: cexpr
+  versions:
+  - 0.6.0
+- name: cfg-expr
+  versions:
+  - 0.17.2
+- name: cfg-if
+  versions:
+  - 1.0.0
+- name: cfg_aliases
+  versions:
+  - 0.2.1
+- name: chacha20
+  versions:
+  - 0.9.1
+- name: chacha20poly1305
+  versions:
+  - 0.10.1
+- name: chrono
+  versions:
+  - 0.4.38
+- name: chrono-tz
+  versions:
+  - 0.10.0
+- name: chrono-tz-build
+  versions:
+  - 0.4.0
+- name: chunked_transfer
+  versions:
+  - 1.5.0
+- name: ciborium
+  versions:
+  - 0.2.2
+- name: ciborium-io
+  versions:
+  - 0.2.2
+- name: ciborium-ll
+  versions:
+  - 0.2.2
+- name: cipher
+  versions:
+  - 0.4.4
+- name: clang-sys
+  versions:
+  - 1.9.0
+- name: clap
+  std: true
+  versions:
+  - 4.5.21
+- name: clap_builder
+  versions:
+  - 4.5.21
+- name: clap_complete
+  versions:
+  - 4.5.38
+- name: clap_derive
+  versions:
+  - 4.5.18
+- name: clap_lex
+  versions:
+  - 0.7.3
+- name: cmake
+  versions:
+  - 0.1.52
+- name: codespan-reporting
+  versions:
+  - 0.11.1
+- name: color-eyre
+  versions:
+  - 0.6.3
+- name: color_quant
+  versions:
+  - 1.1.0
+- name: colorchoice
+  versions:
+  - 1.0.3
+- name: colored
+  versions:
+  - 2.1.0
+- name: combine
+  versions:
+  - 4.6.7
+- name: comfy-table
+  versions:
+  - 7.1.3
+- name: concurrent-queue
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 2.5.0
+- name: config
+  versions:
+  - 0.14.1
+- name: console
+  versions:
+  - 0.15.8
+- name: console_error_panic_hook
+  versions:
+  - 0.1.7
+- name: const-oid
+  versions:
+  - 0.9.6
+- name: const-random
+  versions:
+  - 0.1.18
+- name: const-random-macro
+  versions:
+  - 0.1.16
+- name: const_fn
+  versions:
+  - 0.4.10
+- name: const_format
+  versions:
+  - 0.2.33
+- name: const_format_proc_macros
+  versions:
+  - 0.2.33
+- name: constant_time_eq
+  versions:
+  - 0.3.1
+- name: convert_case
+  versions:
+  - 0.6.0
+- name: cookie
+  versions:
+  - 0.18.1
+- name: cookie_store
+  versions:
+  - 0.21.1
+- name: core-foundation
+  versions:
+  - 0.10.0
+- name: core-foundation-sys
+  versions:
+  - 0.8.7
+- name: cpp_demangle
+  versions:
+  - 0.4.4
+- name: cpufeatures
+  versions:
+  - 0.2.16
+- name: cpuid-bool
+  versions:
+  - 0.99.99
+- name: cranelift-bforest
+  versions:
+  - 0.114.0
+- name: cranelift-codegen
+  versions:
+  - 0.114.0
+- name: cranelift-codegen-meta
+  versions:
+  - 0.114.0
+- name: cranelift-entity
+  versions:
+  - 0.114.0
+- name: cranelift-frontend
+  versions:
+  - 0.114.0
+- name: crc
+  versions:
+  - 3.2.1
+- name: crc-catalog
+  versions:
+  - 2.4.0
+- name: crc32c
+  versions:
+  - 0.6.8
+- name: crc32fast
+  versions:
+  - 1.4.2
+- name: criterion
+  std: true
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 0.5.1
+- name: criterion-plot
+  versions:
+  - 0.5.0
+- name: crossbeam
+  versions:
+  - 0.8.4
+- name: crossbeam-channel
+  versions:
+  - 0.5.13
+- name: crossbeam-deque
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 0.8.5
+- name: crossbeam-epoch
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 0.9.18
+- name: crossbeam-queue
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 0.3.11
+- name: crossbeam-utils
+  versions:
+  - 0.8.20
+- name: crossterm
+  versions:
+  - 0.28.1
+- name: crunchy
+  versions:
+  - 0.2.2
+- name: crypto-bigint
+  std: true
+  versions:
+  - 0.5.5
+- name: crypto-common
+  versions:
+  - 0.2.0-pre.2
+- name: crypto-mac
+  versions:
+  - 0.11.1
+- name: csv
+  std: true
+  versions:
+  - 1.3.1
+- name: csv-core
+  versions:
+  - 0.1.11
+- name: ctor
+  versions:
+  - 0.2.9
+- name: ctr
+  versions:
+  - 0.9.2
+- name: ctrlc
+  versions:
+  - 3.4.5
+- name: curl
+  versions:
+  - 0.4.47
+- name: curl-sys
+  versions:
+  - 0.4.78+curl-8.11.0
+- name: curve25519-dalek
+  versions:
+  - 4.1.3
+- name: curve25519-dalek-derive
+  versions:
+  - 0.1.1
+- name: cxx
+  versions:
+  - 1.0.133
+- name: cxx-build
+  versions:
+  - 1.0.133
+- name: cxxbridge-flags
+  versions:
+  - 1.0.133
+- name: cxxbridge-macro
+  versions:
+  - 1.0.133
+- name: darling
+  versions:
+  - 0.20.10
+- name: darling_core
+  versions:
+  - 0.20.10
+- name: darling_macro
+  versions:
+  - 0.20.10
+- name: dashmap
+  versions:
+  - 6.1.0
+- name: data-encoding
+  versions:
+  - 2.6.0
+- name: deadpool
+  versions:
+  - 0.12.1
+- name: deadpool-runtime
+  versions:
+  - 0.1.4
+- name: debugid
+  versions:
+  - 0.8.0
+- name: deflate
+  versions:
+  - 1.0.0
+- name: der
+  versions:
+  - 0.7.9
+- name: der-parser
+  versions:
+  - 9.0.0
+- name: deranged
+  versions:
+  - 0.3.11
+- name: derivative
+  versions:
+  - 2.2.0
+- name: derive_builder
+  versions:
+  - 0.20.2
+- name: derive_builder_core
+  versions:
+  - 0.20.2
+- name: derive_builder_macro
+  versions:
+  - 0.20.2
+- name: derive_more
+  versions:
+  - 1.0.0
+- name: deunicode
+  versions:
+  - 1.6.0
+- name: dialoguer
+  versions:
+  - 0.11.0
+- name: diff
+  versions:
+  - 0.1.13
+- name: difference
+  versions:
+  - 2.0.0
+- name: difflib
+  versions:
+  - 0.4.0
+- name: digest
+  versions:
+  - 0.10.7
+- name: directories
+  versions:
+  - 5.0.1
+- name: dirs
+  versions:
+  - 5.0.1
+- name: dirs-next
+  versions:
+  - 2.0.0
+- name: dirs-sys
+  versions:
+  - 0.4.1
+- name: dirs-sys-next
+  versions:
+  - 0.1.2
+- name: displaydoc
+  versions:
+  - 0.2.5
+- name: dissimilar
+  versions:
+  - 1.0.9
+- name: dlv-list
+  versions:
+  - 0.6.0
+- name: doc-comment
+  versions:
+  - 0.4.1
+- name: dotenv
+  versions:
+  - 0.15.0
+- name: dotenvy
+  versions:
+  - 0.15.7
+- name: downcast
+  versions:
+  - 0.11.0
+- name: downcast-rs
+  versions:
+  - 1.2.1
+- name: dtoa
+  versions:
+  - 1.0.9
+- name: dunce
+  versions:
+  - 1.0.5
+- name: dyn-clone
+  versions:
+  - 1.0.17
+- name: ecdsa
+  versions:
+  - 0.16.9
+- name: ed25519
+  versions:
+  - 2.2.3
+- name: ed25519-dalek
+  versions:
+  - 2.1.1
+- name: either
+  versions:
+  - 1.13.0
+- name: elliptic-curve
+  versions:
+  - 0.13.8
+- name: ena
+  versions:
+  - 0.14.3
+- name: encode_unicode
+  versions:
+  - 1.0.0
+- name: encoding_rs
+  versions:
+  - 0.8.35
+- name: endian-type
+  versions:
+  - 0.2.0
+- name: enum-as-inner
+  versions:
+  - 0.6.1
+- name: enum-iterator
+  versions:
+  - 2.1.0
+- name: enum-iterator-derive
+  versions:
+  - 1.4.0
+- name: enum_dispatch
+  versions:
+  - 0.3.13
+- name: enumflags2
+  versions:
+  - 0.7.10
+- name: enumflags2_derive
+  versions:
+  - 0.7.10
+- name: env_filter
+  versions:
+  - 0.1.2
+- name: env_logger
+  std: true
+  versions:
+  - 0.11.5
+- name: equivalent
+  versions:
+  - 1.0.1
+- name: erased-serde
+  versions:
+  - 0.4.5
+- name: errno
+  versions:
+  - 0.3.10
+- name: errno-dragonfly
+  versions:
+  - 0.1.2
+- name: error-chain
+  versions:
+  - 0.12.4
+- name: ethers-core
+  std: true
+  versions:
+  - 2.0.14
+- name: event-listener
+  versions:
+  - 5.3.1
+- name: event-listener-strategy
+  versions:
+  - 0.5.3
+- name: eyre
+  versions:
+  - 0.6.12
+- name: failure
+  versions:
+  - 0.1.8
+- name: failure_derive
+  versions:
+  - 0.1.8
+- name: fake-simd
+  versions:
+  - 0.1.2
+- name: fallible-iterator
+  versions:
+  - 0.3.0
+- name: fallible-streaming-iterator
+  versions:
+  - 0.1.9
+- name: fancy-regex
+  versions:
+  - 0.14.0
+- name: fastrand
+  versions:
+  - 2.2.0
+- name: fdeflate
+  versions:
+  - 0.3.6
+- name: ff
+  versions:
+  - 0.13.0
+- name: fiat-crypto
+  versions:
+  - 0.2.9
+- name: filetime
+  versions:
+  - 0.2.25
+- name: finl_unicode
+  versions:
+  - 1.3.0
+- name: fixed-hash
+  versions:
+  - 0.8.0
+- name: fixedbitset
+  versions:
+  - 0.5.7
+- name: flatbuffers
+  versions:
+  - 24.3.25
+- name: flate2
+  versions:
+  - 1.0.35
+- name: float-cmp
+  versions:
+  - 0.10.0
+- name: flume
+  versions:
+  - 0.11.1
+- name: fnv
+  versions:
+  - 1.0.7
+- name: foreign-types
+  versions:
+  - 0.5.0
+- name: foreign-types-shared
+  versions:
+  - 0.3.1
+- name: form_urlencoded
+  versions:
+  - 1.2.1
+- name: fragile
+  versions:
+  - 1.2.2
+- name: fs-err
+  versions:
+  - 3.0.0
+- name: fs2
+  versions:
+  - 0.4.3
+- name: fs_extra
+  versions:
+  - 1.3.0
+- name: fuchsia-cprng
+  versions:
+  - 0.1.1
+- name: funty
+  versions:
+  - 2.0.0
+- name: futf
+  versions:
+  - 0.1.5
+- name: futures
+  versions:
+  - 0.3.31
+- name: futures-channel
+  versions:
+  - 0.3.31
+- name: futures-core
+  versions:
+  - 0.3.31
+- name: futures-executor
+  versions:
+  - 0.3.31
+- name: futures-intrusive
+  versions:
+  - 0.5.0
+- name: futures-io
+  versions:
+  - 0.3.31
+- name: futures-lite
+  versions:
+  - 2.5.0
+- name: futures-macro
+  versions:
+  - 0.3.31
+- name: futures-sink
+  versions:
+  - 0.3.31
+- name: futures-task
+  versions:
+  - 0.3.31
+- name: futures-timer
+  versions:
+  - 3.0.3
+- name: futures-util
+  versions:
+  - 0.3.31
+- name: fxhash
+  versions:
+  - 0.2.1
+- name: gcc
+  versions:
+  - 0.3.55
+- name: generic-array
+  versions:
+  - 1.1.1
+- name: gethostname
+  versions:
+  - 0.5.0
+- name: getopts
+  versions:
+  - 0.2.21
+- name: getrandom
+  versions:
+  - 0.2.15
+- name: ghash
+  versions:
+  - 0.5.1
+- name: gif
+  versions:
+  - 0.13.1
+- name: gimli
+  versions:
+  - 0.31.1
+- name: git2
+  versions:
+  - 0.19.0
+- name: glob
+  versions:
+  - 0.3.1
+- name: globset
+  versions:
+  - 0.4.15
+- name: globwalk
+  versions:
+  - 0.9.1
+- name: gloo-timers
+  versions:
+  - 0.3.0
+- name: governor
+  versions:
+  - 0.7.0
+- name: group
+  versions:
+  - 0.13.0
+- name: h2
+  std: true
+  versions:
+  - 0.4.7
+- name: half
+  versions:
+  - 2.4.1
+- name: handlebars
+  versions:
+  - 6.2.0
+- name: hash32
+  versions:
+  - 0.3.1
+- name: hashbrown
+  versions:
+  - 0.15.2
+- name: hashlink
+  versions:
+  - 0.9.1
+- name: hdrhistogram
+  versions:
+  - 7.5.4
+- name: headers
+  std: true
+  versions:
+  - 0.4.0
+- name: headers-core
+  versions:
+  - 0.3.0
+- name: heapless
+  versions:
+  - 0.7.17
+- name: heck
+  versions:
+  - 0.5.0
+- name: hermit-abi
+  versions:
+  - 0.4.0
+- name: hex
+  std: true
+  versions:
+  - 0.4.3
+- name: hex-literal
+  versions:
+  - 0.4.1
+- name: hkdf
+  versions:
+  - 0.12.4
+- name: hmac
+  versions:
+  - 0.12.1
+- name: hmac-drbg
+  versions:
+  - 0.3.0
+- name: home
+  versions:
+  - 0.5.9
+- name: hostname
+  versions:
+  - 0.4.0
+- name: html5ever
+  versions:
+  - 0.29.0
+- name: http
+  versions:
+  - 1.1.0
+- name: http-body
+  versions:
+  - 1.0.1
+- name: http-body-util
+  versions:
+  - 0.1.2
+- name: http-range-header
+  versions:
+  - 0.4.2
+- name: http-types
+  versions:
+  - 2.12.0
+- name: httparse
+  versions:
+  - 1.9.5
+- name: httpdate
+  versions:
+  - 1.0.3
+- name: humansize
+  versions:
+  - 2.1.3
+- name: humantime
+  versions:
+  - 2.1.0
+- name: humantime-serde
+  versions:
+  - 1.1.1
+- name: hyper
+  std: true
+  versions:
+  - 1.5.1
+- name: hyper-rustls
+  versions:
+  - 0.27.3
+- name: hyper-timeout
+  std: true
+  versions:
+  - 0.5.2
+- name: hyper-tls
+  versions:
+  - 0.6.0
+- name: hyper-util
+  versions:
+  - 0.1.10
+- name: iana-time-zone
+  versions:
+  - 0.1.61
+- name: iana-time-zone-haiku
+  versions:
+  - 0.1.2
+- name: ident_case
+  versions:
+  - 1.0.1
+- name: idna
+  versions:
+  - 1.0.3
+- name: if_chain
+  versions:
+  - 1.0.2
+- name: ignore
+  versions:
+  - 0.4.23
+- name: image
+  versions:
+  - 0.25.5
+- name: impl-codec
+  versions:
+  - 0.7.0
+- name: impl-serde
+  versions:
+  - 0.5.0
+- name: impl-trait-for-tuples
+  versions:
+  - 0.2.3
+- name: include_dir
+  versions:
+  - 0.7.4
+- name: indenter
+  versions:
+  - 0.3.3
+- name: indexmap
+  versions:
+  - 2.7.0
+- name: indicatif
+  versions:
+  - 0.17.9
+- name: indoc
+  versions:
+  - 2.0.5
+- name: infer
+  versions:
+  - 0.16.0
+- name: inotify
+  versions:
+  - 0.11.0
+- name: inotify-sys
+  versions:
+  - 0.1.5
+- name: inout
+  versions:
+  - 0.2.0-rc.0
+- name: instant
+  versions:
+  - 0.1.13
+- name: integer-encoding
+  versions:
+  - 4.0.2
+- name: inventory
+  versions:
+  - 0.3.15
+- name: io-lifetimes
+  versions:
+  - 2.0.3
+- name: iovec
+  versions:
+  - 0.1.4
+- name: ipconfig
+  versions:
+  - 0.3.2
+- name: ipnet
+  versions:
+  - 2.10.1
+- name: ipnetwork
+  versions:
+  - 0.20.0
+- name: is-terminal
+  versions:
+  - 0.4.13
+- name: is_terminal_polyfill
+  versions:
+  - 1.70.1
+- name: itertools
+  versions:
+  - 0.13.0
+- name: itoa
+  versions:
+  - 1.0.14
+- name: jemalloc-sys
+  versions:
+  - 0.5.4+5.3.0-patched
+- name: jni
+  versions:
+  - 0.21.1
+- name: jni-sys
+  versions:
+  - 0.4.0
+- name: jobserver
+  versions:
+  - 0.1.32
+- name: jpeg-decoder
+  versions:
+  - 0.3.1
+- name: js-sys
+  versions:
+  - 0.3.74
+- name: json
+  versions:
+  - 0.12.4
+- name: json-patch
+  versions:
+  - 3.0.1
+- name: json5
+  versions:
+  - 0.4.1
+- name: jsonwebtoken
+  versions:
+  - 9.3.0
+- name: k256
+  std: true
+  versions:
+  - 0.13.4
+- name: keccak
+  versions:
+  - 0.1.5
+- name: kernel32-sys
+  versions:
+  - 0.2.2
+- name: kv-log-macro
+  versions:
+  - 1.0.7
+- name: lalrpop
+  versions:
+  - 0.22.0
+- name: lalrpop-util
+  versions:
+  - 0.22.0
+- name: language-tags
+  versions:
+  - 0.3.2
+- name: lazy_static
+  run-prover: true
+  std: true
+  import-str: |
+    use lazy_static::lazy_static;
+    lazy_static! {
+      static ref EXAMPLE: u8 = 42;
+    }
+  custom-main: assert_eq!(*EXAMPLE, 42);
+  versions:
+  - 1.5.0
+- name: lazycell
+  versions:
+  - 1.3.0
+- name: leb128
+  versions:
+  - 0.2.5
+- name: lexical-core
+  versions:
+  - 1.0.2
+- name: lexical-parse-float
+  versions:
+  - 1.0.2
+- name: lexical-parse-integer
+  versions:
+  - 1.0.2
+- name: lexical-util
+  versions:
+  - 1.0.3
+- name: lexical-write-float
+  versions:
+  - 1.0.2
+- name: lexical-write-integer
+  versions:
+  - 1.0.2
+- name: libc
+  versions:
+  - 0.2.167
+- name: libflate
+  versions:
+  - 2.1.0
+- name: libgit2-sys
+  versions:
+  - 0.17.0+1.8.1
+- name: libloading
+  versions:
+  - 0.8.6
+- name: libm
+  versions:
+  - 0.2.11
+- name: libredox
+  versions:
+  - 0.1.3
+- name: librocksdb-sys
+  versions:
+  - 0.16.0+8.10.0
+- name: libsecp256k1
+  versions:
+  - 0.7.1
+- name: libsqlite3-sys
+  versions:
+  - 0.30.1
+- name: libssh2-sys
+  versions:
+  - 0.3.0
+- name: libz-sys
+  versions:
+  - 1.1.20
+- name: link-cplusplus
+  versions:
+  - 1.0.9
+- name: linked-hash-map
+  versions:
+  - 0.5.6
+- name: linux-raw-sys
+  versions:
+  - 0.6.5
+- name: local-channel
+  versions:
+  - 0.1.5
+- name: local-waker
+  versions:
+  - 0.1.4
+- name: lock_api
+  versions:
+  - 0.4.12
+- name: log
+  versions:
+  - 0.4.22
+- name: lru
+  versions:
+  - 0.12.5
+- name: lru-cache
+  versions:
+  - 0.1.2
+- name: lz4
+  versions:
+  - 1.28.0
+- name: lz4-sys
+  versions:
+  - 1.11.1+lz4-1.10.0
+- name: lz4_flex
+  versions:
+  - 0.11.3
+- name: lzma-sys
+  versions:
+  - 0.1.20
+- name: mac
+  versions:
+  - 0.1.1
+- name: mach
+  versions:
+  - 0.3.2
+- name: maplit
+  versions:
+  - 1.0.2
+- name: markup5ever
+  versions:
+  - 0.14.0
+- name: match_cfg
+  versions:
+  - 0.1.0
+- name: matchers
+  versions:
+  - 0.2.0
+- name: matches
+  versions:
+  - 0.1.10
+- name: matchit
+  versions:
+  - 0.8.5
+- name: matrixmultiply
+  versions:
+  - 0.3.9
+- name: maybe-uninit
+  versions:
+  - 2.0.0
+- name: md-5
+  std: true
+  versions:
+  - 0.10.6
+- name: md5
+  versions:
+  - 0.7.0
+- name: memchr
+  versions:
+  - 2.7.4
+- name: memmap
+  versions:
+  - 0.7.0
+- name: memmap2
+  versions:
+  - 0.9.5
+- name: memoffset
+  versions:
+  - 0.9.1
+- name: metrics
+  versions:
+  - 0.24.1
+- name: metrics-macros
+  versions:
+  - 0.7.1
+- name: metrics-util
+  versions:
+  - 0.18.0
+- name: miette
+  versions:
+  - 7.4.0
+- name: miette-derive
+  versions:
+  - 7.4.0
+- name: mime
+  versions:
+  - 0.3.17
+- name: mime_guess
+  versions:
+  - 2.0.5
+- name: minimal-lexical
+  versions:
+  - 0.1.4
+- name: miniz_oxide
+  versions:
+  - 0.8.0
+- name: mio
+  versions:
+  - 1.0.3
+- name: mio-uds
+  versions:
+  - 0.6.8
+- name: miow
+  skip: true
+  versions:
+  - 0.6.0
+- name: mockall
+  versions:
+  - 0.13.1
+- name: mockall_derive
+  versions:
+  - 0.13.1
+- name: multer
+  versions:
+  - 3.1.0
+- name: multihash
+  versions:
+  - 0.19.2
+- name: multimap
+  std: true
+  versions:
+  - 0.10.0
+- name: multipart
+  versions:
+  - 0.18.0
+- name: nalgebra
+  versions:
+  - 0.33.2
+- name: nanorand
+  versions:
+  - 0.7.0
+- name: native-tls
+  versions:
+  - 0.2.12
+- name: ndarray
+  versions:
+  - 0.16.1
+- name: net2
+  versions:
+  - 0.2.39
+- name: new_debug_unreachable
+  versions:
+  - 1.0.6
+- name: nibble_vec
+  versions:
+  - 0.1.0
+- name: nix
+  versions:
+  - 0.29.0
+- name: no-std-compat
+  versions:
+  - 0.4.1
+- name: nodrop
+  versions:
+  - 0.1.14
+- name: nohash-hasher
+  versions:
+  - 0.2.0
+- name: nom
+  versions:
+  - 6.2.2
+- name: nonzero_ext
+  versions:
+  - 0.3.0
+- name: normalize-line-endings
+  versions:
+  - 0.3.0
+- name: notify
+  versions:
+  - 7.0.0
+- name: ntapi
+  versions:
+  - 0.4.1
+- name: nu-ansi-term
+  versions:
+  - 0.50.1
+- name: num
+  versions:
+  - 0.4.3
+- name: num-bigint
+  versions:
+  - 0.4.6
+- name: num-bigint-dig
+  versions:
+  - 0.7.1
+- name: num-complex
+  versions:
+  - 0.4.6
+- name: num-conv
+  versions:
+  - 0.1.0
+- name: num-derive
+  versions:
+  - 0.4.2
+- name: num-format
+  versions:
+  - 0.4.4
+- name: num-integer
+  versions:
+  - 0.1.46
+- name: num-iter
+  versions:
+  - 0.1.45
+- name: num-rational
+  versions:
+  - 0.4.2
+- name: num-traits
+  versions:
+  - 0.2.19
+- name: num_cpus
+  versions:
+  - 1.16.0
+- name: num_enum
+  versions:
+  - 0.7.3
+- name: num_enum_derive
+  versions:
+  - 0.7.3
+- name: num_threads
+  versions:
+  - 0.1.7
+- name: number_prefix
+  versions:
+  - 0.4.0
+- name: object
+  versions:
+  - 0.36.5
+- name: object_store
+  versions:
+  - 0.11.1
+- name: oid-registry
+  versions:
+  - 0.7.1
+- name: once_cell
+  versions:
+  - 1.20.2
+- name: oorandom
+  versions:
+  - 11.1.4
+- name: opaque-debug
+  versions:
+  - 0.3.1
+- name: openssl
+  std: true
+  versions:
+  - 0.10.68
+- name: openssl-macros
+  versions:
+  - 0.1.1
+- name: openssl-probe
+  versions:
+  - 0.1.5
+- name: openssl-src
+  versions:
+  - 300.4.1+3.4.0
+- name: openssl-sys
+  versions:
+  - 0.9.104
+- name: opentelemetry
+  versions:
+  - 0.27.1
+- name: opentelemetry-http
+  versions:
+  - 0.27.0
+- name: opentelemetry-otlp
+  versions:
+  - 0.27.0
+- name: opentelemetry-proto
+  versions:
+  - 0.27.0
+- name: opentelemetry-semantic-conventions
+  versions:
+  - 0.27.0
+- name: opentelemetry_api
+  versions:
+  - 0.20.0
+- name: opentelemetry_sdk
+  versions:
+  - 0.27.1
+- name: option-ext
+  versions:
+  - 0.2.0
+- name: ordered-float
+  versions:
+  - 4.5.0
+- name: ordered-multimap
+  versions:
+  - 0.7.4
+- name: os_info
+  versions:
+  - 3.9.0
+- name: os_pipe
+  versions:
+  - 1.2.1
+- name: os_str_bytes
+  versions:
+  - 7.0.0
+- name: ouroboros
+  versions:
+  - 0.18.4
+- name: ouroboros_macro
+  versions:
+  - 0.18.4
+- name: outref
+  versions:
+  - 0.5.1
+- name: overload
+  versions:
+  - 0.1.1
+- name: owning_ref
+  versions:
+  - 0.4.1
+- name: owo-colors
+  versions:
+  - 4.1.0
+- name: p256
+  versions:
+  - 0.13.2
+- name: parity-scale-codec
+  versions:
+  - 3.7.0
+- name: parity-scale-codec-derive
+  versions:
+  - 3.7.0
+- name: parking
+  versions:
+  - 2.2.1
+- name: parking_lot
+  versions:
+  - 0.12.3
+- name: parking_lot_core
+  versions:
+  - 0.9.10
+- name: parse-zoneinfo
+  versions:
+  - 0.3.1
+- name: password-hash
+  versions:
+  - 0.5.0
+- name: paste
+  versions:
+  - 1.0.15
+- name: paste-impl
+  versions:
+  - 0.1.18
+- name: pathdiff
+  versions:
+  - 0.2.3
+- name: pbkdf2
+  versions:
+  - 0.12.2
+- name: peeking_take_while
+  versions:
+  - 1.0.0
+- name: pem
+  versions:
+  - 3.0.4
+- name: pem-rfc7468
+  versions:
+  - 1.0.0-rc.0
+- name: percent-encoding
+  versions:
+  - 2.3.1
+- name: pest
+  versions:
+  - 2.7.14
+- name: pest_derive
+  versions:
+  - 2.7.14
+- name: pest_generator
+  versions:
+  - 2.7.14
+- name: pest_meta
+  versions:
+  - 2.7.14
+- name: petgraph
+  versions:
+  - 0.6.5
+- name: phf
+  versions:
+  - 0.11.2
+- name: phf_codegen
+  versions:
+  - 0.11.2
+- name: phf_generator
+  versions:
+  - 0.11.2
+- name: phf_macros
+  versions:
+  - 0.11.2
+- name: phf_shared
+  versions:
+  - 0.11.2
+- name: pico-args
+  versions:
+  - 0.5.0
+- name: pin-project
+  versions:
+  - 1.1.7
+- name: pin-project-internal
+  versions:
+  - 1.1.7
+- name: pin-project-lite
+  versions:
+  - 0.2.15
+- name: pin-utils
+  versions:
+  - 0.1.0
+- name: piper
+  versions:
+  - 0.2.4
+- name: pkcs1
+  versions:
+  - 0.8.0-rc.1
+- name: pkcs8
+  versions:
+  - 0.10.2
+- name: pkg-config
+  versions:
+  - 0.3.31
+- name: platforms
+  versions:
+  - 3.5.0
+- name: plotters
+  versions:
+  - 0.3.7
+- name: plotters-backend
+  versions:
+  - 0.3.7
+- name: plotters-svg
+  versions:
+  - 0.3.7
+- name: png
+  versions:
+  - 0.17.14
+- name: polling
+  versions:
+  - 3.7.4
+- name: poly1305
+  versions:
+  - 0.8.0
+- name: polyval
+  versions:
+  - 0.6.2
+- name: portable-atomic
+  versions:
+  - 1.10.0
+- name: postgres-protocol
+  versions:
+  - 0.6.7
+- name: powerfmt
+  versions:
+  - 0.2.0
+- name: ppv-lite86
+  versions:
+  - 0.2.20
+- name: precomputed-hash
+  versions:
+  - 0.1.1
+- name: predicates
+  versions:
+  - 3.1.2
+- name: predicates-core
+  versions:
+  - 1.0.8
+- name: predicates-tree
+  versions:
+  - 1.0.11
+- name: pretty_assertions
+  versions:
+  - 1.4.1
+- name: pretty_env_logger
+  versions:
+  - 0.5.0
+- name: prettyplease
+  versions:
+  - 0.2.25
+- name: primeorder
+  versions:
+  - 0.14.0-pre.1
+- name: primitive-types
+  versions:
+  - 0.13.1
+- name: proc-macro-crate
+  versions:
+  - 3.2.0
+- name: proc-macro-error
+  versions:
+  - 1.0.4
+- name: proc-macro-error-attr
+  versions:
+  - 1.0.4
+- name: proc-macro-hack
+  versions:
+  - 0.5.20+deprecated
+- name: proc-macro-nested
+  versions:
+  - 0.1.7
+- name: proc-macro2
+  versions:
+  - 1.0.92
+- name: procfs
+  versions:
+  - 0.17.0
+- name: prometheus
+  versions:
+  - 0.13.4
+- name: proptest
+  versions:
+  - 1.5.0
+- name: prost
+  versions:
+  - 0.13.3
+- name: prost-build
+  versions:
+  - 0.13.3
+- name: prost-derive
+  versions:
+  - 0.13.3
+- name: prost-types
+  versions:
+  - 0.13.3
+- name: protobuf
+  versions:
+  - 3.7.1
+- name: protobuf-codegen
+  versions:
+  - 3.7.1
+- name: psm
+  versions:
+  - 0.1.24
+- name: ptr_meta
+  versions:
+  - 0.3.0
+- name: ptr_meta_derive
+  versions:
+  - 0.3.0
+- name: publicsuffix
+  versions:
+  - 2.3.0
+- name: pulldown-cmark
+  versions:
+  - 0.12.2
+- name: pyo3
+  versions:
+  - 0.23.2
+- name: pyo3-build-config
+  versions:
+  - 0.23.2
+- name: pyo3-ffi
+  versions:
+  - 0.23.2
+- name: pyo3-macros
+  versions:
+  - 0.23.2
+- name: pyo3-macros-backend
+  versions:
+  - 0.23.2
+- name: quanta
+  versions:
+  - 0.12.3
+- name: quick-error
+  versions:
+  - 2.0.1
+- name: quick-xml
+  versions:
+  - 0.37.1
+- name: quickcheck
+  versions:
+  - 1.0.3
+- name: quinn
+  versions:
+  - 0.11.6
+- name: quinn-proto
+  versions:
+  - 0.11.9
+- name: quinn-udp
+  versions:
+  - 0.5.7
+- name: quote
+  versions:
+  - 1.0.37
+- name: radium
+  versions:
+  - 1.1.0
+- name: radix_trie
+  versions:
+  - 0.2.1
+- name: rand
+  std: true
+  versions:
+  - 0.8.5
+- name: rand_chacha
+  versions:
+  - 0.9.0-alpha.0
+- name: rand_core
+  versions:
+  - 0.6.4
+- name: rand_distr
+  versions:
+  - 0.4.3
+- name: rand_hc
+  versions:
+  - 0.3.2
+- name: rand_isaac
+  versions:
+  - 0.3.0
+- name: rand_jitter
+  versions:
+  - 0.4.0
+- name: rand_os
+  versions:
+  - 0.2.2
+- name: rand_pcg
+  versions:
+  - 0.9.0-beta.0
+- name: rand_xorshift
+  versions:
+  - 0.3.0
+- name: rand_xoshiro
+  versions:
+  - 0.6.0
+- name: raw-cpuid
+  versions:
+  - 11.2.0
+- name: raw-window-handle
+  versions:
+  - 0.6.2
+- name: rawpointer
+  versions:
+  - 0.2.1
+- name: rayon
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 1.10.0
+- name: rayon-core
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 1.12.1
+- name: rcgen
+  versions:
+  - 0.13.1
+- name: rdrand
+  versions:
+  - 0.8.3
+- name: redis
+  versions:
+  - 0.27.5
+- name: redox_syscall
+  skip: true
+  versions:
+  - 0.5.7
+- name: redox_users
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 0.4.6
+- name: ref-cast
+  versions:
+  - 1.0.23
+- name: ref-cast-impl
+  versions:
+  - 1.0.23
+- name: regex
+  versions:
+  - 1.11.1
+- name: regex-automata
+  versions:
+  - 0.4.9
+- name: regex-lite
+  versions:
+  - 0.1.6
+- name: regex-syntax
+  versions:
+  - 0.8.5
+- name: relative-path
+  versions:
+  - 1.9.3
+- name: remove_dir_all
+  versions:
+  - 1.0.0
+- name: rend
+  versions:
+  - 0.5.2
+- name: reqwest
+  versions:
+  - 0.12.9
+- name: resolv-conf
+  versions:
+  - 0.7.0
+- name: retain_mut
+  versions:
+  - 0.1.9
+- name: revm
+  std: true
+  versions:
+  - 18.0.0
+- name: revm-primitives
+  std: true
+  versions:
+  - 14.0.0
+- name: rfc6979
+  versions:
+  - 0.4.0
+- name: rgb
+  versions:
+  - 0.8.50
+- name: ring
+  inject-cc-flags: true
+  versions:
+  - 0.17.8
+- name: rkyv
+  versions:
+  - 0.8.9
+- name: rkyv_derive
+  versions:
+  - 0.8.9
+- name: rlp
+  versions:
+  - 0.6.1
+- name: rmp
+  versions:
+  - 0.8.14
+- name: rmp-serde
+  versions:
+  - 1.3.0
+- name: rocksdb
+  versions:
+  - 0.22.0
+- name: ron
+  versions:
+  - 0.8.1
+- name: rpassword
+  versions:
+  - 7.3.1
+- name: rsa
+  versions:
+  - 0.9.7
+- name: rstest
+  versions:
+  - 0.23.0
+- name: rstest_macros
+  versions:
+  - 0.23.0
+- name: ruint
+  versions:
+  - 1.12.3
+- name: rusqlite
+  versions:
+  - 0.32.1
+- name: rust-ini
+  versions:
+  - 0.21.1
+- name: rust_decimal
+  versions:
+  - 1.36.0
+- name: rustc-demangle
+  versions:
+  - 0.1.24
+- name: rustc-hash
+  versions:
+  - 2.1.0
+- name: rustc-hex
+  versions:
+  - 2.1.0
+- name: rustc-serialize
+  versions:
+  - 0.3.25
+- name: rustc_version
+  versions:
+  - 0.4.1
+- name: rusticata-macros
+  versions:
+  - 4.1.0
+- name: rustix
+  versions:
+  - 0.38.41
+- name: rustls
+  versions:
+  - 0.23.19
+- name: rustls-native-certs
+  versions:
+  - 0.8.1
+- name: rustls-pemfile
+  versions:
+  - 2.2.0
+- name: rustls-pki-types
+  versions:
+  - 1.10.0
+- name: rustls-webpki
+  versions:
+  - 0.102.8
+- name: rustversion
+  versions:
+  - 1.0.18
+- name: rusty-fork
+  versions:
+  - 0.3.0
+- name: ryu
+  versions:
+  - 1.0.18
+- name: safemem
+  versions:
+  - 0.3.3
+- name: same-file
+  versions:
+  - 1.0.6
+- name: schannel
+  versions:
+  - 0.1.27
+- name: scheduled-thread-pool
+  versions:
+  - 0.2.7
+- name: schemars
+  versions:
+  - 0.8.21
+- name: schemars_derive
+  versions:
+  - 1.0.0-alpha.11
+- name: scoped-tls
+  versions:
+  - 1.0.1
+- name: scopeguard
+  versions:
+  - 1.2.0
+- name: scratch
+  versions:
+  - 1.0.7
+- name: scroll
+  versions:
+  - 0.12.0
+- name: sct
+  versions:
+  - 0.7.1
+- name: seahash
+  versions:
+  - 4.1.0
+- name: sec1
+  versions:
+  - 0.7.3
+- name: secp256k1
+  versions:
+  - 0.30.0
+- name: secp256k1-sys
+  versions:
+  - 0.10.1
+- name: secrecy
+  versions:
+  - 0.10.3
+- name: security-framework
+  versions:
+  - 3.0.1
+- name: security-framework-sys
+  versions:
+  - 2.12.1
+- name: semver
+  versions:
+  - 1.0.23
+- name: semver-parser
+  versions:
+  - 0.10.3
+- name: sentry
+  versions:
+  - 0.35.0
+- name: sentry-backtrace
+  versions:
+  - 0.35.0
+- name: sentry-contexts
+  versions:
+  - 0.35.0
+- name: sentry-core
+  versions:
+  - 0.35.0
+- name: sentry-panic
+  versions:
+  - 0.35.0
+- name: sentry-types
+  versions:
+  - 0.35.0
+- name: serde
+  std: true
+  versions:
+  - 1.0.215
+- name: serde-value
+  versions:
+  - 0.7.0
+- name: serde-wasm-bindgen
+  versions:
+  - 0.6.5
+- name: serde_bytes
+  std: true
+  versions:
+  - 0.11.15
+- name: serde_cbor
+  std: true
+  versions:
+  - 0.11.2
+- name: serde_derive
+  versions:
+  - 1.0.215
+- name: serde_derive_internals
+  versions:
+  - 0.29.1
+- name: serde_ignored
+  versions:
+  - 0.1.10
+- name: serde_json
+  std: true
+  versions:
+  - 1.0.133
+- name: serde_path_to_error
+  versions:
+  - 0.1.16
+- name: serde_qs
+  versions:
+  - 0.13.0
+- name: serde_repr
+  versions:
+  - 0.1.19
+- name: serde_spanned
+  versions:
+  - 0.6.8
+- name: serde_urlencoded
+  std: true
+  versions:
+  - 0.7.1
+- name: serde_with
+  std: true
+  versions:
+  - 3.11.0
+- name: serde_with_macros
+  versions:
+  - 3.11.0
+- name: serde_yaml
+  std: true
+  versions:
+  - 0.9.34+deprecated
+- name: serial_test
+  versions:
+  - 3.2.0
+- name: serial_test_derive
+  versions:
+  - 3.2.0
+- name: sha-1
+  std: true
+  versions:
+  - 0.10.1
+- name: sha1
+  std: true
+  versions:
+  - 0.10.6
+- name: sha1_smol
+  versions:
+  - 1.0.1
+- name: sha2
+  std: true
+  versions:
+  - 0.11.0-pre.1
+- name: sha3
+  std: true
+  versions:
+  - 0.10.8
+- name: sharded-slab
+  versions:
+  - 0.1.7
+- name: shell-escape
+  versions:
+  - 0.1.5
+- name: shell-words
+  versions:
+  - 1.1.0
+- name: shellexpand
+  versions:
+  - 3.1.0
+- name: shlex
+  versions:
+  - 1.3.0
+- name: signal-hook
+  versions:
+  - 0.3.17
+- name: signal-hook-mio
+  versions:
+  - 0.2.4
+- name: signal-hook-registry
+  versions:
+  - 1.4.2
+- name: signature
+  versions:
+  - 2.2.0
+- name: simba
+  versions:
+  - 0.9.0
+- name: simd-adler32
+  versions:
+  - 0.3.7
+- name: simdutf8
+  versions:
+  - 0.1.5
+- name: similar
+  versions:
+  - 2.6.0
+- name: simple_asn1
+  versions:
+  - 0.6.2
+- name: simple_logger
+  versions:
+  - 5.0.0
+- name: siphasher
+  versions:
+  - 1.0.1
+- name: sized-chunks
+  versions:
+  - 0.7.0
+- name: sketches-ddsketch
+  versions:
+  - 0.3.0
+- name: slab
+  versions:
+  - 0.4.9
+- name: slog
+  versions:
+  - 2.7.0
+- name: slotmap
+  versions:
+  - 1.0.7
+- name: smallvec
+  versions:
+  - 1.13.2
+- name: smartstring
+  versions:
+  - 1.0.1
+- name: smawk
+  versions:
+  - 0.3.2
+- name: smol_str
+  versions:
+  - 0.3.2
+- name: snafu
+  versions:
+  - 0.8.5
+- name: snafu-derive
+  versions:
+  - 0.8.5
+- name: snap
+  versions:
+  - 1.1.1
+- name: socket2
+  versions:
+  - 0.5.8
+- name: spin
+  versions:
+  - 0.9.8
+- name: spki
+  versions:
+  - 0.7.3
+- name: sqlformat
+  versions:
+  - 0.3.2
+- name: sqlx
+  versions:
+  - 0.8.2
+- name: sqlx-core
+  versions:
+  - 0.8.2
+- name: sqlx-macros
+  versions:
+  - 0.8.2
+- name: stable_deref_trait
+  versions:
+  - 1.2.0
+- name: standback
+  versions:
+  - 0.4.4
+- name: static_assertions
+  versions:
+  - 1.1.0
+- name: string_cache
+  std: true
+  versions:
+  - 0.8.7
+- name: string_cache_codegen
+  versions:
+  - 0.5.2
+- name: stringprep
+  versions:
+  - 0.1.5
+- name: strip-ansi-escapes
+  versions:
+  - 0.2.0
+- name: strsim
+  versions:
+  - 0.11.1
+- name: structopt
+  versions:
+  - 0.3.26
+- name: structopt-derive
+  versions:
+  - 0.4.18
+- name: strum
+  versions:
+  - 0.26.3
+- name: strum_macros
+  versions:
+  - 0.26.4
+- name: subtle
+  versions:
+  - 2.6.1
+- name: syn
+  versions:
+  - 2.0.90
+- name: sync_wrapper
+  versions:
+  - 1.0.2
+- name: synstructure
+  versions:
+  - 0.13.1
+- name: sysinfo
+  versions:
+  - 0.32.1
+- name: system-configuration
+  versions:
+  - 0.6.1
+- name: system-configuration-sys
+  versions:
+  - 0.6.0
+- name: take_mut
+  versions:
+  - 0.2.2
+- name: tap
+  versions:
+  - 1.0.1
+- name: tar
+  versions:
+  - 0.4.43
+- name: target-lexicon
+  versions:
+  - 0.12.16
+- name: tempdir
+  versions:
+  - 0.3.7
+- name: tempfile
+  versions:
+  - 3.14.0
+- name: tendril
+  versions:
+  - 0.4.3
+- name: term
+  versions:
+  - 1.0.0
+- name: termcolor
+  versions:
+  - 1.4.1
+- name: terminal_size
+  versions:
+  - 0.4.1
+- name: termtree
+  versions:
+  - 0.5.1
+- name: textwrap
+  versions:
+  - 0.16.1
+- name: tfhe
+  std: true
+  versions:
+  - 0.10.0
+- name: thiserror
+  versions:
+  - 2.0.3
+- name: thiserror-impl
+  versions:
+  - 2.0.3
+- name: thread-id
+  versions:
+  - 5.0.0
+- name: thread_local
+  versions:
+  - 1.1.8
+- name: threadpool
+  versions:
+  - 1.8.1
+- name: thrift
+  versions:
+  - 0.17.0
+- name: tiff
+  versions:
+  - 0.9.1
+- name: tikv-jemalloc-sys
+  versions:
+  - 0.6.0+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7
+- name: tikv-jemallocator
+  versions:
+  - 0.6.0
+- name: time
+  versions:
+  - 0.3.36
+- name: time-core
+  versions:
+  - 0.1.2
+- name: time-macros
+  versions:
+  - 0.2.18
+- name: time-macros-impl
+  versions:
+  - 0.1.2
+- name: tiny-keccak
+  versions:
+  - 2.0.2
+- name: tinytemplate
+  std: true
+  versions:
+  - 1.2.1
+- name: tinyvec
+  versions:
+  - 1.8.0
+- name: tinyvec_macros
+  versions:
+  - 0.1.1
+- name: tokio
+  versions:
+  - 1.41.1
+- name: tokio-current-thread
+  versions:
+  - 0.1.7
+- name: tokio-executor
+  versions:
+  - 0.1.10
+- name: tokio-io
+  versions:
+  - 0.1.13
+- name: tokio-io-timeout
+  versions:
+  - 1.2.0
+- name: tokio-macros
+  versions:
+  - 2.4.0
+- name: tokio-native-tls
+  versions:
+  - 0.3.1
+- name: tokio-reactor
+  versions:
+  - 0.1.12
+- name: tokio-retry
+  versions:
+  - 0.3.0
+- name: tokio-rustls
+  versions:
+  - 0.26.0
+- name: tokio-stream
+  versions:
+  - 0.1.16
+- name: tokio-sync
+  versions:
+  - 0.1.8
+- name: tokio-tcp
+  versions:
+  - 0.1.4
+- name: tokio-test
+  versions:
+  - 0.4.4
+- name: tokio-threadpool
+  versions:
+  - 0.1.18
+- name: tokio-timer
+  versions:
+  - 0.2.13
+- name: tokio-tungstenite
+  versions:
+  - 0.24.0
+- name: tokio-util
+  versions:
+  - 0.7.12
+- name: toml
+  std: true
+  versions:
+  - 0.8.19
+- name: toml_datetime
+  versions:
+  - 0.6.8
+- name: toml_edit
+  versions:
+  - 0.22.22
+- name: tonic
+  versions:
+  - 0.12.3
+- name: tonic-build
+  versions:
+  - 0.12.3
+- name: tower
+  std: true
+  versions:
+  - 0.5.1
+- name: tower-http
+  versions:
+  - 0.6.2
+- name: tower-layer
+  versions:
+  - 0.3.3
+- name: tower-service
+  versions:
+  - 0.3.3
+- name: tracing
+  std: true
+  versions:
+  - 0.1.41
+- name: tracing-appender
+  versions:
+  - 0.2.3
+- name: tracing-attributes
+  versions:
+  - 0.1.28
+- name: tracing-core
+  std: true
+  versions:
+  - 0.1.33
+- name: tracing-error
+  versions:
+  - 0.2.1
+- name: tracing-futures
+  std: true
+  versions:
+  - 0.2.5
+- name: tracing-log
+  std: true
+  versions:
+  - 0.2.0
+- name: tracing-opentelemetry
+  versions:
+  - 0.28.0
+- name: tracing-serde
+  std: true
+  versions:
+  - 0.2.0
+- name: tracing-subscriber
+  std: true
+  versions:
+  - 0.3.19
+- name: triomphe
+  versions:
+  - 0.1.14
+- name: trust-dns-proto
+  versions:
+  - 0.23.2
+- name: trust-dns-resolver
+  versions:
+  - 0.23.2
+- name: try-lock
+  versions:
+  - 0.2.5
+- name: trybuild
+  versions:
+  - 1.0.101
+- name: ttf-parser
+  versions:
+  - 0.25.1
+- name: tungstenite
+  std: true
+  versions:
+  - 0.24.0
+- name: twoway
+  versions:
+  - 0.2.2
+- name: twox-hash
+  versions:
+  - 2.0.1
+- name: typed-arena
+  versions:
+  - 2.0.2
+- name: typed-builder
+  versions:
+  - 0.20.0
+- name: typenum
+  versions:
+  - 1.17.0
+- name: ucd-trie
+  versions:
+  - 0.1.7
+- name: uint
+  versions:
+  - 0.10.0
+- name: unarray
+  versions:
+  - 0.1.4
+- name: uncased
+  versions:
+  - 0.9.10
+- name: unic-char-property
+  versions:
+  - 0.9.0
+- name: unic-common
+  versions:
+  - 0.9.0
+- name: unic-ucd-version
+  versions:
+  - 0.9.0
+- name: unicase
+  versions:
+  - 2.8.0
+- name: unicode-bidi
+  versions:
+  - 0.3.17
+- name: unicode-ident
+  versions:
+  - 1.0.14
+- name: unicode-linebreak
+  versions:
+  - 0.1.5
+- name: unicode-normalization
+  versions:
+  - 0.1.24
+- name: unicode-segmentation
+  versions:
+  - 1.12.0
+- name: unicode-width
+  versions:
+  - 0.2.0
+- name: unicode-xid
+  versions:
+  - 0.2.6
+- name: unicode_categories
+  versions:
+  - 0.1.1
+- name: unindent
+  versions:
+  - 0.2.3
+- name: universal-hash
+  versions:
+  - 0.6.0-rc.0
+- name: unreachable
+  versions:
+  - 1.0.0
+- name: unsafe-libyaml
+  versions:
+  - 0.2.11
+- name: unsigned-varint
+  versions:
+  - 0.8.0
+- name: untrusted
+  versions:
+  - 0.9.0
+- name: ureq
+  versions:
+  - 2.11.0
+- name: url
+  versions:
+  - 2.5.4
+- name: urlencoding
+  versions:
+  - 2.1.3
+- name: utf-8
+  versions:
+  - 0.7.6
+- name: utf8-ranges
+  versions:
+  - 1.0.5
+- name: utf8parse
+  versions:
+  - 0.2.2
+- name: uuid
+  versions:
+  - 1.11.0
+- name: valuable
+  versions:
+  - 0.1.0
+- name: value-bag
+  versions:
+  - 1.10.0
+- name: vcpkg
+  versions:
+  - 0.2.15
+- name: vec_map
+  versions:
+  - 0.8.2
+- name: vergen
+  versions:
+  - 9.0.2
+- name: version-compare
+  versions:
+  - 0.2.0
+- name: version_check
+  versions:
+  - 0.9.5
+- name: void
+  versions:
+  - 1.0.2
+- name: vsdb
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 3.0.0
+- name: vsdb_derive
+  versions:
+  - 0.53.0
+- name: vsdbsled
+  patch: |
+    [patch.crates-io]
+    crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+  versions:
+  - 0.34.7-p1
+- name: vsimd
+  versions:
+  - 0.8.0
+- name: vte
+  versions:
+  - 0.13.0
+- name: wait-timeout
+  versions:
+  - 0.2.0
+- name: waker-fn
+  versions:
+  - 1.2.0
+- name: walkdir
+  versions:
+  - 2.5.0
+- name: want
+  versions:
+  - 0.3.1
+- name: warp
+  versions:
+  - 0.3.7
+- name: wasi
+  versions:
+  - 0.13.3+wasi-0.2.2
+- name: wasm-bindgen
+  versions:
+  - 0.2.97
+- name: wasm-bindgen-backend
+  versions:
+  - 0.2.97
+- name: wasm-bindgen-futures
+  versions:
+  - 0.4.47
+- name: wasm-bindgen-macro
+  versions:
+  - 0.2.97
+- name: wasm-bindgen-macro-support
+  versions:
+  - 0.2.97
+- name: wasm-bindgen-shared
+  versions:
+  - 0.2.97
+- name: wasm-encoder
+  versions:
+  - 0.221.2
+- name: wasm-streams
+  versions:
+  - 0.4.2
+- name: wasmparser
+  versions:
+  - 0.221.2
+- name: wast
+  versions:
+  - 221.0.2
+- name: web-sys
+  versions:
+  - 0.3.74
+- name: webpki
+  versions:
+  - 0.22.4
+- name: webpki-roots
+  versions:
+  - 0.26.7
+- name: weezl
+  versions:
+  - 0.1.8
+- name: which
+  versions:
+  - 7.0.0
+- name: whoami
+  versions:
+  - 1.5.2
+- name: widestring
+  versions:
+  - 1.1.0
+- name: winapi
+  versions:
+  - 0.3.9
+- name: winapi-build
+  versions:
+  - 0.1.1
+- name: winapi-i686-pc-windows-gnu
+  versions:
+  - 0.4.0
+- name: winapi-util
+  versions:
+  - 0.1.9
+- name: winapi-x86_64-pc-windows-gnu
+  versions:
+  - 0.4.0
+- name: windows
+  versions:
+  - 0.58.0
+- name: windows-core
+  versions:
+  - 0.58.0
+- name: windows-sys
+  skip: true
+  versions:
+  - 0.59.0
+- name: windows-targets
+  versions:
+  - 0.52.6
+- name: windows_aarch64_gnullvm
+  versions:
+  - 0.52.6
+- name: windows_aarch64_msvc
+  versions:
+  - 0.52.6
+- name: windows_i686_gnu
+  versions:
+  - 0.52.6
+- name: windows_i686_gnullvm
+  versions:
+  - 0.52.6
+- name: windows_i686_msvc
+  versions:
+  - 0.52.6
+- name: windows_x86_64_gnu
+  versions:
+  - 0.52.6
+- name: windows_x86_64_gnullvm
+  versions:
+  - 0.52.6
+- name: windows_x86_64_msvc
+  versions:
+  - 0.52.6
+- name: winnow
+  versions:
+  - 0.6.20
+- name: winreg
+  versions:
+  - 0.52.0
+- name: ws2_32-sys
+  versions:
+  - 0.2.1
+- name: wyz
+  versions:
+  - 0.6.1
+- name: x25519-dalek
+  versions:
+  - 2.0.1
+- name: x509-parser
+  versions:
+  - 0.16.0
+- name: xattr
+  versions:
+  - 1.3.1
+- name: xml-rs
+  versions:
+  - 0.8.23
+- name: xmlparser
+  versions:
+  - 0.13.6
+- name: xz2
+  versions:
+  - 0.1.7
+- name: yaml-rust
+  versions:
+  - 0.4.5
+- name: yansi
+  versions:
+  - 1.0.1
+- name: yasna
+  versions:
+  - 0.5.2
+- name: zerocopy
+  versions:
+  - 0.8.11
+- name: zerocopy-derive
+  versions:
+  - 0.8.11
+- name: zeroize
+  versions:
+  - 1.8.1
+- name: zeroize_derive
+  versions:
+  - 1.4.2
+- name: zip
+  inject-cc-flags: true
+  std: true
+  versions:
+  - 2.2.1
+- name: zstd
+  versions:
+  - 0.13.2
+- name: zstd-safe
+  versions:
+  - 7.2.1
+- name: zstd-sys
+  versions:
+  - 2.0.13+zstd.1.5.6

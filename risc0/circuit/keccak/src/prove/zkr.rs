@@ -12,66 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::{Cursor, Read as _};
+use std::io::Read as _;
 
-use anyhow::{Context as _, Result};
+use anyhow::Result;
 use risc0_circuit_recursion::prove::Program;
-use zip::ZipArchive;
+use xz2::read::XzDecoder;
 
-use crate::{KECCAK_PO2, RECURSION_PO2};
+use crate::{KECCAK_PO2_RANGE, RECURSION_PO2};
 
-const ZKR_ZIP: &[u8] = include_bytes!("keccak_zkr.zip");
+const ZKRS: &[&[u8]] = &[
+    include_bytes!("keccak_lift_14.zkr.xz"),
+    include_bytes!("keccak_lift_15.zkr.xz"),
+    include_bytes!("keccak_lift_16.zkr.xz"),
+    include_bytes!("keccak_lift_17.zkr.xz"),
+    include_bytes!("keccak_lift_18.zkr.xz"),
+];
 
-pub fn get_zkr_u32s(name: &str) -> Result<Vec<u32>> {
-    let mut zip = ZipArchive::new(Cursor::new(ZKR_ZIP))?;
-    let mut entry = zip
-        .by_name(name)
-        .with_context(|| format!("Failed to read {name}"))?;
-
-    let mut bytes = Vec::new();
-    entry.read_to_end(&mut bytes)?;
-
-    Ok(Vec::from(bytemuck::cast_slice(bytes.as_slice())))
-}
-
-pub fn get_zkr() -> Result<Program> {
-    let name = format!("keccak_lift_{KECCAK_PO2}.zkr");
-    let u32s = get_zkr_u32s(&name)?;
-    Ok(Program::from_encoded(&u32s, RECURSION_PO2))
-}
-
-#[cfg(test)]
-mod tests {
-    use anyhow::Result;
-    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
-    use risc0_zkvm::recursion::MerkleGroup;
-
-    use crate::control_id::{KECCAK_CONTROL_ID, KECCAK_CONTROL_ROOT};
-
-    use super::get_zkr;
-
-    fn compute_control_id() -> Result<Digest> {
-        let program = get_zkr()?;
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        Ok(program.compute_control_id(hash_suite))
-    }
-
-    fn compute_control_root() -> Result<Digest> {
-        let control_id = compute_control_id()?;
-        let hash_suite = Poseidon2HashSuite::new_suite();
-        let hashfn = hash_suite.hashfn.as_ref();
-        let group = MerkleGroup::new(vec![control_id])?;
-        Ok(group.calc_root(hashfn))
-    }
-
-    // Makes sure our included control IDs are what we expect
-    #[test]
-    fn control_ids() {
-        assert_eq!(KECCAK_CONTROL_ID, compute_control_id().unwrap());
-    }
-
-    #[test]
-    fn control_roots() {
-        assert_eq!(KECCAK_CONTROL_ROOT, compute_control_root().unwrap());
-    }
+pub fn get_keccak_zkr(po2: usize) -> Result<Program> {
+    let idx = po2 - KECCAK_PO2_RANGE.min().unwrap();
+    let mut decoder = XzDecoder::new(ZKRS[idx]);
+    let mut bytes = vec![];
+    decoder.read_to_end(&mut bytes)?;
+    let u32s = bytemuck::cast_slice(&bytes);
+    Ok(Program::from_encoded(u32s, RECURSION_PO2))
 }

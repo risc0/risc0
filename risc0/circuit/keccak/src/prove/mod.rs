@@ -27,7 +27,7 @@ use cfg_if::cfg_if;
 use risc0_core::{field::Elem, scope};
 use risc0_zkp::{
     adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO},
-    core::digest::Digest,
+    core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite},
     hal::{Buffer, CircuitHal, Hal},
 };
 
@@ -45,19 +45,29 @@ use crate::{
         taps::TAPSET,
         CircuitImpl,
     },
-    Seal,
+    KeccakState,
 };
 
 const GLOBAL_MIX: usize = 0;
 const GLOBAL_OUT: usize = 1;
 
-pub type KeccakState = [u64; 25];
+pub type Seal = Vec<u32>;
 
 pub trait KeccakProver {
     fn prove(&self, inputs: &[KeccakState], po2: usize) -> Result<Seal>;
 
     fn verify(&self, seal: &Seal) -> Result<()> {
-        crate::verify(seal)
+        let hash_suite = Poseidon2HashSuite::new_suite();
+
+        // We don't have a `code' buffer to verify.
+        let check_code_fn = |_: u32, _: &Digest| Ok(());
+
+        Ok(risc0_zkp::verify::verify(
+            &CircuitImpl,
+            &hash_suite,
+            seal,
+            check_code_fn,
+        )?)
     }
 }
 
@@ -91,7 +101,7 @@ where
         scope!("prove");
 
         let cycles: usize = 1 << po2;
-        let preflight = PreflightTrace::new(inputs, cycles);
+        let preflight = PreflightTrace::<C::PreferredPreflightOrder>::new(inputs, cycles);
 
         let global = MetaBuffer::new("global", self.hal.as_ref(), 1, REGCOUNT_GLOBAL, true);
         let code = MetaBuffer::new("code", self.hal.as_ref(), cycles, REGCOUNT_CODE, true);

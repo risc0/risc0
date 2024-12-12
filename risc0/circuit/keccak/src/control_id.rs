@@ -17,8 +17,12 @@
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
-pub const KECCAK_CONTROL_ID: Digest =
-    digest!("d67ee915cfecf608336cad09b34700682c55d634768444646b7d8c1ab2c33048");
+pub const KECCAK_CONTROL_IDS: &[Digest] = &[
+    digest!("ac7c6d4c45958431995be877143b4820348172384d2ee8568e627819989ad16c"), // keccak_lift po2=14
+    digest!("3bdc374b1b517c41447db21face8883804c92730fa1de5746217174b33adea32"), // keccak_lift po2=15
+    digest!("aa86474afc64141ec0fc50722cf10e233526b3454e80fc49657adb1db247c320"), // keccak_lift po2=16
+    digest!("2efcda7414108e6956eeda3fcfe0c7051b7d880806266830c7fb324ec599dc28"), // keccak_lift po2=17
+];
 
 pub const KECCAK_CONTROL_ROOT: Digest =
-    digest!("8c5212747d718367b331b4682cbb584aac81d5151df0366e0530f4144fd9b853");
+    digest!("95492b3fbcbf45570e8e0a0890e8da3da92071415f74962736b0093dcc5bd15d");

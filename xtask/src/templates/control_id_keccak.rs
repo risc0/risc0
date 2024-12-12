@@ -17,6 +17,6 @@
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::digest;
 
-pub const KECCAK_CONTROL_ID: Digest = digest!("{}");
+pub const KECCAK_CONTROL_IDS: &[Digest] = &[{}];
 
 pub const KECCAK_CONTROL_ROOT: Digest = digest!("{}");

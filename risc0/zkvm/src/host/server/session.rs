@@ -18,19 +18,22 @@
 use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use anyhow::{ensure, Result};
+use enum_map::EnumMap;
 use risc0_binfmt::{MemoryImage, SystemState};
-use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
+use risc0_circuit_rv32im::prove::{emu::exec::EcallMetric, segment::Segment as CircuitSegment};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{
-        client::env::{ProveZkrRequest, SegmentPath},
+        client::env::{ProveKeccakRequest, ProveZkrRequest, SegmentPath},
         prove_info::SessionStats,
     },
     sha::Digest,
     Assumption, AssumptionReceipt, Assumptions, ExitCode, Journal, MaybePruned, Output,
     ReceiptClaim,
 };
+
+use super::exec::syscall::{SyscallKind, SyscallMetric};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -93,6 +96,16 @@ pub struct Session {
     /// A list of pending ZKR proof requests.
     // TODO: make this scalable so we don't OOM
     pub(crate) pending_zkrs: Vec<ProveZkrRequest>,
+
+    /// A list of pending keccak proof requests.
+    // TODO: make this scalable so we don't OOM
+    pub(crate) pending_keccaks: Vec<ProveKeccakRequest>,
+
+    /// ecall metrics grouped by name.
+    pub(crate) ecall_metrics: Vec<(String, EcallMetric)>,
+
+    /// syscall metrics grouped by kind.
+    pub(crate) syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
 }
 
 /// The execution trace of a portion of a program.
@@ -159,6 +172,9 @@ impl Session {
         pre_state: SystemState,
         post_state: SystemState,
         pending_zkrs: Vec<ProveZkrRequest>,
+        pending_keccaks: Vec<ProveKeccakRequest>,
+        ecall_metrics: Vec<(String, EcallMetric)>,
+        syscall_metrics: EnumMap<SyscallKind, SyscallMetric>,
     ) -> Self {
         Self {
             segments,
@@ -175,6 +191,9 @@ impl Session {
             pre_state,
             post_state,
             pending_zkrs,
+            pending_keccaks,
+            ecall_metrics,
+            syscall_metrics,
         }
     }
 
@@ -242,23 +261,48 @@ impl Session {
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
     pub fn log(&self) {
+        if std::env::var_os("RISC0_INFO").is_none() {
+            return;
+        }
+
+        let pct = |cycles: u64| cycles as f64 / self.total_cycles as f64 * 100.0;
+
         tracing::info!("number of segments: {}", self.segments.len());
-        tracing::info!("total cycles: {}", self.total_cycles);
+        tracing::info!("{} total cycles", self.total_cycles);
         tracing::info!(
-            "user cycles: {} ({:.2}%)",
+            "{} user cycles ({:.2}%)",
             self.user_cycles,
-            self.user_cycles as f64 / self.total_cycles as f64 * 100.0
+            pct(self.user_cycles)
         );
         tracing::info!(
-            "paging cycles: {} ({:.2}%)",
+            "{} paging cycles ({:.2}%)",
             self.paging_cycles,
-            self.paging_cycles as f64 / self.total_cycles as f64 * 100.0
+            pct(self.paging_cycles)
         );
         tracing::info!(
-            "reserved cycles: {} ({:.2}%)",
+            "{} reserved cycles ({:.2}%)",
             self.reserved_cycles,
-            self.reserved_cycles as f64 / self.total_cycles as f64 * 100.0
+            pct(self.reserved_cycles)
         );
+
+        tracing::info!("ecalls");
+        let mut ecall_metrics = self.ecall_metrics.clone();
+        ecall_metrics.sort_by(|a, b| a.1.cycles.cmp(&b.1.cycles));
+        for (name, metric) in ecall_metrics.iter().rev() {
+            tracing::info!(
+                "\t{} {name} calls, {} cycles, ({:.2}%)",
+                metric.count,
+                metric.cycles,
+                pct(metric.cycles)
+            );
+        }
+
+        tracing::info!("syscalls");
+        let mut syscall_metrics: Vec<_> = self.syscall_metrics.iter().collect();
+        syscall_metrics.sort_by(|a, b| a.1.count.cmp(&b.1.count));
+        for (name, metric) in syscall_metrics.iter().rev() {
+            tracing::info!("\t{} {name:?} calls", metric.count);
+        }
 
         assert_eq!(
             self.total_cycles,

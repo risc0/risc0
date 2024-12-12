@@ -20,14 +20,17 @@ use test_log::test;
 
 use super::testutil::test_inputs;
 use crate::{
-    prove::{keccak_prover, CircuitWitnessGenerator as _, MetaBuffer, PreflightTrace, StepMode},
+    prove::{
+        keccak_prover, preflight::ForwardPreflightOrder, CircuitWitnessGenerator as _, MetaBuffer,
+        PreflightTrace, StepMode,
+    },
     zirgen::circuit::*,
 };
 
 #[test]
 fn basic() {
-    let inputs = test_inputs();
     let po2 = 8; // 256
+    let inputs = test_inputs(po2);
     let prover = keccak_prover().unwrap();
     let seal = prover.prove(&inputs, po2).unwrap();
     prover.verify(&seal).expect("Verification failed");
@@ -50,10 +53,10 @@ fn fwd_rev_ab() {
         }
     }
 
-    let inputs = test_inputs();
     let po2 = 8;
+    let inputs = test_inputs(po2);
     let cycles: usize = 1 << po2;
-    let preflight = PreflightTrace::new(&inputs, cycles);
+    let preflight = PreflightTrace::<ForwardPreflightOrder>::new(&inputs, cycles);
 
     let fwd_data = {
         let global = MetaBuffer::new("global", hal.as_ref(), 1, REGCOUNT_GLOBAL, true);
