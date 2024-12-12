@@ -33,7 +33,7 @@ const EXTFIELDSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "extfieldsub_256.b
 
 // TODO: All of these need guards against returning results >= prime/modulus
 
-pub fn modadd_256(
+pub fn modadd_256_unchecked(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -50,7 +50,7 @@ pub fn modadd_256(
     }
 }
 
-pub fn modinv_256(
+pub fn modinv_256_unchecked(
     inp: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [u32; FIELD_256_WIDTH_WORDS],
@@ -65,7 +65,7 @@ pub fn modinv_256(
     }
 }
 
-pub fn modmul_256(
+pub fn modmul_256_unchecked(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -82,7 +82,7 @@ pub fn modmul_256(
     }
 }
 
-pub fn modsub_256(
+pub fn modsub_256_unchecked(
     lhs: &[u32; FIELD_256_WIDTH_WORDS],
     rhs: &[u32; FIELD_256_WIDTH_WORDS],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
@@ -97,6 +97,57 @@ pub fn modsub_256(
             result.as_mut_ptr() as *mut u32,
         );
     }
+}
+
+pub fn modadd_256(
+    lhs: &[u32; FIELD_256_WIDTH_WORDS],
+    rhs: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [u32; FIELD_256_WIDTH_WORDS],
+) {
+    modadd_256_unchecked(&lhs, &rhs, &modulus, &mut result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result, &modulus));
+}
+
+pub fn modinv_256(
+    inp: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [u32; FIELD_256_WIDTH_WORDS],
+) {
+    modinv_256_unchecked(&inp, &modulus, &mut result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result, &modulus));
+}
+
+pub fn modmul_256(
+    lhs: &[u32; FIELD_256_WIDTH_WORDS],
+    rhs: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [u32; FIELD_256_WIDTH_WORDS],
+) {
+    modmul_256_unchecked(&lhs, &rhs, &modulus, &mut result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result, &modulus));
+}
+
+pub fn modsub_256(
+    lhs: &[u32; FIELD_256_WIDTH_WORDS],
+    rhs: &[u32; FIELD_256_WIDTH_WORDS],
+    modulus: &[u32; FIELD_256_WIDTH_WORDS],
+    result: &mut [u32; FIELD_256_WIDTH_WORDS],
+) {
+    modsub_256_unchecked(&lhs, &rhs, &modulus, &mut result);
+
+    // An honest host will always return a result less than the modulus. A dishonest prover can
+    // sometimes return a result greater than the modulus, so enforce that we're in the honest case.
+    assert!(crate::is_less(&result, &modulus));
 }
 
 // TODO: Make it clearer that these functions are for degree 2 extensions
