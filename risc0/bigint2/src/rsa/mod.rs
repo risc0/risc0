@@ -22,7 +22,7 @@ use crate::WORD_SIZE;
 
 pub const RSA_4096_WIDTH_WORDS: usize = 4096 / (WORD_SIZE * 8);
 
-const BLOB: &[u8] = include_bytes_aligned!(4, "modpow_65537.blob");
+const BLOB: &[u8] = include_bytes_aligned!(4, "modpow65537_4096.blob");
 
 type RsaArray = [u32; RSA_4096_WIDTH_WORDS];
 
