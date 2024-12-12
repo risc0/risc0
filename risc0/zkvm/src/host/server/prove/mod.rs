@@ -43,6 +43,11 @@ use crate::{
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a
 /// [Receipt][crate::Receipt] that can be used to verify correct computation.
 pub trait ProverServer {
+    /// Prove the specified keccak request
+    #[cfg(feature = "unstable")]
+    fn prove_keccak(&self, request: &crate::ProveKeccakRequest)
+        -> Result<SuccinctReceipt<Unknown>>;
+
     /// Prove the specified ELF binary.
     fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(env, &VerifierContext::default(), elf)

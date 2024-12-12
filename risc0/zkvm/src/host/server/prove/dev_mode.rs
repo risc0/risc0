@@ -44,6 +44,14 @@ use crate::{
 pub struct DevModeProver;
 
 impl ProverServer for DevModeProver {
+    #[cfg(feature = "unstable")]
+    fn prove_keccak(
+        &self,
+        _request: &crate::ProveKeccakRequest,
+    ) -> Result<SuccinctReceipt<Unknown>> {
+        unimplemented!("keccak proving unsupported for dev mode");
+    }
+
     fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         eprintln!(
             "WARNING: Proving in dev mode does not generate a valid receipt. \
