@@ -41,8 +41,8 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{
-        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak_permute, sys_log, sys_pipe,
-        sys_prove_zkr, sys_read, sys_read_words, sys_sha_compress, sys_write, DIGEST_WORDS,
+        bigint, sys_bigint, sys_exit, sys_fork, sys_keccak, sys_log, sys_pipe, sys_prove_zkr,
+        sys_read, sys_read_words, sys_sha_compress, sys_write, DIGEST_WORDS,
     },
     PAGE_SIZE,
 };
@@ -431,13 +431,13 @@ fn main() {
             env::verify_assumption(claim_digest, control_root)
                 .expect("env::verify_integrity returned error");
         }
-        MultiTestSpec::SysKeccakPermute => {
+        MultiTestSpec::SysKeccak => {
             // Test vectors are from KeccakCodePackage
             let input = [0u64; 25];
             let mut output1 = [0u64; 25];
 
             unsafe {
-                sys_keccak_permute(&input as *const [u64; 25], &mut output1 as *mut [u64; 25]);
+                sys_keccak(&input as *const [u64; 25], &mut output1 as *mut [u64; 25]);
             };
 
             assert_eq!(
@@ -473,7 +473,7 @@ fn main() {
 
             let mut output2 = [0u64; 25];
             unsafe {
-                sys_keccak_permute(&output1 as *const [u64; 25], &mut output2 as *mut [u64; 25]);
+                sys_keccak(&output1 as *const [u64; 25], &mut output2 as *mut [u64; 25]);
             };
 
             assert_eq!(
@@ -511,7 +511,7 @@ fn main() {
 
             let mut output = [0u64; 25];
             unsafe {
-                sys_keccak_permute(
+                sys_keccak(
                     input.as_ptr() as *const [u64; 25],
                     &mut output as *mut [u64; 25],
                 );

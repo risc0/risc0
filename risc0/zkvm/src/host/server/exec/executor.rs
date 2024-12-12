@@ -207,6 +207,7 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         self.image = result.post_image.clone();
+        let syscall_metrics = self.syscall_table.metrics.borrow().clone();
 
         let session = Session::new(
             refs,
@@ -223,6 +224,8 @@ impl<'a> ExecutorImpl<'a> {
             result.post_state,
             pending_zkrs,
             pending_keccaks,
+            result.ecall_metrics,
+            syscall_metrics,
         );
 
         tracing::info!("execution time: {elapsed:?}");
