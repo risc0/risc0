@@ -55,7 +55,7 @@ fn run_test(po2: usize, claim_digest: Digest) {
 fn keccak_po2_16() {
     run_test(
         16,
-        digest!("822a0c0b9cd04788833b9366addf8343c27563733ec1f3fc4ca405915e1ae162"),
+        digest!("b83c10da0c23587bf318cbcec2c2ac0260dbd6c0fa6905df639f8f6056f0d56c"),
     );
 }
 

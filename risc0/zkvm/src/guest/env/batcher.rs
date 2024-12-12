@@ -90,7 +90,7 @@ impl Keccak2Batcher {
 pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
     const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
 
-    let keccak_state_u32: *const u32 = keccak_state.as_ptr() as *const u32;
+    let keccak_state_u32 = keccak_state.as_ptr() as *const u32;
     for i in 0..3 {
         unsafe {
             sys_sha_compress(
@@ -114,7 +114,7 @@ pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakS
             claim_state.as_mut(),
             claim_state.as_ref(),
             addr_of!(LAST_WORDS),
-            &ZEROES as *const [u32; DIGEST_WORDS],
+            &ZEROES,
         )
     };
 }
