@@ -78,7 +78,7 @@ fn prover_example() {
     let mut planner = Planner::default();
 
     let po2 = 16;
-    let claim_digest = digest!("822a0c0b9cd04788833b9366addf8343c27563733ec1f3fc4ca405915e1ae162");
+    let claim_digest = digest!("b83c10da0c23587bf318cbcec2c2ac0260dbd6c0fa6905df639f8f6056f0d56c");
     let to_guest: (Digest, u32) = (claim_digest, po2);
 
     let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));

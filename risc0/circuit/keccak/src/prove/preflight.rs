@@ -208,7 +208,7 @@ fn compute_sha_infos(state: &mut ShaState, data: &[u32]) -> Vec<ShaInfo> {
     let mut cur = ShaInfo::default();
     for i in 0..64 {
         if i < 16 {
-            w[i] = data[i];
+            w[i] = data[i].to_be();
         } else {
             w[i] = sigma1!(w[i - 2])
                 .wrapping_add(w[i - 7])

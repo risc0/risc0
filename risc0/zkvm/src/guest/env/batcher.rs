@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::ptr::addr_of;
+
 use alloc::vec;
 
 use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2};
@@ -36,17 +38,15 @@ impl Keccak2Batcher {
         }
     }
 
-    pub fn update(&mut self, in_state: &KeccakState) -> KeccakState {
-        let mut out_state = KeccakState::default();
-        unsafe { sys_keccak(in_state, &mut out_state) };
-        self.sha_single_keccak(in_state);
-        self.sha_single_keccak(&out_state);
-        self.inputs.push(*in_state);
+    pub fn update(&mut self, keccak_state: &mut KeccakState) {
+        sha_single_keccak(&mut self.claim_state, keccak_state);
+        unsafe { sys_keccak(keccak_state, keccak_state) };
+        sha_single_keccak(&mut self.claim_state, keccak_state);
+        self.inputs.push(*keccak_state);
         if self.inputs.len() == MAX_KECCAK_INPUTS {
             // we've reached the limit. Create a proof request.
             self.finalize();
         }
-        out_state
     }
 
     pub fn finalize(&mut self) {
@@ -85,30 +85,36 @@ impl Keccak2Batcher {
         self.claim_state = SHA256_INIT;
         self.inputs.clear();
     }
+}
 
-    fn sha_single_keccak(&mut self, keccak_in_state: &KeccakState) {
-        let mut to_hash = [0u32; 64];
-        to_hash[..50].clone_from_slice(bytemuck::cast_slice(keccak_in_state));
+pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
+    const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
 
-        let to_hash: &[Digest] = bytemuck::cast_slice(&to_hash);
-        for i in 0..4 {
-            let mut blk1: [u32; DIGEST_WORDS] = to_hash[i * 2].into();
-            for word in blk1.iter_mut() {
-                *word = word.to_be();
-            }
-            let mut blk2: [u32; DIGEST_WORDS] = to_hash[i * 2 + 1].into();
-            for word in blk2.iter_mut() {
-                *word = word.to_be();
-            }
-
-            unsafe {
-                sys_sha_compress(
-                    self.claim_state.as_mut(),
-                    self.claim_state.as_ref(),
-                    blk1.as_ptr() as *const [u32; DIGEST_WORDS],
-                    blk2.as_ptr() as *const [u32; DIGEST_WORDS],
-                )
-            };
-        }
+    let keccak_state_u32 = keccak_state.as_ptr() as *const u32;
+    for i in 0..3 {
+        unsafe {
+            sys_sha_compress(
+                claim_state.as_mut(),
+                claim_state.as_ref(),
+                keccak_state_u32.add(i * 16) as *const [u32; DIGEST_WORDS],
+                keccak_state_u32.add(i * 16 + 8) as *const [u32; DIGEST_WORDS],
+            )
+        };
     }
+
+    // any last words?
+    static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
+    unsafe {
+        LAST_WORDS[0] = *keccak_state_u32.add(48);
+        LAST_WORDS[1] = *keccak_state_u32.add(49);
+    }
+
+    unsafe {
+        sys_sha_compress(
+            claim_state.as_mut(),
+            claim_state.as_ref(),
+            addr_of!(LAST_WORDS),
+            &ZEROES,
+        )
+    };
 }
