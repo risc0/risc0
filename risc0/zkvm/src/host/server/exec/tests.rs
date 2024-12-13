@@ -19,10 +19,10 @@ use std::{
     sync::Mutex,
 };
 
-use risc0_zkp::digest;
 use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
+use risc0_zkp::digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST, SYS_MULTI_TEST_WORDS},
     BLST_ELF, HEAP_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
@@ -1208,7 +1208,10 @@ fn keccak_update() {
         .run()
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    assert_eq!(session.pending_keccaks[0].claim_digest, digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c"));
+    assert_eq!(
+        session.pending_keccaks[0].claim_digest,
+        digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c")
+    );
 }
 
 #[test]
