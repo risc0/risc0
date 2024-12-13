@@ -498,20 +498,20 @@ below.
 [alignment]: https://doc.rust-lang.org/reference/type-layout.html#the-alignment-modifiers
 [amdhal]: https://en.wikipedia.org/wiki/Amdahl%27s_law
 [appendix]: #rv32im-operations-with-cycle-counts
-[arithmetic circuits]: /reference-docs/about-arithmetic-circuits
+[arithmetic circuits]: /website/docs/reference-docs/about-arithmetic-circuits.md
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
 [bigint]: https://github.com/risc0/risc0/pull/466
 [CBOR]: https://cbor.io
 [continuation segments]: https://www.risczero.com/news/continuations
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
-[ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
+[ecdsa-flamegraph]: /website/static/img/ecdsa-verification-flamegraph.png
 [example-ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [example-waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [hibernates]: https://en.wikipedia.org/wiki/Hibernation_%28computing%29
 [ilp]: https://en.wikipedia.org/wiki/Instruction-level_parallelism
-[image ID]: /terminology#image-id
+[image ID]: /website/docs/terminology.md#image-id
 [L1 cache]: https://en.wikipedia.org/wiki/Cache_hierarchy
 [memory paging]: https://en.wikipedia.org/wiki/Memory_paging
 [Merkle root]: https://en.wikipedia.org/wiki/Merkle_tree
@@ -524,7 +524,7 @@ below.
 [profiles]: https://doc.rust-lang.org/cargo/reference/profiles.html
 [profiling]: ./profiling.md
 [registers]: https://en.wikipedia.org/wiki/Processor_register
-[RISC-V architecture]: /reference-docs/about-risc-v
+[RISC-V architecture]: /website/docs/reference-docs/about-risc-v.md
 [RISC-V operations]: https://marks.page/riscv
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
