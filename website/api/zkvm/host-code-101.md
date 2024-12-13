@@ -85,17 +85,17 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
 [examples]: ./examples.md
-[execute]: /terminology#execute
-[executor]: /terminology#executor
+[execute]: /website/docs/terminology.md#execute
+[executor]: /website/docs/terminology.md#executor
 [executor-env]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnv.html
-[from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
-[guest]: /terminology#guest
-[guest program]: /terminology#guest-program
-[host]: /terminology#host
-[prove]: /terminology#prove
-[Prover]: /terminology#prover
+[from-rust-to-receipt]: /website/static/diagrams/from-rust-to-receipt.png
+[guest]: /website/docs/terminology.md#guest
+[guest program]: /website/docs/terminology.md#guest-program
+[host]: /website/docs/terminology.md#host
+[prove]: /website/docs/terminology.md#prove
+[Prover]: /website/docs/terminology.md#prover
 [quickstart]: ./quickstart.md
-[receipt]: /terminology#receipt
+[receipt]: /website/docs/terminology.md#receipt
 [receipt-verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [Receipts]: ./receipts.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
