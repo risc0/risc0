@@ -37,10 +37,10 @@ fn modadd() {
     let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs, rhs, modulus))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(lhs, rhs, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, MODADD_ELF)
         .unwrap()
@@ -70,10 +70,10 @@ fn modinv() {
     let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
 
     let env = ExecutorEnv::builder()
-            .write(&(inp, modulus))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(inp, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, MODINV_ELF)
         .unwrap()
@@ -105,10 +105,10 @@ fn modmul() {
     let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs, rhs, modulus))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(lhs, rhs, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, MODMUL_ELF)
         .unwrap()
@@ -140,10 +140,10 @@ fn modsub() {
     let expected = BigUint::parse_bytes(EXPECTED, 16).unwrap();
 
     let env = ExecutorEnv::builder()
-            .write(&(lhs, rhs, modulus))
-            .unwrap()
-            .build()
-            .unwrap();
+        .write(&(lhs, rhs, modulus))
+        .unwrap()
+        .build()
+        .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, MODSUB_ELF)
         .unwrap()
