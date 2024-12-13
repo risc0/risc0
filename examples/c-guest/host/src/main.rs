@@ -37,7 +37,7 @@ fn main() -> anyhow::Result<()> {
     let receipt = prover.prove(env, &consensus_elf)?.receipt;
 
     // The default serialization for u32 is to (de)serialize as le bytes, so this will match
-    // the format committed from the guest.
+    // the format committed by the guest.
     let return_value: u32 = receipt.journal.decode()?;
 
     assert_eq!(return_value, 7u32 * 11);
