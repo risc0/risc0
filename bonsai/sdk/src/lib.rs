@@ -48,7 +48,7 @@
 //!     // Add a list of assumptions
 //!     let assumptions: Vec<String> = vec![];
 //!
-//!     // Wether to run in execute only mode
+//!     //Whether to run in execute only mode
 //!     let execute_only = false;
 //!
 //!     // Start a session running the prover
@@ -201,7 +201,7 @@ pub mod responses {
         pub uuid: String,
     }
 
-    /// Response of a image upload request
+    /// Response of an image upload request
     #[derive(Deserialize, Serialize)]
     pub struct ImgUploadRes {
         /// Presigned URL to be supplied to a PUT request
@@ -259,7 +259,7 @@ pub mod responses {
         pub error_msg: Option<String>,
         /// Session Proving State
         ///
-        /// If the status is `RUNNING`, this is a indication of where in the
+        /// If the status is `RUNNING`, this is an indication of where in the
         /// proving pipeline the session currently is, otherwise it is [None].
         /// Possible states in order, include:
         /// * `Setup`
