@@ -382,7 +382,7 @@ mod tests {
         let image = MemoryImage::new(&program, PAGE_SIZE).unwrap();
         assert_eq!(image.pc, prog_pc);
 
-        // This is useful in case one needs to manually inspect the memory image.
+        // This is useful in case one needs to inspect the memory image manually
         // std::fs::write("/tmp/test.img", &image.image).unwrap();
         image.check(TEXT_START).unwrap();
         image.check(STACK_TOP).unwrap();
