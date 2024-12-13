@@ -30,7 +30,7 @@ pub struct Keccak2Batcher {
     claim_state: Digest,
     inputs: Vec<KeccakState>,
     po2: u32,
-    max_inputs: u64,
+    max_inputs: usize,
 }
 
 impl Keccak2Batcher {
@@ -52,8 +52,8 @@ impl Keccak2Batcher {
         #[cfg(not(feature = "std"))]
         let po2 = KECCAK_DEFAULT_PO2;
 
-        let max_keccak_cycles: usize = 1 << self.po2;
-        let max_inputs = max_keccak_cycles / KECCAK_PERMUTE_CYCLES
+        let max_keccak_cycles: usize = 1 << po2;
+        let max_inputs = max_keccak_cycles / KECCAK_PERMUTE_CYCLES;
 
         Self {
             claim_state: SHA256_INIT,
