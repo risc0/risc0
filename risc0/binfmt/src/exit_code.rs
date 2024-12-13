@@ -41,8 +41,8 @@ pub enum ExitCode {
 
     /// This indicates the execution ended on a host-initiated system split.
     ///
-    /// System split is mechanism by which the host can temporarily stop
-    /// execution of the guest. Execution ended in a system split has no output
+    /// System split is the mechanism by which the host can temporarily stop
+    /// execution of the guest. Execution ended in a system split that had no output
     /// and no conclusions can be drawn about whether the program will
     /// eventually halt. System split is used in [continuations] to split
     /// execution into individually provable [segments].
