@@ -217,7 +217,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE].
     pub fn keccak_max_po2(&mut self, limit: u32) -> &mut Self {
-        self.inner.env_vars.insert("RISC0_KECCAK_PO2".to_string(), limit.to_string());
+        self.inner
+            .env_vars
+            .insert("RISC0_KECCAK_PO2".to_string(), limit.to_string());
         self
     }
 
