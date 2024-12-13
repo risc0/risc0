@@ -502,7 +502,7 @@ pub fn build_rust_runtime() -> String {
 /// Builds a static library providing a rust runtime, with additional features given as arguments.
 ///
 /// This can be used to build programs for the zkvm which don't depend on risc0_zkvm. Feature flags
-/// given will be pass when building risc0-zkvm-platform.
+/// given will be passed when building risc0-zkvm-platform.
 pub fn build_rust_runtime_with_features(features: &[&str]) -> String {
     build_staticlib(
         "risc0-zkvm-platform",
