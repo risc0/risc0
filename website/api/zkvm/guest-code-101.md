@@ -90,12 +90,12 @@ If you run into problems, don't be a stranger! You can file an issue on [these d
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
 [examples]: ./examples.md
-[from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
-[guest]: /terminology#guest
-[guest code]: /terminology#guest
+[from-rust-to-receipt]: /website/static/diagrams/from-rust-to-receipt.png
+[guest]: /website/docs/terminology.md#guest
+[guest code]: /website/docs/terminology.md#guest
 [hello-world]: ./tutorials/hello-world.md
-[host]: /terminology#host
-[journal]: /terminology#journal
+[host]: /website/docs/terminology.md#host
+[journal]: /website/docs/terminology.md#journal
 [precompiles]: ./precompiles.md
 [quickstart]: ./quickstart.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
