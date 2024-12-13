@@ -27,7 +27,7 @@ pub fn kzg_to_versioned_hash(commitment: &KzgCommitment) -> [u8; 32] {
 }
 
 #[no_mangle]
-// TODO ideally this is c_size_t, but not stabilized (not guaranteed to be usize on all archs)
+// TODO ideally this is c_size_t, but not stabilized (not guaranteed to be usize on all arches)
 unsafe extern "C" fn malloc(size: usize) -> *mut c_void {
     let layout = Layout::from_size_align(size, 4).expect("unable to allocate more memory");
     let ptr = alloc(layout);
