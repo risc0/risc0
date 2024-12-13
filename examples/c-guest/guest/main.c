@@ -22,7 +22,7 @@ union u32_cast {
 };
 
 int main() {
-  // TODO introduce entropy into memory image (for zk)
+  // TODO introduces entropy into memory image (for zk)
   sha256_state* hasher = init_sha256();
 
   // Read two u32 values from the host, assuming LE byte order.
