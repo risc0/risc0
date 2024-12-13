@@ -31,7 +31,7 @@ To prove correct execution of the [guest program]:
 > you're running the zkVM on your own hardware. See [Host Code 101][host program] for more details on these steps. If you're using [Bonsai] for remote
 > proving, you won't need to write host code.
 
-![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
+![From Guest Code to Receipt](/website/static/diagrams/from-rust-to-receipt.png)
 
 Anyone with a copy of the [receipt] can [verify] the [guest program]'s execution
 and read its [publicly shared outputs][journal]. The verification algorithm
@@ -67,19 +67,19 @@ Check out our [Bonsai on Eth] page.
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
 [Bonsai on Eth]: ../blockchain-integration/bonsai-on-eth.md
-[ELF binary]: /terminology#elf-binary
+[ELF binary]: /website/docs/terminology.md#elf-binary
 [examples]: ./examples.md
-[executor]: /terminology#executor
+[executor]: /website/docs/terminology.md#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: ./guest-code-101.md
 [host program]: ./host-code-101.md
-[imageID]: /terminology#image-id
-[journal]: /terminology#journal
-[prove]: /terminology#validity-proof
-[prover]: /terminology#prover
+[imageID]: /website/docs/terminology.md#image-id
+[journal]: /website/docs/terminology.md#journal
+[prove]: /website/docs/terminology.md#validity-proof
+[prover]: /website/docs/terminology.md#prover
 [quickstart]: ./quickstart.md
 [receipt]: ./receipts.md
-[session]: /terminology#session
+[session]: /website/docs/terminology.md#session
 [use cases]: ../use-cases.md
-[verify]: /terminology#verify
-[zkVM]: /terminology#zero-knowledge-virtual-machine-zkvm
+[verify]: /website/docs/terminology.md#verify
+[zkVM]: /website/docs/terminology.md#zero-knowledge-virtual-machine-zkvm
