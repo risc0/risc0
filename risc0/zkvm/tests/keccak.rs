@@ -30,7 +30,7 @@ fn run_test(po2: u32, claim_digest: Digest) {
     let env = ExecutorEnv::builder()
         .write(&to_guest)
         .unwrap()
-        .keccak_po2(po2)
+        .keccak_max_po2(po2)
         .build()
         .unwrap();
 
