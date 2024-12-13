@@ -29,7 +29,7 @@ fn main() {
 
     let guest_dir = fs::canonicalize(env!("CARGO_MANIFEST_DIR"))
         .unwrap()
-        // Go back a directory from `./host`
+        // Go back to a directory from `./host`
         .parent()
         .unwrap()
         // Use guest directory.
