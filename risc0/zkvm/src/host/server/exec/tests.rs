@@ -19,6 +19,7 @@ use std::{
     sync::Mutex,
 };
 
+use risc0_zkp::digest;
 use anyhow::Result;
 use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
@@ -1197,6 +1198,17 @@ fn heap_bug_zkvm_527() {
 #[test]
 fn keccak_update() {
     run_test(MultiTestSpec::KeccakUpdate);
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::KeccakUpdate2)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    assert_eq!(session.pending_keccaks[0].claim_digest, digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c"));
 }
 
 #[test]
