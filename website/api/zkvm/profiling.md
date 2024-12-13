@@ -76,7 +76,7 @@ Below is the example [flamegraph] you will see by opening
 [http://localhost:8000/ui/flamegraph](http://localhost:8000/ui/flamegraph),
 after running the [steps above](#usage).
 
-![flamegraph of Fibonacci profiling example](/img/profiling_flamegraph.png)
+![flamegraph of Fibonacci profiling example](/website/static/img/profiling_flamegraph.png)
 
 When you visualize the profiling data, you can see the relative performance in
 terms of [cycle count] of the three Fibonacci implementations. This can be
@@ -103,7 +103,7 @@ web interface.
     synchronous and is not subject to any deviations in behavior due to
     measurement overhead.
 
-[cycle count]: /terminology#clock-cycles
+[cycle count]: /website/docs/terminology.md#clock-cycles
 [devmode]: ../generating-proofs/dev-mode.md
 [example-profiling]: https://github.com/risc0/risc0/tree/main/examples/profiling
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
