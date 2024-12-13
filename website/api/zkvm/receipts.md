@@ -7,7 +7,7 @@ _A brief introduction to the RISC Zero [receipt]._
 A receipt gives the results of your program along with proof that they were
 produced honestly.
 
-![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
+![From Guest Code to Receipt](/website/static/diagrams/from-rust-to-receipt.png)
 
 When you execute your [zkVM application][zkvm], the output of your application
 is included in a [receipt]. The [receipt] serves as a succinct [validity proof]
@@ -59,15 +59,15 @@ is:
 
 `let bytes = bincode::serialize(&receipt);`
 
-[execution]: /terminology#execution-trace
-[guest program]: /terminology#guest-program
-[Image ID]: /terminology#image-id
-[journal]: /terminology#journal
-[receipt]: /terminology#receipt
+[execution]: /website/docs/terminology.md#execution-trace
+[guest program]: /website/docs/terminology.md#guest-program
+[Image ID]: /website/docs/terminology.md#image-id
+[journal]: /website/docs/terminology.md#journal
+[receipt]: /website/docs/terminology.md#receipt
 [receipt.journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
 [receipt.verify()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
-[seal]: /terminology#seal
+[seal]: /website/docs/terminology.md#seal
 [serde]: https://crates.io/crates/serde
-[validity proof]: /terminology#validity-proof
+[validity proof]: /website/docs/terminology.md#validity-proof
 [verify]: /terminology#verify
 [zkvm]: ./zkvm-overview.md
