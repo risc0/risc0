@@ -19,11 +19,15 @@ risc0-zkp = { path = "../../../zkp", default-features = false }
 risc0-zkvm = { path = "../..", default-features = false, features = [
   "getrandom",
   "std",
+  "unstable"
 ] }
 hex-literal = "0.4"
 risc0-zkvm-methods = { path = ".." }
 risc0-zkvm-platform = { path = "../../platform", features = ["unstable"] }
-rsa = { version = "0.9", default-features = false, features = ["pem"] }
+rsa = { version = "=0.9.6", default-features = false, features = ["pem"] }
+
+[patch.crates-io]
+rsa = { git = "https://www.github.com/risc0/RustCrypto-RSA.git", rev = "v0.9.6-risczero.0" }
 
 [profile.release]
 lto = true
