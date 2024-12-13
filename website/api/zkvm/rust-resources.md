@@ -30,7 +30,7 @@ in our [Crate Validation Report][crate-validation].
 ![From Guest Code to Receipt][from-rust-to-receipt]
 
 [crate-validation]: https://reports.risczero.com/crates-validation
-[from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
+[from-rust-to-receipt]: /website/static/diagrams/from-rust-to-receipt.png
 [install-rust]: https://www.rust-lang.org/tools/install
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [Rust]: https://www.rust-lang.org
