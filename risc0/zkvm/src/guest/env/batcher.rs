@@ -30,14 +30,10 @@ pub struct Keccak2Batcher {
     claim_state: Digest,
     inputs: Vec<KeccakState>,
     po2: u32,
+    max_inputs: u64,
 }
 
 impl Keccak2Batcher {
-    fn max_keccak_inputs(&self) -> usize {
-        let max_keccak_cycles: usize = 1 << self.po2;
-        max_keccak_cycles / KECCAK_PERMUTE_CYCLES
-    }
-
     pub fn new() -> Self {
         #[cfg(feature = "std")]
         let po2 = match std::env::var("RISC0_KECCAK_PO2") {
@@ -55,10 +51,15 @@ impl Keccak2Batcher {
         };
         #[cfg(not(feature = "std"))]
         let po2 = KECCAK_DEFAULT_PO2;
+
+        let max_keccak_cycles: usize = 1 << self.po2;
+        let max_inputs = max_keccak_cycles / KECCAK_PERMUTE_CYCLES
+
         Self {
             claim_state: SHA256_INIT,
             inputs: vec![],
             po2,
+            max_inputs,
         }
     }
 
@@ -68,7 +69,7 @@ impl Keccak2Batcher {
         unsafe { sys_keccak(keccak_state, keccak_state) };
         // at this point the keccak_state is output state resulting from keccak permutation.
         sha_single_keccak(&mut self.claim_state, keccak_state);
-        if self.inputs.len() == self.max_keccak_inputs() {
+        if self.inputs.len() == self.max_inputs {
             // we've reached the limit. Create a proof request.
             self.finalize();
         }

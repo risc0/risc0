@@ -119,7 +119,6 @@ pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) args: Vec<String>,
     pub(crate) segment_limit_po2: Option<u32>,
-    pub(crate) keccak_po2: Option<u32>,
     pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
@@ -178,14 +177,14 @@ impl<'a> ExecutorEnvBuilder<'a> {
         }
 
         if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
-            let po2 = po2.parse::<u32>()?;
-            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+            let po2_val = po2.parse::<u32>()?;
+            if !KECCAK_PO2_RANGE.contains(&(po2_val as usize)) {
                 bail!(
                     "invalid keccak po2 {po2}. Expected range: {:?}",
                     KECCAK_PO2_RANGE
                 );
             }
-            inner.keccak_po2 = Some(po2);
+            inner.env_vars.insert("RISC0_KECCAK_PO2".to_string(), po2);
         }
 
         Ok(inner)
@@ -217,8 +216,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// either up or down, may result in better proving performance.
     ///
     /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE].
-    pub fn keccak_po2(&mut self, limit: u32) -> &mut Self {
-        self.inner.keccak_po2 = Some(limit);
+    pub fn keccak_max_po2(&mut self, limit: u32) -> &mut Self {
+        self.inner.env_vars.insert("RISC0_KECCAK_PO2".to_string(), limit.to_string());
         self
     }
 
