@@ -1,6 +1,6 @@
 pragma circom 2.0.4;
 
-// Decompose the signal in into an array of bits of length N.
+// Decompose the signal into an array of bits of length N.
 // out[0] will be the least-significant bit, out[N-1] the most.
 template to_bits_exact(N) {
   signal input in;
