@@ -28,7 +28,7 @@ In order to use these components, developers provide:
 
 **RISC Zero technology cannot prevent many types of security issues in user guest programs (e.g. applications) or contracts. It is necessary for zkVM adopters to validate the security of guest programs and contracts. This includes secure development life-cycles and external security auditing by qualified providers.**
 
-![Security Model Diagram](/diagrams/security-model-diagram.svg)
+![Security Model Diagram](/website/static/diagrams/security-model-diagram.svg)
 
 ## Zero-Knowledge Proving
 
@@ -103,17 +103,17 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [10/31/2023↗]: https://github.com/risc0/rz-security/blob/main/audits/zkVM/hexens_zkVM_20231031.pdf
 [benchmarks]: https://gist.github.com/Chick3nman/32e662a5bb63bc4f51b847bb422222fd
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance
-[control ID]: /terminology#control-id
-[control root]: /terminology#control-root
-[deterministically]: /terminology#deterministic-builds
+[control ID]: /website/docs/terminology.md#control-id
+[control root]: /website/docs/terminology.md#control-root
+[deterministically]: /website/docs/terminology.md#deterministic-builds
 [ethSTARK documentation]: https://eprint.iacr.org/2021/582
 [examples]: https://www.pcmag.com/news/zuckerbergs-meta-is-spending-billions-to-buy-350000-nvidia-h100-gpus
-[execution trace]: /terminology#execution-trace
+[execution trace]: /website/docs/terminology.md#execution-trace
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
 [join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
 [lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
 [proof-system]: pathname:///proof-system-in-detail.pdf
-[receipt claim]: /terminology#receipt-claim
+[receipt claim]: /website/docs/terminology.md#receipt-claim
 [resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
 [RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
