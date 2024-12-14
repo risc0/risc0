@@ -532,6 +532,36 @@ fn main() {
                 state
             }
             let mut state = test_input();
+            assert_eq!(
+                state,
+                [
+                    0x3ADE68B1,
+                    0x1B13114FBFF5385,
+                    0xD30638F751A5AE9,
+                    0x24E4646565C90A1D,
+                    0x60F51C90B9E60D61,
+                    0x58829BE0E110C5F5,
+                    0x68A1540CF5FC6E19,
+                    0xDF9DC923C20D0D,
+                    0xBA2C077851FD7B11,
+                    0x799B09FEEB62B565,
+                    0xA6C653739841C249,
+                    0x5259551834EC64FD,
+                    0x3385A4287531E1C1,
+                    0xB400E312157A11D5,
+                    0xAFEC148FAD020779,
+                    0xB7A24B40C82981ED,
+                    0x8C1355E852B17171,
+                    0xDD3955744A90CB45,
+                    0x9D829947352DEDA9,
+                    0xEF38C1403E27D3DD,
+                    0x85F17AFE587B5A21,
+                    0x9219707FA05D1B5,
+                    0x8D5ECFABA9BF24D9,
+                    0x8BD10F70552CACD,
+                    0xE70C5B806E0FCBD1
+                    ]
+                );
 
             env::keccak_update(&mut state);
         }
