@@ -70,7 +70,7 @@ This code implements a [three-layer recursive proof system][zksummit10-talk],
 based on the well-studied zk-STARK protocol and Groth16 protocol. An overview of
 the underlying cryptographic assumptions can be found on our [Security
 Model][security-model] page. With default parameters, this system achieves
-perfect zero-knowledgeness and 98 bits of conjectured security. Our STARK
+perfect zero-knowledge and 98 bits of conjectured security. Our STARK
 protocol is described in [Scalable, Transparent Arguments of RISC-V
 Integrity][proof-system-in-detail], and a soundness/security calculator is
 included in the `soundness.rs` file.
