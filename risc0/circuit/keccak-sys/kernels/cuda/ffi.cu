@@ -91,11 +91,18 @@ struct HostContext {
                        preflight->curPreimage,
                        cycles * sizeof(uint32_t),
                        cudaMemcpyHostToDevice));
+
+    CUDA_OK(cudaMalloc(&ctx->preflight->runOrder, cycles * sizeof(uint32_t)));
+    CUDA_OK(cudaMemcpy(ctx->preflight->runOrder,
+                       preflight->runOrder,
+                       cycles * sizeof(uint32_t),
+                       cudaMemcpyHostToDevice));
   }
 
   ~HostContext() {
     cudaFree(ctx->preflight->curPreimage);
     cudaFree(ctx->preflight->preimages);
+    cudaFree(ctx->preflight->runOrder);
     cudaFree(ctx->preflight);
     cudaFree(ctx->global);
     cudaFree(ctx->data);
@@ -105,9 +112,10 @@ struct HostContext {
 
 __device__ void nextStep(DeviceContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
-  ExecContext execCtx(*ctx->preflight, cycle);
-  MutableBufObj data(execCtx, *ctx->data);
-  GlobalBufObj global(execCtx, *ctx->global);
+  ExecContext execCtx(
+      *ctx->preflight, ctx->preflight->runOrder[cycle], ctx->preflight->curPreimage[cycle]);
+  MutableBufObj data(*ctx->data);
+  GlobalBufObj global(*ctx->global);
   step_Top(execCtx, &data, &global);
 }
 
@@ -184,6 +192,7 @@ const char* risc0_circuit_keccak_cuda_witgen(uint32_t mode,
   try {
     HostContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
+
     auto cfg = getSimpleConfig(lastCycle);
     switch (mode) {
     case kStepModeSeqParallel:

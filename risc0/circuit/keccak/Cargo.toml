@@ -24,9 +24,7 @@ risc0-circuit-keccak-sys = { workspace = true, optional = true }
 risc0-circuit-recursion = { workspace = true, default-features = false }
 risc0-sys = { workspace = true, optional = true }
 rayon = { version = "1.10", optional = true }
-zip = { version = "2.2", default-features = false, features = [
-  "deflate",
-], optional = true }
+xz2 = { version = "0.1", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
@@ -50,6 +48,6 @@ prove = [
   "dep:rayon",
   "dep:risc0-circuit-keccak-sys",
   "dep:risc0-sys",
-  "dep:zip",
+  "dep:xz2",
   "risc0-circuit-recursion/prove",
 ]

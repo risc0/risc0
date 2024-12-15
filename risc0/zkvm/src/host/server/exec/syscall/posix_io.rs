@@ -19,7 +19,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use super::{Syscall, SyscallContext};
+use super::{Syscall, SyscallContext, SyscallKind};
 
 pub(crate) struct SysRead;
 
@@ -76,11 +76,13 @@ impl Syscall for SysRead {
         // Fill unaligned word out.
         let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
         let nread_end = read_all(&mut to_guest_end[0..unaligned_end])?;
+        let nread_total = nread_main + nread_end;
 
-        Ok((
-            (nread_main + nread_end) as u32,
-            u32::from_le_bytes(to_guest_end),
-        ))
+        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Read];
+        metric.count += 1;
+        metric.size += nread_total as u64;
+
+        Ok((nread_total as u32, u32::from_le_bytes(to_guest_end)))
     }
 }
 
@@ -102,6 +104,11 @@ impl Syscall for SysWrite {
         tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
+
+        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Write];
+        metric.count += 1;
+        metric.size += buf_len as u64;
+
         Ok((0, 0))
     }
 }

@@ -510,6 +510,19 @@ impl risc0_zkp::layout::Component for LoadWinLayout {
     }
 }
 pub type NondetRegLayout32LayoutArray = [&'static NondetRegLayout; 32];
+pub struct ExpandBELayout {
+    pub _super: &'static NondetRegLayout32LayoutArray,
+}
+impl risc0_zkp::layout::Component for ExpandBELayout {
+    fn ty_name(&self) -> &'static str {
+        "ExpandBELayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        Ok(())
+    }
+}
 pub struct UnpackReg_32__16_Layout {
     pub _super: &'static NondetRegLayout32LayoutArray,
 }
@@ -557,8 +570,25 @@ impl risc0_zkp::layout::Component for CarryAndExpandLayout {
         Ok(())
     }
 }
+pub struct DoShaStepWLayout {
+    pub _super: &'static NondetRegLayout32LayoutArray,
+    pub arm0: &'static ExpandBELayout,
+    pub arm1: &'static CarryAndExpandLayout,
+}
+impl risc0_zkp::layout::Component for DoShaStepWLayout {
+    fn ty_name(&self) -> &'static str {
+        "DoShaStepWLayout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("arm0", self.arm0)?;
+        v.visit_component("arm1", self.arm1)?;
+        Ok(())
+    }
+}
 pub struct DoShaStepLayout {
-    pub w: &'static CarryAndExpandLayout,
+    pub w: &'static DoShaStepWLayout,
     pub a: &'static CarryAndExpandLayout,
     pub e: &'static CarryAndExpandLayout,
 }
@@ -722,13 +752,17 @@ impl risc0_zkp::layout::Component for _globalLayout {
 pub struct NondetRegStruct {
     pub _super: Val,
 }
+#[derive(Copy, Clone, Debug)]
+pub struct NondetBitRegStruct {
+    pub _super: NondetRegStruct,
+}
 pub type Val5Array = [Val; 5];
 pub type Val64Array = [Val; 64];
 pub type Val64Array5Array = [Val64Array; 5];
 pub type Val64Array5Array5Array = [Val64Array5Array; 5];
 #[derive(Copy, Clone, Debug)]
 pub struct ThetaP1_Super_Super_SuperStruct {
-    pub _super: NondetRegStruct,
+    pub _super: NondetBitRegStruct,
 }
 pub type ThetaP1_Super_Super_SuperStruct64Array = [ThetaP1_Super_Super_SuperStruct; 64];
 #[derive(Copy, Clone, Debug)]
@@ -741,10 +775,10 @@ pub struct ThetaP1Struct {
     pub _super: ThetaP1_Super_SuperStruct5Array,
 }
 pub type Val24Array = [Val; 24];
-pub type NondetRegStruct24Array = [NondetRegStruct; 24];
+pub type NondetBitRegStruct24Array = [NondetBitRegStruct; 24];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_24_Struct {
-    pub _super: NondetRegStruct24Array,
+    pub _super: NondetBitRegStruct24Array,
 }
 #[derive(Copy, Clone, Debug)]
 pub struct RoundToArray_Super_SuperStruct {
@@ -783,12 +817,17 @@ pub type DivStruct32Array = [DivStruct; 32];
 pub type Val32Array = [Val; 32];
 #[derive(Copy, Clone, Debug)]
 pub struct UnpackReg_32__16__SuperStruct {
-    pub _super: NondetRegStruct,
+    pub _super: NondetBitRegStruct,
 }
 pub type UnpackReg_32__16__SuperStruct32Array = [UnpackReg_32__16__SuperStruct; 32];
 #[derive(Copy, Clone, Debug)]
 pub struct UnpackReg_32__16_Struct {
     pub _super: UnpackReg_32__16__SuperStruct32Array,
+}
+pub type NondetBitRegStruct32Array = [NondetBitRegStruct; 32];
+#[derive(Copy, Clone, Debug)]
+pub struct ExpandBEStruct {
+    pub _super: NondetBitRegStruct32Array,
 }
 pub type Val800Array = [Val; 800];
 #[derive(Copy, Clone, Debug)]
@@ -811,10 +850,10 @@ pub struct TopStateStruct {
     pub sflat: NondetRegStruct16Array,
 }
 pub type Val8Array = [Val; 8];
-pub type NondetRegStruct8Array = [NondetRegStruct; 8];
+pub type NondetBitRegStruct8Array = [NondetBitRegStruct; 8];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_8_Struct {
-    pub _super: NondetRegStruct8Array,
+    pub _super: NondetBitRegStruct8Array,
 }
 pub type Val32Array4Array = [Val32Array; 4];
 pub type Val32Array16Array = [Val32Array; 16];
@@ -825,17 +864,20 @@ pub struct ShaStateStruct {
     pub w: Val32Array16Array,
 }
 #[derive(Copy, Clone, Debug)]
+pub struct ComponentStruct {}
+pub type ComponentStruct32Array = [ComponentStruct; 32];
+#[derive(Copy, Clone, Debug)]
 pub struct DoShaStepStruct {
-    pub w: UnpackReg_32__16_Struct,
+    pub w: NondetBitRegStruct32Array,
     pub a: UnpackReg_32__16_Struct,
     pub e: UnpackReg_32__16_Struct,
     pub new_state: ShaStateStruct,
 }
 pub type Val4Array = [Val; 4];
-pub type NondetRegStruct4Array = [NondetRegStruct; 4];
+pub type NondetBitRegStruct4Array = [NondetBitRegStruct; 4];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_4_Struct {
-    pub _super: NondetRegStruct4Array,
+    pub _super: NondetBitRegStruct4Array,
 }
 pub type Val2Array8Array = [Val2Array; 8];
 #[derive(Copy, Clone, Debug)]
@@ -868,7 +910,7 @@ pub type Val50Array = [Val; 50];
 pub type DivStruct800Array = [DivStruct; 800];
 #[derive(Copy, Clone, Debug)]
 pub struct UnpackReg_800__16__SuperStruct {
-    pub _super: NondetRegStruct,
+    pub _super: NondetBitRegStruct,
 }
 pub type UnpackReg_800__16__SuperStruct800Array = [UnpackReg_800__16__SuperStruct; 800];
 #[derive(Copy, Clone, Debug)]
@@ -896,7 +938,7 @@ pub struct ControlStateStruct {
 pub type Val12Array = [Val; 12];
 #[derive(Copy, Clone, Debug)]
 pub struct OneHot_12__SuperStruct {
-    pub _super: NondetRegStruct,
+    pub _super: NondetBitRegStruct,
 }
 pub type OneHot_12__SuperStruct12Array = [OneHot_12__SuperStruct; 12];
 #[derive(Copy, Clone, Debug)]

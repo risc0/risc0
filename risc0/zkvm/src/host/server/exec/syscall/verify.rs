@@ -18,7 +18,7 @@ use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
 
 use crate::sha::{Digest, DIGEST_BYTES};
 
-use super::{Syscall, SyscallContext};
+use super::{Syscall, SyscallContext, SyscallKind};
 
 #[derive(Clone)]
 pub(crate) struct SysVerify;
@@ -59,6 +59,11 @@ impl Syscall for SysVerify {
             .assumptions_used
             .borrow_mut()
             .insert(0, assumption);
+
+        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::VerifyIntegrity];
+        metric.count += 1;
+        metric.size += from_guest_len as u64;
+
         Ok((0, 0))
     }
 }

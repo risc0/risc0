@@ -45,51 +45,58 @@ struct PreflightTrace {
 
   // Which 'preimage' each cycle is working on (to answer extern calls)
   uint32_t* curPreimage;
+
+  // Order of cycles to process
+  uint32_t* runOrder;
 };
 
 struct ExecContext {
 public:
-  __device__ ExecContext(PreflightTrace& preflight, size_t cycle)
-      : preflight(preflight), cycle(cycle) {}
+  __device__ ExecContext(PreflightTrace& preflight, size_t cycle, size_t curPreimage)
+      : preflight(preflight), cycle(cycle), curPreimage(curPreimage) {}
 
   PreflightTrace& preflight;
   size_t cycle;
+  // Current preimage index for this cycle.
+  size_t curPreimage;
 };
 
 struct BufferObj {
-  __device__ virtual Val load(size_t col, size_t back) = 0;
-  __device__ virtual void store(size_t col, Val val) = 0;
+  __device__ virtual Val load(ExecContext& ctx, size_t col, size_t back) = 0;
+  __device__ virtual void store(ExecContext& ctx, size_t col, Val val) = 0;
 };
 
 struct MutableBufObj : public BufferObj {
-  __device__ constexpr MutableBufObj(ExecContext& ctx, Buffer& buf) : ctx(ctx), buf(buf) {}
+  __device__ constexpr MutableBufObj(Buffer& buf) : buf(buf) {}
 
-  __device__ Val load(size_t col, size_t back) override {
+  __device__ Val load(ExecContext& ctx, size_t col, size_t back) override {
     if (back > ctx.cycle) {
       return 0;
     }
     return buf.get(ctx.cycle - back, col);
   }
 
-  __device__ void store(size_t col, Val val) override { return buf.set(ctx.cycle, col, val); }
+  __device__ void store(ExecContext& ctx, size_t col, Val val) override {
+    return buf.set(ctx.cycle, col, val);
+  }
 
-  ExecContext& ctx;
   Buffer& buf;
 };
 
 using MutableBuf = MutableBufObj*;
 
 struct GlobalBufObj : public BufferObj {
-  __device__ constexpr GlobalBufObj(ExecContext& ctx, Buffer& buf) : ctx(ctx), buf(buf) {}
+  __device__ constexpr GlobalBufObj(Buffer& buf) : buf(buf) {}
 
-  __device__ Val load(size_t col, size_t back) override {
+  __device__ Val load(ExecContext& ctx, size_t col, size_t back) override {
     assert(back == 0);
     return buf.get(0, col);
   }
 
-  __device__ void store(size_t col, Val val) override { return buf.set(0, col, val); }
+  __device__ void store(ExecContext& ctx, size_t col, Val val) override {
+    return buf.set(0, col, val);
+  }
 
-  ExecContext& ctx;
   Buffer& buf;
 };
 
@@ -176,23 +183,35 @@ struct Reg {
 #define EQZ(val, loc) eqz(val, loc)
 
 __device__ inline void store(ExecContext& ctx, BoundLayout<Reg> reg, Val val) {
-  reg.buf->store(reg.layout.col, val);
+  reg.buf->store(ctx, reg.layout.col, val);
+}
+
+__device__ inline void set(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {
+  static_cast<MutableBufObj*>(buf)->store(ctx, offset, val);
+}
+
+__device__ inline void setGlobal(ExecContext& ctx, BufferObj* buf, size_t offset, Val val) {
+  static_cast<GlobalBufObj*>(buf)->store(ctx, offset, val);
 }
 
 __device__ inline void storeExt(ExecContext& ctx, BoundLayout<Reg> reg, ExtVal val) {
   for (size_t i = 0; i < EXT_SIZE; i++) {
-    reg.buf->store(reg.layout.col + i, val.elems[i]);
+    reg.buf->store(ctx, reg.layout.col + i, val.elems[i]);
   }
 }
 
 __device__ inline Val load(ExecContext& ctx, BoundLayout<Reg> reg, size_t back) {
-  return reg.buf->load(reg.layout.col, back);
+  return reg.buf->load(ctx, reg.layout.col, back);
+}
+
+__device__ inline Val get(ExecContext& ctx, BufferObj* buf, size_t offset, size_t back) {
+  return static_cast<MutableBufObj*>(buf)->load(ctx, offset, back);
 }
 
 __device__ inline ExtVal loadExt(ExecContext& ctx, BoundLayout<Reg> reg, size_t back) {
   ::cuda::std::array<Fp, EXT_SIZE> elems;
   for (size_t i = 0; i < EXT_SIZE; i++) {
-    elems[i] = reg.buf->load(reg.layout.col + i, back);
+    elems[i] = reg.buf->load(ctx, reg.layout.col + i, back);
   }
   return FpExt(elems[0], elems[1], elems[2], elems[3]);
 }
@@ -287,14 +306,14 @@ __device__ inline Val extern_getPreimage(ExecContext& ctx, Val idx) {
   // printf("extern_getPreimage\n");
   uint32_t idxLow = idx.asUInt32() % 4;
   uint32_t idxHigh = idx.asUInt32() / 4;
-  uint32_t preimageIdx = ctx.preflight.curPreimage[ctx.cycle];
+  uint32_t preimageIdx = ctx.curPreimage;
   const KeccakState& preimages = ctx.preflight.preimages[preimageIdx];
   return (preimages[idxHigh] >> (16 * idxLow)) & 0xffff;
 }
 
 __device__ inline Val extern_nextPreimage(ExecContext& ctx) {
   // printf("extern_nextPreimage\n");
-  return ctx.preflight.curPreimage[ctx.cycle] != ctx.preflight.preimagesSize;
+  return ctx.curPreimage != ctx.preflight.preimagesSize;
 }
 
 #include "defs.cu.inc"

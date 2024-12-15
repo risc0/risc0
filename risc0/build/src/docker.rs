@@ -153,13 +153,20 @@ fn create_dockerfile(
     .concat()
     .join(" ");
 
-    let build = DockerFile::new()
+    let mut build = DockerFile::new()
         .from_alias("build", "risczero/risc0-guest-builder:r0.1.81.0")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
         .env(rustflags_env)
-        .env(&[("CARGO_TARGET_DIR", "target")])
+        .env(&[("CARGO_TARGET_DIR", "target")]);
+
+    #[cfg(feature = "unstable")]
+    {
+        build = build.env(&[("RISC0_FEATURE_bigint2", "")]);
+    }
+
+    build = build
         .env(&[(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
@@ -265,7 +272,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "2e645b8863ec3112ad634af4569e37aee0b869828a22d0ad6a3118b44f78ae73",
+            "7176d580f63b93d9c98ae688a05270db1d3114bced8cca927831c0af5c17746e",
         );
     }
 }
