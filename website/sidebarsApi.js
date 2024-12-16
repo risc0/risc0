@@ -153,8 +153,8 @@ export default {
         },
         {
           type: "doc",
-          label: "Cryptography Acceleration",
-          id: "zkvm/acceleration",
+          label: "Cryptography Precompiles",
+          id: "zkvm/precompiles",
         },
         {
           type: "doc",
