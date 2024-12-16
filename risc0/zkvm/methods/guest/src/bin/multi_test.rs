@@ -532,38 +532,38 @@ fn main() {
                 state
             }
             let mut state = test_input();
+
+            env::keccak_update(&mut state);
             assert_eq!(
                 state,
                 [
-                    0x3ADE68B1,
-                    0x1B13114FBFF5385,
-                    0xD30638F751A5AE9,
-                    0x24E4646565C90A1D,
-                    0x60F51C90B9E60D61,
-                    0x58829BE0E110C5F5,
-                    0x68A1540CF5FC6E19,
-                    0xDF9DC923C20D0D,
-                    0xBA2C077851FD7B11,
-                    0x799B09FEEB62B565,
-                    0xA6C653739841C249,
-                    0x5259551834EC64FD,
-                    0x3385A4287531E1C1,
-                    0xB400E312157A11D5,
-                    0xAFEC148FAD020779,
-                    0xB7A24B40C82981ED,
-                    0x8C1355E852B17171,
-                    0xDD3955744A90CB45,
-                    0x9D829947352DEDA9,
-                    0xEF38C1403E27D3DD,
-                    0x85F17AFE587B5A21,
-                    0x9219707FA05D1B5,
-                    0x8D5ECFABA9BF24D9,
-                    0x8BD10F70552CACD,
-                    0xE70C5B806E0FCBD1
+                    0xd79e8c6b59a6985b,
+                    0xbd19ccee63a9d40,
+                    0xa0a6df6a1793fd20,
+                    0x6f5e7d6a579ba02d,
+                    0x6ff99cb37183ea75,
+                    0x4a7736b846248f01,
+                    0xed6d5dac353f6586,
+                    0xa59ea1c9373e19f7,
+                    0x2a82c3bd8daf69db,
+                    0x7e49515cc085cfcb,
+                    0xf65fb55c8584c54c,
+                    0xf89d733d89b147df,
+                    0xeb85471d7cbcad68,
+                    0x2786372c23d217c,
+                    0xac0b725dc2443591,
+                    0x1cad0517091d449d,
+                    0x6afd9494cb125e27,
+                    0x74fb209306e9daa0,
+                    0x352c0570fa607115,
+                    0xc1b2b78e8fd1ab23,
+                    0x661c47f949651c0d,
+                    0x91bdd8d5e378e77a,
+                    0xdbaf74e7812a697b,
+                    0xe4458a47859ad246,
+                    0xd5f9328619cd99f7
                     ]
                 );
-
-            env::keccak_update(&mut state);
         }
     }
 }

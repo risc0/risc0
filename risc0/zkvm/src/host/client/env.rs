@@ -206,23 +206,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /// Set powers of 2 cycles for keccak proofs
-    ///
-    /// Lowering this value will reduce the memory consumption of the prover. Memory consumption is
-    /// roughly linear with the segment size, so lowering this value by 1 will cut memory
-    /// consumpton by about half.
-    ///
-    /// The default value is chosen to be performant on commonly used hardware. Tuning this value,
-    /// either up or down, may result in better proving performance.
-    ///
-    /// Given value must be within [risc0_circuit_keccak::KECCAK_PO2_RANGE].
-    pub fn keccak_max_po2(&mut self, limit: u32) -> &mut Self {
-        self.inner
-            .env_vars
-            .insert("RISC0_KECCAK_PO2".to_string(), limit.to_string());
-        self
-    }
-
     /// Set a session limit, specified in number of cycles.
     ///
     /// # Example

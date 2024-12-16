@@ -24,13 +24,17 @@ use risc0_zkp::{
 };
 use risc0_zkvm::{get_prover_server, recursion::MerkleGroup, ExecutorEnv, ProverOpts};
 
+use std::collections::HashMap;
+
 fn run_test(po2: u32, claim_digest: Digest) {
     let to_guest: (Digest, u32) = (claim_digest, po2);
 
+    let mut vars = HashMap::new();
+    vars.insert("RISC0_KECCAK_PO2".to_string(), po2.to_string());
     let env = ExecutorEnv::builder()
         .write(&to_guest)
         .unwrap()
-        .keccak_max_po2(po2)
+        .env_vars(vars)
         .build()
         .unwrap();
 
