@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use core::{
-    ptr::{addr_of, null_mut},
+    ptr::{addr_of},
     str::from_utf8,
 };
 
@@ -25,9 +25,8 @@ use risc0_circuit_keccak::{
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::{
     syscall::{
-        sys_alloc_aligned, sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
+        sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
     },
-    WORD_SIZE,
 };
 
 const KECCAK_PERMUTE_CYCLES: usize = 200;
@@ -43,21 +42,17 @@ pub struct Keccak2Batcher {
 
 impl Keccak2Batcher {
     pub fn new() -> Self {
+        const NWORDS: usize = 2;
+        let words = &[0u32; NWORDS];
         let varname = b"RISC0_KECCAK_PO2";
-        let nbytes = unsafe { sys_getenv(null_mut(), 0, varname.as_ptr(), varname.len()) };
+        let nbytes = unsafe { sys_getenv(words.as_ptr() as *mut u32, NWORDS, varname.as_ptr(), varname.len()) };
 
         let po2 = if nbytes == u32::MAX as usize {
             KECCAK_DEFAULT_PO2 as u32
         } else {
-            // allocate words because `sys_getenv` requires words for the output buffer
-            let nwords = (nbytes + WORD_SIZE - 1) / WORD_SIZE;
-            let words = unsafe { sys_alloc_aligned(nwords * WORD_SIZE, 0) } as *mut u32;
-            let nbytes2 = unsafe { sys_getenv(words, nwords, varname.as_ptr(), varname.len()) };
-
             // check that the host did not swap the size of the in-coming buffer between the two calls.
-            assert_eq!(nbytes2, nbytes, "host change the size of the in-coming buffer when reading the `RISC0_KECCAK_PO2` environment variable. First: {nbytes}. Second: {nbytes2}");
             let po2_bytes: &[u8] =
-                unsafe { alloc::slice::from_raw_parts(words.cast() as *const u8, nbytes) };
+                unsafe { alloc::slice::from_raw_parts(words.as_ptr() as *const u8, nbytes) };
             let po2: &str = from_utf8(po2_bytes).unwrap();
             let po2: u32 = po2.parse::<u32>().unwrap();
             if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
