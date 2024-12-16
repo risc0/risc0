@@ -20,7 +20,9 @@ use risc0_circuit_keccak::{
     KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KECCAK_PO2_RANGE,
 };
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
-use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
+use risc0_zkvm_platform::syscall::{
+    sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
+};
 
 const KECCAK_PERMUTE_CYCLES: usize = 200;
 
@@ -35,22 +37,21 @@ pub struct Keccak2Batcher {
 
 impl Keccak2Batcher {
     pub fn new() -> Self {
-        #[cfg(feature = "std")]
-        let po2 = match std::env::var("RISC0_KECCAK_PO2") {
-            Err(_) => KECCAK_DEFAULT_PO2 as u32,
-            Ok(po2) => {
-                let po2 = po2.parse::<u32>().unwrap();
-                if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
-                    panic!(
-                        "invalid keccak po2 {po2}. Expected range: {:?}",
-                        KECCAK_PO2_RANGE
-                    );
-                }
-                po2
+        let varname = b"RISC0_KECCAK_PO2";
+        let mut po2: u32 = 0;
+        let nbytes = unsafe { sys_getenv(&mut po2, 1, varname.as_ptr(), varname.len()) };
+
+        let po2 = if nbytes == u32::MAX as usize {
+            KECCAK_DEFAULT_PO2 as u32
+        } else {
+            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+                panic!(
+                    "invalid keccak po2 {po2}. Expected range: {:?}",
+                    KECCAK_PO2_RANGE
+                );
             }
+            po2
         };
-        #[cfg(not(feature = "std"))]
-        let po2 = KECCAK_DEFAULT_PO2;
 
         let max_keccak_cycles: usize = 1 << po2;
         let max_inputs = max_keccak_cycles / KECCAK_PERMUTE_CYCLES;
