@@ -27,7 +27,7 @@ const MODINV_256_BLOB: &[u8] = include_bytes_aligned!(4, "modinv_256.blob");
 const MODMUL_256_BLOB: &[u8] = include_bytes_aligned!(4, "modmul_256.blob");
 const MODSUB_256_BLOB: &[u8] = include_bytes_aligned!(4, "modsub_256.blob");
 
-// These "unchecked" modular arithmetic operations provide no guarantee that `result >= modulus`
+// These "unchecked" modular arithmetic operations provide no guarantee that `result < modulus`
 // This can be acceptable when computing internal results during a series of finite field
 // operations, but will not work for other use cases (e.g. comparing to a hash value).
 
