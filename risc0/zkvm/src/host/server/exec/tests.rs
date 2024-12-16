@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-    collections::{BTreeMap, HashSet},
+    collections::{BTreeMap, HashMap, HashSet},
     io::Cursor,
     str::from_utf8,
     sync::Mutex,
@@ -1198,9 +1198,12 @@ fn heap_bug_zkvm_527() {
 #[test]
 fn keccak_update() {
     run_test(MultiTestSpec::KeccakUpdate);
+    let mut vars = HashMap::new();
+    vars.insert("RISC0_KECCAK_PO2".to_string(), 15u32.to_string());
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::KeccakUpdate2)
         .unwrap()
+        .env_vars(vars)
         .build()
         .unwrap();
     let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -1212,6 +1215,7 @@ fn keccak_update() {
         session.pending_keccaks[0].claim_digest,
         digest!("4be4abacf05e312a566673392786c5ae69b8c7ed2b77bb2d63119e035420866c")
     );
+    assert_eq!(session.pending_keccaks[0].po2, 15,);
 }
 
 #[test]
