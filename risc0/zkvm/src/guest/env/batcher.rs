@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{
-    ptr::{addr_of},
-    str::from_utf8,
-};
+use core::{ptr::addr_of, str::from_utf8};
 
 use alloc::vec;
 
@@ -23,10 +20,8 @@ use risc0_circuit_keccak::{
     KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KECCAK_PO2_RANGE,
 };
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
-use risc0_zkvm_platform::{
-    syscall::{
-        sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
-    },
+use risc0_zkvm_platform::syscall::{
+    sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
 };
 
 const KECCAK_PERMUTE_CYCLES: usize = 200;
@@ -45,7 +40,14 @@ impl Keccak2Batcher {
         const NWORDS: usize = 2;
         let words = &[0u32; NWORDS];
         let varname = b"RISC0_KECCAK_PO2";
-        let nbytes = unsafe { sys_getenv(words.as_ptr() as *mut u32, NWORDS, varname.as_ptr(), varname.len()) };
+        let nbytes = unsafe {
+            sys_getenv(
+                words.as_ptr() as *mut u32,
+                NWORDS,
+                varname.as_ptr(),
+                varname.len(),
+            )
+        };
 
         let po2 = if nbytes == u32::MAX as usize {
             KECCAK_DEFAULT_PO2 as u32
