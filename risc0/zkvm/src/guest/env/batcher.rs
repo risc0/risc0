@@ -27,7 +27,7 @@ const MAX_KECCAK_INPUTS: usize = MAX_KECCAK_CYCLES / KECCAK_PERMUTE_CYCLES;
 /// This struct implements the batching of calls to the keccak accelerator.
 pub struct Keccak2Batcher {
     claim_state: Digest,
-    inputs: Vec<KeccakState>,
+    inputs: vec::Vec<KeccakState>,
 }
 
 impl Keccak2Batcher {
