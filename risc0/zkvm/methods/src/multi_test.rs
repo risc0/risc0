@@ -50,7 +50,7 @@ pub enum MultiTestSpec {
     EventTrace,
     Fault,
     Halt(u8),
-    KeccakPermute,
+    KeccakUpdate,
     LibM,
     Oom,
     OutOfBounds,
@@ -83,11 +83,12 @@ pub enum MultiTestSpec {
         data: Vec<u8>,
         num_iter: u32,
     },
+    ShaSingleKeccak,
     SysFork,
     SysForkFork,
     SysForkJournalPanic,
     SysInput(Digest),
-    SysKeccakPermute,
+    SysKeccak,
     SysLogInvalidAddr,
     SysProveZkr {
         // Control id of ZKR to execute
