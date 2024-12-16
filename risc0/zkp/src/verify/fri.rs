@@ -13,12 +13,12 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
+use core::ops::DerefMut;
 
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use super::Verifier;
 use crate::{
-    adapter::CircuitCoreDef,
     core::{
         hash::HashFn,
         log2_ceil,
@@ -54,24 +54,21 @@ impl<'a, F: Field> VerifyRoundInfo<'a, F> {
     }
 }
 
-impl<'a, F, C> Verifier<'a, F, C>
+impl<'a, F> Verifier<'a, F>
 where
     F: Field,
-    C: CircuitCoreDef<F>,
 {
     fn verify_query(
         &self,
         round: &mut VerifyRoundInfo<'a, F>,
-        iop: &mut ReadIOP<'a, F>,
         pos: &mut usize,
         goal: &mut F::ExtElem,
     ) -> Result<(), VerificationError> {
         let quot = *pos / round.domain;
         let group = *pos % round.domain;
         // Get the column data
-        let data = round
-            .merkle
-            .verify(iop, self.suite.hashfn.as_ref(), group)?;
+        let hashfn = self.suite.hashfn.as_ref();
+        let data = round.merkle.verify(self.iop().deref_mut(), hashfn, group)?;
         let mut data_ext: Vec<F::ExtElem> = (0..FRI_FOLD)
             .map(|i| {
                 let mut inps = Vec::with_capacity(F::ExtElem::EXT_SIZE);
@@ -97,15 +94,11 @@ where
         Ok(())
     }
 
-    pub fn fri_verify<InnerFn>(
-        &self,
-        iop: &mut ReadIOP<'a, F>,
-        mut degree: usize,
-        mut inner: InnerFn,
-    ) -> Result<(), VerificationError>
+    pub fn fri_verify<InnerFn>(&self, mut inner: InnerFn) -> Result<(), VerificationError>
     where
-        InnerFn: FnMut(&mut ReadIOP<'a, F>, usize) -> Result<F::ExtElem, VerificationError>,
+        InnerFn: FnMut(usize) -> Result<F::ExtElem, VerificationError>,
     {
+        let mut degree: usize = self.tot_cycles;
         let hashfn = self.suite.hashfn.as_ref();
         let orig_domain = INV_RATE * degree;
         let mut domain = orig_domain;
@@ -114,7 +107,7 @@ where
             (log2_ceil((degree + FRI_FOLD - 1) / FRI_FOLD) + FRI_FOLD_PO2 - 1) / FRI_FOLD_PO2;
         let mut rounds = Vec::with_capacity(rounds_capacity);
         while degree > FRI_MIN_DEGREE {
-            rounds.push(VerifyRoundInfo::new(iop, hashfn, domain));
+            rounds.push(VerifyRoundInfo::new(self.iop().deref_mut(), hashfn, domain));
             domain /= FRI_FOLD;
             degree /= FRI_FOLD;
         }
@@ -128,20 +121,22 @@ where
             rounds_capacity
         );
         // Grab the final coeffs + commit
-        let final_coeffs = iop.read_field_elem_slice(F::ExtElem::EXT_SIZE * degree);
+        let final_coeffs = self
+            .iop()
+            .read_field_elem_slice(F::ExtElem::EXT_SIZE * degree);
         let final_digest = hashfn.hash_elem_slice(final_coeffs);
-        iop.commit(&final_digest);
+        self.iop().commit(&final_digest);
         // Get the generator for the final polynomial evaluations
         let gen = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
         // Do queries
         let mut poly_buf: Vec<F::ExtElem> = Vec::with_capacity(degree);
         for _ in 0..QUERIES {
-            let mut pos = iop.random_bits(log2_ceil(orig_domain)) as usize;
+            let mut pos = self.iop().random_bits(log2_ceil(orig_domain)) as usize;
             // Do the 'inner' verification for this index
-            let mut goal = inner(iop, pos)?;
+            let mut goal = inner(pos)?;
             // Verify the per-round proofs
             for round in &mut rounds {
-                self.verify_query(round, iop, &mut pos, &mut goal)?;
+                self.verify_query(round, &mut pos, &mut goal)?;
             }
             // Do final verification
             let x = gen.pow(pos);
