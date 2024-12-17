@@ -21,16 +21,15 @@ use risc0_circuit_rv32im_v2_sys::{
     RawPreflightTrace,
 };
 use risc0_core::{
-    field::{map_pow, Elem, RootsOfUnity},
+    field::{map_pow, Elem, ExtElem as _, RootsOfUnity},
     scope,
 };
 use risc0_sys::ffi_wrap;
 use risc0_zkp::{
     core::log2_ceil,
-    field::ExtElem as _,
     hal::{
         cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHalPoseidon2, CudaHash, CudaHashPoseidon2},
-        AccumPreflight, Buffer, CircuitHal, Hal,
+        AccumPreflight, Buffer, CircuitHal,
     },
     INV_RATE,
 };
@@ -49,12 +48,12 @@ use super::{
 };
 
 pub struct CudaCircuitHal<CH: CudaHash> {
-    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
-    pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
-        Self { hal }
+    pub fn new(_hal: Rc<CudaHal<CH>>) -> Self {
+        Self { _hal }
     }
 }
 

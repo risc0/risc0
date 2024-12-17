@@ -60,8 +60,7 @@ fn basic() {
     assert_ne!(segment.post_digest, pre_image_id);
     assert!(segment.read_record.is_empty());
     assert!(segment.write_record.is_empty());
-    // FIXME
-    // assert_eq!(segment.user_cycles, expected_cycles as u32);
+    assert_eq!(segment.user_cycles, expected_cycles as u32);
     assert_eq!(segment.exit_code, ExitCode::Halted(0));
 }
 

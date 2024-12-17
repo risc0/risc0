@@ -37,10 +37,7 @@ use super::{
 use crate::{
     prove::{witgen::preflight::PreflightTrace, GLOBAL_MIX, GLOBAL_OUT},
     zirgen::{
-        circuit::{
-            CircuitField, ExtVal, Val, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
-            REGISTER_GROUP_DATA,
-        },
+        circuit::{CircuitField, ExtVal, Val, REGISTER_GROUP_ACCUM, REGISTER_GROUP_DATA},
         info::POLY_MIX_POWERS,
     },
 };
@@ -49,12 +46,6 @@ type CpuHal = risc0_zkp::hal::cpu::CpuHal<CircuitField>;
 
 #[derive(Default)]
 pub struct CpuCircuitHal;
-
-impl CpuCircuitHal {
-    pub fn new() -> Self {
-        Self
-    }
-}
 
 impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
     fn generate_witness(
@@ -162,14 +153,12 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
         // usage is within this function and each thread access will not overlap with
         // each other.
 
-        let code = groups[REGISTER_GROUP_CODE].as_slice();
         let data = groups[REGISTER_GROUP_DATA].as_slice();
         let accum = groups[REGISTER_GROUP_ACCUM].as_slice();
         let mix = globals[GLOBAL_MIX].as_slice();
         let out = globals[GLOBAL_OUT].as_slice();
         let check = check.as_slice();
 
-        let code = unsafe { std::slice::from_raw_parts(code.as_ptr(), code.len()) };
         let data = unsafe { std::slice::from_raw_parts(data.as_ptr(), data.len()) };
         let accum = unsafe { std::slice::from_raw_parts(accum.as_ptr(), accum.len()) };
         let mix = unsafe { std::slice::from_raw_parts(mix.as_ptr(), mix.len()) };
@@ -220,9 +209,10 @@ impl CircuitHal<CpuHal> for CpuCircuitHal {
     }
 }
 
+#[allow(dead_code)]
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
     let suite = Poseidon2HashSuite::new_suite();
     let hal = Rc::new(CpuHal::new(suite));
-    let circuit_hal = Rc::new(CpuCircuitHal::new());
+    let circuit_hal = Rc::new(CpuCircuitHal);
     Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
 }

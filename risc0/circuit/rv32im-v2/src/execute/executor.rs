@@ -281,6 +281,7 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
     }
 
     fn on_terminate(&mut self, a0: u32, _a1: u32) {
+        self.user_cycles += 1;
         self.exit_code = Some(ExitCode::Halted(a0));
     }
 

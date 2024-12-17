@@ -79,10 +79,13 @@ pub struct Emulator {
 pub enum TrapCause {
     InstructionAddressMisaligned = 0,
     InstructionAccessFault,
+    #[allow(dead_code)]
     IllegalInstruction(u32),
     Breakpoint,
     LoadAddressMisaligned,
+    #[allow(dead_code)]
     LoadAccessFault(ByteAddr),
+    #[allow(dead_code)]
     StoreAddressMisaligned(ByteAddr),
     StoreAccessFault,
     EnvironmentCallFromUserMode,
@@ -532,7 +535,6 @@ impl Emulator {
         decoded: &DecodedInstruction,
     ) -> Result<bool> {
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
-        let _rs2 = ctx.load_register(decoded.rs2 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
             return ctx.trap(TrapCause::LoadAccessFault(addr));

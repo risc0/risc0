@@ -80,9 +80,10 @@ std::array<Val, 5> extern_getMemoryTxn(ExecContext& ctx, Val addrElem) {
   }
 
   if (txn.addr != addr) {
-    printf("txn.addr: 0x%08x, addr: 0x%08x\n", txn.addr, addr);
+    printf("[%lu]: txn.addr: 0x%08x, addr: 0x%08x\n", ctx.cycle, txn.addr, addr);
     throw std::runtime_error("memory peek not in preflight");
   }
+
   return {
       txn.prevCycle,
       txn.prevWord & 0xffff,
@@ -93,12 +94,12 @@ std::array<Val, 5> extern_getMemoryTxn(ExecContext& ctx, Val addrElem) {
 }
 
 void extern_lookupDelta(ExecContext& ctx, Val table, Val index, Val count) {
-  // printf("lookupDelta(table: %u, index: %u, count: %u, P: %u)\n",
+  // printf("[%lu]: lookupDelta(table: %u, index: %u, count: %u)\n",
+  //        ctx.cycle,
   //        table.asUInt32(),
   //        index.asUInt32(),
-  //        count.asUInt32(),
-  //        Fp::P);
-  ctx.tables.lookupDelta(table, index, count);
+  //        count.asUInt32());
+  ctx.tables.lookupDelta(ctx.cycle, table, index, count);
 }
 
 Val extern_lookupCurrent(ExecContext& ctx, Val table, Val index) {
@@ -152,7 +153,6 @@ void extern_log(ExecContext& ctx, const std::string& message, std::vector<Val> v
 
 std::array<Val, 4> extern_divide(
     ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType) {
-  printf("divide\n");
   uint32_t numer = numerLow.asUInt32() | (numerHigh.asUInt32() << 16);
   uint32_t denom = denomLow.asUInt32() | (denomHigh.asUInt32() << 16);
   auto [quot, rem] = divide_rv32im(numer, denom, signType.asUInt32());
@@ -266,6 +266,8 @@ const char* risc0_circuit_rv32im_v2_cpu_witgen(uint32_t mode,
     }
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }
@@ -280,6 +282,8 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
     }
   } catch (const std::exception& err) {
     return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
   }
   return nullptr;
 }

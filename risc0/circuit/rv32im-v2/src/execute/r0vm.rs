@@ -226,6 +226,7 @@ impl<'a> Risc0Machine<'a> {
             rlen -= 1;
         }
 
+        // Ok(true)
         Ok(false)
     }
 
@@ -247,6 +248,7 @@ impl<'a> Risc0Machine<'a> {
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::HostWrite, CycleState::Decode, 0, 0, 0)?;
+        // Ok(true)
         Ok(false)
     }
 
@@ -254,6 +256,7 @@ impl<'a> Risc0Machine<'a> {
         self.next_pc();
         self.ctx
             .on_ecall_cycle(CycleState::MachineEcall, CycleState::PoseidonEntry, 0, 0, 0)?;
+        // Ok(true)
         Ok(false)
     }
 

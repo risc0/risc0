@@ -25,17 +25,12 @@
 namespace risc0::circuit::rv32im_v2::cpu {
 
 struct LookupTables {
-  std::vector<std::atomic<Fp>> tableU8{1 << 8};
-  std::vector<std::atomic<Fp>> tableU16{1 << 16};
+  std::vector<std::atomic_uint32_t> tableU8;
+  std::vector<std::atomic_uint32_t> tableU16;
 
-  void atomic_rmw(std::atomic<Fp>& atom, Fp count) {
-    Fp old = atom.load(), next;
-    do {
-      next = old + count;
-    } while (!atom.compare_exchange_weak(old, next));
-  }
+  LookupTables() : tableU8(1 << 8), tableU16(1 << 16) {}
 
-  void lookupDelta(Fp table, Fp index, Fp count) {
+  void lookupDelta(size_t cycle, Fp table, Fp index, Fp /*count*/) {
     uint32_t tableU32 = table.asUInt32();
     uint32_t indexU32 = index.asUInt32();
     if (tableU32 == 0) {
@@ -46,14 +41,14 @@ struct LookupTables {
       throw std::runtime_error("Invalid lookup table");
     }
     if (indexU32 >= (1u << tableU32)) {
-      printf("LOOKUP ERROR: table = %u, index = %u\n", tableU32, indexU32);
+      printf("[%lu]: LOOKUP ERROR: table = %u, index = %u\n", cycle, tableU32, indexU32);
       throw std::runtime_error("u8/16 table error");
     }
     // printf("table = %u, index = %u\n", tableU32, indexU32);
     if (tableU32 == 8) {
-      atomic_rmw(tableU8[indexU32], count);
+      tableU8[indexU32]++;
     } else {
-      atomic_rmw(tableU16[indexU32], count);
+      tableU16[indexU32]++;
     }
   }
 
@@ -64,9 +59,9 @@ struct LookupTables {
     }
     uint32_t indexU32 = index.asUInt32();
     if (tableU32 == 8) {
-      return tableU8[indexU32];
+      return Fp(tableU8[indexU32]);
     } else {
-      return tableU16[indexU32];
+      return Fp(tableU16[indexU32]);
     }
   }
 };

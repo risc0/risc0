@@ -665,8 +665,10 @@ struct MemLoadInputLayout {
   MemoryReadLayout data;
 };
 using ArgU8Layout3LayoutArray = ::cuda::std::array<ArgU8Layout,3>;
+using ArgU16Layout1LayoutArray = ::cuda::std::array<ArgU16Layout,1>;
 struct _Arguments_Mem0OutputLayout {
   ArgU8Layout3LayoutArray argU8;
+  ArgU16Layout1LayoutArray argU16;
 };
 struct SplitWordLayout {
   NondetU8RegLayout byte0;
@@ -677,19 +679,25 @@ struct OpLBLayout {
   NondetRegLayout highBit;
   NondetU8RegLayout low7x2;
 };
+struct Mem0OutputArm0Layout {
+  OpLBLayout _super;
+  ArgU16Layout _extra0;
+};
 struct OpLHLayout {
   NondetRegLayout highBit;
-  NondetU8RegLayout low15x2;
+  NondetU16RegLayout low15x2;
 };
 struct Mem0OutputArm1Layout {
   OpLHLayout _super;
   ArgU8Layout _extra0;
   ArgU8Layout _extra1;
+  ArgU8Layout _extra2;
 };
 struct Mem0OutputArm2Layout {
   ArgU8Layout _extra0;
   ArgU8Layout _extra1;
   ArgU8Layout _extra2;
+  ArgU16Layout _extra3;
 };
 struct OpLBULayout {
   SplitWordLayout bytes;
@@ -697,29 +705,34 @@ struct OpLBULayout {
 struct Mem0OutputArm3Layout {
   OpLBULayout _super;
   ArgU8Layout _extra0;
+  ArgU16Layout _extra1;
 };
 struct Mem0OutputArm4Layout {
   ArgU8Layout _extra0;
   ArgU8Layout _extra1;
   ArgU8Layout _extra2;
+  ArgU16Layout _extra3;
 };
 struct Mem0OutputArm5Layout {
   ArgU8Layout _extra0;
   ArgU8Layout _extra1;
   ArgU8Layout _extra2;
+  ArgU16Layout _extra3;
 };
 struct Mem0OutputArm6Layout {
   ArgU8Layout _extra0;
   ArgU8Layout _extra1;
   ArgU8Layout _extra2;
+  ArgU16Layout _extra3;
 };
 struct Mem0OutputArm7Layout {
   ArgU8Layout _extra0;
   ArgU8Layout _extra1;
   ArgU8Layout _extra2;
+  ArgU16Layout _extra3;
 };
 struct Mem0OutputLayout {
-  OpLBLayout arm0;
+  Mem0OutputArm0Layout arm0;
   Mem0OutputArm1Layout arm1;
   Mem0OutputArm2Layout arm2;
   Mem0OutputArm3Layout arm3;
@@ -1890,7 +1903,6 @@ struct IsU24Layout {
   NondetU16RegLayout low16;
   U8RegLayout _0;
 };
-using ArgU16Layout1LayoutArray = ::cuda::std::array<ArgU16Layout,1>;
 using ArgU8Layout1LayoutArray = ::cuda::std::array<ArgU8Layout,1>;
 struct _Arguments_PoseidonPaging__1Layout {
   ArgU16Layout1LayoutArray argU16;

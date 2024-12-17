@@ -84,7 +84,7 @@ impl Segment {
         preflight.body()?;
         preflight.write_pages()?;
         preflight.generate_tables()?;
-        preflight.padding();
+        preflight.padding()?;
         preflight.wrap_memory_txns()?;
         preflight.update_p2_zcheck()?;
 
@@ -184,7 +184,7 @@ impl<'a> Preflight<'a> {
 
     pub fn padding(&mut self) -> Result<()> {
         let last_cycle = 1 << self.segment.po2;
-        for i in self.trace.cycles.len()..last_cycle {
+        for _ in self.trace.cycles.len()..last_cycle {
             self.add_cycle_special(
                 CycleState::ControlDone,
                 CycleState::ControlDone,
@@ -344,6 +344,7 @@ impl<'a> Preflight<'a> {
     }
 
     fn add_cycle_insn(&mut self, state: CycleState, pc: u32, insn: InsnKind) {
+        tracing::trace!("[{}]: {pc:#010x}> {insn:?}", self.trace.cycles.len());
         match insn {
             InsnKind::Eany => {
                 // Technically we need to switch on the machine mode *entering* the EANY
@@ -514,6 +515,7 @@ impl<'a> Risc0Context for Preflight<'a> {
 
     // Pass memory ops to pager + record
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
+        // tracing::trace!("load_u32: {addr:?}");
         let (word, _) = self.load_u32_with_txn(addr)?;
         Ok(word)
     }

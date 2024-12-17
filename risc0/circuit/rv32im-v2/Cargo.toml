@@ -40,6 +40,8 @@ risc0-sys = { workspace = true, optional = true }
 
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
+flate2 = "1.0"
+tar = "0.4"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

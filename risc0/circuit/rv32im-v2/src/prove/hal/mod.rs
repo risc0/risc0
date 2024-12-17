@@ -24,7 +24,7 @@ use risc0_core::scope;
 use risc0_zkp::{
     adapter::{CircuitInfo as _, PROOF_SYSTEM_INFO},
     field::Elem as _,
-    hal::{AccumPreflight, Buffer, CircuitHal, Hal},
+    hal::{Buffer, CircuitHal, Hal},
     prove::Prover,
 };
 
@@ -71,10 +71,11 @@ where
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum StepMode {
     Parallel,
-    #[cfg(test)]
+    // #[cfg(test)]
     SeqForward,
     #[cfg(test)]
     SeqReverse,
@@ -134,7 +135,8 @@ where
             self.hal.as_ref(),
             self.circuit_hal.as_ref(),
             segment,
-            StepMode::Parallel,
+            // StepMode::Parallel,
+            StepMode::SeqForward,
             rand_z,
         )?;
 

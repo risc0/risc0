@@ -35,7 +35,7 @@ use crate::{
         platform::*,
         r0vm::Risc0Context as _,
     },
-    zirgen::circuit::{CircuitField, ExtVal, PoseidonStateLayout, LAYOUT_TOP},
+    zirgen::circuit::{ExtVal, PoseidonStateLayout, LAYOUT_TOP},
 };
 
 use super::{node_idx_to_addr, preflight::Preflight};

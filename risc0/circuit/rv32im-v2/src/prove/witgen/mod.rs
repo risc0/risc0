@@ -20,7 +20,6 @@ mod tests;
 use std::iter::zip;
 
 use anyhow::{Context, Result};
-use num_traits::FromPrimitive as _;
 use preflight::PreflightTrace;
 use risc0_circuit_rv32im_v2_sys::RawPreflightCycle;
 use risc0_core::scope;
@@ -29,11 +28,7 @@ use risc0_zkp::{core::digest::DIGEST_WORDS, field::Elem as _, hal::Hal};
 use self::{poseidon2::Poseidon2State, preflight::Back};
 use super::hal::{CircuitWitnessGenerator, MetaBuffer, StepMode};
 use crate::{
-    execute::{
-        addr::WordAddr,
-        platform::{CycleState, LOOKUP_TABLE_CYCLES, MERKLE_TREE_END_ADDR},
-        segment::Segment,
-    },
+    execute::{addr::WordAddr, platform::MERKLE_TREE_END_ADDR, segment::Segment},
     zirgen::circuit::{
         CircuitField, ExtVal, Val, LAYOUT_GLOBAL, LAYOUT_TOP, REGCOUNT_CODE, REGCOUNT_DATA,
         REGCOUNT_GLOBAL,

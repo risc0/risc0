@@ -2206,8 +2206,10 @@ impl risc0_zkp::layout::Component for MemLoadInputLayout {
     }
 }
 pub type ArgU8Layout3LayoutArray = [&'static ArgU8Layout; 3];
+pub type ArgU16Layout1LayoutArray = [&'static ArgU16Layout; 1];
 pub struct _Arguments_Mem0OutputLayout {
     pub arg_u8: &'static ArgU8Layout3LayoutArray,
+    pub arg_u16: &'static ArgU16Layout1LayoutArray,
 }
 impl risc0_zkp::layout::Component for _Arguments_Mem0OutputLayout {
     fn ty_name(&self) -> &'static str {
@@ -2216,6 +2218,7 @@ impl risc0_zkp::layout::Component for _Arguments_Mem0OutputLayout {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("arg_u8", self.arg_u8)?;
+        v.visit_component("arg_u16", self.arg_u16)?;
         Ok(())
     }
 }
@@ -2251,9 +2254,24 @@ impl risc0_zkp::layout::Component for OpLBLayout {
         Ok(())
     }
 }
+pub struct Mem0OutputArm0Layout {
+    pub _super: &'static OpLBLayout,
+    pub _extra0: &'static ArgU16Layout,
+}
+impl risc0_zkp::layout::Component for Mem0OutputArm0Layout {
+    fn ty_name(&self) -> &'static str {
+        "Mem0OutputArm0Layout"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("_super", self._super)?;
+        v.visit_component("_extra0", self._extra0)?;
+        Ok(())
+    }
+}
 pub struct OpLHLayout {
     pub high_bit: &'static NondetRegLayout,
-    pub low15x2: &'static NondetU8RegLayout,
+    pub low15x2: &'static NondetU16RegLayout,
 }
 impl risc0_zkp::layout::Component for OpLHLayout {
     fn ty_name(&self) -> &'static str {
@@ -2270,6 +2288,7 @@ pub struct Mem0OutputArm1Layout {
     pub _super: &'static OpLHLayout,
     pub _extra0: &'static ArgU8Layout,
     pub _extra1: &'static ArgU8Layout,
+    pub _extra2: &'static ArgU8Layout,
 }
 impl risc0_zkp::layout::Component for Mem0OutputArm1Layout {
     fn ty_name(&self) -> &'static str {
@@ -2280,6 +2299,7 @@ impl risc0_zkp::layout::Component for Mem0OutputArm1Layout {
         v.visit_component("_super", self._super)?;
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
+        v.visit_component("_extra2", self._extra2)?;
         Ok(())
     }
 }
@@ -2287,6 +2307,7 @@ pub struct Mem0OutputArm2Layout {
     pub _extra0: &'static ArgU8Layout,
     pub _extra1: &'static ArgU8Layout,
     pub _extra2: &'static ArgU8Layout,
+    pub _extra3: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Mem0OutputArm2Layout {
     fn ty_name(&self) -> &'static str {
@@ -2297,6 +2318,7 @@ impl risc0_zkp::layout::Component for Mem0OutputArm2Layout {
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
         v.visit_component("_extra2", self._extra2)?;
+        v.visit_component("_extra3", self._extra3)?;
         Ok(())
     }
 }
@@ -2316,6 +2338,7 @@ impl risc0_zkp::layout::Component for OpLBULayout {
 pub struct Mem0OutputArm3Layout {
     pub _super: &'static OpLBULayout,
     pub _extra0: &'static ArgU8Layout,
+    pub _extra1: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Mem0OutputArm3Layout {
     fn ty_name(&self) -> &'static str {
@@ -2325,6 +2348,7 @@ impl risc0_zkp::layout::Component for Mem0OutputArm3Layout {
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("_super", self._super)?;
         v.visit_component("_extra0", self._extra0)?;
+        v.visit_component("_extra1", self._extra1)?;
         Ok(())
     }
 }
@@ -2332,6 +2356,7 @@ pub struct Mem0OutputArm4Layout {
     pub _extra0: &'static ArgU8Layout,
     pub _extra1: &'static ArgU8Layout,
     pub _extra2: &'static ArgU8Layout,
+    pub _extra3: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Mem0OutputArm4Layout {
     fn ty_name(&self) -> &'static str {
@@ -2342,6 +2367,7 @@ impl risc0_zkp::layout::Component for Mem0OutputArm4Layout {
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
         v.visit_component("_extra2", self._extra2)?;
+        v.visit_component("_extra3", self._extra3)?;
         Ok(())
     }
 }
@@ -2349,6 +2375,7 @@ pub struct Mem0OutputArm5Layout {
     pub _extra0: &'static ArgU8Layout,
     pub _extra1: &'static ArgU8Layout,
     pub _extra2: &'static ArgU8Layout,
+    pub _extra3: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Mem0OutputArm5Layout {
     fn ty_name(&self) -> &'static str {
@@ -2359,6 +2386,7 @@ impl risc0_zkp::layout::Component for Mem0OutputArm5Layout {
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
         v.visit_component("_extra2", self._extra2)?;
+        v.visit_component("_extra3", self._extra3)?;
         Ok(())
     }
 }
@@ -2366,6 +2394,7 @@ pub struct Mem0OutputArm6Layout {
     pub _extra0: &'static ArgU8Layout,
     pub _extra1: &'static ArgU8Layout,
     pub _extra2: &'static ArgU8Layout,
+    pub _extra3: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Mem0OutputArm6Layout {
     fn ty_name(&self) -> &'static str {
@@ -2376,6 +2405,7 @@ impl risc0_zkp::layout::Component for Mem0OutputArm6Layout {
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
         v.visit_component("_extra2", self._extra2)?;
+        v.visit_component("_extra3", self._extra3)?;
         Ok(())
     }
 }
@@ -2383,6 +2413,7 @@ pub struct Mem0OutputArm7Layout {
     pub _extra0: &'static ArgU8Layout,
     pub _extra1: &'static ArgU8Layout,
     pub _extra2: &'static ArgU8Layout,
+    pub _extra3: &'static ArgU16Layout,
 }
 impl risc0_zkp::layout::Component for Mem0OutputArm7Layout {
     fn ty_name(&self) -> &'static str {
@@ -2393,11 +2424,12 @@ impl risc0_zkp::layout::Component for Mem0OutputArm7Layout {
         v.visit_component("_extra0", self._extra0)?;
         v.visit_component("_extra1", self._extra1)?;
         v.visit_component("_extra2", self._extra2)?;
+        v.visit_component("_extra3", self._extra3)?;
         Ok(())
     }
 }
 pub struct Mem0OutputLayout {
-    pub arm0: &'static OpLBLayout,
+    pub arm0: &'static Mem0OutputArm0Layout,
     pub arm1: &'static Mem0OutputArm1Layout,
     pub arm2: &'static Mem0OutputArm2Layout,
     pub arm3: &'static Mem0OutputArm3Layout,
@@ -5535,7 +5567,6 @@ impl risc0_zkp::layout::Component for IsU24Layout {
         Ok(())
     }
 }
-pub type ArgU16Layout1LayoutArray = [&'static ArgU16Layout; 1];
 pub type ArgU8Layout1LayoutArray = [&'static ArgU8Layout; 1];
 pub struct _Arguments_PoseidonPaging__1Layout {
     pub arg_u16: &'static ArgU16Layout1LayoutArray,

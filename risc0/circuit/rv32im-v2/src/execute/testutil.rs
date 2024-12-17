@@ -110,7 +110,7 @@ pub fn simple_loop(count: u32) -> Program {
     // sign extend low 12 bits
     let low = ((count as i32) << 20) >> 20;
     // upper 20 bits
-    let high = ((count as i32 - low) >> 12);
+    let high = (count as i32 - low) >> 12;
     tracing::debug!("{count:#010x}: ({high:#010x}, {low:#010x})");
 
     program_from_instructions(
