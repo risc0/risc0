@@ -59,8 +59,9 @@ impl Keccak2Batcher {
             let po2: u32 = po2.parse::<u32>().unwrap();
             if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
                 panic!(
-                    "invalid keccak po2 {po2}. Expected range: {:?}",
-                    KECCAK_PO2_RANGE
+                    "invalid keccak po2 {po2}. Expected range: {} - {}",
+                    KECCAK_PO2_RANGE.start,
+                    KECCAK_PO2_RANGE.end - 1
                 );
             }
             po2
