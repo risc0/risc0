@@ -173,7 +173,7 @@ impl Poseidon2State {
             P2_STATE_LAYOUT.inner[21]._super.offset,
             P2_STATE_LAYOUT.inner[22]._super.offset,
             P2_STATE_LAYOUT.inner[23]._super.offset,
-            P2_STATE_LAYOUT.zcheck._super.offset + 0,
+            P2_STATE_LAYOUT.zcheck._super.offset,
             P2_STATE_LAYOUT.zcheck._super.offset + 1,
             P2_STATE_LAYOUT.zcheck._super.offset + 2,
             P2_STATE_LAYOUT.zcheck._super.offset + 3,
@@ -271,7 +271,7 @@ impl Poseidon2State {
             } else {
                 for i in 0..DIGEST_WORDS {
                     let word = ctx.load_u32(buf_in_addr.postfix_inc())?;
-                    self.inner[2 * i + 0] = word & 0xffff;
+                    self.inner[2 * i] = word & 0xffff;
                     self.inner[2 * i + 1] = word >> 16;
                 }
                 self.buf_in_addr = buf_in_addr.0;
@@ -362,8 +362,8 @@ impl Poseidon2State {
             sum += self.inner[i] as u64;
         }
         sum %= BABY_BEAR_P_U64;
-        for i in 0..CELLS {
-            let diag = M_INT_DIAG_HZN[i].as_u32() as u64;
+        for (i, diag) in M_INT_DIAG_HZN.iter().enumerate().take(CELLS) {
+            let diag = diag.as_u32() as u64;
             let cell = self.inner[i] as u64;
             self.inner[i] = ((sum + diag * cell) % BABY_BEAR_P_U64) as u32;
         }

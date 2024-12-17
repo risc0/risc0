@@ -643,7 +643,7 @@ fn sign_extend_u32(x: u32) -> i64 {
 pub fn disasm(insn: &Instruction, decoded: &DecodedInstruction) -> String {
     let (rd, rs1, rs2) = (decoded.rd, decoded.rs1, decoded.rs2);
     match insn.kind {
-        InsnKind::Invalid => format!("illegal"),
+        InsnKind::Invalid => "illegal".to_string(),
         InsnKind::Add => format!("add x{rd}, x{rs1}, x{rs2}"),
         InsnKind::Sub => format!("sub x{rd}, x{rs1}, x{rs2}"),
         InsnKind::Xor => format!("xor x{rd}, x{rs1}, x{rs2}"),
@@ -690,11 +690,11 @@ pub fn disasm(insn: &Instruction, decoded: &DecodedInstruction) -> String {
         InsnKind::Sh => format!("sh x{rs2}, {}(x{rs1})", decoded.imm_i() as i32),
         InsnKind::Sw => format!("sw x{rs2}, {}(x{rs1})", decoded.imm_i() as i32),
         InsnKind::Eany => match decoded.rs2 {
-            0 => format!("ecall"),
-            1 => format!("ebreak"),
-            _ => format!("illegal eany"),
+            0 => "ecall".to_string(),
+            1 => "ebreak".to_string(),
+            _ => "illegal eany".to_string(),
         },
-        InsnKind::Mret => format!("mret"),
+        InsnKind::Mret => "mret".to_string(),
     }
 }
 

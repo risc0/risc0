@@ -270,8 +270,8 @@ impl<'a> Risc0Machine<'a> {
 
     fn peek(&mut self, ptr: ByteAddr, len: usize) -> Result<Vec<u8>> {
         let mut bytes = vec![0u8; len];
-        for i in 0..len {
-            bytes[i] = self.peek_u8(ptr + i)?;
+        for (i, byte) in bytes.iter_mut().enumerate().take(len) {
+            *byte = self.peek_u8(ptr + i)?;
         }
         Ok(bytes)
     }
