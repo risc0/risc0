@@ -960,7 +960,7 @@ dependencies = [
  "human-repr",
  "regex",
  "reqwest",
- "reqwest-middleware",
+ "reqwest-middleware 0.4.0",
  "reqwest-retry",
  "risc0-binfmt",
  "risc0-build",
@@ -4111,6 +4111,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "reqwest-middleware"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1ccd3b55e711f91a9885a2fa6fbbb2e39db1776420b062efc058c6410f7e5e3"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "http 1.2.0",
+ "reqwest",
+ "serde",
+ "thiserror 1.0.69",
+ "tower-service",
+]
+
+[[package]]
 name = "reqwest-retry"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4124,7 +4139,7 @@ dependencies = [
  "hyper 1.5.1",
  "parking_lot 0.11.2",
  "reqwest",
- "reqwest-middleware",
+ "reqwest-middleware 0.3.3",
  "retry-policies",
  "tokio",
  "tracing",
