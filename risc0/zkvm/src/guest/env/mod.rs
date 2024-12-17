@@ -500,7 +500,6 @@ pub fn read_buffered<T: DeserializeOwned>() -> Result<T, crate::serde::Error> {
 
 /// get an updated keccak state
 #[cfg(feature = "unstable")]
-#[no_mangle]
-pub fn risc0_keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
+pub fn keccak_update(state: &mut risc0_circuit_keccak::KeccakState) {
     unsafe { KECCAK2_BATCHER.get_mut().unwrap().update(state) }
 }
