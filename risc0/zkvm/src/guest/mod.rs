@@ -73,7 +73,7 @@
 //! [rust guest workarounds](https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22)
 //! tag on GitHub.
 //!
-//! [^starter-ex]: The example is based on the [Factors example](https://github.com/risc0/risc0/tree/main/examples/factors).
+//! [^starter-ex]: The example is based on the [Factors example]().
 
 #![deny(missing_docs)]
 
