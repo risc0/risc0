@@ -1,0 +1,67 @@
+[package]
+name = "risc0-circuit-rv32im-v2"
+description = "RISC Zero circuit for rv32im-v2"
+version = "0.1.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[[example]]
+name = "rv32im_v2"
+required-features = ["prove"]
+
+[dependencies]
+anyhow = { version = "1.0", features = ["backtrace"] }
+num-derive = "0.4.2"
+num-traits = "0.2.19"
+risc0-binfmt = { workspace = true }
+risc0-core = { workspace = true }
+risc0-zkp = { workspace = true, default-features = false }
+serde = { version = "1.0", default-features = false, features = [
+  "derive",
+  "alloc",
+] }
+tracing = "0.1"
+
+[target.'cfg(not(target_os = "zkvm"))'.dependencies]
+bytemuck = { version = "1.13", optional = true }
+cfg-if = { version = "1.0", optional = true }
+derive_more = { version = "1.0", features = [
+  "add",
+  "add_assign",
+  "debug",
+], optional = true }
+paste = { version = "1.0", optional = true }
+rand = { version = "0.8", optional = true }
+rayon = { version = "1.5", optional = true }
+risc0-circuit-rv32im-v2-sys = { workspace = true, optional = true }
+risc0-sys = { workspace = true, optional = true }
+
+[dev-dependencies]
+clap = { version = "4.5", features = ["derive"] }
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[features]
+cuda = [
+  "prove",
+  "risc0-circuit-rv32im-v2-sys/cuda",
+  "risc0-sys/cuda",
+  "risc0-zkp/cuda",
+]
+default = ["prove"]
+execute = ["dep:bytemuck", "dep:derive_more", "std"]
+prove = [
+  "dep:cfg-if",
+  "dep:paste",
+  "dep:rand",
+  "dep:rayon",
+  "dep:risc0-circuit-rv32im-v2-sys",
+  "dep:risc0-sys",
+  "execute",
+  "risc0-core/perf",
+  "risc0-zkp/prove",
+  "std",
+]
+std = ["risc0-zkp/std", "serde/std"]
