@@ -40,8 +40,8 @@ use crate::{
     receipt::SuccinctReceipt,
     recursion::{prove::zkr::test_recursion_circuit, MerkleGroup},
     register_zkr, ApiClient, ApiServer, CoprocessorCallback, ExecutorEnv, InnerReceipt,
-    ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt, SessionInfo,
-    SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
+    ProveKeccakRequest, ProveZkrRequest, ProverOpts, Receipt, ReceiptClaim, SegmentReceipt,
+    SessionInfo, SuccinctReceiptVerifierParameters, Unknown, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -134,6 +134,13 @@ impl TestClient {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.prove_zkr(request, receipt_out)
+        })
+    }
+
+    fn prove_keccak(&self, request: ProveKeccakRequest) -> SuccinctReceipt<Unknown> {
+        with_server(self.addr, || {
+            let receipt_out = AssetRequest::Path(self.get_work_path());
+            self.client.prove_keccak(request, receipt_out)
         })
     }
 
@@ -395,6 +402,72 @@ impl CoprocessorCallback for Coprocessor {
         let receipt = client.prove_zkr(proof_request);
         self.receipt = Some(receipt);
         Ok(())
+    }
+
+    fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+        let client = TestClient::new();
+        let receipt = client.prove_keccak(proof_request);
+        self.receipt = Some(receipt);
+        Ok(())
+    }
+}
+
+mod keccak_po2 {
+    use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
+    use anyhow::Result;
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use test_log::test;
+
+    use super::Asset;
+    use crate::{
+        host::api::tests::TestClient, receipt::SuccinctReceipt, CoprocessorCallback, ExecutorEnv,
+        ProveKeccakRequest, ProveZkrRequest, Unknown,
+    };
+
+    pub const KECCAK_TEST_PO2: u32 = 15;
+    struct Coprocessor {
+        pub(crate) receipt: Option<SuccinctReceipt<Unknown>>,
+    }
+
+    impl Coprocessor {
+        fn new() -> Self {
+            Self { receipt: None }
+        }
+    }
+
+    impl CoprocessorCallback for Coprocessor {
+        fn prove_zkr(&mut self, _proof_request: ProveZkrRequest) -> Result<()> {
+            unimplemented!()
+        }
+
+        fn prove_keccak(&mut self, proof_request: ProveKeccakRequest) -> Result<()> {
+            assert_eq!(proof_request.po2, KECCAK_TEST_PO2 as usize);
+            let client = TestClient::new();
+            let receipt = client.prove_keccak(proof_request);
+            self.receipt = Some(receipt);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn keccak_max_po2() {
+        let mut client = TestClient::new();
+
+        let spec = &MultiTestSpec::KeccakUpdate2;
+        let coprocessor = Rc::new(RefCell::new(Coprocessor::new()));
+        let mut vars = HashMap::new();
+        vars.insert("RISC0_KECCAK_PO2".to_string(), KECCAK_TEST_PO2.to_string());
+
+        let env = ExecutorEnv::builder()
+            .coprocessor_callback_ref(coprocessor.clone())
+            .write(&spec)
+            .unwrap()
+            .env_vars(vars)
+            .build()
+            .unwrap();
+
+        let _session = client.execute(env, Asset::Inline(MULTI_TEST_ELF.into()));
     }
 }
 

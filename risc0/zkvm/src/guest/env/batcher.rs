@@ -12,131 +12,150 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::{ptr::addr_of, str::from_utf8};
+
 use alloc::vec;
 
-use anyhow::Result;
-use risc0_zkvm_platform::syscall::DIGEST_BYTES;
+use risc0_circuit_keccak::{
+    KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KECCAK_PO2_RANGE,
+};
+use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
+use risc0_zkvm_platform::syscall::{
+    sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
+};
 
-use crate::sha::Digest;
+const KECCAK_PERMUTE_CYCLES: usize = 200;
 
 /// This struct implements the batching of calls to the keccak accelerator.
-pub struct KeccakBatcher {
-    input_transcript: [u8; Self::KECCAK_LIMIT],
-    block_count_offset: usize,
-    data_offset: usize,
+#[derive(Debug)]
+pub struct Keccak2Batcher {
+    claim_state: Digest,
+    inputs: Vec<KeccakState>,
+    po2: u32,
+    max_inputs: usize,
 }
 
-impl Default for KeccakBatcher {
-    /// create a new instance of a batcher with an input transcript region
-    fn default() -> Self {
+impl Keccak2Batcher {
+    pub fn new() -> Self {
+        const NWORDS: usize = 2;
+        let words = &[0u32; NWORDS];
+        let varname = b"RISC0_KECCAK_PO2";
+        let nbytes = unsafe {
+            sys_getenv(
+                words.as_ptr() as *mut u32,
+                NWORDS,
+                varname.as_ptr(),
+                varname.len(),
+            )
+        };
+
+        let po2 = if nbytes == u32::MAX as usize {
+            KECCAK_DEFAULT_PO2 as u32
+        } else {
+            // check that the host did not swap the size of the in-coming buffer between the two calls.
+            let po2_bytes: &[u8] =
+                unsafe { alloc::slice::from_raw_parts(words.as_ptr() as *const u8, nbytes) };
+            let po2: &str = from_utf8(po2_bytes).unwrap();
+            let po2: u32 = po2.parse::<u32>().unwrap();
+            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+                panic!(
+                    "invalid keccak po2 {po2}. Expected range: {} - {} (inclusive)",
+                    KECCAK_PO2_RANGE.start(),
+                    KECCAK_PO2_RANGE.end(),
+                );
+            }
+            po2
+        };
+
+        let max_keccak_cycles: usize = 1 << po2;
+        let max_inputs = max_keccak_cycles / KECCAK_PERMUTE_CYCLES;
+
         Self {
-            input_transcript: [0u8; Self::KECCAK_LIMIT],
-            block_count_offset: 0,
-            data_offset: Self::BLOCK_COUNT_BYTES,
-        }
-    }
-}
-
-impl KeccakBatcher {
-    pub const fn init() -> Self {
-        Self {
-            input_transcript: [0u8; Self::KECCAK_LIMIT],
-            block_count_offset: 0,
-            data_offset: Self::BLOCK_COUNT_BYTES,
+            claim_state: SHA256_INIT,
+            inputs: vec![],
+            po2,
+            max_inputs,
         }
     }
 
-    pub const KECCAK_LIMIT: usize = 100_000;
-    pub const BLOCK_COUNT_BYTES: usize = 8;
-    pub const BLOCK_BYTES: usize = 136;
-    pub const FINAL_PADDING_BYTES: usize = 8;
-
-    /// write data to the input transcript.
-    ///
-    /// This is meant to be used by lower-level functions within keccak crates.
-    /// Many keccak crates will write raw data and padding to a 1600 bit buffer
-    /// often called the "state". All data and padding written to the state
-    /// should be passed to this function.
-    fn write_data(&mut self, input: &[u8]) -> Result<()> {
-        self.input_transcript[self.data_offset..self.data_offset + input.len()]
-            .copy_from_slice(input);
-        self.data_offset += input.len();
-
-        Ok(())
+    pub fn update(&mut self, keccak_state: &mut KeccakState) {
+        self.inputs.push(*keccak_state);
+        sha_single_keccak(&mut self.claim_state, keccak_state);
+        unsafe { sys_keccak(keccak_state, keccak_state) };
+        // at this point the keccak_state is output state resulting from keccak permutation.
+        sha_single_keccak(&mut self.claim_state, keccak_state);
+        if self.inputs.len() == self.max_inputs {
+            // we've reached the limit. Create a proof request.
+            self.finalize();
+        }
     }
 
-    /// write padding to the input transcript.
-    ///
-    /// Pad the raw input with the delimitor, 0x00 bytes, and a 0x80 byte. This
-    /// will pad the raw data upto the current block boundary.
-    fn write_padding(&mut self) -> Result<()> {
-        self.write_data(&[0x01])?;
-        let data_length = self.current_data_length();
-        let remaining_bytes = Self::BLOCK_BYTES - (data_length % Self::BLOCK_BYTES);
-
-        let zeroes = vec![0u8; remaining_bytes - 1];
-
-        self.write_data(&zeroes)?;
-        self.write_data(&[0x80])?;
-
-        Ok(())
-    }
-
-    /// write keccak hash to the transcript, updating the block count.
-    ///
-    /// the amount of raw data written to the
-    pub fn write_keccak_entry(&mut self, input: &[u8], hash: &[u8; 32]) -> Result<()> {
-        // if this entry does not fit in the remaining space, create a new claim and reset the batcher.
-        let padding_bytes = Self::BLOCK_BYTES - (input.len() % Self::BLOCK_BYTES);
-        if self.data_offset + input.len() + padding_bytes + DIGEST_BYTES + Self::FINAL_PADDING_BYTES
-            > Self::KECCAK_LIMIT
-        {
-            let _digest = self.finalize_transcript();
+    pub fn finalize(&mut self) {
+        if self.inputs.is_empty() {
+            // no input so there's nothing to do
+            self.reset();
+            return;
         }
 
-        self.write_data(input)?;
-        self.write_padding()?;
+        let input: &[u32] = bytemuck::cast_slice(self.inputs.as_flattened());
+        let claim_digest = self.claim_digest();
 
-        let data_length = self.current_data_length();
-        let block_count = (data_length / Self::BLOCK_BYTES) as u8;
+        unsafe {
+            sys_prove_keccak(
+                claim_digest.as_ref(),
+                self.po2,
+                KECCAK_CONTROL_ROOT.as_ref(),
+                input.as_ptr(),
+                input.len(),
+            );
+        }
+        crate::guest::env::verify_assumption(claim_digest, KECCAK_CONTROL_ROOT).unwrap();
 
-        self.write_data(hash)?;
-        self.input_transcript[self.block_count_offset] = block_count;
-
-        self.block_count_offset = self.data_offset;
-        self.data_offset += Self::BLOCK_COUNT_BYTES;
-        Ok(())
-    }
-
-    /// get the digest of the input transcript
-    pub fn finalize_transcript(&mut self) -> Digest {
-        use risc0_zkp::core::hash::sha::Sha256;
-
-        self.input_transcript
-            [self.block_count_offset..self.block_count_offset + Self::BLOCK_COUNT_BYTES]
-            .copy_from_slice(&[0u8; Self::BLOCK_COUNT_BYTES]);
-        let transcript_digest = crate::sha::Impl::hash_bytes(
-            &self.input_transcript[0..self.block_count_offset + Self::BLOCK_COUNT_BYTES],
-        );
-
-        // TODO: add assumption, send transcript
-        // crate::guest::env::verify_assumption(*transcript_digest, Digest::default()).unwrap();
         self.reset();
-        *transcript_digest
+    }
+
+    fn claim_digest(&self) -> Digest {
+        let mut claim_digest = self.claim_state;
+        for word in claim_digest.as_mut_words().iter_mut() {
+            *word = word.to_be();
+        }
+        claim_digest
     }
 
     fn reset(&mut self) {
-        self.block_count_offset = 0;
-        self.data_offset = Self::BLOCK_COUNT_BYTES;
+        self.claim_state = SHA256_INIT;
+        self.inputs.clear();
+    }
+}
+
+pub(crate) fn sha_single_keccak(claim_state: &mut Digest, keccak_state: &KeccakState) {
+    const ZEROES: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
+
+    let keccak_state_u32 = keccak_state.as_ptr() as *const u32;
+    for i in 0..3 {
+        unsafe {
+            sys_sha_compress(
+                claim_state.as_mut(),
+                claim_state.as_ref(),
+                keccak_state_u32.add(i * 16) as *const [u32; DIGEST_WORDS],
+                keccak_state_u32.add(i * 16 + 8) as *const [u32; DIGEST_WORDS],
+            )
+        };
     }
 
-    fn current_data_length(&self) -> usize {
-        self.data_offset - (self.block_count_offset + Self::BLOCK_COUNT_BYTES)
+    // any last words?
+    static mut LAST_WORDS: [u32; DIGEST_WORDS] = [0u32; DIGEST_WORDS];
+    unsafe {
+        LAST_WORDS[0] = *keccak_state_u32.add(48);
+        LAST_WORDS[1] = *keccak_state_u32.add(49);
     }
 
-    /// returns ture if the batcher has consumed data to hash. Used to determine
-    /// whether if transcript hash should be generated.
-    pub fn has_data(&self) -> bool {
-        self.data_offset != Self::BLOCK_COUNT_BYTES
-    }
+    unsafe {
+        sys_sha_compress(
+            claim_state.as_mut(),
+            claim_state.as_ref(),
+            addr_of!(LAST_WORDS),
+            &ZEROES,
+        )
+    };
 }

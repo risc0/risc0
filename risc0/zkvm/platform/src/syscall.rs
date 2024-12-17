@@ -74,6 +74,10 @@ pub mod reg_abi {
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
+pub const KECCACK_STATE_BYTES: usize = 200;
+pub const KECCACK_STATE_WORDS: usize = 200 / WORD_SIZE;
+pub const KECCACK_STATE_DWORDS: usize = 200 / 8;
+
 /// Number of words in each cycle received using the SOFTWARE ecall
 pub const IO_CHUNK_WORDS: usize = 4;
 
@@ -620,7 +624,11 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
 // Some environment variable names are considered safe by default to use in the guest, provided by
 // the host, and are included in this list. It may be useful to allow guest developers to register
 // additional variable names as part of their guest program.
-const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE"];
+const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[
+    b"RUST_BACKTRACE",
+    b"RUST_LIB_BACKTRACE",
+    b"RISC0_KECCAK_PO2",
+];
 
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
@@ -656,7 +664,7 @@ pub unsafe extern "C" fn sys_getenv(
             }
         }
         if !allowed {
-            const MSG_1: &[u8] = "sys_getenv not enabaled for var".as_bytes();
+            const MSG_1: &[u8] = "sys_getenv not enabled for var".as_bytes();
             unsafe { sys_log(MSG_1.as_ptr(), MSG_1.len()) };
             unsafe { sys_log(varname, varname_len) };
             const MSG_2: &[u8] = "sys_getenv is disabled; can be enabled with the sys-getenv feature flag on risc0-zkvm-platform".as_bytes();
@@ -892,8 +900,9 @@ pub extern "C" fn sys_exit(status: i32) -> ! {
 ///
 /// # Safety
 ///
+/// `claim_digest` must be aligned and dereferenceable.
 /// `control_id` must be aligned and dereferenceable.
-///
+/// `control_root` must be aligned and dereferenceable.
 /// `input` must be aligned and have `input_len` u32s dereferenceable
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
@@ -926,26 +935,22 @@ pub unsafe extern "C" fn sys_prove_zkr(
     }
 }
 
-/// Get a keccak hash from the host with the given input data - should be
-/// invoked during `hasher.finalize(...)`
+/// Permute the keccak state on the host
 ///
 /// # Safety
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_keccak(
-    input_ptr: *const u8,
-    len: usize,
-    out_state: *mut [u32; DIGEST_WORDS],
+    in_state: *const [u64; KECCACK_STATE_DWORDS],
+    out_state: *mut [u64; KECCACK_STATE_DWORDS],
 ) {
-    syscall_2(
+    syscall_1(
         nr::SYS_KECCAK,
         out_state as *mut u32,
-        DIGEST_WORDS,
-        input_ptr as u32,
-        len as u32,
+        KECCACK_STATE_WORDS,
+        in_state as u32,
     );
 }
-
 /// Executes the keccak circuit, and then executes the lift predicate
 /// in the recursion circuit.
 ///
@@ -956,26 +961,28 @@ pub unsafe extern "C" fn sys_keccak(
 ///
 /// # Safety
 ///
+/// `claim_digest` must be aligned and dereferenceable.
 /// `control_root` must be aligned and dereferenceable.
-///
 /// `input` must be aligned and have `input_len` u32s dereferenceable
 #[cfg_attr(all(feature = "export-syscalls", feature = "unstable"), no_mangle)]
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_keccak(
-    po2: usize,
+    claim_digest: *const [u32; DIGEST_WORDS],
+    po2: u32,
+    control_root: *const [u32; DIGEST_WORDS],
     input: *const u32,
     input_len: usize,
-    control_root: *const [u32; DIGEST_WORDS],
 ) {
     let Return(a0, _) = unsafe {
-        syscall_4(
+        syscall_5(
             nr::SYS_PROVE_KECCAK,
             null_mut(),
             0,
-            po2 as u32,
+            claim_digest as u32,
+            po2,
+            control_root as u32,
             input as u32,
             input_len as u32,
-            control_root as u32,
         )
     };
 
@@ -983,7 +990,8 @@ pub unsafe extern "C" fn sys_prove_keccak(
     // Currently, this should always be the case. This check is
     // included for forwards-compatibility.
     if a0 != 0 {
-        panic!("sys_execute_keccak returned error result");
+        const MSG: &[u8] = "sys_prove_keccak returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 }
 

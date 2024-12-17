@@ -120,57 +120,67 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
         // This algorithm doesn't work if `scalar` is a multiple of `pt`'s order
 
         // Initialize two values to alternate writes to avoid unnecessary copies.
-        let mut result_flip = false;
-        let mut result1 = AffinePoint::IDENTITY;
-        let mut result2 = AffinePoint::IDENTITY;
+        let mut result_buffer1 = AffinePoint::IDENTITY;
+        let mut result_buffer2 = AffinePoint::IDENTITY;
+
+        let mut result_ptr = &mut result_buffer1;
+        let mut result_scratch = &mut result_buffer2;
 
         // Note: the first value can be an uninitialized value.
-        let mut doubled_pt1 = *self;
-        let mut doubled_pt2 = *self;
+        let mut doubled_pt_buffer1 = *self;
+        let mut doubled_pt_buffer2 = *self;
+
+        let mut doubled_point = &mut doubled_pt_buffer1;
+        let mut doubled_point_scratch = &mut doubled_pt_buffer2;
 
         let mut first_write = true;
         for pos in 0..bits(scalar) {
-            // Alternate between the doubled value. Immutable reference is to the current value,
-            // mutable reference is to the other that can be written to.
-            // Note: This is not using a boolean flag because `pos%2` is less cycles.
-            let (current_doubled, next_doubled) = if pos % 2 == 0 {
-                (&doubled_pt2, &mut doubled_pt1)
-            } else {
-                (&doubled_pt1, &mut doubled_pt2)
-            };
-
             if bit(scalar, pos) {
-                // Alternate buffers to write to and use as current value.
-                let (current_result, next_result) = if result_flip {
-                    (&result2, &mut result1)
-                } else {
-                    (&result1, &mut result2)
-                };
-
                 if first_write {
                     first_write = false;
-                    *next_result = *current_doubled;
+                    *result_ptr = *doubled_point;
                 } else {
-                    current_result.add(current_doubled, next_result);
+                    result_ptr.add_internal(doubled_point, result_scratch);
+                    // Swap references to result buffers to update the result.
+                    core::mem::swap(&mut result_ptr, &mut result_scratch);
                 }
-                result_flip = !result_flip;
             }
 
-            current_doubled.double(next_doubled);
+            doubled_point.double_internal(doubled_point_scratch);
+            // Swap references to doubled point buffers to update the current doubled value.
+            core::mem::swap(&mut doubled_point, &mut doubled_point_scratch);
         }
 
         if first_write {
             // Multiplied by zero, which is the identity point.
             *result = AffinePoint::IDENTITY;
         } else {
-            // Return the result, based on which buffer was written to last.
-            *result = if result_flip { result2 } else { result1 };
+            // Copy the value from the buffer most recently written to.
+            *result = *result_ptr;
         }
+
+        // Check that the final result is less than the curve's prime.
+        let prime = C::CURVE.buffer[0];
+        assert!(crate::is_less(&result_ptr.buffer[0], &prime));
+        assert!(crate::is_less(&result_ptr.buffer[1], &prime));
     }
 
     /// Elliptic curve doubling of the affine point.
     #[stability::unstable]
     pub fn double(&self, result: &mut Self) {
+        self.double_internal(result);
+
+        // An honest host will always return a result less than the curve's prime in each coordinate.
+        // A dishonest prover can sometimes return a result greater than the prime, so enforce that
+        // we're in the honest case.
+        let prime = C::CURVE.buffer[0];
+        assert!(crate::is_less(&result.buffer[0], &prime));
+        assert!(crate::is_less(&result.buffer[1], &prime));
+    }
+
+    /// [double] without checking the result is less than the curve's prime.
+    #[inline]
+    fn double_internal(&self, result: &mut Self) {
         let curve = C::CURVE;
         // If the point is zero, can short-circuit and return the identity point.
         if let Some(point) = self.as_u32s() {
@@ -190,6 +200,18 @@ impl<const WIDTH: usize, C: Curve<WIDTH>> AffinePoint<WIDTH, C> {
     /// Elliptic curve addition of the affine point.
     #[stability::unstable]
     pub fn add(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
+        self.add_internal(rhs, result);
+
+        // An honest host will always return a result less than the curve's prime in each coordinate.
+        // A dishonest prover can sometimes return a result greater than the prime, so enforce that
+        // we're in the honest case.
+        let prime = C::CURVE.buffer[0];
+        assert!(crate::is_less(&result.buffer[0], &prime));
+        assert!(crate::is_less(&result.buffer[1], &prime));
+    }
+
+    #[inline]
+    fn add_internal(&self, rhs: &AffinePoint<WIDTH, C>, result: &mut AffinePoint<WIDTH, C>) {
         let curve = C::CURVE;
 
         // If the left or right value is zero, can return the other value.

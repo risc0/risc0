@@ -13,10 +13,9 @@
 // limitations under the License.
 
 use risc0_circuit_rv32im::prove::emu::addr::ByteAddr;
-use risc0_zkvm_platform::syscall::reg_abi::{REG_A3, REG_A4};
-use sha3::{Digest, Keccak256};
+use risc0_zkvm_platform::syscall::reg_abi::REG_A3;
 
-use super::{Syscall, SyscallContext};
+use super::{Syscall, SyscallContext, SyscallKind};
 
 #[derive(Clone, Default)]
 pub(crate) struct SysKeccak;
@@ -29,11 +28,14 @@ impl Syscall for SysKeccak {
         to_guest: &mut [u32],
     ) -> anyhow::Result<(u32, u32)> {
         let buf_ptr = ByteAddr(ctx.load_register(REG_A3));
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        let from_guest = &ctx.load_region(buf_ptr, 25 * 8)?;
+        let mut from_guest: [u64; 25] = bytemuck::cast_slice(from_guest).try_into()?;
 
-        let output = Keccak256::digest(from_guest);
-        bytemuck::cast_slice_mut(to_guest).clone_from_slice(output.as_slice());
+        keccak::f1600(&mut from_guest);
+        to_guest.clone_from_slice(bytemuck::cast_slice(&from_guest));
+
+        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::Keccak];
+        metric.count += 1;
 
         Ok((0, 0))
     }
