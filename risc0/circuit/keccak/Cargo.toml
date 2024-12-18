@@ -7,6 +7,10 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[[example]]
+name = "keccak"
+required-features = ["prove"]
+
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 paste = "1.0"
