@@ -122,7 +122,7 @@ fn init() -> Result<()> {
     // this is a rust revamp of rzup. Before this version, rzup was a bash
     // script. In order to facilitate compatibility within our tools, we touch a
     // file in a known location to indicate to the client that the rust
-    // impelemtnation of rzup is being utilized.
+    // implementation of rzup is being utilized.
     let new_rzup_indicator = utils::rzup_home()?.join(risc0_build::RUST_RZUP_INDICATOR);
     if !new_rzup_indicator.exists() {
         fs::create_dir_all(new_rzup_indicator.parent().unwrap())?;
