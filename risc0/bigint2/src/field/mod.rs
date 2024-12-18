@@ -17,7 +17,7 @@ mod tests;
 
 use include_bytes_aligned::include_bytes_aligned;
 
-use crate::ffi::{sys_bigint2_3, sys_bigint2_4};
+use crate::ffi::{sys_bigint2_3, sys_bigint2_4, sys_bigint2_5};
 use crate::WORD_SIZE;
 
 pub const FIELD_256_WIDTH_WORDS: usize = 256 / (WORD_SIZE * 8);
@@ -175,14 +175,16 @@ pub fn extfieldadd_256(
 pub fn extfieldmul_256(
     lhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     rhs: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
+    monic_irr: &[[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
     modulus: &[u32; FIELD_256_WIDTH_WORDS],
     result: &mut [[u32; FIELD_256_WIDTH_WORDS]; EXT_DEGREE_2],
 ) {
     unsafe {
-        sys_bigint2_4(
+        sys_bigint2_5(
             EXTFIELDMUL_256_BLOB.as_ptr(),
             lhs.as_ptr() as *const u32,
             rhs.as_ptr() as *const u32,
+            monic_irr.as_ptr() as *const u32,
             modulus.as_ptr() as *const u32,
             result.as_mut_ptr() as *mut u32,
         );

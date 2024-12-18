@@ -17,7 +17,8 @@ extern crate num_bigint_dig as num_bigint;
 
 use num_bigint::BigUint;
 
-use risc0_bigint2_methods::{EXTFIELDSUB_ELF, EXTFIELDADD_ELF, MODADD_ELF, MODINV_ELF, MODMUL_ELF, MODSUB_ELF};
+use risc0_bigint2_methods::{EXTFIELDMUL_ELF, EXTFIELDSUB_ELF, EXTFIELDADD_ELF,
+    MODADD_ELF, MODINV_ELF, MODMUL_ELF, MODSUB_ELF};
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, VerifierContext,
 };
@@ -230,6 +231,53 @@ fn extfieldsub() {
             .unwrap();
     let now = Instant::now();
     let session = ExecutorImpl::from_elf(env, EXTFIELDSUB_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let result: (BigUint, BigUint) = session.journal.as_ref().unwrap().decode().unwrap();
+    assert_eq!(result, expected);
+
+    let prover = get_prover_server(&ProverOpts::fast()).unwrap();
+    let prove_info = prover
+        .prove_session(&VerifierContext::default(), &session)
+        .unwrap();
+    let elapsed = now.elapsed();
+    tracing::info!("Runtime: {}", elapsed.as_millis());
+    tracing::info!("User cycles: {}", prove_info.stats.user_cycles);
+}
+
+#[test]
+fn extfieldmul() {
+    const LHS0: &[u8] = b"05";
+    const LHS1: &[u8] = b"02";
+    const RHS0: &[u8] = b"02";
+    const RHS1: &[u8] = b"03";
+// (2x+5)(3x+2) = 6xx+4x+15x+10 = 6xx+5x+3 = 6(xx+0x+1)-0x-6 + 5x+3 = 5x+4
+    const MONICIRR0: &[u8] = b"06";
+    const MONICIRR1: &[u8] = b"00";
+    const PRIME: &[u8] = b"07";
+    const EXPECTED0: &[u8] = b"04";
+    const EXPECTED1: &[u8] = b"05";
+
+    let lhs0 = BigUint::parse_bytes(LHS0, 16).unwrap();
+    let lhs1 = BigUint::parse_bytes(LHS1, 16).unwrap();
+    let rhs0 = BigUint::parse_bytes(RHS0, 16).unwrap();
+    let rhs1 = BigUint::parse_bytes(RHS1, 16).unwrap();
+    let monicirr0 = BigUint::parse_bytes(MONICIRR0, 16).unwrap();
+    let monicirr1 = BigUint::parse_bytes(MONICIRR1, 16).unwrap();
+    let prime = BigUint::parse_bytes(PRIME, 16).unwrap();
+    let expected0 = BigUint::parse_bytes(EXPECTED0, 16).unwrap();
+    let expected1 = BigUint::parse_bytes(EXPECTED1, 16).unwrap();
+    let expected = (expected0, expected1);
+
+    let env = ExecutorEnv::builder()
+            .write(&(lhs0, lhs1, rhs0, rhs1, monicirr0, monicirr1, prime))
+            .unwrap()
+            .build()
+            .unwrap();
+    let now = Instant::now();
+    let session = ExecutorImpl::from_elf(env, EXTFIELDMUL_ELF)
         .unwrap()
         .run()
         .unwrap();
