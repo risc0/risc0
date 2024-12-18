@@ -17,7 +17,7 @@ pub static RZUP_HELP: &str = r"Discussion:
     release channels, enabling you to easily switch between different
     versions and keep them updated.
 
-    If you are new to RISC Zero, consider visitng our documentation
+    If you are new to RISC Zero, consider visiting our documentation
     to learn more.";
 
 pub static SHOW_HELP: &str = r"Discussion:
