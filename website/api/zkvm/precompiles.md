@@ -85,7 +85,7 @@ Some crates will allow you a choice of different backend crates, and you may be
 able to use this to select a crate we have already published a patch for. An
 example is Revm's `revm-precompile` crate, which by default uses `k256`; in this
 case you can use [our patch for `k256`][k256-patch]. However, if you set the
-[`secp256k1` feature flag][[revm-precompile-toml]], it will use the `secp256k1`
+[`secp256k1` feature flag][revm-precompile-toml], it will use the `secp256k1`
 crate instead, where we don't currently provide a patch.
 
 If you need a precompile patched into a different crate than the ones listed
