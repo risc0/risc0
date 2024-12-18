@@ -176,6 +176,7 @@ impl Receipt {
         self.inner.verify_integrity_with_context(ctx)?;
 
         // in dev-mode, avoid matching claims
+        #[cfg(feature = "std")]
         if crate::is_dev_mode() {
             return Ok(());
         }
