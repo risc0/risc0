@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod paged_map;
 pub(crate) mod poseidon2;
 pub(crate) mod preflight;
 #[cfg(test)]

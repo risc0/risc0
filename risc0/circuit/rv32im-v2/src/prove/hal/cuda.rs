@@ -238,26 +238,114 @@ pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {
     Ok(Box::new(SegmentProverImpl::new(hal, circuit_hal)))
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use std::rc::Rc;
+#[cfg(test)]
+mod tests {
+    use std::rc::Rc;
 
-//     use risc0_core::field::baby_bear::BabyBear;
-//     use risc0_zkp::{
-//         core::hash::sha::Sha256HashSuite,
-//         hal::{cpu::CpuHal, cuda::CudaHalSha256},
-//     };
-//     use test_log::test;
+    use rand::{thread_rng, Rng};
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::{
+        adapter::CircuitInfo as _,
+        core::hash::sha::Sha256HashSuite,
+        hal::{cpu::CpuHal, cuda::CudaHalSha256, Hal},
+    };
+    use test_log::test;
 
-//     use crate::prove::hal::cpu::CpuCircuitHal;
+    use super::*;
+    use crate::{
+        prove::{hal::cpu::CpuCircuitHal, CircuitImpl},
+        zirgen::taps::TAPSET,
+    };
 
-//     #[test]
-//     fn eval_check() {
-//         const PO2: usize = 4;
-//         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
-//         let cpu_eval = CpuCircuitHal;
-//         let gpu_hal = Rc::new(CudaHalSha256::new());
-//         let gpu_eval = super::CudaCircuitHal::new(gpu_hal.clone());
-//         crate::prove::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
-//     }
-// }
+    pub struct EvalCheckParams {
+        pub po2: usize,
+        pub steps: usize,
+        pub domain: usize,
+        pub code: Vec<Val>,
+        pub data: Vec<Val>,
+        pub accum: Vec<Val>,
+        pub mix: Vec<Val>,
+        pub out: Vec<Val>,
+        pub poly_mix: ExtVal,
+    }
+
+    impl EvalCheckParams {
+        pub fn new(po2: usize) -> Self {
+            let mut rng = thread_rng();
+            let steps = 1 << po2;
+            let domain = steps * INV_RATE;
+            let code_size = TAPSET.group_size(REGISTER_GROUP_CODE);
+            let data_size = TAPSET.group_size(REGISTER_GROUP_DATA);
+            let accum_size = TAPSET.group_size(REGISTER_GROUP_ACCUM);
+            let code = random_fps(&mut rng, code_size * domain);
+            let data = random_fps(&mut rng, data_size * domain);
+            let accum = random_fps(&mut rng, accum_size * domain);
+            let mix = random_fps(&mut rng, CircuitImpl::MIX_SIZE);
+            let out = random_fps(&mut rng, CircuitImpl::OUTPUT_SIZE);
+            let poly_mix = ExtVal::random(&mut rng);
+            tracing::debug!("code: {} bytes", code.len() * 4);
+            tracing::debug!("data: {} bytes", data.len() * 4);
+            tracing::debug!("accum: {} bytes", accum.len() * 4);
+            tracing::debug!("mix: {} bytes", mix.len() * 4);
+            tracing::debug!("out: {} bytes", out.len() * 4);
+            Self {
+                po2,
+                steps,
+                domain,
+                code,
+                data,
+                accum,
+                mix,
+                out,
+                poly_mix,
+            }
+        }
+    }
+
+    fn random_fps<E: Elem>(rng: &mut impl Rng, size: usize) -> Vec<E> {
+        let mut ret = Vec::new();
+        for _ in 0..size {
+            ret.push(E::random(rng));
+        }
+        ret
+    }
+
+    #[test]
+    fn eval_check() {
+        const PO2: usize = 4;
+        let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let cpu_eval = CpuCircuitHal;
+        let gpu_hal = Rc::new(CudaHalSha256::new());
+        let gpu_eval = super::CudaCircuitHal::new(gpu_hal.clone());
+        let params = EvalCheckParams::new(PO2);
+        let check1 = eval_check_impl(&params, &cpu_hal, &cpu_eval);
+        let check2 = eval_check_impl(&params, gpu_hal.as_ref(), &gpu_eval);
+        assert_eq!(check1, check2);
+    }
+
+    fn eval_check_impl<H, C>(params: &EvalCheckParams, hal: &H, circuit_hal: &C) -> Vec<H::Elem>
+    where
+        H: Hal<Elem = Val, ExtElem = ExtVal>,
+        C: CircuitHal<H>,
+    {
+        let check = hal.alloc_elem("check", ExtVal::EXT_SIZE * params.domain);
+        let code = hal.copy_from_elem("code", &params.code);
+        let data = hal.copy_from_elem("data", &params.data);
+        let accum = hal.copy_from_elem("accum", &params.accum);
+        let mix = hal.copy_from_elem("mix", &params.mix);
+        let out = hal.copy_from_elem("out", &params.out);
+        circuit_hal.eval_check(
+            &check,
+            &[&accum, &code, &data],
+            &[&mix, &out],
+            params.poly_mix,
+            params.po2,
+            params.steps,
+        );
+        let mut ret = vec![H::Elem::ZERO; check.size()];
+        check.view(|view| {
+            ret.clone_from_slice(view);
+        });
+        ret
+    }
+}
