@@ -19,6 +19,7 @@ use risc0_circuit_rv32im_v2::{
     execute::{platform::LOOKUP_TABLE_CYCLES, testutil, MemoryImage2, DEFAULT_SEGMENT_LIMIT_PO2},
     prove::segment_prover,
 };
+use risc0_core::scope;
 
 /// keccak prover benchmarking tool
 #[derive(Parser)]
@@ -55,6 +56,10 @@ fn main() {
 
     let program = testutil::simple_loop(iterations as u32);
     let image = MemoryImage2::new(program);
+    let prover = segment_prover().unwrap();
+
+    scope!("top");
+
     let result = testutil::execute(
         image,
         args.po2,
@@ -64,7 +69,6 @@ fn main() {
     )
     .unwrap();
 
-    let prover = segment_prover().unwrap();
     let segments = result.segments;
     let segment = segments.first().unwrap();
     assert_eq!(args.po2, segment.po2 as usize);
@@ -83,6 +87,7 @@ fn main() {
         );
         tot_time += run_time;
     }
+
     println!(
         "{} runs of PO2={po2} completed in {tot_time:.3}s, avg={:.3}s, {:.3} cycles/sec",
         args.count,
