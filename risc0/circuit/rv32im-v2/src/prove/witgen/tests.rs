@@ -29,11 +29,8 @@ use crate::{
     zirgen::circuit::{ExtVal, REGCOUNT_DATA},
 };
 
-#[test]
-fn basic() {
-    let program = testutil::basic();
+fn run_preflight(program: Program) {
     let image = MemoryImage2::new(program);
-
     let result = testutil::execute(
         image,
         DEFAULT_SEGMENT_LIMIT_PO2,
@@ -49,6 +46,16 @@ fn basic() {
     let rand_z = ExtVal::random(&mut rng);
 
     segment.preflight(rand_z).unwrap();
+}
+
+#[test]
+fn basic() {
+    run_preflight(testutil::basic());
+}
+
+#[test]
+fn simple_loop() {
+    run_preflight(testutil::simple_loop(500000));
 }
 
 fn fwd_rev_ab_test(program: Program) {

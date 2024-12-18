@@ -14,6 +14,7 @@
 
 use anyhow::{bail, Result};
 use risc0_binfmt::Program;
+use risc0_core::scope;
 use risc0_zkp::{core::digest::Digest, MAX_CYCLES_PO2};
 
 use super::{image::MemoryImage2, platform::*, syscall::Syscall, Executor, SimpleSession};
@@ -41,6 +42,8 @@ pub fn execute<S: Syscall>(
     syscall_handler: &S,
     input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {
+    scope!("execute");
+
     if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&segment_limit_po2) {
         bail!("Invalid segment_limit_po2: {segment_limit_po2}");
     }
