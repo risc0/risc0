@@ -175,6 +175,11 @@ impl Receipt {
         tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
+        // in dev-mode, avoid matching claims
+        if crate::is_dev_mode() {
+            return Ok(());
+        }
+
         // Check that the claim on the verified receipt matches what was expected. Since we have
         // constrained all field in the ReceiptClaim, we can directly construct the expected digest
         // and do not need to open the claim digest on the inner receipt.

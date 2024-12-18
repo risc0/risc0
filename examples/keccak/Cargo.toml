@@ -1,0 +1,17 @@
+[package]
+name = "keccak"
+version = "0.12.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+risc0-zkvm = { path = "../../risc0/zkvm" }
+keccak-methods = { path = "methods" }
+
+[dev-dependencies]
+hex = "0.4"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+prove = ["risc0-zkvm/prove"]
