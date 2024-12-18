@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::u32;
-
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
