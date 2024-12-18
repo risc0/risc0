@@ -15,6 +15,7 @@
 pub mod zkr;
 
 use std::{
+    borrow::Borrow,
     collections::{BTreeMap, VecDeque},
     fmt::Debug,
     sync::Mutex,
@@ -32,7 +33,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, PROOF_SYSTEM_INFO},
     core::{
         digest::{Digest, DIGEST_SHORTS},
-        hash::hash_suite_from_name,
+        hash::{hash_suite_from_name, HashSuite},
     },
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::{CircuitHal, Hal},
@@ -53,6 +54,7 @@ use crate::{
 
 use risc0_circuit_recursion::prove::Program;
 
+// DO NOT MERGE: Deprecate this value.
 /// Number of rows to use for the recursion circuit witness as a power of 2.
 pub const RECURSION_PO2: usize = 18;
 
@@ -131,6 +133,105 @@ pub fn join(
         control_id: prover.control_id,
         control_inclusion_proof,
         claim: claim_decoded.merge(&ab_claim)?.into(),
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
+}
+
+/// DO NOT MERGE
+pub const MAX_JOIN_WIDTH: usize = match RECURSION_PO2 {
+    18 => 2,
+    19 => 3,
+    20 => 6,
+    21 => 12,
+    _ => panic!("max join with not known for po2 = RECURSION_PO2"),
+};
+
+/// Run the join_n program TODO
+pub fn join_n(
+    receipts: &[impl Borrow<SuccinctReceipt<ReceiptClaim>>],
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    ensure!(receipts.len() >= 2, "need at least two receipts to join");
+    ensure!(
+        receipts.len() <= MAX_JOIN_WIDTH,
+        "can only join with width {}; max {MAX_JOIN_WIDTH}",
+        receipts.len()
+    );
+    tracing::debug!("Proving join with width {}", receipts.len());
+
+    let opts = ProverOpts::succinct();
+    let mut prover = Prover::new_join_n(receipts, opts.clone())?;
+    let receipt = prover.prover.run()?;
+    let mut out_stream = VecDeque::<u32>::new();
+    out_stream.extend(receipt.output.iter());
+
+    // Construct the expected claim that should have result from the join.
+    let first: ReceiptClaim = receipts.first().unwrap().borrow().claim.clone().value()?;
+    let last: ReceiptClaim = receipts.last().unwrap().borrow().claim.clone().value()?;
+    let joined_claims = ReceiptClaim {
+        pre: first.pre,
+        post: last.post,
+        exit_code: last.exit_code,
+        input: first.input,
+        output: last.output,
+    };
+
+    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
+
+    // Include an inclusion proof for control_id to allow verification against a root.
+    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
+        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: prover.control_id,
+        control_inclusion_proof,
+        claim: claim_decoded.merge(&joined_claims)?.into(),
+        verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
+    })
+}
+
+/// Run the join_n program TODO
+pub fn lift_join_n(
+    receipts: &[impl Borrow<SegmentReceipt>],
+) -> Result<SuccinctReceipt<ReceiptClaim>> {
+    ensure!(receipts.len() >= 2, "need at least two receipts to join");
+    ensure!(
+        receipts.len() <= MAX_JOIN_WIDTH,
+        "can only join with width {}; max {MAX_JOIN_WIDTH}",
+        receipts.len()
+    );
+    tracing::debug!("Proving join with width {}", receipts.len());
+
+    let opts = ProverOpts::succinct();
+    let mut prover = Prover::new_lift_join_n(receipts, opts.clone())?;
+    let receipt = prover.prover.run()?;
+    let mut out_stream = VecDeque::<u32>::new();
+    out_stream.extend(receipt.output.iter());
+
+    // Construct the expected claim that should have result from the join.
+    let first: ReceiptClaim = receipts.first().unwrap().borrow().claim.clone();
+    let last: ReceiptClaim = receipts.last().unwrap().borrow().claim.clone();
+    let joined_claims = ReceiptClaim {
+        pre: first.pre,
+        post: last.post,
+        exit_code: last.exit_code,
+        input: first.input,
+        output: last.output,
+    };
+
+    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
+
+    // Include an inclusion proof for control_id to allow verification against a root.
+    let control_inclusion_proof = MerkleGroup::new(opts.control_ids.clone())?
+        .get_proof(&prover.control_id, opts.hash_suite()?.hashfn.as_ref())?;
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        hashfn: opts.hashfn,
+        control_id: prover.control_id,
+        control_inclusion_proof,
+        claim: claim_decoded.merge(&joined_claims)?.into(),
         verifier_parameters: SuccinctReceiptVerifierParameters::default().digest(),
     })
 }
@@ -388,7 +489,7 @@ impl Prover {
     /// Initialize a recursion prover with the test recursion program. This program is used in
     /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
-        let (program, control_id) = zkr::test_recursion_circuit(&opts.hashfn)?;
+        let (program, control_id) = zkr::test_recursion_circuit(&opts.hashfn, RECURSION_PO2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         for digest in digests {
@@ -416,16 +517,13 @@ impl Prover {
         let inner_hash_suite = hash_suite_from_name(&segment.hashfn)
             .ok_or_else(|| anyhow!("unsupported hash function: {}", segment.hashfn))?;
         let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
+        // NOTE: It's a bit wasteful to calculate the the control root everytime, Unclear if this
+        // has any significant effect on performance. The Merkle tree is capped to 256 elements.
         let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
 
-        // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
-        // which lift program we are going to run.
-        let mut iop = ReadIOP::new(&segment.seal, inner_hash_suite.rng.as_ref());
-        iop.read_field_elem_slice::<BabyBearElem>(risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE);
-        let po2 = *iop.read_u32s(1).first().unwrap() as usize;
-
         // Instantiate the prover with the lift recursion program and its control ID.
-        let (program, control_id) = zkr::lift(po2, &opts.hashfn)?;
+        let po2 = Self::extract_po2(segment, &inner_hash_suite);
+        let (program, control_id) = zkr::lift(po2, &opts.hashfn, RECURSION_PO2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
@@ -463,7 +561,7 @@ impl Prover {
             b.hashfn
         );
 
-        let (program, control_id) = zkr::join(&opts.hashfn)?;
+        let (program, control_id) = zkr::join(&opts.hashfn, RECURSION_PO2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         // Determine the control root from the receipts themselves, and ensure they are equal. If
@@ -480,6 +578,103 @@ impl Prover {
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(a)?;
         prover.add_segment_receipt(b)?;
+        Ok(prover)
+    }
+
+    /// docs TODO
+    pub fn new_join_n(
+        receipts: &[impl Borrow<SuccinctReceipt<ReceiptClaim>>],
+        opts: ProverOpts,
+    ) -> Result<Self> {
+        ensure!(receipts.len() >= 2, "need at least two receipts to join");
+        ensure!(
+            receipts.len() <= MAX_JOIN_WIDTH,
+            "can only join with width {}; max {MAX_JOIN_WIDTH}",
+            receipts.len()
+        );
+        for x in receipts {
+            ensure!(
+                x.borrow().hashfn == "poseidon2",
+                "join recursion program only supports poseidon2 hashfn; received {}",
+                x.borrow().hashfn
+            );
+        }
+
+        let (program, control_id) = zkr::join_n(&opts.hashfn, RECURSION_PO2, receipts.len())?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        // Determine the control root from the receipts themselves, and ensure they are equal. If
+        // the determined control root does not match what the downstream verifier expects, they
+        // will reject.
+        let merkle_root = receipts.first().unwrap().borrow().control_root()?;
+        for x in &receipts[1..] {
+            ensure!(
+                merkle_root == x.borrow().control_root()?,
+                "merkle roots for join receipt do not all match: {} != {}",
+                merkle_root,
+                x.borrow().control_root()?
+            );
+        }
+
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+        for x in receipts {
+            prover.add_segment_receipt(x.borrow())?;
+        }
+        Ok(prover)
+    }
+
+    /// docs TODO
+    pub fn new_lift_join_n(
+        receipts: &[impl Borrow<SegmentReceipt>],
+        opts: ProverOpts,
+    ) -> Result<Self> {
+        ensure!(
+            receipts.len() >= 2,
+            "need at least two receipts to lift_join"
+        );
+        ensure!(
+            receipts.len() <= MAX_JOIN_WIDTH,
+            "can only lift_join with width {}; max {MAX_JOIN_WIDTH}",
+            receipts.len()
+        );
+        for x in receipts {
+            ensure!(
+                x.borrow().hashfn == "poseidon2",
+                "lift_join recursion program only supports poseidon2 hashfn; received {}",
+                x.borrow().hashfn
+            );
+        }
+
+        let hashfn_name: String = receipts.first().unwrap().borrow().hashfn.clone();
+        let inner_hash_suite = hash_suite_from_name(&hashfn_name)
+            .ok_or_else(|| anyhow!("unsupported hash function: {}", &hashfn_name))?;
+        let allowed_ids = MerkleGroup::new(opts.control_ids.clone())?;
+        // NOTE: It's a bit wasteful to calculate the the control root everytime, Unclear if this
+        // has any significant effect on performance. The Merkle tree is capped to 256 elements.
+        let merkle_root = allowed_ids.calc_root(inner_hash_suite.hashfn.as_ref());
+
+        // Instantiate the prover with the lift_join recursion program and its control ID.
+        let po2 = Self::extract_po2(receipts.first().unwrap().borrow(), &inner_hash_suite);
+        let (program, control_id) =
+            zkr::lift_join_n(po2, &opts.hashfn, RECURSION_PO2, receipts.len())?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
+
+        // Get the control ID for the rv32im with the given po2. It must also be in the allowed IDs.
+        let which = po2 - MIN_CYCLES_PO2;
+        let inner_control_id = POSEIDON2_CONTROL_IDS[which];
+        for x in receipts {
+            ensure!(
+                Self::extract_po2(x.borrow(), &inner_hash_suite) == po2,
+                "cannot lift_join receipts with heterogeneous po2s"
+            );
+            prover.add_seal(
+                &x.borrow().seal,
+                &inner_control_id,
+                &allowed_ids.get_proof(&inner_control_id, inner_hash_suite.hashfn.as_ref())?,
+            )?;
+        }
         Ok(prover)
     }
 
@@ -509,7 +704,7 @@ impl Prover {
         );
 
         // Load the resolve predicate as a Program and construct the prover.
-        let (program, control_id) = zkr::resolve(&opts.hashfn)?;
+        let (program, control_id) = zkr::resolve(&opts.hashfn, RECURSION_PO2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         // Load the input values needed by the predicate.
@@ -572,6 +767,7 @@ impl Prover {
     ///
     /// The primary use for this program is to transform the receipt itself, e.g. using a different
     /// hash function for FRI. See [identity_p254] for more information.
+    // DO NOT MERGE: The program po2 should be configurable outside of what is set "globally"
     pub fn new_identity(a: &SuccinctReceipt<ReceiptClaim>, opts: ProverOpts) -> Result<Self> {
         ensure!(
             a.hashfn == "poseidon2",
@@ -579,12 +775,21 @@ impl Prover {
             a.hashfn
         );
 
-        let (program, control_id) = zkr::identity(&opts.hashfn)?;
+        let (program, control_id) = zkr::identity(&opts.hashfn, RECURSION_PO2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
         prover.add_input_digest(&a.control_root()?, DigestKind::Poseidon2);
         prover.add_segment_receipt(a)?;
         Ok(prover)
+    }
+
+    fn extract_po2(receipt: &SegmentReceipt, inner_hash_suite: &HashSuite<BabyBear>) -> usize {
+        // Read the output fields in the rv32im seal to get the po2. We need this po2 to chose
+        // which lift program we are going to run.
+        // TODO: Is there a way to get the po2 without needing a hash suite? seems weird.
+        let mut iop = ReadIOP::new(&receipt.seal, inner_hash_suite.rng.as_ref());
+        iop.read_field_elem_slice::<BabyBearElem>(risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE);
+        *iop.read_u32s(1).first().unwrap() as usize
     }
 
     pub(crate) fn add_input(&mut self, input: &[u32]) {
@@ -637,6 +842,9 @@ impl Prover {
     }
 
     /// Add a receipt covering rv32im execution, and include the first level of ReceiptClaim.
+    // NOTE: Somewhat a confusing name, since this is to add a receipt resulting from a recursion
+    // execution, rather than one from an rv32im execution, which is what we mean by segment
+    // receipt in other places.
     fn add_segment_receipt(&mut self, a: &SuccinctReceipt<ReceiptClaim>) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &a.control_inclusion_proof)?;
         let mut data = Vec::<u32>::new();

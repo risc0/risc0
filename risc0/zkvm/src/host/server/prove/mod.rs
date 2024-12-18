@@ -28,7 +28,7 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    host::prove_info::ProveInfo,
+    host::{prove_info::ProveInfo, recursion::MAX_JOIN_WIDTH},
     is_dev_mode,
     receipt::{
         CompositeReceipt, Groth16Receipt, Groth16ReceiptVerifierParameters, InnerAssumptionReceipt,
@@ -81,6 +81,15 @@ pub trait ProverServer {
         b: &SuccinctReceipt<ReceiptClaim>,
     ) -> Result<SuccinctReceipt<ReceiptClaim>>;
 
+    /// Join a slice [SuccinctReceipt] into a [SuccinctReceipt]
+    fn join_n(
+        &self,
+        receipts: &[SuccinctReceipt<ReceiptClaim>],
+    ) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
+    /// Lift and join a slice [SegmentReceipt] into a [SuccinctReceipt]
+    fn lift_join_n(&self, receipts: &[SegmentReceipt]) -> Result<SuccinctReceipt<ReceiptClaim>>;
+
     /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a [SuccinctReceipt]
     /// proving the validity of the assumption.
     fn resolve(
@@ -110,15 +119,24 @@ pub trait ProverServer {
         // Compress all receipts in the top-level session into one succinct receipt for the session.
         let continuation_receipt = receipt
             .segments
-            .iter()
+            .chunks(MAX_JOIN_WIDTH)
+            .map(|segments| match segments {
+                &[ref segment] => self.lift(segment),
+                _ => self.lift_join_n(segments),
+            })
+            .collect::<Result<Vec<_>>>()?
+            .chunks(MAX_JOIN_WIDTH - 1)
             .try_fold(
                 None,
                 |left: Option<SuccinctReceipt<ReceiptClaim>>,
-                 right: &SegmentReceipt|
+                 right: &[SuccinctReceipt<ReceiptClaim>]|
                  -> Result<_> {
-                    Ok(Some(match left {
-                        Some(left) => self.join(&left, &self.lift(right)?)?,
-                        None => self.lift(right)?,
+                    Ok(Some(match (left, right) {
+                        (None, &[ref right]) => right.clone(),
+                        // NOTE: This case is slightly less efficient than it could be.
+                        (None, _) => self.join_n(right)?,
+                        (Some(left), &[ref right]) => self.join(&left, right)?,
+                        (Some(left), _) => self.join_n(&[&[left], right].concat())?,
                     }))
                 },
             )?
