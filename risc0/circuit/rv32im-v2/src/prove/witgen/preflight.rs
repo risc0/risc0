@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
-
 use anyhow::{anyhow, bail, Result};
 use derive_more::Debug;
 use num_traits::FromPrimitive as _;
@@ -35,7 +33,7 @@ use crate::{
 
 use self::poseidon2::Checksum;
 
-use super::{node_addr_to_idx, node_idx_to_addr, poseidon2, Poseidon2State};
+use super::{node_addr_to_idx, node_idx_to_addr, paged_map::PagedMap, poseidon2, Poseidon2State};
 
 #[derive(Clone, Debug, Default)]
 pub(crate) enum Back {
@@ -69,9 +67,9 @@ pub(crate) struct Preflight<'a> {
     user_cycle: u32,
     txn_idx: u32,
     phys_cycles: u32,
-    orig_words: BTreeMap<WordAddr, u32>,
-    prev_cycle: BTreeMap<WordAddr, u32>,
-    page_memory: BTreeMap<WordAddr, u32>,
+    orig_words: PagedMap,
+    prev_cycle: PagedMap,
+    page_memory: PagedMap,
 }
 
 impl Segment {
@@ -101,16 +99,19 @@ fn get_digest_addr(idx: u32) -> WordAddr {
 impl<'a> Preflight<'a> {
     fn new(segment: &'a Segment, rand_z: ExtVal) -> Self {
         tracing::debug!("po2: {}", segment.po2);
+        let total_cycles = 1 << segment.po2;
 
-        let mut page_memory = BTreeMap::new();
+        let mut page_memory = PagedMap::default();
         for (&node_idx, digest) in segment.partial_image.digests.iter() {
             let node_addr = node_idx_to_addr(node_idx);
             for i in 0..DIGEST_WORDS {
-                page_memory.insert(node_addr + i, digest.as_words()[i]);
+                page_memory.insert(&(node_addr + i), digest.as_words()[i]);
             }
         }
         Self {
             trace: PreflightTrace {
+                cycles: Vec::with_capacity(total_cycles),
+                backs: Vec::with_capacity(total_cycles),
                 rand_z,
                 ..Default::default()
             },
@@ -123,8 +124,8 @@ impl<'a> Preflight<'a> {
             txn_idx: 0,
             user_cycle: 0,
             phys_cycles: 0,
-            orig_words: BTreeMap::new(),
-            prev_cycle: BTreeMap::new(),
+            orig_words: Default::default(),
+            prev_cycle: Default::default(),
             page_memory,
         }
     }
@@ -203,7 +204,7 @@ impl<'a> Preflight<'a> {
             let addr = WordAddr(txn.addr);
             if txn.prev_cycle == u32::MAX {
                 // If first cycle for a particular address, set 'prev_cycle' to final cycle
-                txn.prev_cycle = self.prev_cycle[&addr];
+                txn.prev_cycle = self.prev_cycle.get(&addr).unwrap();
             } else {
                 // Otherwise, compute cycle diff and another diff
                 let diff = txn.cycle - txn.prev_cycle;
@@ -211,8 +212,8 @@ impl<'a> Preflight<'a> {
             }
 
             // If last cycle, set final value to original value
-            if txn.cycle == self.prev_cycle[&addr] {
-                txn.word = self.orig_words[&addr];
+            if txn.cycle == self.prev_cycle.get(&addr).unwrap() {
+                txn.word = self.orig_words.get(&addr).unwrap_or_default();
             }
         }
         Ok(())
@@ -409,33 +410,6 @@ impl<'a> Preflight<'a> {
         );
         self.phys_cycles += 1;
     }
-
-    pub(crate) fn load_u32_with_txn(
-        &mut self,
-        addr: WordAddr,
-    ) -> Result<(u32, RawMemoryTransaction)> {
-        let cycle = self.trace.cycles.len();
-        let word = if addr >= MERKLE_TREE_START_ADDR {
-            *self
-                .page_memory
-                .get(&addr)
-                .ok_or(anyhow!("Invalid load from page memory"))?
-        } else {
-            self.pager.load(addr)?
-        };
-        self.orig_words.entry(addr).or_insert(word);
-        let prev_cycle = *self.prev_cycle.get(&addr).unwrap_or(&u32::MAX);
-        let txn = RawMemoryTransaction {
-            addr: addr.0,
-            cycle: cycle as u32,
-            word,
-            prev_cycle,
-            prev_word: word,
-        };
-        self.prev_cycle.insert(addr, txn.cycle);
-        self.trace.txns.push(txn.clone());
-        Ok((word, txn))
-    }
 }
 
 impl<'a> Risc0Context for Preflight<'a> {
@@ -516,34 +490,49 @@ impl<'a> Risc0Context for Preflight<'a> {
     // Pass memory ops to pager + record
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
         // tracing::trace!("load_u32: {addr:?}");
-        let (word, _) = self.load_u32_with_txn(addr)?;
+        let cycle = self.trace.cycles.len();
+        let word = if addr >= MERKLE_TREE_START_ADDR {
+            self.page_memory
+                .get(&addr)
+                .ok_or(anyhow!("Invalid load from page memory"))?
+        } else {
+            self.pager.load(addr)?
+        };
+        self.orig_words.get_mut(&addr).get_or_insert(word);
+        let prev_cycle = self
+            .prev_cycle
+            .insert_default(&addr, cycle as u32, u32::MAX);
+        self.trace.txns.push(RawMemoryTransaction {
+            addr: addr.0,
+            cycle: cycle as u32,
+            word,
+            prev_cycle,
+            prev_word: word,
+        });
         Ok(word)
     }
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()> {
         let cycle = self.trace.cycles.len();
         let prev_word = if addr >= MEMORY_END_ADDR {
-            let prev_word = *self
-                .page_memory
-                .get(&addr)
-                .ok_or(anyhow!("Invalid store to page memory"))?;
-            self.page_memory.insert(addr, word);
-            prev_word
+            self.page_memory
+                .insert(&addr, word)
+                .ok_or(anyhow!("Invalid store to page memory"))?
         } else {
             let prev_word = self.pager.load(addr)?;
             self.pager.store(addr, word)?;
             prev_word
         };
-        let prev_cycle = *self.prev_cycle.get(&addr).unwrap_or(&u32::MAX);
-        let txn = RawMemoryTransaction {
+        let prev_cycle = self
+            .prev_cycle
+            .insert_default(&addr, cycle as u32, u32::MAX);
+        self.trace.txns.push(RawMemoryTransaction {
             addr: addr.0,
             cycle: cycle as u32,
             word,
             prev_cycle,
             prev_word,
-        };
-        self.prev_cycle.insert(addr, txn.cycle);
-        self.trace.txns.push(txn);
+        });
         Ok(())
     }
 
