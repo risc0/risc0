@@ -31,6 +31,8 @@ const LOAD_ROOT_CYCLES: u32 = 1;
 const RESUME_CYCLES: u32 = 2;
 const SUSPEND_CYCLES: u32 = 2;
 const STORE_ROOT_CYCLES: u32 = 1;
+const U8_TABLE_CYCLES: u32 = (1 << 8) / 16;
+const U16_TABLE_CYCLES: u32 = (1 << 16) / 16;
 
 const POSEIDON_PAGING: u32 = 1;
 const POSEIDON_LOAD_IN: u32 = 2;
@@ -53,7 +55,9 @@ const CYCLE_COST_RESERVED: u32 = LOAD_ROOT_CYCLES
     + SUSPEND_CYCLES
     + POSEIDON_ENTRY
     + POSEIDON_PAGING
-    + STORE_ROOT_CYCLES;
+    + STORE_ROOT_CYCLES
+    + U8_TABLE_CYCLES
+    + U16_TABLE_CYCLES;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 enum PageState {

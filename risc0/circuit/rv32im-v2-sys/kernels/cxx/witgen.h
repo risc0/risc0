@@ -129,10 +129,12 @@ struct MutableBufObj : public BufferObj {
   MutableBufObj(Buffer& buf) : buf(buf) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
-    if (back > ctx.cycle) {
-      return 0;
-    }
-    return buf.get(ctx.cycle - back, col);
+    // if (back > ctx.cycle) {
+    //   return 0;
+    // }
+    // return buf.get(ctx.cycle - back, col);
+    // size_t backRow = (group.getRows() + ctx.cycle - back) % group.getRows();
+    // return group.get(backRow, col);
   }
 
   void store(ExecContext& ctx, size_t col, Val val) override {

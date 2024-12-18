@@ -336,7 +336,7 @@ impl<'a> Preflight<'a> {
             user_cycle: self.user_cycle,
             txn_idx: self.txn_idx,
             paging_idx,
-            diff_count: 0,
+            diff_count: [0, 0],
         };
         // tracing::trace!("[{}]: {cycle:?}", self.trace.cycles.len());
         self.trace.cycles.push(cycle);
@@ -504,7 +504,7 @@ impl<'a> Risc0Context for Preflight<'a> {
             .insert_default(&addr, cycle as u32, u32::MAX);
         self.trace.txns.push(RawMemoryTransaction {
             addr: addr.0,
-            cycle: cycle as u32,
+            cycle: (2 * cycle) as u32,
             word,
             prev_cycle,
             prev_word: word,
@@ -528,7 +528,7 @@ impl<'a> Risc0Context for Preflight<'a> {
             .insert_default(&addr, cycle as u32, u32::MAX);
         self.trace.txns.push(RawMemoryTransaction {
             addr: addr.0,
-            cycle: cycle as u32,
+            cycle: (2 * cycle + 1) as u32,
             word,
             prev_cycle,
             prev_word,

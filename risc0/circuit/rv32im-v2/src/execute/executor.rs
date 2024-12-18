@@ -132,6 +132,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     index: segment_counter,
                     input_digest: self.input_digest,
                     output_digest: self.output_digest,
+                    segment_threshold: 4000,
                 })?;
 
                 segment_counter += 1;
@@ -166,6 +167,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             index: segment_counter,
             input_digest: self.input_digest,
             output_digest: self.output_digest,
+            segment_threshold: 4000,
         })?;
 
         self.cycles.total += 1 << last_po2;
