@@ -64,7 +64,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use keccak_methods::{KECCAK_ELF, KECCAK_ID};
+    use keccak_methods::KECCAK_ID;
 
     #[test]
     fn hash_abc() {
@@ -72,7 +72,7 @@ mod tests {
         receipt.verify(KECCAK_ID).unwrap();
         assert_eq!(
             hex::encode(digest.as_bytes()),
-            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45",
             "We expect to match the reference keccak hash of the standard test value 'abc'"
         );
     }
