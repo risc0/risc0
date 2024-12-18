@@ -41,6 +41,14 @@ pub trait Risc0Context {
 
     fn peek_u32(&mut self, addr: WordAddr) -> Result<u32>;
 
+    fn load_register(&mut self, base: WordAddr, idx: usize) -> Result<u32> {
+        self.load_u32(base + idx)
+    }
+
+    fn store_register(&mut self, base: WordAddr, idx: usize, word: u32) -> Result<()> {
+        self.store_u32(base + idx, word)
+    }
+
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32>;
 
     fn store_u32(&mut self, addr: WordAddr, word: u32) -> Result<()>;
@@ -350,7 +358,7 @@ impl<'a> EmuContext for Risc0Machine<'a> {
         } else {
             USER_REGS_ADDR.waddr()
         };
-        self.ctx.load_u32(base + idx)
+        self.ctx.load_register(base, idx)
     }
 
     fn store_register(&mut self, idx: usize, word: u32) -> Result<()> {
@@ -367,7 +375,7 @@ impl<'a> EmuContext for Risc0Machine<'a> {
             base += REG_MAX * 2;
         }
 
-        self.ctx.store_u32(base + idx, word)
+        self.ctx.store_register(base, idx, word)
     }
 
     fn load_memory(&mut self, addr: WordAddr) -> Result<u32> {
