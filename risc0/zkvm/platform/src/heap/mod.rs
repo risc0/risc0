@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #[cfg(not(feature = "heap-embedded-alloc"))]
-pub mod bump;
+mod bump;
 
 #[cfg(feature = "heap-embedded-alloc")]
 pub mod embedded;
@@ -36,6 +36,21 @@ pub fn free() -> usize {
             embedded::HEAP.free()
         } else {
             bump::free()
+        }
+    }
+}
+
+/// Initialize the heap with the memory allocations defined in the [memory][crate::memory] module.
+///
+/// # Safety
+///
+/// This function must be called exactly once, before the heap is used.
+pub unsafe fn init() {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "heap-embedded-alloc")] {
+            embedded::init();
+        } else {
+            bump::init();
         }
     }
 }

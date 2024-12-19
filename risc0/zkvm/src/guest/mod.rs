@@ -149,14 +149,7 @@ macro_rules! entry {
 #[cfg(target_os = "zkvm")]
 #[no_mangle]
 unsafe extern "C" fn __start() -> ! {
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "heap-embedded-alloc")] {
-            risc0_zkvm_platform::heap::embedded::init();
-        } else {
-            risc0_zkvm_platform::heap::bump::init();
-        }
-    }
-
+    risc0_zkvm_platform::heap::init();
     env::init();
 
     {
