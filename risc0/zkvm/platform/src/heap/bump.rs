@@ -18,6 +18,24 @@ use core::alloc::{GlobalAlloc, Layout};
 #[global_allocator]
 pub static HEAP: BumpPointerAlloc = BumpPointerAlloc;
 
+extern "C" {
+    // This symbol is defined by the loader and marks the end
+    // of all elf sections, so this is where we start our
+    // heap.
+    //
+    // This is generated automatically by the linker; see
+    // https://lld.llvm.org/ELF/linker_script.html#sections-command
+    static _end: u8;
+}
+
+static HEAP_START: usize = unsafe { (&_end) as *const u8 as usize };
+
+/// Pointer to next heap address to use, initialized as the address of the _end symbol.
+///
+/// The heap grows into higher addresses from it's starting position. Since this is a bump
+/// allocator and memory is never freed, this address strictly increases over time.
+pub(crate) static mut HEAP_POS: usize = HEAP_START;
+
 pub struct BumpPointerAlloc;
 
 unsafe impl GlobalAlloc for BumpPointerAlloc {
@@ -33,5 +51,20 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
         // NOTE: This is safe to avoid zeroing allocated bytes, as the bump allocator does not
         //       re-use memory and the zkVM memory is zero-initialized.
         self.alloc(layout)
+    }
+}
+
+impl BumpPointerAlloc {
+    /// Used memory on the heap, in bytes. Note that the bump allocator never frees memory.
+    pub fn used(&self) -> usize {
+        // SAFETY: Single threaded, and non-premptive so access is safe.
+        unsafe { HEAP_POS - HEAP_START }
+    }
+
+    /// Free memory on the heap, in bytes.
+    pub fn free(&self) -> usize {
+        // SAFETY: Single threaded, and non-premptive so access is safe. HEAP_POS will always be
+        // less than the start of system memory.
+        crate::memory::SYSTEM.start() - unsafe { HEAP_POS }
     }
 }

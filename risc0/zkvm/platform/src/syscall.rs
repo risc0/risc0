@@ -730,6 +730,10 @@ pub unsafe extern "C" fn sys_argv(
     a0 as usize
 }
 
+// NOTE: The sys_alloc_x functions is specific to the bump allocator, and should not be used unless the bump
+// allocator is configured (e.g. it should not be used when embedded-alloc is used as the global
+// allocator). The configured cfgs should prevent this.
+
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 #[deprecated]
 pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
@@ -739,31 +743,39 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 /// # Safety
 ///
 /// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
-#[cfg(feature = "export-syscalls")]
+#[cfg(all(feature = "export-syscalls", not(target_os = "zkvm")))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    #[cfg(target_os = "zkvm")]
-    extern "C" {
-        // This symbol is defined by the loader and marks the end
-        // of all elf sections, so this is where we start our
-        // heap.
-        //
-        // This is generated automatically by the linker; see
-        // https://lld.llvm.org/ELF/linker_script.html#sections-command
-        static _end: u8;
-    }
+    unimplemented!("sys_alloc_aligned called outside of target_os = zkvm");
+}
 
-    // Pointer to next heap address to use, or 0 if the heap has not yet been
-    // initialized.
-    static mut HEAP_POS: usize = 0;
+/// # Safety
+///
+/// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(all(
+    feature = "export-syscalls",
+    feature = "heap-embedded-alloc",
+    target_os = "zkvm"
+))]
+#[no_mangle]
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    unimplemented!("sys_alloc_aligned called when the bump allocator is disabled");
+}
 
-    // SAFETY: Single threaded, so nothing else can touch this while we're working.
+/// # Safety
+///
+/// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(all(
+    feature = "export-syscalls",
+    not(feature = "heap-embedded-alloc"),
+    target_os = "zkvm"
+))]
+#[no_mangle]
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    use crate::heap::bump::HEAP_POS;
+
+    // SAFETY: Single threaded, and non-premptive so access is safe.
     let mut heap_pos = unsafe { HEAP_POS };
-
-    #[cfg(target_os = "zkvm")]
-    if heap_pos == 0 {
-        heap_pos = unsafe { (&_end) as *const u8 as usize };
-    }
 
     // Honor requested alignment if larger than word size.
     // Note: align is typically a power of two.
@@ -783,6 +795,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 
+    // SAFETY: Single threaded, and non-premptive so modification is safe.
     unsafe { HEAP_POS = heap_pos };
     ptr
 }
