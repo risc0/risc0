@@ -25,7 +25,7 @@ body:
       description: Please give precedence as to what lead you to file this issue.
       placeholder: |
         - What are you trying to do?
-        - What obsticales did you face?
+        - What obstacles did you face?
     validations:
       required: true
   - type: textarea
