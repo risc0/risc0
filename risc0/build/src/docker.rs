@@ -171,7 +171,25 @@ fn create_dockerfile(
             "CC_riscv32im_risc0_zkvm_elf",
             "/root/.local/share/cargo-risczero/cpp/bin/riscv32-unknown-elf-gcc",
         )])
-        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")])
+        .env(&[("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib")]);
+
+    let compile_time_env = guest_opts
+        .use_docker
+        .clone()
+        .expect("use_docker is None")
+        .compile_time_env
+        .unwrap_or_default();
+
+    let compile_time_env = compile_time_env
+        .iter()
+        .map(|(k, v)| (k.as_str(), v.as_str()))
+        .collect::<Vec<_>>();
+
+    if !compile_time_env.is_empty() {
+        build = build.env(&compile_time_env);
+    }
+
+    build = build
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
         .run(&fetch_cmd)
@@ -244,14 +262,19 @@ mod test {
     use std::path::Path;
 
     use super::{build_guest_package_docker, TARGET_DIR};
-    use crate::config::GuestBuildOptions;
+    use crate::{config::GuestBuildOptions, DockerOptions};
 
     const SRC_DIR: &str = "../..";
 
-    fn build(manifest_path: &str) {
+    fn build(manifest_path: &str, compile_time_env: Option<Vec<(String, String)>>) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        build_guest_package_docker(manifest_path, src_dir, &GuestBuildOptions::default()).unwrap();
+        let mut build_opts = GuestBuildOptions::default();
+        build_opts.use_docker = Some(DockerOptions {
+            root_dir: Some(src_dir.to_path_buf()),
+            compile_time_env,
+        });
+        build_guest_package_docker(manifest_path, src_dir, &build_opts).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
@@ -269,10 +292,44 @@ mod test {
     // `cargo run --bin cargo-risczero -- risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml`
     #[test]
     fn test_reproducible_methods_guest() {
-        build("../../risc0/zkvm/methods/guest/Cargo.toml");
+        build("../../risc0/zkvm/methods/guest/Cargo.toml", None);
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
             "e7cc6921eaa9f3523a6a0b0752212a243cba0be73ef0ed09c66b556873363740",
+        );
+    }
+
+    // Test passing of compile time environment variables to the docker build.
+    #[test]
+    fn test_reproducible_methods_with_compile_time_env() {
+        build(
+            "../../risc0/zkvm/methods/guest/Cargo.toml",
+            Some(vec![
+                ("COMMIT_STR".to_string(), "commit to a string".to_string()),
+                ("SHOULD_COMMIT".to_string(), "true".to_string()),
+            ]),
+        );
+        compare_image_id(
+            "risc0_zkvm_methods_guest/hello_commit_env",
+            "0f96966bd0203521e4c84abba2cce75442b46a930c7b8d03ee428bee8107df24",
+        );
+
+        // Notice change in compile time environment variable
+        // changes the image id
+        build(
+            "../../risc0/zkvm/methods/guest/Cargo.toml",
+            Some(vec![
+                (
+                    "COMMIT_STR".to_string(),
+                    "commit to another string".to_string(),
+                ),
+                ("SHOULD_COMMIT".to_string(), "true".to_string()),
+            ]),
+        );
+
+        compare_image_id(
+            "risc0_zkvm_methods_guest/hello_commit_env",
+            "425b8b3b462c9e6e45b6c971afd75636dedd0cd19c065486b6d5501a5c05ca18",
         );
     }
 }
