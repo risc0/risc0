@@ -3587,7 +3587,6 @@ dependencies = [
  "borsh",
  "bytemuck",
  "bytes",
- "cfg-if",
  "elf",
  "enum-map",
  "getrandom",

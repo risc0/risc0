@@ -4511,7 +4511,6 @@ dependencies = [
  "borsh",
  "bytemuck",
  "bytes",
- "cfg-if",
  "chrono",
  "ciborium",
  "clap 4.5.23",
