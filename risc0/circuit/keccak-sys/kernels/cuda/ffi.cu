@@ -114,8 +114,8 @@ __device__ void nextStep(DeviceContext* ctx, uint32_t cycle) {
   // printf("nextStep: %u\n", cycle);
   ExecContext execCtx(
       *ctx->preflight, ctx->preflight->runOrder[cycle], ctx->preflight->curPreimage[cycle]);
-  MutableBufObj data(execCtx, *ctx->data);
-  GlobalBufObj global(execCtx, *ctx->global);
+  MutableBufObj data(*ctx->data);
+  GlobalBufObj global(*ctx->global);
   step_Top(execCtx, &data, &global);
 }
 
@@ -225,6 +225,17 @@ const char* risc0_circuit_keccak_cuda_scatter(Fp* into,
     auto cfg = getSimpleConfig(count);
     scatter_preflight<<<cfg.grid, cfg.block, 0, stream>>>(into, ctx.d_infos, from, rows, count);
     CUDA_OK(cudaStreamSynchronize(stream));
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
+  }
+  return nullptr;
+}
+
+const char* risc0_circuit_keccak_cuda_reset() {
+  try {
+    CUDA_OK(cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0));
   } catch (const std::exception& err) {
     return strdup(err.what());
   } catch (...) {
