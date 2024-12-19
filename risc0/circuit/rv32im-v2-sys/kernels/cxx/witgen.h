@@ -126,15 +126,14 @@ struct BufferObj {
 };
 
 struct MutableBufObj : public BufferObj {
-  MutableBufObj(Buffer& buf) : buf(buf) {}
+  MutableBufObj(Buffer& buf, bool zeroBack = false) : buf(buf), zeroBack(zeroBack) {}
 
   Val load(ExecContext& ctx, size_t col, size_t back) override {
-    // if (back > ctx.cycle) {
-    //   return 0;
-    // }
-    // return buf.get(ctx.cycle - back, col);
-    // size_t backRow = (group.getRows() + ctx.cycle - back) % group.getRows();
-    // return group.get(backRow, col);
+    if (zeroBack && back > 0) {
+      return 0;
+    }
+    size_t backRow = (buf.rows + ctx.cycle - back) % buf.rows;
+    return buf.get(backRow, col);
   }
 
   void store(ExecContext& ctx, size_t col, Val val) override {
@@ -142,6 +141,7 @@ struct MutableBufObj : public BufferObj {
   }
 
   Buffer& buf;
+  bool zeroBack;
 };
 
 using MutableBuf = MutableBufObj*;
@@ -273,7 +273,6 @@ void extern_memoryDelta(
     ExecContext& ctx, Val addr, Val cycle, Val dataLow, Val dataHigh, Val count);
 uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle);
 Val extern_isFirstCycle_0(ExecContext& ctx);
-Val extern_getCycle(ExecContext& ctx);
 void extern_log(ExecContext& ctx, const std::string& message, std::vector<Val> vals);
 std::array<Val, 4> extern_divide(
     ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType);
