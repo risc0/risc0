@@ -56,11 +56,6 @@ You can find detailed information in the [version management design][version-man
 
 > NOTE: The tables below are generated from the [`deployment.toml`][deployment.toml] file in the risc0-ethereum repository.
 
-:::warning
-Following our [version management design and security policy][version-management], the 1.2 verifier contracts will not be available through the mainnet routers until December 11th, 2024.
-The 1.2 verifiers are available through the router on testnet immediately.
-:::
-
 <!-- GENERATED CONTENT BEGIN -->
 
 ### Ethereum Mainnet (1)

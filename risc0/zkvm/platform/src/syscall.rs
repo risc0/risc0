@@ -624,7 +624,11 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
 // Some environment variable names are considered safe by default to use in the guest, provided by
 // the host, and are included in this list. It may be useful to allow guest developers to register
 // additional variable names as part of their guest program.
-const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[b"RUST_BACKTRACE", b"RUST_LIB_BACKTRACE"];
+const ALLOWED_ENV_VARNAMES: &[&[u8]] = &[
+    b"RUST_BACKTRACE",
+    b"RUST_LIB_BACKTRACE",
+    b"RISC0_KECCAK_PO2",
+];
 
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
@@ -964,7 +968,7 @@ pub unsafe extern "C" fn sys_keccak(
 #[stability::unstable]
 pub unsafe extern "C" fn sys_prove_keccak(
     claim_digest: *const [u32; DIGEST_WORDS],
-    po2: usize,
+    po2: u32,
     control_root: *const [u32; DIGEST_WORDS],
     input: *const u32,
     input_len: usize,
@@ -975,7 +979,7 @@ pub unsafe extern "C" fn sys_prove_keccak(
             null_mut(),
             0,
             claim_digest as u32,
-            po2 as u32,
+            po2,
             control_root as u32,
             input as u32,
             input_len as u32,

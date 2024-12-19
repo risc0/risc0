@@ -12,38 +12,79 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::ptr::addr_of;
+use core::{ptr::addr_of, str::from_utf8};
 
 use alloc::vec;
 
-use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2};
+use risc0_circuit_keccak::{
+    KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KECCAK_PO2_RANGE,
+};
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
-use risc0_zkvm_platform::syscall::{sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS};
+use risc0_zkvm_platform::syscall::{
+    sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
+};
 
 const KECCAK_PERMUTE_CYCLES: usize = 200;
-const MAX_KECCAK_CYCLES: usize = 1 << KECCAK_DEFAULT_PO2;
-const MAX_KECCAK_INPUTS: usize = MAX_KECCAK_CYCLES / KECCAK_PERMUTE_CYCLES;
 
 /// This struct implements the batching of calls to the keccak accelerator.
+#[derive(Debug)]
 pub struct Keccak2Batcher {
     claim_state: Digest,
     inputs: Vec<KeccakState>,
+    po2: u32,
+    max_inputs: usize,
 }
 
 impl Keccak2Batcher {
-    pub const fn init() -> Self {
+    pub fn new() -> Self {
+        const NWORDS: usize = 2;
+        let words = &[0u32; NWORDS];
+        let varname = b"RISC0_KECCAK_PO2";
+        let nbytes = unsafe {
+            sys_getenv(
+                words.as_ptr() as *mut u32,
+                NWORDS,
+                varname.as_ptr(),
+                varname.len(),
+            )
+        };
+
+        let po2 = if nbytes == u32::MAX as usize {
+            KECCAK_DEFAULT_PO2 as u32
+        } else {
+            // check that the host did not swap the size of the in-coming buffer between the two calls.
+            let po2_bytes: &[u8] =
+                unsafe { alloc::slice::from_raw_parts(words.as_ptr() as *const u8, nbytes) };
+            let po2: &str = from_utf8(po2_bytes).unwrap();
+            let po2: u32 = po2.parse::<u32>().unwrap();
+            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
+                panic!(
+                    "invalid keccak po2 {po2}. Expected range: {} - {} (inclusive)",
+                    KECCAK_PO2_RANGE.start(),
+                    KECCAK_PO2_RANGE.end(),
+                );
+            }
+            po2
+        };
+
+        let max_keccak_cycles: usize = 1 << po2;
+        let max_inputs = max_keccak_cycles / KECCAK_PERMUTE_CYCLES;
+
         Self {
             claim_state: SHA256_INIT,
             inputs: vec![],
+            po2,
+            max_inputs,
         }
     }
 
     pub fn update(&mut self, keccak_state: &mut KeccakState) {
+        self.inputs.push(*keccak_state);
         sha_single_keccak(&mut self.claim_state, keccak_state);
         unsafe { sys_keccak(keccak_state, keccak_state) };
+        // at this point the keccak_state is output state resulting from keccak permutation.
         sha_single_keccak(&mut self.claim_state, keccak_state);
-        self.inputs.push(*keccak_state);
-        if self.inputs.len() == MAX_KECCAK_INPUTS {
+        if self.inputs.len() == self.max_inputs {
             // we've reached the limit. Create a proof request.
             self.finalize();
         }
@@ -62,7 +103,7 @@ impl Keccak2Batcher {
         unsafe {
             sys_prove_keccak(
                 claim_digest.as_ref(),
-                KECCAK_DEFAULT_PO2,
+                self.po2,
                 KECCAK_CONTROL_ROOT.as_ref(),
                 input.as_ptr(),
                 input.len(),

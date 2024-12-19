@@ -73,8 +73,8 @@ Val extern_nextPreimage(ExecContext& ctx) {
 
 void stepExec(ExecBuffers& buffers, PreflightTrace& preflight, size_t cycle) {
   keccak::cpu::ExecContext ctx(preflight, cycle);
-  keccak::cpu::MutableBufObj data(ctx, buffers.data);
-  keccak::cpu::GlobalBufObj global(ctx, buffers.global);
+  keccak::cpu::MutableBufObj data(buffers.data);
+  keccak::cpu::GlobalBufObj global(buffers.global);
   step_Top(ctx, &data, &global);
 }
 
