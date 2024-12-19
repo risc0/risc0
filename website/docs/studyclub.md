@@ -23,7 +23,7 @@ Full recordings and slides from past sessions are [available on YouTube](https:/
 
 ### Showcases & Use Cases
 
-- [Unlocking the ZK Future: Uses Cases for ZK](https://www.youtube.com/watch?v=J4YHSdG0KnA\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=1)
+- [Unlocking the ZK Future: Use Cases for ZK](https://www.youtube.com/watch?v=J4YHSdG0KnA\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=1)
 - [Intro to Zeth: a block prover for Ethereum (built on Bonsai)](https://www.youtube.com/watch?v=4pBmf839eOA\&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl\&index=2)
 
 ### Developer Tooling
