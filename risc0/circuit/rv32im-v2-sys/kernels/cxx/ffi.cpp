@@ -19,6 +19,7 @@
 #include "steps.h"
 #include "witgen.h"
 
+#include "vendor/nvtx3/nvtx3.hpp"
 #include "vendor/poolstl.hpp"
 
 #include <array>
@@ -28,6 +29,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <string.h>
 #include <vector>
 
@@ -227,8 +229,50 @@ constexpr size_t kStepModeParallel = 0;
 constexpr size_t kStepModeSeqForward = 1;
 constexpr size_t kStepModeSeqReverse = 2;
 
+namespace risc0 {
+
+struct AccumIterator {
+  FpExt* buf;
+  size_t rows;
+  size_t row;
+  size_t col;
+
+  using difference_type = int;
+  using value_type = FpExt;
+  using pointer = FpExt*;
+  using reference = FpExt&;
+  using iterator_category = std::forward_iterator_tag;
+
+  AccumIterator(FpExt* buf, size_t rows, size_t row, size_t col)
+      : buf(buf), rows(rows), row(row), col(col) {}
+
+  reference operator*() const { return buf[col * rows + row]; }
+
+  AccumIterator& operator++() {
+    row++;
+    return *this;
+  }
+
+  AccumIterator operator++(int) {
+    auto tmp = *this;
+    ++*this;
+    return tmp;
+  }
+
+  bool operator==(const AccumIterator& rhs) const { return row == rhs.row && col == rhs.col; }
+  bool operator!=(const AccumIterator& rhs) const { return !(*this == rhs); }
+
+  int operator-(const AccumIterator& rhs) const { return row - rhs.row; }
+  AccumIterator operator+(int rhs) { return AccumIterator(buf, rows, row + rhs, col); }
+
+  bool operator<(const AccumIterator& rhs) const { return row < rhs.row; }
+};
+
+} // namespace risc0
+
 extern "C" {
 
+using namespace risc0;
 using namespace risc0::circuit::rv32im_v2::cpu;
 
 const char* risc0_circuit_rv32im_v2_cpu_witgen(uint32_t mode,
@@ -289,37 +333,58 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
     //   stepAccum(*buffers, *preflight, tables, cycle);
     // }
 
-    printf("phase1\n");
-    for (size_t cycle = lastCycle; cycle-- > 0;) {
-      stepAccum(*buffers, *preflight, tables, cycle);
+    {
+      nvtx3::scoped_range range("phase1");
+      auto begin = poolstl::iota_iter<uint32_t>(0);
+      auto end = poolstl::iota_iter<uint32_t>(lastCycle);
+      std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
+        stepAccum(*buffers, *preflight, tables, cycle);
+      });
+      // for (size_t cycle = lastCycle; cycle-- > 0;) {
+      //   stepAccum(*buffers, *preflight, tables, cycle);
+      // }
     }
 
     buffers->accum.checked = false;
 
-    // prefix-sum
-    printf("phase2\n");
-    std::array<risc0::Fp, 4> tot;
-    for (size_t row = 0; row < lastCycle; row++) {
-      for (size_t j = 0; j < 4; j++) {
-        size_t col = buffers->accum.cols - 4 + j;
-        tot[j] += buffers->accum.get(row, col);
-        buffers->accum.set(row, col, tot[j]);
-      }
+    {
+      // prefix-sum
+      nvtx3::scoped_range range("phase2");
+      // std::array<Fp, 4> tot;
+      // for (size_t row = 0; row < lastCycle; row++) {
+      //   for (size_t j = 0; j < 4; j++) {
+      //     size_t col = buffers->accum.cols - 4 + j;
+      //     tot[j] += buffers->accum.get(row, col);
+      //     buffers->accum.set(row, col, tot[j]);
+      //   }
+      // }
+      FpExt* buf = reinterpret_cast<FpExt*>(buffers->accum.buf);
+      size_t rows = buffers->accum.rows;
+      size_t col = buffers->accum.cols / 4 - 1;
+      AccumIterator itBegin(buf, rows, 0, col);
+      AccumIterator itEnd(buf, rows, lastCycle, col);
+      std::exclusive_scan(poolstl::par, itBegin, itEnd, itBegin, FpExt{});
     }
 
-    // apply totals
-    printf("phase3\n");
-    for (size_t row = lastCycle; row-- > 0;) {
-      size_t back1 = (row + lastCycle - 1) % lastCycle;
-      std::array<risc0::Fp, 4> prev;
-      for (size_t k = 0; k < 4; k++) {
-        prev[k] = buffers->accum.get(back1, buffers->accum.cols - 4 + k);
-      }
-      for (size_t j = 0; j < buffers->accum.cols / 4 - 1; j++) {
+    {
+      // apply totals
+      nvtx3::scoped_range range("phase3");
+      auto begin = poolstl::iota_iter<uint32_t>(0);
+      auto end = poolstl::iota_iter<uint32_t>(lastCycle);
+      std::for_each(poolstl::par, begin, end, [&](uint32_t row) {
+        // for (size_t row = lastCycle; row-- > 0;) {
+        size_t back1 = (row + lastCycle - 1) % lastCycle;
+        std::array<Fp, 4> prev;
         for (size_t k = 0; k < 4; k++) {
-          buffers->accum.set(row, j * 4 + k, buffers->accum.get(row, j * 4 + k) + prev[k]);
+          prev[k] = buffers->accum.get(back1, buffers->accum.cols - 4 + k);
         }
-      }
+        for (size_t j = 0; j < buffers->accum.cols / 4 - 1; j++) {
+          for (size_t k = 0; k < 4; k++) {
+            buffers->accum.set(row, j * 4 + k, buffers->accum.get(row, j * 4 + k) + prev[k]);
+          }
+        }
+        // }
+      });
     }
   } catch (const std::exception& err) {
     return strdup(err.what());

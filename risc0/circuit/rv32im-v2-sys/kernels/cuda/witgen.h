@@ -54,10 +54,11 @@ struct MutableBufObj : public BufferObj {
   __device__ MutableBufObj(Buffer& buf) : buf(buf) {}
 
   __device__ Val load(ExecContext& ctx, size_t col, size_t back) override {
-    if (back > ctx.cycle) {
-      return 0;
-    }
-    return buf.get(ctx.cycle - back, col);
+    // if (zeroBack && back > 0) {
+    //   return 0;
+    // }
+    size_t backRow = (buf.rows + ctx.cycle - back) % buf.rows;
+    return buf.get(backRow, col);
   }
 
   __device__ void store(ExecContext& ctx, size_t col, Val val) override {
@@ -255,7 +256,6 @@ __device__ void
 extern_memoryDelta(ExecContext& ctx, Val addr, Val cycle, Val dataLow, Val dataHigh, Val count);
 __device__ uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle);
 __device__ Val extern_isFirstCycle_0(ExecContext& ctx);
-__device__ Val extern_getCycle(ExecContext& ctx);
 __device__ ::cuda::std::array<Val, 4> extern_divide(
     ExecContext& ctx, Val numerLow, Val numerHigh, Val denomLow, Val denomHigh, Val signType);
 __device__ void extern_print(ExecContext& ctx, Val v);

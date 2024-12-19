@@ -141,7 +141,7 @@ __device__ ::cuda::std::array<Val, 5> extern_getMemoryTxn(ExecContext& ctx, Val 
   //        txn.addr,
   //        txn.word);
 
-  if (txn.cycle != ctx.cycle) {
+  if (txn.cycle / 2 != ctx.cycle) {
     printf("txn.cycle: %u, ctx.cycle: %zu\n", txn.cycle, ctx.cycle);
     assert(false && "txn cycle mismatch");
   }
@@ -187,17 +187,13 @@ extern_memoryDelta(ExecContext& ctx, Val addr, Val cycle, Val dataLow, Val dataH
 
 __device__ uint32_t extern_getDiffCount(ExecContext& ctx, Val cycle) {
   // printf("getDiffCount\n");
-  return ctx.preflight.cycles[cycle.asUInt32()].diffCount;
+  uint32_t cycleU32 = cycle.asUInt32();
+  return ctx.preflight.cycles[cycleU32 / 2].diffCount[cycleU32 % 2];
 }
 
 __device__ Val extern_isFirstCycle_0(ExecContext& ctx) {
   // printf("isFirstCycle\n");
   return ctx.cycle == 0;
-}
-
-__device__ Val extern_getCycle(ExecContext& ctx) {
-  // printf("getCycle\n");
-  return ctx.cycle;
 }
 
 __device__ ::cuda::std::array<Val, 4> extern_divide(
