@@ -119,12 +119,12 @@ __device__ void nextStep(DeviceContext* ctx, uint32_t cycle) {
   step_Top(execCtx, &data, &global);
 }
 
-__global__ void par_stepExec(DeviceContext* ctx, uint32_t start, uint32_t count) {
+__global__ void par_stepExec(DeviceContext* ctx, uint32_t count) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle >= count) {
     return;
   }
-  nextStep(ctx, start + cycle);
+  nextStep(ctx, cycle);
 }
 
 __global__ void rev_stepExec(DeviceContext* ctx, uint32_t count) {
