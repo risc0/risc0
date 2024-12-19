@@ -17,3 +17,25 @@ pub mod bump;
 
 #[cfg(feature = "heap-embedded-alloc")]
 pub mod embedded;
+
+/// Estimate of used memory on the heap, in bytes.
+pub fn used() -> usize {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "heap-embedded-alloc")] {
+            embedded::HEAP.used()
+        } else {
+            bump::used()
+        }
+    }
+}
+
+/// Estimate of free memory on the heap, in bytes.
+pub fn free() -> usize {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "heap-embedded-alloc")] {
+            embedded::HEAP.free()
+        } else {
+            bump::free()
+        }
+    }
+}
