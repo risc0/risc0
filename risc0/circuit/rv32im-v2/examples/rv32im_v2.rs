@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    thread::sleep,
-    time::{Duration, Instant},
-};
+use std::time::Instant;
 
 use clap::Parser;
 use risc0_circuit_rv32im_v2::{
@@ -78,8 +75,6 @@ fn main() {
 
     let mut tot_time: f64 = 0.0;
     for i in 0..args.count {
-        sleep(Duration::from_secs(5));
-
         let start_time = Instant::now();
         let seal = prover.prove(segment).unwrap();
         if !args.skip_verification {

@@ -99,6 +99,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         mut callback: F,
     ) -> Result<ExecutorResult> {
         let segment_limit = 1 << segment_po2;
+        let segment_threshold = segment_limit - 4000;
         let mut segment_counter = 0u64;
 
         self.reset();
@@ -114,7 +115,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 }
             }
 
-            if self.segment_cycles() >= segment_limit {
+            if self.segment_cycles() >= segment_threshold {
                 Risc0Machine::suspend(self)?;
 
                 let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
@@ -132,7 +133,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     index: segment_counter,
                     input_digest: self.input_digest,
                     output_digest: self.output_digest,
-                    segment_threshold: 4000,
+                    segment_threshold,
                 })?;
 
                 segment_counter += 1;
@@ -150,7 +151,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         Risc0Machine::suspend(self)?;
 
         let (pre_digest, partial_image, post_digest) = self.pager.commit()?;
-        let last_po2 = log2_ceil(self.segment_cycles().next_power_of_two() as usize);
+        let last_cycles = self.segment_cycles().next_power_of_two();
+        let last_po2 = log2_ceil(last_cycles as usize);
         let exit_code = self.exit_code.unwrap();
 
         callback(Segment {
@@ -167,7 +169,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             index: segment_counter,
             input_digest: self.input_digest,
             output_digest: self.output_digest,
-            segment_threshold: 4000,
+            segment_threshold: 1, // TODO
         })?;
 
         self.cycles.total += 1 << last_po2;
