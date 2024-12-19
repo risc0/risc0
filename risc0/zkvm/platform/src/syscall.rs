@@ -730,10 +730,6 @@ pub unsafe extern "C" fn sys_argv(
     a0 as usize
 }
 
-// NOTE: The sys_alloc_x functions is specific to the bump allocator, and should not be used unless the bump
-// allocator is configured (e.g. it should not be used when embedded-alloc is used as the global
-// allocator). The configured cfgs should prevent this.
-
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 #[deprecated]
 pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
@@ -772,32 +768,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 ))]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    use crate::heap::bump::HEAP_POS;
-
-    // SAFETY: Single threaded, and non-premptive so access is safe.
-    let mut heap_pos = unsafe { HEAP_POS };
-
-    // Honor requested alignment if larger than word size.
-    // Note: align is typically a power of two.
-    let align = usize::max(align, WORD_SIZE);
-
-    let offset = heap_pos & (align - 1);
-    if offset != 0 {
-        heap_pos += align - offset;
-    }
-
-    let ptr = heap_pos as *mut u8;
-    heap_pos += bytes;
-
-    // Check to make sure heap doesn't collide with SYSTEM memory.
-    if crate::memory::SYSTEM.start() < heap_pos {
-        const MSG: &[u8] = "Out of memory!".as_bytes();
-        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
-    }
-
-    // SAFETY: Single threaded, and non-premptive so modification is safe.
-    unsafe { HEAP_POS = heap_pos };
-    ptr
+    crate::heap::bump::alloc_aligned(bytes, align)
 }
 
 /// Send a ReceiptClaim digest to the host to request verification.

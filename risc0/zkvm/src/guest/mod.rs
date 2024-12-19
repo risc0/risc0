@@ -151,6 +151,8 @@ macro_rules! entry {
 unsafe extern "C" fn __start() -> ! {
     #[cfg(feature = "heap-embedded-alloc")]
     risc0_zkvm_platform::heap::embedded::init();
+    #[cfg(not(feature = "heap-embedded-alloc"))]
+    risc0_zkvm_platform::heap::bump::init();
 
     env::init();
 

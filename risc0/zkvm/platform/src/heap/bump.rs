@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::syscall::sys_alloc_aligned;
+use crate::{memory::GUEST_MAX_MEM, syscall::sys_panic, WORD_SIZE};
 use core::alloc::{GlobalAlloc, Layout};
 
 #[global_allocator]
@@ -28,19 +28,19 @@ extern "C" {
     static _end: u8;
 }
 
-static HEAP_START: usize = unsafe { (&_end) as *const u8 as usize };
+static mut HEAP_START: usize = 0;
 
-/// Pointer to next heap address to use, initialized as the address of the _end symbol.
+/// Pointer to next heap address to use, initialized by the [init] function to the _end symbol.
 ///
 /// The heap grows into higher addresses from it's starting position. Since this is a bump
 /// allocator and memory is never freed, this address strictly increases over time.
-pub(crate) static mut HEAP_POS: usize = HEAP_START;
+static mut HEAP_POS: usize = 0;
 
 pub struct BumpPointerAlloc;
 
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        sys_alloc_aligned(layout.size(), layout.align())
+        alloc_aligned(layout.size(), layout.align())
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
@@ -54,17 +54,57 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
     }
 }
 
-impl BumpPointerAlloc {
-    /// Used memory on the heap, in bytes. Note that the bump allocator never frees memory.
-    pub fn used(&self) -> usize {
-        // SAFETY: Single threaded, and non-premptive so access is safe.
-        unsafe { HEAP_POS - HEAP_START }
+/// Used memory on the heap, in bytes. Note that the bump allocator never frees memory.
+pub fn used() -> usize {
+    // SAFETY: Single threaded, and non-premptive so access is safe.
+    unsafe { HEAP_POS - HEAP_START }
+}
+
+/// Free memory on the heap, in bytes.
+pub fn free() -> usize {
+    // SAFETY: Single threaded, and non-premptive so access is safe. HEAP_POS will always be
+    // less than the start of system memory.
+    GUEST_MAX_MEM - unsafe { HEAP_POS }
+}
+
+pub(crate) unsafe fn alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    // SAFETY: Single threaded, and non-premptive so access is safe.
+    let mut heap_pos = unsafe { HEAP_POS };
+
+    // Honor requested alignment if larger than word size.
+    // Note: align is typically a power of two.
+    let align = usize::max(align, WORD_SIZE);
+
+    let offset = heap_pos & (align - 1);
+    if offset != 0 {
+        heap_pos += align - offset;
     }
 
-    /// Free memory on the heap, in bytes.
-    pub fn free(&self) -> usize {
-        // SAFETY: Single threaded, and non-premptive so access is safe. HEAP_POS will always be
-        // less than the start of system memory.
-        crate::memory::SYSTEM.start() - unsafe { HEAP_POS }
+    let ptr = heap_pos as *mut u8;
+    heap_pos += bytes;
+
+    // Check to make sure heap doesn't collide with SYSTEM memory.
+    if GUEST_MAX_MEM < heap_pos {
+        const MSG: &[u8] = "Out of memory!".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+
+    // SAFETY: Single threaded, and non-premptive so modification is safe.
+    unsafe { HEAP_POS = heap_pos };
+    ptr
+}
+
+/// Initialize the bump allocator with the memory allocations defined in the [memory][crate::memory] module.
+///
+/// # Saftey
+///
+/// This function must be called exactly once.
+pub unsafe fn init() {
+    extern "C" {
+        static _end: u8;
+    }
+    unsafe {
+        HEAP_START = (&_end) as *const u8 as usize;
+        HEAP_POS = HEAP_START;
     }
 }
