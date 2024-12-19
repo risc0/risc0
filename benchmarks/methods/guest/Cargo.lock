@@ -1159,6 +1159,7 @@ dependencies = [
  "anyhow",
  "borsh",
  "bytemuck",
+ "cfg-if",
  "getrandom",
  "hex",
  "risc0-binfmt",
@@ -1182,6 +1183,7 @@ name = "risc0-zkvm-platform"
 version = "1.3.0-alpha.1"
 dependencies = [
  "bytemuck",
+ "cfg-if",
  "getrandom",
  "libm",
  "stability",
