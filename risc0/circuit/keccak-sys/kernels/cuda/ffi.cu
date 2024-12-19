@@ -233,4 +233,15 @@ const char* risc0_circuit_keccak_cuda_scatter(Fp* into,
   return nullptr;
 }
 
+const char* risc0_circuit_keccak_cuda_reset() {
+  try {
+    CUDA_OK(cudaDeviceSetLimit(cudaLimit::cudaLimitStackSize, 0));
+  } catch (const std::exception& err) {
+    return strdup(err.what());
+  } catch (...) {
+    return strdup("Generic exception");
+  }
+  return nullptr;
+}
+
 } // extern "C"

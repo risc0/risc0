@@ -16,8 +16,9 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_keccak_sys::{
-    risc0_circuit_keccak_cuda_eval_check, risc0_circuit_keccak_cuda_scatter,
-    risc0_circuit_keccak_cuda_witgen, RawBuffer, RawExecBuffers, RawPreflightTrace, ScatterInfo,
+    risc0_circuit_keccak_cuda_eval_check, risc0_circuit_keccak_cuda_reset,
+    risc0_circuit_keccak_cuda_scatter, risc0_circuit_keccak_cuda_witgen, RawBuffer, RawExecBuffers,
+    RawPreflightTrace, ScatterInfo,
 };
 use risc0_core::{
     field::{
@@ -55,6 +56,12 @@ pub struct CudaCircuitHal<CH: CudaHash> {
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         Self { hal }
+    }
+}
+
+impl<CH: CudaHash> Drop for CudaCircuitHal<CH> {
+    fn drop(&mut self) {
+        cuda_reset();
     }
 }
 
@@ -220,6 +227,10 @@ pub fn keccak_prover() -> Result<Box<dyn KeccakProver>> {
     let hal = Rc::new(CudaHalPoseidon2::new());
     let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
     Ok(Box::new(KeccakProverImpl { hal, circuit_hal }))
+}
+
+fn cuda_reset() {
+    ffi_wrap(|| unsafe { risc0_circuit_keccak_cuda_reset() }).unwrap();
 }
 
 #[cfg(test)]
