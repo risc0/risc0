@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_rv32im_v2_sys::{
-    risc0_circuit_rv32im_v2_cpu_accum, risc0_circuit_rv32im_v2_cuda_eval_check,
+    risc0_circuit_rv32im_v2_cuda_accum, risc0_circuit_rv32im_v2_cuda_eval_check,
     risc0_circuit_rv32im_v2_cuda_witgen, RawAccumBuffers, RawBuffer, RawExecBuffers,
     RawPreflightTrace,
 };
@@ -113,24 +113,24 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
         let cycles = preflight.cycles.len();
         tracing::debug!("accumulate: {cycles}");
 
-        let data_vec = data.buf.to_vec();
-        let accum_vec = accum.buf.to_vec();
-        let mix_vec = mix.buf.to_vec();
+        // let data_vec = data.buf.to_vec();
+        // let accum_vec = accum.buf.to_vec();
+        // let mix_vec = mix.buf.to_vec();
         let buffers = RawAccumBuffers {
             data: RawBuffer {
-                buf: data_vec.as_ptr(),
+                buf: data.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: data.rows,
                 cols: data.cols,
                 checked_reads: data.checked_reads,
             },
             accum: RawBuffer {
-                buf: accum_vec.as_ptr(),
+                buf: accum.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: accum.rows,
                 cols: accum.cols,
                 checked_reads: accum.checked_reads,
             },
             mix: RawBuffer {
-                buf: mix_vec.as_ptr(),
+                buf: mix.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: mix.rows,
                 cols: mix.cols,
                 checked_reads: mix.checked_reads,
@@ -142,19 +142,22 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
             txns_len: preflight.txns.len() as u32,
             table_split_cycle: preflight.table_split_cycle,
         };
-        let result = ffi_wrap(|| unsafe {
-            risc0_circuit_rv32im_v2_cpu_accum(&buffers, &preflight, cycles as u32)
-        });
-        data.buf.view_mut(|view| {
-            view.copy_from_slice(&data_vec);
-        });
-        accum.buf.view_mut(|view| {
-            view.copy_from_slice(&accum_vec);
-        });
-        mix.buf.view_mut(|view| {
-            view.copy_from_slice(&mix_vec);
-        });
-        result
+        ffi_wrap(|| unsafe {
+            risc0_circuit_rv32im_v2_cuda_accum(&buffers, &preflight, cycles as u32)
+        })
+        // let result = ffi_wrap(|| unsafe {
+        //     risc0_circuit_rv32im_v2_cpu_accum(&buffers, &preflight, cycles as u32)
+        // });
+        // data.buf.view_mut(|view| {
+        //     view.copy_from_slice(&data_vec);
+        // });
+        // accum.buf.view_mut(|view| {
+        //     view.copy_from_slice(&accum_vec);
+        // });
+        // mix.buf.view_mut(|view| {
+        //     view.copy_from_slice(&mix_vec);
+        // });
+        // result
     }
 }
 

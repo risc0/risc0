@@ -29,12 +29,12 @@ extern __device__ NondetExtRegStruct back_NondetExtReg(ExecContext& ctx,
 extern __device__ NondetExtRegStruct exec_NondetExtReg(ExecContext& ctx,
                                                        ExtVal arg0,
                                                        BoundLayout<NondetExtRegLayout> layout1);
-extern __device__ RegStruct back_Reg(ExecContext& ctx,
-                                     Index distance0,
-                                     BoundLayout<NondetRegLayout> layout1);
-extern __device__ RegStruct exec_Reg(ExecContext& ctx,
-                                     Val arg0,
-                                     BoundLayout<NondetRegLayout> layout1);
+extern __device__ NondetRegStruct back_Reg(ExecContext& ctx,
+                                           Index distance0,
+                                           BoundLayout<NondetRegLayout> layout1);
+extern __device__ NondetRegStruct exec_Reg(ExecContext& ctx,
+                                           Val arg0,
+                                           BoundLayout<NondetRegLayout> layout1);
 extern __device__ NondetExtRegStruct back_ExtReg(ExecContext& ctx,
                                                  Index distance0,
                                                  BoundLayout<NondetExtRegLayout> layout1);
@@ -60,7 +60,7 @@ extern __device__ NondetRegStruct exec_IsZero(ExecContext& ctx,
                                               BoundLayout<IsZeroLayout> layout1);
 extern __device__ ArgU8Struct exec_ArgU8(ExecContext& ctx,
                                          Val arg0,
-                                         Val arg1,
+                                         Val arg1_0,
                                          BoundLayout<ArgU8Layout> layout2);
 extern __device__ NondetRegStruct exec_NondetU8Reg(ExecContext& ctx,
                                                    Val arg0,
@@ -70,7 +70,7 @@ extern __device__ U8RegStruct exec_U8Reg(ExecContext& ctx,
                                          BoundLayout<U8RegLayout> layout1);
 extern __device__ ArgU16Struct exec_ArgU16(ExecContext& ctx,
                                            Val arg0,
-                                           Val arg1,
+                                           Val arg1_0,
                                            BoundLayout<ArgU16Layout> layout2);
 extern __device__ NondetRegStruct exec_NondetU16Reg(ExecContext& ctx,
                                                     Val arg0,
@@ -89,128 +89,130 @@ extern __device__ NormalizeU32Struct exec_NormalizeU32(ExecContext& ctx,
                                                        BoundLayout<NormalizeU32Layout> layout1);
 extern __device__ AddrDecomposeStruct exec_AddrDecompose(ExecContext& ctx,
                                                          ValU32Struct arg0,
-                                                         Val arg1,
+                                                         Val arg1_0,
                                                          BoundLayout<AddrDecomposeLayout> layout2);
 extern __device__ AddrDecomposeBitsStruct exec_AddrDecomposeBits(
-    ExecContext& ctx, ValU32Struct arg0, Val arg1, BoundLayout<AddrDecomposeBitsLayout> layout2);
+    ExecContext& ctx, ValU32Struct arg0, Val arg1_0, BoundLayout<AddrDecomposeBitsLayout> layout2);
 extern __device__ CmpEqualStruct exec_CmpEqual(ExecContext& ctx,
                                                ValU32Struct arg0,
-                                               ValU32Struct arg1,
+                                               ValU32Struct arg1_0,
                                                BoundLayout<CmpEqualLayout> layout2);
 extern __device__ CmpLessThanUnsignedStruct
 exec_CmpLessThanUnsigned(ExecContext& ctx,
                          ValU32Struct arg0,
-                         ValU32Struct arg1,
+                         ValU32Struct arg1_0,
                          BoundLayout<CmpLessThanUnsignedLayout> layout2);
 extern __device__ NondetRegStruct exec_GetSignU32(ExecContext& ctx,
                                                   ValU32Struct arg0,
                                                   BoundLayout<GetSignU32Layout> layout1);
 extern __device__ CmpLessThanStruct exec_CmpLessThan(ExecContext& ctx,
                                                      ValU32Struct arg0,
-                                                     ValU32Struct arg1,
+                                                     ValU32Struct arg1_0,
                                                      BoundLayout<CmpLessThanLayout> layout2);
 extern __device__ ToBits_16_Struct exec_ToBits_16_(ExecContext& ctx,
                                                    Val arg0,
                                                    BoundLayout<ToBits_16_Layout> layout1);
 extern __device__ FromBits_16_Struct exec_BitwiseAndU16(ExecContext& ctx,
                                                         Val arg0,
-                                                        Val arg1,
+                                                        Val arg1_0,
                                                         BoundLayout<BitwiseAndU16Layout> layout2);
 extern __device__ ValU32Struct exec_BitwiseAnd(ExecContext& ctx,
                                                ValU32Struct arg0,
-                                               ValU32Struct arg1,
+                                               ValU32Struct arg1_0,
                                                BoundLayout<BitwiseAndLayout> layout2);
 extern __device__ ValU32Struct exec_BitwiseOr(ExecContext& ctx,
                                               ValU32Struct arg0,
-                                              ValU32Struct arg1,
+                                              ValU32Struct arg1_0,
                                               BoundLayout<BitwiseOrLayout> layout2);
 extern __device__ ValU32Struct exec_BitwiseXor(ExecContext& ctx,
                                                ValU32Struct arg0,
-                                               ValU32Struct arg1,
+                                               ValU32Struct arg1_0,
                                                BoundLayout<BitwiseXorLayout> layout2);
 extern __device__ DecoderStruct exec_Decoder(ExecContext& ctx,
                                              ValU32Struct arg0,
                                              BoundLayout<DecoderLayout> layout1);
 extern __device__ MemoryArgStruct exec_MemoryArg(ExecContext& ctx,
                                                  Val arg0,
-                                                 Val arg1,
-                                                 Val arg2,
+                                                 Val arg1_0,
+                                                 Val arg2_0,
                                                  ValU32Struct arg3,
                                                  BoundLayout<MemoryArgLayout> layout4);
 extern __device__ CycleArgStruct exec_CycleArg(ExecContext& ctx,
                                                Val arg0,
-                                               Val arg1,
+                                               Val arg1_0,
                                                BoundLayout<CycleArgLayout> layout2);
 extern __device__ IsCycleStruct exec_IsCycle(ExecContext& ctx,
                                              Val arg0,
                                              BoundLayout<IsCycleLayout> layout1);
 extern __device__ MemoryIOStruct exec_MemoryIO(ExecContext& ctx,
-                                               RegStruct arg0,
-                                               Val arg1,
+                                               Val arg0,
+                                               Val arg1_0,
                                                BoundLayout<MemoryIOLayout> layout2);
 extern __device__ IsForwardStruct exec_IsForward(ExecContext& ctx,
                                                  MemoryIOStruct arg0,
                                                  BoundLayout<IsForwardLayout> layout1);
 extern __device__ GetDataStruct exec_MemoryRead(ExecContext& ctx,
-                                                RegStruct arg0,
-                                                Val arg1,
+                                                NondetRegStruct arg0,
+                                                Val arg1_0,
                                                 BoundLayout<MemoryReadLayout> layout2);
 extern __device__ MemoryWriteStruct exec_MemoryWrite(ExecContext& ctx,
-                                                     RegStruct arg0,
-                                                     Val arg1,
-                                                     ValU32Struct arg2,
+                                                     NondetRegStruct arg0,
+                                                     Val arg1_0,
+                                                     ValU32Struct arg2_0,
                                                      BoundLayout<MemoryWriteLayout> layout3);
 extern __device__ MemoryWriteUnconstrainedStruct
 exec_MemoryWriteUnconstrained(ExecContext& ctx,
-                              RegStruct arg0,
-                              Val arg1,
+                              NondetRegStruct arg0,
+                              Val arg1_0,
                               BoundLayout<MemoryWriteUnconstrainedLayout> layout2);
 extern __device__ GetDataStruct exec_MemoryPageIn(ExecContext& ctx,
-                                                  RegStruct arg0,
-                                                  Val arg1,
+                                                  NondetRegStruct arg0,
+                                                  Val arg1_0,
                                                   BoundLayout<MemoryPageInLayout> layout2);
 extern __device__ GetDataStruct exec_MemoryPageOut(ExecContext& ctx,
-                                                   RegStruct arg0,
-                                                   Val arg1,
+                                                   NondetRegStruct arg0,
+                                                   Val arg1_0,
                                                    BoundLayout<MemoryPageOutLayout> layout2);
 extern __device__ OneHot_3_Struct exec_OneHot_3_(ExecContext& ctx,
                                                  Val arg0,
                                                  BoundLayout<OneHot_3_Layout> layout1);
 extern __device__ GetDataStruct exec_MemoryGet(ExecContext& ctx,
-                                               RegStruct arg0,
-                                               Val arg1,
-                                               OneHot_3_Struct arg2,
+                                               NondetRegStruct arg0,
+                                               Val arg1_0,
+                                               OneHot_3_Struct arg2_0,
                                                BoundLayout<MemoryGetLayout> layout3);
 extern __device__ OneHot_8_Struct exec_OneHot_8_(ExecContext& ctx,
                                                  Val arg0,
                                                  BoundLayout<OneHot_8_Layout> layout1);
 extern __device__ InstInputStruct exec_InstInput(ExecContext& ctx,
                                                  Val arg0,
-                                                 Val arg1,
-                                                 Val arg2,
-                                                 ValU32Struct arg3,
+                                                 Val arg1_0,
+                                                 ValU32Struct arg2_0,
+                                                 Val arg3,
                                                  Val arg4,
-                                                 Val arg5,
-                                                 BoundLayout<InstInputLayout> layout6);
+                                                 BoundLayout<InstInputLayout> layout5);
+extern __device__ DoCycleTableStruct exec_DoCycleTable(ExecContext& ctx,
+                                                       NondetRegStruct arg0,
+                                                       BoundLayout<DoCycleTableLayout> layout1);
 extern __device__ DecoderStruct exec_DecodeInst(ExecContext& ctx,
-                                                RegStruct arg0,
-                                                InstInputStruct arg1,
+                                                NondetRegStruct arg0,
+                                                InstInputStruct arg1_0,
                                                 BoundLayout<DecodeInstLayout> layout2);
 extern __device__ GetDataStruct exec_ReadReg(ExecContext& ctx,
-                                             RegStruct arg0,
-                                             InstInputStruct arg1,
-                                             Val arg2,
+                                             NondetRegStruct arg0,
+                                             InstInputStruct arg1_0,
+                                             Val arg2_0,
                                              BoundLayout<ReadRegLayout> layout3);
 extern __device__ WriteRdStruct exec_WriteRd(ExecContext& ctx,
-                                             RegStruct arg0,
-                                             InstInputStruct arg1,
-                                             DecoderStruct arg2,
+                                             NondetRegStruct arg0,
+                                             InstInputStruct arg1_0,
+                                             DecoderStruct arg2_0,
                                              Val arg3,
                                              ValU32Struct arg4,
                                              BoundLayout<WriteRdLayout> layout5);
 extern __device__ ExpandU32Struct exec_ExpandU32(ExecContext& ctx,
                                                  ValU32Struct arg0,
-                                                 Val arg1,
+                                                 Val arg1_0,
                                                  BoundLayout<ExpandU32Layout> layout2);
 extern __device__ SplitTotalStruct exec_SplitTotal(ExecContext& ctx,
                                                    Val arg0,
@@ -218,18 +220,18 @@ extern __device__ SplitTotalStruct exec_SplitTotal(ExecContext& ctx,
 extern __device__ MultiplyAccumulateStruct
 exec_MultiplyAccumulate(ExecContext& ctx,
                         ValU32Struct arg0,
-                        ValU32Struct arg1,
-                        ValU32Struct arg2,
+                        ValU32Struct arg1_0,
+                        ValU32Struct arg2_0,
                         MultiplySettingsStruct arg3,
                         BoundLayout<MultiplyAccumulateLayout> layout4);
 extern __device__ DivInputStruct exec_DivInput(ExecContext& ctx,
-                                               RegStruct arg0,
-                                               InstInputStruct arg1,
+                                               NondetRegStruct arg0,
+                                               InstInputStruct arg1_0,
                                                BoundLayout<DivInputLayout> layout2);
 extern __device__ DivideReturnStruct exec_DoDiv(ExecContext& ctx,
                                                 ValU32Struct arg0,
-                                                ValU32Struct arg1,
-                                                Val arg2,
+                                                ValU32Struct arg1_0,
+                                                Val arg2_0,
                                                 Val arg3,
                                                 BoundLayout<DoDivLayout> layout4);
 extern __device__ ValU32Struct exec_OpSRL(ExecContext& ctx,
@@ -260,17 +262,17 @@ extern __device__ ValU32Struct exec_OpREMU(ExecContext& ctx,
                                            DivInputStruct arg0,
                                            BoundLayout<OpREMULayout> layout1);
 extern __device__ InstOutputStruct exec_Div0(ExecContext& ctx,
-                                             RegStruct arg0,
-                                             InstInputStruct arg1,
+                                             NondetRegStruct arg0,
+                                             InstInputStruct arg1_0,
                                              BoundLayout<Div0Layout> layout2);
 extern __device__ MiscInputStruct exec_MiscInput(ExecContext& ctx,
-                                                 RegStruct arg0,
-                                                 InstInputStruct arg1,
+                                                 NondetRegStruct arg0,
+                                                 InstInputStruct arg1_0,
                                                  BoundLayout<MiscInputLayout> layout2);
 extern __device__ InstOutputStruct exec_FinalizeMisc(ExecContext& ctx,
-                                                     RegStruct arg0,
-                                                     MiscInputStruct arg1,
-                                                     MiscOutputStruct arg2,
+                                                     NondetRegStruct arg0,
+                                                     MiscInputStruct arg1_0,
+                                                     MiscOutputStruct arg2_0,
                                                      BoundLayout<FinalizeMiscLayout> layout3);
 extern __device__ MiscOutputStruct exec_OpXOR(ExecContext& ctx,
                                               MiscInputStruct arg0,
@@ -288,8 +290,8 @@ extern __device__ MiscOutputStruct exec_OpSLTU(ExecContext& ctx,
                                                MiscInputStruct arg0,
                                                BoundLayout<OpSLTULayout> layout1);
 extern __device__ InstOutputStruct exec_Misc0(ExecContext& ctx,
-                                              RegStruct arg0,
-                                              InstInputStruct arg1,
+                                              NondetRegStruct arg0,
+                                              InstInputStruct arg1_0,
                                               BoundLayout<Misc0Layout> layout2);
 extern __device__ MiscOutputStruct exec_OpXORI(ExecContext& ctx,
                                                MiscInputStruct arg0,
@@ -316,8 +318,8 @@ extern __device__ MiscOutputStruct exec_OpBLT(ExecContext& ctx,
                                               MiscInputStruct arg0,
                                               BoundLayout<OpBLTLayout> layout1);
 extern __device__ InstOutputStruct exec_Misc1(ExecContext& ctx,
-                                              RegStruct arg0,
-                                              InstInputStruct arg1,
+                                              NondetRegStruct arg0,
+                                              InstInputStruct arg1_0,
                                               BoundLayout<Misc1Layout> layout2);
 extern __device__ MiscOutputStruct exec_OpBGE(ExecContext& ctx,
                                               MiscInputStruct arg0,
@@ -329,17 +331,17 @@ extern __device__ MiscOutputStruct exec_OpBGEU(ExecContext& ctx,
                                                MiscInputStruct arg0,
                                                BoundLayout<OpBGEULayout> layout1);
 extern __device__ InstOutputStruct exec_Misc2(ExecContext& ctx,
-                                              RegStruct arg0,
-                                              InstInputStruct arg1,
+                                              NondetRegStruct arg0,
+                                              InstInputStruct arg1_0,
                                               BoundLayout<Misc2Layout> layout2);
 extern __device__ MulInputStruct exec_MulInput(ExecContext& ctx,
-                                               RegStruct arg0,
-                                               InstInputStruct arg1,
+                                               NondetRegStruct arg0,
+                                               InstInputStruct arg1_0,
                                                BoundLayout<MulInputLayout> layout2);
 extern __device__ DoMulStruct exec_DoMul(ExecContext& ctx,
                                          ValU32Struct arg0,
-                                         ValU32Struct arg1,
-                                         Val arg2,
+                                         ValU32Struct arg1_0,
+                                         Val arg2_0,
                                          Val arg3,
                                          BoundLayout<DoMulLayout> layout4);
 extern __device__ ValU32Struct exec_OpSLL(ExecContext& ctx,
@@ -361,22 +363,22 @@ extern __device__ ValU32Struct exec_OpMULHU(ExecContext& ctx,
                                             MulInputStruct arg0,
                                             BoundLayout<OpMULHULayout> layout1);
 extern __device__ InstOutputStruct exec_Mul0(ExecContext& ctx,
-                                             RegStruct arg0,
-                                             InstInputStruct arg1,
+                                             NondetRegStruct arg0,
+                                             InstInputStruct arg1_0,
                                              BoundLayout<Mul0Layout> layout2);
 extern __device__ MemLoadInputStruct exec_MemLoadInput(ExecContext& ctx,
-                                                       RegStruct arg0,
-                                                       InstInputStruct arg1,
+                                                       NondetRegStruct arg0,
+                                                       InstInputStruct arg1_0,
                                                        BoundLayout<MemLoadInputLayout> layout2);
 extern __device__ MemStoreInputStruct exec_MemStoreInput(ExecContext& ctx,
-                                                         RegStruct arg0,
-                                                         InstInputStruct arg1,
+                                                         NondetRegStruct arg0,
+                                                         InstInputStruct arg1_0,
                                                          BoundLayout<MemStoreInputLayout> layout2);
 extern __device__ MemStoreFinalizeStruct
 exec_MemStoreFinalize(ExecContext& ctx,
-                      RegStruct arg0,
-                      MemStoreInputStruct arg1,
-                      ValU32Struct arg2,
+                      NondetRegStruct arg0,
+                      MemStoreInputStruct arg1_0,
+                      ValU32Struct arg2_0,
                       BoundLayout<MemStoreFinalizeLayout> layout3);
 extern __device__ SplitWordStruct exec_SplitWord(ExecContext& ctx,
                                                  Val arg0,
@@ -391,15 +393,15 @@ extern __device__ ValU32Struct exec_OpLBU(ExecContext& ctx,
                                           MemLoadInputStruct arg0,
                                           BoundLayout<OpLBULayout> layout1);
 extern __device__ InstOutputStruct exec_Mem0(ExecContext& ctx,
-                                             RegStruct arg0,
-                                             InstInputStruct arg1,
+                                             NondetRegStruct arg0,
+                                             InstInputStruct arg1_0,
                                              BoundLayout<Mem0Layout> layout2);
 extern __device__ ValU32Struct exec_OpSB(ExecContext& ctx,
                                          MemStoreInputStruct arg0,
                                          BoundLayout<OpSBLayout> layout1);
 extern __device__ InstOutputStruct exec_Mem1(ExecContext& ctx,
-                                             RegStruct arg0,
-                                             InstInputStruct arg1,
+                                             NondetRegStruct arg0,
+                                             InstInputStruct arg1_0,
                                              BoundLayout<Mem1Layout> layout2);
 extern __device__ DigestRegStruct back_DigestReg(ExecContext& ctx,
                                                  Index distance0,
@@ -408,55 +410,60 @@ extern __device__ DigestRegStruct exec_DigestReg(ExecContext& ctx,
                                                  ValU32Struct8Array arg0,
                                                  BoundLayout<DigestRegLayout> layout1);
 extern __device__ InstOutputStruct exec_ControlLoadRoot(ExecContext& ctx,
-                                                        RegStruct arg0,
-                                                        InstInputStruct arg1,
+                                                        NondetRegStruct arg0,
+                                                        InstInputStruct arg1_0,
                                                         BoundLayout<ControlLoadRootLayout> layout2,
                                                         GlobalBuf global3);
 extern __device__ InstOutputStruct exec_ControlResume(ExecContext& ctx,
-                                                      RegStruct arg0,
-                                                      InstInputStruct arg1,
+                                                      NondetRegStruct arg0,
+                                                      InstInputStruct arg1_0,
                                                       BoundLayout<ControlResumeLayout> layout2,
                                                       GlobalBuf global3);
 extern __device__ InstOutputStruct
 exec_ControlUserECALL(ExecContext& ctx,
-                      RegStruct arg0,
-                      InstInputStruct arg1,
+                      NondetRegStruct arg0,
+                      InstInputStruct arg1_0,
                       BoundLayout<ControlUserECALLLayout> layout2);
 extern __device__ InstOutputStruct exec_ControlMRET(ExecContext& ctx,
-                                                    RegStruct arg0,
-                                                    InstInputStruct arg1,
+                                                    NondetRegStruct arg0,
+                                                    InstInputStruct arg1_0,
                                                     BoundLayout<ControlMRETLayout> layout2);
 extern __device__ InstOutputStruct exec_ControlSuspend(ExecContext& ctx,
-                                                       RegStruct arg0,
-                                                       InstInputStruct arg1,
+                                                       NondetRegStruct arg0,
+                                                       InstInputStruct arg1_0,
                                                        BoundLayout<ControlSuspendLayout> layout2,
                                                        GlobalBuf global3);
 extern __device__ InstOutputStruct
 exec_ControlStoreRoot(ExecContext& ctx,
-                      RegStruct arg0,
-                      InstInputStruct arg1,
+                      NondetRegStruct arg0,
+                      InstInputStruct arg1_0,
                       BoundLayout<ControlStoreRootLayout> layout2,
                       GlobalBuf global3);
 extern __device__ InstOutputStruct exec_ControlTable(ExecContext& ctx,
-                                                     RegStruct arg0,
-                                                     InstInputStruct arg1,
+                                                     NondetRegStruct arg0,
+                                                     InstInputStruct arg1_0,
                                                      BoundLayout<ControlTableLayout> layout2);
+extern __device__ InstOutputStruct exec_ControlDone(ExecContext& ctx,
+                                                    NondetRegStruct arg0,
+                                                    InstInputStruct arg1_0,
+                                                    BoundLayout<ControlDoneLayout> layout2,
+                                                    GlobalBuf global3);
 extern __device__ InstOutputStruct exec_Control0(ExecContext& ctx,
-                                                 RegStruct arg0,
-                                                 InstInputStruct arg1,
+                                                 NondetRegStruct arg0,
+                                                 InstInputStruct arg1_0,
                                                  BoundLayout<Control0Layout> layout2,
                                                  GlobalBuf global3);
 extern __device__ OneHot_4_Struct exec_OneHot_4_(ExecContext& ctx,
                                                  Val arg0,
                                                  BoundLayout<OneHot_4_Layout> layout1);
 extern __device__ ECallOutputStruct exec_MachineECall(ExecContext& ctx,
-                                                      RegStruct arg0,
-                                                      InstInputStruct arg1,
-                                                      Val arg2,
+                                                      NondetRegStruct arg0,
+                                                      InstInputStruct arg1_0,
+                                                      Val arg2_0,
                                                       BoundLayout<MachineECallLayout> layout3);
 extern __device__ ECallOutputStruct exec_ECallTerminate(ExecContext& ctx,
-                                                        RegStruct arg0,
-                                                        InstInputStruct arg1,
+                                                        NondetRegStruct arg0,
+                                                        InstInputStruct arg1_0,
                                                         BoundLayout<ECallTerminateLayout> layout2,
                                                         GlobalBuf global3);
 extern __device__ DecomposeLow2Struct exec_DecomposeLow2(ExecContext& ctx,
@@ -464,46 +471,48 @@ extern __device__ DecomposeLow2Struct exec_DecomposeLow2(ExecContext& ctx,
                                                          BoundLayout<DecomposeLow2Layout> layout1);
 extern __device__ ECallOutputStruct
 exec_ECallHostReadSetup(ExecContext& ctx,
-                        RegStruct arg0,
-                        InstInputStruct arg1,
+                        NondetRegStruct arg0,
+                        InstInputStruct arg1_0,
                         BoundLayout<ECallHostReadSetupLayout> layout2);
 extern __device__ ECallOutputStruct exec_ECallHostWrite(ExecContext& ctx,
-                                                        RegStruct arg0,
-                                                        InstInputStruct arg1,
+                                                        NondetRegStruct arg0,
+                                                        InstInputStruct arg1_0,
                                                         BoundLayout<ECallHostWriteLayout> layout2);
 extern __device__ ECallOutputStruct
 exec_ECallHostReadWords(ExecContext& ctx,
-                        RegStruct arg0,
-                        InstInputStruct arg1,
-                        Val arg2,
+                        NondetRegStruct arg0,
+                        InstInputStruct arg1_0,
+                        Val arg2_0,
                         Val arg3,
                         BoundLayout<ECallHostReadWordsLayout> layout4);
 extern __device__ InstOutputStruct exec_ECall0(ExecContext& ctx,
-                                               RegStruct arg0,
-                                               InstInputStruct arg1,
+                                               NondetRegStruct arg0,
+                                               InstInputStruct arg1_0,
                                                BoundLayout<ECall0Layout> layout2,
                                                GlobalBuf global3);
-extern __device__ RegStruct exec_SBox(ExecContext& ctx, Val arg0, BoundLayout<SBoxLayout> layout1);
+extern __device__ NondetRegStruct exec_SBox(ExecContext& ctx,
+                                            Val arg0,
+                                            BoundLayout<SBoxLayout> layout1);
 extern __device__ MultiplyByMIntStruct exec_DoIntRound(ExecContext& ctx,
                                                        Val24Array arg0,
-                                                       Val arg1,
+                                                       Val arg1_0,
                                                        BoundLayout<DoIntRoundLayout> layout2);
 extern __device__ DoIntRoundsStruct exec_DoIntRounds(ExecContext& ctx,
                                                      Val24Array arg0,
                                                      BoundLayout<DoIntRoundsLayout> layout1);
 extern __device__ MultiplyByMExtStruct exec_DoExtRound(ExecContext& ctx,
                                                        Val24Array arg0,
-                                                       Val24Array arg1,
+                                                       Val24Array arg1_0,
                                                        BoundLayout<DoExtRoundLayout> layout2);
 extern __device__ MultiplyByMExtStruct exec_DoExtRoundByIdx(
-    ExecContext& ctx, Val24Array arg0, Val arg1, BoundLayout<DoExtRoundByIdxLayout> layout2);
+    ExecContext& ctx, Val24Array arg0, Val arg1_0, BoundLayout<DoExtRoundByIdxLayout> layout2);
 extern __device__ PoseidonStateStruct back_PoseidonState(ExecContext& ctx,
                                                          Index distance0,
                                                          BoundLayout<PoseidonStateLayout> layout1);
 extern __device__ PoseidonStateStruct exec_PoseidonState(ExecContext& ctx,
                                                          PoseidonOpDefStruct arg0,
-                                                         Val arg1,
-                                                         Val arg2,
+                                                         Val arg1_0,
+                                                         Val arg2_0,
                                                          Val arg3,
                                                          Val arg4,
                                                          Val arg5,
@@ -513,50 +522,50 @@ extern __device__ PoseidonStateStruct exec_PoseidonState(ExecContext& ctx,
 extern __device__ PoseidonStateStruct
 exec_PoseidonInvalid(ExecContext& ctx, BoundLayout<PoseidonStateLayout> layout0);
 extern __device__ ReadAddrStruct exec_ReadAddr(ExecContext& ctx,
-                                               RegStruct arg0,
-                                               Val arg1,
+                                               NondetRegStruct arg0,
+                                               Val arg1_0,
                                                BoundLayout<ReadAddrLayout> layout2);
 extern __device__ PoseidonStateStruct exec_PoseidonEcall(ExecContext& ctx,
-                                                         RegStruct arg0,
-                                                         Val arg1,
+                                                         NondetRegStruct arg0,
+                                                         Val arg1_0,
                                                          BoundLayout<PoseidonEcallLayout> layout2);
 extern __device__ PoseidonStateStruct exec_PoseidonPagingEntry(
-    ExecContext& ctx, RegStruct arg0, Val arg1, BoundLayout<PoseidonStateLayout> layout2);
+    ExecContext& ctx, NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2);
 extern __device__ PoseidonStateStruct exec_PoseidonEntry(ExecContext& ctx,
-                                                         RegStruct arg0,
-                                                         ValU32Struct arg1,
-                                                         Val arg2,
+                                                         NondetRegStruct arg0,
+                                                         ValU32Struct arg1_0,
+                                                         Val arg2_0,
                                                          BoundLayout<PoseidonEntryLayout> layout3);
 extern __device__ ReadElemStruct exec_ReadElem(ExecContext& ctx,
-                                               RegStruct arg0,
-                                               Val arg1,
+                                               NondetRegStruct arg0,
+                                               Val arg1_0,
                                                BoundLayout<ReadElemLayout> layout2);
 extern __device__ PoseidonStateStruct
 exec_PoseidonLoadState(ExecContext& ctx,
-                       RegStruct arg0,
-                       PoseidonStateStruct arg1,
+                       NondetRegStruct arg0,
+                       PoseidonStateStruct arg1_0,
                        BoundLayout<PoseidonLoadStateLayout> layout2);
 extern __device__ PoseidonStateStruct
 exec_PoseidonLoadInShort(ExecContext& ctx,
-                         RegStruct arg0,
-                         PoseidonStateStruct arg1,
+                         NondetRegStruct arg0,
+                         PoseidonStateStruct arg1_0,
                          BoundLayout<PoseidonLoadInShortLayout> layout2,
                          GlobalBuf global3);
 extern __device__ PoseidonStateStruct
 exec_PoseidonLoadInLow(ExecContext& ctx,
-                       RegStruct arg0,
-                       PoseidonStateStruct arg1,
+                       NondetRegStruct arg0,
+                       PoseidonStateStruct arg1_0,
                        BoundLayout<PoseidonLoadInLowLayout> layout2,
                        GlobalBuf global3);
 extern __device__ PoseidonStateStruct
 exec_PoseidonLoadInHigh(ExecContext& ctx,
-                        RegStruct arg0,
-                        PoseidonStateStruct arg1,
+                        NondetRegStruct arg0,
+                        PoseidonStateStruct arg1_0,
                         BoundLayout<PoseidonLoadInHighLayout> layout2,
                         GlobalBuf global3);
 extern __device__ PoseidonStateStruct exec_PoseidonLoadIn(ExecContext& ctx,
-                                                          RegStruct arg0,
-                                                          PoseidonStateStruct arg1,
+                                                          NondetRegStruct arg0,
+                                                          PoseidonStateStruct arg1_0,
                                                           BoundLayout<PoseidonLoadInLayout> layout2,
                                                           GlobalBuf global3);
 extern __device__ PoseidonStateStruct exec_PoseidonExtRound(
@@ -565,36 +574,36 @@ extern __device__ PoseidonStateStruct exec_PoseidonIntRounds(
     ExecContext& ctx, PoseidonStateStruct arg0, BoundLayout<PoseidonIntRoundsLayout> layout1);
 extern __device__ PoseidonStateStruct
 exec_PoseidonCheckOut(ExecContext& ctx,
-                      RegStruct arg0,
-                      PoseidonStateStruct arg1,
+                      NondetRegStruct arg0,
+                      PoseidonStateStruct arg1_0,
                       BoundLayout<PoseidonCheckOutLayout> layout2);
 extern __device__ PoseidonStateStruct
 exec_PoseidonStoreOut(ExecContext& ctx,
-                      RegStruct arg0,
-                      PoseidonStateStruct arg1,
+                      NondetRegStruct arg0,
+                      PoseidonStateStruct arg1_0,
                       BoundLayout<PoseidonStoreOutLayout> layout2);
 extern __device__ PoseidonStateStruct exec_PoseidonDoOut(ExecContext& ctx,
-                                                         RegStruct arg0,
-                                                         PoseidonStateStruct arg1,
+                                                         NondetRegStruct arg0,
+                                                         PoseidonStateStruct arg1_0,
                                                          BoundLayout<PoseidonDoOutLayout> layout2);
 extern __device__ PoseidonStateStruct
 exec_PoseidonStoreState(ExecContext& ctx,
-                        RegStruct arg0,
-                        PoseidonStateStruct arg1,
+                        NondetRegStruct arg0,
+                        PoseidonStateStruct arg1_0,
                         BoundLayout<PoseidonStoreStateLayout> layout2);
 extern __device__ IsU24Struct exec_IsU24(ExecContext& ctx,
                                          Val arg0,
                                          BoundLayout<IsU24Layout> layout1);
 extern __device__ PoseidonStateStruct exec_PoseidonPagingLoadNode(
-    ExecContext& ctx, RegStruct arg0, Val arg1, BoundLayout<PoseidonStateLayout> layout2);
+    ExecContext& ctx, NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2);
 extern __device__ PoseidonStateStruct exec_PoseidonPagingLoadPage(
-    ExecContext& ctx, RegStruct arg0, Val arg1, BoundLayout<PoseidonStateLayout> layout2);
+    ExecContext& ctx, NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2);
 extern __device__ PoseidonStateStruct
 exec_PoseidonPagingLoadDone(ExecContext& ctx, BoundLayout<PoseidonStateLayout> layout0);
 extern __device__ PoseidonStateStruct exec_PoseidonPagingStoreNode(
-    ExecContext& ctx, RegStruct arg0, Val arg1, BoundLayout<PoseidonStateLayout> layout2);
+    ExecContext& ctx, NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2);
 extern __device__ PoseidonStateStruct exec_PoseidonPagingStorePage(
-    ExecContext& ctx, RegStruct arg0, Val arg1, BoundLayout<PoseidonStateLayout> layout2);
+    ExecContext& ctx, NondetRegStruct arg0, Val arg1_0, BoundLayout<PoseidonStateLayout> layout2);
 extern __device__ PoseidonStateStruct
 exec_PoseidonPagingStoreDone(ExecContext& ctx, BoundLayout<PoseidonStateLayout> layout0);
 extern __device__ OneHot_6_Struct exec_OneHot_6_(ExecContext& ctx,
@@ -602,18 +611,18 @@ extern __device__ OneHot_6_Struct exec_OneHot_6_(ExecContext& ctx,
                                                  BoundLayout<OneHot_6_Layout> layout1);
 extern __device__ PoseidonStateStruct
 exec_PoseidonPaging(ExecContext& ctx,
-                    RegStruct arg0,
-                    Val arg1,
-                    PoseidonStateStruct arg2,
+                    NondetRegStruct arg0,
+                    Val arg1_0,
+                    PoseidonStateStruct arg2_0,
                     BoundLayout<PoseidonPagingLayout> layout3);
 extern __device__ InstOutputStruct exec_Poseidon0(ExecContext& ctx,
-                                                  RegStruct arg0,
-                                                  InstInputStruct arg1,
+                                                  NondetRegStruct arg0,
+                                                  InstInputStruct arg1_0,
                                                   BoundLayout<Poseidon0Layout> layout2,
                                                   GlobalBuf global3);
 extern __device__ InstOutputStruct exec_Poseidon1(ExecContext& ctx,
-                                                  RegStruct arg0,
-                                                  InstInputStruct arg1,
+                                                  NondetRegStruct arg0,
+                                                  InstInputStruct arg1_0,
                                                   BoundLayout<Poseidon1Layout> layout2);
 extern __device__ OneHot_11_Struct exec_OneHot_11_(ExecContext& ctx,
                                                    Val arg0,

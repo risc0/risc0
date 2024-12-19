@@ -99,6 +99,9 @@ impl<H: Hal> WitnessGenerator<H> {
         // is_terminate
         global[LAYOUT_GLOBAL.is_terminate._super.offset] = 1u32.into();
 
+        // shutdown_cycle
+        global[LAYOUT_GLOBAL.shutdown_cycle._super.offset] = segment.segment_threshold.into();
+
         let global = MetaBuffer {
             buf: hal.copy_from_elem("global", &global),
             rows: 1,
@@ -190,10 +193,12 @@ impl Injector {
     }
 
     fn set_cycle(&mut self, row: usize, cycle: &RawPreflightCycle) {
+        const CYCLE_COL: usize = LAYOUT_TOP.cycle._super.offset;
         const NEXT_PC_LOW: usize = LAYOUT_TOP.next_pc_low._super.offset;
         const NEXT_PC_HIGH: usize = LAYOUT_TOP.next_pc_high._super.offset;
         const NEXT_STATE: usize = LAYOUT_TOP.next_state_0._super.offset;
         const MACHINE_MODE: usize = LAYOUT_TOP.next_machine_mode._super.offset;
+        self.set(row, CYCLE_COL, row as u32);
         self.set(row, NEXT_PC_LOW, cycle.pc & 0xffff);
         self.set(row, NEXT_PC_HIGH, cycle.pc >> 16);
         self.set(row, NEXT_STATE, cycle.state);

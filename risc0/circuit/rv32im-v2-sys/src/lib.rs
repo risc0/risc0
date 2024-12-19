@@ -44,7 +44,7 @@ pub struct RawPreflightCycle {
     pub user_cycle: u32,
     pub txn_idx: u32,
     pub paging_idx: u32,
-    pub diff_count: u32,
+    pub diff_count: [u32; 2],
 }
 
 #[repr(C)]
