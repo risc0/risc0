@@ -96,7 +96,7 @@ pub(crate) unsafe fn alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
 
 /// Initialize the bump allocator with the memory allocations defined in the [memory][crate::memory] module.
 ///
-/// # Saftey
+/// # Safety
 ///
 /// This function must be called exactly once.
 pub unsafe fn init() {
