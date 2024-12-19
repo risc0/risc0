@@ -33,7 +33,7 @@ unsafe impl critical_section::Impl for CriticalSection {
 
 /// Initialize the embedded-alloc allocator with the memory allocations defined in the [memory][crate::memory] module.
 ///
-/// # Saftey
+/// # Safety
 ///
 /// This function must be called exactly once.
 pub unsafe fn init() {
