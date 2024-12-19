@@ -706,7 +706,28 @@ fn get_guest_dir<H: AsRef<Path>, G: AsRef<Path>>(host_pkg: H, guest_pkg: G) -> P
 pub fn embed_methods_with_options(
     guest_pkg_to_options: HashMap<&str, GuestOptions>,
 ) -> Vec<GuestListEntry> {
-    do_embed_methods(guest_pkg_to_options)
+    // Read the cargo metadata for info from `[package.metadata.risc0]`.
+    let pkg = current_package();
+    let guest_packages = guest_packages(&pkg);
+
+    do_embed_methods(pkg, guest_packages, guest_pkg_to_options)
+}
+
+/// Embeds methods built for RISC-V for use by host-side dependencies.
+/// Specify custom options for the package by defining its [GuestOptions].
+/// Only compiles guests with options passed [GuestOptions].
+/// See [embed_methods].
+pub fn embed_some_methods_with_options(
+    guests_to_embed: HashMap<&str, GuestOptions>,
+) -> Vec<GuestListEntry> {
+    // Read the cargo metadata for info from `[package.metadata.risc0]`.
+    let pkg = current_package();
+    let mut guest_packages = guest_packages(&pkg);
+
+    // No need to check for extra options, that fails downstream.
+    guest_packages.retain(|guest_pkg| guests_to_embed.contains_key(guest_pkg.name.as_str()));
+
+    do_embed_methods(pkg, guest_packages, guests_to_embed)
 }
 
 /// Build methods for RISC-V and embed minimal metadata - the `elf` name and path.
@@ -720,21 +741,46 @@ pub fn embed_methods_with_options(
 pub fn embed_method_metadata_with_options(
     guest_pkg_to_options: HashMap<&str, GuestOptions>,
 ) -> Vec<MinGuestListEntry> {
-    do_embed_methods(guest_pkg_to_options)
+    // Read the cargo metadata for info from `[package.metadata.risc0]`.
+    let pkg = current_package();
+    let guest_packages = guest_packages(&pkg);
+
+    do_embed_methods(pkg, guest_packages, guest_pkg_to_options)
+}
+
+/// Build methods for RISC-V and embed minimal metadata - the `elf` name and path.
+/// To embed the full elf, use [embed_some_methods_with_options].
+///
+/// Use this option if you wish to import the guest `elf` into your prover at runtime
+/// rather than embedding it into the prover binary. This reduces build times for large
+/// binaries, but makes prover initialization fallible.
+///
+/// Specify custom options for the package by defining its [GuestOptions].
+/// Only compiles guests with options passed [GuestOptions].
+pub fn embed_some_method_metadata_with_options(
+    guests_to_embed: HashMap<&str, GuestOptions>,
+) -> Vec<MinGuestListEntry> {
+    // Read the cargo metadata for info from `[package.metadata.risc0]`.
+    let pkg = current_package();
+    let mut guest_packages = guest_packages(&pkg);
+
+    // No need to check for extra options, that fails downstream.
+    guest_packages.retain(|guest_pkg| guests_to_embed.contains_key(guest_pkg.name.as_str()));
+
+    do_embed_methods(pkg, guest_packages, guests_to_embed)
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 fn do_embed_methods<G: GuestBuilder>(
+    pkg: Package,
+    guest_packages: Vec<Package>,
     mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
 ) -> Vec<G> {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
 
-    // Read the cargo metadata for info from `[package.metadata.risc0]`.
-    let pkg = current_package();
-    let guest_packages = guest_packages(&pkg);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
