@@ -1,7 +1,7 @@
 [package]
 name = "rzup"
-description = "utility to install the RISC Zero toolchain"
-version = "0.2.2"
+description = "The RISC Zero version management library and CLI"
+version = "0.3.0-alpha.1"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -10,25 +10,28 @@ repository = { workspace = true }
 [package.metadata.release]
 release = false
 
+[[bin]]
+name = "rzup"
+path = "src/bin/rzup.rs"
+required-features = ["cli"] # check this
+
+[features]
+default = ["cli"] # and this
+cli = ["dep:clap"]
+
 [dependencies]
-anyhow = "1.0.93"
-cfg-if = "1.0.0"
-clap = { version = "4.5.22", features = ["derive"] }
+anyhow = { version = "1.0.94", features = ["backtrace"] }
+thiserror = "2.0.7"
 dirs = "5.0.1"
-downloader = "0.2.8"
-flate2 = "1.0.34"
-fs2 = "0.4.3"
-lazy_static = "1.5.0"
-regex = "1.11.1"
-reqwest = { version = "0.12", default-features = false, features = [
-  "json",
-  "rustls-tls",
-] }
-risc0-build = { path = "../risc0/build" }
+tempfile = "3.14.0"
+semver = "1.0.24"
 serde = { version = "1.0.215", features = ["derive"] }
-tar = "0.4.43"
-tempfile = "3.12.0"
-termcolor = "1.4.1"
-thiserror = "1.0.65"
-tokio = { version = "1.42.0", features = ["rt-multi-thread", "macros"] }
-xz = "0.1.0"
+toml = "0.8.19"
+
+# cli dependencies
+clap = { version = "4.5.23", features = ["derive"], optional = true }
+
+# TEMP
+# [lints.rust]
+# dead_code = "allow"
+# unused_variables = "allow"

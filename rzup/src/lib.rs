@@ -1,74 +1,68 @@
-// Copyright 2024 RISC Zero, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+#[cfg(feature = "cli")]
 pub mod cli;
-pub mod errors;
-pub mod extension;
-pub mod repo;
-pub mod toolchain;
-pub mod utils;
+mod components;
+mod env;
+pub mod error;
+mod settings;
 
-use std::fs;
+use crate::components::registry::ComponentRegistry;
+use crate::env::Environment;
+use crate::settings::Settings;
+pub use error::{Result, RzupError};
+use std::path::PathBuf;
 
-use anyhow::{anyhow, Context, Result};
-use std::process::Command;
-
-pub struct Rzup;
+pub struct Rzup {
+    environment: Environment,
+    registry: ComponentRegistry,
+}
 
 impl Rzup {
-    pub fn version() -> &'static str {
-        env!("CARGO_PKG_VERSION")
+    pub fn new() -> Result<Self> {
+        let environment = Environment::new()?;
+        let mut registry = ComponentRegistry::new(&environment)?;
+        registry.scan_environment(&environment)?;
+
+        Ok(Self {
+            environment,
+            registry,
+        })
     }
 
-    pub async fn update() -> Result<()> {
-        // Run the curl command to download and execute the rzup-init.sh script
-        // NOTE: This requires curl - we should look into fallbacks
-        let output = Command::new("sh")
-            .arg("-c")
-            .arg("curl -L https://risczero.com/install | bash")
-            .output()
-            .expect("Failed to execute update command");
+    pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
+        let environment = Environment::with_root(root)?;
+        let mut registry = ComponentRegistry::new(&environment)?;
+        registry.scan_environment(&environment)?;
 
-        // Check if the command was successful
-        if output.status.success() {
-            info_msg!("rzup has been updated successfully.");
-        } else {
-            info_msg!("Failed to update rzup.");
-            if let Some(code) = output.status.code() {
-                eprintln!("Exit code: {}", code);
-            }
-        }
+        Ok(Self {
+            environment,
+            registry,
+        })
+    }
 
+    pub fn install_all(&mut self, version: Option<String>, force: bool) -> Result<()> {
+        self.registry
+            .install_all(&self.environment, version, force)?;
+        self.registry.scan_environment(&self.environment)?;
         Ok(())
     }
 
-    pub fn uninstall() -> Result<()> {
-        let cargo_bin_path = dirs::home_dir()
-            .ok_or_else(|| anyhow!("Could not determine home directory"))?
-            .join(".cargo/bin");
-
-        let rzup_path = cargo_bin_path.join("rzup");
-
-        if rzup_path.exists() {
-            verbose_msg!(format!("Removing rzup from {}", rzup_path.display()));
-
-            fs::remove_file(&rzup_path).context("Failed to remove rzup.")?;
-            info_msg!(format!(
-                "Uninstalled rzup from {}",
-                cargo_bin_path.display()
-            ));
-        }
+    pub fn install_component(
+        &mut self,
+        component: &str,
+        version: Option<String>,
+        force: bool,
+    ) -> Result<()> {
+        self.registry
+            .install_component(&self.environment, component, version, force)?;
+        self.registry.scan_environment(&self.environment)?;
         Ok(())
+    }
+
+    pub fn environment(&self) -> &Environment {
+        &self.environment
+    }
+
+    pub fn settings(&self) -> &Settings {
+        self.registry.settings()
     }
 }
