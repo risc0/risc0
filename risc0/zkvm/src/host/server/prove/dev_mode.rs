@@ -89,7 +89,7 @@ impl ProverServer for DevModeProver {
                 AssumptionReceipt::Proven(receipt) => Ok(receipt),
                 AssumptionReceipt::Unresolved(assumption) => {
                     let claim = keccak_assumptions.get(&assumption).ok_or(anyhow!(
-                        "no receipt available for unresolved assumption: {assumption:#?} \n assumptions: {:?}",keccak_assumptions
+                        "no receipt available for unresolved assumption: {assumption:#?}"
                     ))?;
                     Ok(InnerAssumptionReceipt::Fake(FakeReceipt {
                         claim: MaybePruned::Pruned(*claim),
