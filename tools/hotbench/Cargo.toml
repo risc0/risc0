@@ -7,7 +7,7 @@ edition = { workspace = true }
 release = false
 
 [dependencies]
-cargo_metadata = "0.18"
+cargo_metadata = "0.19"
 human-repr = "1.0"
 serde = "1.0"
 serde_json = "1.0"
