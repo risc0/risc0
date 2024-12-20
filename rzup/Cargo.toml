@@ -22,7 +22,9 @@ lazy_static = "1.5.0"
 regex = "1.11.1"
 reqwest = { version = "0.12", default-features = false, features = [
   "json",
-  "default-tls",
+  "native-tls",
+  "native-tls-vendored",
+  "native-tls-alpn"
 ] }
 risc0-build = { path = "../risc0/build" }
 serde = { version = "1.0.215", features = ["derive"] }
