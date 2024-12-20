@@ -101,6 +101,12 @@ versions `>=1.2.0` of `risc0` crates. For users who need a stable, production-re
 working on stablizing these precompiles as soon as possible, and the `"unstable"` feature flag will
 no longer be required.
 
+## Timing Attacks
+
+These precompiles do not currently provide strict guarantees about constant-time execution and
+proving time. Be very careful if using any of these precompiles with private data, such as signing
+a message within the zkvm where an observer can measure the proving time.
+
 [^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
