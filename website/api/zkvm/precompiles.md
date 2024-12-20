@@ -105,7 +105,7 @@ no longer be required.
 
 These precompiles do not currently provide strict guarantees about constant-time execution and
 proving time. Be very careful if using any of these precompiles with private data, such as signing
-a message within the zkvm where an observer can measure the proving time.
+a message within the zkvm where an observer can measure the proving time or view cycle counts.
 
 [^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
