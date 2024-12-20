@@ -28,11 +28,18 @@ pub const KECCAK_PO2_RANGE: core::ops::RangeInclusive<usize> = 14..=18;
 
 pub const RECURSION_PO2: usize = 18;
 
+pub const KECCAK_PERMUTE_CYCLES: usize = 200;
+
 pub type KeccakState = [u64; 25];
 
 pub fn get_control_id(po2: usize) -> &'static Digest {
     assert!(KECCAK_PO2_RANGE.contains(&po2), "po2 {po2} out of range");
     &KECCAK_CONTROL_IDS[po2 - KECCAK_PO2_RANGE.min().unwrap()]
+}
+
+pub fn max_keccak_inputs(po2: u32) -> usize {
+    let max_keccak_cycles: usize = 1 << po2;
+    max_keccak_cycles / KECCAK_PERMUTE_CYCLES
 }
 
 #[cfg(feature = "prove")]

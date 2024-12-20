@@ -17,14 +17,12 @@ use core::{ptr::addr_of, str::from_utf8};
 use alloc::vec;
 
 use risc0_circuit_keccak::{
-    KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KECCAK_PO2_RANGE,
+    max_keccak_inputs, KeccakState, KECCAK_CONTROL_ROOT, KECCAK_DEFAULT_PO2, KECCAK_PO2_RANGE,
 };
 use risc0_zkp::core::{digest::Digest, hash::sha::SHA256_INIT};
 use risc0_zkvm_platform::syscall::{
     sys_getenv, sys_keccak, sys_prove_keccak, sys_sha_compress, DIGEST_WORDS,
 };
-
-const KECCAK_PERMUTE_CYCLES: usize = 200;
 
 /// This struct implements the batching of calls to the keccak accelerator.
 #[derive(Debug)]
@@ -67,8 +65,7 @@ impl Keccak2Batcher {
             po2
         };
 
-        let max_keccak_cycles: usize = 1 << po2;
-        let max_inputs = max_keccak_cycles / KECCAK_PERMUTE_CYCLES;
+        let max_inputs = max_keccak_inputs(po2);
 
         Self {
             claim_state: SHA256_INIT,
