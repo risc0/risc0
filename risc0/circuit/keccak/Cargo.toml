@@ -24,6 +24,7 @@ tracing = { version = "0.1", default-features = false, features = [
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 bytemuck = "1.20"
 cfg-if = { version = "1.0", optional = true }
+keccak = { version = "0.1.5", optional = true }
 risc0-circuit-keccak-sys = { workspace = true, optional = true }
 risc0-circuit-recursion = { workspace = true, default-features = false }
 risc0-sys = { workspace = true, optional = true }
@@ -49,6 +50,7 @@ default = ["prove"]
 # Enables ZKR registration to actually generate proofs.
 prove = [
   "dep:cfg-if",
+  "dep:keccak",
   "dep:rayon",
   "dep:risc0-circuit-keccak-sys",
   "dep:risc0-sys",

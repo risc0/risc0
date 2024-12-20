@@ -15,19 +15,14 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, bail, Result};
-use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
-use risc0_zkp::core::{
-    digest::{Digest, DIGEST_BYTES},
-    hash::sha::{Sha256, SHA256_INIT},
-};
+use risc0_circuit_keccak::{compute_keccak_digest, KECCAK_CONTROL_ROOT};
 
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::Unknown,
-    sha, Assumption, AssumptionReceipt, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt,
-    MaybePruned, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
-    VerifierContext,
+    Assumption, AssumptionReceipt, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt, MaybePruned,
+    ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -78,7 +73,7 @@ impl ProverServer for DevModeProver {
         let mut keccak_assumptions = HashMap::new();
 
         for proof_request in session.pending_keccaks.iter() {
-            let claim = compute_keccak_digest(proof_request);
+            let claim = compute_keccak_digest(&proof_request.input);
             let assumption = Assumption {
                 claim,
                 control_root: KECCAK_CONTROL_ROOT,
@@ -174,42 +169,4 @@ impl ProverServer for DevModeProver {
             receipt.journal.bytes.clone(),
         ))
     }
-}
-
-fn compute_keccak_digest(proof_request: &crate::host::client::env::ProveKeccakRequest) -> Digest {
-    let mut transcript = vec![];
-
-    let mut input = proof_request.input.clone();
-    let input_states: &mut [KeccakState] = bytemuck::cast_slice_mut(input.as_mut_slice());
-    for input in input_states.iter_mut() {
-        let mut data = [0u64; 32];
-        data[0..25].clone_from_slice(input);
-        transcript.push(data);
-
-        keccak::f1600(input);
-
-        data[0..25].clone_from_slice(input);
-        transcript.push(data);
-    }
-
-    let mut digest = SHA256_INIT;
-    for halfs in bytemuck::cast_slice::<[u64; 32], [u64; 8]>(transcript.as_slice()) {
-        let mut first_half = [0u8; DIGEST_BYTES];
-        first_half.clone_from_slice(bytemuck::cast_slice(&halfs[0..4]));
-
-        let mut second_half = [0u8; DIGEST_BYTES];
-        second_half.clone_from_slice(bytemuck::cast_slice(&halfs[4..8]));
-
-        digest = *sha::Impl::compress(
-            &digest,
-            &Digest::from_bytes(first_half),
-            &Digest::from_bytes(second_half),
-        );
-    }
-
-    // reorder to match the keccak accelerator
-    for word in digest.as_mut_words() {
-        *word = word.to_be();
-    }
-    digest
 }
