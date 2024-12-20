@@ -43,7 +43,8 @@ struct Cli {
 
 const PAGING_CYCLES: usize = 1821;
 const NON_LOOP_CYCLES: usize = 8;
-const RESERVED_CYCLES: usize = LOOKUP_TABLE_CYCLES + PAGING_CYCLES + NON_LOOP_CYCLES;
+const RESERVED_CYCLES: usize =
+    LOOKUP_TABLE_CYCLES + PAGING_CYCLES + NON_LOOP_CYCLES + MAX_INSN_CYCLES;
 
 fn main() {
     tracing_subscriber::fmt()

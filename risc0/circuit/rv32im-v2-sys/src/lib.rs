@@ -60,7 +60,7 @@ pub struct RawBuffer {
     pub buf: *const BabyBearElem,
     pub rows: usize,
     pub cols: usize,
-    pub checked_reads: bool,
+    pub checked: bool,
 }
 
 #[repr(C)]

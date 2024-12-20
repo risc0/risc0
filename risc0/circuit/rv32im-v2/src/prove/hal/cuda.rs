@@ -78,13 +78,13 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
                 buf: global_ptr.as_ptr() as *const Val,
                 rows: global.rows,
                 cols: global.cols,
-                checked_reads: global.checked_reads,
+                checked: global.checked,
             },
             data: RawBuffer {
                 buf: data_ptr.as_ptr() as *const Val,
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
         };
 
@@ -113,27 +113,26 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
         let cycles = preflight.cycles.len();
         tracing::debug!("accumulate: {cycles}");
 
-        // let data_vec = data.buf.to_vec();
-        // let accum_vec = accum.buf.to_vec();
-        // let mix_vec = mix.buf.to_vec();
         let buffers = RawAccumBuffers {
             data: RawBuffer {
                 buf: data.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
             accum: RawBuffer {
                 buf: accum.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: accum.rows,
                 cols: accum.cols,
-                checked_reads: accum.checked_reads,
+                // Disable checked reads/writes for CUDA so that in-place
+                // changes can be made during phase2 and phase3 of accumulation.
+                checked: false,
             },
             mix: RawBuffer {
                 buf: mix.buf.as_device_ptr().as_ptr() as *const Val,
                 rows: mix.rows,
                 cols: mix.cols,
-                checked_reads: mix.checked_reads,
+                checked: mix.checked,
             },
         };
         let preflight = RawPreflightTrace {
@@ -145,19 +144,6 @@ impl<CH: CudaHash> CircuitAccumulator<CudaHal<CH>> for CudaCircuitHal<CH> {
         ffi_wrap(|| unsafe {
             risc0_circuit_rv32im_v2_cuda_accum(&buffers, &preflight, cycles as u32)
         })
-        // let result = ffi_wrap(|| unsafe {
-        //     risc0_circuit_rv32im_v2_cpu_accum(&buffers, &preflight, cycles as u32)
-        // });
-        // data.buf.view_mut(|view| {
-        //     view.copy_from_slice(&data_vec);
-        // });
-        // accum.buf.view_mut(|view| {
-        //     view.copy_from_slice(&accum_vec);
-        // });
-        // mix.buf.view_mut(|view| {
-        //     view.copy_from_slice(&mix_vec);
-        // });
-        // result
     }
 }
 

@@ -106,7 +106,7 @@ impl<H: Hal> WitnessGenerator<H> {
             buf: hal.copy_from_elem("global", &global),
             rows: 1,
             cols: REGCOUNT_GLOBAL,
-            checked_reads: true,
+            checked: true,
         };
 
         let code = MetaBuffer::new("code", hal, cycles, REGCOUNT_CODE, false);

@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <cuda/std/array>
 #include <string.h>
+#include <thrust/execution_policy.h>
+#include <thrust/scan.h>
 
 namespace risc0::circuit::rv32im_v2::cuda {
 
@@ -367,6 +369,26 @@ __global__ void stepAccum(DeviceAccumContext* ctx, uint32_t count) {
   step_TopAccum(execCtx, &accum, &data, &mix);
 }
 
+__global__ void finalizeAccum(DeviceAccumContext* ctx, uint32_t lastCycle) {
+  uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+  if (cycle >= lastCycle) {
+    return;
+  }
+
+  Buffer& accum = *ctx->accum;
+
+  size_t back1 = (cycle + lastCycle - 1) % lastCycle;
+  Fp prev[4];
+  for (size_t k = 0; k < 4; k++) {
+    prev[k] = accum.get(back1, accum.cols - 4 + k);
+  }
+  for (size_t j = 0; j < accum.cols / 4 - 1; j++) {
+    for (size_t k = 0; k < 4; k++) {
+      accum.set(cycle, j * 4 + k, accum.get(cycle, j * 4 + k) + prev[k]);
+    }
+  }
+}
+
 } // namespace risc0::circuit::rv32im_v2::cuda
 
 constexpr size_t kStepModeParallel = 0;
@@ -426,23 +448,30 @@ const char* risc0_circuit_rv32im_v2_cuda_accum(AccumBuffers* buffers,
   try {
     HostAccumContext ctx(buffers, preflight, lastCycle);
     CudaStream stream;
+    auto cfg = getSimpleConfig(lastCycle);
 
     {
       nvtx3::scoped_range range("phase1");
-      auto cfg = getSimpleConfig(lastCycle);
       stepAccum<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
       CUDA_OK(cudaStreamSynchronize(stream));
     }
 
     {
       nvtx3::scoped_range range("phase2");
-      // TODO
-      // thrust::exclusive_scan(thrust::device, ramIndex, ramIndex + steps, ramIndex);
+      size_t rows = buffers->accum.rows;
+      for (size_t j = 0; j < 4; j++) {
+        size_t col = buffers->accum.cols - 4 + j;
+        Fp* itBegin = buffers->accum.buf + col * rows;
+        Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
+        thrust::inclusive_scan(thrust::device, itBegin, itEnd, itBegin);
+      }
+      CUDA_OK(cudaStreamSynchronize(stream));
     }
 
     {
       nvtx3::scoped_range range("phase3");
-      // TODO
+      finalizeAccum<<<cfg.grid, cfg.block, 0, stream>>>(ctx.ctx, lastCycle);
+      CUDA_OK(cudaStreamSynchronize(stream));
     }
 
   } catch (const std::exception& err) {

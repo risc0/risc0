@@ -25,25 +25,25 @@ struct Buffer {
   Fp* buf;
   size_t rows;
   size_t cols;
-  bool checkedReads;
+  bool checked;
 
   __device__ void set(size_t row, size_t col, Fp val) {
     Fp& elem = buf[col * rows + row];
-    // if (elem != Fp::invalid() && elem != val) {
-    //   printf("set(row: %lu, col: %lu, val: 0x%08x) cur: 0x%08x\n",
-    //          row,
-    //          col,
-    //          val.asUInt32(),
-    //          elem.asUInt32());
-    //   assert(false && "Inconsistent set");
-    // }
+    if (elem != Fp::invalid() && elem != val && checked) {
+      printf("set(row: %lu, col: %lu, val: 0x%08x) cur: 0x%08x\n",
+             row,
+             col,
+             val.asUInt32(),
+             elem.asUInt32());
+      assert(false && "Inconsistent set");
+    }
     // printf("set(row: %lu, col: %lu, val: 0x%08x)\n", row, col, val.asUInt32());
     elem = val;
   }
 
   __device__ Fp get(size_t row, size_t col) {
     Fp ret = buf[col * rows + row];
-    if (ret == Fp::invalid() && checkedReads) {
+    if (ret == Fp::invalid() && checked) {
       printf("get(row: %lu, col: %lu) -> 0x%08x\n", row, col, ret.asRaw());
       assert(false && "Read of unset value");
     }

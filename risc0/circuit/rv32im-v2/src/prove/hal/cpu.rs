@@ -65,13 +65,13 @@ impl CircuitWitnessGenerator<CpuHal> for CpuCircuitHal {
                 buf: global_buf.as_ptr(),
                 rows: global.rows,
                 cols: global.cols,
-                checked_reads: global.checked_reads,
+                checked: global.checked,
             },
             data: RawBuffer {
                 buf: data_buf.as_ptr(),
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
         };
         let preflight = RawPreflightTrace {
@@ -105,19 +105,19 @@ impl CircuitAccumulator<CpuHal> for CpuCircuitHal {
                 buf: data_buf.as_ptr(),
                 rows: data.rows,
                 cols: data.cols,
-                checked_reads: data.checked_reads,
+                checked: data.checked,
             },
             accum: RawBuffer {
                 buf: accum_buf.as_ptr(),
                 rows: accum.rows,
                 cols: accum.cols,
-                checked_reads: accum.checked_reads,
+                checked: accum.checked,
             },
             mix: RawBuffer {
                 buf: mix_buf.as_ptr(),
                 rows: mix.rows,
                 cols: mix.cols,
-                checked_reads: mix.checked_reads,
+                checked: mix.checked,
             },
         };
         let preflight = RawPreflightTrace {
