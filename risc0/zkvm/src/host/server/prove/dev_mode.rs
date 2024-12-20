@@ -12,13 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use std::collections::HashMap;
+
+use anyhow::{anyhow, bail, Result};
+use risc0_circuit_keccak::{KeccakState, KECCAK_CONTROL_ROOT};
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_BYTES},
+    hash::sha::{Sha256, SHA256_INIT},
+};
 
 use crate::{
     host::{prove_info::ProveInfo, server::session::null_callback},
     receipt::{FakeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     receipt_claim::Unknown,
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
+    sha, Assumption, AssumptionReceipt, ExecutorEnv, ExecutorImpl, InnerAssumptionReceipt,
+    MaybePruned, ProverOpts, ProverServer, Receipt, ReceiptClaim, Segment, Session,
     VerifierContext,
 };
 
@@ -64,10 +72,47 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        let claim = session.claim()?;
+        let (_, session_assumption_receipts): (Vec<_>, Vec<_>) =
+            session.assumptions.iter().cloned().unzip();
+
+        let mut keccak_assumptions = HashMap::new();
+
+        for proof_request in session.pending_keccaks.iter() {
+            let claim = compute_keccak_digest(proof_request);
+            let assumption = Assumption {
+                claim,
+                control_root: KECCAK_CONTROL_ROOT,
+            };
+            tracing::debug!("adding keccak assumption: {assumption:#?}");
+            keccak_assumptions.insert(assumption, claim);
+        }
+
+        // TODO: add test case for when a single session refers to the same assumption multiple times
+        let inner_assumption_receipts: Vec<_> = session_assumption_receipts
+            .into_iter()
+            .map(|assumption_receipt| match assumption_receipt {
+                AssumptionReceipt::Proven(receipt) => Ok(receipt),
+                AssumptionReceipt::Unresolved(assumption) => {
+                    let claim = keccak_assumptions.get(&assumption).ok_or(anyhow!(
+                        "no receipt available for unresolved assumption: {assumption:#?} \n assumptions: {:?}",keccak_assumptions
+                    ))?;
+                    Ok(InnerAssumptionReceipt::Fake(FakeReceipt {
+                        claim: MaybePruned::Pruned(*claim),
+                    }))
+                }
+            })
+            .collect::<Result<_>>()?;
+
+        let assumption_receipts: Vec<_> = inner_assumption_receipts
+            .iter()
+            .map(|inner| AssumptionReceipt::Proven(inner.clone()))
+            .collect();
+
+        let session_claim = session.claim_with_assumptions(assumption_receipts.iter())?;
+
         let receipt = Receipt::new(
             InnerReceipt::Fake(FakeReceipt {
-                claim: claim.into(),
+                claim: session_claim.into(),
             }),
             session.journal.clone().unwrap_or_default().bytes,
         );
@@ -129,4 +174,42 @@ impl ProverServer for DevModeProver {
             receipt.journal.bytes.clone(),
         ))
     }
+}
+
+fn compute_keccak_digest(proof_request: &crate::host::client::env::ProveKeccakRequest) -> Digest {
+    let mut transcript = vec![];
+
+    let mut input = proof_request.input.clone();
+    let input_states: &mut [KeccakState] = bytemuck::cast_slice_mut(input.as_mut_slice());
+    for input in input_states.iter_mut() {
+        let mut data = [0u64; 32];
+        data[0..25].clone_from_slice(input);
+        transcript.push(data);
+
+        keccak::f1600(input);
+
+        data[0..25].clone_from_slice(input);
+        transcript.push(data);
+    }
+
+    let mut digest = SHA256_INIT;
+    for halfs in bytemuck::cast_slice::<[u64; 32], [u64; 8]>(transcript.as_slice()) {
+        let mut first_half = [0u8; DIGEST_BYTES];
+        first_half.clone_from_slice(bytemuck::cast_slice(&halfs[0..4]));
+
+        let mut second_half = [0u8; DIGEST_BYTES];
+        second_half.clone_from_slice(bytemuck::cast_slice(&halfs[4..8]));
+
+        digest = *sha::Impl::compress(
+            &digest,
+            &Digest::from_bytes(first_half),
+            &Digest::from_bytes(second_half),
+        );
+    }
+
+    // reorder to match the keccak accelerator
+    for word in digest.as_mut_words() {
+        *word = word.to_be();
+    }
+    digest
 }
