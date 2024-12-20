@@ -57,10 +57,14 @@ impl Extension {
         }
     }
 
-    fn api_url(&self, tag: Option<&str>) -> String {
-        let base_url = match self {
+    fn base_url(&self) -> &'static str {
+        match self {
             Extension::CargoRiscZero => "https://api.github.com/repos/risc0/risc0/releases",
-        };
+        }
+    }
+
+    fn api_url(&self, tag: Option<&str>) -> String {
+        let base_url = self.base_url();
         match tag {
             Some(tag) => format!("{}/tags/{}", base_url, tag),
             None => format!("{}/latest", base_url),
@@ -86,6 +90,24 @@ impl Extension {
         let release_info: GithubReleaseInfo = res.json().await?;
 
         Ok(release_info)
+    }
+
+    pub async fn list_release_infos(&self) -> Result<Vec<GithubReleaseInfo>> {
+        let client = http_client()?;
+
+        let url = self.base_url();
+
+        let res = client.get(url).send().await?;
+
+        if res.status() == 403 {
+            return Err(RzupError::Other(
+                "Rate limited by GitHub API. Please set a GitHub token in the GITHUB_TOKEN environment variable."
+                    .into(),
+            ).into());
+        }
+
+        let release_infos: Vec<GithubReleaseInfo> = res.json().await?;
+        Ok(release_infos)
     }
 
     async fn download(
