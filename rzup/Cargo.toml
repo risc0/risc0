@@ -1,7 +1,7 @@
 [package]
 name = "rzup"
 description = "utility to install the RISC Zero toolchain"
-version = "0.2.2"
+version = "0.2.3"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -22,7 +22,10 @@ lazy_static = "1.5.0"
 regex = "1.11.1"
 reqwest = { version = "0.12", default-features = false, features = [
   "json",
-  "rustls-tls",
+  "http2",
+  "native-tls",
+  "native-tls-vendored",
+  "native-tls-alpn"
 ] }
 risc0-build = { path = "../risc0/build" }
 serde = { version = "1.0.215", features = ["derive"] }
