@@ -31,8 +31,6 @@ const LOAD_ROOT_CYCLES: u32 = 1;
 const RESUME_CYCLES: u32 = 2;
 const SUSPEND_CYCLES: u32 = 2;
 const STORE_ROOT_CYCLES: u32 = 1;
-const U8_TABLE_CYCLES: u32 = (1 << 8) / 16;
-const U16_TABLE_CYCLES: u32 = (1 << 16) / 16;
 
 const POSEIDON_PAGING: u32 = 1;
 const POSEIDON_LOAD_IN: u32 = 2;
@@ -43,21 +41,19 @@ const POSEIDON_ENTRY: u32 = 1;
 pub(crate) const POSEIDON_BLOCK_WORDS: u32 = 8;
 pub(crate) const POSEIDON_PAGE_ROUNDS: u32 = PAGE_WORDS as u32 / POSEIDON_BLOCK_WORDS;
 
-const CYCLE_COST_PAGE: u32 = POSEIDON_PAGING + 10 * POSEIDON_PAGE_ROUNDS + POSEIDON_DO_OUT;
+const PAGE_CYCLES: u32 = POSEIDON_PAGING + 10 * POSEIDON_PAGE_ROUNDS + POSEIDON_DO_OUT;
 
-const CYCLE_COST_NODE: u32 =
+const NODE_CYCLES: u32 =
     POSEIDON_PAGING + POSEIDON_LOAD_IN + POSEIDON_EXTERNAL + POSEIDON_INTERNAL + POSEIDON_DO_OUT;
 
-const CYCLE_COST_RESERVED: u32 = LOAD_ROOT_CYCLES
+pub(crate) const RESERVED_PAGING_CYCLES: u32 = LOAD_ROOT_CYCLES
     + POSEIDON_ENTRY
     + POSEIDON_PAGING
     + RESUME_CYCLES
     + SUSPEND_CYCLES
     + POSEIDON_ENTRY
     + POSEIDON_PAGING
-    + STORE_ROOT_CYCLES
-    + U8_TABLE_CYCLES
-    + U16_TABLE_CYCLES;
+    + STORE_ROOT_CYCLES;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 enum PageState {
@@ -106,14 +102,14 @@ impl PagedMemory {
             image,
             page_cache: BTreeMap::new(),
             page_states: BTreeMap::new(),
-            cycles: CYCLE_COST_RESERVED,
+            cycles: RESERVED_PAGING_CYCLES,
         }
     }
 
     pub(crate) fn reset(&mut self) {
         self.page_cache.clear();
         self.page_states.clear();
-        self.cycles = CYCLE_COST_RESERVED;
+        self.cycles = RESERVED_PAGING_CYCLES;
     }
 
     pub(crate) fn loaded_pages(&self) -> PagingActivity {
@@ -175,7 +171,7 @@ impl PagedMemory {
             PageState::Loaded
         };
         if state == PageState::Loaded {
-            self.cycles += CYCLE_COST_PAGE;
+            self.cycles += PAGE_CYCLES;
             self.fixup_costs(node_idx, PageState::Dirty);
             self.page_states.insert(node_idx, PageState::Dirty);
         }
@@ -235,7 +231,7 @@ impl PagedMemory {
         tracing::trace!("load_page: {page_idx:#08x}");
         self.page_cache
             .insert(page_idx, self.image.get_page(page_idx)?);
-        self.cycles += CYCLE_COST_PAGE;
+        self.cycles += PAGE_CYCLES;
         self.fixup_costs(node_idx(page_idx), PageState::Loaded);
         Ok(())
     }
@@ -251,11 +247,11 @@ impl PagedMemory {
                 if node_idx < MEMORY_PAGES as u32 {
                     if state == PageState::Unloaded {
                         // tracing::trace!("fixup: {state:?}: {node_idx:#010x}");
-                        self.cycles += CYCLE_COST_NODE;
+                        self.cycles += NODE_CYCLES;
                     }
                     if goal == PageState::Dirty {
                         // tracing::trace!("fixup: {goal:?}: {node_idx:#010x}");
-                        self.cycles += CYCLE_COST_NODE;
+                        self.cycles += NODE_CYCLES;
                     }
                 }
                 self.page_states.insert(node_idx, goal);

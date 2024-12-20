@@ -16,7 +16,10 @@ use std::time::Instant;
 
 use clap::Parser;
 use risc0_circuit_rv32im_v2::{
-    execute::{platform::LOOKUP_TABLE_CYCLES, testutil, MemoryImage2, DEFAULT_SEGMENT_LIMIT_PO2},
+    execute::{
+        platform::LOOKUP_TABLE_CYCLES, testutil, MemoryImage2, DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
+    },
     prove::segment_prover,
 };
 use risc0_core::scope;
@@ -63,6 +66,7 @@ fn main() {
     let result = testutil::execute(
         image,
         args.po2,
+        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,

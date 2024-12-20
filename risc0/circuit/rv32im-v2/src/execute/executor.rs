@@ -95,11 +95,12 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn run<F: FnMut(Segment) -> Result<()>>(
         &mut self,
         segment_po2: usize,
+        max_insn_cycles: usize,
         max_cycles: Option<u64>,
         mut callback: F,
     ) -> Result<ExecutorResult> {
         let segment_limit = 1 << segment_po2;
-        let segment_threshold = segment_limit - 4000;
+        let segment_threshold = segment_limit - max_insn_cycles as u32;
         let mut segment_counter = 0u64;
 
         self.reset();
@@ -169,7 +170,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             index: segment_counter,
             input_digest: self.input_digest,
             output_digest: self.output_digest,
-            segment_threshold: 1, // TODO
+            segment_threshold,
         })?;
 
         self.cycles.total += 1 << last_po2;

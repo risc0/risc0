@@ -178,7 +178,6 @@ Val extern_hostReadPrepare(ExecContext& ctx, Val fp, Val len) {
   std::cout << "hostReadPrepare\n";
   throw std::runtime_error("extern_hostReadPrepare");
   // return ctx.stepHandler.readPrepare(fp.asUInt32(), len.asUInt32());
-  // return 0;
 }
 
 Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val lenVal) {
@@ -188,7 +187,6 @@ Val extern_hostWrite(ExecContext& ctx, Val fdVal, Val addrLow, Val addrHigh, Val
   // uint32_t addr = addrLow.asUInt32() | (addrHigh.asUInt32() << 16);
   // uint32_t len = lenVal.asUInt32();
   // return ctx.stepHandler.write(fd, addr, len);
-  // return 0;
 }
 
 std::array<Val, 2> extern_nextPagingIdx(ExecContext& ctx) {
@@ -228,47 +226,6 @@ void stepAccum(AccumBuffers& buffers,
 constexpr size_t kStepModeParallel = 0;
 constexpr size_t kStepModeSeqForward = 1;
 constexpr size_t kStepModeSeqReverse = 2;
-
-namespace risc0 {
-
-struct AccumIterator {
-  FpExt* buf;
-  size_t rows;
-  size_t row;
-  size_t col;
-
-  using difference_type = int;
-  using value_type = FpExt;
-  using pointer = FpExt*;
-  using reference = FpExt&;
-  using iterator_category = std::forward_iterator_tag;
-
-  AccumIterator(FpExt* buf, size_t rows, size_t row, size_t col)
-      : buf(buf), rows(rows), row(row), col(col) {}
-
-  reference operator*() const { return buf[col * rows + row]; }
-
-  AccumIterator& operator++() {
-    row++;
-    return *this;
-  }
-
-  AccumIterator operator++(int) {
-    auto tmp = *this;
-    ++*this;
-    return tmp;
-  }
-
-  bool operator==(const AccumIterator& rhs) const { return row == rhs.row && col == rhs.col; }
-  bool operator!=(const AccumIterator& rhs) const { return !(*this == rhs); }
-
-  int operator-(const AccumIterator& rhs) const { return row - rhs.row; }
-  AccumIterator operator+(int rhs) { return AccumIterator(buf, rows, row + rhs, col); }
-
-  bool operator<(const AccumIterator& rhs) const { return row < rhs.row; }
-};
-
-} // namespace risc0
 
 extern "C" {
 
@@ -323,15 +280,6 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
                                               uint32_t lastCycle) {
   try {
     LookupTables tables;
-    // for (size_t cycle = 0; cycle < lastCycle; cycle++) {
-    //   // size_t cycle = lastCycle - 1;
-    //   for (size_t i = 0; i < 4; i++) {
-    //     buffers->accum.set(cycle, buffers->accum.cols - 4 + i, 0);
-    //   }
-    // }
-    // for (size_t cycle = 0; cycle < lastCycle; cycle++) {
-    //   stepAccum(*buffers, *preflight, tables, cycle);
-    // }
 
     {
       nvtx3::scoped_range range("phase1");
@@ -340,9 +288,6 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
       std::for_each(poolstl::par, begin, end, [&](uint32_t cycle) {
         stepAccum(*buffers, *preflight, tables, cycle);
       });
-      // for (size_t cycle = lastCycle; cycle-- > 0;) {
-      //   stepAccum(*buffers, *preflight, tables, cycle);
-      // }
     }
 
     buffers->accum.checked = false;
@@ -350,20 +295,14 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
     {
       // prefix-sum
       nvtx3::scoped_range range("phase2");
-      // std::array<Fp, 4> tot;
-      // for (size_t row = 0; row < lastCycle; row++) {
-      //   for (size_t j = 0; j < 4; j++) {
-      //     size_t col = buffers->accum.cols - 4 + j;
-      //     tot[j] += buffers->accum.get(row, col);
-      //     buffers->accum.set(row, col, tot[j]);
-      //   }
-      // }
-      FpExt* buf = reinterpret_cast<FpExt*>(buffers->accum.buf);
       size_t rows = buffers->accum.rows;
-      size_t col = buffers->accum.cols / 4 - 1;
-      AccumIterator itBegin(buf, rows, 0, col);
-      AccumIterator itEnd(buf, rows, lastCycle, col);
-      std::exclusive_scan(poolstl::par, itBegin, itEnd, itBegin, FpExt{});
+      for (size_t j = 0; j < 4; j++) {
+        size_t col = buffers->accum.cols - 4 + j;
+        Fp* itBegin = buffers->accum.buf + col * rows;
+        Fp* itEnd = buffers->accum.buf + col * rows + lastCycle;
+        // NOTE: poolstl does not support parallel inclusive_scan
+        std::inclusive_scan(itBegin, itEnd, itBegin);
+      }
     }
 
     {
@@ -372,7 +311,6 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
       auto begin = poolstl::iota_iter<uint32_t>(0);
       auto end = poolstl::iota_iter<uint32_t>(lastCycle);
       std::for_each(poolstl::par, begin, end, [&](uint32_t row) {
-        // for (size_t row = lastCycle; row-- > 0;) {
         size_t back1 = (row + lastCycle - 1) % lastCycle;
         std::array<Fp, 4> prev;
         for (size_t k = 0; k < 4; k++) {
@@ -383,7 +321,6 @@ const char* risc0_circuit_rv32im_v2_cpu_accum(AccumBuffers* buffers,
             buffers->accum.set(row, j * 4 + k, buffers->accum.get(row, j * 4 + k) + prev[k]);
           }
         }
-        // }
       });
     }
   } catch (const std::exception& err) {

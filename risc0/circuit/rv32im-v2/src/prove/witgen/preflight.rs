@@ -278,7 +278,7 @@ impl<'a> Preflight<'a> {
             0,
             Back::None,
         );
-        if matches!(self.segment.exit_code, ExitCode::Halted(_)) {
+        if !matches!(self.segment.exit_code, ExitCode::Halted(_)) {
             let segment_threshold = self.segment.segment_threshold as usize;
             if self.trace.cycles.len() < segment_threshold {
                 bail!("Stopping segment too early");
