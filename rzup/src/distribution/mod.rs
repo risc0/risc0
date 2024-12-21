@@ -2,6 +2,7 @@ use std::{path::PathBuf, time::Duration};
 
 use crate::{env::Environment, Result, RzupError};
 use downloader::{downloader::Builder, Download};
+use reqwest::blocking::Client;
 use semver::Version;
 use serde::Deserialize;
 
@@ -147,10 +148,10 @@ impl Distribution for GithubRelease {
     }
 
     fn latest_version(&self, component_id: &str) -> Result<Version> {
-        // let client = Client::builder()
-        //     .timeout(Duration::from_secs(10))
-        //     .build()
-        //     .map_err(|e| RzupError::Other(e.into()))?;
+        let client = Client::builder()
+            .timeout(Duration::from_secs(10))
+            .build()
+            .map_err(|e| RzupError::Other(e.into()))?;
 
         let repo = self.repo_name(component_id);
         let url = format!(
@@ -158,11 +159,12 @@ impl Distribution for GithubRelease {
             repo
         );
 
-        let response = reqwest::blocking::get(&url).map_err(|e| RzupError::Other(e.into()))?;
-        // .get(&url)
-        // .header("User-Agent", "rzup")
-        // .send()
-        // .map_err(|e| RzupError::Other(e.into())?;
+        println!("Latest URL: {}", url);
+
+        let response = client
+        .get(&url)
+        .header("User-Agent", "rzup")
+        .send().unwrap();
 
         let release: GithubReleaseResponse =
             response.json().map_err(|e| RzupError::Other(e.into()))?;
