@@ -118,6 +118,7 @@ pub(crate) struct AssumptionReceipts(pub(crate) Vec<AssumptionReceipt>);
 pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) args: Vec<String>,
+    pub(crate) keccak_max_po2: Option<u32>,
     pub(crate) segment_limit_po2: Option<u32>,
     pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
@@ -177,14 +178,14 @@ impl<'a> ExecutorEnvBuilder<'a> {
         }
 
         if let Ok(po2) = std::env::var("RISC0_KECCAK_PO2") {
-            let po2_val = po2.parse::<u32>()?;
-            if !KECCAK_PO2_RANGE.contains(&(po2_val as usize)) {
+            let po2 = po2.parse::<u32>()?;
+            if !KECCAK_PO2_RANGE.contains(&(po2 as usize)) {
                 bail!(
                     "invalid keccak po2 {po2}. Expected range: {:?}",
                     KECCAK_PO2_RANGE
                 );
             }
-            inner.env_vars.insert("RISC0_KECCAK_PO2".to_string(), po2);
+            inner.keccak_max_po2 = Some(po2_val)
         }
 
         Ok(inner)
