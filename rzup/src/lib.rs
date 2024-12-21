@@ -10,6 +10,8 @@ use crate::components::registry::ComponentRegistry;
 use crate::env::Environment;
 use crate::settings::Settings;
 pub use error::{Result, RzupError};
+use semver::Version;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 pub struct Rzup {
@@ -65,5 +67,22 @@ impl Rzup {
 
     pub fn settings(&self) -> &Settings {
         self.registry.settings()
+    }
+
+    pub fn latest_version(&self, component_id: &str) -> Result<Version> {
+        let component = self.registry.components.get(component_id).unwrap();
+        component.get_latest_version()
+    }
+
+    pub fn installed_versions(&self, component_id: &str) -> HashMap<Version, PathBuf> {
+        self.registry
+            .get_component_versions(component_id)
+            .unwrap()
+            .versions
+            .clone()
+    }
+
+    pub fn is_installed(&self, component_id: &str, version: &Version) -> bool {
+        self.installed_versions(component_id).get(version).is_some()
     }
 }

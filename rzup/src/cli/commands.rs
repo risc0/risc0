@@ -113,3 +113,29 @@ impl UseCommand {
         Ok(())
     }
 }
+
+#[derive(Parser)]
+pub(crate) struct CheckCommand;
+
+impl CheckCommand {
+    pub(crate) fn execute(&self, rzup: &Rzup) -> Result<()> {
+        println!("CHECK");
+        for component in rzup.registry.list_components() {
+            let id = component.id();
+            let latest_version = rzup.latest_version(id)?;
+            let versions = rzup.installed_versions(id);
+
+            let max_installed = versions.keys().max().unwrap();
+
+            if !rzup.is_installed(id, &latest_version) {
+                println!(
+                    " update availiable for {} -- {} --> {}",
+                    id,
+                    max_installed.to_string(),
+                    latest_version.to_string(),
+                );
+            }
+        }
+        Ok(())
+    }
+}

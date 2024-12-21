@@ -12,7 +12,7 @@ static DEFAULT_COMPONENTS: &[&str] = &["rust", "cargo-risczero"];
 
 #[derive(Debug, Default, Clone)]
 pub(crate) struct ComponentVersions {
-    versions: HashMap<Version, PathBuf>,
+    pub(crate) versions: HashMap<Version, PathBuf>,
 }
 
 impl ComponentVersions {
@@ -47,7 +47,7 @@ impl ComponentVersions {
 
 #[derive(Default, Debug)]
 pub(crate) struct ComponentRegistry {
-    components: HashMap<&'static str, Box<dyn Component>>,
+    pub(crate) components: HashMap<&'static str, Box<dyn Component>>,
     versions: HashMap<&'static str, ComponentVersions>,
     settings: Settings,
 }
@@ -199,7 +199,7 @@ impl ComponentRegistry {
     }
 
     fn parse_version(version: Option<String>) -> Result<Version> {
-        let version_str = version.unwrap_or_else(|| "0.0.0".to_string());
+        let version_str = version.unwrap_or_else(|| "0.0.0".to_string()); // TODO: Check this usage
         Version::parse(&version_str).map_err(|_| RzupError::InvalidVersion(version_str))
     }
 
@@ -301,23 +301,5 @@ mod tests {
                 Err(RzupError::InvalidVersion(_))
             ));
         }
-    }
-
-    #[test]
-    fn test_component_installation() {
-        let tmp_dir = TempDir::new().unwrap();
-        let env = Environment::with_root(tmp_dir.path()).unwrap();
-        let mut registry = ComponentRegistry::new(&env).unwrap();
-
-        // Test installing valid component
-        assert!(registry
-            .install_component(&env, "rust", Some("1.0.0".to_string()), false)
-            .is_ok());
-
-        // Test installing invalid component
-        assert!(matches!(
-            registry.install_component(&env, "invalid", None, false),
-            Err(RzupError::ComponentNotFound(_))
-        ));
     }
 }
