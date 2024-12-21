@@ -128,7 +128,7 @@ pub fn is_user_memory(addr: ByteAddr) -> bool {
     addr >= USER_START_ADDR && addr < USER_END_ADDR
 }
 
-/// Returns whether `addr` is within user memory bounds.
+/// Returns whether `addr` is within kernel memory bounds.
 pub fn is_kernel_memory(addr: ByteAddr) -> bool {
     addr >= KERNEL_START_ADDR && addr < KERNEL_END_ADDR
 }
