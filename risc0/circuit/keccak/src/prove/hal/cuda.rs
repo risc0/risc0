@@ -16,8 +16,9 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_keccak_sys::{
-    risc0_circuit_keccak_cuda_eval_check, risc0_circuit_keccak_cuda_scatter,
-    risc0_circuit_keccak_cuda_witgen, RawBuffer, RawExecBuffers, RawPreflightTrace, ScatterInfo,
+    risc0_circuit_keccak_cuda_eval_check, risc0_circuit_keccak_cuda_reset,
+    risc0_circuit_keccak_cuda_scatter, risc0_circuit_keccak_cuda_witgen, RawBuffer, RawExecBuffers,
+    RawPreflightTrace, ScatterInfo,
 };
 use risc0_core::{
     field::{
@@ -45,19 +46,41 @@ use crate::{
     },
 };
 
-use super::{CircuitWitnessGenerator, MetaBuffer, PreflightTrace, StepMode};
+use super::{CircuitWitnessGenerator, MetaBuffer, PreflightCycleOrder, PreflightTrace, StepMode};
+use crate::prove::preflight::ControlState;
 
 pub struct CudaCircuitHal<CH: CudaHash> {
-    _hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
-        Self { _hal: hal }
+        Self { hal }
+    }
+}
+
+impl<CH: CudaHash> Drop for CudaCircuitHal<CH> {
+    fn drop(&mut self) {
+        cuda_reset();
+    }
+}
+
+pub(crate) struct CudaPreflightOrder;
+
+// Reorder our processing so that we process each mux arm together.
+// This cuts down on warp divergence at the expense of coalescing
+// fewer memory operations.
+impl PreflightCycleOrder for CudaPreflightOrder {
+    type Key = (u8, u8);
+
+    fn key_for_cycle(state: &ControlState) -> Self::Key {
+        (state.cycle_type, state.sub_type)
     }
 }
 
 impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
+    type PreferredPreflightOrder = CudaPreflightOrder;
+
     fn scatter_preflight(
         &self,
         into: &MetaBuffer<CudaHal<CH>>,
@@ -65,7 +88,7 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         from: &[u32],
     ) -> Result<()> {
         scope!("scatter");
-        let from = self._hal.copy_from_u32("from", from);
+        let from = self.hal.copy_from_u32("from", from);
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_scatter(
                 into.buf.as_device_ptr(),
@@ -77,16 +100,16 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
         })
     }
 
-    fn generate_witness(
+    fn generate_witness<O: PreflightCycleOrder>(
         &self,
         mode: StepMode,
-        preflight: &PreflightTrace,
+        preflight: &PreflightTrace<O>,
         global: &MetaBuffer<CudaHal<CH>>,
         data: &MetaBuffer<CudaHal<CH>>,
     ) -> Result<()> {
         scope!("witgen");
 
-        let cycles = preflight.preimage_idxs.len();
+        let cycles = preflight.cycle;
         assert_eq!(cycles, data.rows);
         tracing::debug!("witgen: {cycles}");
 
@@ -106,10 +129,19 @@ impl<CH: CudaHash> CircuitWitnessGenerator<CudaHal<CH>> for CudaCircuitHal<CH> {
                 checked_reads: data.checked_reads,
             },
         };
+
+        let (run_order, preimage_idx): (Vec<u32>, Vec<u32>) = preflight
+            .cycles
+            .values()
+            .flatten()
+            .map(|c| (c.cycle, c.preimage_idx))
+            .collect();
+
         let preflight = RawPreflightTrace {
             preimages: preflight.preimages.as_ptr(),
             preimages_count: preflight.preimages.len() as u32,
-            preimage_idxs: preflight.preimage_idxs.as_ptr(),
+            preimage_idxs: preimage_idx.as_ptr(),
+            run_order: run_order.as_ptr(),
         };
         ffi_wrap(|| unsafe {
             risc0_circuit_keccak_cuda_witgen(mode as u32, &buffers, &preflight, cycles as u32)
@@ -195,6 +227,10 @@ pub fn keccak_prover() -> Result<Box<dyn KeccakProver>> {
     let hal = Rc::new(CudaHalPoseidon2::new());
     let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
     Ok(Box::new(KeccakProverImpl { hal, circuit_hal }))
+}
+
+fn cuda_reset() {
+    ffi_wrap(|| unsafe { risc0_circuit_keccak_cuda_reset() }).unwrap();
 }
 
 #[cfg(test)]

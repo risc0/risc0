@@ -22,9 +22,9 @@ use risc0_zkp::core::digest::Digest;
 
 pub use self::control_id::{KECCAK_CONTROL_IDS, KECCAK_CONTROL_ROOT};
 
-pub const KECCAK_DEFAULT_PO2: usize = 16;
+pub const KECCAK_DEFAULT_PO2: usize = 17;
 
-pub const KECCAK_PO2_RANGE: core::ops::Range<usize> = 14..18;
+pub const KECCAK_PO2_RANGE: core::ops::RangeInclusive<usize> = 14..=18;
 
 pub const RECURSION_PO2: usize = 18;
 

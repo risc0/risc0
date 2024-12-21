@@ -54,12 +54,7 @@ You can find detailed information in the [version management design][version-man
 
 ### Contract Addresses
 
-> NOTE: The tables below are generated from the \[`deployment.toml`]\[deployment.toml] file in the risc0-ethereum repository.
-
-:::warning
-Following our [version management design and security policy][version-management], the 1.2 verifier contracts will not be available through the mainnet routers until December 11th, 2024.
-The 1.2 verifiers are available through the router on testnet immediately.
-:::
+> NOTE: The tables below are generated from the [`deployment.toml`][deployment.toml] file in the risc0-ethereum repository.
 
 <!-- GENERATED CONTENT BEGIN -->
 
@@ -208,6 +203,7 @@ The 1.2 verifiers are available through the router on testnet immediately.
 
 <!-- GENERATED CONTENT END-->
 
+[deployment.toml]: https://github.com/risc0/risc0-ethereum/tree/release-1.2/contracts/deployment.toml
 [estop-1-etherscan]: https://etherscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code
 [estop-10-etherscan]: https://optimistic.etherscan.io/address/0x03B66cEDaB014Ca7E970Bfb83C1951d10DD2A805#code
 [estop-1101-etherscan]: https://zkevm.polygonscan.com/address/0x5b188d3d31f7bcfC2e3A22F85c3ca4dD23a77dD1#code

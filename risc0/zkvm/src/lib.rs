@@ -101,7 +101,7 @@ pub use {
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
         recursion::{
-            prove::{prove_zkr, register_zkr},
+            prove::{prove_registered_zkr, prove_zkr, register_zkr},
             RECURSION_PO2,
         },
         server::{

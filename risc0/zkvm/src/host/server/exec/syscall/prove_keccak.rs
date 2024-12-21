@@ -20,7 +20,7 @@ use risc0_zkvm_platform::{syscall::reg_abi::*, WORD_SIZE};
 
 use crate::{host::client::env::ProveKeccakRequest, Assumption, AssumptionReceipt};
 
-use super::{Syscall, SyscallContext};
+use super::{Syscall, SyscallContext, SyscallKind};
 
 #[derive(Clone)]
 pub(crate) struct SysProveKeccak;
@@ -65,6 +65,10 @@ impl Syscall for SysProveKeccak {
             .borrow_mut()
             .0
             .push(AssumptionReceipt::Unresolved(assumption));
+
+        let metric = &mut ctx.syscall_table().metrics.borrow_mut()[SyscallKind::ProveKeccak];
+        metric.count += 1;
+        metric.size += 1 << po2 as u64;
 
         Ok((0, 0))
     }
