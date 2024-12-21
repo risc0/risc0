@@ -4730,11 +4730,18 @@ dependencies = [
  "anyhow",
  "clap 4.5.23",
  "dirs",
+ "downloader",
+ "flate2",
+ "fs2",
+ "fs_extra",
+ "reqwest",
  "semver",
  "serde",
+ "tar",
  "tempfile",
  "thiserror 2.0.8",
  "toml",
+ "xz",
 ]
 
 [[package]]

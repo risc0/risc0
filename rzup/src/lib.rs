@@ -1,6 +1,7 @@
 #[cfg(feature = "cli")]
 pub mod cli;
 mod components;
+mod distribution;
 mod env;
 pub mod error;
 mod settings;

@@ -220,10 +220,14 @@ impl ComponentRegistry {
     ) -> Result<()> {
         let component = Self::create_component(id)?;
 
-        let version = Self::parse_version(version)?;
+        let parsed_version = Self::parse_version(version.clone())?;
 
-        if !self.needs_installation(id, &version, force) {
-            println!("{} version {} is already installed", id, version);
+        if !self.needs_installation(id, &parsed_version.clone(), force) {
+            println!(
+                "{} version {} is already installed",
+                id,
+                version.unwrap_or("latest".to_string())
+            );
             return Ok(());
         }
 
@@ -231,9 +235,9 @@ impl ComponentRegistry {
             std::fs::create_dir_all(env.root_dir())?;
         }
 
-        component.install(env, Some(version.to_string()), force)?;
+        component.install(env, version, force)?;
 
-        self.settings.set_active_version(id, &version);
+        self.settings.set_active_version(id, &parsed_version);
         self.settings.save(env.settings_path())?;
         self.scan_environment(env)?;
 
