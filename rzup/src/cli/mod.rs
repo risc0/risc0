@@ -1,6 +1,6 @@
 mod commands;
 
-use crate::cli::commands::{InstallCommand, ShowCommand, UseCommand};
+use crate::cli::commands::{CheckCommand, InstallCommand, ShowCommand, UseCommand};
 use crate::error::Result;
 use crate::Rzup;
 use clap::{Parser, Subcommand};
@@ -8,8 +8,9 @@ use clap::{Parser, Subcommand};
 #[derive(Subcommand)]
 enum Commands {
     Install(InstallCommand),
-    Show(ShowCommand),
+    Check(CheckCommand),
     Use(UseCommand),
+    Show(ShowCommand),
 }
 
 #[derive(Parser)]
@@ -29,6 +30,7 @@ impl Cli {
             Commands::Install(cmd) => cmd.execute(rzup),
             Commands::Show(cmd) => cmd.execute(rzup),
             Commands::Use(cmd) => cmd.execute(rzup),
+            Commands::Check(cmd) => cmd.execute(rzup),
         }
     }
 }

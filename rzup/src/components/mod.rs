@@ -1,7 +1,7 @@
 mod implementations;
 pub(crate) mod registry;
-use crate::distribution::{Distribution, GithubRelease, Platform};
 
+use crate::distribution::{github::GithubRelease, Distribution, Platform};
 use crate::env::Environment;
 use crate::error::Result;
 use flate2::bufread::GzDecoder;
@@ -87,5 +87,9 @@ pub trait Component: std::fmt::Debug {
         }
 
         Ok(())
+    }
+
+    fn get_latest_version(&self) -> Result<Version> {
+        self.distribution().latest_version(self.id())
     }
 }
