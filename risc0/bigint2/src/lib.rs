@@ -17,6 +17,8 @@ pub mod ec;
 #[cfg(feature = "unstable")]
 pub mod ffi;
 #[cfg(feature = "unstable")]
+pub mod field;
+#[cfg(feature = "unstable")]
 pub mod rsa;
 
 #[allow(dead_code)] // Used by the unstable functions
