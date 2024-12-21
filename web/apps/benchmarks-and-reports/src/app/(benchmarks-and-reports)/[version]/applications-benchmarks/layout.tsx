@@ -5,6 +5,7 @@ import type { Version } from "~/types/version";
 import { FooterAscii } from "../../_components/footer-ascii";
 import { redirectIfWrongVersion } from "../../_utils/redirect-if-wrong-version";
 import { ApplicationsBenchmarksCommitHashButton } from "./_components/applications-benchmarks-commit-hash-button";
+import { ApplicationsBenchmarksHeader } from "./_components/applications-benchmarks-header";
 
 export default async function ApplicationsBenchmarksLayout(
   props: PropsWithChildren<{
@@ -20,7 +21,7 @@ export default async function ApplicationsBenchmarksLayout(
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
-        <h1 className="text-2xl">Applications Benchmarks</h1>
+        <ApplicationsBenchmarksHeader />
 
         <Suspense fallback={<SuspenseLoader />}>
           <ApplicationsBenchmarksCommitHashButton version={params.version} />
