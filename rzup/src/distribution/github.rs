@@ -86,8 +86,6 @@ impl Distribution for GithubRelease {
             repo
         );
 
-        println!("Latest URL: {}", url);
-
         let response = client
             .get(&url)
             .header("User-Agent", "rzup")

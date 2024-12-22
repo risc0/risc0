@@ -4,6 +4,7 @@ use crate::env::Environment;
 use crate::error::Result;
 use crate::settings::Settings;
 use crate::RzupError;
+use crate::RzupEvent;
 use semver::Version;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -81,11 +82,20 @@ impl ComponentRegistry {
         self.register(component);
         self.versions.insert(component_id, versions.clone());
 
-        // For fresh installations
+        // For fresh installations, only set active version if none is set
         if !env.settings_path().exists() && self.settings.get_active_version(component_id).is_none()
         {
+            // find the latest installed version
             if let Some(latest) = versions.list_versions().into_iter().max() {
                 self.settings.set_active_version(component_id, latest);
+            }
+        } else if let Some(current_version) = self.settings.get_active_version(component_id) {
+            // Validate that the current active version exists
+            if !versions.has_version(&current_version) {
+                // If the active version doesn't exist, find the latest installed version
+                if let Some(latest) = versions.list_versions().into_iter().max() {
+                    self.settings.set_active_version(component_id, latest);
+                }
             }
         }
 
@@ -99,26 +109,17 @@ impl ComponentRegistry {
         let components: Vec<Box<dyn Component>> =
             vec![Box::new(RustToolchain), Box::new(CargoRiscZero)];
 
-        let settings_missing = !env.settings_path().exists();
-        let mut has_installed_components = false;
-
         for component in components {
             let component_id = component.id();
             let versions = self.scan_component_versions(env, component_id)?;
-            if !versions.versions.is_empty() {
-                has_installed_components = true;
-            }
             self.register_component_versions(env, component, versions)?;
         }
-
-        // save settings after all components are processed
-        if settings_missing {
+        if !env.settings_path().exists() {
+            env.emit(RzupEvent::SettingsCreated {
+                path: env.settings_path().to_path_buf(),
+            });
             self.settings.save(env.settings_path())?;
-            if has_installed_components {
-                println!("\n! Missing settings.toml\n  Created settings.toml with latest versions selected.\n");
-            }
         }
-
         Ok(())
     }
 
@@ -171,6 +172,8 @@ impl ComponentRegistry {
                     version
                 )));
             }
+
+            // Only set if the version exists
             self.settings.set_active_version(id, &version);
             self.settings.save(env.settings_path())?;
             Ok(())
@@ -217,7 +220,10 @@ impl ComponentRegistry {
         let version = version.unwrap_or_else(|| component.get_latest_version().unwrap());
 
         if !self.needs_installation(id, &version, force) {
-            println!("{} version {} is already installed", id, version);
+            env.emit(RzupEvent::ComponentAlreadyInstalled {
+                id: id.to_string(),
+                version: version.to_string(),
+            });
             return Ok(());
         }
 
@@ -226,9 +232,14 @@ impl ComponentRegistry {
         }
 
         component.install(env, Some(&version), force)?;
+
+        let versions = self.scan_component_versions(env, id)?;
+        let component = Self::create_component(id)?;
+
         self.settings.set_active_version(id, &version);
+
+        self.register_component_versions(env, component, versions)?;
         self.settings.save(env.settings_path())?;
-        self.scan_environment(env)?;
 
         Ok(())
     }
@@ -237,6 +248,7 @@ impl ComponentRegistry {
         for &component_id in DEFAULT_COMPONENTS {
             self.install_component(env, component_id, None, force)?;
         }
+
         Ok(())
     }
 }

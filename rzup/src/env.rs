@@ -1,12 +1,13 @@
 use crate::error::Result;
 use crate::RzupError;
+use crate::RzupEvent;
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Clone)]
 pub struct Environment {
     root_dir: PathBuf,
     tmp_dir: PathBuf,
     settings_file: PathBuf,
+    event_handler: Option<Box<dyn Fn(RzupEvent) + Send + Sync>>,
 }
 
 impl Environment {
@@ -19,6 +20,7 @@ impl Environment {
             root_dir,
             tmp_dir,
             settings_file,
+            event_handler: None,
         })
     }
 
@@ -34,6 +36,19 @@ impl Environment {
         };
 
         Self::with_root(root_dir)
+    }
+
+    pub fn set_event_handler<F>(&mut self, handler: F)
+    where
+        F: Fn(RzupEvent) + Send + Sync + 'static,
+    {
+        self.event_handler = Some(Box::new(handler));
+    }
+
+    pub fn emit(&self, event: RzupEvent) {
+        if let Some(handler) = &self.event_handler {
+            handler(event);
+        }
     }
 
     pub fn root_dir(&self) -> &Path {

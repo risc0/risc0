@@ -2,7 +2,7 @@ use std::{path::PathBuf, time::Duration};
 
 pub mod github;
 
-use crate::{env::Environment, Result};
+use crate::{env::Environment, Result, RzupEvent};
 use downloader::{downloader::Builder, Download};
 use semver::Version;
 
@@ -57,7 +57,11 @@ pub trait Distribution {
         let platform = Platform::new();
 
         let download_url = self.download_url(component_id, version, &platform);
-        println!("URL: {}", download_url);
+
+        env.emit(RzupEvent::DownloadStarted {
+            url: download_url.clone(),
+        });
+
         let archive_name = self.get_archive_name(component_id, version, &platform);
 
         let archive = Download::new(&download_url).file_name(&archive_name);
@@ -71,7 +75,7 @@ pub trait Distribution {
             .build()
             .unwrap();
 
-        let _res = dl.download(&[archive]).unwrap();
+        dl.download(&[archive]).unwrap();
 
         Ok(())
     }

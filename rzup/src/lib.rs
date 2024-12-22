@@ -14,6 +14,13 @@ use semver::Version;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+#[derive(Debug)]
+pub enum RzupEvent {
+    DownloadStarted { url: String },
+    ComponentAlreadyInstalled { id: String, version: String },
+    SettingsCreated { path: PathBuf },
+}
+
 pub struct Rzup {
     environment: Environment,
     registry: ComponentRegistry,
@@ -22,13 +29,24 @@ pub struct Rzup {
 impl Rzup {
     pub fn new() -> Result<Self> {
         let environment = Environment::new()?;
-        let mut registry = ComponentRegistry::new(&environment)?;
-        registry.scan_environment(&environment)?;
+        let registry = ComponentRegistry::new(&environment)?;
 
         Ok(Self {
             environment,
             registry,
         })
+    }
+
+    pub fn set_event_handler<F>(&mut self, handler: F)
+    where
+        F: Fn(RzupEvent) + Send + Sync + 'static,
+    {
+        self.environment.set_event_handler(handler);
+    }
+
+    pub fn init(&mut self) -> Result<()> {
+        self.registry.scan_environment(&self.environment)?;
+        Ok(())
     }
 
     pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
