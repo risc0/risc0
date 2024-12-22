@@ -68,14 +68,14 @@ pub async fn handler(subcmd: ExtensionSubcmd) -> Result<()> {
             Ok(())
         }
         ExtensionSubcmd::Use { extension, version } => {
-            let extension_path = parse_extenstion_version(extension, version)?;
+            let extension_path = parse_extension_version(extension, version)?;
             extension.link(&extension_path)
         }
         ExtensionSubcmd::Uninstall { extension } => extension.unlink(),
     }
 }
 
-fn parse_extenstion_version(extension: Extension, version: String) -> Result<PathBuf> {
+fn parse_extension_version(extension: Extension, version: String) -> Result<PathBuf> {
     let extensions = find_installed_extensions()?;
     let version_pattern = match extension {
         Extension::CargoRiscZero => {
