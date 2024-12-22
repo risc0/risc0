@@ -20,21 +20,16 @@ pub trait Component: std::fmt::Debug {
         Box::new(GithubRelease)
     }
 
-    fn install(&self, env: &Environment, version: Option<String>, _force: bool) -> Result<()> {
+    fn install(&self, env: &Environment, version: Option<&Version>, _force: bool) -> Result<()> {
         let version = match version {
-            Some(v) => Version::parse(&v).unwrap(),
-            _ => self.distribution().latest_version(self.id())?,
+            Some(v) => v,
+            None => &self.distribution().latest_version(self.id())?,
         };
-
-        let version_dir = self.create_version_dir(env, &version.to_string())?;
-        let downloaded_file = self.get_downloaded(env, &version)?;
-
+        let version_dir = self.create_version_dir(env, version)?;
+        let downloaded_file = self.get_downloaded(env, version)?;
         self.distribution()
-            .download_version(env, self.id(), Some(&version))?;
-
-        self.extract_archive(&downloaded_file, &version_dir)?;
-
-        Ok(())
+            .download_version(env, self.id(), Some(version))?;
+        self.extract_archive(&downloaded_file, &version_dir)
     }
 
     fn get_path(&self, env: &Environment) -> Result<PathBuf> {
@@ -49,11 +44,9 @@ pub trait Component: std::fmt::Debug {
         Ok(())
     }
 
-    fn create_version_dir(&self, env: &Environment, version: &str) -> Result<PathBuf> {
+    fn create_version_dir(&self, env: &Environment, version: &Version) -> Result<PathBuf> {
         let component_dir = self.get_path(env)?;
-        let parsed_version = Version::parse(version)
-            .map_err(|_| crate::RzupError::InvalidVersion(version.to_string()))?;
-        let version_dir = component_dir.join(format!("v{}-{}", parsed_version, self.id()));
+        let version_dir = component_dir.join(format!("v{}-{}", version, self.id()));
         fs::create_dir_all(&version_dir)?;
         Ok(version_dir)
     }

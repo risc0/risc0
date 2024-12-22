@@ -42,9 +42,8 @@ impl Rzup {
         })
     }
 
-    pub fn install_all(&mut self, version: Option<String>, force: bool) -> Result<()> {
-        self.registry
-            .install_all(&self.environment, version, force)?;
+    pub fn install_all(&mut self, force: bool) -> Result<()> {
+        self.registry.install_all(&self.environment, force)?;
         self.registry.scan_environment(&self.environment)?;
         Ok(())
     }
@@ -52,7 +51,7 @@ impl Rzup {
     pub fn install_component(
         &mut self,
         component: &str,
-        version: Option<String>,
+        version: Option<Version>,
         force: bool,
     ) -> Result<()> {
         self.registry
@@ -83,6 +82,6 @@ impl Rzup {
     }
 
     pub fn is_installed(&self, component_id: &str, version: &Version) -> bool {
-        self.installed_versions(component_id).get(version).is_some()
+        self.installed_versions(component_id).contains_key(version)
     }
 }

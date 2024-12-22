@@ -16,12 +16,16 @@ pub(crate) struct InstallCommand {
 
 impl InstallCommand {
     pub(crate) fn execute(self, rzup: &mut Rzup) -> Result<()> {
+        let version = match self.version {
+            Some(v) => Some(Version::parse(&v).map_err(|_| RzupError::InvalidVersion(v))?),
+            None => None,
+        };
         match self.name {
             None => {
-                rzup.install_all(self.version, self.force)?;
+                rzup.install_all(self.force)?;
             }
             Some(name) => {
-                rzup.install_component(&name, self.version, self.force)?;
+                rzup.install_component(&name, version, self.force)?;
             }
         }
         Ok(())
@@ -119,7 +123,6 @@ pub(crate) struct CheckCommand;
 
 impl CheckCommand {
     pub(crate) fn execute(&self, rzup: &Rzup) -> Result<()> {
-        println!("CHECK");
         for component in rzup.registry.list_components() {
             let id = component.id();
             let latest_version = rzup.latest_version(id)?;
@@ -129,13 +132,14 @@ impl CheckCommand {
 
             if !rzup.is_installed(id, &latest_version) {
                 println!(
-                    " update availiable for {} -- {} --> {}",
-                    id,
-                    max_installed.to_string(),
-                    latest_version.to_string(),
+                    "{} - Update avaliable : {} -> {}",
+                    id, max_installed, latest_version,
                 );
+            } else {
+                println!("{} - Update to date : {}", id, max_installed);
             }
         }
+
         Ok(())
     }
 }

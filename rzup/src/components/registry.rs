@@ -198,11 +198,6 @@ impl ComponentRegistry {
         }
     }
 
-    fn parse_version(version: Option<String>) -> Result<Version> {
-        let version_str = version.unwrap_or_else(|| "0.0.0".to_string()); // TODO: Check this usage
-        Version::parse(&version_str).map_err(|_| RzupError::InvalidVersion(version_str))
-    }
-
     fn needs_installation(&self, id: &str, version: &Version, force: bool) -> bool {
         force
             || self
@@ -215,19 +210,14 @@ impl ComponentRegistry {
         &mut self,
         env: &Environment,
         id: &str,
-        version: Option<String>,
+        version: Option<Version>,
         force: bool,
     ) -> Result<()> {
         let component = Self::create_component(id)?;
+        let version = version.unwrap_or_else(|| component.get_latest_version().unwrap());
 
-        let parsed_version = Self::parse_version(version.clone())?;
-
-        if !self.needs_installation(id, &parsed_version.clone(), force) {
-            println!(
-                "{} version {} is already installed",
-                id,
-                version.unwrap_or("latest".to_string())
-            );
+        if !self.needs_installation(id, &version, force) {
+            println!("{} version {} is already installed", id, version);
             return Ok(());
         }
 
@@ -235,25 +225,18 @@ impl ComponentRegistry {
             std::fs::create_dir_all(env.root_dir())?;
         }
 
-        component.install(env, version, force)?;
-
-        self.settings.set_active_version(id, &parsed_version);
+        component.install(env, Some(&version), force)?;
+        self.settings.set_active_version(id, &version);
         self.settings.save(env.settings_path())?;
         self.scan_environment(env)?;
 
         Ok(())
     }
 
-    pub(crate) fn install_all(
-        &mut self,
-        env: &Environment,
-        version: Option<String>,
-        force: bool,
-    ) -> Result<()> {
-        for &component in DEFAULT_COMPONENTS {
-            self.install_component(env, component, version.clone(), force)?;
+    pub(crate) fn install_all(&mut self, env: &Environment, force: bool) -> Result<()> {
+        for &component_id in DEFAULT_COMPONENTS {
+            self.install_component(env, component_id, None, force)?;
         }
-
         Ok(())
     }
 }
@@ -271,13 +254,6 @@ mod tests {
     }
 
     #[test]
-    fn test_version_parsing() {
-        assert!(ComponentRegistry::parse_version(Some("1.0.0".to_string())).is_ok());
-        assert!(ComponentRegistry::parse_version(None).is_ok());
-        assert!(ComponentRegistry::parse_version(Some("invalid".to_string())).is_err());
-    }
-
-    #[test]
     fn test_installation_needs() {
         let tmp_dir = TempDir::new().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();
@@ -290,16 +266,5 @@ mod tests {
 
         // Should need installation when force is true
         assert!(registry.needs_installation("rust", &version, true));
-    }
-
-    #[test]
-    fn test_version_parsing_errors() {
-        let invalid_versions = ["1.", "1.0.", "a.b.c", "-1.0.0"];
-        for invalid in invalid_versions {
-            assert!(matches!(
-                ComponentRegistry::parse_version(Some(invalid.to_string())),
-                Err(RzupError::InvalidVersion(_))
-            ));
-        }
     }
 }
