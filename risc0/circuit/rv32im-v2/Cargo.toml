@@ -25,7 +25,7 @@ serde = { version = "1.0", default-features = false, features = [
 tracing = "0.1"
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-bytemuck = { version = "1.13", optional = true }
+bytemuck = { version = "1.21", optional = true }
 cfg-if = { version = "1.0", optional = true }
 derive_more = { version = "1.0", features = [
   "add",
