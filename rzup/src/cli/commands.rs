@@ -1,4 +1,5 @@
 use crate::error::Result;
+use crate::events::RzupEvent;
 use crate::{Rzup, RzupError};
 use clap::Parser;
 use semver::Version;
@@ -24,6 +25,7 @@ impl InstallCommand {
             None => {
                 rzup.install_all(self.force)?;
             }
+
             Some(name) => {
                 rzup.install_component(&name, version, self.force)?;
             }
@@ -132,21 +134,34 @@ impl CheckCommand {
         if components.is_empty() {
             println!("! Nothing is installed\n  Please use 'rzup install' to install.")
         }
+
+        let mut results = Vec::new();
+
         for component in components {
             let id = component.id();
+            rzup.environment().emit(RzupEvent::CheckUpdates {
+                id: Some(id.to_string()),
+            });
+
             let latest_version = rzup.latest_version(id)?;
             let versions = rzup.installed_versions(id);
-
             let max_installed = versions.keys().max().unwrap();
 
             if !rzup.is_installed(id, &latest_version) {
-                println!(
-                    "{} - Update avaliable : {} -> {}",
+                results.push(format!(
+                    "{} - Update available : {} -> {}",
                     id, max_installed, latest_version,
-                );
+                ));
             } else {
-                println!("{} - Update to date : {}", id, max_installed);
+                results.push(format!("{} - Up to date : {}", id, max_installed));
             }
+        }
+
+        rzup.environment()
+            .emit(RzupEvent::CheckUpdates { id: None });
+
+        for result in results {
+            println!("{}", result);
         }
 
         Ok(())

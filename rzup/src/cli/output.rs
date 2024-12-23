@@ -58,6 +58,17 @@ impl EventPrinter {
         self.complete_progress(&format!("Uninstalled {} version {}", id, version));
     }
 
+    pub fn handle_checking_updates(&self, id: Option<String>) {
+        match id {
+            Some(name) => {
+                self.start_progress(format!("Checking for updates: {}", name));
+            }
+            None => {
+                self.progress.finish_and_clear();
+            }
+        }
+    }
+
     pub fn handle_debug(&self, message: String) {
         if self.verbose {
             self.progress.suspend(|| {

@@ -54,6 +54,7 @@ impl Cli {
                     printer.handle_already_installed(id, version)
                 }
                 RzupEvent::Uninstalled { id, version } => printer.handle_uninstall(id, version),
+                RzupEvent::CheckUpdates { id } => printer.handle_checking_updates(id),
                 RzupEvent::Debug { message } => printer.handle_debug(message),
             });
         }

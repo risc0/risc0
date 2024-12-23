@@ -26,6 +26,9 @@ pub enum RzupEvent {
         id: String,
         version: String,
     },
+    CheckUpdates {
+        id: Option<String>, // none means finished checking
+    },
     Debug {
         message: String,
     },
