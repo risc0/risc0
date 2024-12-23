@@ -17,7 +17,7 @@ required-features = ["cli"] # check this
 
 [features]
 default = ["cli"] # and this
-cli = ["dep:clap"]
+cli = ["dep:clap", "dep:indicatif"]
 
 [dependencies]
 anyhow = { version = "1.0.94", features = ["backtrace"] }
@@ -27,9 +27,6 @@ tempfile = "3.14.0"
 semver = "1.0.24"
 serde = { version = "1.0.215", features = ["derive"] }
 toml = "0.8.19"
-
-# cli dependencies
-clap = { version = "4.5.23", features = ["derive"], optional = true }
 downloader = { version = "0.2.8", default-features = false, features = ["rustls-tls"] }
 flate2 = "1.0.35"
 xz = "0.1.0"
@@ -37,6 +34,10 @@ fs2 = "0.4.3"
 fs_extra = "1.3.0"
 tar = "0.4.43"
 reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tls", "blocking", "json"] }
+
+# cli dependencies
+clap = { version = "4.5.23", features = ["derive"], optional = true }
+indicatif = {version = "0.17.9", optional = true }
 
 # TEMP
 # [lints.rust]

@@ -104,9 +104,9 @@ impl Distribution for GithubRelease {
         let status = response.status();
 
         if status == 403 || status == 429 {
-            return Err(RzupError::RateLimited(format!(
-                "GitHub API rate limit exceeded. Please try again later.",
-            )));
+            return Err(RzupError::RateLimited(
+                "GitHub API rate limit exceeded. Please try again later.".to_string(),
+            ));
         }
 
         let release: GithubReleaseResponse =

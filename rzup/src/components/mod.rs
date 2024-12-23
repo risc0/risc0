@@ -27,14 +27,14 @@ pub trait Component: std::fmt::Debug {
             None => &self.distribution().latest_version(env, self.id())?,
         };
 
-        env.emit(RzupEvent::InstallationStarted {
-            id: self.id().to_string(),
-            version: version.to_string(),
-        });
         let version_dir = self.create_version_dir(env, version)?;
         let downloaded_file = self.get_downloaded(env, version)?;
         self.distribution()
             .download_version(env, self.id(), Some(version))?;
+        env.emit(RzupEvent::InstallationStarted {
+            id: self.id().to_string(),
+            version: version.to_string(),
+        });
         self.extract_archive(env, &downloaded_file, &version_dir)?;
 
         env.emit(RzupEvent::InstallationCompleted {

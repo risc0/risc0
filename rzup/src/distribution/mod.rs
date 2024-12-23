@@ -67,7 +67,21 @@ pub trait Distribution {
             message: format!("Resolved download URL: {}", download_url),
         });
 
+        let version_str = version
+            .map(|v| format!(" version {}", v))
+            .unwrap_or_default();
+
+        env.emit(RzupEvent::Debug {
+            message: format!(
+                "Downlaoding {} version {}",
+                component_id,
+                version_str.clone()
+            ),
+        });
+
         env.emit(RzupEvent::DownloadStarted {
+            id: component_id.to_string(),
+            version: version_str.clone(),
             url: download_url.clone(),
         });
 
@@ -86,49 +100,12 @@ pub trait Distribution {
             .build()
             .map_err(|e| RzupError::Other(anyhow::anyhow!("Failed to create downloader: {}", e)))?;
 
-        let results = dl
-            .download(&[archive])
+        dl.download(&[archive])
             .map_err(|e| RzupError::Other(anyhow::anyhow!("Download failed: {}", e)))?;
-
-        for result in results {
-            let summary =
-                result.map_err(|e| RzupError::Other(anyhow::anyhow!("Download error: {}", e)))?;
-
-            env.emit(RzupEvent::Debug {
-                message: format!(
-                    "Processing download summary with {} status entries",
-                    summary.status.len()
-                ),
-            });
-
-            for (url, status_code) in &summary.status {
-                match status_code {
-                    403 | 429 => {
-                        return Err(RzupError::RateLimited(format!(
-                            "Rate limit detected (status {}) when downloading {} from {}. Please try again later.",
-                            status_code, component_id, url
-                        )));
-                    }
-                    200..=299 => continue,
-                    _ => {
-                        return Err(RzupError::InstallationFailed(format!(
-                            "Download failed with status {} for {} from {}",
-                            status_code, component_id, url
-                        )));
-                    }
-                }
-            }
-
-            if summary.verified == downloader::verify::Verification::Failed {
-                return Err(RzupError::InstallationFailed(format!(
-                    "Download verification failed for {}",
-                    component_id
-                )));
-            }
-        }
 
         env.emit(RzupEvent::DownloadCompleted {
             id: component_id.to_string(),
+            version: version_str,
         });
 
         Ok(())

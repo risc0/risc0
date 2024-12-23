@@ -16,13 +16,33 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum RzupEvent {
-    DownloadStarted { url: String },
-    DownloadCompleted { id: String },
-    InstallationStarted { id: String, version: String },
-    InstallationCompleted { id: String, version: String },
-    ComponentAlreadyInstalled { id: String, version: String },
-    SettingsCreated { path: PathBuf },
-    Debug { message: String },
+    DownloadStarted {
+        id: String,
+        version: String,
+        url: String,
+    },
+    DownloadCompleted {
+        id: String,
+        version: String,
+    },
+    InstallationStarted {
+        id: String,
+        version: String,
+    },
+    InstallationCompleted {
+        id: String,
+        version: String,
+    },
+    ComponentAlreadyInstalled {
+        id: String,
+        version: String,
+    },
+    SettingsCreated {
+        path: PathBuf,
+    },
+    Debug {
+        message: String,
+    },
 }
 
 pub struct Rzup {
