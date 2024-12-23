@@ -4,50 +4,16 @@ mod components;
 mod distribution;
 mod env;
 pub mod error;
+mod events;
 mod settings;
-
 use crate::components::registry::ComponentRegistry;
 use crate::env::Environment;
 use crate::settings::Settings;
 pub use error::{Result, RzupError};
+use events::RzupEvent;
 use semver::Version;
 use std::collections::HashMap;
 use std::path::PathBuf;
-
-#[derive(Debug)]
-pub enum RzupEvent {
-    DownloadStarted {
-        id: String,
-        version: String,
-        url: String,
-    },
-    DownloadCompleted {
-        id: String,
-        version: String,
-    },
-    InstallationStarted {
-        id: String,
-        version: String,
-    },
-    InstallationCompleted {
-        id: String,
-        version: String,
-    },
-    ComponentAlreadyInstalled {
-        id: String,
-        version: String,
-    },
-    SettingsCreated {
-        path: PathBuf,
-    },
-    Uninstalled {
-        id: String,
-        version: String,
-    },
-    Debug {
-        message: String,
-    },
-}
 
 pub struct Rzup {
     environment: Environment,
@@ -84,11 +50,14 @@ impl Rzup {
         registry: &mut ComponentRegistry,
     ) -> Result<()> {
         if !environment.settings_path().exists() {
-            environment.emit(RzupEvent::SettingsCreated {
-                path: environment.settings_path().to_path_buf(),
+            environment.emit(RzupEvent::Debug {
+                message: format!(
+                    "Creating new settings file at {}",
+                    environment.settings_path().display()
+                ),
             });
-            registry.settings().save(environment.settings_path())?;
         }
+        registry.settings().save(environment)?;
         Ok(())
     }
 

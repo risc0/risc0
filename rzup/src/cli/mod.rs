@@ -53,7 +53,6 @@ impl Cli {
                 RzupEvent::ComponentAlreadyInstalled { id, version } => {
                     printer.handle_already_installed(id, version)
                 }
-                RzupEvent::SettingsCreated { path } => printer.handle_settings_created(path),
                 RzupEvent::Uninstalled { id, version } => printer.handle_uninstall(id, version),
                 RzupEvent::Debug { message } => printer.handle_debug(message),
             });

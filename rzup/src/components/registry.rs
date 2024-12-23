@@ -55,7 +55,7 @@ pub(crate) struct ComponentRegistry {
 
 impl ComponentRegistry {
     pub(crate) fn new(env: &Environment) -> Result<Self> {
-        let settings = Settings::load(env.settings_path())?;
+        let settings = Settings::load(env)?;
         Ok(Self {
             components: HashMap::new(),
             versions: HashMap::new(),
@@ -122,11 +122,6 @@ impl ComponentRegistry {
             self.register_component_versions(component, versions)?;
         }
 
-        // Save settings only if `initialize_settings` didn't already handle it
-        if !env.settings_path().exists() {
-            self.settings.save(env.settings_path())?;
-        }
-
         Ok(())
     }
 
@@ -182,7 +177,7 @@ impl ComponentRegistry {
 
             // Only set if the version exists
             self.settings.set_active_version(id, &version);
-            self.settings.save(env.settings_path())?;
+            self.settings.save(env)?;
             Ok(())
         } else {
             Err(RzupError::ComponentNotFound(id.to_string()))
@@ -256,7 +251,7 @@ impl ComponentRegistry {
         self.settings.set_active_version(id, &version);
 
         self.register_component_versions(component, versions)?;
-        self.settings.save(env.settings_path())?;
+        self.settings.save(env)?;
 
         Ok(())
     }

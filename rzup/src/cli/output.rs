@@ -60,13 +60,6 @@ impl EventPrinter {
         println!("! Version {} of {} is already installed", version, id);
     }
 
-    pub fn handle_settings_created(&self, path: std::path::PathBuf) {
-        println!(
-            "\n! Missing settings.toml\n  Created settings.toml at {}\n",
-            path.display()
-        );
-    }
-
     pub fn handle_uninstall(&self, id: String, version: String) {
         println!(" Uninstalled {} version {}", id, version);
     }

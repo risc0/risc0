@@ -1,10 +1,11 @@
+use crate::env::Environment;
 use crate::error::Result;
+use crate::events::RzupEvent;
 use crate::RzupError;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Settings {
@@ -13,11 +14,21 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub(crate) fn load(settings_path: &Path) -> Result<Self> {
+    pub(crate) fn load(env: &Environment) -> Result<Self> {
+        let settings_path = env.settings_path();
         if !settings_path.exists() {
+            env.emit(RzupEvent::Debug {
+                message: format!(
+                    "No settings file found at {}, using defaults",
+                    settings_path.display()
+                ),
+            });
             return Ok(Self::default());
         }
 
+        env.emit(RzupEvent::Debug {
+            message: format!("Loading settings from {}", settings_path.display()),
+        });
         let contents = fs::read_to_string(settings_path)
             .map_err(|e| RzupError::Environment(format!("Failed to read settings file: {}", e)))?;
 
@@ -25,17 +36,21 @@ impl Settings {
             .map_err(|e| RzupError::Environment(format!("Failed to parse settings file: {}", e)))
     }
 
-    pub(crate) fn save(&self, settings_path: &Path) -> Result<()> {
-        if let Some(parent) = settings_path.parent() {
+    pub(crate) fn save(&self, env: &Environment) -> Result<()> {
+        if let Some(parent) = env.settings_path().parent() {
             fs::create_dir_all(parent).map_err(|e| {
                 RzupError::Environment(format!("Failed to create settings directory: {}", e))
             })?;
         }
 
+        env.emit(RzupEvent::Debug {
+            message: format!("Saving settings to {}", env.settings_path().display()),
+        });
+
         let contents = toml::to_string_pretty(self)
             .map_err(|e| RzupError::Environment(format!("Failed to serialize settings: {}", e)))?;
 
-        fs::write(settings_path, contents)
+        fs::write(env.settings_path(), contents)
             .map_err(|e| RzupError::Environment(format!("Failed to write settings file: {}", e)))?;
 
         Ok(())
