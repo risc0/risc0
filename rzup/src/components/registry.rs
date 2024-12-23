@@ -81,7 +81,7 @@ impl ComponentRegistry {
         self.register(component);
         self.versions.insert(component_id, versions.clone());
 
-        // Default logic to set active version if none exists
+        // set active version if none exists
         if self.settings.get_active_version(component_id).is_none() {
             if let Some(latest) = versions.list_versions().into_iter().max() {
                 self.settings.set_active_version(component_id, latest);
@@ -175,7 +175,7 @@ impl ComponentRegistry {
                 )));
             }
 
-            // Only set if the version exists
+            // only set if the version exists
             self.settings.set_active_version(id, &version);
             self.settings.save(env)?;
             Ok(())
@@ -228,9 +228,7 @@ impl ComponentRegistry {
         let component = Self::create_component(id)?;
         let version = match version {
             Some(v) => v,
-            None => {
-                component.get_latest_version(env)?
-            }
+            None => component.get_latest_version(env)?,
         };
 
         if !self.needs_installation(id, &version, force) {

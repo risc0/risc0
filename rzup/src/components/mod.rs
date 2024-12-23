@@ -34,10 +34,55 @@ pub trait Component: std::fmt::Debug {
 
         let version_dir = self.create_version_dir(env, version)?;
         let downloaded_file = self.get_downloaded(env, version)?;
-        self.distribution()
-            .download_version(env, self.id(), Some(version))?;
-        self.extract_archive(env, &downloaded_file, &version_dir)?;
 
+        // clean up
+        let cleanup = |env: &Environment, version_dir: &Path, downloaded_file: &Path| {
+            if version_dir.exists() {
+                env.emit(RzupEvent::Debug {
+                    message: format!(
+                        "Cleaning up failed installation directory: {}",
+                        version_dir.display()
+                    ),
+                });
+                if let Err(e) = std::fs::remove_dir_all(version_dir) {
+                    env.emit(RzupEvent::Debug {
+                        message: format!("Failed to remove installation directory: {}", e),
+                    });
+                }
+            }
+
+            if downloaded_file.exists() {
+                env.emit(RzupEvent::Debug {
+                    message: format!(
+                        "Cleaning up downloaded archive: {}",
+                        downloaded_file.display()
+                    ),
+                });
+                if let Err(e) = std::fs::remove_file(downloaded_file) {
+                    env.emit(RzupEvent::Debug {
+                        message: format!("Failed to remove downloaded archive: {}", e),
+                    });
+                }
+            }
+        };
+
+        // download and extract, cleaning up on error
+        let result = (|| -> Result<()> {
+            self.distribution()
+                .download_version(env, self.id(), Some(version))?;
+            self.extract_archive(env, &downloaded_file, &version_dir)?;
+            Ok(())
+        })();
+
+        if let Err(e) = &result {
+            env.emit(RzupEvent::Debug {
+                message: format!("Installation failed: {}", e),
+            });
+            cleanup(env, &version_dir, &downloaded_file);
+            return Err(e.clone());
+        }
+
+        // clean up just the downloaded file after installation
         if downloaded_file.exists() {
             env.emit(RzupEvent::Debug {
                 message: format!(
@@ -95,7 +140,7 @@ pub trait Component: std::fmt::Debug {
             });
         }
 
-        // If this was the last version, clean up the component directory if it's empty
+        // clean up the component directory if it's empty
         let component_path = self.get_path(env)?;
         if component_path.exists() {
             let entries = fs::read_dir(&component_path)?;

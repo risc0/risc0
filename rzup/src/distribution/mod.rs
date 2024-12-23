@@ -51,29 +51,42 @@ pub trait Distribution {
         platform: &Platform,
     ) -> PathBuf;
 
+    fn check_release_exists(&self, component_id: &str, version: &Version) -> Result<bool>;
+
     fn download_version(
         &self,
         env: &Environment,
         component_id: &str,
         version: Option<&Version>,
     ) -> Result<()> {
+        let version = match version {
+            Some(v) => v,
+            None => &self.latest_version(env, component_id)?,
+        };
+
+        // check if release exists before download
+        if !self.check_release_exists(component_id, version)? {
+            env.emit(RzupEvent::InstallationFailed {
+                id: component_id.to_string(),
+                version: version.to_string(),
+            });
+            return Err(RzupError::InvalidVersion(format!(
+                "Version {} is not available for {}",
+                version, component_id
+            )));
+        }
+
         let platform = Platform::new();
         env.emit(RzupEvent::Debug {
             message: format!("Platform detected: {}", platform),
         });
 
-        let download_url = self.download_url(env, component_id, version, &platform)?;
-        env.emit(RzupEvent::Debug {
-            message: format!("Resolved download URL: {}", download_url),
-        });
-
-        let version_str = version
-            .map(|v| format!("{}", v))
-            .unwrap_or_default();
+        let download_url = self.download_url(env, component_id, Some(version), &platform)?;
+        let version_str = version.to_string();
 
         env.emit(RzupEvent::Debug {
             message: format!(
-                "Downlaoding {} version {}",
+                "Downloading {} version {}",
                 component_id,
                 version_str.clone()
             ),
@@ -85,7 +98,7 @@ pub trait Distribution {
             url: download_url.clone(),
         });
 
-        let archive_name = self.get_archive_name(component_id, version, &platform);
+        let archive_name = self.get_archive_name(component_id, Some(version), &platform);
         env.emit(RzupEvent::Debug {
             message: format!("Download will be saved to: {}", archive_name.display()),
         });
@@ -98,10 +111,10 @@ pub trait Distribution {
             .download_folder(env.tmp_dir())
             .parallel_requests(1)
             .build()
-            .map_err(|e| RzupError::Other(anyhow::anyhow!("Failed to create downloader: {}", e)))?;
+            .map_err(|e| RzupError::Other(format!("Failed to create downloader: {}", e)))?;
 
         dl.download(&[archive])
-            .map_err(|e| RzupError::Other(anyhow::anyhow!("Download failed: {}", e)))?;
+            .map_err(|e| RzupError::Other(format!("Download failed: {}", e)))?;
 
         env.emit(RzupEvent::DownloadCompleted {
             id: component_id.to_string(),

@@ -1,8 +1,9 @@
 use indicatif::{ProgressBar, ProgressStyle};
 
+#[derive(Clone)]
 pub(crate) struct EventPrinter {
     verbose: bool,
-    progress: ProgressBar,
+    pub progress: ProgressBar,
 }
 
 impl EventPrinter {
@@ -24,7 +25,7 @@ impl EventPrinter {
         self.progress.set_message(message);
     }
 
-    fn complete_progress(&self, message: &str) {
+    pub fn complete_progress(&self, message: &str) {
         self.progress.finish_and_clear();
         println!("{}", message);
         self.progress.reset(); // Reset for next operation
@@ -75,5 +76,11 @@ impl EventPrinter {
                 println!("Debug: {}", message);
             });
         }
+    }
+}
+
+impl Drop for EventPrinter {
+    fn drop(&mut self) {
+        self.progress.finish_and_clear();
     }
 }

@@ -87,7 +87,7 @@ impl Distribution for GithubRelease {
         let client = Client::builder()
             .timeout(Duration::from_secs(10))
             .build()
-            .map_err(|e| RzupError::Other(e.into()))?;
+            .map_err(|e| RzupError::Other(e.to_string()))?;
 
         let repo = self.repo_name(component_id);
         let url = format!(
@@ -109,8 +109,9 @@ impl Distribution for GithubRelease {
             ));
         }
 
-        let release: GithubReleaseResponse =
-            response.json().map_err(|e| RzupError::Other(e.into()))?;
+        let release: GithubReleaseResponse = response
+            .json()
+            .map_err(|e| RzupError::Other(e.to_string()))?;
 
         // parse version from tag name
         let version_str = match component_id {
@@ -125,5 +126,38 @@ impl Distribution for GithubRelease {
         };
 
         Version::parse(version_str).map_err(|_| RzupError::InvalidVersion(version_str.to_string()))
+    }
+    fn check_release_exists(&self, component_id: &str, version: &Version) -> Result<bool> {
+        let client = Client::builder()
+            .timeout(Duration::from_secs(10))
+            .build()
+            .map_err(|e| RzupError::Other(format!("Failed to create HTTP client: {}", e)))?;
+
+        let repo = self.repo_name(component_id);
+        let version_str = self.get_version_str(component_id, version);
+        let url = format!(
+            "https://api.github.com/repos/risc0/{}/releases/tags/{}",
+            repo, version_str
+        );
+
+        let response = client
+            .get(&url)
+            .header("User-Agent", "rzup")
+            .send()
+            .map_err(|e| RzupError::Other(format!("Failed to check release: {}", e)))?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => Ok(true),
+            reqwest::StatusCode::NOT_FOUND => Ok(false),
+            reqwest::StatusCode::FORBIDDEN | reqwest::StatusCode::TOO_MANY_REQUESTS => {
+                Err(RzupError::RateLimited(
+                    "GitHub API rate limit exceeded. Please try again later.".to_string(),
+                ))
+            }
+            status => Err(RzupError::Other(format!(
+                "Unexpected response checking release: {}",
+                status
+            ))),
+        }
     }
 }

@@ -21,7 +21,10 @@ pub enum RzupEvent {
         id: String,
         version: String,
     },
-
+    InstallationFailed {
+        id: String,
+        version: String,
+    },
     Uninstalled {
         id: String,
         version: String,
