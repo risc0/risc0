@@ -67,6 +67,10 @@ impl EventPrinter {
         );
     }
 
+    pub fn handle_uninstall(&self, id: String, version: String) {
+        println!(" Uninstalled {} version {}", id, version);
+    }
+
     pub fn handle_debug(&self, message: String) {
         if self.verbose {
             println!("Debug: {}", message);

@@ -40,6 +40,10 @@ pub enum RzupEvent {
     SettingsCreated {
         path: PathBuf,
     },
+    Uninstalled {
+        id: String,
+        version: String,
+    },
     Debug {
         message: String,
     },
@@ -109,6 +113,13 @@ impl Rzup {
     ) -> Result<()> {
         self.registry
             .install_component(&self.environment, component, version, force)?;
+        self.registry.scan_environment(&self.environment)?;
+        Ok(())
+    }
+
+    pub fn uninstall_component(&mut self, component: &str, version: Version) -> Result<()> {
+        self.registry
+            .uninstall_component(&self.environment, component, version)?;
         self.registry.scan_environment(&self.environment)?;
         Ok(())
     }

@@ -152,3 +152,19 @@ impl CheckCommand {
         Ok(())
     }
 }
+
+#[derive(Parser)]
+pub(crate) struct UninstallCommand {
+    /// Name of component to uninstall
+    name: String,
+    /// Version of the component to uninstall
+    version: String,
+}
+
+impl UninstallCommand {
+    pub(crate) fn execute(&self, rzup: &mut Rzup) -> Result<()> {
+        let version = Version::parse(&self.version)
+            .map_err(|_| RzupError::InvalidVersion(self.version.clone()))?;
+        rzup.uninstall_component(&self.name, version)
+    }
+}

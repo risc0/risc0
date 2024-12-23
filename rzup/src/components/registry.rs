@@ -268,6 +268,20 @@ impl ComponentRegistry {
 
         Ok(())
     }
+
+    pub(crate) fn uninstall_component(
+        &mut self,
+        env: &Environment,
+        id: &str,
+        version: Version,
+    ) -> Result<()> {
+        env.emit(RzupEvent::Debug {
+            message: format!("Uninstalling component {} (version: {:?})", id, version),
+        });
+
+        let component = Self::create_component(id)?;
+        component.uninstall(env, &version)
+    }
 }
 
 #[cfg(test)]

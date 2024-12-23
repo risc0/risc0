@@ -5,6 +5,7 @@ use crate::error::Result;
 use crate::Rzup;
 use crate::RzupEvent;
 use clap::{Parser, Subcommand};
+use commands::UninstallCommand;
 use commands::{CheckCommand, InstallCommand, ShowCommand, UseCommand};
 use output::{EventPrinter, Spinner};
 
@@ -14,6 +15,8 @@ enum Commands {
     Check(CheckCommand),
     Use(UseCommand),
     Show(ShowCommand),
+    #[command(hide = true)]
+    Uninstall(UninstallCommand),
 }
 
 #[derive(Parser)]
@@ -51,6 +54,7 @@ impl Cli {
                     printer.handle_already_installed(id, version)
                 }
                 RzupEvent::SettingsCreated { path } => printer.handle_settings_created(path),
+                RzupEvent::Uninstalled { id, version } => printer.handle_uninstall(id, version),
                 RzupEvent::Debug { message } => printer.handle_debug(message),
             });
         }
@@ -60,6 +64,7 @@ impl Cli {
             Commands::Show(cmd) => cmd.execute(rzup),
             Commands::Use(cmd) => cmd.execute(rzup),
             Commands::Check(cmd) => cmd.execute(rzup),
+            Commands::Uninstall(cmd) => cmd.execute(rzup),
         }
     }
 }
