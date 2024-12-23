@@ -21,6 +21,7 @@ pub enum RzupEvent {
         id: String,
         version: String,
     },
+
     Uninstalled {
         id: String,
         version: String,

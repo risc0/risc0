@@ -7,7 +7,7 @@ use crate::RzupEvent;
 use clap::{Parser, Subcommand};
 use commands::UninstallCommand;
 use commands::{CheckCommand, InstallCommand, ShowCommand, UseCommand};
-use output::{EventPrinter, Spinner};
+use output::EventPrinter;
 
 #[derive(Subcommand)]
 enum Commands {
@@ -34,7 +34,7 @@ pub struct Cli {
 
 impl Cli {
     pub fn execute(self, rzup: &mut Rzup) -> Result<()> {
-        let printer = EventPrinter::new(self.verbose, Spinner::new());
+        let printer = EventPrinter::new(self.verbose);
 
         if !self.quiet {
             rzup.set_event_handler(move |event| match event {
@@ -67,4 +67,3 @@ impl Cli {
         }
     }
 }
-

@@ -228,7 +228,9 @@ impl ComponentRegistry {
         let component = Self::create_component(id)?;
         let version = match version {
             Some(v) => v,
-            None => component.get_latest_version(env)?,
+            None => {
+                component.get_latest_version(env)?
+            }
         };
 
         if !self.needs_installation(id, &version, force) {

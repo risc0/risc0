@@ -68,7 +68,7 @@ pub trait Distribution {
         });
 
         let version_str = version
-            .map(|v| format!(" version {}", v))
+            .map(|v| format!("{}", v))
             .unwrap_or_default();
 
         env.emit(RzupEvent::Debug {
