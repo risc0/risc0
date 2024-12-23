@@ -12,6 +12,15 @@ fn main() -> Result<()> {
         RzupEvent::DownloadStarted { url } => {
             println!("!!Downloading from: {}", url);
         }
+        RzupEvent::DownloadCompleted { id } => {
+            println!("✓ Download completed for {}", id);
+        }
+        RzupEvent::InstallationStarted { id, version } => {
+            println!("Installing {} version {}...", id, version);
+        }
+        RzupEvent::InstallationCompleted { id, version } => {
+            println!("✓ Successfully installed {} version {}", id, version);
+        }
         RzupEvent::ComponentAlreadyInstalled { id, version } => {
             println!("{} version {} is already installed", id, version);
         }
@@ -23,7 +32,10 @@ fn main() -> Result<()> {
         }
     });
 
-    rzup.init()?;
+    if let Err(e) = cli.execute(&mut rzup) {
+        eprintln!("✗ Error:\n   {}", e);
+        std::process::exit(1);
+    }
 
-    cli.execute(&mut rzup)
+    Ok(())
 }

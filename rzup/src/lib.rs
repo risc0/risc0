@@ -17,6 +17,9 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub enum RzupEvent {
     DownloadStarted { url: String },
+    DownloadCompleted { id: String },
+    InstallationStarted { id: String, version: String },
+    InstallationCompleted { id: String, version: String },
     ComponentAlreadyInstalled { id: String, version: String },
     SettingsCreated { path: PathBuf },
 }
@@ -29,12 +32,39 @@ pub struct Rzup {
 impl Rzup {
     pub fn new() -> Result<Self> {
         let environment = Environment::new()?;
-        let registry = ComponentRegistry::new(&environment)?;
+        let mut registry = ComponentRegistry::new(&environment)?;
+        Self::initialize_settings(&environment, &mut registry)?;
+        registry.scan_environment(&environment)?;
 
         Ok(Self {
             environment,
             registry,
         })
+    }
+
+    pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
+        let environment = Environment::with_root(root)?;
+        let mut registry = ComponentRegistry::new(&environment)?;
+        Self::initialize_settings(&environment, &mut registry)?;
+        registry.scan_environment(&environment)?;
+
+        Ok(Self {
+            environment,
+            registry,
+        })
+    }
+
+    fn initialize_settings(
+        environment: &Environment,
+        registry: &mut ComponentRegistry,
+    ) -> Result<()> {
+        if !environment.settings_path().exists() {
+            environment.emit(RzupEvent::SettingsCreated {
+                path: environment.settings_path().to_path_buf(),
+            });
+            registry.settings().save(environment.settings_path())?;
+        }
+        Ok(())
     }
 
     pub fn set_event_handler<F>(&mut self, handler: F)
@@ -42,22 +72,6 @@ impl Rzup {
         F: Fn(RzupEvent) + Send + Sync + 'static,
     {
         self.environment.set_event_handler(handler);
-    }
-
-    pub fn init(&mut self) -> Result<()> {
-        self.registry.scan_environment(&self.environment)?;
-        Ok(())
-    }
-
-    pub fn with_root<P: Into<PathBuf>>(root: P) -> Result<Self> {
-        let environment = Environment::with_root(root)?;
-        let mut registry = ComponentRegistry::new(&environment)?;
-        registry.scan_environment(&environment)?;
-
-        Ok(Self {
-            environment,
-            registry,
-        })
     }
 
     pub fn install_all(&mut self, force: bool) -> Result<()> {

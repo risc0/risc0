@@ -4,6 +4,7 @@ pub(crate) mod registry;
 use crate::distribution::{github::GithubRelease, Distribution, Platform};
 use crate::env::Environment;
 use crate::error::Result;
+use crate::RzupEvent;
 use flate2::bufread::GzDecoder;
 use semver::Version;
 use std::fs::{self, File};
@@ -25,11 +26,23 @@ pub trait Component: std::fmt::Debug {
             Some(v) => v,
             None => &self.distribution().latest_version(self.id())?,
         };
+
+        env.emit(RzupEvent::InstallationStarted {
+            id: self.id().to_string(),
+            version: version.to_string(),
+        });
         let version_dir = self.create_version_dir(env, version)?;
         let downloaded_file = self.get_downloaded(env, version)?;
         self.distribution()
             .download_version(env, self.id(), Some(version))?;
-        self.extract_archive(&downloaded_file, &version_dir)
+        self.extract_archive(&downloaded_file, &version_dir)?;
+
+        env.emit(RzupEvent::InstallationCompleted {
+            id: self.id().to_string(),
+            version: version.to_string(),
+        });
+
+        Ok(())
     }
 
     fn get_path(&self, env: &Environment) -> Result<PathBuf> {

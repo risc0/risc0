@@ -2,6 +2,7 @@ use std::{path::PathBuf, time::Duration};
 
 pub mod github;
 
+use crate::RzupError;
 use crate::{env::Environment, Result, RzupEvent};
 use downloader::{downloader::Builder, Download};
 use semver::Version;
@@ -75,7 +76,12 @@ pub trait Distribution {
             .build()
             .unwrap();
 
-        dl.download(&[archive]).unwrap();
+        dl.download(&[archive])
+            .map_err(|e| RzupError::Other(anyhow::anyhow!("Download failed: {}", e)))?;
+
+        env.emit(RzupEvent::DownloadCompleted {
+            id: component_id.to_string(),
+        });
 
         Ok(())
     }

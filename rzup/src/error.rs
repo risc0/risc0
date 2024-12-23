@@ -19,6 +19,9 @@ pub enum RzupError {
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),
+
+    #[error("Rate Limited: {0}")]
+    RateLimited(String),
 }
 
 pub type Result<T> = std::result::Result<T, RzupError>;

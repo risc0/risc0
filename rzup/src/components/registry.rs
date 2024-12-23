@@ -69,7 +69,6 @@ impl ComponentRegistry {
 
     fn register_component_versions(
         &mut self,
-        env: &Environment,
         component: Box<dyn Component>,
         versions: ComponentVersions,
     ) -> Result<()> {
@@ -82,20 +81,10 @@ impl ComponentRegistry {
         self.register(component);
         self.versions.insert(component_id, versions.clone());
 
-        // For fresh installations, only set active version if none is set
-        if !env.settings_path().exists() && self.settings.get_active_version(component_id).is_none()
-        {
-            // find the latest installed version
+        // Default logic to set active version if none exists
+        if self.settings.get_active_version(component_id).is_none() {
             if let Some(latest) = versions.list_versions().into_iter().max() {
                 self.settings.set_active_version(component_id, latest);
-            }
-        } else if let Some(current_version) = self.settings.get_active_version(component_id) {
-            // Validate that the current active version exists
-            if !versions.has_version(&current_version) {
-                // If the active version doesn't exist, find the latest installed version
-                if let Some(latest) = versions.list_versions().into_iter().max() {
-                    self.settings.set_active_version(component_id, latest);
-                }
             }
         }
 
@@ -112,14 +101,14 @@ impl ComponentRegistry {
         for component in components {
             let component_id = component.id();
             let versions = self.scan_component_versions(env, component_id)?;
-            self.register_component_versions(env, component, versions)?;
+            self.register_component_versions(component, versions)?;
         }
+
+        // Save settings only if `initialize_settings` didn't already handle it
         if !env.settings_path().exists() {
-            env.emit(RzupEvent::SettingsCreated {
-                path: env.settings_path().to_path_buf(),
-            });
             self.settings.save(env.settings_path())?;
         }
+
         Ok(())
     }
 
@@ -217,7 +206,10 @@ impl ComponentRegistry {
         force: bool,
     ) -> Result<()> {
         let component = Self::create_component(id)?;
-        let version = version.unwrap_or_else(|| component.get_latest_version().unwrap());
+        let version = match version {
+            Some(v) => v,
+            None => component.get_latest_version()?,
+        };
 
         if !self.needs_installation(id, &version, force) {
             env.emit(RzupEvent::ComponentAlreadyInstalled {
@@ -238,7 +230,7 @@ impl ComponentRegistry {
 
         self.settings.set_active_version(id, &version);
 
-        self.register_component_versions(env, component, versions)?;
+        self.register_component_versions(component, versions)?;
         self.settings.save(env.settings_path())?;
 
         Ok(())

@@ -92,6 +92,14 @@ impl Distribution for GithubRelease {
             .send()
             .unwrap();
 
+        let status = response.status();
+
+        if status == 403 || status == 429 {
+            return Err(RzupError::RateLimited(format!(
+                "GitHub API rate limit exceeded. Please try again later.",
+            )));
+        }
+
         let release: GithubReleaseResponse =
             response.json().map_err(|e| RzupError::Other(e.into()))?;
 
