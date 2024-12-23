@@ -37,4 +37,3 @@ impl From<anyhow::Error> for RzupError {
 }
 
 pub type Result<T> = std::result::Result<T, RzupError>;
-

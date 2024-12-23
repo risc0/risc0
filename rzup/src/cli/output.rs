@@ -1,7 +1,7 @@
 use indicatif::{ProgressBar, ProgressStyle};
 
 #[derive(Clone)]
-pub(crate) struct EventPrinter {
+pub(super) struct EventPrinter {
     verbose: bool,
     pub progress: ProgressBar,
 }

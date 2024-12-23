@@ -23,7 +23,7 @@ impl ComponentVersions {
         }
     }
 
-    pub(crate) fn has_version(&self, version: &Version) -> bool {
+    pub fn has_version(&self, version: &Version) -> bool {
         self.versions.contains_key(version)
     }
 
@@ -31,7 +31,7 @@ impl ComponentVersions {
         self.versions.insert(version, path);
     }
 
-    pub(crate) fn get_active_version<'a>(
+    pub fn get_active_version<'a>(
         &'a self,
         settings: &'a Settings,
         component_id: &str,
@@ -41,7 +41,7 @@ impl ComponentVersions {
             .and_then(|v| self.versions.get_key_value(&v))
     }
 
-    pub(crate) fn list_versions(&self) -> Vec<&Version> {
+    pub fn list_versions(&self) -> Vec<&Version> {
         self.versions.keys().collect()
     }
 }
@@ -54,7 +54,7 @@ pub(crate) struct ComponentRegistry {
 }
 
 impl ComponentRegistry {
-    pub(crate) fn new(env: &Environment) -> Result<Self> {
+    pub fn new(env: &Environment) -> Result<Self> {
         let settings = Settings::load(env)?;
         Ok(Self {
             components: HashMap::new(),
@@ -63,7 +63,7 @@ impl ComponentRegistry {
         })
     }
 
-    pub(crate) fn settings(&self) -> &Settings {
+    pub fn settings(&self) -> &Settings {
         &self.settings
     }
 
@@ -91,7 +91,7 @@ impl ComponentRegistry {
         Ok(())
     }
 
-    pub(crate) fn scan_environment(&mut self, env: &Environment) -> Result<()> {
+    pub fn scan_environment(&mut self, env: &Environment) -> Result<()> {
         env.emit(RzupEvent::Debug {
             message: format!("Scanning environment at {}", env.root_dir().display()),
         });
@@ -157,11 +157,11 @@ impl ComponentRegistry {
         Ok(versions)
     }
 
-    pub(crate) fn get_component_versions(&self, id: &str) -> Option<&ComponentVersions> {
+    pub fn get_component_versions(&self, id: &str) -> Option<&ComponentVersions> {
         self.versions.get(id)
     }
 
-    pub(crate) fn set_active_version(
+    pub fn set_active_version(
         &mut self,
         env: &Environment,
         id: &str,
@@ -184,7 +184,7 @@ impl ComponentRegistry {
         }
     }
 
-    pub(crate) fn list_components(&self) -> Vec<&dyn Component> {
+    pub fn list_components(&self) -> Vec<&dyn Component> {
         self.components
             .values()
             .map(|boxed| boxed.as_ref())
@@ -211,7 +211,7 @@ impl ComponentRegistry {
                 .map_or(true, |versions| !versions.has_version(version))
     }
 
-    pub(crate) fn install_component(
+    pub fn install_component(
         &mut self,
         env: &Environment,
         id: &str,
@@ -256,7 +256,7 @@ impl ComponentRegistry {
         Ok(())
     }
 
-    pub(crate) fn install_all(&mut self, env: &Environment, force: bool) -> Result<()> {
+    pub fn install_all(&mut self, env: &Environment, force: bool) -> Result<()> {
         for &component_id in DEFAULT_COMPONENTS {
             self.install_component(env, component_id, None, force)?;
         }
@@ -264,7 +264,7 @@ impl ComponentRegistry {
         Ok(())
     }
 
-    pub(crate) fn uninstall_component(
+    pub fn uninstall_component(
         &mut self,
         env: &Environment,
         id: &str,

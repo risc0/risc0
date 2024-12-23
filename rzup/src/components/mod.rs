@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use xz::bufread::XzDecoder;
 
-pub trait Component: std::fmt::Debug {
+pub(crate) trait Component: std::fmt::Debug {
     fn id(&self) -> &'static str;
 
     fn distribution(&self) -> Box<dyn Distribution> {

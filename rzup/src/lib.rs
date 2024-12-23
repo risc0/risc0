@@ -3,17 +3,20 @@ pub mod cli;
 mod components;
 mod distribution;
 mod env;
-pub mod error;
+
 mod events;
 mod settings;
+
+pub mod error;
 use crate::components::registry::ComponentRegistry;
 use crate::env::Environment;
 use crate::settings::Settings;
-pub use error::{Result, RzupError};
 use events::RzupEvent;
 use semver::Version;
 use std::collections::HashMap;
 use std::path::PathBuf;
+
+pub use error::{Result, RzupError};
 
 pub struct Rzup {
     environment: Environment,
@@ -102,7 +105,8 @@ impl Rzup {
     }
 
     pub fn latest_version(&self, component_id: &str) -> Result<Version> {
-        let component = self.registry.components.get(component_id).unwrap();
+        let components = &self.registry.components;
+        let component = components.get(component_id).unwrap();
         component.get_latest_version(self.environment())
     }
 

@@ -35,7 +35,7 @@ impl std::fmt::Display for Platform {
     }
 }
 
-pub trait Distribution {
+pub(crate) trait Distribution {
     fn download_url(
         &self,
         env: &Environment,

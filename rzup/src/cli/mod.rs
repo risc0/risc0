@@ -1,5 +1,7 @@
-mod commands;
-mod output;
+#[cfg(feature = "cli")]
+pub(crate) mod commands;
+#[cfg(feature = "cli")]
+pub(crate) mod output;
 
 use crate::error::Result;
 use crate::Rzup;
