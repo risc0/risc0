@@ -37,10 +37,15 @@ pub(crate) struct ShowCommand;
 
 impl ShowCommand {
     pub(crate) fn execute(self, rzup: &Rzup) -> Result<()> {
+        let components = rzup.registry.list_components();
+        if components.is_empty() {
+            println!("! Nothing is installed\n  Please use 'rzup install' to install.");
+            return Ok(());
+        }
         println!("Installed components:");
         println!("--------------------");
 
-        for component in rzup.registry.list_components() {
+        for component in components {
             let id = component.id();
             if let Some(versions) = rzup.registry.get_component_versions(id) {
                 println!("\n{}", id);
@@ -123,7 +128,11 @@ pub(crate) struct CheckCommand;
 
 impl CheckCommand {
     pub(crate) fn execute(&self, rzup: &Rzup) -> Result<()> {
-        for component in rzup.registry.list_components() {
+        let components = rzup.registry.list_components();
+        if components.is_empty() {
+            println!("! Nothing is installed\n  Please use 'rzup install' to install.")
+        }
+        for component in components {
             let id = component.id();
             let latest_version = rzup.latest_version(id)?;
             let versions = rzup.installed_versions(id);

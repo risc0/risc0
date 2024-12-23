@@ -1,5 +1,6 @@
 use crate::distribution::{Distribution, Platform};
-use crate::{Result, RzupError};
+use crate::env::Environment;
+use crate::{Result, RzupError, RzupEvent};
 use reqwest::blocking::Client;
 use semver::Version;
 use serde::Deserialize;
@@ -46,22 +47,26 @@ impl GithubRelease {
 impl Distribution for GithubRelease {
     fn download_url(
         &self,
+        env: &Environment,
         component_id: &str,
         version: Option<&Version>,
         platform: &Platform,
-    ) -> String {
+    ) -> Result<String> {
         let (asset, ext) = self.asset_name(component_id, platform);
         let version_str = match version {
             Some(v) => self.get_version_str(component_id, v),
-            None => self.latest_version(component_id).unwrap().to_string(),
+            None => {
+                env.emit(RzupEvent::Debug {
+                    message: format!("No version specified, fetching latest for {}", component_id),
+                });
+                format!("v{}", self.latest_version(env, component_id)?)
+            }
         };
-
         let repo = self.repo_name(component_id);
-
-        format!(
+        Ok(format!(
             "https://github.com/risc0/{}/releases/download/{}/{}.{}",
             repo, version_str, asset, ext
-        )
+        ))
     }
 
     fn get_archive_name(
@@ -74,7 +79,11 @@ impl Distribution for GithubRelease {
         PathBuf::from(format!("{}.{}", asset_name, extension))
     }
 
-    fn latest_version(&self, component_id: &str) -> Result<Version> {
+    fn latest_version(&self, env: &Environment, component_id: &str) -> Result<Version> {
+        env.emit(RzupEvent::Debug {
+            message: format!("Fetching latest version for {}", component_id),
+        });
+
         let client = Client::builder()
             .timeout(Duration::from_secs(10))
             .build()

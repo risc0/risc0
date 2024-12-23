@@ -92,6 +92,10 @@ impl ComponentRegistry {
     }
 
     pub(crate) fn scan_environment(&mut self, env: &Environment) -> Result<()> {
+        env.emit(RzupEvent::Debug {
+            message: format!("Scanning environment at {}", env.root_dir().display()),
+        });
+
         self.components.clear();
         self.versions.clear();
 
@@ -100,7 +104,21 @@ impl ComponentRegistry {
 
         for component in components {
             let component_id = component.id();
+
+            env.emit(RzupEvent::Debug {
+                message: format!("Scanning versions for component: {}", component_id),
+            });
+
             let versions = self.scan_component_versions(env, component_id)?;
+
+            env.emit(RzupEvent::Debug {
+                message: format!(
+                    "Found {} versions for {}",
+                    versions.versions.len(),
+                    component_id
+                ),
+            });
+
             self.register_component_versions(component, versions)?;
         }
 
@@ -205,10 +223,17 @@ impl ComponentRegistry {
         version: Option<Version>,
         force: bool,
     ) -> Result<()> {
+        env.emit(RzupEvent::Debug {
+            message: format!(
+                "Installing component {} (version: {:?}, force: {})",
+                id, version, force
+            ),
+        });
+
         let component = Self::create_component(id)?;
         let version = match version {
             Some(v) => v,
-            None => component.get_latest_version()?,
+            None => component.get_latest_version(env)?,
         };
 
         if !self.needs_installation(id, &version, force) {

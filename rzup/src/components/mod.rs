@@ -24,7 +24,7 @@ pub trait Component: std::fmt::Debug {
     fn install(&self, env: &Environment, version: Option<&Version>, _force: bool) -> Result<()> {
         let version = match version {
             Some(v) => v,
-            None => &self.distribution().latest_version(self.id())?,
+            None => &self.distribution().latest_version(env, self.id())?,
         };
 
         env.emit(RzupEvent::InstallationStarted {
@@ -35,7 +35,7 @@ pub trait Component: std::fmt::Debug {
         let downloaded_file = self.get_downloaded(env, version)?;
         self.distribution()
             .download_version(env, self.id(), Some(version))?;
-        self.extract_archive(&downloaded_file, &version_dir)?;
+        self.extract_archive(env, &downloaded_file, &version_dir)?;
 
         env.emit(RzupEvent::InstallationCompleted {
             id: self.id().to_string(),
@@ -72,7 +72,20 @@ pub trait Component: std::fmt::Debug {
         Ok(env.tmp_dir().join(archive_name))
     }
 
-    fn extract_archive(&self, archive_path: &Path, target_dir: &Path) -> Result<()> {
+    fn extract_archive(
+        &self,
+        env: &Environment,
+        archive_path: &Path,
+        target_dir: &Path,
+    ) -> Result<()> {
+        env.emit(RzupEvent::Debug {
+            message: format!(
+                "Extracting archive {} to {}",
+                archive_path.display(),
+                target_dir.display()
+            ),
+        });
+
         let file = File::open(archive_path)?;
         let reader = BufReader::new(file);
         let filename = archive_path.to_string_lossy();
@@ -95,7 +108,7 @@ pub trait Component: std::fmt::Debug {
         Ok(())
     }
 
-    fn get_latest_version(&self) -> Result<Version> {
-        self.distribution().latest_version(self.id())
+    fn get_latest_version(&self, env: &Environment) -> Result<Version> {
+        self.distribution().latest_version(env, self.id())
     }
 }

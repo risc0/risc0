@@ -22,6 +22,7 @@ pub enum RzupEvent {
     InstallationCompleted { id: String, version: String },
     ComponentAlreadyInstalled { id: String, version: String },
     SettingsCreated { path: PathBuf },
+    Debug { message: String },
 }
 
 pub struct Rzup {
@@ -102,7 +103,7 @@ impl Rzup {
 
     pub fn latest_version(&self, component_id: &str) -> Result<Version> {
         let component = self.registry.components.get(component_id).unwrap();
-        component.get_latest_version()
+        component.get_latest_version(self.environment())
     }
 
     pub fn installed_versions(&self, component_id: &str) -> HashMap<Version, PathBuf> {

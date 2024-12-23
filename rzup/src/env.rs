@@ -35,7 +35,11 @@ impl Environment {
                 .join(".risc02")
         };
 
-        Self::with_root(root_dir)
+        let env = Self::with_root(root_dir)?;
+        env.emit(RzupEvent::Debug {
+            message: format!("Initialized environment at {}", env.root_dir().display()),
+        });
+        Ok(env)
     }
 
     pub fn set_event_handler<F>(&mut self, handler: F)
