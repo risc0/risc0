@@ -38,6 +38,20 @@ pub trait Component: std::fmt::Debug {
             .download_version(env, self.id(), Some(version))?;
         self.extract_archive(env, &downloaded_file, &version_dir)?;
 
+        if downloaded_file.exists() {
+            env.emit(RzupEvent::Debug {
+                message: format!(
+                    "Cleaning up downloaded archive: {}",
+                    downloaded_file.display()
+                ),
+            });
+            if let Err(e) = std::fs::remove_file(&downloaded_file) {
+                env.emit(RzupEvent::Debug {
+                    message: format!("Failed to remove downloaded archive: {}", e),
+                });
+            }
+        }
+
         env.emit(RzupEvent::InstallationCompleted {
             id: self.id().to_string(),
             version: version.to_string(),
