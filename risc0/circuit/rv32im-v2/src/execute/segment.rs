@@ -44,6 +44,8 @@ pub struct Segment {
     /// Total paging cycles
     pub paging_cycles: u32,
 
+    pub segment_threshold: u32,
+
     pub po2: u32,
 
     pub exit_code: ExitCode,

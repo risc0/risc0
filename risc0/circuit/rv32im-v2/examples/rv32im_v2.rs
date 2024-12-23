@@ -16,7 +16,10 @@ use std::time::Instant;
 
 use clap::Parser;
 use risc0_circuit_rv32im_v2::{
-    execute::{platform::LOOKUP_TABLE_CYCLES, testutil, MemoryImage2, DEFAULT_SEGMENT_LIMIT_PO2},
+    execute::{
+        platform::LOOKUP_TABLE_CYCLES, testutil, MemoryImage2, DEFAULT_SEGMENT_LIMIT_PO2,
+        MAX_INSN_CYCLES,
+    },
     prove::segment_prover,
 };
 use risc0_core::scope;
@@ -40,7 +43,8 @@ struct Cli {
 
 const PAGING_CYCLES: usize = 1821;
 const NON_LOOP_CYCLES: usize = 8;
-const RESERVED_CYCLES: usize = LOOKUP_TABLE_CYCLES + PAGING_CYCLES + NON_LOOP_CYCLES;
+const RESERVED_CYCLES: usize =
+    LOOKUP_TABLE_CYCLES + PAGING_CYCLES + NON_LOOP_CYCLES + MAX_INSN_CYCLES;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -50,48 +54,71 @@ fn main() {
     let args = Cli::parse();
 
     let po2 = args.po2;
-    let cycles = 1 << po2;
-    assert!(cycles > RESERVED_CYCLES);
-    let iterations = (cycles - RESERVED_CYCLES) / 2;
+    let segment_cycles = 1 << po2;
+    assert!(segment_cycles > RESERVED_CYCLES);
+    let iterations = (segment_cycles - RESERVED_CYCLES) / 2;
 
     let program = testutil::simple_loop(iterations as u32);
     let image = MemoryImage2::new(program);
     let prover = segment_prover().unwrap();
 
-    scope!("top");
-
     let result = testutil::execute(
-        image,
+        image.clone(),
         args.po2,
+        MAX_INSN_CYCLES,
         testutil::DEFAULT_SESSION_LIMIT,
         &testutil::NullSyscall,
         None,
     )
     .unwrap();
+    let user_cycles = result.result.user_cycles as usize;
+    let total_cycles = result.result.total_cycles as usize;
 
-    let segments = result.segments;
-    let segment = segments.first().unwrap();
-    assert_eq!(args.po2, segment.po2 as usize);
+    scope!("top");
 
-    let mut tot_time: f64 = 0.0;
+    let mut tot_exec_time: f64 = 0.0;
+    let mut tot_prove_time: f64 = 0.0;
     for i in 0..args.count {
+        let image = image.clone();
+
+        let start_time = Instant::now();
+        let result = testutil::execute(
+            image,
+            args.po2,
+            MAX_INSN_CYCLES,
+            testutil::DEFAULT_SESSION_LIMIT,
+            &testutil::NullSyscall,
+            None,
+        )
+        .unwrap();
+        let exec_time = start_time.elapsed().as_secs_f64();
+
+        let segments = result.segments;
+        let segment = segments.first().unwrap();
+        assert_eq!(args.po2, segment.po2 as usize);
+
         let start_time = Instant::now();
         let seal = prover.prove(segment).unwrap();
         if !args.skip_verification {
             prover.verify(&seal).expect("Verification failed");
         }
-        let run_time = start_time.elapsed().as_secs_f64();
+        let prove_time = start_time.elapsed().as_secs_f64();
+
         println!(
-            "PO2={po2} Run #{i}: {run_time:.3}s, {:.3} cycles/sec",
-            cycles as f64 / run_time
+            "PO2={po2} Run [{i}] exec: {exec_time:.3}s, {:.3} cycles/sec | prove: {prove_time:.3}s, {:.3} cycles/sec",
+            user_cycles as f64 / exec_time,
+            total_cycles as f64 / prove_time
         );
-        tot_time += run_time;
+        tot_exec_time += exec_time;
+        tot_prove_time += prove_time;
     }
 
     println!(
-        "{} runs of PO2={po2} completed in {tot_time:.3}s, avg={:.3}s, {:.3} cycles/sec",
+        "{} runs of PO2={po2} exec: {tot_exec_time:.3}s, avg={:.3}s, {:.3} cycles/sec | prove: {tot_prove_time:.3}s, avg={:.3}s, {:.3} cycles/sec",
         args.count,
-        tot_time / (args.count as f64),
-        (args.count * cycles) as f64 / tot_time,
+        tot_exec_time / (args.count as f64),
+        (args.count * user_cycles) as f64 / tot_exec_time,
+        tot_prove_time / (args.count as f64),
+        (args.count * total_cycles) as f64 / tot_prove_time,
     );
 }
