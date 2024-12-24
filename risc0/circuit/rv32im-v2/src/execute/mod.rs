@@ -29,8 +29,10 @@ mod trace;
 use self::platform::MEMORY_PAGES;
 
 pub use self::{
+    addr::{ByteAddr, WordAddr},
     executor::{Executor, ExecutorResult, SimpleSession},
     image::MemoryImage2,
+    syscall::{Syscall, SyscallContext},
 };
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;

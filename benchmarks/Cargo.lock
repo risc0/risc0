@@ -133,6 +133,9 @@ name = "anyhow"
 version = "1.0.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1fd03a028ef38ba2276dce7e33fcd6369c158a1bca17946c4b1b701891c1ff7"
+dependencies = [
+ "backtrace",
+]
 
 [[package]]
 name = "approx"
@@ -2874,6 +2877,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-rv32im-v2"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "cfg-if",
+ "derive_more 1.0.0",
+ "num-derive",
+ "num-traits",
+ "paste",
+ "rand",
+ "rayon",
+ "risc0-binfmt",
+ "risc0-circuit-rv32im-v2-sys",
+ "risc0-core",
+ "risc0-sys",
+ "risc0-zkp",
+ "serde",
+ "tracing",
+]
+
+[[package]]
+name = "risc0-circuit-rv32im-v2-sys"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "cust",
+ "derive_more 1.0.0",
+ "glob",
+ "risc0-build-kernel",
+ "risc0-core",
+ "risc0-sys",
+ "sppark",
+]
+
+[[package]]
 name = "risc0-core"
 version = "1.3.0-alpha.1"
 dependencies = [
@@ -2972,6 +3011,7 @@ dependencies = [
  "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-v2",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkp",

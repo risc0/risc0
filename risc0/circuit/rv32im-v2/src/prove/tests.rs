@@ -34,7 +34,7 @@ fn run_program(program: Program) {
 
     let prover = segment_prover().unwrap();
     let seal = prover.prove(segment).unwrap();
-    prover.verify(&seal).unwrap();
+    crate::verify(&seal).unwrap();
 }
 
 #[test]
