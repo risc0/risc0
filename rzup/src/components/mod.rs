@@ -21,7 +21,7 @@ pub(crate) trait Component: std::fmt::Debug {
         Box::new(GithubRelease)
     }
 
-    fn install(&self, env: &Environment, version: Option<&Version>, _force: bool) -> Result<()> {
+    fn install(&self, env: &Environment, version: Option<&Version>, force: bool) -> Result<()> {
         let version = match version {
             Some(v) => v,
             None => &self.distribution().latest_version(env, self.id())?,
@@ -34,6 +34,17 @@ pub(crate) trait Component: std::fmt::Debug {
 
         let version_dir = self.create_version_dir(env, version)?;
         let downloaded_file = self.get_downloaded(env, version)?;
+
+        if force && version_dir.exists() {
+            env.emit(RzupEvent::Debug {
+                message: format!(
+                    "Force flag set - removing existing installation at {}",
+                    version_dir.display()
+                ),
+            });
+            std::fs::remove_dir_all(&version_dir)?;
+            std::fs::create_dir_all(&version_dir)?;
+        }
 
         // clean up
         let cleanup = |env: &Environment, version_dir: &Path, downloaded_file: &Path| {
