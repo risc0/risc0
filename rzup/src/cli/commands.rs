@@ -71,12 +71,12 @@ impl ShowCommand {
                 if let Some(settings_ver) = settings_version {
                     if active_version.is_none() {
                         println!(
-                            "! Version {} specified in settings.toml is not installed.",
+                            "! Version {} specified in settings.toml is not installed",
                             settings_ver
                         );
                         println!(
-                            "  Please use 'rzup install {} {}' to install it",
-                            id, settings_ver
+                            "   Please use 'rzup use {} <VERSION>' to switch active component",
+                            id,
                         );
                     }
                 } else if active_version.is_none() {
