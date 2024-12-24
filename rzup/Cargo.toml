@@ -17,7 +17,7 @@ required-features = ["cli"] # check this
 
 [features]
 default = ["cli"] # and this
-cli = ["dep:clap", "dep:indicatif"]
+cli = ["dep:clap", "dep:indicatif", "dep:colored"]
 
 [dependencies]
 anyhow = { version = "1.0.94", features = ["backtrace"] }
@@ -37,7 +37,9 @@ reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tl
 
 # cli dependencies
 clap = { version = "4.5.23", features = ["derive"], optional = true }
-indicatif = {version = "0.17.9", optional = true }
+indicatif = { version = "0.17.9", optional = true }
+colored = { version = "2.2.0", optional = true }
+
 
 # TEMP
 # [lints.rust]

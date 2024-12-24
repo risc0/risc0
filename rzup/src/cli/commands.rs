@@ -2,13 +2,14 @@ use crate::error::Result;
 use crate::events::RzupEvent;
 use crate::{Rzup, RzupError};
 use clap::Parser;
+use colored::Colorize;
 use semver::Version;
 
 #[derive(Parser)]
 pub(crate) struct InstallCommand {
-    /// Name of component to install (optional)
+    /// Name of component to install (e.g. rust). If not provided, installs all default components.
     name: Option<String>,
-    /// Version of the component to install (optional)
+    /// Version of the component to install (optional). If not provided, installs the latest version.
     version: Option<String>,
     /// Force the install
     #[arg(short, long)]
@@ -44,8 +45,8 @@ impl ShowCommand {
             println!("! Nothing is installed\n  Please use 'rzup install' to install.");
             return Ok(());
         }
-        println!("Installed components:");
-        println!("--------------------");
+        println!("{}", "Installed components:".bold());
+        println!("{}", "--------------------".bold());
 
         for component in components {
             let id = component.id();
@@ -149,11 +150,19 @@ impl CheckCommand {
 
             if !rzup.is_installed(id, &latest_version) {
                 results.push(format!(
-                    "{} - Update available : {} -> {}",
-                    id, max_installed, latest_version,
+                    "{} - {} : {} -> {}",
+                    id.bold(),
+                    "Update Available".bold().yellow(),
+                    max_installed,
+                    latest_version,
                 ));
             } else {
-                results.push(format!("{} - Up to date : {}", id, max_installed));
+                results.push(format!(
+                    "{} - {} : {}",
+                    id.bold(),
+                    "Up to date".bold().green(),
+                    max_installed
+                ));
             }
         }
 

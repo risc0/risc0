@@ -7,22 +7,32 @@ use crate::error::Result;
 use crate::Rzup;
 use crate::RzupEvent;
 use clap::{Parser, Subcommand};
+use colored::Colorize;
 use commands::UninstallCommand;
 use commands::{CheckCommand, InstallCommand, ShowCommand, UseCommand};
 use output::EventPrinter;
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Install a component (e.g. cargo-risczero)
     Install(InstallCommand),
+    /// Check for component updates
     Check(CheckCommand),
+    /// Use a component version
     Use(UseCommand),
+    /// Show installed components
     Show(ShowCommand),
+    /// Uninstall a component
     #[command(hide = true)]
     Uninstall(UninstallCommand),
 }
 
 #[derive(Parser)]
 #[command(name = "rzup", version)]
+#[command(
+    long_about = None,
+    about = banner()
+)]
 pub struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -36,9 +46,8 @@ pub struct Cli {
 
 impl Cli {
     pub fn execute(self, rzup: &mut Rzup) -> Result<()> {
-        let printer = EventPrinter::new(self.verbose);
-
         if !self.quiet {
+            let printer = EventPrinter::new(self.verbose);
             rzup.set_event_handler(move |event| match event {
                 RzupEvent::DownloadStarted { id, version, url } => {
                     printer.handle_download(id, version, url)
@@ -79,4 +88,18 @@ impl Cli {
 
         Ok(())
     }
+}
+
+fn banner() -> String {
+    let version = env!("CARGO_PKG_VERSION");
+    format!(
+        r#"
+rzup v{}
+
+   {}"#,
+        version,
+        r#"RISC
+   ZERO"#
+            .bold()
+    )
 }
