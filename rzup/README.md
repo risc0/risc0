@@ -4,7 +4,7 @@
 
 ## Installation
 
-rzup can be installed with:
+`rzup` can be installed with:
 
 ```sh
 curl -L https://risczero.com/install | bash
@@ -21,8 +21,8 @@ rzup install [OPTIONS] [NAME] [VERSION]
 ```
 
 Arguments:
-- `NAME`: Optional component name to install (e.g., "rust", "cargo-risczero")
-- `VERSION`: Optional specific version to install
+- `NAME`: (Optional) component name to install (e.g., "rust", "cargo-risczero")
+- `VERSION`: (Optional) Version to install. If no version is specified, it will use the latest release version.
 
 Options:
 - `-f, --force`: Force reinstallation even if already installed
@@ -42,16 +42,11 @@ rzup install rust --force
 
 ### Check
 
-Check for available updates to installed components.
+Check for available updates of installed components.
 
 ```sh
 rzup check
 ```
-
-This command will:
-1. Compare installed versions with latest available versions
-2. Tell you which components have updates available
-
 
 ### Use
 
@@ -98,7 +93,7 @@ Arguments:
 - `NAME`: Component name (required)
 - `VERSION`: Version to uninstall (required)
 
-## Component Types
+## Components
 
 rzup manages the following components:
 
