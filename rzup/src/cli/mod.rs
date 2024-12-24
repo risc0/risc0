@@ -14,7 +14,8 @@ use output::EventPrinter;
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Install a component (e.g. cargo-risczero)
+    /// Install components (e.g. cargo-risczero)
+    #[command(alias = "update")]
     Install(InstallCommand),
     /// Check for component updates
     Check(CheckCommand),
