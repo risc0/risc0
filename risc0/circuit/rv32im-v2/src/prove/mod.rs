@@ -19,9 +19,8 @@ mod witgen;
 
 use anyhow::Result;
 use cfg_if::cfg_if;
-use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-use crate::{execute::segment::Segment, zirgen::CircuitImpl};
+use crate::execute::segment::Segment;
 
 const GLOBAL_MIX: usize = 0;
 const GLOBAL_OUT: usize = 1;
@@ -30,20 +29,6 @@ pub type Seal = Vec<u32>;
 
 pub trait SegmentProver {
     fn prove(&self, segment: &Segment) -> Result<Seal>;
-
-    fn verify(&self, seal: &Seal) -> Result<()> {
-        let hash_suite = Poseidon2HashSuite::new_suite();
-
-        // We don't have a `code' buffer to verify.
-        let check_code_fn = |_: u32, _: &Digest| Ok(());
-
-        Ok(risc0_zkp::verify::verify(
-            &CircuitImpl,
-            &hash_suite,
-            seal,
-            check_code_fn,
-        )?)
-    }
 }
 
 pub fn segment_prover() -> Result<Box<dyn SegmentProver>> {

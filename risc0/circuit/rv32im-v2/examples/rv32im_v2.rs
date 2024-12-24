@@ -100,7 +100,7 @@ fn main() {
         let start_time = Instant::now();
         let seal = prover.prove(segment).unwrap();
         if !args.skip_verification {
-            prover.verify(&seal).expect("Verification failed");
+            risc0_circuit_rv32im_v2::verify(&seal).expect("Verification failed");
         }
         let prove_time = start_time.elapsed().as_secs_f64();
 

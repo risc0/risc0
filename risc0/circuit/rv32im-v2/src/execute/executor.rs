@@ -22,12 +22,13 @@ use super::{
     addr::{ByteAddr, WordAddr},
     image::MemoryImage2,
     pager::PagedMemory,
-    platform::{CycleState, LOOKUP_TABLE_CYCLES},
+    platform::*,
     r0vm::{Risc0Context, Risc0Machine},
     rv32im::{disasm, DecodedInstruction, Emulator, Instruction},
     segment::Segment,
     syscall::Syscall,
     trace::{TraceCallback, TraceEvent},
+    SyscallContext,
 };
 
 pub struct Executor<'a, 'b, S: Syscall> {
@@ -291,15 +292,52 @@ impl<'a, 'b, S: Syscall> Risc0Context for Executor<'a, 'b, S> {
     }
 
     fn host_read(&mut self, fd: u32, buf: &mut [u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_read(fd, buf)?;
+        let rlen = self.syscall_handler.host_read(self, fd, buf)?;
         let slice = &buf[..rlen as usize];
         self.read_record.push(slice.to_vec());
         Ok(rlen)
     }
 
     fn host_write(&mut self, fd: u32, buf: &[u8]) -> Result<u32> {
-        let rlen = self.syscall_handler.host_write(fd, buf)?;
+        let rlen = self.syscall_handler.host_write(self, fd, buf)?;
         self.write_record.push(rlen);
         Ok(rlen)
+    }
+}
+
+impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
+    fn peek_register(&mut self, idx: usize) -> Result<u32> {
+        if idx >= REG_MAX {
+            bail!("invalid register: x{idx}");
+        }
+        Risc0Context::peek_u32(self, USER_REGS_ADDR.waddr() + idx)
+    }
+
+    fn peek_u32(&mut self, addr: ByteAddr) -> Result<u32> {
+        // let addr = Self::check_guest_addr(addr)?;
+        Risc0Context::peek_u32(self, addr.waddr())
+    }
+
+    fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
+        // let addr = Self::check_guest_addr(addr)?;
+        let word = Risc0Context::peek_u32(self, addr.waddr())?;
+        let bytes = word.to_be_bytes();
+        Ok(bytes[addr.subaddr() as usize])
+    }
+
+    fn peek_page(&mut self, _page_idx: u32) -> Result<Vec<u8>> {
+        // let addr = self.pager.image.info.get_page_addr(page_idx);
+        // if !is_guest_memory(addr) {
+        //     bail!("{page_idx} is an invalid guest page_idx");
+        // }
+        todo!()
+    }
+
+    fn get_cycle(&self) -> u64 {
+        self.cycles.user
+    }
+
+    fn get_pc(&self) -> u32 {
+        self.pc.0
     }
 }

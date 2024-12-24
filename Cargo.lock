@@ -4522,6 +4522,7 @@ dependencies = [
  "risc0-circuit-keccak-methods",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
+ "risc0-circuit-rv32im-v2",
  "risc0-core",
  "risc0-groth16",
  "risc0-zkp",

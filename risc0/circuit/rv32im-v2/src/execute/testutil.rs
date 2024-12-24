@@ -22,7 +22,7 @@ use risc0_zkp::{
 
 use super::{
     image::MemoryImage2, pager::RESERVED_PAGING_CYCLES, platform::*, syscall::Syscall, Executor,
-    SimpleSession,
+    SimpleSession, SyscallContext,
 };
 
 pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
@@ -32,11 +32,11 @@ pub const MIN_CYCLES_PO2: usize = log2_ceil(LOOKUP_TABLE_CYCLES + RESERVED_PAGIN
 pub struct NullSyscall;
 
 impl Syscall for NullSyscall {
-    fn host_read(&self, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
+    fn host_read(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &mut [u8]) -> Result<u32> {
         unimplemented!()
     }
 
-    fn host_write(&self, _fd: u32, _buf: &[u8]) -> Result<u32> {
+    fn host_write(&self, _ctx: &mut dyn SyscallContext, _fd: u32, _buf: &[u8]) -> Result<u32> {
         unimplemented!()
     }
 }
