@@ -21,7 +21,7 @@ implementation.
 
 The zkVM implements the `RV32IM` instruction set. This is the `RV32I` base
 instruction along with the multiplication (`M`) feature. We do not implement
-`CRS` instructions. This means that a program does not have what is typically
+`CSR` instructions. This means that a program does not have what is typically
 described as privileged and user modes. We do not implement loads or stores to
 unaligned addresses. So all addresses must be multiples of `0x4` and all code
 must be mapped to addresses divisible by `0x4`.
