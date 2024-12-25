@@ -20,67 +20,77 @@ use std::{
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    let cxx_root = manifest_dir.join("cxx");
+    println!("cargo:cxx_root={}", cxx_root.to_string_lossy());
+
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        build_cuda_kernels();
+        println!(
+            "cargo:cuda_root={}",
+            manifest_dir.join("kernels/zkp/cuda").to_string_lossy()
+        );
+        build_cuda_kernels(&cxx_root);
     }
 
-    build_cpu_kernels();
-}
-
-fn build_cpu_kernels() {
-    rerun_if_changed("kernels/cxx");
-    KernelBuild::new(KernelType::Cpp)
-        .files(glob_paths("kernels/cxx/*.cpp"))
-        .include(env::var("DEP_RISC0_SYS_CXX_ROOT").unwrap())
-        .compile("risc0_keccak_cpu");
-}
-
-fn build_cuda_kernels() {
-    let output = "risc0_keccak_cuda";
-
-    println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
-    println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
-    println!("cargo:rerun-if-env-changed=SCCACHE_RECACHE");
-    rerun_if_changed("kernels/cuda");
-
-    if env::var("RISC0_SKIP_BUILD_KERNELS").is_ok() {
-        let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
-        let out_path = out_dir.join(format!("lib{output}-skip.a"));
-        std::fs::OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(&out_path)
-            .unwrap();
-        println!("cargo:{}={}", output, out_path.display());
-        return;
+    if env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos" || os == "ios") {
+        println!(
+            "cargo:metal_root={}",
+            manifest_dir.join("kernels/zkp/metal").to_string_lossy()
+        );
+        build_metal_kernels();
     }
+}
 
-    env::set_var("SCCACHE_IDLE_TIMEOUT", "0");
+fn build_cuda_kernels(cxx_root: &Path) {
+    let cpp_compiler = env::var("CUDA_HOST_COMPILER").unwrap_or_else(|_| "c++".to_string());
 
-    let mut build = cc::Build::new();
-    build
-        .cuda(true)
-        .cudart("static")
-        .debug(false)
-        .flag("-diag-suppress=177")
-        .flag("-diag-suppress=550")
-        .flag("-diag-suppress=2922")
-        .flag("-std=c++17")
-        .flag("-Xcompiler")
-        .flag("-Wno-unused-function,-Wno-unused-parameter")
-        .include(env::var("DEP_RISC0_SYS_CUDA_ROOT").unwrap())
-        .include(env::var("DEP_SPPARK_ROOT").unwrap());
-    if env::var_os("NVCC_PREPEND_FLAGS").is_none() && env::var_os("NVCC_APPEND_FLAGS").is_none() {
-        build.flag("-arch=native");
+    let mut cuda = cc::Build::new();
+    cuda.cuda(true);
+    cuda.flag("-arch=native");
+    cuda.flag(&format!("-ccbin={}", cpp_compiler));
+    cuda.flag("-Xcompiler");
+    cuda.flag("-O0");
+
+    KernelBuild::new(KernelType::Cuda)
+        .files([
+            "kernels/zkp/cuda/combos.cu",
+            "kernels/zkp/cuda/eltwise.cu",
+            "kernels/zkp/cuda/ffi.cu",
+            "kernels/zkp/cuda/kernels.cu",
+            "kernels/zkp/cuda/sha.cu",
+            "kernels/zkp/cuda/supra/api.cu",
+            "kernels/zkp/cuda/supra/ntt.cu",
+        ])
+        .deps(["kernels/zkp/cuda", "kernels/zkp/cuda/supra"])
+        .flag("-DFEATURE_BABY_BEAR")
+        .include(cxx_root)
+        .include(env::var("DEP_SPPARK_ROOT").unwrap())
+        .compile("risc0_zkp_cuda");
+}
+
+fn build_metal_kernels() {
+    const METAL_KERNELS: &[(&str, &[&str])] = &[(
+        "zkp",
+        &[
+            "eltwise.metal",
+            "fri.metal",
+            "mix.metal",
+            "ntt.metal",
+            "poseidon2.metal",
+            "sha.metal",
+            "zk.metal",
+        ],
+    )];
+
+    let inc_path = Path::new("kernels/zkp/metal");
+    for (name, srcs) in METAL_KERNELS {
+        let dir = Path::new("kernels").join(name).join("metal");
+        let src_paths = srcs.iter().map(|x| dir.join(x));
+        let out = format!("metal_kernels_{name}");
+        KernelBuild::new(KernelType::Metal)
+            .files(src_paths)
+            .include(inc_path)
+            .dep(inc_path.join("sha256.h"))
+            .compile(&out);
     }
-    build.files(glob_paths("kernels/cuda/*.cu")).compile(output);
-}
-
-fn rerun_if_changed<P: AsRef<Path>>(path: P) {
-    println!("cargo:rerun-if-changed={}", path.as_ref().display());
-}
-
-fn glob_paths(pattern: &str) -> Vec<PathBuf> {
-    glob::glob(pattern).unwrap().map(|x| x.unwrap()).collect()
 }
