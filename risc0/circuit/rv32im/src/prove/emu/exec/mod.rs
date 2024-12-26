@@ -364,7 +364,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         self.pc = self.pending.pc;
         self.insn_cycles += self.pending.cycles;
-        self.cycles.user += self.pending.cycles as u64;
+        self.cycles.user += self.pending.cycles as u64 + self.pager.get_pending_cycles() as u64;
 
         if let Some(kind) = self.pending.ecall.take() {
             self.ecall_metrics.0[kind].count += 1;

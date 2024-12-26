@@ -281,6 +281,18 @@ impl PagedMemory {
         };
         self.pending_actions.push(action);
     }
+
+    pub fn get_pending_cycles(&self) -> usize {
+        let mut pending_cycles = 0;
+        for action in self.pending_actions.iter() {
+            match action {
+                Action::PageRead(_, cycles) => pending_cycles += cycles,
+                Action::PageWrite(_, cycles, _) => pending_cycles += cycles,
+                Action::Store(_, _) => {}
+            }
+        }
+        pending_cycles
+    }
 }
 
 impl Page {
