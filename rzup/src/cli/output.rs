@@ -61,8 +61,8 @@ impl EventPrinter {
 
     pub fn handle_checking_updates(&self, id: Option<String>) {
         match id {
-            Some(name) => {
-                self.start_progress(format!("Checking for updates: {}", name));
+            Some(_) => {
+                self.start_progress("Checking for updates ...".to_string());
             }
             None => {
                 self.progress.finish_and_clear();

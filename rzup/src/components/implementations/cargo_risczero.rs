@@ -13,6 +13,7 @@ impl Component for CargoRiscZero {
 mod tests {
     use super::*;
     use crate::env::Environment;
+    use semver::Version;
 
     #[test]
     fn test_cargo_risczero_install() {
@@ -20,12 +21,12 @@ mod tests {
         let env = Environment::with_root(tmp_dir.path()).unwrap();
         let component = CargoRiscZero;
 
+        let version = Version::new(1, 0, 0);
+
         // Test installation
-        component
-            .install(&env, Some("1.0.0".to_string()), true)
-            .unwrap();
+        component.install(&env, Some(&version), true).unwrap();
 
         // Clean up
-        component._uninstall(&env).unwrap();
+        component.uninstall(&env, &version).unwrap();
     }
 }

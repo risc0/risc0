@@ -11,6 +11,8 @@ impl Component for RustToolchain {
 
 #[cfg(test)]
 mod tests {
+    use semver::Version;
+
     use super::*;
     use crate::env::Environment;
 
@@ -20,12 +22,12 @@ mod tests {
         let env = Environment::with_root(tmp_dir.path()).unwrap();
         let component = RustToolchain;
 
+        let version = Version::new(1, 81, 0);
+
         // Test installation
-        component
-            .install(&env, Some("1.79.0".to_string()), true)
-            .unwrap();
+        component.install(&env, Some(&version), true).unwrap();
 
         // Clean up
-        component._uninstall(&env).unwrap();
+        component.uninstall(&env, &version).unwrap();
     }
 }
