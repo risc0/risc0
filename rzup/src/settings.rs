@@ -67,3 +67,33 @@ impl Settings {
             .insert(component.to_string(), version.to_string());
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_settings_save_and_load() {
+        let tmp_dir = TempDir::new().unwrap();
+        let env = Environment::with_root(tmp_dir.path()).unwrap();
+        let mut settings = Settings::default();
+
+        // Add some test data
+        let version = Version::new(1, 0, 0);
+        settings.set_active_version("test-component", &version);
+
+        // Save settings
+        settings.save(&env).unwrap();
+
+        // Load settings and verify
+        let loaded = Settings::load(&env).unwrap();
+        assert_eq!(loaded.get_active_version("test-component"), Some(version));
+    }
+
+    #[test]
+    fn test_settings_defaults() {
+        let settings = Settings::default();
+        assert!(settings.active_versions.is_empty());
+    }
+}

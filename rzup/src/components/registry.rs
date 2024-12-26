@@ -284,25 +284,41 @@ mod tests {
     use super::*;
     use tempfile::TempDir;
 
-    #[test]
-    fn test_component_creation() {
-        assert!(ComponentRegistry::create_component("rust").is_ok());
-        assert!(ComponentRegistry::create_component("cargo-risczero").is_ok());
-        assert!(ComponentRegistry::create_component("invalid").is_err());
-    }
-
-    #[test]
-    fn test_installation_needs() {
+    fn setup_test_registry() -> (TempDir, Environment, ComponentRegistry) {
         let tmp_dir = TempDir::new().unwrap();
         let env = Environment::with_root(tmp_dir.path()).unwrap();
         let registry = ComponentRegistry::new(&env).unwrap();
+        (tmp_dir, env, registry)
+    }
 
+    #[test]
+    fn test_registry_initialization() {
+        let (_tmp_dir, _env, registry) = setup_test_registry();
+        assert!(registry.list_components().is_empty());
+    }
+
+    #[test]
+    fn test_component_version_handling() {
+        let mut versions = ComponentVersions::new();
+        let version = Version::new(1, 0, 0);
+        let path = PathBuf::from("/test/path");
+
+        versions.add_version(version.clone(), path.clone());
+
+        assert!(versions.has_version(&version));
+        assert_eq!(versions.list_versions(), vec![&version]);
+    }
+
+    #[test]
+    fn test_registry_component_installation() {
+        let (_tmp_dir, env, mut registry) = setup_test_registry();
         let version = Version::new(1, 0, 0);
 
-        // Should need installation when component doesn't exist
-        assert!(registry.needs_installation("rust", &version, false));
+        registry
+            .install_component(&env, "cargo-risczero", Some(version.clone()), false)
+            .unwrap();
 
-        // Should need installation when force is true
-        assert!(registry.needs_installation("rust", &version, true));
+        let versions = registry.get_component_versions("cargo-risczero").unwrap();
+        assert!(versions.has_version(&version));
     }
 }

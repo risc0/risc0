@@ -113,12 +113,64 @@ impl Rzup {
     pub fn installed_versions(&self, component_id: &str) -> HashMap<Version, PathBuf> {
         self.registry
             .get_component_versions(component_id)
-            .unwrap()
-            .versions
-            .clone()
+            .map_or_else(HashMap::new, |versions| versions.versions.clone())
     }
 
     pub fn is_installed(&self, component_id: &str, version: &Version) -> bool {
         self.installed_versions(component_id).contains_key(version)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    fn setup_test_env() -> (TempDir, Rzup) {
+        let tmp_dir = TempDir::new().unwrap();
+        let rzup = Rzup::with_root(tmp_dir.path()).unwrap();
+        (tmp_dir, rzup)
+    }
+
+    #[test]
+    fn test_rzup_initialization() {
+        let (_tmp_dir, rzup) = setup_test_env();
+        assert!(rzup.settings().get_active_version("rust").is_none());
+        assert!(rzup
+            .settings()
+            .get_active_version("cargo-risczero")
+            .is_none());
+    }
+
+    #[test]
+    fn test_install_and_uninstall_component() {
+        let (_tmp_dir, mut rzup) = setup_test_env();
+        let version = Version::new(1, 0, 0);
+
+        // Test installation
+        rzup.install_component("cargo-risczero", Some(version.clone()), false)
+            .unwrap();
+        assert!(rzup.is_installed("cargo-risczero", &version));
+        assert_eq!(
+            rzup.settings()
+                .get_active_version("cargo-risczero")
+                .unwrap(),
+            version
+        );
+
+        // Test uninstallation
+        rzup.uninstall_component("cargo-risczero", version.clone())
+            .unwrap();
+        assert!(!rzup.is_installed("cargo-risczero", &version));
+    }
+
+    #[test]
+    fn test_install_all() {
+        let (_tmp_dir, mut rzup) = setup_test_env();
+        rzup.install_all(false).unwrap();
+
+        // Both default components should be installed
+        assert!(!rzup.installed_versions("rust").is_empty());
+        assert!(!rzup.installed_versions("cargo-risczero").is_empty());
     }
 }

@@ -103,6 +103,7 @@ pub(crate) trait Distribution {
             message: format!("Download will be saved to: {}", archive_name.display()),
         });
 
+        // TODO: Use custom client impl with blocking reqwest to utilize GITHUB TOKEN
         let archive = Download::new(&download_url).file_name(&archive_name);
         std::fs::create_dir_all(env.tmp_dir())?;
 
