@@ -119,6 +119,26 @@ impl Rzup {
     pub fn is_installed(&self, component_id: &str, version: &Version) -> bool {
         self.installed_versions(component_id).contains_key(version)
     }
+
+    // TODO: update this to work with toolchains too
+    pub fn get_bin_path(&self, component_id: &str) -> Result<PathBuf> {
+        let version = self
+            .settings()
+            .get_active_version(component_id)
+            .ok_or_else(|| {
+                RzupError::ComponentNotFound(format!(
+                    "No active version found for {}",
+                    component_id
+                ))
+            })?;
+
+        let installed_versions = self.installed_versions(component_id);
+        let version_dir = installed_versions.get(&version).ok_or_else(|| {
+            RzupError::ComponentNotFound(format!("{} version {} not found", component_id, version))
+        })?;
+
+        Ok(version_dir.join(component_id))
+    }
 }
 
 #[cfg(test)]
