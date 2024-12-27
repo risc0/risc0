@@ -1,5 +1,5 @@
 name: Feature Request
-description: Submit your requests and suggestions to improve!
+description: Submit your suggestions for new features or improvements to RISC Zero
 labels: [ enhancement ]
 body:
   - type: checkboxes
@@ -14,7 +14,7 @@ body:
     id: stackexchange
     attributes:
       label: Experiencing problems? Have you tried our Discord first?
-      description: Please search <https://discord.com/invite/risczero> to see if a post already exists, and ask if not. Please do not file support issues here.
+      description: Please search [our Discord server](https://discord.com/invite/risczero) to see if a post already exists, and ask if not. Please do not file support issues here.
       options:
         - label: This is not a support question.
           required: true
@@ -22,8 +22,11 @@ body:
     id: motivation
     attributes:
       label: Motivation
-      description: Please give precedence as to what lead you to file this issue.
-      # placeholder: Describe ...
+      description: Please provide context as to what led you to file this feature request.
+      placeholder: |
+        - What problem are you trying to solve?
+        - How do you currently work around this?
+        - Why is this feature important?
     validations:
       required: false
   - type: textarea
@@ -31,7 +34,10 @@ body:
     attributes:
       label: Request
       description: Please describe what is needed.
-      # placeholder: Describe what you would like to see added or changed.
+      placeholder: |
+        - What specific feature would you like to see?
+        - How should it work from a user's perspective?
+        - What would be the expected outcome?
     validations:
       required: true
   - type: textarea
@@ -39,7 +45,9 @@ body:
     attributes:
       label: Solution
       description: If possible, please describe what a solution could be.
-      # placeholder: Describe what you would like to see added or changed.
+      placeholder: |
+        - Do you have ideas about how to implement this?
+        - Are there similar features in other projects we could learn from?
     validations:
       required: false
   - type: dropdown
