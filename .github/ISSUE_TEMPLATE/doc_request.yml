@@ -14,7 +14,7 @@ body:
     id: stackexchange
     attributes:
       label: Experiencing problems? Have you tried our Discord first?
-      description: Please search <https://discord.com/invite/risczero> to see if a post already exists, and ask if not. Please do not file support issues here.
+      description: Please search [our Discord server](https://discord.com/invite/risczero) to see if a post already exists, and ask if not. Please do not file support issues here.
       options:
         - label: This is not a support question.
           required: true
@@ -22,10 +22,10 @@ body:
     id: motivation
     attributes:
       label: Motivation
-      description: Please give precedence as to what lead you to file this issue.
+      description: Please provide context as to what led you to file this issue.
       placeholder: |
         - What are you trying to do?
-        - What obsticales did you face?
+        - What obstacles did you face?
     validations:
       required: true
   - type: textarea
@@ -33,7 +33,7 @@ body:
     attributes:
       label: Request
       description: Please describe what is needed.
-      # placeholder: Describe what you would like to see added or changed.
+      placeholder: Describe what specific documentation changes or additions would help you.
     validations:
       required: true
   - type: textarea
