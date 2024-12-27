@@ -1,21 +1,24 @@
-{
-  "rust-analyzer.linkedProjects": [
-    "Cargo.toml",
-    "benchmarks/Cargo.toml",
-    "examples/Cargo.toml",
-    "risc0/cargo-risczero/tests/test_crate",
-    "risc0/zkvm/methods/guest/Cargo.toml",
-    "risc0/zkvm/methods/std/Cargo.toml",
-    "tools/crates-validator/Cargo.toml"
-  ],
-  "rust-analyzer.check.command": "clippy",
-  "rust-analyzer.check.extraEnv": {
-    "RISC0_SKIP_BUILD": "1",
-    "RISC0_SKIP_BUILD_KERNELS": "1",
-    "CARGO_TARGET_DIR": "target/analyzer"
-  },
-  "rust-analyzer.server.extraEnv": {
-    "CC": "clang",
-    "CXX": "clang++"
-  }
-}
+{				
+"rust-analyzer.linkedProjects": [				
+"Cargo.toml",				
+"benchmarks/Cargo.toml",				
+"examples/Cargo.toml",				
+"risc0/cargo-risczero/tests/test_crate",				
+"risc0/zkvm/methods/guest/Cargo.toml",				
+"risc0/zkvm/methods/std/Cargo.toml",				
+"tools/crates-validator/Cargo.toml"				
+],				
+"rust-analyzer.check.command": "clippy",				
+"rust-analyzer.check.extraEnv": {				
+"RISC0_SKIP_BUILD": "1",				
+"RISC0_SKIP_BUILD_KERNELS": "1",				
+"CARGO_TARGET_DIR": "target/analyzer"				
+},				
+"rust-analyzer.server.extraEnv": {				
+"CC": "clang",				
+"CXX": "clang++"				
+},				
+"rust-analyzer.checkOnSave.enable": true,				
+"rust-analyzer.completion.autoimport.enable": true,				
+"rust-analyzer.inlayHints.enable": true				
+}				
