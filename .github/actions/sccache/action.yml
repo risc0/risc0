@@ -6,6 +6,8 @@ inputs:
     required: true
     default: rust-cache-${{ runner.os }}-${{ runner.arch }}
   disable_s3:
+    description: 'Whether to disable S3 caching functionality'
+    type: boolean
     default: false
 
 runs:
