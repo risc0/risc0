@@ -1,15 +1,19 @@
 {
   "recommendations": [
-    "biomejs.biome",
-    "EditorConfig.EditorConfig",
+    "rust-lang.rust-analyzer",
+    "serayuzgur.crates",
+    "tamasfe.even-better-toml",
+    "vadimcn.vscode-lldb",
     "kriegalex.vscode-cudacpp",
     "llvm-vs-code-extensions.vscode-clangd",
     "ms-vscode.cpptools",
-    "rust-lang.rust-analyzer",
-    "serayuzgur.crates",
+    "biomejs.biome",
+    "EditorConfig.EditorConfig",
+    "streetsidesoftware.code-spell-checker",
     "stkb.rewrap",
-    "tamasfe.even-better-toml",
     "valentjn.vscode-ltex",
-    "unifiedjs.vscode-remark"
-  ]
+    "unifiedjs.vscode-remark",
+    "yzhang.markdown-all-in-one"
+  ],
+  "unwantedRecommendations": []
 }
