@@ -26,9 +26,9 @@
  * \section INITIALIZATION_SECTION Initialization
  *
  * Typically the tool's library that plugs into NVTX is indirectly 
- * loaded via enviromental properties that are platform specific. 
+ * loaded via environmental properties that are platform specific. 
  * For some platform or special cases, the user may be required 
- * to instead explicity initialize instead though.   This can also
+ * to instead explicitly initialize instead though.   This can also
  * be helpful to control when the API loads a tool's library instead
  * of what would typically be the first function call to emit info.
  * For these rare case, see \ref INITIALIZATION for additional information.
@@ -112,7 +112,7 @@
  * to enable filtering and sorting.  The category naming functions allow 
  * the application to associate a user friendly name with the integer 
  * category.  Support for domains have been added in NVTX_VERSION_2 to 
- * avoid collisions when domains are developed independantly. 
+ * avoid collisions when domains are developed independently. 
  *
  * \subsection RESOURCE_OBJECTS Resource Objects
  *
@@ -718,7 +718,7 @@ NVTX_DECLSPEC nvtxRangeId_t NVTX_API nvtxRangeStartW(const wchar_t* message);
 * \param id - The correlation ID returned from a nvtxRangeStart call.
 *
 * \remarks This function is offered completeness but is an alias for ::nvtxRangeEnd. 
-* It does not need a domain param since that is associated iwth the range ID at ::nvtxDomainRangeStartEx
+* It does not need a domain param since that is associated with the range ID at ::nvtxDomainRangeStartEx
 *
 * \par Example:
 * \code
